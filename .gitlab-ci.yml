@@ -1,0 +1,10 @@
+variables:
+  ALLOWED_TOKENS: "^((feat)|(refactor)|(fix)|(build)|(chore)|(ci)|(dosc)|(style)|(perf)|(test))"
+
+mr-title-check:
+  tags:
+    - shared-fi
+  script:
+    - echo $CI_MERGE_REQUEST_TITLE | grep -E "${ALLOWED_TOKENS}[:] .*"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
