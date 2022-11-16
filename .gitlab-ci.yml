@@ -8,3 +8,14 @@ mr-title-check:
     - echo $CI_MERGE_REQUEST_TITLE | grep -E "${ALLOWED_TOKENS}[:] .*"
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+
+eslint-check:
+  image: gitlab.fi.muni.cz:5050/pb138/ci/iteration-06:latest
+  tags:
+    - shared-fi
+  script:
+   - npm ci --cache /npm/npm-cache --no-audit --prefer-offline
+   - touch src && npx eslint src/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
