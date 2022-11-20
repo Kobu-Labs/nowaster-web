@@ -19,3 +19,13 @@ eslint-check:
    - touch src && npx eslint src/
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+type-check:
+  image: gitlab.fi.muni.cz:5050/pb138/ci/iteration-06:latest
+  tags:
+    - shared-fi
+  script:
+   - npm ci --cache /npm/npm-cache --no-audit --prefer-offline
+   - npx tsc --noEmit
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
