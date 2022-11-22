@@ -1,5 +1,5 @@
-import { RecordedEntity } from "@prisma/client";
-import { AsyncResult } from "../types";
+import type { RecordedEntity } from "@prisma/client";
+import type { AsyncResult } from "../types";
 import client from "../client";
 import { Result } from "@badrap/result";
 
