@@ -1,5 +1,5 @@
-import { AsyncResult } from "../types";
-import { Group } from "@prisma/client";
+import type { AsyncResult } from "../types";
+import type { Group } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
 import join from "./join";

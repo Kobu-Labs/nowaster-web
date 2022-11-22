@@ -29,7 +29,7 @@ const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEnt
     }
 
     return Result.ok(recordedEntity);
-        
+
   } catch (error) {
     return Result.err(error as Error);
   }
@@ -40,21 +40,21 @@ const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEnt
 
 const many = async (params: ReadAllRecordedParams): AsyncResult<RecordedEntity[]> => {
   try {
-    const {limit, ...data} = params;
+    const { limit, ...data } = params;
+
 
     const recordedEntity = await client.recordedEntity.findMany({
-      where: {
-        ...data
-      },
-      take: limit
+      where: data,
+      ...(limit !== undefined ?  { take: limit }: {})
     });
+
 
     if (!recordedEntity) {
       return Result.err(new Error("Recorded entity does not exist"));
     }
 
     return Result.ok(recordedEntity);
-        
+
   } catch (error) {
     return Result.err(error as Error);
   }
