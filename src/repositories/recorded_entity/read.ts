@@ -1,4 +1,4 @@
-import type { AsyncResult } from "../types";
+import { UserVisibleError, type AsyncResult } from "../types";
 import type { RecordedEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
@@ -50,7 +50,7 @@ const many = async (params: ReadAllRecordedParams): AsyncResult<RecordedEntity[]
 
 
     if (!recordedEntity) {
-      return Result.err(new Error("Recorded entity does not exist"));
+      return Result.err(new UserVisibleError("Recorded entity does not exist"));
     }
 
     return Result.ok(recordedEntity);
