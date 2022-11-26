@@ -14,9 +14,9 @@ type UpdateRecordedEntityParams = {
 const update = async (params: UpdateRecordedEntityParams): AsyncResult<RecordedEntity> => {
   try {
     const { id, ...data } = params;
-    
+
     const recordedEntity = await client.recordedEntity.update({
-      where: { 
+      where: {
         id: id,
       },
       data: {
