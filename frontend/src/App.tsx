@@ -8,6 +8,7 @@ import {
   StatsPage,
   TimerPage,
 } from "./pages";
+import { RegisterPage } from "./pages/RegisterPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/timer" element={<TimerPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/logout" element={<LogoutPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </main>
     </>
