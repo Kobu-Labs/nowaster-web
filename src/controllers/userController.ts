@@ -2,12 +2,14 @@ import { Request, Response, Router } from "express";
 import { createUserSchema, readManyUsersSchema, readSingleUserSchema, updateUserSchema } from "../models/userModel";
 import userRepo from "../repositories/user";
 import { handleErroredRequest } from "./utils";
+import argon2 from "argon2";
 
 export const UserController = Router();
 
 UserController.put("/create", async (req: Request, res: Response) => {
   try {
     const userData = createUserSchema.parse(req.body);
+    userData.hashedPassword = await argon2.hash(userData.hashedPassword);
     const userEntity = await userRepo.create(userData);
 
     if (userEntity.isOk) {

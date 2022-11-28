@@ -12,4 +12,5 @@ export const handleErroredRequest = (res: Response, e: unknown) => {
   else {
     res.status(500).send({ message: "Something went wrong" });
   }
+  console.log(e);
 };
