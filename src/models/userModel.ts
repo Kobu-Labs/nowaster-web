@@ -36,3 +36,8 @@ export const readManyUsersSchema = z.object({
     z.number().positive().max(100)
   )
 });
+
+export const loginUserScheme = z.object({
+  email: z.string().email({ message: "Invalid email provided" }),
+  hashedPassword: z.string(),
+});

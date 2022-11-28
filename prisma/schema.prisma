@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-    id              String            @id @default(uuid())
-    userName        String
-    email           String
-    hashedPassword  String
-    salt            String
-    avatar          String?
-    solidEntities   ScheduledEntity[]
-    recordEntities  RecordedEntity[]
-    userToGroups    UserToGroup[]
+    id             String            @id @default(uuid())
+    userName       String
+    email          String            @unique
+    hashedPassword String
+    salt           String
+    avatar         String?
+    solidEntities  ScheduledEntity[]
+    recordEntities RecordedEntity[]
+    userToGroups   UserToGroup[]
 }
 
 model UserToGroup {
@@ -24,7 +24,7 @@ model UserToGroup {
     userId  String
     groupId String
     user    User   @relation(fields: [userId], references: [id])
-    group   Group @relation(fields: [groupId], references: [id])
+    group   Group  @relation(fields: [groupId], references: [id])
 }
 
 model Group {
