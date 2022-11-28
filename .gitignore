@@ -42,3 +42,4 @@ lib/*.js
 test/*.js
 *.map
 
+backend/.DS_Store
