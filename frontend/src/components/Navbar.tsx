@@ -4,8 +4,14 @@ import groupsIcon from "../assets/groups.svg";
 import statsIcon from "../assets/stats.svg";
 import timerIcon from "../assets/timer.svg";
 import logoutIcon from "../assets/logout.svg";
+import { AuthApi } from "../services";
 
 const Navbar = () => {
+  const onSubmit = async () => {
+    const response = await AuthApi.logout();
+    console.log(response.data.message);
+  };
+
   return (
     <nav className="flex flex-col h-screen justify-between">
       <ul>
@@ -24,7 +30,10 @@ const Navbar = () => {
         </li>
       </ul>
       <ul className="mb-16">
-        <li className="mt-4 pb-2 border-b-2 border-indigo-500">
+        <li
+          className="mt-4 pb-2 border-b-2 border-indigo-500"
+          onClick={onSubmit}
+        >
           <NavbarButton label="Logout" path="/logout" icon={logoutIcon} />
         </li>
       </ul>

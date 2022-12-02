@@ -16,7 +16,7 @@ authRouter.get("/", auth(), async (req, res) => {
 
   const user = await client.user.findUnique({
     where: { id },
-    select: { id: true, userName: true, email: true, avatar: true }
+    select: { id: true, username: true, email: true, avatar: true }
   });
     
   if (!user) {
@@ -24,7 +24,7 @@ authRouter.get("/", auth(), async (req, res) => {
     return;
   }
 
-  res.json({ item: user, message: `User ${user.userName} is authorized` });
+  res.json({ item: user, message: `User ${user.username} is authorized` });
 });
 
 /**
@@ -38,7 +38,7 @@ authRouter.post("/login", async (req, res) => {
     return; 
   }
     
-  const { email, hashedPassword } = result.data;
+  const { email, password } = result.data;
   const user = await client.user.findUnique({ where: { email } });
 
   if (!user) {
@@ -46,14 +46,14 @@ authRouter.post("/login", async (req, res) => {
     return;
   }
 
-  const isVerified = await argon2.verify(user.hashedPassword, hashedPassword);
+  const isVerified = await argon2.verify(user.hashedPassword, password);
 
   if (!isVerified) {
     res.status(401).json({ message: "Wrong password" });
     return;
   }
 
-  req.session.user = { id: user.id};
+  req.session.user = { id: user.id };
   res.json({ message: "Logged in" });
 });
 
