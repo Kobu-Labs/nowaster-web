@@ -3,11 +3,10 @@ import { userNameValidator } from "./validation";
 
 
 export const createUserSchema = z.object({
-  userName: userNameValidator,
+  username: userNameValidator,
   email: z.string()
     .email({ message: "Invalid email provided" }),
-  hashedPassword: z.string(),
-  salt: z.string(),
+  password: z.string(),
   // TODO: validate something idk
   avatar: z.string().nullable()
 }
@@ -16,12 +15,11 @@ export const createUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   id: z.string().uuid(),
-  userName: userNameValidator.optional(),
+  username: userNameValidator.optional(),
   email: z.string()
     .email({ message: "Invalid email provided" })
     .optional(),
-  hashedPassword: z.string().optional(),
-  salt: z.string().optional(),
+  password: z.string().optional(),
   avatar: z.string().nullish(),
 });
 
@@ -39,5 +37,5 @@ export const readManyUsersSchema = z.object({
 
 export const loginUserScheme = z.object({
   email: z.string().email({ message: "Invalid email provided" }),
-  hashedPassword: z.string(),
+  password: z.string(),
 });

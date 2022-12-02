@@ -8,7 +8,6 @@ type UpdateUserParams = {
     userName?: string | undefined;
     email?: string | undefined;
     hashedPassword?: string | undefined;
-    salt?: string | undefined;
     avatar?: string | null | undefined;
 }
 
@@ -26,7 +25,6 @@ const update = async (params: UpdateUserParams): AsyncResult<User> => {
         ...(data.userName !== undefined ? { userName: data.userName } : {}),
         ...(data.email !== undefined ? { email: data.email } : {}),
         ...(data.hashedPassword !== undefined ? { hashedPassword: data.hashedPassword } : {}),
-        ...(data.salt !== undefined ? { salt: data.salt } : {}),
         ...(data.avatar !== undefined ? { avatar: data.avatar } : {}),
       }
     });

@@ -9,10 +9,17 @@ export const UserController = Router();
 UserController.put("/create", async (req: Request, res: Response) => {
   try {
     const userData = createUserSchema.parse(req.body);
-    userData.hashedPassword = await argon2.hash(userData.hashedPassword);
-    const userEntity = await userRepo.create(userData);
+    const hashedPassword = await argon2.hash(userData.password);
+    const data = {
+      username:userData.username,
+      email:userData.email,
+      avatar:userData.avatar,
+      hashedPassword:hashedPassword,
+    };
+    const userEntity = await userRepo.create(data);
 
     if (userEntity.isOk) {
+      req.session.user = { id: userEntity.value.id};
       res.send({ user: userEntity, message: "Success" });
     } else {
       userEntity.unwrap();

@@ -4,15 +4,14 @@ generator client {
 
 datasource db {
     provider = "sqlite"
-    url      = env("DATABASE_URL")
+    url      = "file:database"
 }
 
 model User {
     id             String            @id @default(uuid())
-    userName       String
+    username       String            @unique
     email          String            @unique
     hashedPassword String
-    salt           String
     avatar         String?
     solidEntities  ScheduledEntity[]
     recordEntities RecordedEntity[]

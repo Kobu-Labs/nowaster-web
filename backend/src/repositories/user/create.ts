@@ -19,11 +19,11 @@ const create = async (params: CreateUserParams): AsyncResult<User> => {
 
       const isDuplicateUserName = await tx.user.findFirst({
         where: {
-          userName: params.userName,
+          username: params.username,
         }
       });
       if (isDuplicateUserName) {
-        return Result.err(new UserVisibleError(`Username ${params.userName} is already used!`));
+        return Result.err(new UserVisibleError(`Username ${params.username} is already used!`));
       }
 
       const user = await tx.user.create({ data: params });
