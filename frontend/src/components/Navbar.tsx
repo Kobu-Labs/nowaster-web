@@ -13,7 +13,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex flex-col h-screen justify-between">
+    <nav className="flex flex-col h-screen justify-between bg-gray-900 px-4">
       <ul>
         {/* logo */}
         <li className="mt-4 pb-2 border-b-2 border-indigo-500">
