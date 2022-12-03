@@ -17,21 +17,32 @@ export const ChangeColor = () => {
   };
 
   return (
-    <div className="flex items-center">
-      <p className="text-xl"> Choose wanted color </p>
-      <input
-        type="color"
-        value={color}
-        onChange={handleColorChange}
-        className="ml-4 h-8 w-16"
-      />
-      <input
-        type="text"
-        value={subject}
-        onChange={handleSubjectChange}
-        className="ml-4"
-      />
-      <button className="ml-4"> Change </button>
+    <div className="bg-gray-800 p-4 rounded-lg">
+      <h2 className="text-xl m-2 mb-4">Manage Colours</h2>
+      <form className="flex justify-around">
+        <div className="flex items-center">
+          {/*<label htmlFor="colorPicker">Change color</label>*/}
+          <input
+            type="color"
+            id="colorPicker"
+            value={color}
+            onChange={handleColorChange}
+            className="ml-2 h-8 w-16 rounded-lg"
+          />
+          {/*<label htmlFor="subjectInput" className="ml-2"> for subject</label>*/}
+          <input
+            type="text"
+            id="subjectInput"
+            value={subject}
+            placeholder="Enter subject"
+            onChange={handleSubjectChange}
+            className="ml-4 bg-gray-900 rounded-lg h-8 text-center"
+          />
+          <button type="button" className="ml-4 bg-gray-900 h-8 py-0">
+            Change Color
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

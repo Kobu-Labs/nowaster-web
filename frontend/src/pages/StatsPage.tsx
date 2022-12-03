@@ -1,69 +1,45 @@
 import { FC } from "react";
 import Navbar from "../components/Navbar";
-import { PieChart, Pie, Tooltip, LabelList } from "recharts";
 import { ChangeColor } from "../components/ChangeColor";
+import PieGraph from "../components/PieGraph";
 
 export const StatsPage: FC = () => {
   const data01 = [
     {
-      name: "Group A",
+      name: "PB151",
       value: 400,
       fill: "red",
     },
     {
-      name: "Group B",
+      name: "PB138",
       value: 300,
     },
     {
-      name: "Group C",
+      name: "PB161",
       value: 300,
     },
     {
-      name: "Group D",
+      name: "MB143",
       value: 200,
     },
     {
-      name: "Group E",
+      name: "IB110",
       value: 278,
     },
     {
-      name: "Group F",
+      name: "IB000",
       value: 189,
     },
   ];
 
   return (
     <div className="flex">
-      <div className="fixed top-0 left-0 h-screen overflow-y-auto ml-4">
+      <div className="fixed top-0 left-0 h-screen overflow-y-auto">
         <Navbar />
       </div>
       <div className="flex-grow overflow-y-auto flex items-center justify-center flex-col h-screen">
         <p className="">StatsPage</p>
-        <div>
-          <PieChart width={730} height={500}>
-            <Pie
-              data={data01}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={220}
-              fill="#8884d8"
-            >
-              <LabelList
-                dataKey="name"
-                position="outside"
-                style={{ fontSize: "1.3rem" }}
-              />
-              <LabelList
-                dataKey="value"
-                position="inside"
-                style={{ fontSize: "1.3rem" }}
-              />
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </div>
+        <PieGraph data={data01}></PieGraph>
         <ChangeColor />
       </div>
     </div>
