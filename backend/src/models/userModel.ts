@@ -29,10 +29,7 @@ export const readSingleUserSchema = z.object({
 });
 
 export const readManyUsersSchema = z.object({
-  limit: z.preprocess(
-    (a) => parseInt(z.string().parse(a), 10),
-    z.number().positive().max(100)
-  )
+  limit: z.coerce.number().max(1000)
 });
 
 export const loginUserScheme = z.object({

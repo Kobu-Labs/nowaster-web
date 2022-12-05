@@ -1,81 +1,59 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import { createUserSchema, readManyUsersSchema, readSingleUserSchema, updateUserSchema } from "../models/userModel";
 import userRepo from "../repositories/user";
-import { handleErroredRequest } from "./utils";
 import argon2 from "argon2";
+import { validate } from "./middleware/validation";
+import { handleOkResp, handleResultErrorResp } from "./middleware/responseUtil";
 
 export const UserController = Router();
 
-UserController.put("/create", async (req: Request, res: Response) => {
-  try {
-    const userData = createUserSchema.parse(req.body);
-    const hashedPassword = await argon2.hash(userData.password);
-    const data = {
-      username:userData.username,
-      email:userData.email,
-      avatar:userData.avatar,
-      hashedPassword:hashedPassword,
-    };
-    const userEntity = await userRepo.create(data);
 
-    if (userEntity.isOk) {
-      req.session.user = { id: userEntity.value.id};
-      res.send({ user: userEntity, message: "Success" });
-    } else {
-      userEntity.unwrap();
-    }
+UserController.put("/create", validate({ body: createUserSchema }), async (req, res) => {
+  const hashedPassword = await argon2.hash(req.body.password);
+  const data = {
+    username: req.body.username,
+    email: req.body.email,
+    avatar: req.body.avatar,
+    hashedPassword: hashedPassword,
+  };
+  const userEntity = await userRepo.create(data);
 
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (userEntity.isErr) {
+    return handleResultErrorResp(500, res, userEntity.error);
   }
+
+  req.session.user = { id: userEntity.value.id };
+  return handleOkResp({ user: userEntity }, res);
 });
 
 
-UserController.post("/update", async (req: Request, res: Response) => {
-  try {
-    // TODO: authenticate that user has permission to update thisuserNameValidator
-    const userData = updateUserSchema.parse(req.body);
-    const userEntity = await userRepo.update(userData);
+UserController.post("/update", validate({ body: updateUserSchema }), async (req, res) => {
+  // TODO: authenticate that user has permission to update thisuserNameValidator
+  const userEntity = await userRepo.update(req.body);
 
-    if (userEntity.isOk) {
-      res.send({ user: userEntity, message: "Success" });
-    } else {
-      userEntity.unwrap();
-    }
-
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (userEntity.isErr) {
+    return handleResultErrorResp(500, res, userEntity.error);
   }
+
+  return handleOkResp({ user: userEntity }, res);
 });
 
-UserController.get("/:userId", async (req: Request, res: Response) => {
-  try {
-    const userData = readSingleUserSchema.parse(req.params);
-    const userEntity = await userRepo.read.readSingle(userData);
+UserController.get("/:userId", validate({ params: readSingleUserSchema }), async (req, res) => {
+  const userEntity = await userRepo.read.readSingle(req.params);
 
-    if (userEntity.isOk) {
-      res.send({ user: userEntity, message: "Success" });
-    } else {
-      userEntity.unwrap();
-    }
-
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (userEntity.isErr) {
+    return handleResultErrorResp(500, res, userEntity.error);
   }
+
+  return handleOkResp({ user: userEntity }, res);
 });
 
-UserController.get("/", async (req: Request, res: Response) => {
-  try {
-    const userData = readManyUsersSchema.parse(req.query);
-    const userEntity = await userRepo.read.readMany(userData);
+UserController.get("/", validate({ query: readManyUsersSchema }), async (req, res) => {
+  const userEntity = await userRepo.read.readMany(req.query);
 
-    if (userEntity.isOk) {
-      res.send({ user: userEntity, message: "Success" });
-    } else {
-      userEntity.unwrap();
-    }
-
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (userEntity.isErr) {
+    return handleResultErrorResp(500, res, userEntity.error);
   }
+
+  return handleOkResp({ user: userEntity }, res);
 });
