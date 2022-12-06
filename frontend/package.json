@@ -15,13 +15,19 @@
     "@hookform/resolvers": "^3.1.0",
     "@tanstack/react-query": "^4.29.12",
     "axios": "^1.4.0",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.13.4",
+    "@mui/x-date-pickers": "^6.7.0",
     "react": "^18.2.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.44.3",
     "react-router-dom": "^6.12.1",
     "recharts": "^2.6.2",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "react-router-dom": "^6.12.1",
+    "react-time-picker": "^6.2.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.20",

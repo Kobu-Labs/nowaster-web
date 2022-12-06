@@ -46,7 +46,7 @@ const GroupDetails = (props: GroupDetailsProps) => {
             <span>{user.name}</span>
             <button
               onClick={() => kickUser(user.id)}
-              className="px-2 py-1 text-sm font-medium text-red-500 hover:text-red-700"
+              className="px-2 py-1 text-sm font-medium text-red-500 hover:text-red-700 bg-gray-950 rounded-lg"
             >
               Kick
             </button>
@@ -65,7 +65,7 @@ const GroupDetails = (props: GroupDetailsProps) => {
 
           <button
             onClick={() => deleteGroup(props.groupId)}
-            className="py-1 text-sm font-medium text-red-500 hover:text-red-700 mt-2"
+            className="py-1 text-sm font-medium text-red-500 hover:text-red-700 mt-2 bg-gray-950 rounded-lg"
           >
             Delete group
           </button>

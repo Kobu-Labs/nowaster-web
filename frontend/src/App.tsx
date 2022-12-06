@@ -23,7 +23,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/logout" element={<LogoutPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/auth/*" Component={PrivateRoute} />
+          <Route index element={<Navigate to="home" />} />
+          <Route path="home" element={<HomePage />} />
+          <Route path="groups" element={<GroupsPage />} />
+          <Route path="stats" element={<StatsPage />} />
+          <Route path="timer" element={<TimerPage />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </main>
@@ -32,12 +36,14 @@ function App() {
 }
 
 const PrivateRoute: FC = () => {
-  const { auth, isLoading, isError } = useAuth();
+  {
+    /*const { auth, isLoading, isError } = useAuth();
 
   if (isLoading) return <Loading />;
   if (!auth || isError) {
     console.log("error");
     return <Navigate to="/login" />;
+  }*/
   }
 
   return (

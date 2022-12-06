@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { TimerComponent } from './Timer';
+import { TimerRecorded } from './Timer';
 
 const meta = {
-  title: 'Example/Timer',
-  component: TimerComponent,
+  title: 'Timers/Timer',
+  component: TimerRecorded,
   tags: ['autodocs'],
-} satisfies Meta<typeof TimerComponent>;
+} satisfies Meta<typeof TimerRecorded>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
