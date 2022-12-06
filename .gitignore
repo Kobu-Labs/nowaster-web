@@ -43,3 +43,5 @@ test/*.js
 *.map
 
 backend/.DS_Store
+backend/prisma/database
+backend/prisma/database-journal
