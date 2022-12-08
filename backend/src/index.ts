@@ -6,7 +6,7 @@ import { RecordedController } from "./controllers/study_sessions/recorderControl
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import session from "./middleware/sessionMiddleware";
-import authRouter from "./controllers/authController";
+import AuthController from "./controllers/authController";
 import todoRouter from "./controllers/todosController";
 
 declare module "express-session" {
@@ -24,7 +24,7 @@ app.use(cors());
 
 app.use("/user", UserController);
 app.use("/recorded", RecordedController);
-app.use("/auth", authRouter);
+app.use("/auth", AuthController);
 app.use("/todos", todoRouter);
 
 app.use((_req, res) => {

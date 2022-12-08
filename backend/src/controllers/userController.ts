@@ -23,7 +23,7 @@ UserController.put("/create", validate({ body: createUserSchema }), async (req, 
   }
 
   req.session.user = { id: userEntity.value.id };
-  return handleOkResp({ user: userEntity }, res);
+  return handleOkResp(userEntity.value, res);
 });
 
 
@@ -35,7 +35,7 @@ UserController.post("/update", validate({ body: updateUserSchema }), async (req,
     return handleResultErrorResp(500, res, userEntity.error);
   }
 
-  return handleOkResp({ user: userEntity }, res);
+  return handleOkResp(userEntity.value, res);
 });
 
 UserController.get("/:userId", validate({ params: readSingleUserSchema }), async (req, res) => {
@@ -45,7 +45,7 @@ UserController.get("/:userId", validate({ params: readSingleUserSchema }), async
     return handleResultErrorResp(500, res, userEntity.error);
   }
 
-  return handleOkResp({ user: userEntity }, res);
+  return handleOkResp(userEntity.value, res);
 });
 
 UserController.get("/", validate({ query: readManyUsersSchema }), async (req, res) => {
@@ -55,5 +55,5 @@ UserController.get("/", validate({ query: readManyUsersSchema }), async (req, re
     return handleResultErrorResp(500, res, userEntity.error);
   }
 
-  return handleOkResp({ user: userEntity }, res);
+  return handleOkResp(userEntity.value, res);
 });
