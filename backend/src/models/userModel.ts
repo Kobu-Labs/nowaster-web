@@ -25,7 +25,7 @@ export const updateUserSchema = z.object({
 
 
 export const readSingleUserSchema = z.object({
-  userId: z.string().uuid(),
+  id: z.string().uuid(),
 });
 
 export const readManyUsersSchema = z.object({

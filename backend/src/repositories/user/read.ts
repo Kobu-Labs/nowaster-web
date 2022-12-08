@@ -4,15 +4,13 @@ import client from "../client";
 import { Result } from "@badrap/result";
 
 type ReadUserParams = {
-    userId: string
-}
+    id: string
+} | { email: string }
 
 const readSingle = async (params: ReadUserParams): AsyncResult<User> => {
   try {
     const user = await client.user.findFirst({
-      where: {
-        id: params.userId,
-      }
+      where: params
     });
 
     if (!user) {

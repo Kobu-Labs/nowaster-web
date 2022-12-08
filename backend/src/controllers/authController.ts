@@ -1,69 +1,63 @@
 import { Router } from "express";
 import auth from "../middleware/authMiddleware";
-import client from "../repositories/client";
 import argon2 from "argon2";
 import { loginUserScheme } from "../models/userModel";
+import userRepo from "../repositories/user";
+import { handleErrorResp } from "./middleware/responseUtil";
+import { handleResultErrorResp } from "./middleware/responseUtil";
+import { handleOkResp } from "./middleware/responseUtil";
+import { validate } from "./middleware/validation";
 
-const authRouter = Router();
+const AuthController = Router();
 
 /**
  * This endpoint provides information about the currenct authentication.
  * If the user is authorized it returns the user entity. If there is 
  * invalid cookie or missing cookie, it return 401.
  */
-authRouter.get("/", auth(), async (req, res) => {
+AuthController.get("/", auth(), async (req, res) => {
   const id = req.session.user?.id;
-
-  const user = await client.user.findUnique({
-    where: { id },
-    select: { id: true, username: true, email: true, avatar: true }
-  });
-    
-  if (!user) {
-    res.status(404).json({ message: "Something went wrong" });
-    return;
+  if (id === undefined) {
+    return handleErrorResp(401, res, "Unauthorized");
   }
 
-  res.json({ item: user, message: `User ${user.username} is authorized` });
+  const userResult = await userRepo.read.readSingle({ id: id });
+  if (userResult.isErr) {
+    return handleResultErrorResp(404, res, userResult.error);
+  }
+
+  return handleOkResp(userResult.value, res);
 });
 
 /**
  * This endpoint after successful password verification add the user and
  * role to session stroge.
  */
-authRouter.post("/login", async (req, res) => {
-  const result = await loginUserScheme.safeParseAsync(req.body);
-  if (!result.success) {
-    res.status(400).json(result.error);
-    return; 
-  }
-    
-  const { email, password } = result.data;
-  const user = await client.user.findUnique({ where: { email } });
+AuthController.post("/login", validate({ body: loginUserScheme }), async (req, res) => {
+  const { email, password } = req.body;
+  const userResult = await userRepo.read.readSingle({ email: email });
 
-  if (!user) {
-    res.status(404).json({ message: "User does not exists" });
-    return;
+  if (userResult.isErr) {
+    return handleResultErrorResp(404, res, userResult.error);
   }
 
-  const isVerified = await argon2.verify(user.hashedPassword, password);
+  const isVerified = await argon2.verify(userResult.value.hashedPassword, password);
 
   if (!isVerified) {
-    res.status(401).json({ message: "Wrong password" });
-    return;
+    return handleErrorResp(401, res, "Wrong password");
   }
 
-  req.session.user = { id: user.id };
-  res.json({ message: "Logged in" });
+  req.session.user = { id: userResult.value.id };
+  return handleOkResp(userResult.value, res, "Logged in");
 });
 
 
 /**
  * Remove the authorized user from session storage.
  */
-authRouter.post("/logout", async (req, res) => {
+AuthController.post("/logout", async (req, res) => {
   req.session.destroy(() => undefined);
-  res.json({ message: "Logged out" });
+  return handleOkResp({}, res, "Logged out");
 });
 
-export default authRouter;
+export default AuthController;
