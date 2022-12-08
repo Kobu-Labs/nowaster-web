@@ -1,14 +1,9 @@
 import baseApi from "./baseApi";
 import { UserRegistrationSubmit } from "../validation/registrationSubmit";
 import { User } from "../models/user";
+import { ResponseSingle } from "../models/response";
 
-type RegistrationResponse = {
-    message: string;
-    user: User;
-}
-
-export const register = async (registrationData : UserRegistrationSubmit) => {
-  //change avatar property value
-  const resp = await baseApi.put<RegistrationResponse>('user/create', {...registrationData, ...{avatar: "test"}});
-  return resp;
+export const register = async (registrationData : UserRegistrationSubmit) : Promise<ResponseSingle<User>>=> {
+  const resp = await baseApi.put<ResponseSingle<User>>('user/create', {...registrationData, ...{avatar: "test"}});
+  return resp.data;
 }

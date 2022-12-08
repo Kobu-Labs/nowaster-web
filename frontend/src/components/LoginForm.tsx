@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { AuthApi } from "../services";
 import {
   UserLoginSubmit,
-  UserRegistrationSubmit,
 } from "../validation/registrationSubmit";
 import NavbarButton from "./NavbarButton";
 import { FC, useState } from "react";
@@ -13,7 +12,7 @@ const LoginForm: FC = () => {
   const {
     register,
     handleSubmit,
-  } = useForm<UserRegistrationSubmit>();
+  } = useForm<UserLoginSubmit>();
 
   const navigate = useNavigate();
   const [backendErrorMessage, setBackendErrorMessage] = useState<string | null>(

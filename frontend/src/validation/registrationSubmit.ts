@@ -7,7 +7,7 @@ export const registrationSchema = z.object({
 });
 
 export type UserLoginSubmit = {
-  username: string,
+  email: string,
   password: string,
 }
 
