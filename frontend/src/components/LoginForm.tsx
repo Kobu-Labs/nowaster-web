@@ -1,38 +1,41 @@
 import { useNavigate } from "react-router-dom";
 import { AuthApi } from "../services";
-import {
-  UserLoginSubmit,
-} from "../validation/registrationSubmit";
+import { UserLoginSubmit } from "../validation/registrationSubmit";
 import NavbarButton from "./NavbarButton";
 import { FC, useState } from "react";
-import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoginResponse } from "../services/authApi";
+import { ResponseSingle } from "../services/types";
 
 const LoginForm: FC = () => {
-  const {
-    register,
-    handleSubmit,
-  } = useForm<UserLoginSubmit>();
+  const { register, handleSubmit } = useForm<UserLoginSubmit>();
 
   const navigate = useNavigate();
   const [backendErrorMessage, setBackendErrorMessage] = useState<string | null>(
     null
   );
 
+  const queryClient = useQueryClient();
+  const { mutateAsync: login } = useMutation<
+    ResponseSingle<LoginResponse>,
+    unknown,
+    UserLoginSubmit,
+    unknown
+  >({
+    mutationFn: async (loginData) => await AuthApi.login(loginData),
+    retry: false,
+  });
+
   const onSubmit = async (data: UserLoginSubmit) => {
-    try {
-      const result = await AuthApi.login(data);
-      console.log(result.data.message);
-      navigate("/auth/home");
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        console.log(err.response?.data.message);
-        setBackendErrorMessage(err.response?.data.message);
-      } else {
-        console.log("Unexpected error", err);
-        setBackendErrorMessage("Unexpected error");
-      }
+    const result = await login(data);
+
+    if (result.status === "error") {
+      setBackendErrorMessage(result.message || "");
+      return;
     }
+    queryClient.setQueryData(["auth"], () => result);
+    navigate("/home");
   };
 
   return (

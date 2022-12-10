@@ -9,52 +9,25 @@ import {
   TimerPage,
 } from "./pages";
 import { RegisterPage } from "./pages/RegisterPage";
-import { Navigate } from "react-router-dom";
-import { FC } from "react";
-import Loading from "./pages/Loading";
-import useAuth from "./hooks/useAuth";
+import { WithAuthorization } from "./components/WithAuthorization";
 
 function App() {
   return (
     <>
       <main className="">
         <Routes>
-          <Route index element={<Navigate to="/auth/home" />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/logout" element={<LogoutPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route index element={<Navigate to="home" />} />
-          <Route path="home" element={<HomePage />} />
-          <Route path="groups" element={<GroupsPage />} />
-          <Route path="stats" element={<StatsPage />} />
-          <Route path="timer" element={<TimerPage />} />
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route index path="/home" Component={WithAuthorization(HomePage)} />
+          <Route path="/login" Component={LoginPage} />
+          <Route path="/logout" Component={LogoutPage} />
+          <Route path="/register" Component={RegisterPage} />
+          <Route path="/groups" Component={WithAuthorization(GroupsPage)} />
+          <Route path="/stats" Component={WithAuthorization(StatsPage)} />
+          <Route path="/timer" Component={WithAuthorization(TimerPage)} />
+          <Route path="*" Component={LoginPage} />
         </Routes>
       </main>
     </>
   );
 }
-
-const PrivateRoute: FC = () => {
-  {
-    /*const { auth, isLoading, isError } = useAuth();
-
-  if (isLoading) return <Loading />;
-  if (!auth || isError) {
-    console.log("error");
-    return <Navigate to="/login" />;
-  }*/
-  }
-
-  return (
-    <Routes>
-      <Route index element={<Navigate to="home" />} />
-      <Route path="home" element={<HomePage />} />
-      <Route path="groups" element={<GroupsPage />} />
-      <Route path="stats" element={<StatsPage />} />
-      <Route path="timer" element={<TimerPage />} />
-    </Routes>
-  );
-};
 
 export default App;
