@@ -6,7 +6,7 @@ const useAuth = () => {
     queryKey: ["auth"],
     retry: false,
     queryFn: () => AuthApi.auth(),
-    staleTime: 1000 * 60 * 3, // 3 minutes
+    staleTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
   });
 
