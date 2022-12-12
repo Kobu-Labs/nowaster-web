@@ -92,27 +92,28 @@ export const TimerRecorded = () => {
     <div className="bg-gray-800 rounded-lg p-4">
       <SubjectInput onSave={setSavedSubject} />
       <h2 className="text-xl m-2 mb-4">Subject: {savedSubject}</h2>
-      <h2 className="text-3xl m-2 mb-4">{formatTime(count)}</h2>
+
+      <h2 className="text-7xl m-4 my-8">{formatTime(count)}</h2>
       {isActive ? (
-        <button onClick={handlePause} className="ml-4 bg-gray-900 h-8 py-0">
+        <button onClick={handlePause} className="mx-2 bg-gray-900 h-8 py-0">
           Pause
         </button>
       ) : count === 0 ? (
-        <button onClick={handleStart} className="ml-4 bg-gray-900 h-8 py-0">
+        <button onClick={handleStart} className="mx-2 bg-gray-900 h-8 py-0">
           Start
         </button>
       ) : (
-        <button onClick={handleStart} className="ml-4 bg-gray-900 h-8 py-0">
+        <button onClick={handleStart} className="mx-2 bg-gray-900 h-8 py-0">
           Unpause
         </button>
       )}
       {count > 0 && !isActive && (
-        <button onClick={ResetTimer} className="ml-4 bg-gray-900 h-8 py-0">
+        <button onClick={ResetTimer} className="mx-2 bg-gray-900 h-8 py-0">
           Reset
         </button>
       )}
       <button
-        className="ml-4 bg-gray-900 h-8 py-0"
+        className="mx-2 bg-gray-900 h-8 py-0"
         type="button"
         onClick={handleSubmit}
       >

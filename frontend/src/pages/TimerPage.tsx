@@ -16,7 +16,7 @@ export const TimerPage: FC = () => {
       <div className="flex-grow overflow-y-auto flex items-center justify-center flex-col h-screen">
         <div className="ml-48 mb-10">
           <div className="text-sm font-medium text-center border-b text-gray-200 border-gray-700">
-            <ul className="flex flex-wrap -mb-px">
+            <ul className="flex flex-wrap -mb-px mx-28">
               <li className="mr-2">
                 <button
                   onClick={() => setActiveTimer(scheduledDisplayString)}
@@ -43,11 +43,13 @@ export const TimerPage: FC = () => {
               </li>
             </ul>
           </div>
-          {activeTimer === recordedDisplayString ? (
-            <TimerRecorded></TimerRecorded>
-          ) : (
-            <TimerScheduled></TimerScheduled>
-          )}
+          <div className="h-72 bg-gray-800 rounded-lg">
+            {activeTimer === recordedDisplayString ? (
+              <TimerRecorded></TimerRecorded>
+            ) : (
+              <TimerScheduled></TimerScheduled>
+            )}
+          </div>
         </div>
       </div>
     </div>
