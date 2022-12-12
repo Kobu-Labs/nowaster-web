@@ -8,8 +8,8 @@ import { AuthApi } from "../services";
 
 const Navbar = () => {
   const onSubmit = async () => {
-    const response = await AuthApi.logout();
-    console.log(response.data.message);
+    //TODO: handle this with key invalidation
+    await AuthApi.logout();
   };
 
   return (
@@ -17,7 +17,7 @@ const Navbar = () => {
       <ul>
         {/* logo */}
         <li className="mt-4 pb-2 border-b-2 border-indigo-500">
-          <NavbarButton label="Home" path="/" icon={homeIcon} />
+          <NavbarButton label="Home" path="/home" icon={homeIcon} />
         </li>
         <li className="mt-4 pb-2 border-b-2 border-indigo-500">
           <NavbarButton label="My Groups" path="/groups" icon={groupsIcon} />
