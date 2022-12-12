@@ -7,9 +7,17 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoginResponse } from "../services/authApi";
 import { ResponseSingle } from "../services/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../validation/loginSubmit";
 
 const LoginForm: FC = () => {
-  const { register, handleSubmit } = useForm<UserLoginSubmit>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UserLoginSubmit>({
+    resolver: zodResolver(loginSchema),
+  });
 
   const navigate = useNavigate();
   const [backendErrorMessage, setBackendErrorMessage] = useState<string | null>(
@@ -51,10 +59,10 @@ const LoginForm: FC = () => {
               Email:
             </label>
             <input
-              type="email"
+              type="text"
               id="email"
               {...register("email")}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-black dark:text-white"
             />
           </div>
           <div className="mb-4">
@@ -68,7 +76,7 @@ const LoginForm: FC = () => {
               type="password"
               id="password"
               {...register("password")}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-black dark:text-white"
             />
           </div>
           <div className="mt-6">
@@ -81,7 +89,8 @@ const LoginForm: FC = () => {
           </div>
         </form>
         <span className="text-red-500">
-          {backendErrorMessage && <>{backendErrorMessage}</>}
+          {(errors.email && <>{errors.email.message}</>) ||
+            (backendErrorMessage && <>{backendErrorMessage}</>)}
         </span>
         <div className="flex mt-6">
           <span className="text-indigo-500">Dont Have an Account?</span>

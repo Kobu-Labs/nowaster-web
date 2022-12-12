@@ -27,7 +27,7 @@ const RegisterForm = () => {
   const onSubmit = async (data: UserRegistrationSubmit) => {
     try {
       const result = await UserApi.register(data);
-      console.log(result.data.message);
+      console.log(result.message);
       navigate("/");
     } catch (err) {
       if (err instanceof AxiosError) {
