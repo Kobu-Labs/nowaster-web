@@ -1,4 +1,6 @@
 import React, { useState, useCallback } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function formatTime(secondsInput: number) {
   const hours = Math.floor(secondsInput / 3600);
@@ -74,6 +76,9 @@ export const TimerScheduled: React.FC = () => {
     );
   };
 
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+
   return (
     <div className="bg-gray-800 rounded-lg p-4">
       <div>
@@ -91,54 +96,60 @@ export const TimerScheduled: React.FC = () => {
         </button>
       </div>
       <h2 className="text-xl m-2 mb-4">Subject: {savedSubject}</h2>
-      <span className="text-xl m-2 mb-4">From:</span>
-      <select
-        value={fromHours}
-        onChange={handleFromHoursChange}
-        className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
-      >
-        {Array.from({ length: 24 }, (_, i) => i).map((value) => (
-          <option key={value} value={value}>
-            {value.toString().padStart(2, "0")}
-          </option>
-        ))}
-      </select>
-      :
-      <select
-        value={fromMinutes}
-        onChange={handleFromMinutesChange}
-        className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
-      >
-        {Array.from({ length: 60 }, (_, i) => i).map((value) => (
-          <option key={value} value={value}>
-            {value.toString().padStart(2, "0")}
-          </option>
-        ))}
-      </select>
-      <span className="text-xl m-2 mb-4">To:</span>
-      <select
-        value={toHours}
-        onChange={handleToHoursChange}
-        className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
-      >
-        {Array.from({ length: 24 }, (_, i) => i).map((value) => (
-          <option key={value} value={value}>
-            {value.toString().padStart(2, "0")}
-          </option>
-        ))}
-      </select>
-      :
-      <select
-        value={toMinutes}
-        onChange={handleToMinutesChange}
-        className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
-      >
-        {Array.from({ length: 60 }, (_, i) => i).map((value) => (
-          <option key={value} value={value}>
-            {value.toString().padStart(2, "0")}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-center">
+        <span className="m-2">From:</span>
+        <DatePicker selected={startDate} onChange={(date) => setStartDate(date!)} className="ml-4 bg-gray-900 rounded-lg h-8 text-center"/>
+        <select
+          value={fromHours}
+          onChange={handleFromHoursChange}
+          className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
+        >
+          {Array.from({ length: 24 }, (_, i) => i).map((value) => (
+            <option key={value} value={value}>
+              {value.toString().padStart(2, "0")}
+            </option>
+          ))}
+        </select>
+        :
+        <select
+          value={fromMinutes}
+          onChange={handleFromMinutesChange}
+          className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
+        >
+          {Array.from({ length: 60 }, (_, i) => i).map((value) => (
+            <option key={value} value={value}>
+              {value.toString().padStart(2, "0")}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex items-center">
+        <span className="m-2 ml-7">To:</span>
+        <DatePicker selected={endDate} onChange={(date) => setEndDate(date!)} className="ml-4 bg-gray-900 rounded-lg h-8 text-center"/>
+        <select
+          value={toHours}
+          onChange={handleToHoursChange}
+          className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
+        >
+          {Array.from({ length: 24 }, (_, i) => i).map((value) => (
+            <option key={value} value={value}>
+              {value.toString().padStart(2, "0")}
+            </option>
+          ))}
+        </select>
+        :
+        <select
+          value={toMinutes}
+          onChange={handleToMinutesChange}
+          className="m-2 bg-gray-900 h-8 px-2 rounded-lg"
+        >
+          {Array.from({ length: 60 }, (_, i) => i).map((value) => (
+            <option key={value} value={value}>
+              {value.toString().padStart(2, "0")}
+            </option>
+          ))}
+        </select>
+      </div>
       <br className="mb-4"></br>
       <button onClick={handleButtonClick} className="ml-4 bg-gray-900 h-8 py-0">
         Submit Time
