@@ -1,4 +1,10 @@
+type Data<T> = {
+  isOk: boolean;
+  isErr: boolean;
+  value: T;
+};
+
 export type ResponseSingle<T> = {
-    item: T,
-    message: string
-} 
+  data: Data<T>;
+  status: string;
+};

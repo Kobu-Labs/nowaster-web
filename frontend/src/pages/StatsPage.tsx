@@ -34,13 +34,16 @@ export const StatsPage: FC = () => {
 
   return (
     <div className="flex">
-      <div className="fixed top-0 left-0 h-screen overflow-y-auto">
+      <div className="h-screen sticky top-0">
         <Navbar />
       </div>
       <div className="flex-grow overflow-y-auto flex items-center justify-center flex-col h-screen">
-        <p className="">StatsPage</p>
-        <PieGraph data={data01}></PieGraph>
-        <ChangeColor />
+        <div className="bg-gray-900 rounded-lg p-8 pt-0 flex flex-col items-center">
+          <div className="h-[80vh] w-[80vh]">
+            <PieGraph data={data01}></PieGraph>
+          </div>
+          <ChangeColor />
+        </div>
       </div>
     </div>
   );

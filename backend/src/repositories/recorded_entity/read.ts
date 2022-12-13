@@ -4,12 +4,8 @@ import client from "../client";
 import { Result } from "@badrap/result";
 
 
-type ReadAllRecordedParams = {
-    categories?: string[];
-    limit?: number;
-    userId?: string;
-    startDate?: Date;
-    groupId?: string
+type ReadSingleRecordByUserIdParams = {
+    userId: string
 };
 
 type ReadSingleRecordedParams = {
@@ -38,14 +34,15 @@ const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEnt
 };
 
 
-const many = async (params: ReadAllRecordedParams): AsyncResult<RecordedEntity[]> => {
+const singleByUserId = async (params: ReadSingleRecordByUserIdParams): AsyncResult<RecordedEntity> => {
   try {
-    const { limit, ...data } = params;
+    const { userId } = params;
 
 
-    const recordedEntity = await client.recordedEntity.findMany({
-      where: data,
-      ...(limit !== undefined ?  { take: limit }: {})
+    const recordedEntity = await client.recordedEntity.findFirst({
+      where: {
+        userId: userId
+      }
     });
 
 
@@ -62,7 +59,7 @@ const many = async (params: ReadAllRecordedParams): AsyncResult<RecordedEntity[]
 
 const read = {
   single,
-  many,
+  singleByUserId,
 };
 
 export default read;

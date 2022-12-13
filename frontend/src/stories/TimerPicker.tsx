@@ -1,38 +1,42 @@
 import React, { useState, useCallback } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { ScheduledEntityApi } from "../services";
+import { CreateScheduledEntity } from "../models/scheduledEntity";
+import { timerSchema } from "../validation/timerSubmit";
+import useAuth from "../hooks/useAuth";
+import CategoryPicker from "../components/CategoryPicker";
 
-function formatTime(secondsInput: number) {
-  const hours = Math.floor(secondsInput / 3600);
-  const minutes = Math.floor((secondsInput - hours * 3600) / 60);
-  const seconds = secondsInput - hours * 3600 - minutes * 60;
+function calculateDate(
+  date: Date,
+  hours: number,
+  minutes: number,
+  seconds: number
+) {
+  const newDate = date;
 
-  let hours_str = hours.toString();
-  let minutes_str = minutes.toString();
-  let seconds_str = seconds.toString();
+  newDate.setHours(hours);
+  newDate.setMinutes(minutes);
+  newDate.setSeconds(seconds);
 
-  if (hours < 10) {
-    hours_str = "0" + hours_str;
-  }
-  if (minutes < 10) {
-    minutes_str = "0" + minutes_str;
-  }
-  if (seconds < 10) {
-    seconds_str = "0" + seconds_str;
-  }
-  if (hours > 0) {
-    return hours_str + ":" + minutes_str + ":" + seconds_str;
-  }
-  return minutes_str + ":" + seconds_str;
+  return newDate;
 }
 
+const successfulSubmitMessage = "Time submited successfuly";
+
 export const TimerScheduled: React.FC = () => {
+  const { auth } = useAuth();
+  const [fromDate, setfromDate] = useState<Date>(new Date());
   const [fromHours, setFromHours] = useState(0);
   const [fromMinutes, setFromMinutes] = useState(0);
+  const [toDate, settoDate] = useState<Date>(new Date());
   const [toHours, setToHours] = useState(0);
   const [toMinutes, setToMinutes] = useState(0);
   const [subjectInput, setSubjectInput] = useState<string>("");
-  const [savedSubject, setSavedSubject] = useState<string>("");
+  const [descriptionInput, setDescriptionInput] = useState<string>("");
+  const [frontendError, setFrontendError] = useState<string | undefined>(
+    undefined
+  );
 
   const handleFromHoursChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -63,42 +67,56 @@ export const TimerScheduled: React.FC = () => {
     []
   );
 
-  const saveSubject = useCallback(() => {
-    setSavedSubject(subjectInput);
-    setSubjectInput("");
-  }, [subjectInput]);
-
-  const handleButtonClick = () => {
-    alert(
-      `Subject: ${savedSubject}, From time: ${formatTime(
-        fromHours * 60 + fromMinutes
-      )}, To time: ${formatTime(toHours * 60 + toMinutes)}`
-    );
+  const handleDescriptionInputChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setDescriptionInput(event.target.value);
   };
 
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const handleButtonClick = async () => {
+    const userId = auth!.data.id;
+    const description = descriptionInput;
+    const startTime = calculateDate(fromDate, fromHours, fromMinutes, 0);
+    const endTime = calculateDate(toDate, toHours, toMinutes, 0);
+
+    const formData = {
+      startTime,
+      endTime,
+      category: subjectInput,
+      description,
+      userId,
+    };
+
+    const validationResult = timerSchema.safeParse(formData);
+
+    if (validationResult.success) {
+      submitScheduledTimer(formData);
+      setFrontendError(successfulSubmitMessage);
+    } else {
+      console.log("WRONG DATA");
+      console.log(validationResult.error.errors.at(0)?.message);
+      setFrontendError(validationResult.error.errors.at(0)?.message);
+    }
+  };
+
+  const submitScheduledTimer = async (data: CreateScheduledEntity) => {
+    const result = await ScheduledEntityApi.create(data);
+    console.log(result);
+  };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4">
-      <div>
-        <label>
-          Pick subject:
-          <input
-            type="text"
-            onChange={handleSubjectInputChange}
-            value={subjectInput}
-            className="ml-4 bg-gray-900 rounded-lg h-8 text-center"
-          />
-        </label>
-        <button onClick={saveSubject} className="ml-4 bg-gray-900 h-8 py-0">
-          Save
-        </button>
-      </div>
-      <h2 className="text-xl m-2 mb-4">Subject: {savedSubject}</h2>
+    <div className="bg-gray-800 rounded-lg p-4 flex flex-col items-center">
+      <CategoryPicker
+        handleCategoryInputChange={handleSubjectInputChange}
+        categoryInput={subjectInput}
+      />
       <div className="flex items-center">
         <span className="m-2">From:</span>
-        <DatePicker selected={startDate} onChange={(date) => setStartDate(date!)} className="ml-4 bg-gray-900 rounded-lg h-8 text-center"/>
+        <DatePicker
+          selected={fromDate}
+          onChange={(date) => setfromDate(date ? date : new Date())}
+          className="ml-4 bg-gray-900 rounded-lg h-8 text-center"
+        />
         <select
           value={fromHours}
           onChange={handleFromHoursChange}
@@ -125,7 +143,11 @@ export const TimerScheduled: React.FC = () => {
       </div>
       <div className="flex items-center">
         <span className="m-2 ml-7">To:</span>
-        <DatePicker selected={endDate} onChange={(date) => setEndDate(date!)} className="ml-4 bg-gray-900 rounded-lg h-8 text-center"/>
+        <DatePicker
+          selected={toDate}
+          onChange={(date) => settoDate(date ? date : new Date())}
+          className="ml-4 bg-gray-900 rounded-lg h-8 text-center"
+        />
         <select
           value={toHours}
           onChange={handleToHoursChange}
@@ -150,10 +172,29 @@ export const TimerScheduled: React.FC = () => {
           ))}
         </select>
       </div>
-      <br className="mb-4"></br>
-      <button onClick={handleButtonClick} className="ml-4 bg-gray-900 h-8 py-0">
-        Submit Time
-      </button>
+      <textarea
+        className="bg-gray-900 rounded-lg h-16 w-80 my-2 px-2"
+        placeholder="Enter description..."
+        onChange={handleDescriptionInputChange}
+      ></textarea>
+
+      <div className="flex flex-col">
+        <button
+          onClick={handleButtonClick}
+          className="mx-36 bg-gray-900 h-8 py-0 mb-4 mt-2"
+        >
+          Submit Time
+        </button>
+        <span
+          className={`${
+            frontendError === successfulSubmitMessage
+              ? "text-green-400"
+              : "text-red-500"
+          }`}
+        >
+          {frontendError && <>{frontendError}</>}
+        </span>
+      </div>
     </div>
   );
 };

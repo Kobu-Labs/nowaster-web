@@ -5,7 +5,7 @@ import { Result } from "@badrap/result";
 
 type ReadAllScheduledParams = {
     categories?: string[];
-    limit: number;
+    limit?: number;
     userId?: string;
     fromDate?: Date;
     toDate?: Date;

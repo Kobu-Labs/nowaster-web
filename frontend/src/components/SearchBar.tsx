@@ -18,14 +18,14 @@ const SearchBar = () => {
         <input
           type="text"
           id="search"
-          className="bg-gray-800 border text-white text-sm rounded-lg block w-full pl-10 p-2.5"
+          className="bg-gray-900 text-white text-sm rounded-lg block w-full pl-10 p-2.5"
           placeholder="Search Group"
           required
         />
       </div>
       <button
         type="button"
-        className="p-2.5 ml-2 text-sm font-medium text-white bg-gray-900 rounded-lg border border-gray-900 hover:bg-gray-950 focus:ring-4 focus:outline-none focus:gray-900"
+        className="p-2.5 ml-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-950 focus:ring-4 focus:outline-none focus:gray-900"
       >
         <img src={searchIcon} alt="Search Icon" className="w-5 h-5" />
         <span className="sr-only">Search</span>

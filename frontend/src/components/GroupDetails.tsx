@@ -36,7 +36,7 @@ const GroupDetails = (props: GroupDetailsProps) => {
 
   return (
     <div className="bg-gray-800 rounded-lg p-4">
-      <h1 className="m-4">{props.groupName}</h1>
+      <h1 className="m-4 text-center">{props.groupName}</h1>
       <div className="overflow-y-auto max-h-96 bg-gray-900 rounded-lg p-2">
         {users.map((user) => (
           <div
@@ -53,7 +53,7 @@ const GroupDetails = (props: GroupDetailsProps) => {
           </div>
         ))}
       </div>
-      <div className="bg-gray-900 rounded-lg mt-4 p-4">
+      <div className="bg-gray-900 rounded-lg mt-4 p-4 text-center">
         <h2 className="text-xl m-2">Manage Group Settings</h2>
         <div className="px-4 py-2 flex flex-col">
           <div>

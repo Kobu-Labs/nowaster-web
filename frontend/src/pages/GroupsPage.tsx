@@ -39,18 +39,18 @@ export const GroupsPage: FC = () => {
 
   return (
     <div className="flex">
-      <div className="fixed top-0 left-0 h-screen overflow-y-auto">
+      <aside className="h-screen sticky top-0">
         <Navbar />
-      </div>
-      <div className="flex-grow overflow-y-auto">
-        <div className="ml-48 mr-8 bg-gray-900 p-4 rounded-lg pb-8">
+      </aside>
+      <div className="flex-grow overflow-y-auto flex justify-center flex-col h-screen">
+        <div className="m-8 bg-gray-900 p-4 rounded-lg pb-8">
           <div className="flex bg-gray-800 rounded-lg px-2 pt-2">
             <GroupsNav setActiveGroup={setGroup}></GroupsNav>
             <SearchBar></SearchBar>
           </div>
 
-          <div className="flex justify-around mt-10 flex-grow overflow-y-auto">
-            <div className="flex flex-col justify-around">
+          <div className="flex justify-around mt-10">
+            <div className="flex flex-col justify-around w-[60vh]">
               <PieGraph data={data01}></PieGraph>
               <ChangeColor></ChangeColor>
             </div>

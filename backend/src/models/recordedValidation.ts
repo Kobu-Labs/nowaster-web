@@ -6,9 +6,8 @@ export const createRecordedSchema = z.object({
   category: z.string().nonempty(),
   description: z.string()
     .max(50)
-    .optional()
-    .transform(x => x ? x : null),
-  startTime: z.string().pipe(z.coerce.date())
+    .nullable(),
+  startTime: z.coerce.date()
 });
 
 export const readRecordedSchema = z.object({
@@ -26,7 +25,7 @@ export const updateRecordedSchema = z.object({
   description: z.string()
     .max(50)
     .optional(),
-  startTime: z.string().pipe(z.coerce.date()).optional()
+  startTime: z.coerce.date().optional()
 });
 
 

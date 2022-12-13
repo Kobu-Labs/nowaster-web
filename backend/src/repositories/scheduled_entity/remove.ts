@@ -5,7 +5,6 @@ import { Result } from "@badrap/result";
 
 type DeleteSingleScheduledParams = {
     id: string;
-    userId: string;
 };
 
 const single = async (params: DeleteSingleScheduledParams) : AsyncResult<ScheduledEntity>=> { 
@@ -19,10 +18,6 @@ const single = async (params: DeleteSingleScheduledParams) : AsyncResult<Schedul
 
       if (!scheduledEntity) {
         return Result.err(new Error("Scheduled Entity does not exist"));
-      }
-
-      if (scheduledEntity.userId != params.userId) {
-        return Result.err(new Error("User is not the owner of the scheduled Entity"));
       }
 
       const deletedEntity = await tx.scheduledEntity.delete({
@@ -39,7 +34,6 @@ const single = async (params: DeleteSingleScheduledParams) : AsyncResult<Schedul
 
 type DeleteManyScheduledParams = {
     ids: string[];
-    userId: string;
 };
 
 const many = async (params: DeleteManyScheduledParams) : AsyncResult<ScheduledEntity[]>=> {
@@ -54,10 +48,6 @@ const many = async (params: DeleteManyScheduledParams) : AsyncResult<ScheduledEn
       if (scheduledEntity.length !== params.ids.length) {
         const missingIds = params.ids.filter(x => !scheduledEntity.map(obj => obj.id).includes(x));
         return Result.err(new Error("Could not find scheduled entitites with id:" + missingIds.toString()));
-      }
-
-      if (!scheduledEntity.every(x => x.userId === params.userId)) {
-        return Result.err(new Error("User is not the owner of the recorded entity"));
       }
 
       await tx.scheduledEntity.deleteMany({
