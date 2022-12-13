@@ -1,93 +1,60 @@
-import { Request, Response, Router } from "express";
-import { handleErroredRequest } from "../utils";
-import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, readRecordedSchema, updateRecordedSchema } from "../../models/recorded_validation";
+import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, readRecordedSchema, updateRecordedSchema } from "../../models/recordedValidation";
 import recordedSessionRepo from "../../repositories/recorded_entity";
+import { validate } from "../middleware/validation";
+import { handleOkResp, handleResultErrorResp } from "../middleware/responseUtil";
+import { Router } from "express";
 
 export const RecordedController = Router();
 
-
 // create new study session
-RecordedController.post("/", async (req: Request, res: Response) => {
-  try {
-    const recordedSessionData = createRecordedSchema.parse(req.body);
-    const recordedSessionEntity = await recordedSessionRepo.create(recordedSessionData);
-
-
-    if (recordedSessionEntity.isOk) {
-      res.send({ recordedSession: recordedSessionEntity, message: "Success" });
-    } else {
-      recordedSessionEntity.unwrap();
-    }
-  } catch (e) {
-    handleErroredRequest(res, e);
+RecordedController.post("/", validate({ body: createRecordedSchema }), async (req, res) => {
+  const recordedSessionEntity = await recordedSessionRepo.create(req.body);
+  
+  if (recordedSessionEntity.isErr) {
+    return handleResultErrorResp(500, res, recordedSessionEntity.error);
   }
+  return handleOkResp(recordedSessionEntity, res);
 });
 
 
 // get users study sessions
-RecordedController.get("/:userId", async (req: Request, res: Response) => {
-  try {
-    const userData = readRecordedSchema.parse(req.params);
-    const recordedSessionEntity = await recordedSessionRepo.read.many(userData);
+RecordedController.get("/:userId", validate({ params: readRecordedSchema }), async (req, res) => {
+  const recordedSessionEntities = await recordedSessionRepo.read.singleByUserId(req.params);
 
-    if (recordedSessionEntity.isOk) {
-      res.send({ recordedSession: recordedSessionEntity, message: "Success" });
-    } else {
-      recordedSessionEntity.unwrap();
-    }
-
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (recordedSessionEntities.isErr) {
+    return handleResultErrorResp(500, res, recordedSessionEntities.error);
   }
+  return handleOkResp(recordedSessionEntities, res);
 });
 
 
 // get specific session
-RecordedController.get("/:userId/:id", async (req: Request, res: Response) => {
-  try {
-    const userData = readByIdRecordedSchema.parse(req.params);
-    const recordedSessionEntity = await recordedSessionRepo.read.single(userData);
+RecordedController.get("/:userId/:id", validate({ params: readByIdRecordedSchema }), async (req, res) => {
+  const recordedSessionEntity = await recordedSessionRepo.read.single(req.params);
 
-    if (recordedSessionEntity.isOk) {
-      res.send({ recordedSession: recordedSessionEntity, message: "Success" });
-    } else {
-      recordedSessionEntity.unwrap();
-    }
-
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (recordedSessionEntity.isErr) {
+    return handleResultErrorResp(500, res, recordedSessionEntity.error);
   }
+  return handleOkResp(recordedSessionEntity, res);
 });
 
 
 // update study session
-RecordedController.put("/", async (req, res) => {
-  try {
-    const data = updateRecordedSchema.parse(req.body);
-    const updatedEntity = await recordedSessionRepo.update(data);
-
-    if (updatedEntity.isOk) {
-      res.send({ recordedSession: updatedEntity, message: "Success" });
-    } else {
-      updatedEntity.unwrap();
-    }
-  } catch (e) {
-    handleErroredRequest(res, e);
+RecordedController.put("/", validate({ body: updateRecordedSchema }), async (req, res) => {
+  const updatedEntity = await recordedSessionRepo.update(req.body);
+  
+  if (updatedEntity.isErr) {
+    return handleResultErrorResp(500, res, updatedEntity.error);
   }
-});
+  return handleOkResp(updatedEntity, res);
+}); 
 
 // delete study session by id
-RecordedController.delete("/", async (req, res) => {
-  try {
-    const data = deleteRecordedSchema.parse(req.body);
-    const deletedEntity = await recordedSessionRepo.remove.single(data);
+RecordedController.delete("/", validate({ body: deleteRecordedSchema }), async (req, res) => {
+  const deletedEntity = await recordedSessionRepo.remove.single(req.body);
 
-    if (deletedEntity.isOk) {
-      res.send({ recordedSession: deletedEntity, message: "Success" });
-    } else {
-      deletedEntity.unwrap();
-    }
-  } catch (e) {
-    handleErroredRequest(res, e);
+  if (deletedEntity.isErr) {
+    return handleResultErrorResp(500, res, deletedEntity.error);
   }
-});
+  return handleOkResp(deletedEntity, res);
+}); 

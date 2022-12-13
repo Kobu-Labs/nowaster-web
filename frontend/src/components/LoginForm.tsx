@@ -48,14 +48,11 @@ const LoginForm: FC = () => {
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="bg-white shadow p-8 rounded">
-        <h2 className="text-2xl font-bold mb-6 text-indigo-500">Login</h2>
+      <div className="bg-gray-800 shadow p-8 rounded-lg text-center">
+        <h2 className="text-2xl font-bold mb-6">Login</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block font-semibold mb-2 text-indigo-500"
-            >
+            <label htmlFor="email" className="block font-semibold mb-2">
               Email:
             </label>
             <input
@@ -66,23 +63,20 @@ const LoginForm: FC = () => {
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block font-semibold mb-2 text-indigo-500"
-            >
+            <label htmlFor="password" className="block font-semibold mb-2">
               Password:
             </label>
             <input
               type="password"
               id="password"
               {...register("password")}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black dark:text-white"
+              className="w-full bg-gray-900 rounded-lg px-3 py-2"
             />
           </div>
           <div className="mt-6">
             <button
               type="submit"
-              className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
             >
               Login
             </button>
@@ -93,7 +87,7 @@ const LoginForm: FC = () => {
             (backendErrorMessage && <>{backendErrorMessage}</>)}
         </span>
         <div className="flex mt-6">
-          <span className="text-indigo-500">Dont Have an Account?</span>
+          <span>Don't Have an Account?</span>
 
           <NavbarButton
             label={"Sign up"}

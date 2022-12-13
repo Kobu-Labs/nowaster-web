@@ -4,12 +4,11 @@ import Navbar from "../components/Navbar";
 export const HomePage: FC = () => {
   return (
     <div className="flex">
-      <div className="fixed top-0 left-0 h-screen overflow-y-auto">
+      <div className="h-screen sticky top-0">
         <Navbar />
       </div>
       <div className="flex-grow overflow-y-auto">
-        <p className="ml-48">
-          {" "}
+        <p className="m-8">
           HomePage <br></br> Lorem ipsum dolor sit amet, consectetuer adipiscing
           elit. Fusce tellus. Aliquam erat volutpat. Integer rutrum, orci
           vestibulum ullamcorper ultricies, lacus quam ultricies odio, vitae

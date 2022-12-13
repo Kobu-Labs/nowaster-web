@@ -18,7 +18,7 @@ export const ChangeColor = () => {
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
-      <h2 className="text-xl m-2 mb-4">Manage Colours</h2>
+      <h2 className="text-xl m-2 mb-4 text-center">Manage Colours</h2>
       <form className="flex justify-around">
         <div className="flex items-center">
           {/*<label htmlFor="colorPicker">Change color</label>*/}

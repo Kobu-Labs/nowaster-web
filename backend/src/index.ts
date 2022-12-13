@@ -8,6 +8,7 @@ import cors from "cors";
 import session from "./middleware/sessionMiddleware";
 import AuthController from "./controllers/authController";
 import todoRouter from "./controllers/todosController";
+import { ScheduledController } from "./controllers/study_sessions/scheduledController";
 
 declare module "express-session" {
   interface SessionData { user: { id: string, } }
@@ -24,6 +25,7 @@ app.use(cors());
 
 app.use("/user", UserController);
 app.use("/recorded", RecordedController);
+app.use("/scheduled", ScheduledController);
 app.use("/auth", AuthController);
 app.use("/todos", todoRouter);
 

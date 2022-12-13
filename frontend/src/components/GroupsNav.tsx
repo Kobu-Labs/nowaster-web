@@ -22,8 +22,8 @@ const GroupsNav = (props: GroupsNavProps) => {
         <button
           key={index}
           className={`m-1 mb-3 flex-shrink-0 inline-flex items-center px-4 py-2 text-sm font-medium ${
-            index === activeItem ? "text-blue-500" : "text-white"
-          } hover:text-gray-300 bg-gray-900`}
+            index === activeItem ? "text-blue-600" : "text-white"
+          } hover:text-blue-500 bg-gray-900`}
           onClick={() => handleItemClick(index)}
         >
           {item}
