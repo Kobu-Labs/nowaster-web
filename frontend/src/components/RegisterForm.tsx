@@ -9,6 +9,7 @@ import { UserApi } from "../services";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { useState } from "react";
+import AvatarPicker from "./AvatarPicker";
 
 const RegisterForm = () => {
   const {
@@ -26,7 +27,11 @@ const RegisterForm = () => {
 
   const onSubmit = async (data: UserRegistrationSubmit) => {
     try {
-      const result = await UserApi.register(data);
+      const dataWithAvatar = {
+        ...data,
+        avatar: selectedImage
+      }
+      const result = await UserApi.register(dataWithAvatar);
       console.log(result);
       navigate("/home");
     } catch (err) {
@@ -38,6 +43,11 @@ const RegisterForm = () => {
         setBackendErrorMessage("Unexpected error");
       }
     }
+  };
+
+  const [selectedImage, setSelectedImage] = useState<string>('/avatars/av1.svg');
+  const handleAvatarSelect = (selectedAvatar: string) => {
+    setSelectedImage(selectedAvatar);
   };
 
   return (
@@ -81,6 +91,9 @@ const RegisterForm = () => {
           <span className="text-red-500">
             {errors.password && <>{errors.password.message}</>}
           </span>
+
+          <AvatarPicker onAvatarSelect={handleAvatarSelect}/>
+
           <button
             className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded ml-32 mr-32"
             type="submit"
