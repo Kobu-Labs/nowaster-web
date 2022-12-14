@@ -8,7 +8,6 @@ export const register = async (
 ): Promise<ResponseSingle<User>> => {
   const resp = await baseApi.put<ResponseSingle<User>>("user/create", {
     ...registrationData,
-    ...{ avatar: "test" },
   });
   return resp.data;
 };
