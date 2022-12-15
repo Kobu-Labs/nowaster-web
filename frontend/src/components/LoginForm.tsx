@@ -59,7 +59,7 @@ const LoginForm: FC = () => {
               type="text"
               id="email"
               {...register("email")}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black dark:text-white"
+              className="w-full bg-gray-900 rounded-lg px-3 py-2"
             />
           </div>
           <div className="mb-4">
