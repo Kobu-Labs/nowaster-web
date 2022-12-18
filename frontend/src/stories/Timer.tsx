@@ -9,11 +9,14 @@ import CategoryPicker from "../components/CategoryPicker";
 import { CreateScheduledEntity } from "../models/scheduledEntity";
 import { timerSchema } from "../validation/timerSubmit";
 
-function formatTime(secondsInput: number) {
-  const hours = Math.floor(secondsInput / 3600);
-  const minutes = Math.floor((secondsInput - hours * 3600) / 60);
-  const seconds = secondsInput - hours * 3600 - minutes * 60;
+//get this to utils
+export function formatTime(secondsInput: number) {
+  const seconds = Math.floor(secondsInput % 60);
+  const minutes = Math.floor((secondsInput / 60) % 60);
+  const hours = Math.floor((secondsInput / (60 * 60)) % 24);
+  const days = Math.floor(secondsInput / (60 * 60 * 24));
 
+  const days_str = days.toString() + "days ";
   let hours_str = hours.toString();
   let minutes_str = minutes.toString();
   let seconds_str = seconds.toString();
@@ -26,6 +29,10 @@ function formatTime(secondsInput: number) {
   }
   if (seconds < 10) {
     seconds_str = "0" + seconds_str;
+  }
+
+  if (days > 0) {
+    return days_str + hours_str + ":" + minutes_str + ":" + seconds_str;
   }
   if (hours > 0) {
     return hours_str + ":" + minutes_str + ":" + seconds_str;
