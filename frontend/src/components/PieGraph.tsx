@@ -5,13 +5,16 @@ import {
   LabelList,
   ResponsiveContainer,
 } from "recharts";
+import { formatTime } from "../stories/Timer";
+
+export type PieChartProp = {
+  name: string;
+  value: number;
+  fill?: string;
+};
 
 type PieGraphProps = {
-  data: {
-    name: string;
-    value: number;
-    fill?: string;
-  }[];
+  data: PieChartProp[];
 };
 
 const PieGraph = (props: PieGraphProps) => {
@@ -19,7 +22,12 @@ const PieGraph = (props: PieGraphProps) => {
     <ResponsiveContainer>
       <PieChart>
         <Pie
-          data={props.data}
+          data={props.data.map((pieGraphProp) => {
+            return {
+              ...pieGraphProp,
+              value: pieGraphProp.value / (60 * 60),
+            };
+          })}
           dataKey="value"
           nameKey="name"
           cx="50%"
@@ -35,6 +43,7 @@ const PieGraph = (props: PieGraphProps) => {
           <LabelList
             dataKey="value"
             position="inside"
+            formatter={(seconds: number) => formatTime(seconds * 3600)}
             style={{ fontSize: "1.3rem" }}
           />
         </Pie>

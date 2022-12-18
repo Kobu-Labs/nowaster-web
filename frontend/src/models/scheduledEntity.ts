@@ -7,4 +7,8 @@ export type ScheduledEntity = {
   endTime: Date;
 };
 
+export type GetByUserScheduledEntityData = {
+  userId: string;
+};
+
 export type CreateScheduledEntity = Omit<ScheduledEntity, "id">;
