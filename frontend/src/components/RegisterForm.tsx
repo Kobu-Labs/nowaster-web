@@ -29,8 +29,8 @@ const RegisterForm = () => {
     try {
       const dataWithAvatar = {
         ...data,
-        avatar: selectedImage
-      }
+        avatar: selectedImage,
+      };
       const result = await UserApi.register(dataWithAvatar);
       console.log(result);
       navigate("/home");
@@ -45,73 +45,74 @@ const RegisterForm = () => {
     }
   };
 
-  const [selectedImage, setSelectedImage] = useState<string>('/avatars/av1.svg');
+  const [selectedImage, setSelectedImage] =
+    useState<string>("/avatars/av1.svg");
   const handleAvatarSelect = (selectedAvatar: string) => {
     setSelectedImage(selectedAvatar);
   };
 
   return (
     <>
-      <h2 className="text-indigo-500">Registration</h2>
-      <div className="flex flex-col items-center justify-center h-screen">
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="p-6 max-w-2xl mx-auto bg-white rounded-xl shadow-lg flex flex-col"
-        >
-          <div className="flex items-center  justify-between mb-2">
-            <label className="text-indigo-500">Email Address:</label>
-            <input
-              type="text"
-              {...register("email")}
-              className="border-2 text-white"
-            />
-          </div>
-          <span className="text-red-500">
-            {errors.email && <>{errors.email.message}</>}
-          </span>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-indigo-500">Username:</label>
-            <input
-              type="text"
-              {...register("username")}
-              className="border-2 text-white"
-            />
-          </div>
-          <span className="text-red-500">
-            {errors.username && <>{errors.username.message}</>}
-          </span>
-          <div className="flex items-center mb-2 justify-between">
-            <label className="text-indigo-500">Password:</label>
-            <input
-              type="password"
-              {...register("password")}
-              className="border-2 text-white"
-            />
-          </div>
-          <span className="text-red-500">
-            {errors.password && <>{errors.password.message}</>}
-          </span>
+      <div className="flex items-center  justify-center h-screen">
+        <div className="bg-gray-800 shadow p-8 rounded-lg">
+          <h2 className="text-2xl font-bold mb-6 text-center">Registration</h2>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex items-center  justify-between mb-2">
+              <label>Email Address:</label>
+              <input
+                type="text"
+                {...register("email")}
+                className="bg-gray-900 rounded-lg px-2 w-8/12"
+              />
+            </div>
+            <span className="text-red-500">
+              {errors.email && <>{errors.email.message}</>}
+            </span>
+            <div className="flex items-center justify-between mb-2">
+              <label>Username:</label>
+              <input
+                type="text"
+                {...register("username")}
+                className="bg-gray-900 rounded-lg px-2 w-8/12"
+              />
+            </div>
+            <span className="text-red-500">
+              {errors.username && <>{errors.username.message}</>}
+            </span>
+            <div className="flex items-center mb-2 justify-between">
+              <label>Password:</label>
+              <input
+                type="password"
+                {...register("password")}
+                className="bg-gray-900 rounded-lg px-2 w-8/12"
+              />
+            </div>
+            <span className="text-red-500">
+              {errors.password && <>{errors.password.message}</>}
+            </span>
 
-          <AvatarPicker onAvatarSelect={handleAvatarSelect}/>
+            <AvatarPicker onAvatarSelect={handleAvatarSelect} />
 
-          <button
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded ml-32 mr-32"
-            type="submit"
-          >
-            Register
-          </button>
-          <span className="text-red-500">
-            {backendErrorMessage && <>{backendErrorMessage}</>}
-          </span>
-        </form>
-        <div className="flex mt-6">
-          <span className="text-indigo-500">Already Have an Account?</span>
-
-          <NavbarButton
-            label={"Sign in"}
-            path={"/login"}
-            icon={""}
-          ></NavbarButton>
+            <div className="mt-6 flex justify-center">
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-12 rounded-lg"
+                type="submit"
+              >
+                Register
+              </button>
+            </div>
+            <span className="text-red-500">
+              {backendErrorMessage && <>{backendErrorMessage}</>}
+            </span>
+          </form>
+          <div className="flex mt-6 justify-center">
+            <span>Already Have an Account?</span>
+            <NavbarButton
+              label={"Sign in"}
+              path={"/login"}
+              icon={""}
+            ></NavbarButton>
+          </div>
         </div>
       </div>
     </>
