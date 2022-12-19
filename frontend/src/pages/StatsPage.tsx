@@ -79,6 +79,7 @@ export const StatsPage: FC = () => {
           </div>
           <CustomizeGraph
             pieGraphProps={scheduledEntities}
+            filteredData={filteredData}
             setFilteredData={setFilteredData}
           ></CustomizeGraph>
         </div>

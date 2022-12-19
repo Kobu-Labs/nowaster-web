@@ -52,7 +52,7 @@ const PieGraphFilter: React.FC<{
           <input
             type="date"
             id="startDate"
-            className="w-full bg-gray-900 rounded-lg px-3 py-2"
+            className="w-44 bg-gray-900 rounded-lg px-3 py-2"
             value={startDate ? startDate.toISOString().split("T")[0] : ""}
             onChange={(e) => setStartDate(new Date(e.target.value))}
           />
@@ -65,7 +65,7 @@ const PieGraphFilter: React.FC<{
           <input
             type="date"
             id="endDate"
-            className="w-full bg-gray-900 rounded-lg px-3 py-2"
+            className="w-44 bg-gray-900 rounded-lg px-3 py-2"
             value={endDate ? endDate.toISOString().split("T")[0] : ""}
             onChange={(e) => setEndDate(new Date(e.target.value))}
           />
