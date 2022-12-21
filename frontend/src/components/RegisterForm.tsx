@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import AvatarPicker from "./AvatarPicker";
+import { useQueryClient } from "@tanstack/react-query";
 
 const RegisterForm = () => {
   const {
@@ -25,6 +26,8 @@ const RegisterForm = () => {
     null
   );
 
+  const queryClient = useQueryClient();
+
   const onSubmit = async (data: UserRegistrationSubmit) => {
     try {
       const dataWithAvatar = {
@@ -32,14 +35,12 @@ const RegisterForm = () => {
         avatar: selectedImage,
       };
       const result = await UserApi.register(dataWithAvatar);
-      console.log(result);
+      queryClient.setQueryData(["auth"], () => result);
       navigate("/home");
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.log(err.response?.data.message);
         setBackendErrorMessage(err.response?.data.message);
       } else {
-        console.log("Unexpected error", err);
         setBackendErrorMessage("Unexpected error");
       }
     }
