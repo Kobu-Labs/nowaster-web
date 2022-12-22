@@ -1,7 +1,7 @@
 import baseApi from "./baseApi";
 import { UserRegistrationSubmit } from "../validation/registrationSubmit";
 import { User } from "../models/user";
-import { ResponseSingle } from "../models/response";
+import { ResponseSingle } from "./types";
 
 export const register = async (
   registrationData: UserRegistrationSubmit

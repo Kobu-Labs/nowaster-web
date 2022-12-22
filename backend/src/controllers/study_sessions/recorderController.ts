@@ -13,6 +13,7 @@ RecordedController.post("/", validate({ body: createRecordedSchema }), async (re
   if (recordedSessionEntity.isErr) {
     return handleResultErrorResp(500, res, recordedSessionEntity.error);
   }
+  //TODO: .value
   return handleOkResp(recordedSessionEntity, res);
 });
 
@@ -20,11 +21,12 @@ RecordedController.post("/", validate({ body: createRecordedSchema }), async (re
 // get users study sessions
 RecordedController.get("/:userId", validate({ params: readRecordedSchema }), async (req, res) => {
   const recordedSessionEntities = await recordedSessionRepo.read.singleByUserId(req.params);
+  console.log(recordedSessionEntities);
 
   if (recordedSessionEntities.isErr) {
     return handleResultErrorResp(500, res, recordedSessionEntities.error);
   }
-  return handleOkResp(recordedSessionEntities, res);
+  return handleOkResp(recordedSessionEntities.value, res);
 });
 
 
@@ -35,6 +37,7 @@ RecordedController.get("/:userId/:id", validate({ params: readByIdRecordedSchema
   if (recordedSessionEntity.isErr) {
     return handleResultErrorResp(500, res, recordedSessionEntity.error);
   }
+  //TODO: .value
   return handleOkResp(recordedSessionEntity, res);
 });
 
@@ -46,6 +49,7 @@ RecordedController.put("/", validate({ body: updateRecordedSchema }), async (req
   if (updatedEntity.isErr) {
     return handleResultErrorResp(500, res, updatedEntity.error);
   }
+  //TODO: .value
   return handleOkResp(updatedEntity, res);
 }); 
 
@@ -56,5 +60,6 @@ RecordedController.delete("/", validate({ body: deleteRecordedSchema }), async (
   if (deletedEntity.isErr) {
     return handleResultErrorResp(500, res, deletedEntity.error);
   }
+  //TODO: .value
   return handleOkResp(deletedEntity, res);
 }); 

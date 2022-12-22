@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
 import Navbar from "../components/Navbar";
-import { TimerRecorded } from "../stories/Timer";
+import { TimerRecorded } from "../stories/TimerRecorded";
 import { TimerScheduled } from "../stories/TimerPicker";
 
 export const TimerPage: FC = () => {
