@@ -14,7 +14,7 @@ ScheduledController.post("/", validate({ body: createScheduledSchema }), async (
   if (scheduledSessionEntity.isErr) {
     return handleResultErrorResp(500, res, scheduledSessionEntity.error);
   }
-  return handleOkResp(scheduledSessionEntity, res);
+  return handleOkResp(scheduledSessionEntity.value, res);
 });
 
 

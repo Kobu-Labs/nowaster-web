@@ -1,7 +1,7 @@
-import { UserVisibleError, type AsyncResult } from "../types";
 import type { RecordedEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
+import type { AsyncResult } from "../types";
 
 
 type ReadSingleRecordByUserIdParams = {
@@ -12,17 +12,13 @@ type ReadSingleRecordedParams = {
     id: string
 }
 
-const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEntity> => {
+const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEntity | null> => {
   try {
     const recordedEntity = await client.recordedEntity.findFirst({
       where: {
         id: params.id,
       }
     });
-
-    if (!recordedEntity) {
-      return Result.err(new Error("Recorded entity does not exist"));
-    }
 
     return Result.ok(recordedEntity);
 
@@ -34,7 +30,7 @@ const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEnt
 };
 
 
-const singleByUserId = async (params: ReadSingleRecordByUserIdParams): AsyncResult<RecordedEntity> => {
+const singleByUserId = async (params: ReadSingleRecordByUserIdParams): AsyncResult<RecordedEntity | null> => {
   try {
     const { userId } = params;
 
@@ -44,11 +40,6 @@ const singleByUserId = async (params: ReadSingleRecordByUserIdParams): AsyncResu
         userId: userId
       }
     });
-
-
-    if (!recordedEntity) {
-      return Result.err(new UserVisibleError("Recorded entity does not exist"));
-    }
 
     return Result.ok(recordedEntity);
 

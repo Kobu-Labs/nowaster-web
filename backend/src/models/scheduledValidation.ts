@@ -25,8 +25,8 @@ export const updateScheduledSchema = z.object({
   description: z.string()
     .max(50)
     .optional(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date()
+  startTime: z.coerce.date().optional(),
+  endTime: z.coerce.date().optional()
 });
 
 

@@ -15,3 +15,5 @@ export type GetByUserIdRecordedEntity = {
 };
 
 export type CreateRecordedEntity = Omit<RecordedEntity, "id">;
+
+export type FinishCurrentRecordedEntity = GetByUserIdRecordedEntity;

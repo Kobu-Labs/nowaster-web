@@ -43,3 +43,5 @@ app.use((_req, res) => {
 app.listen(port, () => {
   console.log(`[${new Date().toISOString()}] API listening on port ${port}`);
 });
+const Test = 10;
+export default Test;

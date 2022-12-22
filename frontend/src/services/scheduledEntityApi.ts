@@ -1,9 +1,10 @@
 import baseApi from "./baseApi";
-import { ResponseSingle } from "../models/response";
+import { ResponseSingle } from "./types";
 import {
   CreateScheduledEntity,
   GetByUserScheduledEntityData,
   ScheduledEntity,
+  UpdateScheduledEntityParams,
 } from "../models/scheduledEntity";
 import { ResponseMulti } from "./types";
 
@@ -25,3 +26,8 @@ export const getByUser = async (
   );
   return resp.data;
 };
+
+export const update = async (params:UpdateScheduledEntityParams ) : Promise<ResponseSingle<ScheduledEntity>> => {
+  const resp = await baseApi.put<ResponseSingle<ScheduledEntity>>("scheduled/", {...params})
+  return resp.data
+}

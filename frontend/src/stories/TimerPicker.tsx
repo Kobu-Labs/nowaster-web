@@ -3,9 +3,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ScheduledEntityApi } from "../services";
 import { CreateScheduledEntity } from "../models/scheduledEntity";
-import { timerSchema } from "../validation/timerSubmit";
 import useAuth from "../hooks/useAuth";
-import CategoryPicker from "../components/CategoryPicker";
+import { timerScheduledSchema } from "../validation/timerScheduledSubmit";
 
 function calculateDate(
   date: Date,
@@ -87,7 +86,7 @@ export const TimerScheduled: React.FC = () => {
       userId,
     };
 
-    const validationResult = timerSchema.safeParse(formData);
+    const validationResult = timerScheduledSchema.safeParse(formData);
 
     if (validationResult.success) {
       submitScheduledTimer(formData);
@@ -106,10 +105,15 @@ export const TimerScheduled: React.FC = () => {
 
   return (
     <div className="bg-gray-800 rounded-lg p-4 flex flex-col items-center">
-      <CategoryPicker
-        handleCategoryInputChange={handleSubjectInputChange}
-        categoryInput={subjectInput}
-      />
+      <div className="my-8">
+        <input
+          type="text"
+          onChange={handleSubjectInputChange}
+          value={subjectInput}
+          className="bg-gray-900 rounded-lg h-8 text-center px-9"
+          placeholder="Category"
+        />
+      </div>
       <div className="flex items-center">
         <span className="m-2">From:</span>
         <DatePicker

@@ -12,3 +12,11 @@ export type GetByUserScheduledEntityData = {
 };
 
 export type CreateScheduledEntity = Omit<ScheduledEntity, "id">;
+
+export type UpdateScheduledEntityParams = {
+    id: string;
+    startTime?: Date;
+    endTime?: Date;
+    category?: string;
+    description?: string | null;
+};
