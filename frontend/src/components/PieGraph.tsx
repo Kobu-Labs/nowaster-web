@@ -2,10 +2,10 @@ import {
   PieChart,
   Pie,
   Tooltip,
-  LabelList,
   ResponsiveContainer,
-} from "recharts";
-import { formatTime } from "../stories/Timer";
+  Cell,
+} from 'recharts';
+import { formatTime } from '../stories/Timer';
 
 export type PieChartProp = {
   name: string;
@@ -15,6 +15,46 @@ export type PieChartProp = {
 
 type PieGraphProps = {
   data: PieChartProp[];
+};
+
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  outerRadius,
+  payload,
+}: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+  index: number;
+  payload: PieChartProp;
+}) => {
+  const RADIAN = Math.PI / 180;
+  const radius = outerRadius + 30;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const formattedValue = formatTime(payload.value * 3600);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="#FFFFFF"
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+    >
+      <tspan x={x} dy={-10}>
+        {payload.name}
+      </tspan>
+      <tspan x={x} dy={20}>
+        {formattedValue}
+      </tspan>
+    </text>
+  );
 };
 
 const PieGraph = (props: PieGraphProps) => {
@@ -34,18 +74,12 @@ const PieGraph = (props: PieGraphProps) => {
           cy="50%"
           outerRadius="80%"
           fill="#8884d8"
+          label={renderCustomizedLabel}
+          labelLine={false}
         >
-          <LabelList
-            dataKey="name"
-            position="outside"
-            style={{ fontSize: "1.3rem" }}
-          />
-          <LabelList
-            dataKey="value"
-            position="inside"
-            formatter={(seconds: number) => formatTime(seconds * 3600)}
-            style={{ fontSize: "1.3rem" }}
-          />
+          {props.data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill || ''} />
+          ))}
         </Pie>
         <Tooltip />
       </PieChart>
