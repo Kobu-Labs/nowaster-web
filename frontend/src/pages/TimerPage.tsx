@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
 import Navbar from "../components/Navbar";
 import { TimerRecorded } from "../stories/TimerRecorded";
-import { TimerScheduled } from "../stories/TimerPicker";
+import { TimerScheduled } from "../stories/TimerScheduled";
 
 export const TimerPage: FC = () => {
   const scheduledDisplayString = "Scheduled";
