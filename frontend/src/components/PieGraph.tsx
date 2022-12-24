@@ -5,7 +5,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import { formatTime } from '../stories/Timer';
+import { formatTime } from '../stories/TimerRecorded';
 
 export type PieChartProp = {
   name: string;

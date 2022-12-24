@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TimerRecordedFormSubmit, timerRecordedFormSchema } from "../validation/timerRecordedSubmit";
 
-function formatTime(secondsInput: number) {
+export function formatTime(secondsInput: number) {
   const hours = Math.floor(secondsInput / 3600);
   const minutes = Math.floor((secondsInput - hours * 3600) / 60);
   const seconds = secondsInput - hours * 3600 - minutes * 60;

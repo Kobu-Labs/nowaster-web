@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { TimerRecorded } from './Timer';
+import { TimerRecorded } from './TimerRecorded';
 
 const meta = {
   title: 'Timers/Timer',
