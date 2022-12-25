@@ -9,6 +9,7 @@ import session from "./middleware/sessionMiddleware";
 import AuthController from "./controllers/authController";
 import todoRouter from "./controllers/todosController";
 import { ScheduledController } from "./controllers/study_sessions/scheduledController";
+import { GroupController } from "./controllers/studyGroupController";
 
 declare module "express-session" {
   interface SessionData { user: { id: string, } }
@@ -26,6 +27,7 @@ app.use(cors());
 app.use("/user", UserController);
 app.use("/recorded", RecordedController);
 app.use("/scheduled", ScheduledController);
+app.use("/group", GroupController);
 app.use("/auth", AuthController);
 app.use("/todos", todoRouter);
 
