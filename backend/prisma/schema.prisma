@@ -27,10 +27,19 @@ model UserToGroup {
 }
 
 model Group {
-    id           String        @id @default(uuid())
+    id           String         @id @default(uuid())
     creatorId    String
     groupName    String
+    inviteOnly   Boolean        @default(false)
     userToGroups UserToGroup[]
+    GroupInvites GroupInvite[]
+}
+
+model GroupInvite {
+    id      String @id @default(uuid())
+    groupId String
+    group   Group  @relation(fields: [groupId], references: [id])
+    code    String
 }
 
 model ScheduledEntity {
