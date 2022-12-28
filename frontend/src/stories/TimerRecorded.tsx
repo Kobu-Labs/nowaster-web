@@ -43,6 +43,7 @@ export const TimerRecorded = () => {
     handleSubmit,
     setValue,
     getValues,
+    reset,
     formState: { errors },
   } = useForm<TimerRecordedFormSubmit>({
     resolver: zodResolver(timerRecordedFormSchema),
@@ -96,14 +97,19 @@ export const TimerRecorded = () => {
     }
   };
 
+  const clearTimer = () => {
+    setSecondsMeasured(0);
+    setIsActive(false)
+    reset({ description: "", category: "" })
+  }
+
   const resetTimer = async () => {
-    setIsActive(false);
     const activeEntity = await RecordedEntityApi.getByUserId({ userId: auth!.data.id })
     if (activeEntity.status === "error" || activeEntity.data === null) {
       return
     }
     await RecordedEntityApi.deleteSingle({ id: activeEntity.data.id })
-    setSecondsMeasured(0);
+    clearTimer()
   };
 
   const finishTimer = async () => {
@@ -121,7 +127,7 @@ export const TimerRecorded = () => {
       }
     }
     setUserMessage({ success: "Study session was submitted!" })
-    resetTimer();
+    clearTimer()
   };
 
   return (
