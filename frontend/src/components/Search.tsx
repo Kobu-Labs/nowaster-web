@@ -8,6 +8,7 @@ const debounceDelay = 500;
 interface SearchProps<T> {
     onSearchExecuted: (args: T[] | null) => void
     executeSearch: (term: string) => T[] | null
+    placeholder: string
 }
 
 const Search = <T,>(props: SearchProps<T>) => {
@@ -38,12 +39,12 @@ const Search = <T,>(props: SearchProps<T>) => {
                         id="search"
                         className="bg-gray-900 text-white text-sm rounded-lg block w-full pl-10 p-2.5"
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search Group"
+                        placeholder={props.placeholder}
                         required
                     />
                 </div>
                 <button
-                    type="button"
+                    type="submit"
                     className="p-2.5 ml-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-950 focus:ring-4 focus:outline-none focus:gray-900"
                 >
                     <img src={searchIcon} alt="Search Icon" className="w-5 h-5" />
