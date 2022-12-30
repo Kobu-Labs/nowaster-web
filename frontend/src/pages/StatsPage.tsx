@@ -5,6 +5,7 @@ import { ScheduledEntityApi } from "../services";
 import useAuth from "../hooks/useAuth";
 import CustomizeGraph from "../components/CustomizeGraph";
 import pastelColors from "../assets/colors";
+import { processPieChartData } from "../components/GraphDataProcessor";
 
 export type GraphDataSingle = {
   startDate: Date;
@@ -64,7 +65,7 @@ export const StatsPage: FC = () => {
       fill: x.fill,
     }));
 
-    setGraphProps(graphProps);
+    setGraphProps(processPieChartData(graphProps, 0.05));
   }, [filteredData, graphData]);
 
   return (
