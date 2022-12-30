@@ -4,6 +4,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  TooltipProps,
 } from 'recharts';
 import { formatTime } from '../stories/TimerRecorded';
 
@@ -37,7 +38,7 @@ const renderCustomizedLabel = ({
   const radius = outerRadius + 30;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  const formattedValue = formatTime(payload.value * 3600);
+  const formattedValue = formatTime(Math.round(payload.value * 3600));
 
   return (
     <text
@@ -55,6 +56,18 @@ const renderCustomizedLabel = ({
       </tspan>
     </text>
   );
+};
+
+const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-4 text-gray-900 text-x1">
+        <p className="label">{`${payload[0].name}`}</p>
+        <p className="desc">{`${formatTime(Math.round(payload[0].value! * 3600))}`}</p>
+      </div>
+    );
+  }
+  return null;
 };
 
 const PieGraph = (props: PieGraphProps) => {
@@ -81,7 +94,7 @@ const PieGraph = (props: PieGraphProps) => {
             <Cell key={`cell-${index}`} fill={entry.fill || ''} />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip content={<CustomTooltip/>} />
       </PieChart>
     </ResponsiveContainer>
   );
