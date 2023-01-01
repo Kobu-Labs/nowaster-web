@@ -4,6 +4,7 @@ import groupsIcon from "../assets/groups.svg";
 import statsIcon from "../assets/stats.svg";
 import timerIcon from "../assets/timer.svg";
 import logoutIcon from "../assets/logout.svg";
+import adminIcon from "../assets/admin.svg";
 import logo from "../assets/logo.svg";
 import { AuthApi } from "../services";
 import { NavLink } from "react-router-dom";
@@ -39,6 +40,9 @@ const Navbar = () => {
         </li>
         <li className="mt-4 pb-2 border-b-2 border-blue-600">
           <NavbarButton label="Timer" path="/timer" icon={timerIcon} />
+        </li>
+        <li className="mt-4 pb-2 border-b-2 border-blue-600">
+          <NavbarButton label="Admin" path="/admin" icon={adminIcon} />
         </li>
       </ul>
       <ul className="mb-16">
