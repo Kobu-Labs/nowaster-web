@@ -92,15 +92,12 @@ export const TimerScheduled: React.FC = () => {
       submitScheduledTimer(formData);
       setFrontendError(successfulSubmitMessage);
     } else {
-      console.log("WRONG DATA");
-      console.log(validationResult.error.errors.at(0)?.message);
       setFrontendError(validationResult.error.errors.at(0)?.message);
     }
   };
 
   const submitScheduledTimer = async (data: CreateScheduledEntity) => {
-    const result = await ScheduledEntityApi.create(data);
-    console.log(result);
+    await ScheduledEntityApi.create(data);
   };
 
   return (

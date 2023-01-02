@@ -20,3 +20,7 @@ export type UpdateScheduledEntityParams = {
     category?: string;
     description?: string | null;
 };
+
+export type DeleteSingleScheduledParams = {
+  id: string;
+};
