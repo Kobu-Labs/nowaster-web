@@ -21,12 +21,9 @@ const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEnt
     });
 
     return Result.ok(recordedEntity);
-
   } catch (error) {
     return Result.err(error as Error);
   }
-
-
 };
 
 

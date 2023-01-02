@@ -45,9 +45,18 @@ const readMany = async (params: ReadManyUserParams): AsyncResult<User[]> => {
   }
 };
 
+const readAll = async (): AsyncResult<User[]> => {
+  try {
+    const users = await client.user.findMany();
+    return Result.ok(users);
+  } catch (error) {
+    return Result.err(error as Error);
+  }
+};
 
 const read = {
   readSingle,
-  readMany
+  readMany,
+  readAll
 };
 export default read;

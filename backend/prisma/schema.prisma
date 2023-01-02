@@ -7,6 +7,13 @@ datasource db {
     url      = "file:database"
 }
 
+model Ban {
+    id      String    @id @default(uuid())
+    userId  String
+    endTime DateTime?
+    user    User      @relation(fields: [userId], references: [id])
+}
+
 model User {
     id             String            @id @default(uuid())
     username       String            @unique
@@ -16,6 +23,7 @@ model User {
     solidEntities  ScheduledEntity[]
     recordEntities RecordedEntity[]
     userToGroups   UserToGroup[]
+    bans           Ban[]
 }
 
 model UserToGroup {
@@ -27,10 +35,10 @@ model UserToGroup {
 }
 
 model Group {
-    id           String         @id @default(uuid())
+    id           String        @id @default(uuid())
     creatorId    String
     groupName    String
-    inviteOnly   Boolean        @default(false)
+    inviteOnly   Boolean       @default(false)
     userToGroups UserToGroup[]
     GroupInvites GroupInvite[]
 }

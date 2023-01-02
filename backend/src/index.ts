@@ -10,6 +10,7 @@ import AuthController from "./controllers/authController";
 import todoRouter from "./controllers/todosController";
 import { ScheduledController } from "./controllers/study_sessions/scheduledController";
 import { GroupController } from "./controllers/studyGroupController";
+import { BanController } from "./controllers/banController";
 
 declare module "express-session" {
   interface SessionData { user: { id: string, } }
@@ -25,6 +26,7 @@ app.use(session());
 app.use(cors());
 
 app.use("/user", UserController);
+app.use("/ban", BanController);
 app.use("/recorded", RecordedController);
 app.use("/scheduled", ScheduledController);
 app.use("/group", GroupController);

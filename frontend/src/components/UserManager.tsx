@@ -1,55 +1,61 @@
+import { useQuery } from "@tanstack/react-query";
+import { User } from "../models/user";
+import { BanApi, UserApi } from "../services";
 import Search from "./Search";
 import { useState } from "react";
+import useAuth from "../hooks/useAuth";
 
-interface User {
-  id: number;
-  name: string;
-}
-
-const data: User[] = [
-  { id: 1, name: "John 123456" },
-  { id: 2, name: "Jane" },
-  { id: 3, name: "Alice" },
-  { id: 4, name: "Bob" },
-  { id: 5, name: "John" },
-  { id: 6, name: "Jane" },
-  { id: 7, name: "Alice" },
-  { id: 8, name: "Bob" },
-];
-
-const kickUser = (userId: number) => {
-  console.log(`Kicking user ${userId}`);
-  // Implement kick logic here
-};
-
-const banUser = (userId: number, duration: string) => {
-  console.log(`Banning user ${userId} for ${duration}`);
-  // Implement ban logic here
-};
-
-const permabanUser = (userId: number) => {
-  console.log(`Permanently banning user ${userId}`);
-  // Implement permaban logic here
+const getTommorow = () => {
+  const tomorrow = new Date();
+  // Set date to current date plus 1 day
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow;
 };
 
 const UserManager = () => {
-  const [searchResults, setSearchResults] = useState<User[]>(data);
+  const { auth } = useAuth();
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+
+  const { data } = useQuery({
+    queryKey: ["users"],
+    retry: false,
+    queryFn: async () => {
+      const result = await UserApi.getAll();
+      if (result.status === "error") {
+        return [];
+      }
+      return result.data.filter((user) => auth!.data.id != user.id);
+    },
+    onSuccess: setSearchResults,
+  });
+
+  if (data === undefined) {
+    return <></>;
+  }
+
+  // checks if there are any existing users
 
   const executeSearch = (term: string): User[] | null => {
     if (!term || term == "") {
-      return data;
+      return searchResults;
     }
 
-    const filteredData = data.filter((item) =>
-      item.name.toLowerCase().includes(term.toLowerCase())
+    const filteredusers = searchResults.filter((user) =>
+      user.username.toLowerCase().includes(term.toLowerCase())
     );
-    return filteredData;
+    return filteredusers;
   };
 
-  const onSearchExecuted = (data: User[] | null): void => {
-    setSearchResults(data || []);
+  const onSearchExecuted = (users: User[] | null): void => {
+    setSearchResults(users || []);
   };
 
+  const banUser = async (userId: string, endTime: Date | null) => {
+    console.log(`Banning user ${userId} for ${endTime?.getTime()}`);
+    await BanApi.create({ userId, endTime });
+  };
+
+  console.log(searchResults);
   return (
     <>
       <Search<User>
@@ -64,23 +70,17 @@ const UserManager = () => {
               key={user.id}
               className="flex items-center justify-between p-2 px-4 rounded-lg"
             >
-              <span className="w-64 text-left">{user.name}</span>
+              <span className="w-64 text-left">{user.username}</span>
               <div>
                 <button
-                  className="px-2 py-1 mr-2 text-sm text-white bg-red-500 rounded hover:bg-red-600"
-                  onClick={() => kickUser(user.id)}
-                >
-                  Kick
-                </button>
-                <button
                   className="px-2 py-1 mr-2 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600"
-                  onClick={() => banUser(user.id, "1 day")}
+                  onClick={() => banUser(user.id, getTommorow())}
                 >
                   Ban (1 day)
                 </button>
                 <button
                   className="px-2 py-1 text-sm text-white bg-red-800 rounded hover:bg-red-900"
-                  onClick={() => permabanUser(user.id)}
+                  onClick={() => banUser(user.id, null)}
                 >
                   Permaban
                 </button>
