@@ -5,8 +5,8 @@ import {
   ResponsiveContainer,
   Cell,
   TooltipProps,
-} from 'recharts';
-import { formatTime } from '../stories/TimerRecorded';
+} from "recharts";
+import { formatTime } from "../stories/TimerRecorded";
 
 export type PieChartProp = {
   name: string;
@@ -35,7 +35,7 @@ const renderCustomizedLabel = ({
   payload: PieChartProp;
 }) => {
   const RADIAN = Math.PI / 180;
-  const radius = outerRadius + 30;
+  const radius = outerRadius + 10;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
   const formattedValue = formatTime(Math.round(payload.value * 3600));
@@ -45,7 +45,7 @@ const renderCustomizedLabel = ({
       x={x}
       y={y}
       fill="#FFFFFF"
-      textAnchor={x > cx ? 'start' : 'end'}
+      textAnchor={x > cx ? "start" : "end"}
       dominantBaseline="central"
     >
       <tspan x={x} dy={-10}>
@@ -63,7 +63,9 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     return (
       <div className="bg-white p-4 text-gray-900 text-x1">
         <p className="label">{`${payload[0].name}`}</p>
-        <p className="desc">{`${formatTime(Math.round(payload[0].value! * 3600))}`}</p>
+        <p className="desc">{`${formatTime(
+          Math.round(payload[0].value! * 3600)
+        )}`}</p>
       </div>
     );
   }
@@ -91,10 +93,10 @@ const PieGraph = (props: PieGraphProps) => {
           labelLine={false}
         >
           {props.data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.fill || ''} />
+            <Cell key={`cell-${index}`} fill={entry.fill || ""} />
           ))}
         </Pie>
-        <Tooltip content={<CustomTooltip/>} />
+        <Tooltip content={<CustomTooltip />} />
       </PieChart>
     </ResponsiveContainer>
   );

@@ -5,6 +5,7 @@ import {
   GetByUserScheduledEntityData,
   ScheduledEntity,
   UpdateScheduledEntityParams,
+  DeleteSingleScheduledParams,
 } from "../models/scheduledEntity";
 import { ResponseMulti } from "./types";
 
@@ -30,4 +31,9 @@ export const getByUser = async (
 export const update = async (params:UpdateScheduledEntityParams ) : Promise<ResponseSingle<ScheduledEntity>> => {
   const resp = await baseApi.put<ResponseSingle<ScheduledEntity>>("scheduled/", {...params})
   return resp.data
+}
+
+export const removeSingle = async (id: DeleteSingleScheduledParams) : Promise<ResponseSingle<ScheduledEntity>> => {
+  const resp = await baseApi.delete<ResponseSingle<ScheduledEntity>>("scheduled/", {data: id});
+  return resp.data;
 }

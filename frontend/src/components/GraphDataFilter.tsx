@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { filterPieGraphProps } from "../utils/GraphFilter";
+import { GraphDataSingle } from "../pages/StatsPage";
 
 type FilterCriteria = {
   startDate?: Date;
@@ -7,13 +8,6 @@ type FilterCriteria = {
   maxDuration?: number;
   minDuration?: number;
   name?: string;
-};
-
-type GraphDataSingle = {
-  startDate: Date;
-  endDate: Date;
-  duration: number;
-  name: string;
 };
 
 const PieGraphFilter: React.FC<{
@@ -36,8 +30,6 @@ const PieGraphFilter: React.FC<{
     };
 
     filterPieGraphProps(pieGraphProps, filterCriteria, setFilteredData);
-    console.log("filtering");
-    console.log(pieGraphProps);
   };
 
   return (
