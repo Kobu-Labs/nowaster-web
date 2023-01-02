@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUserSchema, readManyUsersSchema, readSingleUserSchema, updateUserSchema } from "../models/userModel";
+import { createUserSchema, readSingleUserSchema, updateUserSchema } from "../models/userModel";
 import userRepo from "../repositories/user";
 import argon2 from "argon2";
 import { validate } from "./middleware/validation";
@@ -48,8 +48,20 @@ UserController.get("/:userId", validate({ params: readSingleUserSchema }), async
   return handleOkResp(userEntity.value, res);
 });
 
+/*
 UserController.get("/", validate({ query: readManyUsersSchema }), async (req, res) => {
   const userEntity = await userRepo.read.readMany(req.query);
+
+  if (userEntity.isErr) {
+    return handleResultErrorResp(500, res, userEntity.error);
+  }
+
+  return handleOkResp(userEntity.value, res);
+});
+*/
+
+UserController.get("/", async (_, res) => {
+  const userEntity = await userRepo.read.readAll();
 
   if (userEntity.isErr) {
     return handleResultErrorResp(500, res, userEntity.error);
