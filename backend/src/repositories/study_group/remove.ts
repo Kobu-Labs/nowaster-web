@@ -11,7 +11,7 @@ type RemoveGroupParams = {
 
 const remove = async (params: RemoveGroupParams): AsyncResult<Group> => {
   try {
-    return await client.$transaction(async (tx)=>{
+    return await client.$transaction(async (tx) => {
       const group = await tx.group.findFirst({
         where: {
           id: params.id,
@@ -25,12 +25,24 @@ const remove = async (params: RemoveGroupParams): AsyncResult<Group> => {
       if (group.creatorId != params.creatorId) {
         return Result.err(new Error("User is not the owner of the group"));
       }
+      await tx.userToGroup.deleteMany({
+        where: {
+          groupId: params.id
+        }
+      });
+
+      await tx.groupInvite.deleteMany({
+        where:{
+          groupId: params.id
+        }
+      });
 
       const deletedGroup = await tx.group.delete({
         where: {
           id: params.id,
         }
       });
+
       return Result.ok(deletedGroup);
     });
   } catch (error) {
