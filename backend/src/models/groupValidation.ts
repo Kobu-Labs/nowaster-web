@@ -26,3 +26,20 @@ export const generateInviteCodeSchema = z.object({
   groupId: z.string().uuid(),
 });
 
+export const getGroupsByUser = z.object({
+  userId: z.string().uuid(),
+});
+
+export const getUserDetailsPerGroup = z.object({
+  groupId: z.string().uuid(),
+});
+
+export const getUsersOfGroupParams = z.object({
+  groupId: z.string().uuid(),
+});
+
+export const kickUserSchema = z.object({
+  groupId: z.string().uuid(),
+  kickedUserId: z.string().uuid(),
+  kickingUserId: z.string().uuid(),
+});

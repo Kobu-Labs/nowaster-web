@@ -22,8 +22,8 @@ model User {
     avatar         String?
     solidEntities  ScheduledEntity[]
     recordEntities RecordedEntity[]
-    userToGroups   UserToGroup[]
     bans           Ban[]
+    groups         UserToGroup[]
 }
 
 model UserToGroup {
@@ -35,12 +35,12 @@ model UserToGroup {
 }
 
 model Group {
-    id           String        @id @default(uuid())
-    creatorId    String
-    groupName    String
-    inviteOnly   Boolean       @default(false)
-    userToGroups UserToGroup[]
-    GroupInvites GroupInvite[]
+    id              String            @id @default(uuid())
+    creatorId       String
+    groupName       String
+    inviteOnly      Boolean           @default(false)
+    users           UserToGroup[]
+    GroupInvites    GroupInvite[]
 }
 
 model GroupInvite {

@@ -5,6 +5,10 @@ import {
   joinGroupSchema,
   deleteGroupSchema,
   generateInviteCodeSchema,
+  getGroupsByUser,
+  getUserDetailsPerGroup,
+  getUsersOfGroupParams,
+  kickUserSchema,
 } from "./../models/groupValidation";
 import groupRepo from "../repositories/study_group";
 import { validate } from "./middleware/validation";
@@ -27,7 +31,7 @@ GroupController.post("/", validate({ body: createGroupSchema }), async (req: Req
 
 // get specific group
 GroupController.get("/:id", validate({ params: readGroupSchema }), async (req, res) => {
-  const groupEntity = await groupRepo.read(req.params);
+  const groupEntity = await groupRepo.read.byId(req.params);
 
   if (groupEntity.isErr) {
     return handleResultErrorResp(500, res, groupEntity.error);
@@ -38,18 +42,24 @@ GroupController.get("/:id", validate({ params: readGroupSchema }), async (req, r
 
 // user join group
 GroupController.put("/", validate({ body: joinGroupSchema }), async (req, res) => {
-  const group = await groupRepo.read({ id: req.body.groupId });
+  const group = await groupRepo.read.byId({ id: req.body.groupId });
   if (group.isErr) {
     return handleResultErrorResp(500, res, group.error);
   }
 
-
-
   if (group.value.inviteOnly) {
-    // TODO: check the code
+    if (req.body.code === undefined) {
+      return handleErrorResp(401, res, "Cannot join an invite only group");
+    }
+    const isCodeValid = await groupRepo.invite.validateCode({ code: req.body.code, groupId: req.body.groupId });
+    if (isCodeValid.isErr || !isCodeValid.value){
+      return handleErrorResp(401, res, "Failed to join this group");
+    }
+    await groupRepo.invite.deleteCode({
+      groupId: req.body.groupId,
+      code: req.body.code
+    });
   }
-
-
 
   const groupEntity = await groupRepo.update(req.body);
 
@@ -60,9 +70,21 @@ GroupController.put("/", validate({ body: joinGroupSchema }), async (req, res) =
   return handleOkResp(groupEntity.value, res);
 });
 
+
+// get groups by user
+GroupController.get("/user/:userId", validate({ params: getGroupsByUser }), async (req, res) => {
+  const groups = await groupRepo.read.byUser(req.params);
+  if (groups.isErr) {
+    return handleResultErrorResp(500, res, groups.error);
+  }
+
+  return handleOkResp(groups.value, res);
+});
+
+
 // generate invite code
 GroupController.post("/invite", validate({ body: generateInviteCodeSchema }), async (req, res) => {
-  const group = await groupRepo.read({ id: req.body.groupId });
+  const group = await groupRepo.read.byId({ id: req.body.groupId });
   if (group.isErr) {
     return handleResultErrorResp(500, res, group.error);
   }
@@ -78,13 +100,43 @@ GroupController.post("/invite", validate({ body: generateInviteCodeSchema }), as
   return handleOkResp(inviteLink.value, res);
 });
 
-// delete group session by id
-GroupController.delete("/", validate({ body: deleteGroupSchema }), async (req, res) => {
-  const deletedEntity = await groupRepo.remove(req.body);
+// delete group by id
+GroupController.delete("/", validate({ query: deleteGroupSchema }), async (req, res) => {
+  const deletedEntity = await groupRepo.remove(req.query);
 
   if (deletedEntity.isErr) {
     return handleResultErrorResp(500, res, deletedEntity.error);
   }
 
   return handleOkResp(deletedEntity.value, res);
+});
+
+// get time per user in given group
+GroupController.get("/details/:groupId", validate({ params: getUserDetailsPerGroup }), async (req, res) => {
+  const data = await groupRepo.read.groupSummary(req.params);
+  if (data.isErr) {
+    return handleResultErrorResp(500, res, data.error);
+  }
+
+  return handleOkResp(data.value, res);
+});
+
+// get all users of particular group
+GroupController.get("/users/:groupId", validate({ params: getUsersOfGroupParams }), async (req, res) => {
+  const data = await groupRepo.read.usersOfGroup(req.params);
+  if (data.isErr) {
+    return handleResultErrorResp(500, res, data.error);
+  }
+
+  return handleOkResp(data.value, res);
+});
+
+// kick user from group
+GroupController.post("/kick", validate({ body: kickUserSchema }), async (req, res) => {
+  const data = await groupRepo.kick(req.body);
+  if (data.isErr) {
+    return handleResultErrorResp(500, res, data.error);
+  }
+
+  return handleOkResp(data.value, res);
 });
