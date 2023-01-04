@@ -16,7 +16,7 @@ const UserManager = () => {
   const { auth } = useAuth();
   const [searchResults, setSearchResults] = useState<User[]>([]);
 
-  const { data } = useQuery({
+  const { data: values} = useQuery({
     queryKey: ["users"],
     retry: false,
     queryFn: async () => {
@@ -26,21 +26,20 @@ const UserManager = () => {
       }
       return result.data.filter((user) => auth!.data.id != user.id);
     },
-    onSuccess: setSearchResults,
+    onSuccess:(data) =>  setSearchResults(data),
   });
 
-  if (data === undefined) {
-    return <></>;
-  }
-
-  // checks if there are any existing users
 
   const executeSearch = (term: string): User[] | null => {
-    if (!term || term == "") {
-      return searchResults;
+    if (values === undefined) {
+      return [];
     }
 
-    const filteredusers = searchResults.filter((user) =>
+    if (!term || term == "") {
+      return values;
+    }
+
+    const filteredusers = values.filter((user) =>
       user.username.toLowerCase().includes(term.toLowerCase())
     );
     return filteredusers;
