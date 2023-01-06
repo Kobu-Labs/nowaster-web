@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createGroupSchema = z.object({
   creatorId: z.string().uuid(),
-  groupName: z.string(),
+  groupName: z.string().min(3).max(20),
   inviteOnly: z.boolean()
 });
 
