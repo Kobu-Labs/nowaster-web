@@ -1,6 +1,6 @@
 import baseApi from "./baseApi";
 import { ResponseMulti, ResponseSingle } from "./types";
-import { Ban, CreateBanData, GetBansByUserIdData } from "../models/Ban";
+import { Ban, CreateBanData, GetBansByUserEmailData } from "../models/Ban";
 
 export const create = async (
   banData: CreateBanData
@@ -9,11 +9,11 @@ export const create = async (
   return resp.data;
 };
 
-export const getByUserId = async (
-  getBansByUserIdData: GetBansByUserIdData
-): Promise<ResponseMulti<Ban[]>> => {
-  const resp = await baseApi.get<ResponseMulti<Ban[]>>(
-    "recorded/" + getBansByUserIdData.userId
+export const getByUserEmail = async (
+  getBansByUserEmailData: GetBansByUserEmailData
+): Promise<ResponseMulti<Ban>> => {
+  const resp = await baseApi.get<ResponseMulti<Ban>>(
+    "/ban/" + getBansByUserEmailData.email
   );
   return resp.data;
 };

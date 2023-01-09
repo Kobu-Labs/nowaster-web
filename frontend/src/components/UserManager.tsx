@@ -4,6 +4,7 @@ import { BanApi, UserApi } from "../services";
 import Search from "./Search";
 import { useState } from "react";
 import useAuth from "../hooks/useAuth";
+import { duration } from "@mui/material";
 
 const getTommorow = () => {
   const tomorrow = new Date();
@@ -16,7 +17,7 @@ const UserManager = () => {
   const { auth } = useAuth();
   const [searchResults, setSearchResults] = useState<User[]>([]);
 
-  const { data: values} = useQuery({
+  const { data: values } = useQuery({
     queryKey: ["users"],
     retry: false,
     queryFn: async () => {
@@ -26,9 +27,8 @@ const UserManager = () => {
       }
       return result.data.filter((user) => auth!.data.id != user.id);
     },
-    onSuccess:(data) =>  setSearchResults(data),
+    onSuccess: (data) => setSearchResults(data),
   });
-
 
   const executeSearch = (term: string): User[] | null => {
     if (values === undefined) {
@@ -49,9 +49,14 @@ const UserManager = () => {
     setSearchResults(users || []);
   };
 
-  const banUser = async (userId: string, endTime: Date | null) => {
-    console.log(`Banning user ${userId} for ${endTime?.getTime()}`);
-    await BanApi.create({ userId, endTime });
+  const banUser = async (user: User, endTime: Date | null) => {
+    console.log(`Banning user ${user.id} for ${endTime?.getTime()}`);
+    await BanApi.create({ userId: user.id, endTime });
+    if (endTime) {
+      alert(`Banning user ${user.username} for 24 hours`);
+    } else {
+      alert(`Banning user ${user.username} permanently`);
+    }
   };
 
   console.log(searchResults);
@@ -73,13 +78,13 @@ const UserManager = () => {
               <div>
                 <button
                   className="px-2 py-1 mr-2 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600"
-                  onClick={() => banUser(user.id, getTommorow())}
+                  onClick={() => banUser(user, getTommorow())}
                 >
                   Ban (1 day)
                 </button>
                 <button
                   className="px-2 py-1 text-sm text-white bg-red-800 rounded hover:bg-red-900"
-                  onClick={() => banUser(user.id, null)}
+                  onClick={() => banUser(user, null)}
                 >
                   Permaban
                 </button>

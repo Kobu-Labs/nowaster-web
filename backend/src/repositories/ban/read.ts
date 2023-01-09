@@ -3,25 +3,27 @@ import type { AsyncResult } from "../types";
 import { Result } from "@badrap/result";
 import client from "../client";
 
-type ReadByUserIdParams = {
-    userId: string
+type ReadByUserEmailParams = {
+    email: string
 };
 
-export const byUserId = async (params: ReadByUserIdParams): AsyncResult<Ban[]> => {
+
+export const byUserEmail = async (params: ReadByUserEmailParams): AsyncResult<Ban[]> => {
   try {
     const recordedEntity = await client.ban.findMany({
       where: {
-        userId: params.userId,
+        user: {
+          email: params.email
+        }
       }
     });
-    
-    return Result.ok(recordedEntity);    
+
+    return Result.ok(recordedEntity);
   } catch (error) {
     return Result.err(error as Error);
   }
 };
-
 const read = {
-  byUserId,
+  byUserEmail,
 };
 export default read;

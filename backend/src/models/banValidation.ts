@@ -6,5 +6,5 @@ export const createBanSchema = z.object({
 });
 
 export const readBanSchema = z.object({
-  userId: z.string().uuid(),
+  email: z.string().email(),
 });

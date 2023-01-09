@@ -4,8 +4,8 @@ export type Ban = {
   endTime: Date | null;
 };
 
-export type GetBansByUserIdData = {
-  userId: string;
+export type GetBansByUserEmailData = {
+  email: string;
 };
 
 export type CreateBanData = Omit<Ban, "id">;

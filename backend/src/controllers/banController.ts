@@ -18,9 +18,8 @@ BanController.post("/", validate({ body: createBanSchema }), async (req, res) =>
   return handleOkResp(recordedSessionEntity, res);
 });
 
-BanController.get("/:userId", validate({ params: readBanSchema }), async (req, res) => {
-  const recordedSessionEntities = await banRepo.read.byUserId(req.params);
-  console.log(recordedSessionEntities);
+BanController.get("/:email", validate({ params: readBanSchema }), async (req, res) => {
+  const recordedSessionEntities = await banRepo.read.byUserEmail(req.params);
   
   if (recordedSessionEntities.isErr) {
     return handleResultErrorResp(500, res, recordedSessionEntities.error);

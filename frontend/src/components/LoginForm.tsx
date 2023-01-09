@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { AuthApi } from "../services";
+import { AuthApi, BanApi, UserApi } from "../services";
 import { UserLoginSubmit } from "../validation/registrationSubmit";
 import NavbarButton from "./NavbarButton";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { LoginResponse } from "../services/authApi";
+import { LoginResponse, auth } from "../services/authApi";
 import { ResponseSingle } from "../services/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validation/loginSubmit";
@@ -38,8 +38,17 @@ const LoginForm: FC = () => {
   const onSubmit = async (data: UserLoginSubmit) => {
     const result = await login(data);
 
+    const userBans = await BanApi.getByUserEmail({ email: data.email });
+    console.log(userBans);
+
     if (result.status === "error") {
       setBackendErrorMessage(result.message || "");
+      return;
+    } else if (
+      userBans.data.filter((x) => !x.endTime || x.endTime > new Date())
+        .length !== 0
+    ) {
+      setBackendErrorMessage("User is banned!");
       return;
     }
     queryClient.setQueryData(["auth"], () => result);
