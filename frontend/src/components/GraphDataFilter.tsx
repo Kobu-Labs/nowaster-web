@@ -32,6 +32,7 @@ const PieGraphFilter: React.FC<{
     filterPieGraphProps(pieGraphProps, filterCriteria, setFilteredData);
   };
 
+
   return (
     <div className="bg-gray-800 rounded-lg flex flex-col items-center text-center">
       <h2 className="text-xl m-2 mb-4 text-center">Filter data</h2>
@@ -45,7 +46,7 @@ const PieGraphFilter: React.FC<{
             type="date"
             id="startDate"
             className="w-44 bg-gray-900 rounded-lg px-3 py-2"
-            value={startDate ? startDate.toISOString().split("T")[0] : ""}
+            value={isFinite(startDate) ? startDate.toISOString().split("T")[0] : (new Date(1990, 10, 19)).toISOString()}
             onChange={(e) => setStartDate(new Date(e.target.value))}
           />
         </div>
@@ -58,7 +59,7 @@ const PieGraphFilter: React.FC<{
             type="date"
             id="endDate"
             className="w-44 bg-gray-900 rounded-lg px-3 py-2"
-            value={endDate ? endDate.toISOString().split("T")[0] : ""}
+            value={isFinite(endDate) ? endDate.toISOString().split("T")[0] : (new Date(1990, 10, 19).toISOString())}
             onChange={(e) => setEndDate(new Date(e.target.value))}
           />
         </div>

@@ -26,13 +26,13 @@ export const StatsPage: FC = () => {
       </div>
       <div className="flex-grow overflow-y-auto flex items-center justify-center flex-col h-screen">
         <div className="bg-gray-900 rounded-lg h-screen my-2">
-          {showGraph ? <GraphAndFilter /> : <EntitiesList />}
           <button
             className="m-3 border-solid border-2 rounded-lg hover:bg-gray-900 bg-gray-800"
             onClick={toggleShow}
           >
             Switch to {showGraph ? "List" : "Graph"}
           </button>
+          {showGraph ? <GraphAndFilter /> : <EntitiesList />}
         </div>
       </div>
     </div>
