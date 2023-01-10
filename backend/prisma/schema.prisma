@@ -15,15 +15,16 @@ model Ban {
 }
 
 model User {
-    id             String            @id @default(uuid())
-    username       String            @unique
-    email          String            @unique
+    id             String               @id @default(uuid())
+    username       String               @unique
+    email          String               @unique
     hashedPassword String
     avatar         String?
     solidEntities  ScheduledEntity[]
     recordEntities RecordedEntity[]
     bans           Ban[]
     groups         UserToGroup[]
+    UserFunctions  UserFunctionToUser[]
 }
 
 model UserToGroup {
@@ -35,12 +36,12 @@ model UserToGroup {
 }
 
 model Group {
-    id              String            @id @default(uuid())
-    creatorId       String
-    groupName       String
-    inviteOnly      Boolean           @default(false)
-    users           UserToGroup[]
-    GroupInvites    GroupInvite[]
+    id           String        @id @default(uuid())
+    creatorId    String
+    groupName    String
+    inviteOnly   Boolean       @default(false)
+    users        UserToGroup[]
+    GroupInvites GroupInvite[]
 }
 
 model GroupInvite {
@@ -67,4 +68,19 @@ model RecordedEntity {
     category    String
     description String?
     user        User     @relation(fields: [userId], references: [id])
+}
+
+model UserFunction {
+    id                 String               @id @default(uuid())
+    description        String
+    name               String
+    UserFunctionToUser UserFunctionToUser[]
+}
+
+model UserFunctionToUser {
+    id             String       @id @default(uuid())
+    user           User         @relation(fields: [userId], references: [id])
+    userId         String
+    userFunctionId String
+    userFunction   UserFunction @relation(fields: [userFunctionId], references: [id])
 }

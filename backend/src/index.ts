@@ -7,10 +7,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import session from "./middleware/sessionMiddleware";
 import AuthController from "./controllers/authController";
-import todoRouter from "./controllers/todosController";
 import { ScheduledController } from "./controllers/study_sessions/scheduledController";
 import { GroupController } from "./controllers/studyGroupController";
 import { BanController } from "./controllers/banController";
+import { UserFunctionController } from "./controllers/userFunctionController";
 
 declare module "express-session" {
   interface SessionData { user: { id: string, } }
@@ -31,7 +31,7 @@ app.use("/recorded", RecordedController);
 app.use("/scheduled", ScheduledController);
 app.use("/group", GroupController);
 app.use("/auth", AuthController);
-app.use("/todos", todoRouter);
+app.use("/function", UserFunctionController);
 
 app.use((_req, res) => {
   const response: ApiResponse<null> = {
