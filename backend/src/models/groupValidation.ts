@@ -43,3 +43,9 @@ export const kickUserSchema = z.object({
   kickedUserId: z.string().uuid(),
   kickingUserId: z.string().uuid(),
 });
+
+export const LeaveUserSchema = z.object({
+  groupId: z.string().uuid(),
+  UserId: z.string().uuid(),
+});
+

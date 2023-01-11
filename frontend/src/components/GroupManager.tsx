@@ -12,7 +12,7 @@ const GroupManager = () => {
     const { auth } = useAuth()
     const [searchResults, setSearchResults] = useState<Group[]>([]);
     const { data: values } = useQuery({
-        queryKey: ["groups"],
+        queryKey: ["groups", auth!.data.id],
         retry: false,
         queryFn: async () => {
             const result = await GroupApi.getGroupsByUser({ userId: auth!.data.id })

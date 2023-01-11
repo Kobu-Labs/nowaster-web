@@ -124,8 +124,41 @@ const groupEntities = (data: (ScheduledEntity & { user: User })[]): SummaryRepor
   });
 
   return Object.values(result);
+};
 
+const getPrivateGroups = async (): AsyncResult<Group[]> => {
+  try {
+    const groups = await client.group.findMany({
+      where: {
+        inviteOnly: true,
+      },
+    });
+    return Result.ok(groups);
+  } catch (error) {
+    return Result.err(error as Error);
+  }
+};
 
+const getAllGroups = async (): AsyncResult<Group[]> => {
+  try {
+    const groups = await client.group.findMany();
+    return Result.ok(groups);
+  } catch (error) {
+    return Result.err(error as Error);
+  }
+};
+
+const getPublicGroups = async (): AsyncResult<Group[]> => {
+  try {
+    const groups = await client.group.findMany({
+      where: {
+        inviteOnly: false,
+      },
+    });
+    return Result.ok(groups);
+  } catch (error) {
+    return Result.err(error as Error);
+  }
 };
 
 const read = {
@@ -133,6 +166,9 @@ const read = {
   byUser,
   usersOfGroup,
   groupSummary,
+  getPublicGroups,
+  getPrivateGroups,
+  getAllGroups,
 };
 
 export default read;

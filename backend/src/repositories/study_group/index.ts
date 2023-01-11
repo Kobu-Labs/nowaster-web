@@ -4,6 +4,7 @@ import remove from "./remove";
 import update from "./join";
 import invite from "./invite";
 import kick from "./kickUser";
+import leave from "./leave";
 
 const groupRepo = {
   create,
@@ -12,6 +13,7 @@ const groupRepo = {
   update,
   invite,
   kick,
+  leave,
 };
 
 export default groupRepo;

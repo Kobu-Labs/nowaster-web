@@ -15,7 +15,7 @@ const GroupsNav = (props: GroupsNavProps) => {
     const navbarRef = useRef<HTMLDivElement>(null);
     const { auth } = useAuth()
     if (auth === undefined) {
-        return
+        return null;
     }
     const { data } = useQuery({
         queryKey: ["groups"],
@@ -26,7 +26,7 @@ const GroupsNav = (props: GroupsNavProps) => {
 
 
     if (data === undefined) {
-        return
+        return null;
     }
 
     const handleActiveGroupChange = (group: Group) => {
