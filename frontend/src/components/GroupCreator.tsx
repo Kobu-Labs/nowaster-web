@@ -13,7 +13,7 @@ const GroupCreator: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    queryClient.invalidateQueries({ queryKey: ["groups"] });
+    queryClient.invalidateQueries({ queryKey: ["groups", auth!.data.id] });
 
     const validation = GroupSchema.safeParse({ name, isInviteOnly });
     if (!validation.success) {

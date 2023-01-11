@@ -9,6 +9,7 @@ import {
   getUserDetailsPerGroup,
   getUsersOfGroupParams,
   kickUserSchema,
+  LeaveUserSchema,
 } from "./../models/groupValidation";
 import groupRepo from "../repositories/study_group";
 import { validate } from "./middleware/validation";
@@ -27,6 +28,39 @@ GroupController.post("/", validate({ body: createGroupSchema }), async (req: Req
 
   return handleOkResp(groupEntity.value, res);
 
+});
+
+// get all groups
+GroupController.get("/all",  async (_req, res) => {
+  const groupsResult = await groupRepo.read.getAllGroups();
+
+  if (groupsResult.isErr) {
+    return handleResultErrorResp(500, res, groupsResult.error);
+  }
+
+  return handleOkResp(groupsResult.value, res);
+});
+
+// get invite only groups
+GroupController.get("/private",  async (_req, res) => {
+  const groupsResult = await groupRepo.read.getPrivateGroups();
+
+  if (groupsResult.isErr) {
+    return handleResultErrorResp(500, res, groupsResult.error);
+  }
+
+  return handleOkResp(groupsResult.value, res);
+});
+
+// get public groups
+GroupController.get("/public",  async (_req, res) => {
+  const groupsResult = await groupRepo.read.getPublicGroups();
+
+  if (groupsResult.isErr) {
+    return handleResultErrorResp(500, res, groupsResult.error);
+  }
+
+  return handleOkResp(groupsResult.value, res);
 });
 
 // get specific group
@@ -139,4 +173,14 @@ GroupController.post("/kick", validate({ body: kickUserSchema }), async (req, re
   }
 
   return handleOkResp(data.value, res);
+});
+
+GroupController.delete("/leave", validate({ query: LeaveUserSchema }), async (req, res) => {
+  const deletedEntity = await groupRepo.leave(req.query);
+
+  if (deletedEntity.isErr) {
+    return handleResultErrorResp(500, res, deletedEntity.error);
+  }
+
+  return handleOkResp(deletedEntity.value, res);
 });
