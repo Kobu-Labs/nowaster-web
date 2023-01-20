@@ -7,13 +7,6 @@ datasource db {
     url      = "file:database"
 }
 
-model Ban {
-    id      String    @id @default(uuid())
-    userId  String
-    endTime DateTime?
-    user    User      @relation(fields: [userId], references: [id])
-}
-
 model User {
     id             String               @id @default(uuid())
     username       String               @unique
@@ -22,33 +15,6 @@ model User {
     avatar         String?
     solidEntities  ScheduledEntity[]
     recordEntities RecordedEntity[]
-    bans           Ban[]
-    groups         UserToGroup[]
-    UserFunctions  UserFunctionToUser[]
-}
-
-model UserToGroup {
-    id      String @id @default(uuid())
-    userId  String
-    groupId String
-    user    User   @relation(fields: [userId], references: [id])
-    group   Group  @relation(fields: [groupId], references: [id])
-}
-
-model Group {
-    id           String        @id @default(uuid())
-    creatorId    String
-    groupName    String
-    inviteOnly   Boolean       @default(false)
-    users        UserToGroup[]
-    GroupInvites GroupInvite[]
-}
-
-model GroupInvite {
-    id      String @id @default(uuid())
-    groupId String
-    group   Group  @relation(fields: [groupId], references: [id])
-    code    String
 }
 
 model ScheduledEntity {
@@ -68,19 +34,4 @@ model RecordedEntity {
     category    String
     description String?
     user        User     @relation(fields: [userId], references: [id])
-}
-
-model UserFunction {
-    id                 String               @id @default(uuid())
-    description        String
-    name               String
-    UserFunctionToUser UserFunctionToUser[]
-}
-
-model UserFunctionToUser {
-    id             String       @id @default(uuid())
-    user           User         @relation(fields: [userId], references: [id])
-    userId         String
-    userFunctionId String
-    userFunction   UserFunction @relation(fields: [userFunctionId], references: [id])
 }

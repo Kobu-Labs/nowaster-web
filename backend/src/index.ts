@@ -8,9 +8,6 @@ import cors from "cors";
 import session from "./middleware/sessionMiddleware";
 import AuthController from "./controllers/authController";
 import { ScheduledController } from "./controllers/study_sessions/scheduledController";
-import { GroupController } from "./controllers/studyGroupController";
-import { BanController } from "./controllers/banController";
-import { UserFunctionController } from "./controllers/userFunctionController";
 
 declare module "express-session" {
   interface SessionData { user: { id: string, } }
@@ -26,12 +23,9 @@ app.use(session());
 app.use(cors());
 
 app.use("/user", UserController);
-app.use("/ban", BanController);
 app.use("/recorded", RecordedController);
 app.use("/scheduled", ScheduledController);
-app.use("/group", GroupController);
 app.use("/auth", AuthController);
-app.use("/function", UserFunctionController);
 
 app.use((_req, res) => {
   const response: ApiResponse<null> = {
