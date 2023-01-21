@@ -3,28 +3,14 @@ import type { ScheduledEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
 
-type ReadAllScheduledParams = {
-    categories?: string[];
-    limit?: number;
-    userId?: string;
-    fromDate?: Date;
-    toDate?: Date;
-    groupId?: string
-};
-
 type ReadSingleScheduledParams = {
     id: string
 }
 
-const many = async (params: ReadAllScheduledParams): AsyncResult<ScheduledEntity[] | null> => {
+const many = async (): AsyncResult<ScheduledEntity[] | null> => {
   try {
-    const {limit, ...data} = params;
 
     const scheduledEntity = await client.scheduledEntity.findMany({
-      where: {
-        ...data
-      },
-      take: limit
     });
 
     if (!scheduledEntity) {

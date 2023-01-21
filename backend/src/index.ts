@@ -1,12 +1,9 @@
 import express from "express";
 import { env } from "process";
 import type { ApiResponse } from "./controllers/types";
-import { UserController } from "./controllers/userController";
 import { RecordedController } from "./controllers/study_sessions/recorderController";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import session from "./middleware/sessionMiddleware";
-import AuthController from "./controllers/authController";
 import { ScheduledController } from "./controllers/study_sessions/scheduledController";
 
 declare module "express-session" {
@@ -19,13 +16,10 @@ const port = env.PORT ?? 4000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(session());
 app.use(cors());
 
-app.use("/user", UserController);
 app.use("/recorded", RecordedController);
 app.use("/scheduled", ScheduledController);
-app.use("/auth", AuthController);
 
 app.use((_req, res) => {
   const response: ApiResponse<null> = {

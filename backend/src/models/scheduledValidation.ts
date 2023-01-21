@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const createScheduledSchema = z.object({
-  userId: z.string().uuid(),
   category: z.string().nonempty(),
   description: z.string()
     .max(50)
@@ -10,12 +9,7 @@ export const createScheduledSchema = z.object({
   endTime: z.coerce.date()
 });
 
-export const readScheduledSchema = z.object({
-  userId: z.string().uuid(),
-});
-
 export const readByIdScheduledSchema = z.object({
-  userId: z.string().uuid(),
   id: z.string().uuid(),
 });
 

@@ -7,31 +7,17 @@ datasource db {
     url      = "file:database"
 }
 
-model User {
-    id             String               @id @default(uuid())
-    username       String               @unique
-    email          String               @unique
-    hashedPassword String
-    avatar         String?
-    solidEntities  ScheduledEntity[]
-    recordEntities RecordedEntity[]
-}
-
 model ScheduledEntity {
     id          String   @id @default(uuid())
-    userId      String
     startTime   DateTime
     endTime     DateTime
     category    String
     description String?
-    user        User     @relation(fields: [userId], references: [id])
 }
 
 model RecordedEntity {
     id          String   @id @default(uuid())
-    userId      String
     startTime   DateTime
     category    String
     description String?
-    user        User     @relation(fields: [userId], references: [id])
 }
