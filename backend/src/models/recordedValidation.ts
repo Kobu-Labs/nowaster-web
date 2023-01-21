@@ -2,7 +2,6 @@ import { z } from "zod";
 
 
 export const createRecordedSchema = z.object({
-  userId: z.string().uuid(),
   category: z.string().nonempty(),
   description: z.string()
     .max(50)
@@ -10,12 +9,8 @@ export const createRecordedSchema = z.object({
   startTime: z.coerce.date()
 });
 
-export const readRecordedSchema = z.object({
-  userId: z.string().uuid(),
-});
 
 export const readByIdRecordedSchema = z.object({
-  userId: z.string().uuid(),
   id: z.string().uuid(),
 });
 

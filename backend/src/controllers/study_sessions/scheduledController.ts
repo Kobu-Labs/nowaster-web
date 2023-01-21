@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema, readScheduledSchema, updateScheduledSchema } from "../../models/scheduledValidation";
+import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema,  updateScheduledSchema } from "../../models/scheduledValidation";
 import scheduledSessionRepo from "../../repositories/scheduled_entity";
 import { handleOkResp, handleResultErrorResp } from "../middleware/responseUtil";
 import { validate } from "../middleware/validation";
@@ -19,8 +19,8 @@ ScheduledController.post("/", validate({ body: createScheduledSchema }), async (
 
 
 // get users study sessions
-ScheduledController.get("/:userId", validate({ params: readScheduledSchema }), async (req, res) => {
-  const scheduledSessionEntities = await scheduledSessionRepo.read.many(req.params);
+ScheduledController.get("/", async (_req, res) => {
+  const scheduledSessionEntities = await scheduledSessionRepo.read.many();
 
   if (scheduledSessionEntities.isErr) {
     return handleResultErrorResp(500, res, scheduledSessionEntities.error);
@@ -31,7 +31,7 @@ ScheduledController.get("/:userId", validate({ params: readScheduledSchema }), a
 
 
 // get specific session
-ScheduledController.get("/:userId/:id", validate({ params: readByIdScheduledSchema }), async (req, res) => {
+ScheduledController.get("/:id", validate({ params: readByIdScheduledSchema }), async (req, res) => {
   const scheduledSessionEntity = await scheduledSessionRepo.read.single(req.params);
 
   if (scheduledSessionEntity.isErr) {

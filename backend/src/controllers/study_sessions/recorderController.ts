@@ -1,4 +1,4 @@
-import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, readRecordedSchema, updateRecordedSchema } from "../../models/recordedValidation";
+import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, updateRecordedSchema } from "../../models/recordedValidation";
 import recordedSessionRepo from "../../repositories/recorded_entity";
 import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "../middleware/responseUtil";
@@ -18,20 +18,8 @@ RecordedController.post("/", validate({ body: createRecordedSchema }), async (re
 });
 
 
-// get users study sessions
-RecordedController.get("/:userId", validate({ params: readRecordedSchema }), async (req, res) => {
-  const recordedSessionEntities = await recordedSessionRepo.read.singleByUserId(req.params);
-  console.log(recordedSessionEntities);
-
-  if (recordedSessionEntities.isErr) {
-    return handleResultErrorResp(500, res, recordedSessionEntities.error);
-  }
-  return handleOkResp(recordedSessionEntities.value, res);
-});
-
-
 // get specific session
-RecordedController.get("/:userId/:id", validate({ params: readByIdRecordedSchema }), async (req, res) => {
+RecordedController.get("/:id", validate({ params: readByIdRecordedSchema }), async (req, res) => {
   const recordedSessionEntity = await recordedSessionRepo.read.single(req.params);
 
   if (recordedSessionEntity.isErr) {
