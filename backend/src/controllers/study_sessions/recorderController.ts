@@ -1,6 +1,6 @@
+import { validate } from "../../middleware/validation";
 import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, updateRecordedSchema } from "../../models/recordedValidation";
 import recordedSessionRepo from "../../repositories/recorded_entity";
-import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "../middleware/responseUtil";
 import { Router } from "express";
 

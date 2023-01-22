@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema,  updateScheduledSchema } from "../../models/scheduledValidation";
 import scheduledSessionRepo from "../../repositories/scheduled_entity";
 import { handleOkResp, handleResultErrorResp } from "../middleware/responseUtil";
-import { validate } from "../middleware/validation";
+import { validate } from "../../middleware/validation";
 
 export const ScheduledController = Router();
 
