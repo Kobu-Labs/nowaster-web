@@ -1,10 +1,10 @@
 import express from "express";
 import { env } from "process";
 import type { ApiResponse } from "./controllers/types";
-import { RecordedController } from "./controllers/study_sessions/recorderController";
+import { RecordedController } from "./controllers/RecordedSessionController";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { ScheduledController } from "./controllers/study_sessions/scheduledController";
+import { ScheduledController } from "./controllers/ScheduledSessionController";
 
 declare module "express-session" {
   interface SessionData { user: { id: string, } }
