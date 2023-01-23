@@ -1,8 +1,8 @@
-import { validate } from "../../middleware/validation";
-import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, updateRecordedSchema } from "../../models/recordedValidation";
-import recordedSessionRepo from "../../repositories/recorded_entity";
 import { Router } from "express";
-import { handleOkResp, handleResultErrorResp } from "../utils/handleResponse";
+import { validate } from "../middleware/validation";
+import recordedSessionRepo from "../repositories/recorded_entity";
+import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
+import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, updateRecordedSchema } from "../models/recordedValidation";
 
 export const RecordedController = Router();
 
