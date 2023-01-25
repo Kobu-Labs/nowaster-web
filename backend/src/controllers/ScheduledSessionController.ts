@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema,  updateScheduledSchema } from "../models/scheduledValidation";
+import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema,  updateScheduledSchema } from "../validation/scheduledSessionValidation";
 import scheduledSessionRepo from "../repositories/scheduled_entity";
 import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
