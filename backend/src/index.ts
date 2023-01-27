@@ -1,21 +1,15 @@
 import express from "express";
+import cors from "cors";
 import { env } from "process";
 import type { ApiResponse } from "./controllers/types";
 import { RecordedController } from "./controllers/RecordedSessionController";
-import cookieParser from "cookie-parser";
-import cors from "cors";
 import { ScheduledController } from "./controllers/ScheduledSessionController";
-
-declare module "express-session" {
-  interface SessionData { user: { id: string, } }
-}
 
 const app = express();
 const port = env.PORT ?? 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(cors());
 
 app.use("/recorded", RecordedController);
