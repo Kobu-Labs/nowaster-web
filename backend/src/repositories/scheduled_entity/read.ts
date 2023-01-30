@@ -6,11 +6,17 @@ import { Result } from "@badrap/result";
 type ReadSingleScheduledParams = {
     id: string
 }
+type ReadManyScheduledParams = {
+    limit?: number | undefined
+}
 
-const many = async (): AsyncResult<ScheduledEntity[] | null> => {
+
+const many = async (params: ReadManyScheduledParams): AsyncResult<ScheduledEntity[] | null> => {
   try {
 
     const scheduledEntity = await client.scheduledEntity.findMany({
+      take: params.limit,
+      orderBy: { startTime: "desc" }
     });
 
     if (!scheduledEntity) {
@@ -18,7 +24,7 @@ const many = async (): AsyncResult<ScheduledEntity[] | null> => {
     }
 
     return Result.ok(scheduledEntity);
-        
+
   } catch (error) {
     return Result.err(error as Error);
   }
@@ -37,7 +43,7 @@ const single = async (params: ReadSingleScheduledParams): AsyncResult<ScheduledE
     }
 
     return Result.ok(scheduledEntity);
-        
+
   } catch (error) {
     return Result.err(error as Error);
   }
