@@ -13,6 +13,10 @@ export const readByIdScheduledSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const readManyScheduledSchema = z.object({
+    limit : z.coerce.number().optional()
+})
+
 export const updateScheduledSchema = z.object({
   id: z.string().uuid(),
   category: z.string().nonempty().optional(),

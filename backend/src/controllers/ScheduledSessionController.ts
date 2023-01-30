@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema,  updateScheduledSchema } from "../validation/scheduledSessionValidation";
+import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema, readManyScheduledSchema, updateScheduledSchema } from "../validation/scheduledSessionValidation";
 import scheduledSessionRepo from "../repositories/scheduled_entity";
 import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
@@ -10,7 +10,7 @@ export const ScheduledController = Router();
 // create new study session
 ScheduledController.post("/", validate({ body: createScheduledSchema }), async (req, res) => {
   const scheduledSessionEntity = await scheduledSessionRepo.create(req.body);
-  
+
   if (scheduledSessionEntity.isErr) {
     return handleResultErrorResp(500, res, scheduledSessionEntity.error);
   }
@@ -19,8 +19,8 @@ ScheduledController.post("/", validate({ body: createScheduledSchema }), async (
 
 
 // get users study sessions
-ScheduledController.get("/", async (_req, res) => {
-  const scheduledSessionEntities = await scheduledSessionRepo.read.many();
+ScheduledController.get("/", validate({ query: readManyScheduledSchema }), async (req, res) => {
+  const scheduledSessionEntities = await scheduledSessionRepo.read.many(req.query);
 
   if (scheduledSessionEntities.isErr) {
     return handleResultErrorResp(500, res, scheduledSessionEntities.error);
