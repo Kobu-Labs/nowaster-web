@@ -9,8 +9,8 @@ export const createScheduledSchema = z.object({
   endTime: z.coerce.date()
 });
 
-export const readByIdScheduledSchema = z.object({
-  id: z.string().uuid(),
+export const readByUserScheduledSchema = z.object({
+  userId: z.string().uuid(),
 });
 
 export const readManyScheduledSchema = z.object({
