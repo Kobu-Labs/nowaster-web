@@ -10,12 +10,8 @@ export const createScheduledSchema = z.object({
 });
 
 export const readByUserScheduledSchema = z.object({
-  userId: z.string().uuid(),
-});
-
-export const readManyScheduledSchema = z.object({
     limit : z.coerce.number().optional()
-})
+});
 
 export const updateScheduledSchema = z.object({
   id: z.string().uuid(),
