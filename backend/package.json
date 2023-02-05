@@ -10,6 +10,9 @@
     "type": "git",
     "url": "https://gitlab.fi.muni.cz/xjakube1/pb138-project"
   },
+  "prisma": {
+        "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -19,12 +22,13 @@
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-session": "^1.17.7",
+    "@types/node": "^20.3.3",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "eslint": "^8.38.0",
     "prisma": "^4.12.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@prisma/client": "^4.12.0",
