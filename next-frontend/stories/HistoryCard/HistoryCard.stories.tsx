@@ -13,48 +13,55 @@ type Story = StoryObj<typeof meta>;
 
 export const TwoHours: Story = {
   args: {
-    userId: "19i42894294",
-    tags: ["school", "pb138", "pb138/project", "focus"],
-    startTime: new Date(2023, 5, 27, 19, 0),
-    endTime: new Date(2023, 5, 27, 21, 0),
-    category: "pb138",
-    description: "Working on the project",
+    session: {
+      userId: "19i42894294",
+      tags: ["school", "pb138", "pb138/project", "focus"],
+      startTime: new Date(2023, 5, 27, 19, 0),
+      endTime: new Date(2023, 5, 27, 21, 0),
+      category: "pb138",
+      description: "Working on the project",
+    }
   }
 }
 
 export const NinetyMinutes: Story = {
   args: {
-    userId: "19i42894294",
-    tags: ["school", "pb138", "pb138/project", "focus"],
-    startTime: new Date(2023, 5, 27, 19, 0),
-    endTime: new Date(2023, 5, 27, 20, 30),
-    category: "pb138",
-    description: "Working on the project",
+    session: {
+      userId: "19i42894294",
+      tags: ["school", "pb138", "pb138/project", "focus"],
+      startTime: new Date(2023, 5, 27, 19, 0),
+      endTime: new Date(2023, 5, 27, 20, 30),
+      category: "pb138",
+      description: "Working on the project",
+    }
   }
 }
 
 
 export const HalfHour: Story = {
   args: {
-    userId: "19i42894294",
-    tags: ["school", "pb138", "pb138/project", "focus"],
-    startTime: new Date(2023, 5, 27, 20, 0),
-    endTime: new Date(2023, 5, 27, 20, 30),
-    category: "pb138",
-    description: "Working on the project",
+    session: {
+      userId: "19i42894294",
+      tags: ["school", "pb138", "pb138/project", "focus"],
+      startTime: new Date(2023, 5, 27, 20, 0),
+      endTime: new Date(2023, 5, 27, 20, 30),
+      category: "pb138",
+      description: "Working on the project",
+    }
   }
 }
 
 
 export const NineMinutesNineSeconds: Story = {
   args: {
-    userId: "19i42894294",
-    tags: ["school", "pb138", "pb138/project", "focus"],
-    startTime: new Date(2023, 5, 27, 20, 0, 0),
-    endTime: new Date(2023, 5, 27, 20, 9, 9),
-    category: "pb138",
-    description: "Working on the project",
+    session: {
+      userId: "19i42894294",
+      tags: ["school", "pb138", "pb138/project", "focus"],
+      startTime: new Date(2023, 5, 27, 20, 0, 0),
+      endTime: new Date(2023, 5, 27, 20, 9, 9),
+      category: "pb138",
+      description: "Working on the project",
+    }
   }
 }
-
 

@@ -1,7 +1,10 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { differenceInMilliseconds } from "date-fns"
 import { FC } from "react"
 import { SessionTag } from "../SessionTag/SessionTag"
 
+
+// TODO replace this by the actual study session type - missing tags
 type ScheduledSession = {
   userId: string,
   tags: string[],
@@ -24,19 +27,28 @@ const formatTimeDiff = (startTime: Date, endTime: Date): string => {
   return `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}:${formatTimeUnit(seconds)}`
 }
 
-type HistoryCardProps = ScheduledSession
+type HistoryCardProps = {
+  session: ScheduledSession,
+  hideBorder?: boolean
+}
 
-export const HistoryCard: FC<HistoryCardProps> = (props) => {
+export const HistoryCard: FC<HistoryCardProps> = ({ session, hideBorder }) => {
   return (
-      <div className="flex items-center">
-        <span className="h-9 w-9">H</span>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">{props.category}</p>
-          <p className="text-muted-foreground text-sm">{props.description}</p>
-          <div className="flex">{props.tags.map((val) => <SessionTag value={val}></SessionTag>
-          )}</div>
+    <Card className={hideBorder ? "border-hidden" : ""}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold">
+          {session.category}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex grow-0">
+        <div>
+          <p className="text-muted-foreground text-sm">{session.description}</p>
+          <div className="mt-1 flex" >
+            {session.tags.map((val) => <SessionTag value={val}></SessionTag>)}
+          </div>
         </div>
-        <div className="mb-16 ml-auto font-medium">{formatTimeDiff(props.startTime, props.endTime)}</div>
-      </div>
+        <div className="ml-auto font-medium">{formatTimeDiff(session.startTime, session.endTime)}</div>
+      </CardContent>
+    </Card>
   )
 }
