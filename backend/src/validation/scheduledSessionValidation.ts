@@ -6,7 +6,8 @@ export const createScheduledSchema = z.object({
     .max(50)
     .nullable(),
   startTime: z.coerce.date(),
-  endTime: z.coerce.date()
+  endTime: z.coerce.date(),
+  tags: z.array(z.string()),
 });
 
 export const readByUserScheduledSchema = z.object({
@@ -18,8 +19,8 @@ export const readByIdScheduledSchema = z.object({
 });
 
 export const readManyScheduledSchema = z.object({
-    limit : z.coerce.number().optional()
-})
+  limit: z.coerce.number().optional()
+});
 
 export const updateScheduledSchema = z.object({
   id: z.string().uuid(),
@@ -28,7 +29,8 @@ export const updateScheduledSchema = z.object({
     .max(50)
     .optional(),
   startTime: z.coerce.date().optional(),
-  endTime: z.coerce.date().optional()
+  endTime: z.coerce.date().optional(),
+  tags: z.array(z.string()),
 });
 
 
