@@ -1,5 +1,6 @@
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { DateTime } from "luxon"
+
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,6 +16,7 @@ interface DateTimePickerProps {
 
 export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
   const [selectedDateTime, setSelectedDateTime] = useState<DateTime | null>(null);
+
 
   const handleSelect: SelectSingleEventHandler = (_day, selected) => {
     const selectedDate = DateTime.fromJSDate(selected);
@@ -32,6 +34,7 @@ export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
       setSelectedDateTime(modifiedDate);
       onDateSelected(modifiedDate.toJSDate());
     }
+
   };
 
   const handleTimeChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -45,6 +48,7 @@ export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
     } else {
       modifiedDay = selectedDateTime.set({ hour: hours, minute: minutes });
     }
+
 
     setSelectedDateTime(modifiedDay);
     onDateSelected(modifiedDay.toJSDate());
@@ -66,6 +70,7 @@ export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
           ) : (
             <span>Pick a date</span>
           )}
+
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -83,6 +88,7 @@ export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
             value={selectedDateTime?.toFormat('HH:mm')}
           />
         </div>
+
       </PopoverContent>
     </Popover>
   );
