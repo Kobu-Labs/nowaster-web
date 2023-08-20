@@ -7,11 +7,12 @@ import { FC, useState } from "react"
 
 type CategoryPickerProps = {
   categories: string[]
+  onCategorySelected: (category: string | null) => void
 }
 
 export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [value, setValue] = useState<string | null>(null)
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -22,36 +23,37 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           aria-expanded={isOpen}
           className="w-[200px] justify-between"
         >
-          {searchTerm
-            ? props.categories.find((framework) => framework === searchTerm) || ""
+          {value
+            ? props.categories.find((framework) => framework === value) || ""
             : "Select category"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput onValueChange={setSearchTerm} placeholder="Search categories" />
+          <CommandInput onValueChange={setValue} placeholder="Search categories" />
           <CommandEmpty>
-            <button onClick={() => console.log("Creating " + searchTerm)}>
-              {"Create '" + searchTerm + "'"}
+            <button onClick={() => console.log("Creating " + value)}>
+              {"Create '" + value + "'"}
             </button>
           </CommandEmpty>
           <CommandGroup>
-            {props.categories.map((framework) => (
+            {props.categories.map((category) => (
               <CommandItem
-                key={framework}
+                key={category}
                 onSelect={(currentValue) => {
-                  setSearchTerm(currentValue === searchTerm ? "" : currentValue)
+                  setValue(currentValue === value ? null : currentValue)
+                  props.onCategorySelected(currentValue === value ? null : currentValue)
                   setIsOpen(false)
                 }}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    searchTerm === framework ? "opacity-100" : "opacity-0"
+                    value === category ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {framework}
+                {category}
               </CommandItem>
             ))}
           </CommandGroup>
