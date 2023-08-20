@@ -34,7 +34,7 @@ type HistoryCardProps = {
 
 export const HistoryCard: FC<HistoryCardProps> = ({ session, hideBorder }) => {
   return (
-    <Card className={hideBorder ? "border-hidden" : ""}>
+    <Card className={(hideBorder ? "border-hidden" : "border border-input") + " hover:bg-accent hover:text-accent-foreground hover:cursor-pointer"}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-2xl font-bold">
           {session.category}
@@ -47,7 +47,8 @@ export const HistoryCard: FC<HistoryCardProps> = ({ session, hideBorder }) => {
             {session.tags.map((val) => <SessionTag value={val}></SessionTag>)}
           </div>
         </div>
-        <div className="ml-auto font-medium">{formatTimeDiff(session.startTime, session.endTime)}</div>
+        <div className="flex-grow"/>
+        <div className="ml-4 font-medium">{formatTimeDiff(session.startTime, session.endTime)}</div>
       </CardContent>
     </Card>
   )
