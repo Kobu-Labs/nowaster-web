@@ -1,13 +1,9 @@
 import { z } from "zod";
+import { RecordedEntity, RecordedSessionSchema } from "../models";
+import { HasID } from "../utils";
 
 
-export const createRecordedSchema = z.object({
-  category: z.string().nonempty(),
-  description: z.string()
-    .max(50)
-    .nullable(),
-  startTime: z.coerce.date()
-});
+export const createRecordedSchema = RecordedSessionSchema
 
 export const readManyRecordedSchema = z.object({
   limit: z.coerce.number().optional()
@@ -17,14 +13,7 @@ export const readByIdRecordedSchema = z.object({
   id: z.string().uuid(),
 });
 
-export const updateRecordedSchema = z.object({
-  id: z.string().uuid(),
-  category: z.string().nonempty().optional(),
-  description: z.string()
-    .max(50)
-    .optional(),
-  startTime: z.coerce.date().optional()
-});
+export const updateRecordedSchema = RecordedSessionSchema.partial().merge(HasID)
 
 export const deleteRecordedSchema = z.object({
   id: z.string().uuid(),
