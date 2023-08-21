@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RecordedEntity, RecordedSessionSchema } from "../models";
+import { RecordedSessionSchema } from "../models";
 import { HasID } from "../utils";
 
 

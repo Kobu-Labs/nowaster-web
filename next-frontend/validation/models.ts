@@ -13,5 +13,6 @@ export const ScheduledSessionSchema = z.object({
   endTime: z.coerce.date().optional(),
   category: z.string(),
   description: z.string().optional(),
+  tags: z.array(z.string()),
 });
 export type ScheduledSession = z.infer<typeof ScheduledSessionSchema>;
