@@ -1,42 +1,46 @@
-import baseApi from "./baseApi";
-import { ResponseSingle } from "./types";
-import {
-  ScheduledEntity,
-} from "models/ScheduledSession";
-import { ResponseMulti } from "./types";
+import baseApi, { handleResponse } from "./baseApi";
 
 import {
-  CreateScheduledEntity,
-  GetByUserScheduledEntityData,
-  UpdateScheduledEntityParams,
-  DeleteSingleScheduledParams,
-} from "api/types"
+  CreateScheduledSessionRequest,
+  GetSessionsRequest,
+  UpdateScheduledSessionRequest,
+  DeleteScheduledSessionRequest,
+} from "@/validation/requests/scheduledSession"
 
-export const create = async (
-  scheduledEntity: CreateScheduledEntity
-): Promise<ResponseSingle<ScheduledEntity>> => {
-  const resp = await baseApi.post<ResponseSingle<ScheduledEntity>>(
+import {
+  CreateScheduledSessionResponse,
+  createScheduledSessionResponseSchema,
+  DeleteScheduledSessionResponse,
+  deleteScheduledSessionResponseSchema,
+  GetSessionResponse,
+  getSessionResponseSchema,
+  UpdateScheduledSessionResponse,
+  updateScheduledSessionResponseSchema,
+} from "@/validation/responses/scheduledSession";
+import { Result } from "@badrap/result"
+
+
+export const create = async (params: CreateScheduledSessionRequest): Promise<Result<CreateScheduledSessionResponse>> => {
+  const { data } = await baseApi.post(
     "scheduled/",
-    scheduledEntity
+    params
   );
-  return resp.data;
+  return handleResponse(data, createScheduledSessionResponseSchema)
 };
 
-export const getByUser = async (
-  getByUserScheduledEntityData: GetByUserScheduledEntityData
-): Promise<ResponseMulti<ScheduledEntity>> => {
-  const resp = await baseApi.get<ResponseMulti<ScheduledEntity>>(
-    "scheduled/", {params: {limit: getByUserScheduledEntityData.limit}}
+export const getSessions = async (params: GetSessionsRequest): Promise<Result<GetSessionResponse>> => {
+  const { data } = await baseApi.get(
+    "scheduled/", { params: { limit: params.limit } }
   );
-  return resp.data
+  return handleResponse(data, getSessionResponseSchema)
 };
 
-export const update = async (params: UpdateScheduledEntityParams): Promise<ResponseSingle<ScheduledEntity>> => {
-  const resp = await baseApi.put<ResponseSingle<ScheduledEntity>>("scheduled/", { ...params })
-  return resp.data
+export const update = async (params: UpdateScheduledSessionRequest): Promise<Result<UpdateScheduledSessionResponse>> => {
+  const { data } = await baseApi.put("scheduled/", { ...params })
+  return handleResponse(data, updateScheduledSessionResponseSchema)
 }
 
-export const removeSingle = async (id: DeleteSingleScheduledParams): Promise<ResponseSingle<ScheduledEntity>> => {
-  const resp = await baseApi.delete<ResponseSingle<ScheduledEntity>>("scheduled/", { data: id });
-  return resp.data;
+export const deleteSingle = async (params: DeleteScheduledSessionRequest): Promise<Result<DeleteScheduledSessionResponse>> => {
+  const { data } = await baseApi.delete("scheduled/", { data: params });
+  return handleResponse(data, deleteScheduledSessionResponseSchema)
 }
