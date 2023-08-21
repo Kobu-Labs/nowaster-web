@@ -26,9 +26,9 @@ export const getByUser = async (
   getByUserScheduledEntityData: GetByUserScheduledEntityData
 ): Promise<ResponseMulti<ScheduledEntity>> => {
   const resp = await baseApi.get<ResponseMulti<ScheduledEntity>>(
-    "scheduled/" + getByUserScheduledEntityData.userId
+    "scheduled/", {params: {limit: getByUserScheduledEntityData.limit}}
   );
-  return resp.data;
+  return resp.data
 };
 
 export const update = async (params: UpdateScheduledEntityParams): Promise<ResponseSingle<ScheduledEntity>> => {
