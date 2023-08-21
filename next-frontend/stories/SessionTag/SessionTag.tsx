@@ -28,6 +28,6 @@ const getColor = (color: keyof typeof colors | undefined): string => {
 
 export const SessionTag: FC<SessionTagProps> = (props) => {
   return (
-    <Badge className={"text-white " + getColor(props.color)}>{props.value}</Badge>
+    <Badge className={"hover:transition hover:scale-110 text-white " + getColor(props.color)}>{props.value}</Badge>
   )
 }
