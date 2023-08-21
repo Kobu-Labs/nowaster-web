@@ -12,48 +12,69 @@ type ReadManyScheduledParams = {
 
 
 const many = async (params: ReadManyScheduledParams): AsyncResult<ScheduledEntity[] | null> => {
-  try {
+    try {
 
-    const scheduledEntity = await client.scheduledEntity.findMany({
-      take: params.limit,
-      orderBy: { startTime: "desc" }
-    });
+        const scheduledEntity = await client.scheduledEntity.findMany({
+            take: params.limit,
+            orderBy: { startTime: "desc" },
+            include: {
+                tags: {
+                    select: {
+                        tag: true,
+                    }
 
-    if (!scheduledEntity) {
-      return Result.err(new Error("ScheduledEntity does not exist"));
+                }
+            }
+        });
+
+        if (!scheduledEntity) {
+            return Result.err(new Error("ScheduledEntity does not exist"));
+        }
+
+        return Result.ok(scheduledEntity.map(session => {
+            const { tags, ...rest } = session;
+            return { tags: tags.map(t => t.tag), ...rest };
+        }));
+
+
+    } catch (error) {
+        return Result.err(error as Error);
     }
-
-    return Result.ok(scheduledEntity);
-
-  } catch (error) {
-    return Result.err(error as Error);
-  }
 };
 
 const single = async (params: ReadSingleScheduledParams): AsyncResult<ScheduledEntity> => {
-  try {
-    const scheduledEntity = await client.scheduledEntity.findFirst({
-      where: {
-        id: params.id,
-      }
-    });
+    try {
+        const scheduledEntity = await client.scheduledEntity.findFirst({
+            where: {
+                id: params.id,
+            },
+            include: {
+                tags: {
+                    select: {
+                        tag: true,
+                    }
 
-    if (!scheduledEntity) {
-      return Result.err(new Error("ScheduledEntity does not exist"));
+                }
+            }
+        });
+
+        if (!scheduledEntity) {
+            return Result.err(new Error("ScheduledEntity does not exist"));
+        }
+
+        const { tags, ...rest } = scheduledEntity;
+        return Result.ok({ tags: tags.map(t => t.tag), ...rest });
+
+    } catch (error) {
+        return Result.err(error as Error);
     }
-
-    return Result.ok(scheduledEntity);
-
-  } catch (error) {
-    return Result.err(error as Error);
-  }
 
 };
 
 
 const read = {
-  single,
-  many,
+    single,
+    many,
 };
 
 export default read;
