@@ -1,18 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScheduledSession } from "@/validation/models"
 import { differenceInMilliseconds } from "date-fns"
 import { FC } from "react"
 import { SessionTag } from "../SessionTag/SessionTag"
 
-
-// TODO replace this by the actual study session type - missing tags
-type ScheduledSession = {
-  userId: string,
-  tags: string[],
-  startTime: Date,
-  endTime: Date,
-  category: string,
-  description: string,
-}
 
 const formatTimeUnit = (unit: number): string => {
   return (unit < 10 ? "0" : "") + unit.toString()
@@ -44,10 +35,10 @@ export const HistoryCard: FC<HistoryCardProps> = ({ session, hideBorder }) => {
         <div>
           <p className="text-muted-foreground text-sm">{session.description}</p>
           <div className="mt-1 flex" >
-            {session.tags.map((val) => <SessionTag value={val}></SessionTag>)}
+            {session.tags.map((val) => <SessionTag key={val.id} value={val.label}></SessionTag>)}
           </div>
         </div>
-        <div className="flex-grow"/>
+        <div className="grow" />
         <div className="ml-4 font-medium">{formatTimeDiff(session.startTime, session.endTime)}</div>
       </CardContent>
     </Card>
