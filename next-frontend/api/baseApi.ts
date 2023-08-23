@@ -9,21 +9,21 @@ const baseApi = axios.create({
 });
 
 export const handleResponse = async <T>(data: any, schema: ZodType<T>): Promise<Result<T>> => {
-  const test = await ResponseSchema.safeParseAsync(data)
-  if (!test.success) {
+  const request = await ResponseSchema.safeParseAsync(data)
+  if (!request.success) {
     return Result.err(new Error("Response is of unexpected structure!"))
   }
 
-  if (test.data.status === "fail") {
+  if (request.data.status === "fail") {
     return Result.err(new Error("Request failed!"))
   }
 
-  const parsed = await schema.safeParseAsync(test.data)
-  if (!parsed.success) {
-    return Result.err(new Error("Parsing data failed!"))
+  const requestBody = await schema.safeParseAsync(request.data.data)
+  if (!requestBody.success) {
+    return Result.err(new Error("Parsing data failed!\n" + requestBody.error.message))
   }
 
-  return Result.ok(parsed.data)
+  return Result.ok(requestBody.data)
 }
 
 export default baseApi;
