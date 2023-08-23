@@ -25,22 +25,22 @@ export const create = async (params: CreateScheduledSessionRequest): Promise<Res
     "scheduled/",
     params
   );
-  return handleResponse(data, createScheduledSessionResponseSchema)
+  return await handleResponse(data, createScheduledSessionResponseSchema)
 };
 
 export const getSessions = async (params: GetSessionsRequest): Promise<Result<GetSessionResponse>> => {
   const { data } = await baseApi.get(
     "scheduled/", { params: { limit: params.limit } }
   );
-  return handleResponse(data, getSessionResponseSchema)
+  return await handleResponse(data, getSessionResponseSchema)
 };
 
 export const update = async (params: UpdateScheduledSessionRequest): Promise<Result<UpdateScheduledSessionResponse>> => {
   const { data } = await baseApi.put("scheduled/", { ...params })
-  return handleResponse(data, updateScheduledSessionResponseSchema)
+  return await handleResponse(data, updateScheduledSessionResponseSchema)
 }
 
 export const deleteSingle = async (params: DeleteScheduledSessionRequest): Promise<Result<DeleteScheduledSessionResponse>> => {
   const { data } = await baseApi.delete("scheduled/", { data: params });
-  return handleResponse(data, deleteScheduledSessionResponseSchema)
+  return await handleResponse(data, deleteScheduledSessionResponseSchema)
 }
