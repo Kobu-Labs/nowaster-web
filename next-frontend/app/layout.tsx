@@ -3,6 +3,7 @@ import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { SiteHeader } from "@/components/site-header"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ReactQueryProvider } from "./ReactQueryProvider"
 
 
 interface RootLayoutProps {
@@ -12,7 +13,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <>
+    <ReactQueryProvider>
       <html lang="en" suppressHydrationWarning>
         <head />
         <body
@@ -29,6 +30,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </ThemeProvider>
         </body>
       </html>
-    </>
+    </ReactQueryProvider>
   )
 }
