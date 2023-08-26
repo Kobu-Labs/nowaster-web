@@ -13,7 +13,4 @@ type Story = StoryObj<typeof meta>;
 
 
 export const TagPickerBase: Story = {
-  args: {
-    tags: ["one", "two", "three", "four"]
-  }
 }
