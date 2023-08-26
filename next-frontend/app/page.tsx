@@ -16,7 +16,7 @@ export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sessions", "dashboard"],
     retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions({ limit: 10 }),
+    queryFn: async () => await ScheduledSessionApi.getSessions({ limit: 7 }),
   });
 
   const [granularity, setGranularity] = useState<Granularity>("year")
