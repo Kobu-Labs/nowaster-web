@@ -1,20 +1,35 @@
+import { TagApi } from "@/api"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { Tag } from "@/validation/models"
+import { useQuery } from "@tanstack/react-query"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
 import { SessionTag } from "../SessionTag/SessionTag"
 
 type TagPickerProps = {
-  tags: string[]
   onTagSelected: (tag: string[]) => void
 }
 
 export const TagPicker: FC<TagPickerProps> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([])
   const [searchTerm, setSearchTerm] = useState<string>("")
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["tags"],
+    retry: false,
+    queryFn: async () => await TagApi.readMany(),
+  });
+
+  if (isLoading || isError ) {
+    return <div >Something bad happenned</div>
+  }
+
+  if (data.isErr){
+    return <div>{data.error.message}</div>
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -41,9 +56,9 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
             </button>
           </CommandEmpty>
           <CommandGroup>
-            {props.tags.map((tag) => (
+            {data.value.map((tag) => (
               <CommandItem
-                key={tag}
+                key={tag.id}
                 onSelect={() => {
                   if (selectedTags.indexOf(tag) === -1) {
                     const newArray = [tag, ...selectedTags]
