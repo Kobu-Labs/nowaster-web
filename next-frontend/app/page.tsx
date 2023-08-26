@@ -14,7 +14,7 @@ import { ScheduledSessionApi } from "@/api"
 type Granularity = "today" | "week" | "month" | "year"
 export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["sessions", "slider"],
+    queryKey: ["sessions", "dashboard"],
     retry: false,
     queryFn: async () => await ScheduledSessionApi.getSessions({ limit: 10 }),
   });
