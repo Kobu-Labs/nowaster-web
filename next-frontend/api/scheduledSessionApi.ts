@@ -28,9 +28,9 @@ export const create = async (params: CreateScheduledSessionRequest): Promise<Res
   return await handleResponse(data, createScheduledSessionResponseSchema)
 };
 
-export const getSessions = async (params: GetSessionsRequest): Promise<Result<GetSessionResponse>> => {
+export const getSessions = async (params?: GetSessionsRequest): Promise<Result<GetSessionResponse>> => {
   const { data } = await baseApi.get(
-    "scheduled/", { params: { limit: params.limit } }
+    "scheduled/", { params: {...params} }
   );
   return await handleResponse(data, getSessionResponseSchema)
 };
