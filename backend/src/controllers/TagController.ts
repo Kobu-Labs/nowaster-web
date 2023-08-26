@@ -1,12 +1,11 @@
 // TODO 
 // read tag by id
-// read all tags
 // delete a tag
 // update a tag
 
 import { Router } from "express";
 import { validate } from "../middleware/validation";
-import { createTagSchema } from "../validation/tagValidation";
+import { createTagSchema, readManyTags } from "../validation/tagValidation";
 import tagRepo from "../repositories/tag_repository";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
 
@@ -21,4 +20,15 @@ TagController.post("/", validate({ body: createTagSchema }), async (req, res) =>
   }
 
   return handleOkResp(tag.value, res);
+});
+
+
+TagController.get("/", validate({ query: readManyTags }), async (req, res) => {
+  const tags = await tagRepo.read.many(req.query);
+
+  if (tags.isErr) {
+    return handleResultErrorResp(500, res, tags.error);
+  }
+
+  return handleOkResp(tags.value, res);
 });
