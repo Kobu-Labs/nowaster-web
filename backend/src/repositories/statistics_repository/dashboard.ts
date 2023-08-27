@@ -3,6 +3,22 @@ import client from "../client";
 import type { AsyncResult } from "../types";
 import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
+const sumSessionTimeInMinutes = async (): AsyncResult<number> => {
+  try {
+    const session = await client.scheduledEntity.findMany({
+      select: {
+        endTime: true,
+        startTime: true,
+      }
+    });
+
+    const test = session.reduce((acc, ses) => acc + differenceInMinutes(ses.endTime, ses.startTime), 0);
+    return Result.ok(test);
+  } catch (error) {
+    return Result.err(error as Error);
+  }
+};
+
 const getCurrentStreak = async (): AsyncResult<number> => {
   try {
     const take = 45;
