@@ -29,8 +29,6 @@ export default function IndexPage() {
     return <div>{data.error.message}</div>
   }
 
-  console.log(data.value)
-
   return (
     <div className="p-8">
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
