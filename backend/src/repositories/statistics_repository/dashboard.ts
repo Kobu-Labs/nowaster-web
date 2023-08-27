@@ -3,6 +3,15 @@ import client from "../client";
 import type { AsyncResult } from "../types";
 import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
+const getAmountOfSessions = async (): AsyncResult<number> => {
+  try {
+    return Result.ok(await client.scheduledEntity.count());
+  }
+  catch (error) {
+    return Result.err(error as Error);
+  }
+};
+
 const sumSessionTimeInMinutes = async (): AsyncResult<number> => {
   try {
     const session = await client.scheduledEntity.findMany({
