@@ -3,6 +3,39 @@ import client from "../client";
 import type { AsyncResult } from "../types";
 import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
+type DashboardStatistics = {
+    streak: number,
+    minutes: number,
+    session_count: number
+}
+
+export const getDashboardData = async (): AsyncResult<DashboardStatistics> => {
+  try {
+    const session_count = await getAmountOfSessions();
+    if (session_count.isErr) {
+      return Result.err(session_count.error);
+    }
+
+    const minutes = await sumSessionTimeInMinutes();
+    if (minutes.isErr) {
+      return Result.err(minutes.error);
+    }
+
+    const streak = await getCurrentStreak();
+    if (streak.isErr) {
+      return Result.err(streak.error);
+    }
+
+    return Result.ok({
+      streak: streak.value,
+      minutes: minutes.value,
+      session_count: session_count.value
+    });
+  } catch (error) {
+    return Result.err(error as Error);
+  }
+};
+
 const getAmountOfSessions = async (): AsyncResult<number> => {
   try {
     return Result.ok(await client.scheduledEntity.count());
