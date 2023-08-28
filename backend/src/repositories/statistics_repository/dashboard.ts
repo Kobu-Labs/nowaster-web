@@ -3,6 +3,8 @@ import client from "../client";
 import type { AsyncResult } from "../types";
 import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
+const SESSION_PAGINATION = 45;
+
 type DashboardStatistics = {
     streak: number,
     minutes: number,
@@ -63,7 +65,6 @@ const sumSessionTimeInMinutes = async (): AsyncResult<number> => {
 
 const getCurrentStreak = async (): AsyncResult<number> => {
   try {
-    const take = 45;
     let currentSkip = 0;
     let currentDate = new Date();
     let streak = 0;
@@ -80,7 +81,7 @@ const getCurrentStreak = async (): AsyncResult<number> => {
           }
         },
         skip: currentSkip,
-        take: take,
+        take: SESSION_PAGINATION,
         orderBy: {
           endTime: "desc",
         },
