@@ -56,8 +56,8 @@ const sumSessionTimeInMinutes = async (): AsyncResult<number> => {
       }
     });
 
-    const test = session.reduce((acc, ses) => acc + differenceInMinutes(ses.endTime, ses.startTime), 0);
-    return Result.ok(test);
+    const timeInMinutes = session.reduce((acc, ses) => acc + differenceInMinutes(ses.endTime, ses.startTime), 0);
+    return Result.ok(timeInMinutes);
   } catch (error) {
     return Result.err(error as Error);
   }
