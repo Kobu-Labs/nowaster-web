@@ -64,13 +64,13 @@ const sumSessionTimeInMinutes = async (): AsyncResult<number> => {
 };
 
 const getCurrentStreak = async (): AsyncResult<number> => {
-  try {
-    let currentSkip = 0;
-    let currentDate = new Date();
-    let streak = 0;
-    let sessions;
+  let currentSkip = 0;
+  let currentDate = new Date();
+  let streak = 0;
+  let sessions;
 
-    do {
+  do {
+    try {
       sessions = await client.scheduledEntity.findMany({
         select: {
           endTime: true,
@@ -86,24 +86,23 @@ const getCurrentStreak = async (): AsyncResult<number> => {
           endTime: "desc",
         },
       });
-            console.log("fetched:" + sessions)
+    } catch (error) {
+      return Result.err(error as Error);
+    }
 
-      for (const { endTime } of sessions) {
-        if (isSameDay(endTime, currentDate)) {
-          streak++;
-          currentDate = subDays(currentDate, 1);
-        } else if (isSameDay(endTime, addDays(currentDate, 1))) {
-          // noop - multiple sessions in one day
-        } else {
-          return Result.ok(streak);
-        }
+    for (const { endTime } of sessions) {
+      if (isSameDay(endTime, currentDate)) {
+        streak++;
+        currentDate = subDays(currentDate, 1);
+      } else if (isSameDay(endTime, addDays(currentDate, 1))) {
+        // noop - multiple sessions in one day
+      } else {
+        return Result.ok(streak);
       }
+    }
 
-      currentSkip++;
-    } while (sessions.length > 0);
+    currentSkip++;
+  } while (sessions.length > 0);
 
-    return Result.ok(streak);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+  return Result.ok(streak);
 };
