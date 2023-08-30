@@ -14,7 +14,7 @@ StatisticsController.get("/dashboard", async (_req, res) => {
   return handleOkResp(dashboardData.value, res);
 });
 
-StatisticsController.get("/calendar", async (_req, res) => {
+StatisticsController.get("/streak", async (_req, res) => {
   const dashboardData = await statisticsRepo.getStreakCalendarData();
 
   if (dashboardData.isErr) {
