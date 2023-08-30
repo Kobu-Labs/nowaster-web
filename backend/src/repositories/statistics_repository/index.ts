@@ -1,6 +1,9 @@
-import { getDashboardData } from "./dashboard"
-const statisticsRepo = {
-    getDashboardData
-}
+import { getDashboardData } from "./dashboard";
+import { getStreakCalendarData } from "./streak_calendar";
 
-export default statisticsRepo
+const statisticsRepo = {
+  getDashboardData,
+  getStreakCalendarData,
+};
+
+export default statisticsRepo;
