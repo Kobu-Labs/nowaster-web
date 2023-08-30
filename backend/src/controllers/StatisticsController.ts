@@ -6,7 +6,7 @@ export const StatisticsController = Router();
 
 
 StatisticsController.get("/dashboard", async (_req, res) => {
-  const dashboardData = await statisticsRepo.getDashboardData()
+  const dashboardData = await statisticsRepo.getDashboardData();
 
   if (dashboardData.isErr) {
     return handleResultErrorResp(500, res, dashboardData.error);
@@ -14,4 +14,11 @@ StatisticsController.get("/dashboard", async (_req, res) => {
   return handleOkResp(dashboardData.value, res);
 });
 
-//  TODO: calendar data
+StatisticsController.get("/calendar", async (_req, res) => {
+  const dashboardData = await statisticsRepo.getStreakCalendarData();
+
+  if (dashboardData.isErr) {
+    return handleResultErrorResp(500, res, dashboardData.error);
+  }
+  return handleOkResp(dashboardData.value, res);
+});
