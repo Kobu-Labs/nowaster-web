@@ -1,8 +1,5 @@
-import { buttonVariants } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils"
-import { ScheduledSession } from "@/validation/models";
 import { cva } from "class-variance-authority";
 import { addDays, isSameDay, subDays } from "date-fns";
 import { DayContent, DayContentProps } from "react-day-picker";
