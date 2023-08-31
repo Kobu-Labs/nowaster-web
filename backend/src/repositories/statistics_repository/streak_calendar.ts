@@ -11,7 +11,7 @@ export const getStreakCalendarData = async (): AsyncResult<Date[]> => {
     const result = await client.scheduledEntity.findMany({
       where: {
         endTime: {
-          lt: new Date(),
+          lte: new Date(),
           gt: subDays(new Date(), DAYS_AMOUNT),
         }
       },
