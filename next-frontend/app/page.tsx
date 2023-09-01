@@ -1,19 +1,15 @@
 "use client"
 
-import { Overview } from "@/components/overview-chart"
-import { Button } from "@/components/ui/button"
+import { Granularity, Overview } from "@/components/overview-chart"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { HistoryCard } from "@/stories/HistoryCard/HistoryCard"
-import { DateTime } from "luxon"
-import { AlignVerticalDistributeEnd, Calendar, Hourglass, PlusSquare } from "lucide-react"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { ScheduledSessionApi, StatisticsApi } from "@/api"
 import { KpiCard } from "@/components/KpiCard"
 import { StreakCalendar } from "@/stories/StreakCalendar/StreakCalendar"
 
-type Granularity = "today" | "week" | "month" | "year"
 export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sessions", "slider"],
@@ -79,7 +75,6 @@ export default function IndexPage() {
                     <SelectItem value="year">Past year</SelectItem>
                     <SelectItem value="month">Past month</SelectItem>
                     <SelectItem value="week">Past week</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -88,20 +83,6 @@ export default function IndexPage() {
           <CardContent className="pl-2">
             <Overview granularity={granularity} />
           </CardContent>
-        </Card>
-        <Card className="col-span-2">
-          {data.value.length === 0
-            ? <Button className="h-[120px] grow" variant="outline">
-              <div className="flex flex-col items-center gap-2">
-                <strong>No session yet</strong>
-                <PlusSquare />
-              </div>
-            </Button>
-            : data.value.map((session) => (
-              <HistoryCard session={session} hideBorder />
-
-            ))
-          }
         </Card>
         <div className="col-span-1">
           <StreakCalendar sessionsDates={streak.data.value} />
