@@ -55,13 +55,13 @@ export default function IndexPage() {
 
   return (
     <div className="p-8">
-      <h2 className="text-3xl font-bold mb-8 tracking-tight">Dashboard</h2>
+      <h2 className="mb-8 text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="flex gap-8 ">
         <KpiCard value={stats.data.value.session_count.toString()} title={"Total Sessions"} description={""}><AlignVerticalDistributeEnd /></KpiCard>
         <KpiCard value={stats.data.value.minutes.toString()} title={"Total Minutes Spent"} description={"Thats a plenty"}><Hourglass /> </KpiCard>
         <KpiCard value={stats.data.value.streak.toString()} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCard>
       </div>
-      <div className="grid mt-8 gap-8 md:grid-cols-2 lg:grid-cols-7">
+      <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-3">
           <CardHeader>
             <div className="flex justify-between">
@@ -80,7 +80,8 @@ export default function IndexPage() {
               </Select>
             </div>
           </CardHeader>
-          <CardContent className="pl-2">
+          {/* FIX: harcoded height should not be used here */}
+          <CardContent className="ml-2 h-[234px] w-full">
             <Overview granularity={granularity} />
           </CardContent>
         </Card>
