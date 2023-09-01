@@ -83,7 +83,7 @@ export function Overview(props: OverviewProps) {
     return <div>{data.error.message}</div>
   }
   return (
-    <ResponsiveContainer width="100%" height={500}>
+    <ResponsiveContainer>
       <BarChart data={preprocessData(props.granularity, data.value)}>
         <XAxis
           dataKey="granularity"
