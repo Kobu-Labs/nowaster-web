@@ -9,13 +9,15 @@ import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
 import { SessionTag } from "../SessionTag/SessionTag"
 
+type TagWithId = Tag & {id: string}
+
 type TagPickerProps = {
-  onTagSelected: (tag: string[]) => void
+  onTagSelected: (tag: TagWithId[]) => void
 }
 
 export const TagPicker: FC<TagPickerProps> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([])
+  const [selectedTags, setSelectedTags] = useState<TagWithId[]>([])
   const [searchTerm, setSearchTerm] = useState<string>("")
   const { data, isLoading, isError } = useQuery({
     queryKey: ["tags"],
@@ -42,7 +44,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
         >
           {selectedTags.length === 0
             ? "Select Tags"
-            : selectedTags.map((tag) => (<SessionTag value={tag} />))}
+            : selectedTags.map((tag) => (<SessionTag value={tag.label} />))}
           <div className="grow"></div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -77,7 +79,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
                     selectedTags.find(x => x === tag) ? "opacity-100" : "opacity-0"
                   )}
                 />
-                <SessionTag value={tag} />
+                <SessionTag value={tag.label} />
               </CommandItem>
             ))}
           </CommandGroup>
