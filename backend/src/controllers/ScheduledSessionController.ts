@@ -1,14 +1,19 @@
 import { Router } from "express";
-import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema, readManyScheduledSchema, updateScheduledSchema } from "../validation/scheduledSessionValidation";
+import { createScheduledSchema, deleteScheduledSchema,  readByIdScheduledSchema,  readManyScheduledSchema, updateScheduledSchema } from "../validation/scheduledSessionValidation";
 import scheduledSessionRepo from "../repositories/scheduled_entity";
 import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
 
 export const ScheduledController = Router();
+const SessionsController = Router();
+const CategoriesController = Router();
+
+ScheduledController.use("/sessions", SessionsController)
+
 
 
 // create new study session
-ScheduledController.post("/", validate({ body: createScheduledSchema }), async (req, res) => {
+SessionsController.post("/", validate({ body: createScheduledSchema }), async (req, res) => {
   const scheduledSessionEntity = await scheduledSessionRepo.create(req.body);
 
   if (scheduledSessionEntity.isErr) {
@@ -19,7 +24,7 @@ ScheduledController.post("/", validate({ body: createScheduledSchema }), async (
 
 
 // get users study sessions
-ScheduledController.get("/", validate({ query: readManyScheduledSchema }), async (req, res) => {
+SessionsController.get("/", validate({ query: readManyScheduledSchema }), async (req, res) => {
   const scheduledSessionEntities = await scheduledSessionRepo.read.many(req.query);
 
   if (scheduledSessionEntities.isErr) {
@@ -31,7 +36,7 @@ ScheduledController.get("/", validate({ query: readManyScheduledSchema }), async
 
 
 // get specific session
-ScheduledController.get("/:id", validate({ params: readByIdScheduledSchema }), async (req, res) => {
+SessionsController.get("/:id", validate({ params: readByIdScheduledSchema }), async (req, res) => {
   const scheduledSessionEntity = await scheduledSessionRepo.read.single(req.params);
 
   if (scheduledSessionEntity.isErr) {
@@ -42,7 +47,7 @@ ScheduledController.get("/:id", validate({ params: readByIdScheduledSchema }), a
 });
 
 // update study session
-ScheduledController.put("/", validate({ body: updateScheduledSchema }), async (req, res) => {
+SessionsController.put("/", validate({ body: updateScheduledSchema }), async (req, res) => {
   const updatedEntity = await scheduledSessionRepo.update(req.body);
 
   if (updatedEntity.isErr) {
@@ -53,7 +58,7 @@ ScheduledController.put("/", validate({ body: updateScheduledSchema }), async (r
 });
 
 // delete study session by id
-ScheduledController.delete("/", validate({ body: deleteScheduledSchema }), async (req, res) => {
+SessionsController.delete("/", validate({ body: deleteScheduledSchema }), async (req, res) => {
   const deletedEntity = await scheduledSessionRepo.remove.single(req.body);
 
   if (deletedEntity.isErr) {
