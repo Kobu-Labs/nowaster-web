@@ -1,18 +1,33 @@
+import { ScheduledSessionApi } from "@/api"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { useQuery } from "@tanstack/react-query"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
 
 type CategoryPickerProps = {
-  categories: string[]
   onCategorySelected: (category: string | null) => void
 }
 
 export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState<string | null>(null)
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["sessions", "slider"],
+    retry: false,
+    queryFn: async () => await ScheduledSessionApi.getCategories(),
+  });
+
+  if (isLoading || isError ) {
+    return <div >Something bad happenned</div>
+  }
+
+  if (data.isErr){
+    return <div>{data.error.message}</div>
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -24,7 +39,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           className="w-[200px] justify-between"
         >
           {value
-            ? props.categories.find((framework) => framework === value) || ""
+            ? data.value.find((category) => category === value) || ""
             : "Select category"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -38,7 +53,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
             </button>
           </CommandEmpty>
           <CommandGroup>
-            {props.categories.map((category) => (
+            {data.value.map((category) => (
               <CommandItem
                 key={category}
                 onSelect={(currentValue) => {
