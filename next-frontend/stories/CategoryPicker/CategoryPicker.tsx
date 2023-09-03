@@ -21,13 +21,14 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
     queryFn: async () => await ScheduledSessionApi.getCategories(),
   });
 
-  if (isLoading || isError ) {
+  if (isLoading || isError) {
     return <div >Something bad happenned</div>
   }
 
-  if (data.isErr){
+  if (data.isErr) {
     return <div>{data.error.message}</div>
   }
+  console.log(value)
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -38,19 +39,19 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           aria-expanded={isOpen}
           className="w-[200px] justify-between"
         >
-          {value
-            ? data.value.find((category) => category === value) || ""
-            : "Select category"}
+          {value || "Select category"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
           <CommandInput onValueChange={setValue} placeholder="Search categories" />
-          <CommandEmpty>
-            <button onClick={() => console.log("Creating " + value)}>
-              {"Create '" + value + "'"}
-            </button>
+          <CommandEmpty
+            onClick={() => {
+              props.onCategorySelected(value)
+              setIsOpen(false)
+            }}>
+            {"Create '" + value + "'"}
           </CommandEmpty>
           <CommandGroup>
             {data.value.map((category) => (

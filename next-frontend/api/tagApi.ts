@@ -4,7 +4,7 @@ import { Result } from "@badrap/result";
 import baseApi, { handleResponse } from "./baseApi";
 
 export const readMany = async (params?: ReadManyTagsRequest): Promise<Result<ReadManyTagsResponse>> => {
-  const { data } = await baseApi.post(
+  const { data } = await baseApi.get(
     "tags/",
     { params: { ...params } }
   );
