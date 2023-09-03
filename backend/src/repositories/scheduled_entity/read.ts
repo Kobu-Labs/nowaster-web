@@ -71,10 +71,30 @@ const single = async (params: ReadSingleScheduledParams): AsyncResult<ScheduledE
 
 };
 
+const getCategories = async (): AsyncResult<string[]> => {
+    try {
+        const categories = await client.scheduledEntity.findMany({
+            where: {},
+            select: {
+                category: true
+            },
+            distinct: [
+                "category"
+            ]
+        });
+
+        return Result.ok(categories.map(c => c.category));
+
+    } catch (error) {
+        return Result.err(error as Error);
+    }
+};
+
 
 const read = {
     single,
     many,
+    getCategories,
 };
 
 export default read;
