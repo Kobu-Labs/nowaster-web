@@ -9,7 +9,18 @@ const SessionsController = Router();
 const CategoriesController = Router();
 
 ScheduledController.use("/sessions", SessionsController)
+ScheduledController.use("/categories", CategoriesController)
 
+
+CategoriesController.get("/", async (_req, res) => {
+  const categories = await scheduledSessionRepo.read.getCategories();
+
+  if (categories.isErr) {
+    return handleResultErrorResp(500, res, categories.error);
+  }
+
+  return handleOkResp(categories.value, res);
+});
 
 
 // create new study session
