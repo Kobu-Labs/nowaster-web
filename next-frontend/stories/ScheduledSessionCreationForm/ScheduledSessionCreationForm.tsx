@@ -27,6 +27,7 @@ export function ScheduledSessionCreationForm() {
   })
 
   async function onSubmit(values: z.infer<typeof createScheduledSchema>) {
+    // TODO: make somehitng actually happen
     const result = await ScheduledSessionApi.create(values)
   }
 
@@ -42,7 +43,7 @@ export function ScheduledSessionCreationForm() {
                 <FormItem >
                   <FormLabel className="block">Category</FormLabel>
                   <FormControl>
-                    <CategoryPicker categories={["one", "two", "three"]} onCategorySelected={(category) => {
+                    <CategoryPicker onCategorySelected={(category) => {
                       if (category === null) {
                         form.resetField("category")
                       } else {
@@ -122,7 +123,6 @@ export function ScheduledSessionCreationForm() {
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <TagPicker
-                      tags={["one", "two", "three"]}
                       onTagSelected={(tags) => {
                         field.onChange(tags)
                       }}

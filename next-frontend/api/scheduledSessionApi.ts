@@ -12,6 +12,8 @@ import {
   createScheduledSessionResponseSchema,
   DeleteScheduledSessionResponse,
   deleteScheduledSessionResponseSchema,
+  GetCategoriesReponse,
+  getCategoriesResponseSchema,
   GetSessionResponse,
   getSessionResponseSchema,
   UpdateScheduledSessionResponse,
@@ -44,4 +46,9 @@ export const update = async (params: UpdateScheduledSessionRequest): Promise<Res
 export const deleteSingle = async (params: DeleteScheduledSessionRequest): Promise<Result<DeleteScheduledSessionResponse>> => {
   const { data } = await baseApi.delete(BASE_URL + "sessions/", { data: params });
   return await handleResponse(data, deleteScheduledSessionResponseSchema)
+}
+
+export const getCategories = async (): Promise<Result<GetCategoriesReponse>> => {
+  const { data } = await baseApi.get(BASE_URL + "/categories")
+  return await handleResponse(data, getCategoriesResponseSchema)
 }
