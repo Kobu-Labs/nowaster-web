@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { TagSchema } from "./tagValidation";
+import { HasID } from "./utils";
 
 export const createScheduledSchema = z.object({
   category: z.string().nonempty(),
@@ -7,7 +9,7 @@ export const createScheduledSchema = z.object({
     .nullable(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
-  tags: z.array(z.string()),
+  tags: z.array(TagSchema.merge(HasID)),
 });
 
 export const readByUserScheduledSchema = z.object({
