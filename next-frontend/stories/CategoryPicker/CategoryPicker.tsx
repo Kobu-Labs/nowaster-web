@@ -28,7 +28,6 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   if (data.isErr) {
     return <div>{data.error.message}</div>
   }
-  console.log(value)
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
