@@ -22,8 +22,6 @@ export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
       hour: selectedDateTime?.hour,
       minute: selectedDateTime?.minute,
     });
-    console.log(selectedDateTime?.toJSDate())
-    console.log(modifiedDate.toJSDate())
 
     if (modifiedDate.toJSDate().getTime() === selectedDateTime?.toJSDate().getTime()) {
       setSelectedDateTime(null)
