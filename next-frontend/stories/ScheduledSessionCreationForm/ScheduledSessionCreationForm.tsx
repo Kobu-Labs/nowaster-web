@@ -12,28 +12,37 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { createScheduledSchema } from "@/validation/requests/scheduledSession"
+import { createScheduledSchema, CreateScheduledSessionRequest } from "@/validation/requests/scheduledSession"
 import { CategoryPicker } from "../CategoryPicker/CategoryPicker"
 import { ScheduledSessionApi } from "@/api"
 import { DateTimePicker } from "../DateTimePicker/DateTimePicker"
 import { useForm } from "react-hook-form"
 import { TagPicker } from "../TagPicker/TagPicker"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 
+type ApiResult = Awaited<ReturnType<typeof ScheduledSessionApi.create>>;
 
-export function ScheduledSessionCreationForm() {
-  const form = useForm<z.infer<typeof createScheduledSchema>>({
+export const ScheduledSessionCreationForm = () => {
+  const [result, setResult] = useState<ApiResult | null>(null)
+  const form = useForm<CreateScheduledSessionRequest>({
     resolver: zodResolver(createScheduledSchema),
   })
 
-  async function onSubmit(values: z.infer<typeof createScheduledSchema>) {
-    // TODO: make somehitng actually happen
+  async function onSubmit(values: CreateScheduledSessionRequest) {
     const result = await ScheduledSessionApi.create(values)
+    setResult(result)
   }
 
   return (
-    <Card className="inline-flex">
-      <CardContent className="mt-3">
+    <Card >
+      {result && <CardHeader>
+        {result.isOk
+          ? <div className="text-[#adfa1d]">Session created succefully!</div>
+          : <div className="text-[#7d1715]">Session failed to be created: {result.error.message}</div>}
+      </CardHeader>}
+      <CardContent className="mt-3 ">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -59,6 +68,7 @@ export function ScheduledSessionCreationForm() {
             <FormField
               control={form.control}
               name="description"
+              defaultValue={null}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -116,6 +126,7 @@ export function ScheduledSessionCreationForm() {
             </div>
 
             <FormField
+              defaultValue={[]}
               name="tags"
               control={form.control}
               render={({ field }) => (
@@ -133,7 +144,7 @@ export function ScheduledSessionCreationForm() {
               )}
             />
 
-            <Button type="submit">Submit</Button>
+            <Button type="submit" className={cn(result && result.isErr && "bg-[#7d1715]")}>Submit</Button>
           </form>
         </Form>
       </CardContent>

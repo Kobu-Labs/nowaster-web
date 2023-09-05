@@ -12,6 +12,10 @@ export const siteConfig = {
     {
       title: "Login",
       href: "/login"
-    }
+    },
+    {
+      title: "New Session",
+      href: "/new"
+    },
   ],
 }
