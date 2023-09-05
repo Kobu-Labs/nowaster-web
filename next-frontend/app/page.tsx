@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query"
 import { ScheduledSessionApi, StatisticsApi } from "@/api"
 import { KpiCard } from "@/components/KpiCard"
 import { StreakCalendar } from "@/stories/StreakCalendar/StreakCalendar"
+import { OverviewAreaChart } from "@/components/overview-area-chart"
 
 export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
@@ -63,6 +64,7 @@ export default function IndexPage() {
       </div>
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-3">
+        {/* TODO: extract to its own component togerther with Overview */}
           <CardHeader>
             <div className="flex justify-between">
               <CardTitle>Past Activity Overview</CardTitle>
@@ -85,8 +87,8 @@ export default function IndexPage() {
             <Overview granularity={granularity} />
           </CardContent>
         </Card>
-        <div className="col-span-1">
-          <StreakCalendar sessionsDates={streak.data.value} />
+        <div className="col-span-4">
+            <OverviewAreaChart granularity="month" />
         </div>
       </div>
     </div>
