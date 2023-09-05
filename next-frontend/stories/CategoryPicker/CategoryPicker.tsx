@@ -47,6 +47,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
         <Command>
           <CommandInput onValueChange={setValue} placeholder="Search categories" />
           <CommandEmpty
+            className="cursor-pointer py-6 text-center text-sm"
             onClick={() => {
               props.onCategorySelected(value)
               setIsOpen(false)
