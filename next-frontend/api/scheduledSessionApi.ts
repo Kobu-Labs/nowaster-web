@@ -25,7 +25,7 @@ const BASE_URL = "scheduled/"
 
 export const create = async (params: CreateScheduledSessionRequest): Promise<Result<CreateScheduledSessionResponse>> => {
   const { data } = await baseApi.post(
-    BASE_URL,
+    BASE_URL + "sessions/",
     params
   );
   return await handleResponse(data, createScheduledSessionResponseSchema)
