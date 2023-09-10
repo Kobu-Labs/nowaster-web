@@ -29,7 +29,6 @@ export default function IndexPage() {
     queryFn: async () => await StatisticsApi.getDashboardData(),
   });
 
-  const [granularity, setGranularity] = useState<Granularity>("year")
 
   if (isLoading || isError) {
     return <div >Something bad happenned</div>
@@ -63,32 +62,9 @@ export default function IndexPage() {
         <KpiCard value={stats.data.value.streak.toString()} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCard>
       </div>
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-3">
-        {/* TODO: extract to its own component togerther with Overview */}
-          <CardHeader>
-            <div className="flex justify-between">
-              <CardTitle>Past Activity Overview</CardTitle>
-              <Select onValueChange={(a: Granularity) => { setGranularity(a) }}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select a timeframe" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="year">Past year</SelectItem>
-                    <SelectItem value="month">Past month</SelectItem>
-                    <SelectItem value="week">Past week</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          {/* FIX: harcoded height should not be used here */}
-          <CardContent className="ml-2 h-[234px] w-full">
-            <Overview granularity={granularity} />
-          </CardContent>
-        </Card>
+        <Overview granularity="month" />
         <div className="col-span-4">
-            <OverviewAreaChart granularity="week" />
+          <OverviewAreaChart granularity="week" />
         </div>
       </div>
     </div>
