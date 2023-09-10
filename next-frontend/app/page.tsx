@@ -88,7 +88,7 @@ export default function IndexPage() {
           </CardContent>
         </Card>
         <div className="col-span-4">
-            <OverviewAreaChart granularity="month" />
+            <OverviewAreaChart granularity="week" />
         </div>
       </div>
     </div>
