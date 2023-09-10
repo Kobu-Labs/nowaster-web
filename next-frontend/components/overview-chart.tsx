@@ -3,13 +3,20 @@
 import { ScheduledSessionApi } from "@/api"
 import { ScheduledSession } from "@/validation/models"
 import { useQuery } from "@tanstack/react-query"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { addDays, addMonths, addSeconds, differenceInMinutes, format, getDate, getDay, getDaysInMonth, getMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { useState } from "react"
 
-export type Granularity = "week" | "month" | "year"
+export const Granularity = {
+  week: "Past week",
+  month: "Past month",
+  year: "Past year"
+} as const
 
 const dateProcessors: {
-  [K in Granularity]: {
+  [K in keyof typeof Granularity]: {
     amount: () => number,
     key: (value: Date) => string,
     start: Date,
@@ -37,10 +44,10 @@ const dateProcessors: {
 }
 
 type OverviewProps = {
-  granularity: Granularity,
+  granularity: keyof typeof Granularity,
 }
 
-const preprocessData = (granularity: Granularity, data: (ScheduledSession & { id: string })[]): { granularity: string, val: number }[] => {
+const preprocessData = (granularity: keyof typeof Granularity, data: (ScheduledSession & { id: string })[]): { granularity: string, val: number }[] => {
   const processor = dateProcessors[granularity]
   let processed = data.reduce((value: { [month: string]: number }, item) => {
     const key = processor.key(item.endTime)
@@ -74,6 +81,7 @@ export function Overview(props: OverviewProps) {
     retry: false,
     queryFn: async () => await ScheduledSessionApi.getSessions(),
   });
+  const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.granularity)
 
   if (isLoading || isError) {
     return <div >Something bad happenned</div>
@@ -82,25 +90,49 @@ export function Overview(props: OverviewProps) {
   if (data.isErr) {
     return <div>{data.error.message}</div>
   }
+
   return (
-    <ResponsiveContainer>
-      <BarChart data={preprocessData(props.granularity, data.value)}>
-        <XAxis
-          dataKey="granularity"
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-        />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value: number) => format(addSeconds(new Date(0), value * 60), "hh:mm:ss")}
-        />
-        <Bar dataKey="val" fill="#e879f9" radius={[4, 4, 0, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
+    <Card className="col-span-3">
+      <CardHeader>
+        <div className="flex justify-between">
+          <CardTitle>Past Activity Overview</CardTitle>
+          <Select onValueChange={(a: keyof typeof Granularity) => { setGranularity(a) }}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={Granularity[granularity]} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup defaultChecked>
+                {/* TODO: minor UX issue: currently selected item doesnt have its checkmakr */}
+                {Object.entries(Granularity).map(([k, v]) =>
+                  <SelectItem key={k}  disabled={k === granularity} value={k}>{v}</SelectItem>
+                )}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      {/* FIX: harcoded height should not be used here */}
+      <CardContent className="ml-2 h-[234px] w-full">
+        <ResponsiveContainer>
+          <BarChart data={preprocessData(granularity, data.value)}>
+            <XAxis
+              dataKey="granularity"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value: number) => format(addSeconds(new Date(0), value * 60), "hh:mm:ss")}
+            />
+            <Bar dataKey="val" fill="#e879f9" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   )
 }
