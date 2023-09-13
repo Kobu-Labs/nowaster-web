@@ -10,5 +10,5 @@ const tagRepo = {
   update
 };
 
-export default tagRepo
+export default tagRepo;
 

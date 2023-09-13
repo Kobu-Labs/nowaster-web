@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { ScheduledSessionApi } from "@/api"
-import { ScheduledSession } from "@/validation/models"
-import { useQuery } from "@tanstack/react-query"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { addDays, addMonths, addSeconds, differenceInMinutes, format, getDate, getDay, getDaysInMonth, getMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { useState } from "react"
+import { ScheduledSessionApi } from "@/api";
+import { ScheduledSession } from "@/validation/models";
+import { useQuery } from "@tanstack/react-query";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { addDays, addMonths, addSeconds, differenceInMinutes, format, getDate, getDay, getDaysInMonth, getMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useState } from "react";
 
 export const Granularity = {
   week: "Past week",
   month: "Past month",
   year: "Past year"
-} as const
+} as const;
 
 const dateProcessors: {
   [K in keyof typeof Granularity]: {
@@ -41,39 +41,39 @@ const dateProcessors: {
     amount: () => 12,
     key: (value: Date) => (getMonth(value) + 1).toString()
   }
-}
+};
 
 type OverviewProps = {
   granularity: keyof typeof Granularity,
 }
 
 const preprocessData = (granularity: keyof typeof Granularity, data: (ScheduledSession & { id: string })[]): { granularity: string, val: number }[] => {
-  const processor = dateProcessors[granularity]
+  const processor = dateProcessors[granularity];
   let processed = data.reduce((value: { [month: string]: number }, item) => {
-    const key = processor.key(item.endTime)
+    const key = processor.key(item.endTime);
     if (!value[key]) {
-      value[key] = 0
+      value[key] = 0;
     }
 
-    value[key] += differenceInMinutes(item.endTime, item.startTime)
-    return value
-  }, {})
+    value[key] += differenceInMinutes(item.endTime, item.startTime);
+    return value;
+  }, {});
 
 
   let i = 0;
-  let current = processor.start
+  let current = processor.start;
   while (i < processor.amount()) {
     i++;
     if (!processed[processor.key(current)]) {
-      processed[processor.key(current)] = 0
+      processed[processor.key(current)] = 0;
     }
-    current = processor.next(current)
+    current = processor.next(current);
   }
 
   return Object.entries(processed).map(value => {
-    return { granularity: value[0], val: value[1] }
-  })
-}
+    return { granularity: value[0], val: value[1] };
+  });
+};
 
 export function Overview(props: OverviewProps) {
   const { data, isLoading, isError } = useQuery({
@@ -81,14 +81,14 @@ export function Overview(props: OverviewProps) {
     retry: false,
     queryFn: async () => await ScheduledSessionApi.getSessions(),
   });
-  const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.granularity)
+  const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.granularity);
 
   if (isLoading || isError) {
-    return <div >Something bad happenned</div>
+    return <div >Something bad happenned</div>;
   }
 
   if (data.isErr) {
-    return <div>{data.error.message}</div>
+    return <div>{data.error.message}</div>;
   }
 
   return (
@@ -96,7 +96,7 @@ export function Overview(props: OverviewProps) {
       <CardHeader>
         <div className="flex justify-between">
           <CardTitle>Past Activity Overview</CardTitle>
-          <Select onValueChange={(a: keyof typeof Granularity) => { setGranularity(a) }}>
+          <Select onValueChange={(a: keyof typeof Granularity) => { setGranularity(a); }}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={Granularity[granularity]} />
             </SelectTrigger>
@@ -134,5 +134,5 @@ export function Overview(props: OverviewProps) {
         </ResponsiveContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

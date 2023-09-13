@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { subDays } from 'date-fns';
-import { StreakCalendar } from './StreakCalendar';
+import type { Meta, StoryObj } from "@storybook/react";
+import { subDays } from "date-fns";
+import { StreakCalendar } from "./StreakCalendar";
 
 const meta = {
-  title: 'StreakCalendar',
+  title: "StreakCalendar",
   component: StreakCalendar,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof StreakCalendar>;
 
 
@@ -33,11 +33,11 @@ export const GuaranteedStreaks: Story = {
       new Date(2023, 7, 5, 0, 30),
     ]
   }
-}
+};
 
 
 export const RandomDates: Story = {
   args: {
     sessionsDates: new Array(70).fill(0).map(_x => randomDate(subDays(new Date(), 100), new Date()))
   }
-}
+};

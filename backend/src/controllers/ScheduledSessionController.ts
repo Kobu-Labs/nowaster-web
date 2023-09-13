@@ -8,8 +8,8 @@ export const ScheduledController = Router();
 const SessionsController = Router();
 const CategoriesController = Router();
 
-ScheduledController.use("/sessions", SessionsController)
-ScheduledController.use("/categories", CategoriesController)
+ScheduledController.use("/sessions", SessionsController);
+ScheduledController.use("/categories", CategoriesController);
 
 
 CategoriesController.get("/", async (_req, res) => {

@@ -1,7 +1,7 @@
-import Link from "next/link"
+import Link from "next/link";
 
-import { siteConfig } from "@/config/site"
-import { MainNav } from "@/components/main-nav"
+import { siteConfig } from "@/config/site";
+import { MainNav } from "@/components/main-nav";
 
 export function SiteHeader() {
   return (
@@ -10,5 +10,5 @@ export function SiteHeader() {
         <MainNav items={siteConfig.mainNav} />
       </div>
     </header>
-  )
+  );
 }

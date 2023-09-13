@@ -1,7 +1,7 @@
 
 
-import type { Meta, StoryObj } from '@storybook/react';
-import { CategoryPicker } from './CategoryPicker';
+import type { Meta, StoryObj } from "@storybook/react";
+import { CategoryPicker } from "./CategoryPicker";
 
 const meta = {
   title: "CategoryPicker",
@@ -22,10 +22,10 @@ export const Basic: Story = {
       "soccer",
     ]
   }
-}
+};
 export const NoCategories: Story = {
   args: {
     categories: [
     ]
   }
-}
+};

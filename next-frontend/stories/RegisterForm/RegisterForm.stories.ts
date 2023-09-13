@@ -1,11 +1,11 @@
 
-import type { Meta, StoryObj } from '@storybook/react';
-import { RegisterForm } from './RegisterForm';
+import type { Meta, StoryObj } from "@storybook/react";
+import { RegisterForm } from "./RegisterForm";
 
 const meta = {
-  title: 'RegisterForm',
+  title: "RegisterForm",
   component: RegisterForm,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof RegisterForm>;
 
 export default meta;
@@ -13,4 +13,4 @@ type Story = StoryObj<typeof meta>;
 
 
 export const MainRegisterForm: Story = {
-}
+};

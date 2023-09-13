@@ -9,8 +9,8 @@ export type DeleteScheduledSessionResponse = z.infer<typeof deleteScheduledSessi
 export type GetCategoriesReponse = z.infer<typeof getCategoriesResponseSchema>;
 
 
-export const createScheduledSessionResponseSchema = ScheduledSessionSchema.merge(HasID)
-export const getSessionResponseSchema = z.array(ScheduledSessionSchema.merge(HasID))
-export const updateScheduledSessionResponseSchema = ScheduledSessionSchema.merge(HasID)
-export const deleteScheduledSessionResponseSchema = ScheduledSessionSchema.merge(HasID)
-export const getCategoriesResponseSchema = z.array(z.string())
+export const createScheduledSessionResponseSchema = ScheduledSessionSchema.merge(HasID);
+export const getSessionResponseSchema = z.array(ScheduledSessionSchema.merge(HasID));
+export const updateScheduledSessionResponseSchema = ScheduledSessionSchema.merge(HasID);
+export const deleteScheduledSessionResponseSchema = ScheduledSessionSchema.merge(HasID);
+export const getCategoriesResponseSchema = z.array(z.string());

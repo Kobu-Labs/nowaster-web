@@ -1,4 +1,4 @@
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { cva } from "class-variance-authority";
 import { addDays, isSameDay, subDays } from "date-fns";
@@ -17,7 +17,7 @@ export const dayCellVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
 type StreakCalendarProps = {
   sessionsDates: Date[]
@@ -26,9 +26,9 @@ type StreakCalendarProps = {
 export const StreakCalendar = ({ sessionsDates: sessions }: StreakCalendarProps) => {
   function StreakCalculator(props: DayContentProps) {
     // TODO: not very performance friendly
-    const isActiveDay = sessions.some(x => isSameDay(x, props.date))
-    const isNextDayActive = sessions.some(x => isSameDay(addDays(props.date, 1), x))
-    const isPreviousDayActive = sessions.some(x => isSameDay(subDays(props.date, 1), x))
+    const isActiveDay = sessions.some(x => isSameDay(x, props.date));
+    const isNextDayActive = sessions.some(x => isSameDay(addDays(props.date, 1), x));
+    const isPreviousDayActive = sessions.some(x => isSameDay(subDays(props.date, 1), x));
 
     return (
       <div className={dayCellVariants({ variant: isActiveDay ? "active" : "default" })}>
@@ -49,5 +49,5 @@ export const StreakCalendar = ({ sessionsDates: sessions }: StreakCalendarProps)
           }} />
       </CardContent>
     </Card>
-  )
-}
+  );
+};

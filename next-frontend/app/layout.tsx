@@ -1,9 +1,9 @@
-import "@/styles/globals.css"
-import { fontSans } from "@/lib/fonts"
-import { cn } from "@/lib/utils"
-import { SiteHeader } from "@/components/site-header"
-import { ThemeProvider } from "@/components/theme-provider"
-import { ReactQueryProvider } from "./ReactQueryProvider"
+import "@/styles/globals.css";
+import { fontSans } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
+import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ReactQueryProvider } from "./ReactQueryProvider";
 
 
 interface RootLayoutProps {
@@ -31,5 +31,5 @@ export default function RootLayout({ children }: RootLayoutProps) {
         </body>
       </html>
     </ReactQueryProvider>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { HistoryCard } from './HistoryCard';
+import type { Meta, StoryObj } from "@storybook/react";
+import { HistoryCard } from "./HistoryCard";
 
 const meta = {
-  title: 'HistoryCard',
+  title: "HistoryCard",
   component: HistoryCard,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof HistoryCard>;
 
 export default meta;
@@ -22,7 +22,7 @@ export const TwoHours: Story = {
       description: "Working on the project",
     }
   }
-}
+};
 
 export const NinetyMinutes: Story = {
   args: {
@@ -35,7 +35,7 @@ export const NinetyMinutes: Story = {
       description: "Working on the project",
     }
   }
-}
+};
 
 
 export const HalfHour: Story = {
@@ -49,7 +49,7 @@ export const HalfHour: Story = {
       description: "Working on the project",
     }
   }
-}
+};
 
 
 export const NineMinutesNineSeconds: Story = {
@@ -63,5 +63,5 @@ export const NineMinutesNineSeconds: Story = {
       description: "Working on the project",
     }
   }
-}
+};
 
