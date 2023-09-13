@@ -1,12 +1,12 @@
-"use client"
-import { ScheduledSessionCreationForm } from "@/stories/ScheduledSessionCreationForm/ScheduledSessionCreationForm"
+"use client";
+import { ScheduledSessionCreationForm } from "@/stories/ScheduledSessionCreationForm/ScheduledSessionCreationForm";
 
 const NewSessionPage = () => {
   return (
-    <div className="flex justify-center mt-8">
+    <div className="mt-8 flex justify-center">
       <ScheduledSessionCreationForm />
     </div>
-  )
+  );
 
-}
-export default NewSessionPage
+};
+export default NewSessionPage;

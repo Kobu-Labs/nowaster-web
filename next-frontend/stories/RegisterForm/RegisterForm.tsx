@@ -1,8 +1,8 @@
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,20 +10,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useForm } from "react-hook-form"
-import { Card, CardContent } from "@/components/ui/card"
-import { registrationSchema } from "@/validation/registerForm"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { Card, CardContent } from "@/components/ui/card";
+import { registrationSchema } from "@/validation/registerForm";
 
 
 export const RegisterForm = () => {
   const form = useForm<z.infer<typeof registrationSchema>>({
     resolver: zodResolver(registrationSchema),
-  })
+  });
 
   function onSubmit(values: z.infer<typeof registrationSchema>) {
-    console.log(values)
+    console.log(values);
   }
 
   return (
@@ -75,5 +75,5 @@ export const RegisterForm = () => {
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

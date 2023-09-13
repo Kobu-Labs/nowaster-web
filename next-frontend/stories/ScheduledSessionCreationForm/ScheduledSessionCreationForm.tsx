@@ -1,8 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { Button } from "@/components/ui/button"
-import { ArrowBigRight } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { ArrowBigRight } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -10,29 +10,29 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { createScheduledSchema, CreateScheduledSessionRequest } from "@/validation/requests/scheduledSession"
-import { CategoryPicker } from "../CategoryPicker/CategoryPicker"
-import { ScheduledSessionApi } from "@/api"
-import { DateTimePicker } from "../DateTimePicker/DateTimePicker"
-import { useForm } from "react-hook-form"
-import { TagPicker } from "../TagPicker/TagPicker"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { useState } from "react"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { createScheduledSchema, CreateScheduledSessionRequest } from "@/validation/requests/scheduledSession";
+import { CategoryPicker } from "../CategoryPicker/CategoryPicker";
+import { ScheduledSessionApi } from "@/api";
+import { DateTimePicker } from "../DateTimePicker/DateTimePicker";
+import { useForm } from "react-hook-form";
+import { TagPicker } from "../TagPicker/TagPicker";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 type ApiResult = Awaited<ReturnType<typeof ScheduledSessionApi.create>>;
 
 export const ScheduledSessionCreationForm = () => {
-  const [result, setResult] = useState<ApiResult | null>(null)
+  const [result, setResult] = useState<ApiResult | null>(null);
   const form = useForm<CreateScheduledSessionRequest>({
     resolver: zodResolver(createScheduledSchema),
-  })
+  });
 
   async function onSubmit(values: CreateScheduledSessionRequest) {
-    const result = await ScheduledSessionApi.create(values)
-    setResult(result)
+    const result = await ScheduledSessionApi.create(values);
+    setResult(result);
   }
 
   return (
@@ -54,9 +54,9 @@ export const ScheduledSessionCreationForm = () => {
                   <FormControl>
                     <CategoryPicker onCategorySelected={(category) => {
                       if (category === null) {
-                        form.resetField("category")
+                        form.resetField("category");
                       } else {
-                        field.onChange(category)
+                        field.onChange(category);
                       }
                     }} />
                   </FormControl>
@@ -90,9 +90,9 @@ export const ScheduledSessionCreationForm = () => {
                     <FormControl>
                       <DateTimePicker onDateSelected={(date) => {
                         if (date === null) {
-                          form.resetField("startTime")
+                          form.resetField("startTime");
                         } else {
-                          field.onChange(date)
+                          field.onChange(date);
                         }
                       }}></DateTimePicker>
                     </FormControl>
@@ -112,9 +112,9 @@ export const ScheduledSessionCreationForm = () => {
                     <FormControl>
                       <DateTimePicker onDateSelected={(date) => {
                         if (date === null) {
-                          form.resetField("endTime")
+                          form.resetField("endTime");
                         } else {
-                          field.onChange(date)
+                          field.onChange(date);
                         }
                       }}
                       />
@@ -135,7 +135,7 @@ export const ScheduledSessionCreationForm = () => {
                   <FormControl>
                     <TagPicker
                       onTagSelected={(tags) => {
-                        field.onChange(tags)
+                        field.onChange(tags);
                       }}
                     />
                   </FormControl>
@@ -149,5 +149,5 @@ export const ScheduledSessionCreationForm = () => {
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

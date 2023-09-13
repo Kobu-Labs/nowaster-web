@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type KpiProps = {
   value: string,
@@ -9,7 +9,7 @@ type KpiProps = {
 
 export const KpiCard = (props: KpiProps) => {
   return (
-    <Card className="hover:bg-accent hover:text-accent-foreground group grow hover:cursor-pointer">
+    <Card className="group grow hover:cursor-pointer hover:bg-accent hover:text-accent-foreground">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">
           {props.title}
@@ -22,9 +22,9 @@ export const KpiCard = (props: KpiProps) => {
         <div className={"text-2xl font-bold group-hover:scale-y-125 group-hover:text-green-400 group-hover:transition"} >
           {props.value}
         </div>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {props.description}
         </p>
       </CardContent>
-    </Card>)
-}
+    </Card>);
+};

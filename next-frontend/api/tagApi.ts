@@ -8,7 +8,7 @@ export const readMany = async (params?: ReadManyTagsRequest): Promise<Result<Rea
     "tags/",
     { params: { ...params } }
   );
-  return await handleResponse(data, readManyTagsResponseSchema)
+  return await handleResponse(data, readManyTagsResponseSchema);
 };
 
 export const create = async (params: CreateTagRequest): Promise<Result<CreateTagResponse>> => {

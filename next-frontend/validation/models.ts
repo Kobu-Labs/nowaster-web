@@ -3,7 +3,7 @@ import { HasID } from "./utils";
 
 export const TagSchema = z.object({
   label: z.string()
-})
+});
 
 export type Tag = z.infer<typeof TagSchema>
 

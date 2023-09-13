@@ -1,22 +1,22 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScheduledSession } from "@/validation/models"
-import { differenceInMilliseconds } from "date-fns"
-import { FC } from "react"
-import { SessionTag } from "../SessionTag/SessionTag"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScheduledSession } from "@/validation/models";
+import { differenceInMilliseconds } from "date-fns";
+import { FC } from "react";
+import { SessionTag } from "../SessionTag/SessionTag";
 
 
 const formatTimeUnit = (unit: number): string => {
-  return (unit < 10 ? "0" : "") + unit.toString()
-}
+  return (unit < 10 ? "0" : "") + unit.toString();
+};
 
 const formatTimeDiff = (startTime: Date, endTime: Date): string => {
-  const secondsRaw = differenceInMilliseconds(endTime, startTime) / 1000
-  const hours = Math.floor(secondsRaw / 3600)
-  const minutes = Math.floor(secondsRaw / 60) % 60
-  const seconds = Math.floor(secondsRaw % 60)
+  const secondsRaw = differenceInMilliseconds(endTime, startTime) / 1000;
+  const hours = Math.floor(secondsRaw / 3600);
+  const minutes = Math.floor(secondsRaw / 60) % 60;
+  const seconds = Math.floor(secondsRaw % 60);
 
-  return `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}:${formatTimeUnit(seconds)}`
-}
+  return `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}:${formatTimeUnit(seconds)}`;
+};
 
 type HistoryCardProps = {
   session: ScheduledSession,
@@ -33,7 +33,7 @@ export const HistoryCard: FC<HistoryCardProps> = ({ session, hideBorder }) => {
       </CardHeader>
       <CardContent className="flex grow-0">
         <div>
-          <p className="text-muted-foreground text-sm">{session.description}</p>
+          <p className="text-sm text-muted-foreground">{session.description}</p>
           <div className="mt-1 flex" >
             {session.tags.map((val) => <SessionTag key={val.id} value={val.label}></SessionTag>)}
           </div>
@@ -42,5 +42,5 @@ export const HistoryCard: FC<HistoryCardProps> = ({ session, hideBorder }) => {
         <div className="ml-4 font-medium">{formatTimeDiff(session.startTime, session.endTime)}</div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

@@ -1,25 +1,25 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const zeroPad = (timeUnit: number) : string => {
   if (timeUnit === 0){
-    return "00"
+    return "00";
   }
 
   if (timeUnit <= 9){
-    return `0${timeUnit}`
+    return `0${timeUnit}`;
   }
 
-  return timeUnit.toString()
-}
+  return timeUnit.toString();
+};
 
 export const formatTime = (minutesTotal: number) => {
-  const hours = Math.floor(minutesTotal / 60)
-  const minutes = (minutesTotal % 60)
+  const hours = Math.floor(minutesTotal / 60);
+  const minutes = (minutesTotal % 60);
 
-  return `${zeroPad(hours)}:${zeroPad(minutes)}`
-}
+  return `${zeroPad(hours)}:${zeroPad(minutes)}`;
+};

@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { SessionTag } from './SessionTag';
+import type { Meta, StoryObj } from "@storybook/react";
+import { SessionTag } from "./SessionTag";
 
 const meta = {
-  title: 'SessionTag',
+  title: "SessionTag",
   component: SessionTag,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof SessionTag>;
 
 
@@ -17,4 +17,4 @@ export const SimpleSessionTag: Story = {
     color:"blue",
     value:"testing"
   }
-}
+};

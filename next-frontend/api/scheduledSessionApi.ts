@@ -5,7 +5,7 @@ import {
   GetSessionsRequest,
   UpdateScheduledSessionRequest,
   DeleteScheduledSessionRequest,
-} from "@/validation/requests/scheduledSession"
+} from "@/validation/requests/scheduledSession";
 
 import {
   CreateScheduledSessionResponse,
@@ -19,36 +19,36 @@ import {
   UpdateScheduledSessionResponse,
   updateScheduledSessionResponseSchema,
 } from "@/validation/responses/scheduledSession";
-import { Result } from "@badrap/result"
+import { Result } from "@badrap/result";
 
-const BASE_URL = "scheduled/"
+const BASE_URL = "scheduled/";
 
 export const create = async (params: CreateScheduledSessionRequest): Promise<Result<CreateScheduledSessionResponse>> => {
   const { data } = await baseApi.post(
     BASE_URL + "sessions/",
     params
   );
-  return await handleResponse(data, createScheduledSessionResponseSchema)
+  return await handleResponse(data, createScheduledSessionResponseSchema);
 };
 
 export const getSessions = async (params?: GetSessionsRequest): Promise<Result<GetSessionResponse>> => {
   const { data } = await baseApi.get(
     BASE_URL + "sessions/", { params: { ...params } }
   );
-  return await handleResponse(data, getSessionResponseSchema)
+  return await handleResponse(data, getSessionResponseSchema);
 };
 
 export const update = async (params: UpdateScheduledSessionRequest): Promise<Result<UpdateScheduledSessionResponse>> => {
-  const { data } = await baseApi.put(BASE_URL + "sessions/", { ...params })
-  return await handleResponse(data, updateScheduledSessionResponseSchema)
-}
+  const { data } = await baseApi.put(BASE_URL + "sessions/", { ...params });
+  return await handleResponse(data, updateScheduledSessionResponseSchema);
+};
 
 export const deleteSingle = async (params: DeleteScheduledSessionRequest): Promise<Result<DeleteScheduledSessionResponse>> => {
   const { data } = await baseApi.delete(BASE_URL + "sessions/", { data: params });
-  return await handleResponse(data, deleteScheduledSessionResponseSchema)
-}
+  return await handleResponse(data, deleteScheduledSessionResponseSchema);
+};
 
 export const getCategories = async (): Promise<Result<GetCategoriesReponse>> => {
-  const { data } = await baseApi.get(BASE_URL + "/categories")
-  return await handleResponse(data, getCategoriesResponseSchema)
-}
+  const { data } = await baseApi.get(BASE_URL + "/categories");
+  return await handleResponse(data, getCategoriesResponseSchema);
+};

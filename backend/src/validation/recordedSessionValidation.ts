@@ -10,8 +10,8 @@ export const createRecordedSchema = z.object({
 });
 
 export const readManyRecordedSchema = z.object({
-    limit : z.coerce.number().optional()
-})
+  limit : z.coerce.number().optional()
+});
 
 export const readByIdRecordedSchema = z.object({
   id: z.string().uuid(),

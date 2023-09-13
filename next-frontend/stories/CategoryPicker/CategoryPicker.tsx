@@ -1,19 +1,19 @@
-import { ScheduledSessionApi } from "@/api"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { useQuery } from "@tanstack/react-query"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { FC, useState } from "react"
+import { ScheduledSessionApi } from "@/api";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { FC, useState } from "react";
 
 type CategoryPickerProps = {
   onCategorySelected: (category: string | null) => void
 }
 
 export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [value, setValue] = useState<string | null>(null)
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [value, setValue] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sessions", "slider"],
@@ -22,11 +22,11 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   });
 
   if (isLoading || isError) {
-    return <div >Something bad happenned</div>
+    return <div >Something bad happenned</div>;
   }
 
   if (data.isErr) {
-    return <div>{data.error.message}</div>
+    return <div>{data.error.message}</div>;
   }
 
   return (
@@ -48,8 +48,8 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           <CommandEmpty
             className="cursor-pointer py-6 text-center text-sm"
             onClick={() => {
-              props.onCategorySelected(value)
-              setIsOpen(false)
+              props.onCategorySelected(value);
+              setIsOpen(false);
             }}>
             {"Create '" + value + "'"}
           </CommandEmpty>
@@ -58,9 +58,9 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
               <CommandItem
                 key={category}
                 onSelect={(currentValue) => {
-                  setValue(currentValue === value ? null : currentValue)
-                  props.onCategorySelected(currentValue === value ? null : currentValue)
-                  setIsOpen(false)
+                  setValue(currentValue === value ? null : currentValue);
+                  props.onCategorySelected(currentValue === value ? null : currentValue);
+                  setIsOpen(false);
                 }}
               >
                 <Check
@@ -76,5 +76,5 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
         </Command>
       </PopoverContent>
     </Popover>
-  )
-}
+  );
+};

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { Granularity, Overview } from "@/components/overview-chart"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { ScheduledSessionApi, StatisticsApi } from "@/api"
-import { KpiCard } from "@/components/KpiCard"
-import { StreakCalendar } from "@/stories/StreakCalendar/StreakCalendar"
-import { OverviewAreaChart } from "@/components/overview-area-chart"
+import { Granularity, Overview } from "@/components/overview-chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ScheduledSessionApi, StatisticsApi } from "@/api";
+import { KpiCard } from "@/components/KpiCard";
+import { StreakCalendar } from "@/stories/StreakCalendar/StreakCalendar";
+import { OverviewAreaChart } from "@/components/overview-area-chart";
 
 export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
@@ -31,26 +31,26 @@ export default function IndexPage() {
 
 
   if (isLoading || isError) {
-    return <div >Something bad happenned</div>
+    return <div >Something bad happenned</div>;
   }
 
   if (data.isErr) {
-    return <div>{data.error.message}</div>
+    return <div>{data.error.message}</div>;
   }
   if (streak.isLoading || streak.isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (streak.data.isErr) {
-    return <div>{streak.data.error.message}</div>
+    return <div>{streak.data.error.message}</div>;
   }
 
   if (stats.isLoading || stats.isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (stats.data.isErr) {
-    return <div>{stats.data.error.message}</div>
+    return <div>{stats.data.error.message}</div>;
   }
 
   return (
@@ -68,5 +68,5 @@ export default function IndexPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
