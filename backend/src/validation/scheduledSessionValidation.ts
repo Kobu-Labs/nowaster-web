@@ -21,7 +21,14 @@ export const readByIdScheduledSchema = z.object({
 });
 
 export const readManyScheduledSchema = z.object({
-  limit: z.coerce.number().optional()
+  limit: z.coerce.number().optional(),
+  fromStartTime: z.coerce.date().optional(),
+  toStartTime: z.coerce.date().optional(),
+  fromEndTime: z.coerce.date().optional(),
+  toEndTime: z.coerce.date().optional(),
+  category: z.string().optional(),
+  /* TODO: Allow for multiple tags being passed here*/
+  tags: z.string().optional()
 });
 
 export const updateScheduledSchema = z.object({
