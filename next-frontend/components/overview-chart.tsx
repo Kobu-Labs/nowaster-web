@@ -77,7 +77,7 @@ const preprocessData = (granularity: keyof typeof Granularity, data: (ScheduledS
 
 export function Overview(props: OverviewProps) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["sessions"],
+    queryKey: ["sessions", "bar-chart"],
     retry: false,
     queryFn: async () => await ScheduledSessionApi.getSessions(),
   });
