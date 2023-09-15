@@ -34,7 +34,7 @@ const many = async (params: z.infer<typeof readManyScheduledSchema>): AsyncResul
           gte: params.fromEndTime,
           lte: params.toEndTime,
         }
-      }
+      },
     });
 
     if (!scheduledEntity) {
