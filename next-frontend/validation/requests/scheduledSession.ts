@@ -11,7 +11,9 @@ export type DeleteScheduledSessionRequest = z.infer<typeof deleteScheduledSchema
 export const createScheduledSchema = ScheduledSessionSchema;
 
 export const readByUserScheduledSchema = z.object({
-  limit: z.coerce.number().optional()
+  limit: z.coerce.number().optional(),
+  fromDate: z.coerce.date().optional(),
+  toDate: z.coerce.date().optional(),
 });
 
 export const updateScheduledSchema = ScheduledSessionSchema.partial().merge(HasID);
