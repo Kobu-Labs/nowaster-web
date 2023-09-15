@@ -2,6 +2,7 @@ import { ScheduledSessionApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { prefixBasedMatch } from "@/lib/searching";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -43,7 +44,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput onValueChange={setValue} placeholder="Search categories" />
           <CommandEmpty
             className="cursor-pointer py-6 text-center text-sm"
@@ -54,7 +55,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
             {"Create '" + value + "'"}
           </CommandEmpty>
           <CommandGroup>
-            {data.value.map((category) => (
+            {data.value.filter(c => prefixBasedMatch(c, value || "")).map((category) => (
               <CommandItem
                 key={category}
                 onSelect={(currentValue) => {
