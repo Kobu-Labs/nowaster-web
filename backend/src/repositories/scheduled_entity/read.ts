@@ -2,17 +2,16 @@ import type { AsyncResult } from "../types";
 import type { ScheduledEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
+import type { z } from "zod";
+import type { readManyScheduledSchema } from "../../validation/scheduledSessionValidation";
 
 type ReadSingleScheduledParams = {
     id: string
 }
-type ReadManyScheduledParams = {
-    limit?: number | undefined
-}
 
-
-const many = async (params: ReadManyScheduledParams): AsyncResult<ScheduledEntity[] | null> => {
+const many = async (params: z.infer<typeof readManyScheduledSchema>): AsyncResult<ScheduledEntity[] | null> => {
   try {
+    const filterTags = params.tags !== undefined ? { tags: { some: { tag: { label: { in: params.tags } } } } } : {};
 
     const scheduledEntity = await client.scheduledEntity.findMany({
       take: params.limit,
@@ -22,7 +21,18 @@ const many = async (params: ReadManyScheduledParams): AsyncResult<ScheduledEntit
           select: {
             tag: true,
           }
-
+        }
+      },
+      where: {
+        category: params.category,
+        ...filterTags,
+        startTime: {
+          gte: params.fromStartTime,
+          lte: params.toStartTime,
+        },
+        endTime: {
+          gte: params.fromEndTime,
+          lte: params.toEndTime,
         }
       }
     });
@@ -35,7 +45,6 @@ const many = async (params: ReadManyScheduledParams): AsyncResult<ScheduledEntit
       const { tags, ...rest } = session;
       return { tags: tags.map(t => t.tag), ...rest };
     }));
-
 
   } catch (error) {
     return Result.err(error as Error);
