@@ -5,7 +5,7 @@ import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { ScheduledSessionApi, StatisticsApi } from "@/api";
 import { KpiCard } from "@/components/KpiCard";
-import { OverviewAreaChartProvider } from "@/components/providers/OveriewAreChartProvider";
+import { ClampedSessionAreaChart } from "@/components/ClampedSessionAreaChart";
 
 export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
@@ -60,10 +60,8 @@ export default function IndexPage() {
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Overview granularity="month" />
         <div className="col-span-4">
-          <OverviewAreaChartProvider
+          <ClampedSessionAreaChart
             granularity="year"
-            queryKey={["sessions"]}
-            queryFn={async ({ fromDate, toDate }) => await ScheduledSessionApi.getSessions({ fromDate, toDate })}
           />
         </div>
       </div>

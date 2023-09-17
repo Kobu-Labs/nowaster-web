@@ -12,8 +12,13 @@ export const createScheduledSchema = ScheduledSessionSchema;
 
 export const readByUserScheduledSchema = z.object({
   limit: z.coerce.number().optional(),
-  fromDate: z.coerce.date().optional(),
-  toDate: z.coerce.date().optional(),
+  fromStartTime: z.coerce.date().optional(),
+  toStartTime: z.coerce.date().optional(),
+  fromEndTime: z.coerce.date().optional(),
+  toEndTime: z.coerce.date().optional(),
+  category: z.string().optional(),
+  /* TODO: Allow for multiple tags being passed here*/
+  tags: z.string().optional()
 });
 
 export const updateScheduledSchema = ScheduledSessionSchema.partial().merge(HasID);
