@@ -4,7 +4,7 @@ import axios from "axios";
 import { ZodType } from "zod";
 
 const baseApi = axios.create({
-  baseURL: "http://localhost:4000",
+  baseURL: "http://localhost:4001",
   validateStatus: () => true,
 });
 
