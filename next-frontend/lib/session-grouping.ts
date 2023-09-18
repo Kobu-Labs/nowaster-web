@@ -1,5 +1,5 @@
 import { ScheduledSession } from "@/validation/models";
-import { addDays, addMonths, differenceInMinutes, endOfMonth, endOfWeek, endOfYear, getDate, getDay, getDaysInMonth, getMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
+import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, getDate, getDay, getDaysInMonth, getMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
 export const Granularity = {
   week: "Past week",
   month: "Past month",
@@ -19,7 +19,7 @@ export const dateProcessors: {
   week: {
     start: (asOf) => startOfISOWeek(asOf || Date.now()),
     next: value => addDays(value, 1),
-    end: (asOf) => endOfWeek(asOf || Date.now()),
+    end: (asOf) => endOfISOWeek(asOf || Date.now()),
     amount: 7,
   },
   month: {
@@ -43,7 +43,7 @@ export const granularizers: {
   }
 } = {
   week: {
-    key: (value: Date) => (1 + getDay(value)).toString()
+    key: (value: Date) => (getDay(value) === 0 ? 7 : getDay(value)).toString()
   },
   month: {
     key: (value: Date) => getDate(value).toString()
