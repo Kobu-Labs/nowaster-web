@@ -53,15 +53,15 @@ export default function IndexPage() {
     <div className="p-8">
       <h2 className="mb-8 text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="flex gap-8 ">
-        <KpiCard value={stats.data.value.session_count.toString()} title={"Total Sessions"} description={""}><AlignVerticalDistributeEnd /></KpiCard>
-        <KpiCard value={stats.data.value.minutes.toString()} title={"Total Minutes Spent"} description={"Thats a plenty"}><Hourglass /> </KpiCard>
+        <KpiCard value={stats.data.value.session_count.toString()} title={"Total Sessions"} description={"Many to go.."}><AlignVerticalDistributeEnd /></KpiCard>
+        <KpiCard value={stats.data.value.minutes.toString()} title={"Total Minutes Spent"} description={"Thats a plenty!"}><Hourglass /> </KpiCard>
         <KpiCard value={stats.data.value.streak.toString()} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCard>
       </div>
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Overview granularity="month" />
         <div className="col-span-4">
           <ClampedSessionAreaChart
-            granularity="year"
+            granularity="week"
           />
         </div>
       </div>
