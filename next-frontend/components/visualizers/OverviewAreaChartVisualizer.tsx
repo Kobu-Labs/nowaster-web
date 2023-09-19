@@ -21,7 +21,7 @@ export const OverviewAreaChartVisualizer: FC<OverviewChartProps> = (props) => {
     <ResponsiveContainer width={"100%"} height={250} >
       <AreaChart data={props.data}>
         <XAxis ticks={props.ticks} type="number" interval={0} domain={props.ticks ? [1, props.ticks.length] : [1]} dataKey="granularity" />
-        <YAxis />
+        <YAxis tickFormatter={(x) => formatTime(x)} />
         <Tooltip content={(data) => customTooltip(data, colors)} />
         {props.categories.map(category => {
           /* BUG:  color switching - implement fix later */
