@@ -6,12 +6,12 @@ import { ScheduledSession } from "@/validation/models";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
-export const columns: ColumnDef<ScheduledSession>[] = [
+export const BaseSessionTableColumns: ColumnDef<ScheduledSession>[] = [
   {
     accessorKey: "category",
     header: "Category",
     cell: (data) => {
-      return <CategoryLabel label={data.row.original.category} />
+      return <CategoryLabel label={data.row.original.category} />;
     }
   },
   {
