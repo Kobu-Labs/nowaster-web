@@ -1,5 +1,6 @@
 import { DataTableColumnHeader } from "@/components/ui/column-header";
 import { getFormattedTimeDifference } from "@/lib/utils";
+import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
 import { SessionTag } from "@/stories/SessionTag/SessionTag";
 import { ScheduledSession } from "@/validation/models";
 import { ColumnDef } from "@tanstack/react-table";
@@ -9,6 +10,9 @@ export const columns: ColumnDef<ScheduledSession>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    cell: (data) => {
+      return <CategoryLabel label={data.row.original.category} />
+    }
   },
   {
     accessorKey: "tags",
