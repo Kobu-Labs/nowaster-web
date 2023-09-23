@@ -86,7 +86,6 @@ export const OverviewAreaChart: FC<OverviewChartProps> = (props) => {
 
   const colors: { [category: string]: string } = {};
   uniqueCategories.forEach((category) => colors[category] = "#" + Math.floor(Math.random() * 16777215).toString(16));
-  console.log(processed);
 
   return (
     <Card>
@@ -125,7 +124,6 @@ export const OverviewAreaChart: FC<OverviewChartProps> = (props) => {
 };
 
 const customTooltip = (data: any, colors: any) => {
-  console.log(data);
   if (!data.payload) {
     return <div />;
   }
