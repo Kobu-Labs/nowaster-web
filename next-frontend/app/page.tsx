@@ -1,14 +1,10 @@
 "use client";
 
-import { Granularity, Overview } from "@/components/overview-chart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Overview } from "@/components/overview-chart";
 import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ScheduledSessionApi, StatisticsApi } from "@/api";
 import { KpiCard } from "@/components/KpiCard";
-import { StreakCalendar } from "@/stories/StreakCalendar/StreakCalendar";
 import { OverviewAreaChart } from "@/components/overview-area-chart";
 
 export default function IndexPage() {

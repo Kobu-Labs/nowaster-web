@@ -15,17 +15,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
   args: {
-    categories: [
-      "school",
-      "gym",
-      "life",
-      "soccer",
-    ]
   }
 };
 export const NoCategories: Story = {
   args: {
-    categories: [
-    ]
   }
 };
