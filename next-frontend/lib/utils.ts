@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
+import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -23,3 +24,7 @@ export const formatTime = (minutesTotal: number) => {
 
   return `${zeroPad(hours)}:${zeroPad(minutes)}`;
 };
+
+export const getFormattedTimeDifference = (from: Date, to: Date) => {
+  return formatTime(Math.abs(differenceInMinutes(from, to)))
+}
