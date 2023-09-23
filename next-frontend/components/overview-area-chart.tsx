@@ -46,11 +46,11 @@ const preprocessData = (processor: typeof dateProcessors[keyof typeof dateProces
     if (!value[key]) {
       value[key] = {};
     }
-    if (!value[key][item.category]) {
-      value[key][item.category] = 0;
+    if (!value[key]![item.category]) {
+      value[key]![item.category] = 0;
     }
 
-    value[key][item.category] += differenceInMinutes(item.endTime, item.startTime);
+    value[key]![item.category] += differenceInMinutes(item.endTime, item.startTime);
     return value;
   }, {});
 
@@ -136,6 +136,7 @@ const customTooltip = (data: any, colors: any) => {
         if (k !== "granularity") {
           return <p className={`text-[${colors[k]}]`}>{`${k}:${v}`}</p>;
         }
+        return <></>;
       })}
     </div>
     : < div />;

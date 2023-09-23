@@ -20,7 +20,7 @@ const colors = {
 const getColor = (color: keyof typeof colors | undefined): string => {
   if (color === undefined) {
     const values = Object.values(colors);
-    return values[values.length * Math.random() << 0];
+    return values[values.length * Math.random() << 0] || "bg-cyan-400";
   }
 
   return colors[color];

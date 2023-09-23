@@ -26,5 +26,5 @@ export const formatTime = (minutesTotal: number) => {
 };
 
 export const getFormattedTimeDifference = (from: Date, to: Date) => {
-  return formatTime(Math.abs(differenceInMinutes(from, to)))
-}
+  return formatTime(Math.abs(differenceInMinutes(from, to)));
+};

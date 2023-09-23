@@ -16,5 +16,5 @@ export const create = async (params: CreateTagRequest): Promise<Result<CreateTag
     "tags/",
     params
   );
-  return await handleResponse(data, createTagResponseSchema)
+  return await handleResponse(data, createTagResponseSchema);
 };
