@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import express from "express";
 import cors from "cors";
 import { env } from "process";
@@ -32,6 +34,10 @@ app.use((_req, res) => {
 
 app.listen(port, () => {
   console.log(`[${new Date().toISOString()}] API listening on port ${port}`);
+  if (app.settings.env === "development") {
+    console.log(`[${new Date().toISOString()}] Application running in development mode!`);
+  }
+  console.log(`[${new Date().toISOString()}] Database used: ${env.DATABASE_URL}`);
 });
 const Test = 10;
 export default Test;
