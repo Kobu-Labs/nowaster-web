@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { FC } from "react";
 
 type SessionTagProps = {
@@ -28,6 +29,10 @@ const getColor = (color: keyof typeof colors | undefined): string => {
 
 export const SessionTag: FC<SessionTagProps> = (props) => {
   return (
-    <Badge className={"hover:transition hover:scale-110 text-white " + getColor(props.color) + " hover:" + getColor(props.color)}>{props.value}</Badge>
+    <Badge className={cn(
+      "h-min text-white hover:scale-110 hover:transition",
+      getColor(props.color),
+      "hover:" + getColor(props.color))}
+    >{props.value}</Badge>
   );
 };
