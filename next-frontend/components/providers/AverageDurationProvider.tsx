@@ -4,7 +4,7 @@ import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 import { Hourglass } from "lucide-react";
-import { KpiCard } from "../KpiCard";
+import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
 
 type AverageDurationProviderProps = {
   filter?: GetSessionsRequest,
@@ -27,7 +27,7 @@ export const AverageDurationProvider = (props: AverageDurationProviderProps) => 
   });
 
   return (
-    <KpiCard variant={"big_value"} value={formatTime(result || 0)} title={"Average session duration"}>
+    <KpiCardVisualizer variant={"big_value"} value={formatTime(result || 0)} title={"Average session duration"}>
       <Hourglass />
-    </KpiCard>);
+    </KpiCardVisualizer>);
 };

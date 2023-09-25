@@ -2,9 +2,9 @@ import { ScheduledSessionApi } from "@/api";
 import { useQuery } from "@tanstack/react-query";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { FC } from "react";
-import { KpiCard } from "../KpiCard";
 import { differenceInMinutes } from "date-fns";
 import { formatTime } from "@/lib/utils";
+import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
 
 type TotalTimeKpiCardProviderProps = {
   filter?: GetSessionsRequest
@@ -23,6 +23,6 @@ export const TotalTimeKpiCardProvider: FC<TotalTimeKpiCardProviderProps> = (prop
   });
 
   return (
-    <KpiCard variant={"big_value"} value={formatTime(result || 0)} title={"Total time"} />
+    <KpiCardVisualizer variant={"big_value"} value={formatTime(result || 0)} title={"Total time"} />
   );
 };
