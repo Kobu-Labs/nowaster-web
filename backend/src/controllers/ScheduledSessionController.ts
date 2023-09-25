@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createScheduledSchema, deleteScheduledSchema,  readByIdScheduledSchema,  readManyScheduledSchema, updateScheduledSchema } from "../validation/scheduledSessionValidation";
+import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema, readManyScheduledSchema, updateScheduledSchema } from "../validation/scheduledSessionValidation";
 import scheduledSessionRepo from "../repositories/scheduled_entity";
 import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
@@ -31,6 +31,16 @@ SessionsController.post("/", validate({ body: createScheduledSchema }), async (r
     return handleResultErrorResp(500, res, scheduledSessionEntity.error);
   }
   return handleOkResp(scheduledSessionEntity.value, res);
+});
+
+// get currently running sessions
+SessionsController.get("/active", async (_req, res) => {
+  const scheduledSessions = await scheduledSessionRepo.read.many({ toStartTime: new Date(), fromEndTime: new Date() });
+
+  if (scheduledSessions.isErr) {
+    return handleResultErrorResp(500, res, scheduledSessions.error);
+  }
+  return handleOkResp(scheduledSessions.value, res);
 });
 
 
