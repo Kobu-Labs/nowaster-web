@@ -31,6 +31,13 @@ export const create = async (params: CreateScheduledSessionRequest): Promise<Res
   return await handleResponse(data, createScheduledSessionResponseSchema);
 };
 
+export const getActiveSessions = async (): Promise<Result<GetSessionResponse>> => {
+  const { data } = await baseApi.get(
+    BASE_URL + "sessions/active/"
+  );
+  return await handleResponse(data, getSessionResponseSchema);
+};
+
 export const getSessions = async (params?: GetSessionsRequest): Promise<Result<GetSessionResponse>> => {
   const { data } = await baseApi.get(
     BASE_URL + "sessions/", { params: { ...params } }
