@@ -2,7 +2,7 @@ import { ScheduledSessionApi } from "@/api";
 import { useQuery } from "@tanstack/react-query";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { FC } from "react";
-import { KpiCard } from "../KpiCard";
+import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
 
 type SessionCountKpiCardProviderProps = {
   filter? : GetSessionsRequest
@@ -23,6 +23,6 @@ export const SessionCountKpiCardProvider:FC<SessionCountKpiCardProviderProps> = 
   });
 
   return (
-    <KpiCard variant={"big_value"} value={(result || 0).toString()} title={"Total sessions"}/>
+    <KpiCardVisualizer variant={"big_value"} value={(result || 0).toString()} title={"Total sessions"}/>
   );
 };
