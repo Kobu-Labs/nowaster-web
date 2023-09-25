@@ -6,6 +6,7 @@ import { NavItem } from "@/types/nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { ActiveSessionPresenter } from "./presenters/ActiveSessionPresenter";
 
 interface MainNavProps {
   items?: NavItem[]
@@ -15,7 +16,7 @@ export function MainNav({ items }: MainNavProps) {
   const currentPath = usePathname();
 
   return (
-    <div className="flex gap-6 md:gap-10">
+    <div className="flex w-full flex-row gap-6">
       <Link href="/" className="flex items-center space-x-2">
         <span className="inline-block font-bold">{siteConfig.name}</span>
       </Link>
@@ -39,6 +40,8 @@ export function MainNav({ items }: MainNavProps) {
           )}
         </nav>
       ) : null}
+      <div className="grow"></div>
+      <ActiveSessionPresenter />
     </div>
   );
 }
