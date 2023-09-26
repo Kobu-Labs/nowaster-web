@@ -1,87 +1,78 @@
-import { Calendar as CalendarIcon } from "lucide-react";
-import { DateTime } from "luxon";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import React from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "recharts";
+import { DateTime } from "luxon";
+import { FC } from "react"
+import { addMinutes } from "date-fns";
 import { cn } from "@/lib/utils";
-import { SelectSingleEventHandler } from "react-day-picker";
-import { Label } from "@/components/ui/label";
+import { CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 
-interface DateTimePickerProps {
-  onDateSelected: (date: Date | null) => void;
+export type QuickOption = {
+  label: string,
+  increment: (date: Date) => Date
 }
 
-export function DateTimePicker({ onDateSelected }: DateTimePickerProps) {
-  const [selectedDateTime, setSelectedDateTime] = useState<DateTime | null>(null);
+type DatePickerDemoProps = {
+  selected: Date | undefined
+  onSelect: (date: Date) => void
+  quickOptions?: QuickOption[]
+}
 
-  const handleSelect: SelectSingleEventHandler = (_day, selected) => {
-    const selectedDate = DateTime.fromJSDate(selected);
-    const modifiedDate = selectedDate.set({
-      hour: selectedDateTime?.hour,
-      minute: selectedDateTime?.minute,
-    });
+export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
 
-    if (modifiedDate.toJSDate().getTime() === selectedDateTime?.toJSDate().getTime()) {
-      setSelectedDateTime(null);
-      onDateSelected(null);
-    } else {
-      setSelectedDateTime(modifiedDate);
-      onDateSelected(modifiedDate.toJSDate());
-    }
-  };
-
-  const handleTimeChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const { value } = e.target;
+    const datetime = DateTime.fromJSDate(props.selected || new Date());
     const hours = Number.parseInt(value.split(":")[0] || "00", 10);
     const minutes = Number.parseInt(value.split(":")[1] || "00", 10);
-
-    let modifiedDay;
-    if (selectedDateTime === null) {
-      modifiedDay = DateTime.now().set({ hour: hours, minute: minutes, second: 0, millisecond: 0 });
-    } else {
-      modifiedDay = selectedDateTime.set({ hour: hours, minute: minutes });
-    }
-
-    setSelectedDateTime(modifiedDay);
-    onDateSelected(modifiedDay.toJSDate());
+    const modifiedDay = datetime.set({ hour: hours, minute: minutes });
+    props.onSelect(modifiedDay.toJSDate());
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild className="z-10">
+    <Popover >
+      <PopoverTrigger onWheel={(e) => props.onSelect(addMinutes(props.selected || new Date(), e.deltaY > 0 ? -1 : 1))} asChild>
         <Button
           variant={"outline"}
           className={cn(
             "w-[280px] justify-start text-left font-normal",
-            !selectedDateTime && "text-muted-foreground"
+            !props.selected && "text-muted-foreground"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {selectedDateTime ? (
-            selectedDateTime.toFormat("DDD HH:mm")
-          ) : (
-            <span>Pick a date</span>
-          )}
+          {props.selected ? DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
-          selected={selectedDateTime?.toJSDate()}
-          onSelect={handleSelect}
+          selected={props.selected}
+          onSelect={(v) => v && props.onSelect(v)}
           initialFocus
         />
         <div className="px-4 pb-4 pt-0">
           <Label>Time</Label>
           <Input
             type="time"
-            onChange={handleTimeChange}
-            value={selectedDateTime?.toFormat("HH:mm")}
+            onChange={handleChange}
+            value={props.selected ? DateTime.fromJSDate(props.selected).toFormat("HH:mm") : "Nothing"}
           />
         </div>
       </PopoverContent>
+      <div className="flex gap-1">
+        {props.quickOptions?.map(val => {
+          return <Button
+            className="block h-min p-1"
+            key={val.label}
+            variant={"secondary"}
+            type="button"
+            onClick={() => props.onSelect(val.increment(props.selected || new Date()))}>{val.label}
+          </Button>;
+        })}
+      </div>
     </Popover>
   );
-}
+};
