@@ -8,9 +8,9 @@ import { DateTime } from "luxon";
 import { FC } from "react"
 import { addMinutes } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CalendarIcon } from "@radix-ui/react-icons";
 
 export type QuickOption = {
   label: string,
