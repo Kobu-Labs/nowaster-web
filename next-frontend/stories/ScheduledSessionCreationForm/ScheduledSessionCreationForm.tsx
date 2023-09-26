@@ -14,16 +14,46 @@ import { Input } from "@/components/ui/input";
 import { createScheduledSchema, CreateScheduledSessionRequest } from "@/validation/requests/scheduledSession";
 import { CategoryPicker } from "../CategoryPicker/CategoryPicker";
 import { ScheduledSessionApi } from "@/api";
-import { DateTimePicker } from "../DateTimePicker/DateTimePicker";
 import { useForm } from "react-hook-form";
 import { TagPicker } from "../TagPicker/TagPicker";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { FC, useState } from "react";
 import { cn } from "@/lib/utils";
+import React from "react";
+import { DateTimePicker, QuickOption } from "../DateTimePicker/DateTimePicker";
+import { addHours, addMinutes, setMinutes, subHours, subMinutes } from "date-fns";
 
 type ApiResult = Awaited<ReturnType<typeof ScheduledSessionApi.create>>;
 
-export const ScheduledSessionCreationForm = () => {
+const creationFormQuickOptions: QuickOption[] = [
+  {
+    label: "now",
+    increment: () => new Date(),
+  },
+  {
+    label: "clamp",
+    increment: (date) => setMinutes(date, 0)
+  },
+  {
+    label: "+ 15m",
+    increment: (date) => addMinutes(date, 15)
+  },
+  {
+    label: "- 15m",
+    increment: (date) => subMinutes(date, 15)
+  },
+  {
+    label: "+ 1h",
+    increment: (date) => addHours(date, 1)
+  },
+  {
+    label: "- 1h",
+    increment: (date) => subHours(date, 1)
+  },
+];
+
+
+export const ScheduledSessionCreationForm: FC = () => {
   const [result, setResult] = useState<ApiResult | null>(null);
   const form = useForm<CreateScheduledSessionRequest>({
     resolver: zodResolver(createScheduledSchema),
@@ -36,11 +66,6 @@ export const ScheduledSessionCreationForm = () => {
 
   return (
     <Card >
-      {result && <CardHeader>
-        {result.isOk
-          ? <div className="text-[#adfa1d]">Session created succefully!</div>
-          : <div className="text-[#7d1715]">Session failed to be created: {result.error.message}</div>}
-      </CardHeader>}
       <CardContent className="mt-3 ">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -84,19 +109,24 @@ export const ScheduledSessionCreationForm = () => {
                 name="startTime"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="block">Start Time</FormLabel>
-                    <FormControl>
-                      <DateTimePicker onDateSelected={(date) => {
-                        if (date === null) {
-                          form.resetField("startTime");
-                        } else {
-                          field.onChange(date);
-                        }
-                      }}></DateTimePicker>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <div>
+                    <FormItem >
+                      <FormLabel className="block">Start Time</FormLabel>
+                      <FormControl>
+                        <DateTimePicker
+                          quickOptions={creationFormQuickOptions}
+                          selected={field.value || undefined}
+                          onSelect={(val) => {
+                            field.onChange(val);
+                            if (!form.getValues("endTime")) {
+                              form.setValue("endTime", val);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </div>
                 )}
               />
 
@@ -109,13 +139,10 @@ export const ScheduledSessionCreationForm = () => {
                   <FormItem>
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
-                      <DateTimePicker onDateSelected={(date) => {
-                        if (date === null) {
-                          form.resetField("endTime");
-                        } else {
-                          field.onChange(date);
-                        }
-                      }}
+                      <DateTimePicker
+                        quickOptions={creationFormQuickOptions}
+                        selected={field.value}
+                        onSelect={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
