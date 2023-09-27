@@ -14,7 +14,6 @@ type Story = StoryObj<typeof meta>;
 
 export const SimpleSessionTag: Story = {
   args: {
-    color:"blue",
     value:"testing"
   }
 };
