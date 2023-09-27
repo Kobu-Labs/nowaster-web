@@ -1,8 +1,10 @@
 "use client";
 
-import { formatTime } from "@/lib/utils";
+import { formatTime, randomColor } from "@/lib/utils";
+import { tagColors } from "@/state/tags";
 import { FC, useState } from "react";
 import { Cell, Label, Pie, PieChart, ResponsiveContainer, Sector } from "recharts";
+import { useRecoilState } from "recoil";
 import { AmountByCategory } from "../providers/PieChartSessionProvider";
 
 type PieChartSessionProps = {
@@ -45,6 +47,21 @@ const renderActiveShape = (props: any) => {
 export const PieChartSessionVisualizer: FC<PieChartSessionProps> = (props) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
+  const [colors, setColors] = useRecoilState(tagColors);
+  const result: { [label: string]: string } = {};
+
+
+  (props.data).forEach(({ key }) => {
+    if (colors[key] === undefined) {
+      result[key] = randomColor();
+    }
+  });
+
+  if (Object.entries(result).length !== 0) {
+    setColors({ ...colors, ...result });
+  }
+
+
   return (
     <ResponsiveContainer width={"100%"} height={180}  >
       <PieChart
@@ -62,9 +79,8 @@ export const PieChartSessionVisualizer: FC<PieChartSessionProps> = (props) => {
           onMouseEnter={(_, i) => setActiveIndex(i)}
           activeIndex={activeIndex}
         >
-          {props.data.map((_entry, index) => {
-            const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
-            return <Cell fillOpacity={0.4} stroke={randomColor} key={`cell-${index}`} fill={randomColor} />;
+          {props.data.map(({key}, index) => {
+            return <Cell fillOpacity={0.4} stroke={colors[key]} key={`cell-${index}`} fill={colors[key]} />;
           })}
           {activeIndex === undefined && <Label
             value={formatTime(props.data.reduce((acc, curr) => acc + curr.value, 0))}
