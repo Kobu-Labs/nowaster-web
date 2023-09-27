@@ -24,9 +24,6 @@ export const OverviewAreaChartProvider = (props: OverviewChartProps) => {
     },
     select: (data) => {
       const uniqueCategories = Array.from(new Set(data.map(x => x.category)));
-
-      const colors: { [category: string]: string } = {};
-      uniqueCategories.forEach((category) => colors[category] = "#" + Math.floor(Math.random() * 16777215).toString(16));
       return { data: groupSessionsByKey(granularizer, data), cats: uniqueCategories };
     },
     refetchOnWindowFocus: false,
