@@ -20,7 +20,7 @@ export const zeroPad = (timeUnit: number): string => {
 
 export const formatTime = (minutesTotal: number) => {
   const hours = Math.floor(minutesTotal / 60);
-  const minutes = (minutesTotal % 60);
+  const minutes = Math.floor(minutesTotal % 60);
 
   return `${zeroPad(hours)}:${zeroPad(minutes)}`;
 };
