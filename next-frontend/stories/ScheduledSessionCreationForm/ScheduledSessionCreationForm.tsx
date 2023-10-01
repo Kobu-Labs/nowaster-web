@@ -16,7 +16,7 @@ import { CategoryPicker } from "../CategoryPicker/CategoryPicker";
 import { ScheduledSessionApi } from "@/api";
 import { useForm } from "react-hook-form";
 import { TagPicker } from "../TagPicker/TagPicker";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FC, useState } from "react";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -66,6 +66,16 @@ export const ScheduledSessionCreationForm: FC = () => {
 
   return (
     <Card >
+      {
+        result && <CardHeader>
+          {
+            result.isOk
+              ? <div className="text-[#adfa1d]">Session created succefully!</div>
+              : <div className="text-[#7d1715]">Session failed to be created: {result.error.message}</div>
+          }
+        </CardHeader>
+      }
+
       <CardContent className="mt-3 ">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
