@@ -1,24 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, getFormattedTimeDifference } from "@/lib/utils";
 import { ScheduledSession } from "@/validation/models";
 import { cva, VariantProps } from "class-variance-authority";
-import { differenceInMilliseconds } from "date-fns";
 import { FC } from "react";
 import { SessionTag } from "../SessionTag/SessionTag";
 
-
-const formatTimeUnit = (unit: number): string => {
-  return (unit < 10 ? "0" : "") + unit.toString();
-};
-
-const formatTimeDiff = (startTime: Date, endTime: Date): string => {
-  const secondsRaw = differenceInMilliseconds(endTime, startTime) / 1000;
-  const hours = Math.floor(secondsRaw / 3600);
-  const minutes = Math.floor(secondsRaw / 60) % 60;
-  const seconds = Math.floor(secondsRaw % 60);
-
-  return `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}:${formatTimeUnit(seconds)}`;
-};
 
 type HistoryCardProps = {
   session: ScheduledSession,
@@ -55,7 +41,7 @@ export const HistoryCard: FC<HistoryCardProps> = (props) => {
           </div>
         </div>
         <div className="grow" />
-        <div className="ml-4 font-medium">{formatTimeDiff(props.session.startTime, props.session.endTime)}</div>
+        <div className="ml-4 font-medium text-xl">{getFormattedTimeDifference(props.session.startTime, props.session.endTime)}</div>
       </CardContent>
     </Card>
   );
