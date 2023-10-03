@@ -73,7 +73,7 @@ export const ScheduledSessionCreationForm: FC = () => {
         className: "text-[#adfa1d]",
         title: "Session created successfully",
         description: (
-          <HistoryCard hideBorder={true} session={result.value} />
+          <HistoryCard variant="borderless" session={result.value} />
         ),
         variant: "default",
       });
