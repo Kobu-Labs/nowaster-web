@@ -16,14 +16,14 @@ import { CategoryPicker } from "../CategoryPicker/CategoryPicker";
 import { ScheduledSessionApi } from "@/api";
 import { useForm } from "react-hook-form";
 import { TagPicker } from "../TagPicker/TagPicker";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FC, useState } from "react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { FC } from "react";
 import React from "react";
 import { DateTimePicker, QuickOption } from "../DateTimePicker/DateTimePicker";
 import { addHours, addMinutes, setMinutes, subHours, subMinutes } from "date-fns";
+import { useToast } from "@/components/ui/use-toast";
+import { HistoryCard } from "../HistoryCard/HistoryCard";
 
-type ApiResult = Awaited<ReturnType<typeof ScheduledSessionApi.create>>;
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -54,28 +54,33 @@ const creationFormQuickOptions: QuickOption[] = [
 
 
 export const ScheduledSessionCreationForm: FC = () => {
-  const [result, setResult] = useState<ApiResult | null>(null);
+  const { toast } = useToast();
+
   const form = useForm<CreateScheduledSessionRequest>({
     resolver: zodResolver(createScheduledSchema),
   });
 
   async function onSubmit(values: CreateScheduledSessionRequest) {
     const result = await ScheduledSessionApi.create(values);
-    setResult(result);
+    toast(result.isErr ?
+      {
+        title: "Session creation failed",
+        description: result.error.message,
+        variant: "destructive",
+      }
+      :
+      {
+        className: "text-[#adfa1d]",
+        title: "Session created successfully",
+        description: (
+          <HistoryCard hideBorder={true} session={result.value} />
+        ),
+        variant: "default",
+      });
   }
 
   return (
     <Card >
-      {
-        result && <CardHeader>
-          {
-            result.isOk
-              ? <div className="text-[#adfa1d]">Session created succefully!</div>
-              : <div className="text-[#7d1715]">Session failed to be created: {result.error.message}</div>
-          }
-        </CardHeader>
-      }
-
       <CardContent className="mt-3 ">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -180,7 +185,7 @@ export const ScheduledSessionCreationForm: FC = () => {
               )}
             />
 
-            <Button type="submit" className={cn(result && result.isErr && "bg-[#7d1715]")}>Submit</Button>
+            <Button type="submit">Submit</Button>
           </form>
         </Form>
       </CardContent>
