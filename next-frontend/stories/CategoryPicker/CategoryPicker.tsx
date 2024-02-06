@@ -22,7 +22,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
     queryFn: async () => await ScheduledSessionApi.getCategories(),
   });
 
-  if (isLoading || isError) {
+  if (!data || isLoading || isError) {
     return <div >Something bad happenned</div>;
   }
 

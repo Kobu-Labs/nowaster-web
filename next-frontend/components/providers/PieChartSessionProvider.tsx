@@ -45,7 +45,7 @@ export const PieChartSessionProvider = (props: PieChartSessionProviderProps) => 
       if (data.isErr) {
         return [];
       }
-      const groupedData = groupData(data, props.groupingFn);
+      const groupedData = groupData(data.value, props.groupingFn);
       return props.postProcess ? props.postProcess(groupedData) : groupedData;
     },
     refetchOnWindowFocus: false,
