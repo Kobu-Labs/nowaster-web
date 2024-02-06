@@ -83,7 +83,7 @@ export function Overview(props: OverviewProps) {
   });
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.granularity);
 
-  if (isLoading || isError) {
+  if (!data || isLoading || isError) {
     return <div >Something bad happenned</div>;
   }
 

@@ -46,7 +46,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
     }
   });
 
-  if (isLoading || isError) {
+  if (!tags || isLoading || isError) {
     return <div >Something bad happenned</div>;
   }
 
