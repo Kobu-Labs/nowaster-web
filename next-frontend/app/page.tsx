@@ -3,22 +3,12 @@
 import { Overview } from "@/components/overview-chart";
 import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { ScheduledSessionApi, StatisticsApi } from "@/api";
+import { StatisticsApi } from "@/api";
 import { ClampedSessionAreaChart } from "@/components/ClampedSessionAreaChart";
 import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
 
 export default function IndexPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["sessions", "slider"],
-    retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions({ limit: 10 }),
-  });
 
-  const streak = useQuery({
-    queryKey: ["statistics", "streak"],
-    retry: false,
-    queryFn: async () => await StatisticsApi.getStreakData(),
-  });
   const stats = useQuery({
     queryKey: ["statistics", "dashboard"],
     retry: false,
@@ -26,22 +16,7 @@ export default function IndexPage() {
   });
 
 
-  if (isLoading || isError) {
-    return <div >Something bad happenned</div>;
-  }
-
-  if (data.isErr) {
-    return <div>{data.error.message}</div>;
-  }
-  if (streak.isLoading || streak.isError) {
-    return <div>Something bad happenned</div>;
-  }
-
-  if (streak.data.isErr) {
-    return <div>{streak.data.error.message}</div>;
-  }
-
-  if (stats.isLoading || stats.isError) {
+  if (!stats.data || stats.isLoading || stats.isError) {
     return <div>Something bad happenned</div>;
   }
 
