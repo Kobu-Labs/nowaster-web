@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ReactQueryProvider } from "./ReactQueryProvider";
 import { RecoilRoot } from "recoil";
 import { Toaster } from "@/components/ui/toaster";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 
 interface RootLayoutProps {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 <SiteHeader />
                 <main className="flex-1">{children}</main>
                 <Toaster />
+                <ReactQueryDevtools initialIsOpen={false} />
               </div>
             </ThemeProvider>
           </body>
