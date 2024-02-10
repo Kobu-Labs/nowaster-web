@@ -17,6 +17,7 @@ export const OverviewAreaChartProvider = (props: OverviewChartProps) => {
     queryKey: ["sessions", props.filter],
     retry: false,
     queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
+    staleTime: Infinity,
     select: (data) => {
       if (data.isErr) {
         return {};

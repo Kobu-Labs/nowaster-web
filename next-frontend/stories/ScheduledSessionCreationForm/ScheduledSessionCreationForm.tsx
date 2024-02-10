@@ -23,6 +23,7 @@ import { DateTimePicker, QuickOption } from "../DateTimePicker/DateTimePicker";
 import { addHours, addMinutes, setMinutes, subHours, subMinutes } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { HistoryCard } from "../HistoryCard/HistoryCard";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 const creationFormQuickOptions: QuickOption[] = [
@@ -55,6 +56,7 @@ const creationFormQuickOptions: QuickOption[] = [
 
 export const ScheduledSessionCreationForm: FC = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const form = useForm<CreateScheduledSessionRequest>({
     resolver: zodResolver(createScheduledSchema),
@@ -62,6 +64,7 @@ export const ScheduledSessionCreationForm: FC = () => {
 
   async function onSubmit(values: CreateScheduledSessionRequest) {
     const result = await ScheduledSessionApi.create(values);
+    queryClient.invalidateQueries({ queryKey: ["sessions"] });
     toast(result.isErr ?
       {
         title: "Session creation failed",
