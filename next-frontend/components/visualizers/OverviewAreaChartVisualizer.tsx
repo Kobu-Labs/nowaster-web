@@ -35,15 +35,14 @@ export const OverviewAreaChartVisualizer: FC<OverviewChartProps> = (props) => {
         <YAxis tickFormatter={(x) => formatTime(x)} />
         <Tooltip content={data => customTooltip(data, colors)} />
         {uniqueCategories.map(category => {
-          const color = randomColor();
           return (
             <Area
               key={category}
-              fill={color}
+              fill={colors[category]}
               type="monotone"
               stackId="1"
               dataKey={(v) => v[category] || 0}
-              stroke={color}
+              stroke={colors[category]}
               strokeWidth={4}
               fillOpacity={0.4}
             />
