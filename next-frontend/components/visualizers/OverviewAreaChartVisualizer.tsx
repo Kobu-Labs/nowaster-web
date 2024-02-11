@@ -61,8 +61,9 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
 
   return values
     ? <div className="rounded-sm p-2">
-      {Object.entries(values).map(([k, v]) => {
-        if (k !== "granularity") {
+      {Object.entries(values)
+        .filter(([k]) => k !== "granularity")
+        .map(([k, v]) => {
           return <p
             key={k}
             style={{ "--legend-color": colors[k] } as React.CSSProperties}
@@ -70,9 +71,7 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
           >
             {`${k}  ${formatTime(v)}`}
           </p>;
-        }
-        return <></>;
-      })}
+        })}
     </div>
     : < div />;
 };
