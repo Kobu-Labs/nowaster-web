@@ -2,9 +2,10 @@ import { ResponseSchema } from "@/validation/responses/base";
 import { Result } from "@badrap/result";
 import axios from "axios";
 import { ZodType } from "zod";
+import * as process from "process";
 
 const baseApi = axios.create({
-  baseURL: "http://localhost:4001",
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:4001",
   validateStatus: () => true,
 });
 
