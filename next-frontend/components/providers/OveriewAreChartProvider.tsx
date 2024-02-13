@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { GroupingOptions, OverviewAreaChartVisualizer } from "@/components/visualizers/OverviewAreaChartVisualizer";
 import { ScheduledSessionApi } from "@/api";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
+import { GroupingOptions } from "@/lib/session-grouping";
 
 
 type OverviewChartProps = {
-  groupingOpts:GroupingOptions
+  groupingOpts: GroupingOptions
   filter?: Partial<GetSessionsRequest>
 }
 
