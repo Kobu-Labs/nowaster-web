@@ -1,11 +1,12 @@
 import { ScheduledSession } from "@/validation/models";
 import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, format, getDaysInMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
 
-export enum Granularity {
-  day,
-  week,
-  month,
-}
+export const Granularity = {
+  day: "day",
+  week: "week",
+  month: "month",
+} as const;
+
 
 export type CategoryPerGranularity = { [category: string]: string } & { granularity: string }
 
