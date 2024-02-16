@@ -14,9 +14,10 @@ type BaseSessionTableProps = {
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
   const { data } = useQuery({
     queryKey: ["sessions", props.filter],
-    retry: false,
     queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
-    select: (data) => data.isOk ? data.value : []
+    select: (data) => {
+      return data.isOk ? data.value : [];
+    }
   });
 
   return <DataTable columns={props.columns} data={data || []} />;

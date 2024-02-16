@@ -15,11 +15,13 @@ export const TotalTimeKpiCardProvider: FC<TotalTimeKpiCardProviderProps> = (prop
   const { data: result } = useQuery({
     queryKey: ["sessions", props.filter],
     retry: false,
-    queryFn: async () => {
-      const data = await ScheduledSessionApi.getSessions(props.filter);
-      return data.isOk ? data.value : [];
-    },
-    select: (data) => data.reduce((acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime), 0),
+    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
+    select: (data) => {
+      if (data.isErr) {
+        return 0;
+      }
+      return data.value.reduce((acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime), 0);
+    }
   });
 
   return (

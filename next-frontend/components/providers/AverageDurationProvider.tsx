@@ -14,13 +14,13 @@ export const AverageDurationProvider = (props: AverageDurationProviderProps) => 
   const { data: result } = useQuery({
     queryKey: ["sessions", props.filter],
     retry: false,
-    queryFn: async () => {
-      const data = await ScheduledSessionApi.getSessions(props.filter);
-      return data.isOk ? data.value : [];
-    },
+    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
     select: (data) => {
-      const totalAmount = data.reduce((acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime), 0);
-      return totalAmount / data.length;
+      if (data.isErr) {
+        return 0;
+      }
+      const totalAmount = data.value.reduce((acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime), 0);
+      return totalAmount / data.value.length;
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
