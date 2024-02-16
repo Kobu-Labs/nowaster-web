@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { GroupingOptions, OverviewAreaChartVisualizer } from "@/components/visualizers/OverviewAreaChartVisualizer";
+import { OverviewAreaChartVisualizer } from "@/components/visualizers/OverviewAreaChartVisualizer";
 import { ScheduledSessionApi } from "@/api";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
-import { GroupingOptions } from "@/lib/session-grouping";
+import { type GetSessionsRequest } from "@/validation/requests/scheduledSession";
+import { type GroupingOptions } from "@/lib/session-grouping";
 
 
 type OverviewChartProps = {
@@ -16,13 +16,13 @@ export const OverviewAreaChartProvider = (props: OverviewChartProps) => {
   const { data: result } = useQuery({
     queryKey: ["sessions", props.filter],
     retry: false,
-    queryFn: async () => {
-      const data = await ScheduledSessionApi.getSessions(props.filter);
-      return data.isOk ? data.value : [];
-    },
+    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
     select: (data) => {
-      const uniqueCategories = Array.from(new Set(data.map(x => x.category)));
-      return { data: data, cats: uniqueCategories };
+      if (data.isErr) {
+        return {};
+      }
+      const uniqueCategories = Array.from(new Set(data.value.map(x => x.category)));
+      return { data: data.value, cats: uniqueCategories };
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

@@ -40,11 +40,11 @@ export const PieChartSessionProvider = (props: PieChartSessionProviderProps) => 
   const { data: result } = useQuery({
     queryKey: ["sessions", props.filter],
     retry: false,
-    queryFn: async () => {
-      const data = await ScheduledSessionApi.getSessions(props.filter);
-      return data.isOk ? data.value : [];
-    },
+    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
     select: (data) => {
+      if (data.isErr) {
+        return [];
+      }
       const groupedData = groupData(data, props.groupingFn);
       return props.postProcess ? props.postProcess(groupedData) : groupedData;
     },
