@@ -1,12 +1,25 @@
 import { ScheduledSession } from "@/validation/models";
-import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, getDate, getDay, getDaysInMonth, getMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
-export const Granularity = {
-  week: "Past week",
-  month: "Past month",
-  year: "Past year"
-} as const;
+import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, format, getDaysInMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
 
-export type SessionsByCategory = { [category: string]: string } & { granularity: string }
+export enum Granularity {
+  week,
+  month,
+  year,
+}
+
+export type CategoryPerGranularity = { [category: string]: string } & { granularity: string }
+
+/**
+ * @type allKeys whether all not to display all keys per given granularity
+ * @type sessionKey function for computing the key from given session
+ * @type granularity
+ */
+export type GroupingOptions = Partial<{
+  allKeys: boolean
+  sessionKey: (session: ScheduledSession) => string | number | string[] | number[]
+}> &
+{ granularity: keyof typeof Granularity }
+
 
 export const dateProcessors: {
   [K in keyof typeof Granularity]: {
@@ -37,38 +50,83 @@ export const dateProcessors: {
 } as const;
 
 
+/**
+ * Calculates granularity key from given session
+ */
 export const granularizers: {
   [K in keyof typeof Granularity]: {
     key: (value: Date) => string,
   }
 } = {
   week: {
-    key: (value: Date) => (getDay(value) === 0 ? 7 : getDay(value)).toString()
+    key: (value: Date) => format(value, "eee"),
   },
   month: {
-    key: (value: Date) => getDate(value).toString()
+    key: (value: Date) => value.getDate().toString(),
   },
   year: {
-    key: (value: Date) => (getMonth(value) + 1).toString()
+    key: (value: Date) => format(value, "LLL")
   }
 } as const;
 
-export const groupSessionsByKey = (processor: typeof granularizers[keyof typeof granularizers], data: (ScheduledSession)[]): SessionsByCategory[] => {
-  let processed = data.reduce((value: { [granularity: string]: { [category: string]: number } }, item) => {
-    const key = processor.key(item.endTime);
-    if (!value[key]) {
-      value[key] = {};
-    }
-    if (!value[key]![item.category]) {
-      value[key]![item.category] = 0;
-    }
 
-    value[key]![item.category] += differenceInMinutes(item.endTime, item.startTime);
+/**
+ * Specifies all available keys for every type of granularity
+ */
+export const allKeys: { [K in keyof typeof Granularity]: (data: ScheduledSession[]) => string[] } = {
+  week: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  month: data => {
+    const days = getDaysInMonth(data.at(0)?.endTime ?? new Date());
+    return Array.from({ length: days }, (_, i) => (i + 1).toString());
+  },
+  year: () => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
+};
+
+const addGroupEntry = (result: Record<string, Record<string | number, number>>, granularityKey: string, sessionKey: string | number, item: ScheduledSession) => {
+  if (!result[granularityKey]) {
+    result[granularityKey] = {};
+  }
+  if (!result[granularityKey]![sessionKey]) {
+    result[granularityKey]![sessionKey] = 0;
+  }
+
+  result[granularityKey]![sessionKey] += differenceInMinutes(item.endTime, item.startTime);
+};
+
+/**
+ * Groups categories by provided criteria
+ * @param  data sessions to be grouped
+ * @param  opts grouping criteria - see {@link GroupingOptions}
+ */
+export const groupSessions = (data: ScheduledSession[], opts: GroupingOptions): { groupedSessions: CategoryPerGranularity[], uniqueCategories: (string | number)[] } => {
+  const accumulator: { [tick: string]: {} } = {};
+  if (opts.allKeys) {
+    allKeys[opts.granularity](data).forEach(tick => accumulator[tick] = {});
+  }
+
+  const sessionKeyGetter = opts.sessionKey ?? ((session) => session.category);
+  const granulizers = granularizers[opts.granularity];
+  const uniques: Set<string | number> = new Set();
+
+  const groupedData = data.reduce((value: { [granularity: string]: { [category: string]: number } }, item) => {
+    const granularityKey = granulizers.key(item.endTime);
+    const sessionKey = sessionKeyGetter(item);
+    if (Array.isArray(sessionKey)) {
+      sessionKey.forEach(key => {
+        addGroupEntry(value, granularityKey, key, item);
+        uniques.add(key);
+      });
+    } else {
+      addGroupEntry(value, granularityKey, sessionKey, item);
+      uniques.add(sessionKey);
+    }
     return value;
-  }, {});
+  }, accumulator);
 
-
-  return Object.entries(processed).map(([k, v]) => {
-    return { granularity: k, ...v };
-  });
+  return {
+    groupedSessions: Object.entries(groupedData).map(([k, v]) => {
+      return { granularity: k, ...v };
+    }),
+    uniqueCategories: Array.from(uniques)
+  };
 };

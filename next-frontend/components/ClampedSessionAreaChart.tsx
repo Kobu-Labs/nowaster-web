@@ -32,8 +32,7 @@ export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (props)
       </CardHeader>
       <CardContent>
         <OverviewAreaChartProvider
-          granularity={granularity}
-          ticks={Array.from({ length: processor.amount }, (_, i) => i + 1)}
+          groupingOpts={{ granularity: granularity, allKeys:true}}
           filter={{
             fromEndTime: processor.start(),
             toEndTime: processor.end(),
