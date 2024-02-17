@@ -21,8 +21,8 @@ export const Weekly: Story = {
   },
   args: {
     groupingOpts: {
-      granularity: "week",
-      allKeys:true,
+      granularity: "day",
+      allKeys: true,
       sessionKey: session => session.tags.map(tag => tag.label)
     },
     data: [
@@ -81,7 +81,7 @@ export const Monthly: Story = {
     );
   },
   args: {
-    groupingOpts: { granularity: "month" },
+    groupingOpts: { granularity: "week" },
     data: [
       {
         userId: "19i42894294",
@@ -144,7 +144,9 @@ export const Yearly: Story = {
     );
   },
   args: {
-    groupingOpts: { granularity: "year" },
+    groupingOpts: {
+      granularity: "month",
+    },
     data: [
       {
         userId: "19i42894294",
