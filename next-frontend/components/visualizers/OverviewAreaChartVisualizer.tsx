@@ -1,52 +1,53 @@
 "use client";
 
-import { Granularity, SessionsByCategory } from "@/lib/session-grouping";
+import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
 import { formatTime, randomColor } from "@/lib/utils";
 import { categoryColors } from "@/state/categories";
+import { ScheduledSession } from "@/validation/models";
 import { FC } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useRecoilState } from "recoil";
 
 type OverviewChartProps = {
-  granularity: keyof typeof Granularity,
-  data: SessionsByCategory[],
-  categories: string[],
-  ticks?: number[],
+  data: ScheduledSession[],
+  groupingOpts: GroupingOptions
 }
 
-
 export const OverviewAreaChartVisualizer: FC<OverviewChartProps> = (props) => {
+  const { groupedSessions, uniqueCategories } = groupSessions(props.data, props.groupingOpts);
+
   const [colors, setColors] = useRecoilState(categoryColors);
-  const result: { [label: string]: string } = {};
-
-
-  (props.categories).forEach(category => {
+  const unsetCategoryColors: { [label: string]: string } = {};
+  uniqueCategories.forEach(category => {
     if (colors[category] === undefined) {
-      result[category] = randomColor();
+      unsetCategoryColors[category] = randomColor();
     }
   });
 
-  if (Object.entries(result).length !== 0) {
-    setColors({ ...colors, ...result });
+  if (Object.entries(unsetCategoryColors).length !== 0) {
+    setColors({ ...colors, ...unsetCategoryColors });
   }
 
   return (
     <ResponsiveContainer width={"100%"} height={250} >
-      <AreaChart data={props.data}>
-        <XAxis ticks={props.ticks} type="number" interval={0} domain={props.ticks ? [1, props.ticks.length] : [1]} dataKey="granularity" />
+      <AreaChart data={groupedSessions} >
+        <XAxis includeHidden dataKey="granularity" />
         <YAxis tickFormatter={(x) => formatTime(x)} />
-        <Tooltip content={(data) => customTooltip(data, colors)} />
-        {props.categories.map(category => {
-          return <Area
-            key={category}
-            fill={colors[category]}
-            type="monotone"
-            stackId="1"
-            dataKey={(v) => v[category] || 0}
-            stroke={colors[category]}
-            strokeWidth={4}
-            fillOpacity={0.4}
-          />;
+        <Tooltip content={data => customTooltip(data, colors)} />
+        {uniqueCategories.map(category => {
+          const color = randomColor();
+          return (
+            <Area
+              key={category}
+              fill={color}
+              type="monotone"
+              stackId="1"
+              dataKey={(v) => v[category] || 0}
+              stroke={color}
+              strokeWidth={4}
+              fillOpacity={0.4}
+            />
+          );
         })}
       </AreaChart>
     </ResponsiveContainer>
