@@ -2,9 +2,9 @@ import { ScheduledSession } from "@/validation/models";
 import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, format, getDaysInMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
 
 export enum Granularity {
+  day,
   week,
   month,
-  year,
 }
 
 export type CategoryPerGranularity = { [category: string]: string } & { granularity: string }
@@ -29,19 +29,19 @@ export const dateProcessors: {
     next: (value: Date) => Date,
   }
 } = {
-  week: {
+  day: {
     start: (asOf) => startOfISOWeek(asOf || Date.now()),
     next: value => addDays(value, 1),
     end: (asOf) => endOfISOWeek(asOf || Date.now()),
     amount: 7,
   },
-  month: {
+  week: {
     start: (asOf) => startOfMonth(asOf || Date.now()),
     next: value => addDays(value, 1),
     end: (asOf) => endOfMonth(asOf || Date.now()),
     amount: getDaysInMonth(Date.now()),
   },
-  year: {
+  month: {
     start: (asOf) => startOfYear(asOf || Date.now()),
     next: value => addMonths(value, 1),
     end: (asOf) => endOfYear(asOf || Date.now()),
@@ -58,13 +58,13 @@ export const granularizers: {
     key: (value: Date) => string,
   }
 } = {
-  week: {
+  day: {
     key: (value: Date) => format(value, "eee"),
   },
-  month: {
+  week: {
     key: (value: Date) => value.getDate().toString(),
   },
-  year: {
+  month: {
     key: (value: Date) => format(value, "LLL")
   }
 } as const;
@@ -74,12 +74,12 @@ export const granularizers: {
  * Specifies all available keys for every type of granularity
  */
 export const allKeys: { [K in keyof typeof Granularity]: (data: ScheduledSession[]) => string[] } = {
-  week: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  month: data => {
+  day: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  week: data => {
     const days = getDaysInMonth(data.at(0)?.endTime ?? new Date());
     return Array.from({ length: days }, (_, i) => (i + 1).toString());
   },
-  year: () => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
+  month: () => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
 };
 
 const addGroupEntry = (result: Record<string, Record<string | number, number>>, granularityKey: string, sessionKey: string | number, item: ScheduledSession) => {
