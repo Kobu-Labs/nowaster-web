@@ -35,13 +35,13 @@ export const HistoryCard: FC<HistoryCardProps> = (props) => {
       </CardHeader>
       <CardContent className="flex grow-0">
         <div>
-          <p className="text-muted-foreground text-sm">{props.session.description}</p>
+          <p className="text-sm text-muted-foreground">{props.session.description}</p>
           <div className="mt-1 flex" >
             {props.session.tags.map((val) => <SessionTag key={val.id} value={val.label}></SessionTag>)}
           </div>
         </div>
         <div className="grow" />
-        <div className="ml-4 font-medium text-xl">{getFormattedTimeDifference(props.session.startTime, props.session.endTime)}</div>
+        <div className="ml-4 text-xl font-medium">{getFormattedTimeDifference(props.session.startTime, props.session.endTime)}</div>
       </CardContent>
     </Card>
   );
