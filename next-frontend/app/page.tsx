@@ -36,7 +36,7 @@ export default function IndexPage() {
         <Overview granularity="month" />
         <div className="col-span-4">
           <ClampedSessionAreaChart
-            granularity="week"
+            initialGranularity="week"
           />
         </div>
       </div>

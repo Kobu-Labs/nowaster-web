@@ -27,7 +27,7 @@ export default function Page(props: { params: { detail: string } }) {
         />
         <div className="col-span-full">
           <ClampedSessionAreaChart
-            granularity="month"
+            initialGranularity="month"
             filter={{ category: props.params.detail }}
           />
         </div>
