@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
 import { Calendar } from "@/components/ui/calendar";
 import React from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "recharts";
 import { DateTime } from "luxon";
-import { FC } from "react"
+import { FC } from "react";
 import { addMinutes } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
