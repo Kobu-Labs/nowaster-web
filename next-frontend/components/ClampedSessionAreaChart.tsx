@@ -6,12 +6,12 @@ import { OverviewAreaChartProvider } from "./providers/OveriewAreChartProvider";
 import { Card, CardContent, CardHeader } from "./ui/card";
 
 type ClampedSessionAreaChartProps = {
-  granularity: keyof typeof Granularity,
+  initialGranularity: keyof typeof Granularity,
   filter?: Partial<GetSessionsRequest>
 }
 
 export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (props) => {
-  const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.granularity);
+  const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.initialGranularity);
   const processor = dateProcessors[granularity];
 
   return (
