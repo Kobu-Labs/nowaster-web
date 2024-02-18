@@ -1,0 +1,41 @@
+name: Eslint Formatting Check
+
+on:
+  push: 
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  check-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "21"
+      - name: Install dependencies
+        run: npm i
+      - name: Eslint check for backend
+        run: npx eslint .
+  check-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./next-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "21"
+      - name: Install dependencies
+        run: npm i
+      - name: Eslint check for frontend
+        run: npx eslint .
+
