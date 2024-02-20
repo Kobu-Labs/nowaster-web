@@ -7,10 +7,10 @@ import { Label } from "recharts";
 import { DateTime } from "luxon";
 import { FC } from "react";
 import { addMinutes } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CalendarIcon } from "@radix-ui/react-icons";
+import { X } from "lucide-react";
 
 export type QuickOption = {
   label: string,
@@ -19,7 +19,7 @@ export type QuickOption = {
 
 type DatePickerDemoProps = {
   selected: Date | undefined
-  onSelect: (date: Date) => void
+  onSelect: (date: Date | undefined) => void
   quickOptions?: QuickOption[]
 }
 
@@ -36,18 +36,21 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
 
   return (
     <Popover >
-      <PopoverTrigger onWheel={(e) => props.onSelect(addMinutes(props.selected || new Date(), e.deltaY > 0 ? -1 : 1))} asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-[280px] justify-start text-left font-normal",
-            !props.selected && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {props.selected ? DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
+      <div className="flex items-center rounded-md border border-input p-1">
+        {props.selected &&
+          (
+            <div onClick={() => props.onSelect(undefined)} className="cursor-pointer rounded-md hover:bg-accent hover:text-accent-foreground">
+              <X />
+            </div>
+          )
+        }
+        <PopoverTrigger onWheel={(e) => props.onSelect(addMinutes(props.selected || new Date(), e.deltaY > 0 ? -1 : 1))} asChild>
+          <div className="inline-flex w-full cursor-pointer  items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ">
+            <CalendarIcon className="h-4 w-4" />
+            {props.selected ? DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm") : <span>Pick a date</span>}
+          </div>
+        </PopoverTrigger>
+      </div>
       <PopoverContent className="w-auto p-0">
         <Calendar
           weekStartsOn={1}
