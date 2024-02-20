@@ -135,9 +135,13 @@ export const ScheduledSessionCreationForm: FC = () => {
                           quickOptions={creationFormQuickOptions}
                           selected={field.value || undefined}
                           onSelect={(val) => {
-                            field.onChange(val);
-                            if (!form.getValues("endTime")) {
-                              form.setValue("endTime", val);
+                            if (val) {
+                              field.onChange(val);
+                              if (!form.getValues("endTime")) {
+                                form.setValue("endTime", val);
+                              }
+                            } else {
+                              form.resetField("startTime");
                             }
                           }}
                         />
@@ -160,7 +164,13 @@ export const ScheduledSessionCreationForm: FC = () => {
                       <DateTimePicker
                         quickOptions={creationFormQuickOptions}
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(val) => {
+                          if (val) {
+                            field.onChange(val);
+                          } else {
+                            form.resetField("endTime");
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
