@@ -66,15 +66,18 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
         </div>
       </PopoverContent>
       <div className="flex gap-1">
-        {props.quickOptions?.map(val => {
-          return <Button
+        {props.quickOptions?.map(val => (
+          <Button
             className="block h-min p-1"
             key={val.label}
             variant={"secondary"}
             type="button"
-            onClick={() => props.onSelect(val.increment(props.selected || new Date()))}>{val.label}
-          </Button>;
-        })}
+            onClick={() => props.onSelect(val.increment(props.selected || new Date()))}
+          >
+            {val.label}
+          </Button>
+        )
+        )}
       </div>
     </Popover>
   );
