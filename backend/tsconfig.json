@@ -1,10 +1,12 @@
 {
-  "extends": "@tsconfig/node18-strictest/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist",
+    "extends": "@tsconfig/node18-strictest/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "dist",
     /* Language and Environment */
     "target": "ESNext",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-
+    "paths": {
+      "@/*": ["./*"]
+    },
     /* Modules */                                        /* Specify what module code is generated. */
     /* Interop Constraints */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
