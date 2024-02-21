@@ -5,9 +5,9 @@
 
 import { Router } from "express";
 import { validate } from "../middleware/validation";
-import { createTagSchema, readManyTags } from "../validation/tagValidation";
 import tagRepo from "../repositories/tag_repository";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
+import { createTagSchema, readManyTags } from "../requests/tagRequests";
 
 export const TagController = Router();
 

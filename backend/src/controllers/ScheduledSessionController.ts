@@ -1,9 +1,8 @@
 import { Router } from "express";
-import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema, readManyScheduledSchema, updateScheduledSchema } from "../validation/scheduledSessionValidation";
 import scheduledSessionRepo from "../repositories/scheduled_entity";
 import { validate } from "../middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
-
+import { createScheduledSchema, deleteScheduledSchema, readByIdScheduledSchema, readManyScheduledSchema, updateScheduledSchema } from "../requests/scheduledSessionRequests";
 export const ScheduledController = Router();
 const SessionsController = Router();
 const CategoriesController = Router();
