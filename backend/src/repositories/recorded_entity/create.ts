@@ -2,12 +2,10 @@ import type { RecordedEntity } from "@prisma/client";
 import type { AsyncResult } from "../types";
 import client from "../client";
 import { Result } from "@badrap/result";
+import type { RecordedSessionRequest } from "@/src/requests/recordedSessionRequests";
 
 
-
-type CreateRecordedParams = Omit<RecordedEntity, "id">
-
-const create = async (params: CreateRecordedParams): AsyncResult<RecordedEntity> => { 
+const create = async (params: RecordedSessionRequest["create"]): AsyncResult<RecordedEntity> => { 
   try {
     const recordedEntity = await client.recordedEntity.create({ data: params });
     return Result.ok(recordedEntity);
