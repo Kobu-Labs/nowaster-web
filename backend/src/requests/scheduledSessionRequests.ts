@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TagSchema } from "./tagValidation";
+import { TagSchema } from "./tagRequests";
 import { HasID } from "./utils";
 
 export const createScheduledSchema = z.object({
