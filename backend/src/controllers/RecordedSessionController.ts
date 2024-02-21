@@ -2,12 +2,12 @@ import { Router } from "express";
 import { validate } from "../middleware/validation";
 import recordedSessionRepo from "../repositories/recorded_entity";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
-import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, readManyRecordedSchema, updateRecordedSchema } from "../requests/recordedSessionRequests";
+import { RecordedSessionRequestSchema } from "@/src/requests/recordedSessionRequests";
 
 export const RecordedController = Router();
 
 // create new study session
-RecordedController.post("/", validate({ body: createRecordedSchema }), async (req, res) => {
+RecordedController.post("/", validate({ body: RecordedSessionRequestSchema.create }), async (req, res) => {
   const recordedSessionEntity = await recordedSessionRepo.create(req.body);
 
   if (recordedSessionEntity.isErr) {
@@ -18,7 +18,7 @@ RecordedController.post("/", validate({ body: createRecordedSchema }), async (re
 });
 
 // get all sessions - sorted by date descending
-RecordedController.get("/", validate({ query: readManyRecordedSchema }), async (req, res) => {
+RecordedController.get("/", validate({ query: RecordedSessionRequestSchema.readMany }), async (req, res) => {
   const recordedSessionEntity = await recordedSessionRepo.read.many(req.query);
 
   if (recordedSessionEntity.isErr) {
@@ -29,7 +29,7 @@ RecordedController.get("/", validate({ query: readManyRecordedSchema }), async (
 });
 
 // get specific session
-RecordedController.get("/:id", validate({ params: readByIdRecordedSchema }), async (req, res) => {
+RecordedController.get("/:id", validate({ params: RecordedSessionRequestSchema.readById }), async (req, res) => {
   const recordedSessionEntity = await recordedSessionRepo.read.single(req.params);
 
   if (recordedSessionEntity.isErr) {
@@ -41,7 +41,7 @@ RecordedController.get("/:id", validate({ params: readByIdRecordedSchema }), asy
 
 
 // update study session
-RecordedController.put("/", validate({ body: updateRecordedSchema }), async (req, res) => {
+RecordedController.put("/", validate({ body: RecordedSessionRequestSchema.updateById }), async (req, res) => {
   const updatedEntity = await recordedSessionRepo.update(req.body);
 
   if (updatedEntity.isErr) {
@@ -52,7 +52,7 @@ RecordedController.put("/", validate({ body: updateRecordedSchema }), async (req
 });
 
 // delete study session by id
-RecordedController.delete("/", validate({ body: deleteRecordedSchema }), async (req, res) => {
+RecordedController.delete("/", validate({ body: RecordedSessionRequestSchema.removeById }), async (req, res) => {
   const deletedEntity = await recordedSessionRepo.remove.single(req.body);
 
   if (deletedEntity.isErr) {
