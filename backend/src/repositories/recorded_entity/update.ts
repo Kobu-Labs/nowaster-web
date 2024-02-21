@@ -2,16 +2,10 @@ import type { AsyncResult } from "../types";
 import type { RecordedEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
+import type { RecordedSessionRequest } from "@/src/requests/recordedSessionRequests";
 
 
-type UpdateRecordedEntityParams = {
-    id: string;
-    category?: string;
-    description?: string | null;
-};
-
-
-const update = async (params: UpdateRecordedEntityParams): AsyncResult<RecordedEntity> => {
+const update = async (params: RecordedSessionRequest["updateById"]): AsyncResult<RecordedEntity> => {
   try {
     const { id, ...data } = params;
 

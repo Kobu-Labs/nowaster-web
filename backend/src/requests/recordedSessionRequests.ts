@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createRecordedSchema = z.object({
+const create = z.object({
   category: z.string().nonempty(),
   description: z.string()
     .max(50)
@@ -8,15 +8,15 @@ export const createRecordedSchema = z.object({
   startTime: z.coerce.date()
 });
 
-export const readManyRecordedSchema = z.object({
-  limit : z.coerce.number().optional()
+const readMany = z.object({
+  limit: z.coerce.number().optional()
 });
 
-export const readByIdRecordedSchema = z.object({
+const readById = z.object({
   id: z.string().uuid(),
 });
 
-export const updateRecordedSchema = z.object({
+const updateById = z.object({
   id: z.string().uuid(),
   category: z.string().nonempty().optional(),
   description: z.string()
@@ -25,7 +25,17 @@ export const updateRecordedSchema = z.object({
   startTime: z.coerce.date().optional()
 });
 
-
-export const deleteRecordedSchema = z.object({
+const removeById = z.object({
   id: z.string().uuid(),
 });
+
+
+export type RecordedSessionRequest = { [Property in (keyof typeof RecordedSessionRequestSchema)]: z.infer<typeof RecordedSessionRequestSchema[Property]> }
+
+export const RecordedSessionRequestSchema = {
+  readById,
+  removeById,
+  create,
+  readMany,
+  updateById
+} as const;

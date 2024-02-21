@@ -2,17 +2,10 @@ import type { RecordedEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "../types";
+import type { RecordedSessionRequest } from "@/src/requests/recordedSessionRequests";
 
 
-type ReadSingleRecordedParams = {
-    id: string
-}
-
-type ReadManyRecordedParams = {
-    limit?: number | undefined
-}
-
-const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEntity | null> => {
+const single = async (params: RecordedSessionRequest["readById"]): AsyncResult<RecordedEntity | null> => {
   try {
     const recordedEntity = await client.recordedEntity.findFirst({
       where: {
@@ -26,7 +19,7 @@ const single = async (params: ReadSingleRecordedParams): AsyncResult<RecordedEnt
   }
 };
 
-const many = async (params: ReadManyRecordedParams): AsyncResult<RecordedEntity[]> => {
+const many = async (params: RecordedSessionRequest["readMany"]): AsyncResult<RecordedEntity[]> => {
   try {
     const recordedEntities = await client.recordedEntity.findMany({
       take: params.limit,
