@@ -3,7 +3,7 @@ import type { ScheduledEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
 import type { z } from "zod";
-import type { readManyScheduledSchema } from "../../validation/scheduledSessionValidation";
+import type { readManyScheduledSchema } from "../../requests/scheduledSessionRequests";
 
 type ReadSingleScheduledParams = {
     id: string

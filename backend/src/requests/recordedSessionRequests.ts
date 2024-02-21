@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 export const createRecordedSchema = z.object({
   category: z.string().nonempty(),
   description: z.string()

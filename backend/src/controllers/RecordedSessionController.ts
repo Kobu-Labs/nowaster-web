@@ -2,7 +2,7 @@ import { Router } from "express";
 import { validate } from "../middleware/validation";
 import recordedSessionRepo from "../repositories/recorded_entity";
 import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
-import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, readManyRecordedSchema, updateRecordedSchema } from "../validation/recordedSessionValidation";
+import { createRecordedSchema, deleteRecordedSchema, readByIdRecordedSchema, readManyRecordedSchema, updateRecordedSchema } from "../requests/recordedSessionRequests";
 
 export const RecordedController = Router();
 
