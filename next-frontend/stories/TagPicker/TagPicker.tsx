@@ -1,6 +1,6 @@
 import { TagApi } from "@/api";
 import { Button } from "@/components/ui/button";
-import { Command, CommandGroup, CommandInput, CommandItem} from "@/components/ui/command";
+import { Command, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { prefixBasedMatch } from "@/lib/searching";
@@ -104,7 +104,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
           }
           <CommandGroup>
             <ScrollArea type="always" className="max-h-48 overflow-y-auto rounded-md border-none">
-              {tags.value.filter((tag) => prefixBasedMatch(tag.label, searchTerm)).map((tag) => (
+              {tags.value.filter((tag) => prefixBasedMatch(tag.label, searchTerm, { caseInsensitive: true })).map((tag) => (
                 <CommandItem
                   value={tag.label}
                   key={tag.id}
