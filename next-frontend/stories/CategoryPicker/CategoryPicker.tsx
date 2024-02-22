@@ -55,7 +55,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
             {"Create '" + value + "'"}
           </CommandEmpty>
           <CommandGroup>
-            {data.value.filter(c => prefixBasedMatch(c, value || "")).map((category) => (
+            {data.value.filter(c => prefixBasedMatch(c, value || "", { caseInsensitive: true })).map((category) => (
               <CommandItem
                 key={category}
                 onSelect={(currentValue) => {
