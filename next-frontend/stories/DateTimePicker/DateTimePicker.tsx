@@ -50,6 +50,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
+          weekStartsOn={1}
           mode="single"
           selected={props.selected}
           onSelect={(v) => v && props.onSelect(v)}
