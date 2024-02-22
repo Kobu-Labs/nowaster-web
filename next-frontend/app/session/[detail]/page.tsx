@@ -1,6 +1,5 @@
 "use client";
 
-import { ClampedSessionAreaChart } from "@/components/ClampedSessionAreaChart";
 import { CommonTagsPresenter } from "@/components/presenters/CommonTagsPresenter";
 import { AverageDurationProvider } from "@/components/providers/AverageDurationProvider";
 import { BaseSessionTableColumns } from "@/components/providers/session-table/BaseColumns";
@@ -8,6 +7,7 @@ import { BaseSessionTable } from "@/components/providers/session-table/BaseSessi
 import { SessionCountKpiCardProvider } from "@/components/providers/SessionCountKpiCardProvider";
 import { TotalTimeKpiCardProvider } from "@/components/providers/TotalTimeKpiCardProvider";
 import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
+import { FilteredAreaChart } from "@/stories/FilteredAreaChart/FilteredAreaChart";
 
 export default function Page(props: { params: { detail: string } }) {
 
@@ -26,8 +26,8 @@ export default function Page(props: { params: { detail: string } }) {
           filter={{ category: props.params.detail }}
         />
         <div className="col-span-full">
-          <ClampedSessionAreaChart
-            initialGranularity="month"
+          <FilteredAreaChart
+            initialGranularity="perDayInMonth"
             filter={{ category: props.params.detail }}
           />
         </div>
