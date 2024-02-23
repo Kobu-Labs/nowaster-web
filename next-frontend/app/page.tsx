@@ -4,8 +4,8 @@ import { Overview } from "@/components/overview-chart";
 import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { StatisticsApi } from "@/api";
-import { ClampedSessionAreaChart } from "@/components/ClampedSessionAreaChart";
 import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
+import { FilteredAreaChart } from "@/stories/FilteredAreaChart/FilteredAreaChart";
 
 export default function IndexPage() {
 
@@ -35,8 +35,8 @@ export default function IndexPage() {
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Overview granularity="month" />
         <div className="col-span-4">
-          <ClampedSessionAreaChart
-            initialGranularity="week"
+          <FilteredAreaChart
+            initialGranularity="perDayInMonth"
           />
         </div>
       </div>
