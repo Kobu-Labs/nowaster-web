@@ -2,9 +2,9 @@ import { ScheduledSession } from "@/validation/models";
 import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, format, getDaysInMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
 
 export const Granularity = {
-  day: "day",
-  week: "week",
-  month: "month",
+  perDayInWeek: "Per Day In Week",
+  perDayInMonth: "Per Day In Month",
+  perMonth: "Monthly",
 } as const;
 
 
@@ -30,19 +30,19 @@ export const dateProcessors: {
     next: (value: Date) => Date,
   }
 } = {
-  day: {
+  perDayInWeek: {
     start: (asOf) => startOfISOWeek(asOf || Date.now()),
     next: value => addDays(value, 1),
     end: (asOf) => endOfISOWeek(asOf || Date.now()),
     amount: 7,
   },
-  week: {
+  perDayInMonth: {
     start: (asOf) => startOfMonth(asOf || Date.now()),
     next: value => addDays(value, 1),
     end: (asOf) => endOfMonth(asOf || Date.now()),
     amount: getDaysInMonth(Date.now()),
   },
-  month: {
+  perMonth: {
     start: (asOf) => startOfYear(asOf || Date.now()),
     next: value => addMonths(value, 1),
     end: (asOf) => endOfYear(asOf || Date.now()),
@@ -59,13 +59,13 @@ export const granularizers: {
     key: (value: Date) => string,
   }
 } = {
-  day: {
+  perDayInWeek: {
     key: (value: Date) => format(value, "eee"),
   },
-  week: {
+  perDayInMonth: {
     key: (value: Date) => value.getDate().toString(),
   },
-  month: {
+  perMonth: {
     key: (value: Date) => format(value, "LLL")
   }
 } as const;
@@ -75,12 +75,12 @@ export const granularizers: {
  * Specifies all available keys for every type of granularity
  */
 export const allKeys: { [K in keyof typeof Granularity]: (data: ScheduledSession[]) => string[] } = {
-  day: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  week: data => {
+  perDayInWeek: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  perDayInMonth: data => {
     const days = getDaysInMonth(data.at(0)?.endTime ?? new Date());
     return Array.from({ length: days }, (_, i) => (i + 1).toString());
   },
-  month: () => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
+  perMonth: () => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
 };
 
 const addGroupEntry = (result: Record<string, Record<string | number, number>>, granularityKey: string, sessionKey: string | number, item: ScheduledSession) => {
