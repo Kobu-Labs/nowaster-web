@@ -10,6 +10,7 @@ import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
 import { FilteredAreaChart } from "@/stories/FilteredAreaChart/FilteredAreaChart";
 
 export default function Page(props: { params: { detail: string } }) {
+  const category = props.params.detail;
 
   return (
     <div>
@@ -19,25 +20,25 @@ export default function Page(props: { params: { detail: string } }) {
         </h2>
       </div>
       <div className="m-8 grid grid-cols-4 gap-8">
-        <SessionCountKpiCardProvider filter={{ category: props.params.detail }} />
-        <TotalTimeKpiCardProvider filter={{ category: props.params.detail }} />
-        <AverageDurationProvider filter={{ category: props.params.detail }} />
+        <SessionCountKpiCardProvider filter={{ category: category }} />
+        <TotalTimeKpiCardProvider filter={{ category: category }} />
+        <AverageDurationProvider filter={{ category: category }} />
         <CommonTagsPresenter
-          filter={{ category: props.params.detail }}
+          filter={{ category: category }}
         />
         <div className="col-span-full">
           <FilteredAreaChart
             initialGranularity="perDayInMonth"
-            filter={{ category: props.params.detail }}
+            filter={{ category: category }}
           />
         </div>
         <div className="col-span-full">
           <BaseSessionTable
-            filter={{ category: props.params.detail }}
+            filter={{ category: category }}
             columns={BaseSessionTableColumns} />
         </div>
       </div>
-    </div>
+    </div >
   );
 
 }
