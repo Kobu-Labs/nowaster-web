@@ -45,7 +45,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command shouldFilter={false}>
-          <CommandInput onValueChange={setValue} placeholder="Search categories" />
+          <CommandInput onValueChange={setValue} placeholder={"Search categories"} value={value ?? undefined} />
           <CommandEmpty
             className="cursor-pointer py-6 text-center text-sm"
             onClick={() => {
