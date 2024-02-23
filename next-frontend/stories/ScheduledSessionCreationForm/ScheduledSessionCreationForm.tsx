@@ -95,7 +95,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormLabel className="block">Category</FormLabel>
                   <FormControl>
                     <CategoryPicker onCategorySelected={(category) => {
-                      if (category === null) {
+                      if (category === undefined) {
                         form.resetField("category");
                       } else {
                         field.onChange(category);
