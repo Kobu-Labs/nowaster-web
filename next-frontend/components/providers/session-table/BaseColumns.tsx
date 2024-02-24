@@ -72,12 +72,12 @@ export const BaseSessionTableColumns: ColumnDef<WithId<ScheduledSession>>[] = [
   },
   {
     accessorKey: "startTime",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="startTime" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Start Time" />,
     cell: ({ row: { original } }) => format(original.startTime, "dd-MM-yyyy HH:mm")
   },
   {
     accessorKey: "endTime",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="endTime" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="End Time" />,
     cell: ({ row: { original } }) => format(original.endTime, "dd-MM-yyyy HH:mm"),
   },
   {
