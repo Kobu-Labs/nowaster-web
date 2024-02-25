@@ -1,5 +1,6 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
 import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
 import { formatTime, randomColor } from "@/lib/utils";
 import { categoryColors } from "@/state/categories";
@@ -55,23 +56,41 @@ export const OverviewAreaChartVisualizer: FC<OverviewChartProps> = (props) => {
 
 const customTooltip = (data: any, colors: { [category: string]: string }) => {
   if (!data.payload) {
-    return <div />;
+    return <></>;
   }
-  const values: [string: number] = data.payload[0]?.payload;
 
-  return values
-    ? <div className="rounded-sm p-2">
-      {Object.entries(values)
-        .filter(([k]) => k !== "granularity")
-        .map(([k, v]) => {
-          return <p
-            key={k}
-            style={{ "--legend-color": colors[k] } as React.CSSProperties}
-            className={"text-[var(--legend-color)]"}
-          >
-            {`${k}  ${formatTime(v)}`}
-          </p>;
-        })}
-    </div>
-    : < div />;
+  const values: [string: number] = data.payload[0]?.payload;
+  if (!values) {
+    return <></>;
+  }
+
+  const filteredValues = Object.entries(values).filter(([key]) => key !== "granularity");
+  if (filteredValues.length === 0) {
+    return <></>;
+  }
+
+  return (
+    <Card className="rounded-sm p-2">
+      {filteredValues.map(([category, totalTime]) => {
+        return (
+          <div className="flex items-center justify-between gap-2">
+            <p
+              key={category + "category"}
+              style={{ "--legend-color": colors[category] } as React.CSSProperties}
+              className={"text-[var(--legend-color)]"}
+            >
+              {category}
+            </p>
+            <p
+              key={category + "time"}
+              style={{ "--legend-color": colors[category] } as React.CSSProperties}
+              className={"text-[var(--legend-color)]"}
+            >
+              {formatTime(totalTime)}
+            </p>
+          </div>
+        );
+      })}
+    </Card>
+  );
 };
