@@ -17,7 +17,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   const [value, setValue] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["sessions", "slider"],
+    queryKey: ["categories"],
     retry: false,
     queryFn: async () => await ScheduledSessionApi.getCategories(),
   });
