@@ -24,4 +24,4 @@ export const ScheduledSessionSchema = z.object({
 });
 export type ScheduledSession = z.infer<typeof ScheduledSessionSchema>;
 
-
+export type WithId<T> = T & { id: string };
