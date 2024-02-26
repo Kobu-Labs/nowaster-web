@@ -7,9 +7,9 @@ type DeleteSingleScheduledParams = {
     id: string;
 };
 
-const single = async (params: DeleteSingleScheduledParams) : AsyncResult<ScheduledEntity>=> { 
+const single = async (params: DeleteSingleScheduledParams): AsyncResult<ScheduledEntity> => {
   try {
-    return await client.$transaction(async (tx)=>{
+    return await client.$transaction(async (tx) => {
       const scheduledEntity = await tx.scheduledEntity.findFirst({
         where: {
           id: params.id,
@@ -53,26 +53,39 @@ type DeleteManyScheduledParams = {
     ids: string[];
 };
 
-const many = async (params: DeleteManyScheduledParams) : AsyncResult<ScheduledEntity[]>=> {
+const many = async (params: DeleteManyScheduledParams): AsyncResult<ScheduledEntity[]> => {
   try {
-    return await client.$transaction(async (tx)=>{
-      const scheduledEntity = await tx.scheduledEntity.findMany({
+    return await client.$transaction(async (tx) => {
+      const sessions = await tx.scheduledEntity.findMany({
         where: {
-          id: {in: params.ids},
+          id: { in: params.ids },
+        },
+        include: {
+          tags: {
+            select: {
+              tag: true
+            }
+          }
         }
       });
 
-      if (scheduledEntity.length !== params.ids.length) {
-        const missingIds = params.ids.filter(x => !scheduledEntity.map(obj => obj.id).includes(x));
+
+
+      if (sessions.length !== params.ids.length) {
+        const missingIds = params.ids.filter(x => !sessions.map(obj => obj.id).includes(x));
         return Result.err(new Error("Could not find scheduled entitites with id:" + missingIds.toString()));
       }
 
       await tx.scheduledEntity.deleteMany({
         where: {
-          id: {in: params.ids},
+          id: { in: params.ids },
         }
       });
-      return Result.ok(scheduledEntity);
+
+      return Result.ok(sessions.map(session => {
+        const { tags, ...rest } = session;
+        return { tags: tags.map(t => t.tag), ...rest };
+      }));
     });
   } catch (error) {
     return Result.err(error as Error);
