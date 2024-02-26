@@ -33,6 +33,6 @@ model TagToSession {
     id        String          @id @default(uuid())
     sessionId String
     tagId     String
-    session   ScheduledEntity @relation(fields: [sessionId], references: [id])
-    tag       Tag             @relation(fields: [tagId], references: [id])
+    session   ScheduledEntity @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+    tag       Tag             @relation(fields: [tagId], references: [id], onDelete:Cascade)
 }
