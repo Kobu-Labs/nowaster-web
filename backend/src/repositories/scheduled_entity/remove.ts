@@ -13,6 +13,14 @@ const single = async (params: DeleteSingleScheduledParams) : AsyncResult<Schedul
       const scheduledEntity = await tx.scheduledEntity.findFirst({
         where: {
           id: params.id,
+        },
+        include: {
+          tags: {
+            select: {
+              tag: true,
+            }
+
+          }
         }
       });
 
@@ -23,6 +31,13 @@ const single = async (params: DeleteSingleScheduledParams) : AsyncResult<Schedul
       const deletedEntity = await tx.scheduledEntity.delete({
         where: {
           id: params.id,
+        },
+        include: {
+          tags: {
+            select: {
+              tag: true
+            }
+          }
         }
       });
       return Result.ok(deletedEntity);
