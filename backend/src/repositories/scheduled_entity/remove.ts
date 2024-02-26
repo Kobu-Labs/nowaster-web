@@ -40,7 +40,9 @@ const single = async (params: DeleteSingleScheduledParams) : AsyncResult<Schedul
           }
         }
       });
-      return Result.ok(deletedEntity);
+
+      const { tags, ...rest } = deletedEntity;
+      return Result.ok({ tags: tags.map(t => t.tag), ...rest });
     });
   } catch (error) {
     return Result.err(error as Error);
