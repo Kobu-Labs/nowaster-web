@@ -1,13 +1,13 @@
 import { ScheduledSessionApi } from "@/api";
 import { DataTable } from "@/components/visualizers/DataTable";
-import { ScheduledSession } from "@/validation/models";
+import { ScheduledSession, WithId } from "@/validation/models";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC } from "react";
 
 type BaseSessionTableProps = {
-  columns: ColumnDef<ScheduledSession>[],
+  columns: ColumnDef<WithId<ScheduledSession>>[],
   filter?: GetSessionsRequest,
 }
 
