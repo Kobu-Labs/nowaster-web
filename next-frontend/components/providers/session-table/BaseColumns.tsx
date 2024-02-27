@@ -1,13 +1,13 @@
 import { ScheduledSessionApi } from "@/api";
 import { DataTableColumnHeader } from "@/components/ui/column-header";
 import { useToast } from "@/components/ui/use-toast";
-import { getFormattedTimeDifference } from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
 import { SessionTag } from "@/stories/SessionTag/SessionTag";
 import { ScheduledSession, WithId } from "@/validation/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { FC } from "react";
 
@@ -81,12 +81,14 @@ export const BaseSessionTableColumns: ColumnDef<WithId<ScheduledSession>>[] = [
     cell: ({ row: { original } }) => format(original.endTime, "dd-MM-yyyy HH:mm"),
   },
   {
-    accessorKey: "duration",
-    header: "Duration",
-    cell: ({ row: { original } }) => {
-      const time = getFormattedTimeDifference(original.startTime, original.endTime);
-
-      return <div>{time}</div>;
+    id: "duration-column",
+    accessorFn: (session) => differenceInMinutes(session.endTime, session.startTime),
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Duration" />
+    ),
+    cell: (test) => {
+      const time = test.cell.getValue<number>();
+      return <div>{formatTime(time)}</div>;
     }
   },
   {
