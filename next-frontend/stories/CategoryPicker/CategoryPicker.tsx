@@ -41,6 +41,10 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
     props.onCategorySelected(undefined);
   };
 
+  const shouldShowAddButton = () => {
+    return currentCategory && categories.value.every(cat => !prefixBasedMatch(cat, currentCategory));
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -57,22 +61,25 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
       <PopoverContent className="w-[200px] p-0">
         <Command shouldFilter={false}>
           <CommandInput onValueChange={setCurrentCategory} placeholder={"Search categories"} value={currentCategory} />
-          <CommandEmpty
-            className="cursor-pointer py-6 text-center text-sm"
-            onClick={() => {
-              props.onCategorySelected(currentCategory);
-              setIsOpen(false);
-            }}>
-            {"Create '" + currentCategory + "'"}
-          </CommandEmpty>
+          {shouldShowAddButton() && (
+            <CommandItem
+              className="hover:bg-accent cursor-pointer py-6 text-center text-sm"
+              onSelect={() => {
+                props.onCategorySelected(currentCategory);
+                setIsOpen(false);
+              }}>
+              {"Create '" + currentCategory + "'"}
+            </CommandItem>
+          )}
           <CommandGroup>
             <ScrollArea type="always" className="max-h-48 overflow-y-auto rounded-md border-none">
               {categories.value
                 .filter(category => prefixBasedMatch(category, currentCategory, { caseInsensitive: true }))
                 .map((category) => (
                   <CommandItem
+                    value={category}
                     key={category}
-                    onSelect={selectedValue => (selectedValue === currentCategory) ? onDeselect() : onSelect(selectedValue)}
+                    onSelect={selectedValue => (selectedValue === currentCategory) ? onDeselect() : onSelect(category)}
                   >
                     <Check
                       className={cn(
