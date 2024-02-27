@@ -3,7 +3,7 @@ import {
   ArrowUpIcon,
   CaretSortIcon,
 } from "@radix-ui/react-icons";
-import { Column } from "@tanstack/react-table";
+import { Column, SortDirection } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 import {
@@ -29,6 +29,15 @@ export function DataTableColumnHeader<TData, TValue>({
     return <div className={cn(className)}>{title}</div>;
   }
 
+  const onSortToggle = (direction: SortDirection) => {
+    const currentSort = column.getIsSorted();
+    if (currentSort === direction) {
+      column.clearSorting();
+    } else {
+      column.toggleSorting(direction === "desc");
+    }
+  };
+
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <DropdownMenu>
@@ -36,7 +45,7 @@ export function DataTableColumnHeader<TData, TValue>({
           <Button
             variant="ghost"
             size="sm"
-            className="-ml-3 h-8 data-[state=open]:bg-accent"
+            className="data-[state=open]:bg-accent -ml-3 h-8"
           >
             <span>{title}</span>
             {column.getIsSorted() === "desc" ? (
@@ -49,12 +58,12 @@ export function DataTableColumnHeader<TData, TValue>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+          <DropdownMenuItem onClick={() => onSortToggle("asc")} className={cn(column.getIsSorted() === "asc" && "bg-accent")}>
+            <ArrowUpIcon className="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
             Asc
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+          <DropdownMenuItem onClick={() => onSortToggle("desc")} className={cn(column.getIsSorted() === "desc" && "bg-accent")}>
+            <ArrowDownIcon className="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
             Desc
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -62,4 +71,3 @@ export function DataTableColumnHeader<TData, TValue>({
     </div>
   );
 }
-
