@@ -2,7 +2,11 @@ type PrefixBasedMatchOpts = Partial<{
   caseInsensitive: boolean
 }>
 
-export const prefixBasedMatch = (value: string, searchTerm: string, opts?: PrefixBasedMatchOpts): boolean => {
+export const prefixBasedMatch = (value: string | undefined, searchTerm: string | undefined, opts?: PrefixBasedMatchOpts): boolean => {
+  if (value === undefined || searchTerm === undefined) {
+    return false;
+  }
+
   if (opts?.caseInsensitive) {
     value = value.toLowerCase();
     searchTerm = searchTerm.toLowerCase();
