@@ -1,4 +1,5 @@
 import { ScheduledSessionApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTableColumnHeader } from "@/components/ui/column-header";
 import { useToast } from "@/components/ui/use-toast";
 import { formatTime } from "@/lib/utils";
@@ -32,7 +33,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
           title: "Session deleted succesfully",
           variant: "default",
         });
-        queryClient.invalidateQueries({ queryKey: ["sessions"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
       }
     },
   });

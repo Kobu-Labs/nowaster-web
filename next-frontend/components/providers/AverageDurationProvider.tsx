@@ -1,4 +1,4 @@
-import { ScheduledSessionApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { formatTime } from "@/lib/utils";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { useQuery } from "@tanstack/react-query";
@@ -11,10 +11,8 @@ type AverageDurationProviderProps = {
 }
 
 export const AverageDurationProvider = (props: AverageDurationProviderProps) => {
-  const { data: result } = useQuery({
-    queryKey: ["sessions", props.filter],
-    retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
+  const { data: sessions } = useQuery({
+    ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
       if (data.isErr) {
         return 0;
@@ -27,7 +25,7 @@ export const AverageDurationProvider = (props: AverageDurationProviderProps) => 
   });
 
   return (
-    <KpiCardVisualizer variant={"big_value"} value={formatTime(result || 0)} title={"Average session duration"}>
+    <KpiCardVisualizer variant={"big_value"} value={formatTime(sessions || 0)} title={"Average session duration"}>
       <Hourglass />
     </KpiCardVisualizer>);
 };

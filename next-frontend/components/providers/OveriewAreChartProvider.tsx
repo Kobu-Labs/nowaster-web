@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { OverviewAreaChartVisualizer } from "@/components/visualizers/OverviewAreaChartVisualizer";
-import { ScheduledSessionApi } from "@/api";
+import { useQuery } from "@tanstack/react-query";
 import { type GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { type GroupingOptions } from "@/lib/session-grouping";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 
 type OverviewChartProps = {
@@ -10,13 +10,11 @@ type OverviewChartProps = {
   filter?: Partial<GetSessionsRequest>
 }
 
-/* BUG: issue with selecting initial granularity (before it got cached) - chart flickers */
 export const OverviewAreaChartProvider = (props: OverviewChartProps) => {
 
   const { data: result } = useQuery({
-    queryKey: ["sessions", props.filter],
+    ...queryKeys.sessions.filtered(props.filter),
     retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
     staleTime: Infinity,
     select: (data) => {
       if (data.isErr) {

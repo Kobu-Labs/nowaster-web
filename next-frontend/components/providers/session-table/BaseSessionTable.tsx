@@ -1,4 +1,4 @@
-import { ScheduledSessionApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/visualizers/DataTable";
 import { ScheduledSession, WithId } from "@/validation/models";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
@@ -13,8 +13,7 @@ type BaseSessionTableProps = {
 
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
   const { data } = useQuery({
-    queryKey: ["sessions", props.filter],
-    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
+    ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
       return data.isOk ? data.value : [];
     }
