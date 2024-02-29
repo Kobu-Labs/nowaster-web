@@ -1,4 +1,4 @@
-import baseApi, { handleResponse } from "./baseApi";
+import baseApi, { handleResponse } from "@/api/baseApi";
 
 import {
   CreateScheduledSessionRequest,

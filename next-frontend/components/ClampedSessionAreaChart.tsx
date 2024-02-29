@@ -2,8 +2,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { FC, useState } from "react";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { dateProcessors, Granularity } from "@/lib/session-grouping";
-import { OverviewAreaChartProvider } from "./providers/OveriewAreChartProvider";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { OverviewAreaChartProvider } from "@/components/providers/OveriewAreChartProvider";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 type ClampedSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity,

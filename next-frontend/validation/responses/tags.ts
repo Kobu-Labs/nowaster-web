@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { TagSchema } from "../models";
-import { HasID } from "../utils";
+import { TagSchema } from "@/validation/models";
+import { HasID } from "@/validation/utils";
 
 
 export type ReadManyTagsResponse = z.infer<typeof readManyTagsResponseSchema>;

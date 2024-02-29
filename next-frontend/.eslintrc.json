@@ -8,28 +8,33 @@
     "plugin:storybook/recommended"
   ],
   "plugins": [
-    "tailwindcss"
+    "tailwindcss",
+    "no-relative-import-paths"
   ],
   "rules": {
+    "no-relative-import-paths/no-relative-import-paths": [
+      "error",
+        { "allowSameFolder": false, "rootDir": ".", "prefix": "@" }
+    ],
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
     "tailwindcss/no-custom-classname": "off",
     "indent": [
       "error",
-        2
+      2
     ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ]
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "double"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ]
   },
   "settings": {
     "tailwindcss": {

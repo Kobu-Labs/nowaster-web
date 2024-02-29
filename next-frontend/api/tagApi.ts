@@ -1,7 +1,7 @@
 import { CreateTagRequest, ReadManyTagsRequest } from "@/validation/requests/tags";
 import { CreateTagResponse, createTagResponseSchema, ReadManyTagsResponse, readManyTagsResponseSchema } from "@/validation/responses/tags";
 import { Result } from "@badrap/result";
-import baseApi, { handleResponse } from "./baseApi";
+import baseApi, { handleResponse } from "@/api/baseApi";
 
 export const readMany = async (params?: ReadManyTagsRequest): Promise<Result<ReadManyTagsResponse>> => {
   const { data } = await baseApi.get(

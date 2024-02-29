@@ -12,17 +12,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createScheduledSchema, CreateScheduledSessionRequest } from "@/validation/requests/scheduledSession";
-import { CategoryPicker } from "../CategoryPicker/CategoryPicker";
+import { CategoryPicker } from "@/stories/CategoryPicker/CategoryPicker";
 import { ScheduledSessionApi } from "@/api";
 import { useForm } from "react-hook-form";
-import { TagPicker } from "../TagPicker/TagPicker";
+import { TagPicker } from "@/stories/TagPicker/TagPicker";
 import { Card, CardContent } from "@/components/ui/card";
 import { FC } from "react";
 import React from "react";
-import { DateTimePicker, QuickOption } from "../DateTimePicker/DateTimePicker";
+import { DateTimePicker, QuickOption } from "@/stories/DateTimePicker/DateTimePicker";
 import { addHours, addMinutes, setMinutes, subHours, subMinutes } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
-import { HistoryCard } from "../HistoryCard/HistoryCard";
+import { HistoryCard } from "@/stories/HistoryCard/HistoryCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 

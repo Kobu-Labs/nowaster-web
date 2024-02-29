@@ -4,7 +4,7 @@ import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 import { Hourglass } from "lucide-react";
-import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
+import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
 
 type AverageDurationProviderProps = {
   filter?: GetSessionsRequest,

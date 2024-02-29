@@ -13,7 +13,7 @@ import { Result } from "@badrap/result";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { FC, useState } from "react";
-import { SessionTag } from "../SessionTag/SessionTag";
+import { SessionTag } from "@/stories/SessionTag/SessionTag";
 
 type TagWithId = Tag & { id: string }
 

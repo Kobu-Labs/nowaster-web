@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ScheduledSessionSchema } from "../models";
-import { HasID } from "../utils";
+import { ScheduledSessionSchema } from "@/validation/models";
+import { HasID } from "@/validation/utils";
 
 export type CreateScheduledSessionResponse = z.infer<typeof createScheduledSessionResponseSchema>;
 export type GetSessionResponse = z.infer<typeof getSessionResponseSchema>;

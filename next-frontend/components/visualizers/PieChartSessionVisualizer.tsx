@@ -5,7 +5,7 @@ import { tagColors } from "@/state/tags";
 import { FC, useState } from "react";
 import { Cell, Label, Pie, PieChart, ResponsiveContainer, Sector } from "recharts";
 import { useRecoilState } from "recoil";
-import { AmountByCategory } from "../providers/PieChartSessionProvider";
+import { AmountByCategory } from "@/components/providers/PieChartSessionProvider";
 
 type PieChartSessionProps = {
   data: AmountByCategory[],

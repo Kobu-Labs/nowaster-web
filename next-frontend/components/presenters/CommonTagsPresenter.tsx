@@ -1,8 +1,8 @@
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import React from "react";
 import { FC } from "react";
-import { PieChartSessionProvider } from "../providers/PieChartSessionProvider";
-import { Card, CardContent, CardHeader } from "../ui/card";
+import { PieChartSessionProvider } from "@/components/providers/PieChartSessionProvider";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 type CommonTagsPresenterProps = {
   filter?: GetSessionsRequest

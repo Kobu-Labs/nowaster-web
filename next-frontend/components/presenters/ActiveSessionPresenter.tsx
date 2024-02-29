@@ -1,6 +1,6 @@
 import { FC } from "react";
-import { useActiveSession } from "../hooks/useActiveSessions";
-import { ActiveSessionVisualizer } from "../visualizers/ActiveSessionVisualizer";
+import { useActiveSession } from "@/components/hooks/useActiveSessions";
+import { ActiveSessionVisualizer } from "@/components/visualizers/ActiveSessionVisualizer";
 
 export const ActiveSessionPresenter: FC = () => {
   const sessions = useActiveSession();

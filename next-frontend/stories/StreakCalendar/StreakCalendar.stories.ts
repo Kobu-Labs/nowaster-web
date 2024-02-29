@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { subDays } from "date-fns";
-import { StreakCalendar } from "./StreakCalendar";
+import { StreakCalendar } from "@/stories/StreakCalendar/StreakCalendar";
 
 const meta = {
   title: "StreakCalendar",
