@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { userNameSchema as usernameSchema } from "./utils";
+import { userNameSchema as usernameSchema } from "@/validation/utils";
 
 export const registrationSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),

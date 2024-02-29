@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HasID } from "./utils";
+import { HasID } from "@/validation/utils";
 
 export const TagSchema = z.object({
   label: z.string()

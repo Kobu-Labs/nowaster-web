@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { FC } from "react";
-import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
+import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 type SessionCountKpiCardProviderProps = {

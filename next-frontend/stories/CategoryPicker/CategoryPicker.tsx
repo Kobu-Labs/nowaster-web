@@ -63,7 +63,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           <CommandInput onValueChange={setCurrentCategory} placeholder={"Search categories"} value={currentCategory} />
           {shouldShowAddButton() && (
             <CommandItem
-              className="hover:bg-accent cursor-pointer py-6 text-center text-sm"
+              className="cursor-pointer py-6 text-center text-sm hover:bg-accent"
               onSelect={() => {
                 props.onCategorySelected(currentCategory);
                 setIsOpen(false);

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { SessionTag } from "./SessionTag";
+import { SessionTag } from "@/stories/SessionTag/SessionTag";
 
 const meta = {
   title: "SessionTag",

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
-import { PieChartSessionVisualizer } from "../visualizers/PieChartSessionVisualizer";
+import { PieChartSessionVisualizer } from "@/components/visualizers/PieChartSessionVisualizer";
 import { ScheduledSession } from "@/validation/models";
 import { differenceInMinutes } from "date-fns";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";

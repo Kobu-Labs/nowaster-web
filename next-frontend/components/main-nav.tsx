@@ -6,7 +6,7 @@ import { NavItem } from "@/types/nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { ActiveSessionPresenter } from "./presenters/ActiveSessionPresenter";
+import { ActiveSessionPresenter } from "@/components/presenters/ActiveSessionPresenter";
 
 interface MainNavProps {
   items?: NavItem[]

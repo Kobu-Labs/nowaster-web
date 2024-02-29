@@ -3,7 +3,7 @@ import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { FC } from "react";
 import { differenceInMinutes } from "date-fns";
 import { formatTime } from "@/lib/utils";
-import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
+import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 type TotalTimeKpiCardProviderProps = {

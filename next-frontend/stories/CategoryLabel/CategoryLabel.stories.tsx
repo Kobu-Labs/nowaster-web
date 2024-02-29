@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { CategoryLabel } from "./CategoryLabel";
+import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
 
 const meta = {
   title: "CategoryLabel",

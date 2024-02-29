@@ -4,7 +4,7 @@ import { ScheduledSession } from "@/validation/models";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { addDays, addMonths, addSeconds, differenceInMinutes, format, getDate, getDay, getDaysInMonth, getMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";

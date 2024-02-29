@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TagSchema } from "../models";
+import { TagSchema } from "@/validation/models";
 
 export type ReadManyTagsRequest = z.infer<typeof readManyTagsRequestSchema>;
 export type CreateTagRequest = z.infer<typeof createTagRequestSchema>;
