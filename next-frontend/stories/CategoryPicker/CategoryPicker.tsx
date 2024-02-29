@@ -2,6 +2,7 @@ import { ScheduledSessionApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { prefixBasedMatch } from "@/lib/searching";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -66,22 +67,24 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
             {"Create '" + currentCategory + "'"}
           </CommandEmpty>
           <CommandGroup>
-            {categories.value
-              .filter(category => prefixBasedMatch(category, currentCategory || "", { caseInsensitive: true }))
-              .map((category) => (
-                <CommandItem
-                  key={category}
-                  onSelect={selectedValue => (selectedValue === currentCategory) ? onDeselect() : onSelect(selectedValue)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      currentCategory === category ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {category}
-                </CommandItem>
-              ))}
+            <ScrollArea type="always" className="max-h-48 overflow-y-auto rounded-md border-none">
+              {categories.value
+                .filter(category => prefixBasedMatch(category, currentCategory || "", { caseInsensitive: true }))
+                .map((category) => (
+                  <CommandItem
+                    key={category}
+                    onSelect={selectedValue => (selectedValue === currentCategory) ? onDeselect() : onSelect(selectedValue)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        currentCategory === category ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {category}
+                  </CommandItem>
+                ))}
+            </ScrollArea>
           </CommandGroup>
         </Command>
       </PopoverContent>
