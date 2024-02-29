@@ -1,19 +1,18 @@
-import { ScheduledSessionApi } from "@/api";
 import { useQuery } from "@tanstack/react-query";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { FC } from "react";
 import { KpiCardVisualizer } from "../visualizers/KpiCardVisualizer";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 type SessionCountKpiCardProviderProps = {
   filter?: GetSessionsRequest
-
 }
+
 export const SessionCountKpiCardProvider: FC<SessionCountKpiCardProviderProps> = (props) => {
 
   const { data: result } = useQuery({
-    queryKey: ["sessions", props.filter],
+    ...queryKeys.sessions.filtered(props.filter),
     retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
     select: (data) => data.isOk ? data.value.length : 0,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
