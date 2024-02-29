@@ -82,7 +82,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
         >
           {selectedTags.length === 0
             ? "Select Tags"
-            : selectedTags.map((tag) => (<SessionTag value={tag.label} />))}
+            : selectedTags.map((tag) => (<SessionTag key={tag.id} value={tag.label} />))}
           <div className="grow"></div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
