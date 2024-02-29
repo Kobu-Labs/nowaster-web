@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { ScheduledSessionApi } from "@/api";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { PieChartSessionVisualizer } from "../visualizers/PieChartSessionVisualizer";
 import { ScheduledSession } from "@/validation/models";
 import { differenceInMinutes } from "date-fns";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 
 type PieChartSessionProviderProps = {
-  filter?: GetSessionsRequest
+  filter?: Partial<GetSessionsRequest>
   groupingFn: (session: ScheduledSession) => string | string[]
   postProcess?: (data: AmountByCategory[]) => AmountByCategory[]
 }
@@ -38,9 +38,8 @@ const groupData = (sessions: ScheduledSession[], groupingFn: (session: Scheduled
 
 export const PieChartSessionProvider = (props: PieChartSessionProviderProps) => {
   const { data: result } = useQuery({
-    queryKey: ["sessions", props.filter],
+    ...queryKeys.sessions.filtered(props.filter),
     retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions(props.filter),
     select: (data) => {
       if (data.isErr) {
         return [];

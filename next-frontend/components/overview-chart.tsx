@@ -1,13 +1,13 @@
 "use client";
 
-import { ScheduledSessionApi } from "@/api";
 import { ScheduledSession } from "@/validation/models";
-import { useQuery } from "@tanstack/react-query";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { addDays, addMonths, addSeconds, differenceInMinutes, format, getDate, getDay, getDaysInMonth, getMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 export const Granularity = {
   week: "Past week",
@@ -76,19 +76,17 @@ const preprocessData = (granularity: keyof typeof Granularity, data: (ScheduledS
 };
 
 export function Overview(props: OverviewProps) {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["sessions", "bar-chart"],
-    retry: false,
-    queryFn: async () => await ScheduledSessionApi.getSessions(),
+  const { data: sessions, isLoading, isError } = useQuery({
+    ...queryKeys.sessions.filtered()
   });
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.granularity);
 
-  if (!data || isLoading || isError) {
+  if (!sessions || isLoading || isError) {
     return <div >Something bad happenned</div>;
   }
 
-  if (data.isErr) {
-    return <div>{data.error.message}</div>;
+  if (sessions.isErr) {
+    return <div>{sessions.error.message}</div>;
   }
 
   return (
@@ -104,7 +102,7 @@ export function Overview(props: OverviewProps) {
               <SelectGroup defaultChecked>
                 {/* TODO: minor UX issue: currently selected item doesnt have its checkmakr */}
                 {Object.entries(Granularity).map(([k, v]) =>
-                  <SelectItem key={k}  disabled={k === granularity} value={k}>{v}</SelectItem>
+                  <SelectItem key={k} disabled={k === granularity} value={k}>{v}</SelectItem>
                 )}
               </SelectGroup>
             </SelectContent>
@@ -114,7 +112,7 @@ export function Overview(props: OverviewProps) {
       {/* FIX: harcoded height should not be used here */}
       <CardContent className="ml-2 h-[234px] w-full">
         <ResponsiveContainer>
-          <BarChart data={preprocessData(granularity, data.value)}>
+          <BarChart data={preprocessData(granularity, sessions.value)}>
             <XAxis
               dataKey="granularity"
               stroke="#888888"

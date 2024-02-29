@@ -24,6 +24,7 @@ import { addHours, addMinutes, setMinutes, subHours, subMinutes } from "date-fns
 import { useToast } from "@/components/ui/use-toast";
 import { HistoryCard } from "../HistoryCard/HistoryCard";
 import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 
 const creationFormQuickOptions: QuickOption[] = [
@@ -64,7 +65,7 @@ export const ScheduledSessionCreationForm: FC = () => {
 
   async function onSubmit(values: CreateScheduledSessionRequest) {
     const result = await ScheduledSessionApi.create(values);
-    queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
     toast(result.isErr ?
       {
         title: "Session creation failed",
