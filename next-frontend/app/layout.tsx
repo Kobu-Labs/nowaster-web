@@ -5,7 +5,7 @@ import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ReactQueryProvider } from "./ReactQueryProvider";
+import { ReactQueryProvider } from "@/app/ReactQueryProvider";
 import { RecoilRoot } from "recoil";
 import { Toaster } from "@/components/ui/toaster";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";

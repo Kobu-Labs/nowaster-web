@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { RecordedSessionSchema } from "../models";
-import { HasID } from "../utils";
+import { RecordedSessionSchema } from "@/validation/models";
+import { HasID } from "@/validation/utils";
 
 
 export const createRecordedSchema = RecordedSessionSchema;

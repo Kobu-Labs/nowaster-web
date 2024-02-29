@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TagPicker } from "./TagPicker";
+import { TagPicker } from "@/stories/TagPicker/TagPicker";
 
 const meta = {
   title: "TagPicker",

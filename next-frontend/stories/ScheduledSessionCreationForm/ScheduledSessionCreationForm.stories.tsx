@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ScheduledSessionCreationForm } from "./ScheduledSessionCreationForm";
+import { ScheduledSessionCreationForm } from "@/stories/ScheduledSessionCreationForm/ScheduledSessionCreationForm";
 
 const meta = {
   title: "ScheduledSessionCreationForm",

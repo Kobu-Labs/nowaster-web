@@ -3,7 +3,7 @@ import { cn, getFormattedTimeDifference } from "@/lib/utils";
 import { ScheduledSession } from "@/validation/models";
 import { cva, VariantProps } from "class-variance-authority";
 import { FC } from "react";
-import { SessionTag } from "../SessionTag/SessionTag";
+import { SessionTag } from "@/stories/SessionTag/SessionTag";
 
 
 type HistoryCardProps = {

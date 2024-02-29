@@ -1,6 +1,6 @@
 
 import type { Meta, StoryObj } from "@storybook/react";
-import { RegisterForm } from "./RegisterForm";
+import { RegisterForm } from "@/stories/RegisterForm/RegisterForm";
 
 const meta = {
   title: "RegisterForm",
