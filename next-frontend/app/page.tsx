@@ -3,16 +3,15 @@
 import { Overview } from "@/components/overview-chart";
 import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { StatisticsApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
 import { FilteredAreaChart } from "@/stories/FilteredAreaChart/FilteredAreaChart";
 
 export default function IndexPage() {
 
   const stats = useQuery({
-    queryKey: ["statistics", "dashboard"],
+    ...queryKeys.statistics.dashboard,
     retry: false,
-    queryFn: async () => await StatisticsApi.getDashboardData(),
   });
 
 
