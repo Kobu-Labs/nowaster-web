@@ -1,4 +1,4 @@
-import { ScheduledSessionApi } from "@/api";
+import { ScheduledSessionApi, TagApi } from "@/api";
 import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { createQueryKeys, mergeQueryKeys } from "@lukemorales/query-key-factory";
 
@@ -13,4 +13,11 @@ const sessionkeys = createQueryKeys("sessions", {
   },
 });
 
-export const queryKeys = mergeQueryKeys(sessionkeys);
+const tagKeys = createQueryKeys("tags", {
+  all: {
+    queryFn: async () => await TagApi.readMany(),
+    queryKey: null
+  }
+});
+
+export const queryKeys = mergeQueryKeys(sessionkeys, tagKeys);
