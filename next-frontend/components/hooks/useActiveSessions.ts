@@ -1,13 +1,12 @@
-import { ScheduledSessionApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { ScheduledSession } from "@/validation/models";
 import { useQuery } from "@tanstack/react-query";
 
-export const useActiveSession = () : ScheduledSession[] => {
+export const useActiveSession = (): ScheduledSession[] => {
   const { data: result } = useQuery({
-    queryKey: ["sessions", "active"],
+    ...queryKeys.sessions.active,
     retry: false,
-    queryFn: async () => {
-      const data = await ScheduledSessionApi.getActiveSessions();
+    select: (data) => {
       return data.isOk ? data.value : [];
     },
   });
