@@ -1,4 +1,5 @@
 import { TagApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/ui/button";
 import { Command, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -26,9 +27,8 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { data: tags, isLoading, isError } = useQuery({
-    queryKey: ["tags"],
+    ...queryKeys.tags.all,
     retry: false,
-    queryFn: async () => await TagApi.readMany(),
   });
 
   const queryClient = useQueryClient();
@@ -41,7 +41,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
         return;
       }
 
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
       handleSelectTag(tagResult.value);
     }
   });
