@@ -1,11 +1,11 @@
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import React from "react";
 import { FC } from "react";
 import { PieChartSessionProvider } from "@/components/providers/PieChartSessionProvider";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 type CommonTagsPresenterProps = {
-  filter?: GetSessionsRequest
+  filter?: Partial<ScheduledSessionRequest["readMany"]>
 }
 
 export const CommonTagsPresenter: FC<CommonTagsPresenterProps> = (props) => {

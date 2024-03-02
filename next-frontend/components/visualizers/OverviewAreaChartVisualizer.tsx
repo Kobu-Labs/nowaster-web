@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
 import { formatTime, randomColor } from "@/lib/utils";
 import { categoryColors } from "@/state/categories";
-import { ScheduledSession } from "@/validation/models";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import { FC } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useRecoilState } from "recoil";

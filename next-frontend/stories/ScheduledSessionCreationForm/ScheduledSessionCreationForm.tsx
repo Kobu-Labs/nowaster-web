@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createScheduledSchema, CreateScheduledSessionRequest } from "@/validation/requests/scheduledSession";
 import { CategoryPicker } from "@/stories/CategoryPicker/CategoryPicker";
 import { ScheduledSessionApi } from "@/api";
 import { useForm } from "react-hook-form";
@@ -25,6 +24,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { HistoryCard } from "@/stories/HistoryCard/HistoryCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { ScheduledSessionRequest, ScheduledSessionRequestSchema } from "@kobu-labs/nowaster-js-typing";
 
 
 const creationFormQuickOptions: QuickOption[] = [
@@ -59,11 +59,11 @@ export const ScheduledSessionCreationForm: FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<CreateScheduledSessionRequest>({
-    resolver: zodResolver(createScheduledSchema),
+  const form = useForm<ScheduledSessionRequest["create"]>({
+    resolver: zodResolver(ScheduledSessionRequestSchema.create),
   });
 
-  async function onSubmit(values: CreateScheduledSessionRequest) {
+  async function onSubmit(values: ScheduledSessionRequest["create"]) {
     const result = await ScheduledSessionApi.create(values);
     queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
     toast(result.isErr ?

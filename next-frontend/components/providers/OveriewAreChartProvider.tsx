@@ -1,13 +1,13 @@
 import { OverviewAreaChartVisualizer } from "@/components/visualizers/OverviewAreaChartVisualizer";
 import { useQuery } from "@tanstack/react-query";
-import { type GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { type GroupingOptions } from "@/lib/session-grouping";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 
 type OverviewChartProps = {
   groupingOpts: GroupingOptions
-  filter?: Partial<GetSessionsRequest>
+  filter?: Partial<ScheduledSessionRequest["readMany"]>
 }
 
 export const OverviewAreaChartProvider = (props: OverviewChartProps) => {

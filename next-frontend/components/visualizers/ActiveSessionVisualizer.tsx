@@ -2,7 +2,7 @@
 import { getFormattedTimeDifference } from "@/lib/utils";
 import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
 import { SessionTag } from "@/stories/SessionTag/SessionTag";
-import { ScheduledSession } from "@/validation/models";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import { FC, useState } from "react";
 
 type ActiveSessionVisualizerProps = {

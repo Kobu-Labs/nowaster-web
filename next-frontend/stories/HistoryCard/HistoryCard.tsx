@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, getFormattedTimeDifference } from "@/lib/utils";
-import { ScheduledSession } from "@/validation/models";
 import { cva, VariantProps } from "class-variance-authority";
 import { FC } from "react";
 import { SessionTag } from "@/stories/SessionTag/SessionTag";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 
 
 type HistoryCardProps = {

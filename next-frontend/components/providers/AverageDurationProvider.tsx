@@ -1,13 +1,13 @@
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { formatTime } from "@/lib/utils";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 import { Hourglass } from "lucide-react";
 import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 type AverageDurationProviderProps = {
-  filter?: GetSessionsRequest,
+  filter?: Partial<ScheduledSessionRequest["readMany"]>,
 }
 
 export const AverageDurationProvider = (props: AverageDurationProviderProps) => {

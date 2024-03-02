@@ -1,4 +1,4 @@
-import { ScheduledSession } from "@/validation/models";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import { addDays, addMonths, differenceInMinutes, endOfISOWeek, endOfMonth, endOfYear, format, getDaysInMonth, startOfISOWeek, startOfMonth, startOfYear } from "date-fns";
 
 export const Granularity = {

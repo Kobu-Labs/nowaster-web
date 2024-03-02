@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { PieChartSessionVisualizer } from "@/components/visualizers/PieChartSessionVisualizer";
-import { ScheduledSession } from "@/validation/models";
 import { differenceInMinutes } from "date-fns";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { ScheduledSession, ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 
 type PieChartSessionProviderProps = {
-  filter?: Partial<GetSessionsRequest>
+  filter?: Partial<ScheduledSessionRequest["readMany"]>
   groupingFn: (session: ScheduledSession) => string | string[]
   postProcess?: (data: AmountByCategory[]) => AmountByCategory[]
 }

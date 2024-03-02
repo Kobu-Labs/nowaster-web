@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { formatTime } from "@/lib/utils";
 import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
 import { SessionTag } from "@/stories/SessionTag/SessionTag";
-import { ScheduledSession, WithId } from "@/validation/models";
+import { ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { differenceInMinutes, format } from "date-fns";
@@ -46,7 +46,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   );
 };
 
-export const BaseSessionTableColumns: ColumnDef<WithId<ScheduledSession>>[] = [
+export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   {
     accessorKey: "category",
     header: "Category",
