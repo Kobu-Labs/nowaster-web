@@ -1,8 +1,8 @@
 "use client";
 
-import { BaseSessionTableColumns } from "@/components/providers/session-table/BaseColumns";
-import { BaseSessionTable } from "@/components/providers/session-table/BaseSessionTable";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/shadcn/card";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
 
 export default function HistoryPage() {
   return (

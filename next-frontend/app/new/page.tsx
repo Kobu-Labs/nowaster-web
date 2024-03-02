@@ -1,5 +1,6 @@
 "use client";
-import { ScheduledSessionCreationForm } from "@/stories/ScheduledSessionCreationForm/ScheduledSessionCreationForm";
+
+import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
 
 const NewSessionPage = () => {
   return (

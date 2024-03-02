@@ -1,11 +1,11 @@
 "use client";
 
-import { Overview } from "@/components/overview-chart";
 import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
-import { FilteredAreaChart } from "@/stories/FilteredAreaChart/FilteredAreaChart";
+import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
+import { Overview } from "@/components/visualizers/charts/overview-chart";
+import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
 
 export default function IndexPage() {
 
@@ -27,14 +27,14 @@ export default function IndexPage() {
     <div className="p-8">
       <h2 className="mb-8 text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="flex gap-8 ">
-        <KpiCardVisualizer value={stats.data.value.session_count.toString()} title={"Total Sessions"} description={"Many to go.."}><AlignVerticalDistributeEnd /></KpiCardVisualizer>
-        <KpiCardVisualizer value={stats.data.value.minutes.toString()} title={"Total Minutes Spent"} description={`That's almost ${Math.ceil(stats.data.value.minutes / 60)} hours!`}><Hourglass /> </KpiCardVisualizer>
-        <KpiCardVisualizer value={stats.data.value.streak.toString()} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCardVisualizer>
+        <KpiCardUiProvider value={stats.data.value.session_count.toString()} title={"Total Sessions"} description={"Many to go.."}><AlignVerticalDistributeEnd /></KpiCardUiProvider>
+        <KpiCardUiProvider value={stats.data.value.minutes.toString()} title={"Total Minutes Spent"} description={`That's almost ${Math.ceil(stats.data.value.minutes / 60)} hours!`}><Hourglass /> </KpiCardUiProvider>
+        <KpiCardUiProvider value={stats.data.value.streak.toString()} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCardUiProvider>
       </div>
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Overview granularity="month" />
         <div className="col-span-4">
-          <FilteredAreaChart
+          <FilteredSessionAreaChart
             initialGranularity="perDayInMonth"
           />
         </div>

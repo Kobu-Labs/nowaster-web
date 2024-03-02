@@ -1,8 +1,9 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LoginForm } from "@/stories/LoginForm/LoginForm";
-import { RegisterForm } from "@/stories/RegisterForm/RegisterForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
+import { LoginForm } from "@/components/visualizers/LoginForm";
+import { RegisterForm } from "@/components/visualizers/RegisterForm";
+
 
 export default function LoginPage() {
   return (

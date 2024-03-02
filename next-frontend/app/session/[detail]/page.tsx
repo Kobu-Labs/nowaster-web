@@ -1,20 +1,20 @@
 "use client";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn/popover";
 import { HexColorPicker } from "react-colorful";
-import { CommonTagsPresenter } from "@/components/presenters/CommonTagsPresenter";
-import { AverageDurationProvider } from "@/components/providers/AverageDurationProvider";
-import { BaseSessionTableColumns } from "@/components/providers/session-table/BaseColumns";
-import { BaseSessionTable } from "@/components/providers/session-table/BaseSessionTable";
-import { SessionCountKpiCardProvider } from "@/components/providers/SessionCountKpiCardProvider";
-import { TotalTimeKpiCardProvider } from "@/components/providers/TotalTimeKpiCardProvider";
-import { CategoryLabel } from "@/stories/CategoryLabel/CategoryLabel";
-import { FilteredAreaChart } from "@/stories/FilteredAreaChart/FilteredAreaChart";
 import { Settings } from "lucide-react";
 import { useRecoilState } from "recoil";
 import { categoryColors } from "@/state/categories";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/shadcn/card";
 import { FC } from "react";
 import { randomColor } from "@/lib/utils";
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
+import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
+import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
+import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
+import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart";
+import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
+import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
 
 type CategoryColorPickerProps = {
   category: string
@@ -58,14 +58,14 @@ export default function Page(props: { params: { detail: string } }) {
         </h2>
       </div>
       <div className="m-8 grid grid-cols-4 gap-8">
-        <SessionCountKpiCardProvider filter={{ category: category }} />
-        <TotalTimeKpiCardProvider filter={{ category: category }} />
-        <AverageDurationProvider filter={{ category: category }} />
-        <CommonTagsPresenter
+        <SessionCountCard filter={{ category: category }} />
+        <TotalSessionTimeCard filter={{ category: category }} />
+        <SessionAverageDurationProvider filter={{ category: category }} />
+        <TagsToSessionPieChart
           filter={{ category: category }}
         />
         <div className="col-span-full">
-          <FilteredAreaChart
+          <FilteredSessionAreaChart
             initialGranularity="perDayInMonth"
             filter={{ category: category }}
           />
