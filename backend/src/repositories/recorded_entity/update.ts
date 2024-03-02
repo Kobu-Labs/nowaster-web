@@ -1,8 +1,8 @@
 import type { RecordedEntity } from "@prisma/client";
 import { Result } from "@badrap/result";
-import type { RecordedSessionRequest } from "@/src/requests/recordedSessionRequests";
 import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
+import type { RecordedSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 
 const update = async (params: RecordedSessionRequest["updateById"]): AsyncResult<RecordedEntity> => {
