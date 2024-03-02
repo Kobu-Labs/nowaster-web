@@ -1,4 +1,4 @@
-import { ScheduledSessionApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,9 +18,8 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(undefined);
 
   const { data: categories, isLoading, isError } = useQuery({
-    queryKey: ["categories"],
+    ...queryKeys.categories.all,
     retry: false,
-    queryFn: async () => await ScheduledSessionApi.getCategories(),
   });
 
   if (!categories || isLoading || isError) {
