@@ -8,6 +8,7 @@ type UpdateTagParams = {
     label: string
 }
 
+// TODO: no endpoint is using this
 const update = async (params: UpdateTagParams): AsyncResult<Tag> => {
   try {
     const { id, ...data } = params;

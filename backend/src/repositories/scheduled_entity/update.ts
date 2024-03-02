@@ -1,8 +1,8 @@
 import type { ScheduledEntity } from "@prisma/client";
 import { Result } from "@badrap/result";
-import type { ScheduledSessionRequest } from "@/src/requests/scheduledSessionRequests";
 import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
+import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<ScheduledEntity> => {
   try {
