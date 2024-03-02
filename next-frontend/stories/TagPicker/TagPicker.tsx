@@ -6,16 +6,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { prefixBasedMatch } from "@/lib/searching";
 import { cn } from "@/lib/utils";
-import { Tag } from "@/validation/models";
-import { CreateTagRequest } from "@/validation/requests/tags";
-import { CreateTagResponse } from "@/validation/responses/tags";
 import { Result } from "@badrap/result";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { FC, useState } from "react";
 import { SessionTag } from "@/stories/SessionTag/SessionTag";
+import { TagRequest, TagResponse, TagWithId } from "@kobu-labs/nowaster-js-typing";
 
-type TagWithId = Tag & { id: string }
 
 type TagPickerProps = {
   onTagSelected: (tag: TagWithId[]) => void
@@ -32,7 +29,7 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
   });
 
   const queryClient = useQueryClient();
-  const { mutate: createTag } = useMutation<Result<CreateTagResponse>, unknown, CreateTagRequest>({
+  const { mutate: createTag } = useMutation<Result<TagResponse["create"]>, unknown, TagRequest["create"]>({
 
     mutationFn: async (params) => await TagApi.create(params),
     retry: false,

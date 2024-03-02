@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { FC } from "react";
 import { KpiCardVisualizer } from "@/components/visualizers/KpiCardVisualizer";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 type SessionCountKpiCardProviderProps = {
-  filter?: GetSessionsRequest
+  filter?: Partial<ScheduledSessionRequest["readMany"]>
 }
 
 export const SessionCountKpiCardProvider: FC<SessionCountKpiCardProviderProps> = (props) => {

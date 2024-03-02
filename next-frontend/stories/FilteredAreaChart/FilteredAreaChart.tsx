@@ -1,14 +1,14 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FC, useState } from "react";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
 import { Granularity } from "@/lib/session-grouping";
 import { Card, CardContent, CardHeader } from "@/components//ui/card";
 import { OverviewAreaChartProvider } from "@/components/providers/OveriewAreChartProvider";
 import { DateTimePicker } from "@/stories/DateTimePicker/DateTimePicker";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 type FilteredAreaChartProps = {
   initialGranularity: keyof typeof Granularity,
-  filter?: Partial<GetSessionsRequest>
+  filter?: Partial<ScheduledSessionRequest["readMany"]>
 }
 
 export const FilteredAreaChart: FC<FilteredAreaChartProps> = (props) => {

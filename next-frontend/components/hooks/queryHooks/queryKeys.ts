@@ -1,9 +1,9 @@
 import { ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 import { createQueryKeys, mergeQueryKeys } from "@lukemorales/query-key-factory";
 
 const sessionkeys = createQueryKeys("sessions", {
-  filtered: (filters?: Partial<GetSessionsRequest>) => ({
+  filtered: (filters?: Partial<ScheduledSessionRequest["readMany"]>) => ({
     queryKey: [filters ?? {}],
     queryFn: async () => await ScheduledSessionApi.getSessions(filters),
   }),
