@@ -4,10 +4,10 @@
 // update a tag
 
 import { Router } from "express";
-import { TagRequestSchema } from "@/src/requests/tagRequests";
 import { validate } from "@/src/middleware/validation";
 import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
 import tagRepo from "@/src/repositories/tag_repository";
+import { TagRequestSchema } from "@kobu-labs/nowaster-js-typing";
 
 export const TagController = Router();
 

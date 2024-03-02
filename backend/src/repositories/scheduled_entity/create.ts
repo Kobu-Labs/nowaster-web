@@ -1,8 +1,8 @@
 import type { ScheduledEntity, Tag } from "@prisma/client";
 import { Result } from "@badrap/result";
-import type { ScheduledSessionRequest } from "@/src/requests/scheduledSessionRequests";
 import type { AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
+import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 
 // tags passed in must already exists

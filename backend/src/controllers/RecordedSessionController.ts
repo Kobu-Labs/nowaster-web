@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { RecordedSessionRequestSchema } from "@/src/requests/recordedSessionRequests";
 import { validate } from "@/src/middleware/validation";
 import recordedSessionRepo from "@/src/repositories/recorded_entity";
 import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
+import { RecordedSessionRequestSchema } from "@kobu-labs/nowaster-js-typing";
 
 export const RecordedController = Router();
 

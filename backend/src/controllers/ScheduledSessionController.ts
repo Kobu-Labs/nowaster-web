@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { ScheduledSessionRequestSchema } from "@/src/requests/scheduledSessionRequests";
 import scheduledSessionRepo from "@/src/repositories/scheduled_entity";
 import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
 import { validate } from "@/src/middleware/validation";
+import { ScheduledSessionRequestSchema } from "@kobu-labs/nowaster-js-typing";
 export const ScheduledController = Router();
 const SessionsController = Router();
 const CategoriesController = Router();

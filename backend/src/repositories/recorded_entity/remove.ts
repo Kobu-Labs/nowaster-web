@@ -1,8 +1,8 @@
 import type { RecordedEntity, } from "@prisma/client";
 import { Result } from "@badrap/result";
 import client from "@/src/repositories/client";
-import type { RecordedSessionRequest } from "@/src/requests/recordedSessionRequests";
 import type { AsyncResult } from "@/src/repositories/types";
+import type { RecordedSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 
 type DeleteManyParams = {

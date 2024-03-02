@@ -11,12 +11,12 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "nodemonConfig": {
-          "watch": [
-            "src"
-          ],
-          "exec": "node -r tsconfig-paths/register -r ts-node/register ./src/index.ts",
-          "ext": "ts, js"
-        },
+    "watch": [
+      "src"
+    ],
+    "exec": "node -r tsconfig-paths/register -r ts-node/register ./src/index.ts",
+    "ext": "ts, js"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -35,6 +35,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "@kobu-labs/nowaster-js-typing": "1.0.3",
     "@prisma/client": "^4.12.0",
     "argon2": "^0.30.3",
     "cookie-parser": "^1.4.6",

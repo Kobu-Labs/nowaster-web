@@ -1,8 +1,8 @@
 import { Result } from "@badrap/result";
 import type { Tag } from "@prisma/client";
-import type { TagRequest } from "@/src/requests/tagRequests";
 import { UserVisibleError, type AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
+import type { TagRequest } from "@kobu-labs/nowaster-js-typing";
 
 type ReadTagByIdParams = {
     id: string

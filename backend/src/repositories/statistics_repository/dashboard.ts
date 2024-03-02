@@ -1,17 +1,12 @@
 import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
 import { Result } from "@badrap/result";
+import type { StatisticsResponse } from "@kobu-labs/nowaster-js-typing";
 import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
 const SESSION_PAGINATION = 45;
 
-type DashboardStatistics = {
-    streak: number,
-    minutes: number,
-    session_count: number
-}
-
-export const getDashboardData = async (): AsyncResult<DashboardStatistics> => {
+export const getDashboardData = async (): AsyncResult<StatisticsResponse["getDashboardData"]> => {
   try {
     const session_count = await getAmountOfSessions();
     if (session_count.isErr) {

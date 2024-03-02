@@ -6,6 +6,8 @@ import type { AsyncResult } from "@/src/repositories/types";
 type DeleteTagParams = {
     id: string
 }
+
+// TODO: no endpoint is using this
 const remove = async (params: DeleteTagParams) : AsyncResult<Tag>=> { 
   try {
     return await client.$transaction(async (tx)=>{
