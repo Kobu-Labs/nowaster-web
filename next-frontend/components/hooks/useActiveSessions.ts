@@ -1,8 +1,8 @@
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { ScheduledSession } from "@/validation/models";
+import { ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
 import { useQuery } from "@tanstack/react-query";
 
-export const useActiveSession = (): ScheduledSession[] => {
+export const useActiveSession = (): ScheduledSessionWithId[] => {
   const { data: result } = useQuery({
     ...queryKeys.sessions.active,
     retry: false,

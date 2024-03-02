@@ -1,14 +1,13 @@
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/visualizers/DataTable";
-import { ScheduledSession, WithId } from "@/validation/models";
-import { GetSessionsRequest } from "@/validation/requests/scheduledSession";
+import { ScheduledSessionRequest, ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC } from "react";
 
 type BaseSessionTableProps = {
-  columns: ColumnDef<WithId<ScheduledSession>>[],
-  filter?: GetSessionsRequest,
+  columns: ColumnDef<ScheduledSessionWithId>[],
+  filter?: Partial<ScheduledSessionRequest["readMany"]>,
 }
 
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {

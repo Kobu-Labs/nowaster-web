@@ -1,8 +1,8 @@
-import { ResponseSchema } from "@/validation/responses/base";
 import { Result } from "@badrap/result";
 import axios from "axios";
 import { ZodType } from "zod";
 import * as process from "process";
+import { ResponseSchema } from "@kobu-labs/nowaster-js-typing";
 
 const baseApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:4001",
