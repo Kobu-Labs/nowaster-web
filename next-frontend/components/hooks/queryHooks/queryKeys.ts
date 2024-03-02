@@ -27,4 +27,11 @@ const statisticsKeys = createQueryKeys("statistics", {
   },
 });
 
-export const queryKeys = mergeQueryKeys(sessionkeys, tagKeys, statisticsKeys);
+const categoryKeys = createQueryKeys("categories", {
+  all: {
+    queryKey: null,
+    queryFn: async () => await ScheduledSessionApi.getCategories(),
+  },
+});
+
+export const queryKeys = mergeQueryKeys(sessionkeys, tagKeys, statisticsKeys, categoryKeys);
