@@ -9,12 +9,11 @@
 */
 -- RedefineTables
 PRAGMA foreign_keys=OFF;
-CREATE TABLE "new_Category" (
+CREATE TABLE "Category" (
     "name" TEXT NOT NULL PRIMARY KEY
 );
-INSERT INTO "new_Category" ("name") SELECT "name" FROM "Category";
-DROP TABLE "Category";
-ALTER TABLE "new_Category" RENAME TO "Category";
+INSERT INTO "Category" ("name") SELECT DISTINCT "category" from "ScheduledEntity";
+
 CREATE TABLE "new_ScheduledEntity" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "startTime" DATETIME NOT NULL,
@@ -23,7 +22,12 @@ CREATE TABLE "new_ScheduledEntity" (
     "description" TEXT,
     CONSTRAINT "ScheduledEntity_categoryName_fkey" FOREIGN KEY ("categoryName") REFERENCES "Category" ("name") ON DELETE RESTRICT ON UPDATE CASCADE
 );
-INSERT INTO "new_ScheduledEntity" ("description", "endTime", "id", "startTime") SELECT "description", "endTime", "id", "startTime" FROM "ScheduledEntity";
+
+INSERT INTO "new_ScheduledEntity" ("description", "endTime", "id", "startTime", "categoryName")   SELECT "ScheduledEntity"."description", "ScheduledEntity"."endTime", "ScheduledEntity"."id", "ScheduledEntity"."startTime", "Category"."name"
+FROM "ScheduledEntity"
+JOIN "Category" on "Category"."name" = "ScheduledEntity"."category";
+
+
 DROP TABLE "ScheduledEntity";
 ALTER TABLE "new_ScheduledEntity" RENAME TO "ScheduledEntity";
 PRAGMA foreign_key_check;
