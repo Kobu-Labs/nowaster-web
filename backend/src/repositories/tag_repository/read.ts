@@ -2,6 +2,7 @@ import { Result } from "@badrap/result";
 import client from "../client";
 import { AsyncResult, UserVisibleError } from "../types";
 import type { Tag } from "@prisma/client";
+import type { TagRequest } from "@/src/requests/tagRequests";
 
 type ReadTagByIdParams = {
     id: string
@@ -11,10 +12,7 @@ type ReadTagByLabelParams = {
     label: string
 }
 
-type ReadManyTagsParams = {
-    limit?: number | undefined
-}
-
+// TODO: not endpoint is using this
 const byId = async (params: ReadTagByIdParams): AsyncResult<Tag> => {
   try {
     const tagEntity = await client.tag.findFirst({
@@ -35,6 +33,7 @@ const byId = async (params: ReadTagByIdParams): AsyncResult<Tag> => {
 };
 
 
+// TODO: not endpoint is using this
 const byLabel = async (params: ReadTagByLabelParams): AsyncResult<Tag> => {
   try {
     const tagEntity = await client.tag.findFirst({
@@ -54,7 +53,7 @@ const byLabel = async (params: ReadTagByLabelParams): AsyncResult<Tag> => {
   }
 };
 
-const many = async (params: ReadManyTagsParams): AsyncResult<Tag[]> => {
+const many = async (params: TagRequest["readMany"]): AsyncResult<Tag[]> => {
   try {
     const tags = await client.tag.findMany({ take: params.limit });
 
