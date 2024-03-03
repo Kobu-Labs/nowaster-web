@@ -2,14 +2,9 @@ import type { AsyncResult } from "../types";
 import type { ScheduledEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
-import type { z } from "zod";
-import type { readManyScheduledSchema } from "../../requests/scheduledSessionRequests";
+import type { ScheduledSessionRequest } from "@/src/requests/scheduledSessionRequests";
 
-type ReadSingleScheduledParams = {
-    id: string
-}
-
-const many = async (params: z.infer<typeof readManyScheduledSchema>): AsyncResult<ScheduledEntity[] | null> => {
+const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<ScheduledEntity[] | null> => {
   try {
     const filterTags = params.tags !== undefined ? { tags: { some: { tag: { label: { in: params.tags } } } } } : {};
 
@@ -51,7 +46,7 @@ const many = async (params: z.infer<typeof readManyScheduledSchema>): AsyncResul
   }
 };
 
-const single = async (params: ReadSingleScheduledParams): AsyncResult<ScheduledEntity> => {
+const single = async (params: ScheduledSessionRequest["readById"]): AsyncResult<ScheduledEntity> => {
   try {
     const scheduledEntity = await client.scheduledEntity.findFirst({
       where: {
