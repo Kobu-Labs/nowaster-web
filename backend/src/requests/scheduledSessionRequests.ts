@@ -37,7 +37,6 @@ const update = z.object({
     .optional(),
   startTime: z.coerce.date().optional(),
   endTime: z.coerce.date().optional(),
-  tags: z.array(z.string()),
 });
 
 const remove = z.object({
