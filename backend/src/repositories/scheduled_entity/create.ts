@@ -2,11 +2,11 @@ import type { AsyncResult } from "../types";
 import type { ScheduledEntity, Tag } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
+import type { ScheduledSessionRequest } from "@/src/requests/scheduledSessionRequests";
 
-type CreateScheduledParams = Omit<ScheduledEntity, "id"> & { tags: Tag[] }
 
 // tags passed in must already exists
-const create = async (params: CreateScheduledParams): AsyncResult<ScheduledEntity & { tags: Tag[] }> => {
+const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<ScheduledEntity & { tags: Tag[] }> => {
   try {
     const scheduledEntity = await client.scheduledEntity.create({
       data: {

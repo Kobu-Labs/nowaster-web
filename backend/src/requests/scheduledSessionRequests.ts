@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TagSchema } from "./tagRequests";
 import { HasID } from "./utils";
 
-export const createScheduledSchema = z.object({
+const create = z.object({
   category: z.string().nonempty(),
   description: z.string()
     .max(50)
@@ -12,11 +12,11 @@ export const createScheduledSchema = z.object({
   tags: z.array(TagSchema.merge(HasID)),
 });
 
-export const readByIdScheduledSchema = z.object({
+const readById = z.object({
   id: z.string().uuid(),
 });
 
-export const readManyScheduledSchema = z.object({
+const readMany = z.object({
   limit: z.coerce.number().optional(),
   fromStartTime: z.coerce.date().optional(),
   toStartTime: z.coerce.date().optional(),
@@ -27,7 +27,7 @@ export const readManyScheduledSchema = z.object({
   tags: z.string().optional()
 });
 
-export const updateScheduledSchema = z.object({
+const update = z.object({
   id: z.string().uuid(),
   category: z.string().nonempty().optional(),
   description: z.string()
@@ -38,7 +38,16 @@ export const updateScheduledSchema = z.object({
   tags: z.array(z.string()),
 });
 
-
-export const deleteScheduledSchema = z.object({
+const remove = z.object({
   id: z.string().uuid(),
 });
+
+export type ScheduledSessionRequest = { [Property in (keyof typeof ScheduledSessionRequestSchema)]: z.infer<typeof ScheduledSessionRequestSchema[Property]> }
+
+export const ScheduledSessionRequestSchema = {
+  readById,
+  create,
+  readMany,
+  update,
+  remove,
+} as const;

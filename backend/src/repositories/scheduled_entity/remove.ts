@@ -2,12 +2,9 @@ import type { AsyncResult } from "../types";
 import type { ScheduledEntity } from "@prisma/client";
 import client from "../client";
 import { Result } from "@badrap/result";
+import type { ScheduledSessionRequest } from "@/src/requests/scheduledSessionRequests";
 
-type DeleteSingleScheduledParams = {
-    id: string;
-};
-
-const single = async (params: DeleteSingleScheduledParams): AsyncResult<ScheduledEntity> => {
+const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<ScheduledEntity> => {
   try {
     return await client.$transaction(async (tx) => {
       const scheduledEntity = await tx.scheduledEntity.findFirst({
@@ -49,6 +46,7 @@ const single = async (params: DeleteSingleScheduledParams): AsyncResult<Schedule
   }
 };
 
+// TODO: no endpoint is actually using this
 type DeleteManyScheduledParams = {
     ids: string[];
 };
