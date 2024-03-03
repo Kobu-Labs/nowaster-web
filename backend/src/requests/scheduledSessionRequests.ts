@@ -1,6 +1,4 @@
 import { z } from "zod";
-import { TagSchema } from "./tagRequests";
-import { HasID } from "./utils";
 
 const create = z.object({
   category: z.string().nonempty(),
@@ -9,7 +7,11 @@ const create = z.object({
     .nullable(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
-  tags: z.array(TagSchema.merge(HasID)),
+  tags: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+    })),
 });
 
 const readById = z.object({
