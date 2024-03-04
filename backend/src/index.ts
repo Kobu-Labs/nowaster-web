@@ -37,5 +37,3 @@ app.listen(port, () => {
   }
   console.log(`[${new Date().toISOString()}] Database used: ${env.DATABASE_URL}`);
 });
-const Test = 10;
-export default Test;
