@@ -4,19 +4,31 @@ import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
 import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
+
 const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<ScheduledEntity> => {
   try {
-    const { id, ...data } = params;
+    const { id, category, ...data } = params;
 
     const scheduledEntity = await client.scheduledEntity.update({
       where: {
         id: id,
       },
       data: {
-        ...data
+        ...data,
+        category: {
+          connectOrCreate: {
+            where: {
+              name: category.name
+            },
+            create: {
+              name: category.name
+            },
+          }
+        }
       }
     });
     return Result.ok(scheduledEntity);
+
   } catch (error) {
     return Result.err(error as Error);
   }
