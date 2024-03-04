@@ -3,6 +3,7 @@ import scheduledSessionRepo from "@/src/repositories/scheduled_entity";
 import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
 import { validate } from "@/src/middleware/validation";
 import { ScheduledSessionRequestSchema } from "@kobu-labs/nowaster-js-typing";
+import categoryRepo from "@/src/repositories/category";
 export const ScheduledController = Router();
 const SessionsController = Router();
 const CategoriesController = Router();
@@ -12,7 +13,7 @@ ScheduledController.use("/categories", CategoriesController);
 
 
 CategoriesController.get("/", async (_req, res) => {
-  const categories = await scheduledSessionRepo.read.getCategories();
+  const categories = await categoryRepo.read.many();
 
   if (categories.isErr) {
     return handleResultErrorResp(500, res, categories.error);
