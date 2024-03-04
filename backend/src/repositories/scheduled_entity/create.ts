@@ -1,12 +1,11 @@
-import type { ScheduledEntity, Tag } from "@prisma/client";
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
-import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import type { ScheduledSession, ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 
 // tags passed in must already exists
-const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<ScheduledEntity & { tags: Tag[] }> => {
+const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<ScheduledSession> => {
   try {
     const scheduledEntity = await client.scheduledEntity.create({
       data: {
@@ -24,9 +23,20 @@ const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<Sc
         startTime: params.startTime,
         endTime: params.endTime,
         description: params.description,
-        category: params.category
+        category: {
+          connectOrCreate: {
+            where: {
+              name: params.category.name
+            },
+            create: {
+              name: params.category.name
+
+            },
+          },
+        },
       },
       include: {
+        category: true,
         tags: {
           select: {
             tag: true

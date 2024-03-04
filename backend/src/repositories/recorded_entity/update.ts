@@ -7,14 +7,15 @@ import type { RecordedSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
 const update = async (params: RecordedSessionRequest["updateById"]): AsyncResult<RecordedEntity> => {
   try {
-    const { id, ...data } = params;
+    const { id, category, ...data } = params;
 
     const recordedEntity = await client.recordedEntity.update({
       where: {
         id: id,
       },
       data: {
-        ...data
+        ...data,
+        ...category
       }
     });
     return Result.ok(recordedEntity);
