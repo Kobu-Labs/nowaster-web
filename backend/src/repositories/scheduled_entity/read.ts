@@ -19,7 +19,9 @@ const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<Sc
         }
       },
       where: {
-        category: params.category,
+        category: {
+          ...params.category,
+        },
         ...filterTags,
         startTime: {
           gte: params.fromStartTime,
@@ -75,30 +77,10 @@ const single = async (params: ScheduledSessionRequest["readById"]): AsyncResult<
 
 };
 
-const getCategories = async (): AsyncResult<string[]> => {
-  try {
-    const categories = await client.scheduledEntity.findMany({
-      where: {},
-      select: {
-        category: true
-      },
-      distinct: [
-        "category"
-      ]
-    });
-
-    return Result.ok(categories.map(c => c.category));
-
-  } catch (error) {
-    return Result.err(error as Error);
-  }
-};
-
 
 const read = {
   single,
   many,
-  getCategories,
 };
 
 export default read;
