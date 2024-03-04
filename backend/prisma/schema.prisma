@@ -11,7 +11,8 @@ model ScheduledEntity {
     id          String         @id @default(uuid())
     startTime   DateTime
     endTime     DateTime
-    category    String
+    category    Category       @relation(fields: [categoryId], references: [id])
+    categoryId  String
     description String?
     tags        TagToSession[]
 }
@@ -34,5 +35,11 @@ model TagToSession {
     sessionId String
     tagId     String
     session   ScheduledEntity @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-    tag       Tag             @relation(fields: [tagId], references: [id], onDelete:Cascade)
+    tag       Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+    id              String            @id @default(uuid())
+    name            String
+    ScheduledEntity ScheduledEntity[]
 }
