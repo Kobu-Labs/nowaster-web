@@ -10,6 +10,13 @@
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
+  "nodemonConfig": {
+          "watch": [
+            "src"
+          ],
+          "exec": "node -r tsconfig-paths/register -r ts-node/register ./src/index.ts",
+          "ext": "ts, js"
+        },
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -36,6 +43,7 @@
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "tsconfig-paths": "^4.2.0",
     "zod": "^3.21.4"
   }
 }
