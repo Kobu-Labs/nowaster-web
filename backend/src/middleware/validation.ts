@@ -1,6 +1,6 @@
+import { handleErrorResp, handleValidationErrorResp } from "@/src/controllers/utils/handleResponse";
 import type { RequestHandler } from "express";
 import { ZodError, ZodSchema } from "zod";
-import { handleErrorResp, handleValidationErrorResp } from "../controllers/utils/handleResponse";
 
 type Validations<TParams, TBody, TQuery> = {
     params?: ZodSchema<TParams>;

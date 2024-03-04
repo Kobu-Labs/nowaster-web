@@ -4,10 +4,10 @@
 // update a tag
 
 import { Router } from "express";
-import { validate } from "../middleware/validation";
-import tagRepo from "../repositories/tag_repository";
-import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
 import { TagRequestSchema } from "@/src/requests/tagRequests";
+import { validate } from "@/src/middleware/validation";
+import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
+import tagRepo from "@/src/repositories/tag_repository";
 
 export const TagController = Router();
 

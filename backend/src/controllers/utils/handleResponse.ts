@@ -1,6 +1,6 @@
+import { UserVisibleError } from "@/src/repositories/types";
 import type { Response } from "express";
 import type z from "zod";
-import { UserVisibleError } from "../../repositories/types";
 
 export function handleErrorResp(status: number, res: Response, msg: string): Response {
   return res.status(status).send({

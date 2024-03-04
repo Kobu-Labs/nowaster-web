@@ -1,6 +1,6 @@
+import client from "@/src/repositories/client";
+import type { AsyncResult } from "@/src/repositories/types";
 import { Result } from "@badrap/result";
-import client from "../client";
-import type { AsyncResult } from "../types";
 import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
 const SESSION_PAGINATION = 45;
