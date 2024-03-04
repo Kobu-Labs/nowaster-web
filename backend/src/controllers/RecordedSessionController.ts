@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { validate } from "../middleware/validation";
-import recordedSessionRepo from "../repositories/recorded_entity";
-import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
 import { RecordedSessionRequestSchema } from "@/src/requests/recordedSessionRequests";
+import { validate } from "@/src/middleware/validation";
+import recordedSessionRepo from "@/src/repositories/recorded_entity";
+import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
 
 export const RecordedController = Router();
 

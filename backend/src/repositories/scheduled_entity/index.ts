@@ -1,7 +1,8 @@
-import create from "./create";
-import read from "./read";
-import remove from "./remove";
-import update from "./update";
+import create from "@/src/repositories/scheduled_entity/create";
+import read from "@/src/repositories/scheduled_entity/read";
+import remove from "@/src/repositories/scheduled_entity/remove";
+import update from "@/src/repositories/scheduled_entity/update";
+
 
 const scheduledSessionRepo = {
   create,

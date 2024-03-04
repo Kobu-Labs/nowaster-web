@@ -1,7 +1,7 @@
-import create from "./create";
-import read from "./read";
-import remove from "./remove";
-import update from "./update";
+import create from "@/src/repositories/recorded_entity/create";
+import read from "@/src/repositories/recorded_entity/read";
+import remove from "@/src/repositories/recorded_entity/remove";
+import update from "@/src/repositories/recorded_entity/update";
 
 const recordedSessionRepo = {
   create,

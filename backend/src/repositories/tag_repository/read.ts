@@ -1,8 +1,8 @@
 import { Result } from "@badrap/result";
-import client from "../client";
-import { AsyncResult, UserVisibleError } from "../types";
 import type { Tag } from "@prisma/client";
 import type { TagRequest } from "@/src/requests/tagRequests";
+import { UserVisibleError, type AsyncResult } from "@/src/repositories/types";
+import client from "@/src/repositories/client";
 
 type ReadTagByIdParams = {
     id: string

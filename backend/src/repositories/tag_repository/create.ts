@@ -1,7 +1,7 @@
 import type { Tag } from "@prisma/client";
-import type { AsyncResult } from "../types";
-import client from "../client";
 import { Result } from "@badrap/result";
+import client from "@/src/repositories/client";
+import type { AsyncResult } from "@/src/repositories/types";
 
 type CreateTagParams = Omit<Tag, "id">
 
