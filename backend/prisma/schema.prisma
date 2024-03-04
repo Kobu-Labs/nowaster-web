@@ -8,13 +8,13 @@ datasource db {
 }
 
 model ScheduledEntity {
-    id          String         @id @default(uuid())
-    startTime   DateTime
-    endTime     DateTime
-    category    Category       @relation(fields: [categoryId], references: [id])
-    categoryId  String
-    description String?
-    tags        TagToSession[]
+    id           String         @id @default(uuid())
+    startTime    DateTime
+    endTime      DateTime
+    category     Category       @relation(fields: [categoryName], references: [name])
+    categoryName String
+    description  String?
+    tags         TagToSession[]
 }
 
 model RecordedEntity {
@@ -39,7 +39,6 @@ model TagToSession {
 }
 
 model Category {
-    id              String            @id @default(uuid())
-    name            String
+    name            String            @id
     ScheduledEntity ScheduledEntity[]
 }
