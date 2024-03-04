@@ -1,11 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { env } from "process";
-import type { ApiResponse } from "./controllers/types";
-import { RecordedController } from "./controllers/RecordedSessionController";
-import { ScheduledController } from "./controllers/ScheduledSessionController";
-import { TagController } from "./controllers/TagController";
-import { StatisticsController } from "./controllers/StatisticsController";
+import { RecordedController } from "@/src/controllers/RecordedSessionController";
+import { ScheduledController } from "@/src/controllers/ScheduledSessionController";
+import { TagController } from "@/src/controllers/TagController";
+import { StatisticsController } from "@/src/controllers/StatisticsController";
+import type { ApiResponse } from "@/src/controllers/types";
 
 const app = express();
 const port = env.PORT ?? 4000;

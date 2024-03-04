@@ -1,6 +1,6 @@
+import client from "@/src/repositories/client";
+import type { AsyncResult } from "@/src/repositories/types";
 import { Result } from "@badrap/result";
-import type { AsyncResult } from "../types";
-import client from "../client";
 import { subDays } from "date-fns";
 
 

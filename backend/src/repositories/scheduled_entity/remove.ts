@@ -1,8 +1,8 @@
-import type { AsyncResult } from "../types";
 import type { ScheduledEntity } from "@prisma/client";
-import client from "../client";
+import client from "@/src/repositories/client";
 import { Result } from "@badrap/result";
 import type { ScheduledSessionRequest } from "@/src/requests/scheduledSessionRequests";
+import type { AsyncResult } from "@/src/repositories/types";
 
 const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<ScheduledEntity> => {
   try {

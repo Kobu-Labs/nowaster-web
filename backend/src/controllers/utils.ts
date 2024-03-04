@@ -1,6 +1,6 @@
 import { ZodError } from "zod";
-import { UserVisibleError } from "../repositories/types";
 import type { Response } from "express";
+import { UserVisibleError } from "@/src/repositories/types";
 
 export const handleErroredRequest = (res: Response, e: unknown) => {
   if (e instanceof ZodError) {

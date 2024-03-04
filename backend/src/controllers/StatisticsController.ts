@@ -1,6 +1,6 @@
+import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
+import statisticsRepo from "@/src/repositories/statistics_repository";
 import { Router } from "express";
-import statisticsRepo from "../repositories/statistics_repository";
-import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
 
 export const StatisticsController = Router();
 

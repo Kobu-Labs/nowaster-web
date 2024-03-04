@@ -1,5 +1,5 @@
-import { getDashboardData } from "./dashboard";
-import { getStreakCalendarData } from "./streak_calendar";
+import { getDashboardData } from "@/src/repositories/statistics_repository/dashboard";
+import { getStreakCalendarData } from "@/src/repositories/statistics_repository/streak_calendar";
 
 const statisticsRepo = {
   getDashboardData,

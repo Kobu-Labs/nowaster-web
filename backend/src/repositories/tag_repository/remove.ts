@@ -1,7 +1,7 @@
 import type { Tag } from "@prisma/client";
-import type { AsyncResult } from "../types";
-import client from "../client";
+import client from "@/src/repositories/client";
 import { Result } from "@badrap/result";
+import type { AsyncResult } from "@/src/repositories/types";
 
 type DeleteTagParams = {
     id: string

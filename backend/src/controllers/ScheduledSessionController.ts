@@ -1,8 +1,8 @@
 import { Router } from "express";
-import scheduledSessionRepo from "../repositories/scheduled_entity";
-import { validate } from "../middleware/validation";
-import { handleOkResp, handleResultErrorResp } from "./utils/handleResponse";
 import { ScheduledSessionRequestSchema } from "@/src/requests/scheduledSessionRequests";
+import scheduledSessionRepo from "@/src/repositories/scheduled_entity";
+import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
+import { validate } from "@/src/middleware/validation";
 export const ScheduledController = Router();
 const SessionsController = Router();
 const CategoriesController = Router();
