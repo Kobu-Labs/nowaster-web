@@ -25,7 +25,7 @@ export const ActiveSessionUiProvider: FC<ActiveSessionUiProviderProps> = ({ sess
     <div>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <CategoryLabel label={session.category} />
+          <CategoryLabel label={session.category.name} />
           <div className="font-medium">{displayedTime}</div>
         </div>
         <div className="flex gap-1" >

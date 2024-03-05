@@ -30,7 +30,7 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
     <Card className={cn(historyCardVariants({ variant: props.variant }))}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-2xl font-bold">
-          {props.session.category}
+          {props.session.category.name}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex grow-0">
