@@ -42,7 +42,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   };
 
   const shouldShowAddButton = () => {
-    return currentCategory && categories.value.every(cat => !prefixBasedMatch(cat, currentCategory));
+    return currentCategory && categories.value.every(cat => !prefixBasedMatch(cat.name, currentCategory));
   };
 
   return (
@@ -74,20 +74,21 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           <CommandGroup>
             <ScrollArea type="always" className="max-h-48 overflow-y-auto rounded-md border-none">
               {categories.value
-                .filter(category => prefixBasedMatch(category, currentCategory, { caseInsensitive: true }))
+                .filter(category => prefixBasedMatch(category.name, currentCategory, { caseInsensitive: true }))
                 .map((category) => (
                   <CommandItem
-                    value={category}
-                    key={category}
-                    onSelect={selectedValue => (selectedValue === currentCategory) ? onDeselect() : onSelect(category)}
+                    value={category.name}
+                    key={category.name}
+                    onSelect={selectedValue => (selectedValue === currentCategory) ? onDeselect() : onSelect(category.name)}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        currentCategory === category ? "opacity-100" : "opacity-0"
+                        currentCategory === category.name ? "opacity-100" : "opacity-0"
                       )}
-                    />
-                    {category}
+                    >
+                      {category}
+                    </Check>
                   </CommandItem>
                 ))}
             </ScrollArea>
