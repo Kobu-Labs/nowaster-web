@@ -40,39 +40,40 @@ const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
 };
 
 export default function Page(props: { params: { detail: string } }) {
-  const category = props.params.detail;
+  const categoryName = props.params.detail;
+  const filter = { category: { name: categoryName } };
 
   return (
     <div>
       <div className="mt-8 pl-8 ">
         <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">Details page for
-          <CategoryLabel label={category} />
+          <CategoryLabel label={categoryName} />
           <Popover >
             <PopoverTrigger asChild className="cursor-pointer">
               <Settings />
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-              <CategoryColorPicker category={category} />
+              <CategoryColorPicker category={categoryName} />
             </PopoverContent>
           </Popover>
         </h2>
       </div>
       <div className="m-8 grid grid-cols-4 gap-8">
-        <SessionCountCard filter={{ category: category }} />
-        <TotalSessionTimeCard filter={{ category: category }} />
-        <SessionAverageDurationProvider filter={{ category: category }} />
+        <SessionCountCard filter={filter} />
+        <TotalSessionTimeCard filter={filter} />
+        <SessionAverageDurationProvider filter={filter} />
         <TagsToSessionPieChart
-          filter={{ category: category }}
+          filter={filter}
         />
         <div className="col-span-full">
           <FilteredSessionAreaChart
             initialGranularity="perDayInMonth"
-            filter={{ category: category }}
+            filter={filter}
           />
         </div>
         <div className="col-span-full">
           <BaseSessionTable
-            filter={{ category: category }}
+            filter={filter}
             columns={BaseSessionTableColumns} />
         </div>
       </div>
