@@ -45,7 +45,3 @@ export const deleteSingle = async (params: ScheduledSessionRequest["remove"]): P
   return await handleResponse(data, ScheduledSessionResponseSchema.remove);
 };
 
-export const getCategories = async (): Promise<Result<ScheduledSessionResponse["getCategories"]>> => {
-  const { data } = await baseApi.get(BASE_URL + "/categories");
-  return await handleResponse(data, ScheduledSessionResponseSchema.getCategories);
-};
