@@ -1,4 +1,4 @@
-import { ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
+import { CategoryApi, ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
 import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 import { createQueryKeys, mergeQueryKeys } from "@lukemorales/query-key-factory";
 
@@ -30,7 +30,7 @@ const statisticsKeys = createQueryKeys("statistics", {
 const categoryKeys = createQueryKeys("categories", {
   all: {
     queryKey: null,
-    queryFn: async () => await ScheduledSessionApi.getCategories(),
+    queryFn: async () => await CategoryApi.getCategories(),
   },
 });
 
