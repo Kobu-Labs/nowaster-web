@@ -5,10 +5,10 @@ import categoryRepo from "@/src/repositories/category";
 import { CategoryRequestSchema } from "@kobu-labs/nowaster-js-typing";
 
 
-export const CategoriesController = Router();
+export const CategoryController = Router();
 
 // read many categories
-CategoriesController.get("/", validate({ query: CategoryRequestSchema.readMany }), async (req, res) => {
+CategoryController.get("/", validate({ query: CategoryRequestSchema.readMany }), async (req, res) => {
   const categories = await categoryRepo.read.many(req.query);
 
   if (categories.isErr) {
@@ -20,7 +20,7 @@ CategoriesController.get("/", validate({ query: CategoryRequestSchema.readMany }
 
 
 // create new study session
-CategoriesController.post("/", validate({ body: CategoryRequestSchema.create }), async (req, res) => {
+CategoryController.post("/", validate({ body: CategoryRequestSchema.create }), async (req, res) => {
   const category = await categoryRepo.create(req.body);
 
   if (category.isErr) {
@@ -31,7 +31,7 @@ CategoriesController.post("/", validate({ body: CategoryRequestSchema.create }),
 
 
 // get category by name
-CategoriesController.get("/:name", validate({ params: CategoryRequestSchema.readByName }), async (req, res) => {
+CategoryController.get("/:name", validate({ params: CategoryRequestSchema.readByName }), async (req, res) => {
   const category = await categoryRepo.read.single(req.params);
 
   if (category.isErr) {
@@ -43,7 +43,7 @@ CategoriesController.get("/:name", validate({ params: CategoryRequestSchema.read
 
 
 // update category
-CategoriesController.put("/", validate({ body: CategoryRequestSchema.update }), async (req, res) => {
+CategoryController.put("/", validate({ body: CategoryRequestSchema.update }), async (req, res) => {
   const category = await categoryRepo.update(req.body);
 
   if (category.isErr) {
