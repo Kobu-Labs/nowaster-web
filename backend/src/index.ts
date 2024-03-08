@@ -9,6 +9,7 @@ import { ScheduledController } from "@/src/controllers/ScheduledSessionControlle
 import { TagController } from "@/src/controllers/TagController";
 import { StatisticsController } from "@/src/controllers/StatisticsController";
 import type { ApiResponse } from "@/src/controllers/types";
+import { CategoryController } from "@/src/controllers/CategoryController";
 
 const app = express();
 const port = env.PORT ?? 4000;
@@ -19,6 +20,7 @@ app.use(cors());
 
 app.use("/recorded", RecordedController);
 app.use("/scheduled", ScheduledController);
+app.use("/category", CategoryController);
 app.use("/tags", TagController);
 app.use("/statistics", StatisticsController);
 
