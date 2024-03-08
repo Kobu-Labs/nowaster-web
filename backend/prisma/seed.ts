@@ -1,4 +1,4 @@
-import { PrismaClient} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 /* { */
 /*     startTime: , */
@@ -81,8 +81,24 @@ const scheduledSessions = [
 
 const client = new PrismaClient();
 async function main() {
-  scheduledSessions.map(async (e) => {
-    await client.scheduledEntity.create({ data: e });
+  scheduledSessions.map(async (session) => {
+    const { category, ...sessionData } = session;
+    await client.scheduledEntity.create({
+      data: {
+        ...sessionData,
+        category: {
+          connectOrCreate: {
+            where: {
+              name: category
+            },
+            create: {
+              name: category
+
+            },
+          },
+        }
+      }
+    });
   });
   console.log("SEEDING SUCCESSFULL");
 }
