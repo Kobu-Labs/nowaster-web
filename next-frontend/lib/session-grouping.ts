@@ -105,7 +105,7 @@ export const groupSessions = (data: ScheduledSession[], opts: GroupingOptions): 
     allKeys[opts.granularity](data).forEach(tick => accumulator[tick] = {});
   }
 
-  const sessionKeyGetter = opts.sessionKey ?? ((session) => session.category);
+  const sessionKeyGetter = opts.sessionKey ?? ((session) => session.category.name);
   const granulizers = granularizers[opts.granularity];
   const uniques: Set<string | number> = new Set();
 
