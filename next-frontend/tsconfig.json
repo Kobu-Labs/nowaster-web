@@ -23,7 +23,6 @@
     ],
 
     /* Type Checking */
-    "strictNullChecks": true,
     "strict": true,                                   /* Enable all strict type-checking options. */
     "noPropertyAccessFromIndexSignature": false,
     "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
