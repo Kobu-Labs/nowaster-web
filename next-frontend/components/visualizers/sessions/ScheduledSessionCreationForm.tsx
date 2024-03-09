@@ -99,7 +99,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                       if (category === undefined) {
                         form.resetField("category");
                       } else {
-                        field.onChange(category);
+                        field.onChange({ name: category });
                       }
                     }} />
                   </FormControl>
