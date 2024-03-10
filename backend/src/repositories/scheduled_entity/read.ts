@@ -1,10 +1,9 @@
-import type { ScheduledEntity } from "@prisma/client";
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
-import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
 
-const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<ScheduledEntity[] | null> => {
+const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<ScheduledSessionResponse["readMany"]> => {
   try {
     const filterTags = params.tags !== undefined ? { tags: { some: { tag: { label: { in: params.tags } } } } } : {};
 
@@ -16,7 +15,8 @@ const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<Sc
           select: {
             tag: true,
           }
-        }
+        },
+        category: true,
       },
       where: {
         category: {
@@ -48,7 +48,7 @@ const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<Sc
   }
 };
 
-const single = async (params: ScheduledSessionRequest["readById"]): AsyncResult<ScheduledEntity> => {
+const single = async (params: ScheduledSessionRequest["readById"]): AsyncResult<ScheduledSessionResponse["readById"]> => {
   try {
     const scheduledEntity = await client.scheduledEntity.findFirst({
       where: {
@@ -59,13 +59,13 @@ const single = async (params: ScheduledSessionRequest["readById"]): AsyncResult<
           select: {
             tag: true,
           }
-
-        }
+        },
+        category: true,
       }
     });
 
     if (!scheduledEntity) {
-      return Result.err(new Error("ScheduledEntity does not exist"));
+      return Result.ok(null);
     }
 
     const { tags, ...rest } = scheduledEntity;
