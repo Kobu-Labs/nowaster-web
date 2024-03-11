@@ -74,7 +74,7 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
           <CommandGroup>
             <ScrollArea type="always" className="max-h-48 overflow-y-auto rounded-md border-none">
               {categories.value
-                .filter(category => prefixBasedMatch(category.name, currentCategory, { caseInsensitive: true }))
+                .filter(category => currentCategory === undefined || prefixBasedMatch(category.name, currentCategory, { caseInsensitive: true }))
                 .map((category) => (
                   <CommandItem
                     value={category.name}
@@ -86,9 +86,8 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
                         "mr-2 h-4 w-4",
                         currentCategory === category.name ? "opacity-100" : "opacity-0"
                       )}
-                    >
-                      {category}
-                    </Check>
+                    />
+                    {category.name}
                   </CommandItem>
                 ))}
             </ScrollArea>
