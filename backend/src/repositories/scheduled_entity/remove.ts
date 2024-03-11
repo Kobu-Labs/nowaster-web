@@ -2,23 +2,15 @@ import type { ScheduledEntity } from "@prisma/client";
 import client from "@/src/repositories/client";
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
-import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
 
-const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<ScheduledEntity> => {
+const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<ScheduledSessionResponse["remove"]> => {
   try {
     return await client.$transaction(async (tx) => {
       const scheduledEntity = await tx.scheduledEntity.findFirst({
         where: {
           id: params.id,
         },
-        include: {
-          tags: {
-            select: {
-              tag: true,
-            }
-
-          }
-        }
       });
 
       if (!scheduledEntity) {
@@ -34,7 +26,8 @@ const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<Sc
             select: {
               tag: true
             }
-          }
+          },
+          category: true,
         }
       });
 
