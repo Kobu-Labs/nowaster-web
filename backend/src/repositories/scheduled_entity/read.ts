@@ -34,10 +34,6 @@ const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<Sc
       },
     });
 
-    if (!scheduledEntity) {
-      return Result.err(new Error("ScheduledEntity does not exist"));
-    }
-
     return Result.ok(scheduledEntity.map(session => {
       const { tags, ...rest } = session;
       return { tags: tags.map(t => t.tag), ...rest };
