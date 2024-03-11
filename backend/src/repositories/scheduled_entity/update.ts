@@ -1,17 +1,24 @@
-import type { ScheduledEntity } from "@prisma/client";
 import { Result } from "@badrap/result";
 import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
-import type { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
 
 
-const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<ScheduledEntity> => {
+const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<ScheduledSessionResponse["update"]> => {
   try {
     const { id, category, ...data } = params;
 
-    const scheduledEntity = await client.scheduledEntity.update({
+    const scheduledSession = await client.scheduledEntity.update({
       where: {
         id: id,
+      },
+      include: {
+        category: true,
+        tags: {
+          select: {
+            tag: true
+          }
+        }
       },
       data: {
         ...data,
@@ -27,7 +34,9 @@ const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<Sc
         }
       }
     });
-    return Result.ok(scheduledEntity);
+
+    const { tags, ...rest } = scheduledSession;
+    return Result.ok({ tags: tags.map(t => t.tag), ...rest });
 
   } catch (error) {
     return Result.err(error as Error);
