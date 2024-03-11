@@ -51,6 +51,22 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
     return <div>{tags.error.message}</div>;
   }
 
+  const showSelectedTagsFirst = (tags: TagWithId[]) => {
+    return tags.sort((tag1, tag2) => {
+      if (selectedTags.some(t => t.id === tag1.id)) {
+        if (selectedTags.some(t => t.id === tag2.id)) {
+          return 0;
+        }
+        return -1;
+      }
+
+      if (selectedTags.some(t => t.id === tag2.id)) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
   const handleDeselectTag = (tag: TagWithId) => {
     const newTags = selectedTags.filter(t => t.id !== tag.id);
     setSelectedTags(newTags);
@@ -101,21 +117,23 @@ export const TagPicker: FC<TagPickerProps> = (props) => {
           }
           <CommandGroup>
             <ScrollArea type="always" className="max-h-48 overflow-y-auto rounded-md border-none">
-              {tags.value.filter((tag) => prefixBasedMatch(tag.label, searchTerm, { caseInsensitive: true })).map((tag) => (
-                <CommandItem
-                  value={tag.label}
-                  key={tag.id}
-                  onSelect={() => (selectedTags.some(t => t.id === tag.id)) ? handleDeselectTag(tag) : handleSelectTag(tag)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedTags.some(t => t.id === tag.id) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <TagBadge value={tag.label} />
-                </CommandItem>
-              ))}
+              {showSelectedTagsFirst(tags.value)
+                .filter((tag) => prefixBasedMatch(tag.label, searchTerm, { caseInsensitive: true }))
+                .map((tag) => (
+                  <CommandItem
+                    value={tag.label}
+                    key={tag.id}
+                    onSelect={() => (selectedTags.some(t => t.id === tag.id)) ? handleDeselectTag(tag) : handleSelectTag(tag)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedTags.some(t => t.id === tag.id) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <TagBadge value={tag.label} />
+                  </CommandItem>
+                ))}
             </ScrollArea>
           </CommandGroup>
         </Command>
