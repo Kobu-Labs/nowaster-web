@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type GroupingOptions } from "@/lib/session-grouping";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
-import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/OverviewAreaChartUiProvider";
+import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider";
 
 
 type SessionBaseChartProps = {
