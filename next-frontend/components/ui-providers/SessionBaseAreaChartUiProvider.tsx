@@ -73,14 +73,16 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
     <Card className="rounded-sm p-2">
       {filteredValues.map(([category, totalTime]) => {
         return (
-          <div key={category} className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2">
             <p
+              key={category + "category"}
               style={{ "--legend-color": colors[category] } as React.CSSProperties}
               className={"text-[var(--legend-color)]"}
             >
               {category}
             </p>
             <p
+              key={category + "time"}
               style={{ "--legend-color": colors[category] } as React.CSSProperties}
               className={"text-[var(--legend-color)]"}
             >

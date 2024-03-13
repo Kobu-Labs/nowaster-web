@@ -1,4 +1,4 @@
-import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/OverviewAreaChartUiProvider";
+import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider";
 import type { Meta, StoryObj } from "@storybook/react";
 import { RecoilRoot } from "recoil";
 
