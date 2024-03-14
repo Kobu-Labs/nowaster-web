@@ -20,6 +20,8 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
   });
 
   return (
-    <KpiCardUiProvider variant={"big_value"} value={(result || 0)} title={"Total sessions"} />
+    <KpiCardUiProvider variant={"big_value"} value={result || 0} title={"Total sessions"}>
+      <Sigma />
+    </KpiCardUiProvider>
   );
 };
