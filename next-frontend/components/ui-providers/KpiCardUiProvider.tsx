@@ -4,7 +4,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { FC } from "react";
 
 interface KpiCardUiProviderProps extends VariantProps<typeof cardVariants> {
-  value: string,
+  value: string | number,
   title: string,
   description?: string
   children?: React.ReactNode

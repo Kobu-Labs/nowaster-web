@@ -27,9 +27,9 @@ export default function IndexPage() {
     <div className="p-8">
       <h2 className="mb-8 text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="flex gap-8 ">
-        <KpiCardUiProvider value={stats.data.value.session_count.toString()} title={"Total Sessions"} description={"Many to go.."}><AlignVerticalDistributeEnd /></KpiCardUiProvider>
-        <KpiCardUiProvider value={stats.data.value.minutes.toString()} title={"Total Minutes Spent"} description={`That's almost ${Math.ceil(stats.data.value.minutes / 60)} hours!`}><Hourglass /> </KpiCardUiProvider>
-        <KpiCardUiProvider value={stats.data.value.streak.toString()} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCardUiProvider>
+        <KpiCardUiProvider value={stats.data.value.session_count} title={"Total Sessions"} description={"Many to go.."}><AlignVerticalDistributeEnd /></KpiCardUiProvider>
+        <KpiCardUiProvider value={stats.data.value.minutes} title={"Total Minutes Spent"} description={`That's almost ${Math.ceil(stats.data.value.minutes / 60)} hours!`}><Hourglass /> </KpiCardUiProvider>
+        <KpiCardUiProvider value={stats.data.value.streak} title={"Current Streak"} description={"Keep it going!"}> <Calendar /></KpiCardUiProvider>
       </div>
       <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         <Overview granularity="month" />
