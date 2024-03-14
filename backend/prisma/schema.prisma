@@ -25,9 +25,10 @@ model RecordedEntity {
 }
 
 model Tag {
-    id       String         @id @default(uuid())
-    label    String
-    sessions TagToSession[]
+    id                   String                 @id @default(uuid())
+    label                String
+    sessions             TagToSession[]
+    TagToAllowedCategory TagToAllowedCategory[]
 }
 
 model TagToSession {
@@ -39,6 +40,15 @@ model TagToSession {
 }
 
 model Category {
-    name            String            @id
-    ScheduledEntity ScheduledEntity[]
+    name                 String                 @id
+    ScheduledEntity      ScheduledEntity[]
+    TagToAllowedCategory TagToAllowedCategory[]
+}
+
+model TagToAllowedCategory {
+    id                String   @id @default(uuid())
+    name              String
+    tagId             String
+    allowedCategories Category @relation(fields: [name], references: [name], onDelete: Cascade)
+    tag               Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
 }

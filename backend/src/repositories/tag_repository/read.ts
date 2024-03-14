@@ -2,7 +2,7 @@ import { Result } from "@badrap/result";
 import type { Tag } from "@prisma/client";
 import { UserVisibleError, type AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
-import type { TagRequest } from "@kobu-labs/nowaster-js-typing";
+import type { TagRequest, TagResponse } from "@kobu-labs/nowaster-js-typing";
 
 type ReadTagByIdParams = {
     id: string
@@ -53,12 +53,30 @@ const byLabel = async (params: ReadTagByLabelParams): AsyncResult<Tag> => {
   }
 };
 
-const many = async (params: TagRequest["readMany"]): AsyncResult<Tag[]> => {
+const many = async (params: TagRequest["readMany"]): AsyncResult<TagResponse["readMany"]> => {
   try {
-    const tags = await client.tag.findMany({ take: params.limit });
+    const tags = await client.tag.findMany({
+      take: params.limit,
+      include: {
+        TagToAllowedCategory: {
+          select: {
+            name: true,
+          },
+        },
+
+      }
+    });
+
+    const res = tags.map(tag => {
+      const { TagToAllowedCategory, ...data } = tag;
+      return {
+        ...data,
+        allowedCategories: TagToAllowedCategory
+      };
+    });
 
 
-    return Result.ok(tags);
+    return Result.ok(res);
   } catch (error) {
     return Result.err(error as Error);
   }
