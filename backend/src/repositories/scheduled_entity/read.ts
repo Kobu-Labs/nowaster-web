@@ -12,8 +12,12 @@ const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<Sc
       orderBy: { startTime: "desc" },
       include: {
         tags: {
-          select: {
-            tag: true,
+          include: {
+            tag: {
+              include: {
+                TagToAllowedCategory: true
+              }
+            }
           }
         },
         category: true,
@@ -36,7 +40,14 @@ const many = async (params: ScheduledSessionRequest["readMany"]): AsyncResult<Sc
 
     return Result.ok(scheduledEntity.map(session => {
       const { tags, ...rest } = session;
-      return { tags: tags.map(t => t.tag), ...rest };
+      const mappedTags = tags.map(tagData => {
+        const { TagToAllowedCategory, ...data } = tagData.tag;
+        return {
+          ...data,
+          allowedCategories: TagToAllowedCategory
+        };
+      });
+      return { tags: mappedTags, ...rest };
     }));
 
   } catch (error) {
