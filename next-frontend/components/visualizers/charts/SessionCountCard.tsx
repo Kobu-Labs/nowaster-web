@@ -3,6 +3,7 @@ import { FC } from "react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
+import { Sigma } from "lucide-react";
 
 type SessionCountCardProps = {
   filter?: Partial<ScheduledSessionRequest["readMany"]>
@@ -19,6 +20,6 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
   });
 
   return (
-    <KpiCardUiProvider variant={"big_value"} value={(result || 0).toString()} title={"Total sessions"} />
+    <KpiCardUiProvider variant={"big_value"} value={(result || 0)} title={"Total sessions"} />
   );
 };
