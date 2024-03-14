@@ -1,11 +1,11 @@
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
-import type { ScheduledSession, ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
 
 
 // tags passed in must already exists
-const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<ScheduledSession> => {
+const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<ScheduledSessionResponse["create"]> => {
   try {
     const scheduledEntity = await client.scheduledEntity.create({
       data: {
@@ -39,14 +39,24 @@ const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<Sc
         category: true,
         tags: {
           select: {
-            tag: true
+            tag: {
+              include: { TagToAllowedCategory: true }
+            }
           },
         }
       }
     });
 
     const { tags, ...rest } = scheduledEntity;
-    return Result.ok({ tags: tags.map(t => t.tag), ...rest });
+    const mappedTags = tags.map(tagData => {
+      const { TagToAllowedCategory, ...data } = tagData.tag;
+      return {
+        ...data,
+        allowedCategories: TagToAllowedCategory
+      };
+    });
+
+    return Result.ok({ tags: mappedTags, ...rest });
   } catch (error) {
     return Result.err(error as Error);
   }
