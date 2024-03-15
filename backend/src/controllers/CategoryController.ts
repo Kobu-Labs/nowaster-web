@@ -44,7 +44,7 @@ CategoryController.get("/:name", validate({ params: CategoryRequestSchema.readBy
 
 // update category
 CategoryController.put("/", validate({ body: CategoryRequestSchema.update }), async (req, res) => {
-  const category = await categoryRepo.update(req.body);
+  const category = await categoryRepo.update.single(req.body);
 
   if (category.isErr) {
     return handleResultErrorResp(500, res, category.error);
@@ -52,3 +52,5 @@ CategoryController.put("/", validate({ body: CategoryRequestSchema.update }), as
 
   return handleOkResp(category.value, res);
 });
+
+
