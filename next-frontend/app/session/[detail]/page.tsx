@@ -1,54 +1,63 @@
-"use client";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn/popover";
-import { HexColorPicker } from "react-colorful";
-import { Settings } from "lucide-react";
-import { useRecoilState } from "recoil";
-import { categoryColors } from "@/state/categories";
-import { Card } from "@/components/shadcn/card";
-import { FC } from "react";
-import { randomColor } from "@/lib/utils";
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
-import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
-import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
-import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
-import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart";
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+"use client"
+
+import { FC } from "react"
+import { categoryColors } from "@/state/categories"
+import { Settings } from "lucide-react"
+import { HexColorPicker } from "react-colorful"
+import { useRecoilState } from "recoil"
+
+import { randomColor } from "@/lib/utils"
+import { Card } from "@/components/shadcn/card"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcn/popover"
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel"
+import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart"
+import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard"
+import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard"
+import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart"
+import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard"
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns"
+import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable"
 
 type CategoryColorPickerProps = {
   category: string
 }
 
 const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
-  const [colors, setColors] = useRecoilState(categoryColors);
+  const [colors, setColors] = useRecoilState(categoryColors)
 
   // colors[props.category] should be always defined at this point
-  const currentCategoryColors = colors[props.category] ?? randomColor();
+  const currentCategoryColors = colors[props.category] ?? randomColor()
 
   const setColorsGlobState = (value: string) => {
-    const { [props.category]: currentCategory, ...rest } = colors;
-    setColors({ ...rest, [props.category]: value });
-  };
+    const { [props.category]: currentCategory, ...rest } = colors
+    setColors({ ...rest, [props.category]: value })
+  }
 
   return (
     <Card>
-      <HexColorPicker color={currentCategoryColors} onChange={setColorsGlobState} />
+      <HexColorPicker
+        color={currentCategoryColors}
+        onChange={setColorsGlobState}
+      />
     </Card>
-  );
-
-};
+  )
+}
 
 export default function Page(props: { params: { detail: string } }) {
-  const categoryName = props.params.detail;
-  const filter = { category: { name: categoryName } };
+  const categoryName = props.params.detail
+  const filter = { category: { name: categoryName } }
 
   return (
-    <div>
+    <div className="grow">
       <div className="mt-8 pl-8 ">
-        <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">Details page for
+        <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
+          Details page for
           <CategoryLabel label={categoryName} />
-          <Popover >
+          <Popover>
             <PopoverTrigger asChild className="cursor-pointer">
               <Settings />
             </PopoverTrigger>
@@ -62,22 +71,16 @@ export default function Page(props: { params: { detail: string } }) {
         <SessionCountCard filter={filter} />
         <TotalSessionTimeCard filter={filter} />
         <SessionAverageDurationProvider filter={filter} />
-        <TagsToSessionPieChart
+        <TagsToSessionPieChart filter={filter} />
+        <FilteredSessionAreaChart
+          initialGranularity="perDayInMonth"
           filter={filter}
+          className="col-span-full h-[350px]"
         />
         <div className="col-span-full">
-          <FilteredSessionAreaChart
-            initialGranularity="perDayInMonth"
-            filter={filter}
-          />
-        </div>
-        <div className="col-span-full">
-          <BaseSessionTable
-            filter={filter}
-            columns={BaseSessionTableColumns} />
+          <BaseSessionTable filter={filter} columns={BaseSessionTableColumns} />
         </div>
       </div>
-    </div >
-  );
-
+    </div>
+  )
 }
