@@ -84,21 +84,23 @@ export default function Page() {
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
-          <TabsContent value="general" className="grid grid-cols-3 gap-4">
-            <div className="col-span-1" >
-              <TotalSessionTimeCard filter={filter} />
-            </div>
-            <div className="col-span-1" >
-              <SessionAverageDurationProvider filter={filter} />
-            </div>
-            <div className="col-span-1" >
-              <SessionCountCard filter={filter} />
-            </div>
-            <div className="col-span-full">
-              <FilteredSessionAreaChart
-                filter={filter}
-                initialGranularity={"perDayInWeek"}
-              />
+          <TabsContent value="general" className="flex flex-col">
+            <div  className="grid grid-cols-3 gap-4 ">
+              <div className="col-span-1" >
+                <TotalSessionTimeCard filter={filter} />
+              </div>
+              <div className="col-span-1" >
+                <SessionAverageDurationProvider filter={filter} />
+              </div>
+              <div className="col-span-1" >
+                <SessionCountCard filter={filter} />
+              </div>
+              <div className="col-span-full">
+                <FilteredSessionAreaChart
+                  filter={filter}
+                  initialGranularity={"perDayInWeek"}
+                />
+              </div>
             </div>
 
             <div className="col-span-full">

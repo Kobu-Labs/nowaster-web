@@ -30,7 +30,7 @@ export const SessionBaseAreaChartUiProvider: FC<SessionBaseAreaChartUiProviderPr
   }
 
   return (
-    <ResponsiveContainer width={"100%"} height={250} >
+    <ResponsiveContainer>
       <AreaChart data={groupedSessions} >
         <XAxis includeHidden dataKey="granularity" />
         <YAxis tickFormatter={(x) => formatTime(x)} />
