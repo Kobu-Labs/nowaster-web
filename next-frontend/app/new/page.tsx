@@ -4,7 +4,7 @@ import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/
 
 const NewSessionPage = () => {
   return (
-    <div className="mt-8 flex justify-center">
+    <div className="grow h-fit mt-8 flex justify-center">
       <ScheduledSessionCreationForm />
     </div>
   );
