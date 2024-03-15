@@ -16,7 +16,9 @@ const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<Sc
         category: true,
         tags: {
           select: {
-            tag: true
+            tag: {
+              include: { TagToAllowedCategory: true }
+            }
           }
         }
       },
@@ -36,7 +38,15 @@ const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<Sc
     });
 
     const { tags, ...rest } = scheduledSession;
-    return Result.ok({ tags: tags.map(t => t.tag), ...rest });
+    const mappedTags = tags.map(tagData => {
+      const { TagToAllowedCategory, ...data } = tagData.tag;
+      return {
+        ...data,
+        allowedCategories: TagToAllowedCategory
+      };
+    });
+
+    return Result.ok({ tags: mappedTags, ...rest });
 
   } catch (error) {
     return Result.err(error as Error);
