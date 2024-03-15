@@ -7,7 +7,7 @@ const tagRepo = {
   create,
   read,
   remove,
-  update
+  update,
 };
 
 export default tagRepo;
