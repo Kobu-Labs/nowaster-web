@@ -24,7 +24,11 @@ const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<Sc
         include: {
           tags: {
             select: {
-              tag: true
+              tag: {
+                include: {
+                  TagToAllowedCategory: true
+                }
+              }
             }
           },
           category: true,
@@ -32,7 +36,16 @@ const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<Sc
       });
 
       const { tags, ...rest } = deletedEntity;
-      return Result.ok({ tags: tags.map(t => t.tag), ...rest });
+      const mappedTags = tags.map(tagData => {
+        const { TagToAllowedCategory, ...data } = tagData.tag;
+        return {
+          ...data,
+          allowedCategories: TagToAllowedCategory
+        };
+      });
+
+      return Result.ok({ tags: mappedTags, ...rest });
+
     });
   } catch (error) {
     return Result.err(error as Error);
