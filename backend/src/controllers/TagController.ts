@@ -31,4 +31,15 @@ TagController.get("/", validate({ query: TagRequestSchema.readMany }), async (re
   }
 
   return handleOkResp(tags.value, res);
+})
+
+    // Add allowed category
+TagController.post("/addAllowedCategory", validate({ body: TagRequestSchema.addAllowedCategory }), async (req, res) => {
+  const tags = await tagRepo.update.addAllowedCategory(req.body);
+
+  if (tags.isErr) {
+    return handleResultErrorResp(500, res, tags.error);
+  }
+
+  return handleOkResp(tags.value, res);
 });
