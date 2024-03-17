@@ -1,4 +1,4 @@
-import { Result } from "@badrap/result";
+import { Result, Result } from "@badrap/result";
 import baseApi, { handleResponse } from "@/api/baseApi";
 import { TagRequest, TagResponse, TagResponseSchema } from "@kobu-labs/nowaster-js-typing";
 
@@ -17,3 +17,11 @@ export const create = async (params: TagRequest["create"]): Promise<Result<TagRe
   );
   return await handleResponse(data, TagResponseSchema.create);
 };
+
+export const addAllowedCategory = async(params:TagRequest["addAllowedCategory"]) : Promise<Result<TagResponse["addAllowedCategory"]>> => {
+  const { data } = await baseApi.post(
+    "tags/addAllowedCategory",
+    params
+  );
+  return await handleResponse(data, TagResponseSchema.addAllowedCategory);
+}
