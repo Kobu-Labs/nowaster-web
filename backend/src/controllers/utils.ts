@@ -5,11 +5,9 @@ import { UserVisibleError } from "@/src/repositories/types";
 export const handleErroredRequest = (res: Response, e: unknown) => {
   if (e instanceof ZodError) {
     res.status(400).send({ message: e.errors, info: "Validation error" });
-  }
-  else if (e instanceof UserVisibleError) {
+  } else if (e instanceof UserVisibleError) {
     res.status(400).send({ message: e.message });
-  }
-  else {
+  } else {
     res.status(500).send({ message: "Something went wrong" });
   }
 };

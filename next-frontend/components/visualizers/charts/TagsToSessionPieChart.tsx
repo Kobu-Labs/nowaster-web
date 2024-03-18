@@ -1,14 +1,16 @@
-import React from "react";
-import { FC } from "react";
-import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
-import { SessionPieChart } from "@/components/visualizers/charts/SessionPieChart";
+import React, { FC } from "react"
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
+
+import { Card, CardContent, CardHeader } from "@/components/shadcn/card"
+import { SessionPieChart } from "@/components/visualizers/charts/SessionPieChart"
 
 type TagsToSessionPieChartProps = {
   filter?: Partial<ScheduledSessionRequest["readMany"]>
 }
 
-export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (props) => {
+export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
+  props
+) => {
   return (
     <Card>
       <CardHeader>
@@ -17,9 +19,11 @@ export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (props) => 
       <CardContent>
         <SessionPieChart
           filter={props.filter}
-          groupingFn={(sessions) => sessions.tags.length ? sessions.tags.map(tag => tag.label) : "-"}
+          groupingFn={(sessions) =>
+            sessions.tags.length ? sessions.tags.map((tag) => tag.label) : "-"
+          }
         />
       </CardContent>
     </Card>
-  );
-};
+  )
+}

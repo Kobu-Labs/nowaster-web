@@ -1,7 +1,9 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/shadcn/button"
+import { Card, CardContent } from "@/components/shadcn/card"
 import {
   Form,
   FormControl,
@@ -9,23 +11,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/shadcn/form";
-import { Input } from "@/components/shadcn/input";
-import { useForm } from "react-hook-form";
-import { Card, CardContent } from "@/components/shadcn/card";
+} from "@/components/shadcn/form"
+import { Input } from "@/components/shadcn/input"
 
 const formSchema = z.object({
   email: z.string().email({ message: "Pass in a correct email" }),
-  password: z.string().min(5, { message: "Password must be at least 5 characters long" })
-});
+  password: z
+    .string()
+    .min(5, { message: "Password must be at least 5 characters long" }),
+})
 
 export const LoginForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-  });
+  })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    console.log(values)
   }
 
   return (
@@ -53,7 +55,7 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="password" type="password"{...field} />
+                    <Input placeholder="password" type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -64,5 +66,5 @@ export const LoginForm = () => {
         </Form>
       </CardContent>
     </Card>
-  );
-};
+  )
+}

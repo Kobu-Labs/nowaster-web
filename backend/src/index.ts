@@ -28,17 +28,20 @@ app.use((_req, res) => {
   const response: ApiResponse<null> = {
     status: "failure",
     data: null,
-    error: "No matching endpoint was found"
+    error: "No matching endpoint was found",
   };
 
   return res.status(404).send(response);
 });
 
-
 app.listen(port, () => {
   console.log(`[${new Date().toISOString()}] API listening on port ${port}`);
   if (app.settings.env === "development") {
-    console.log(`[${new Date().toISOString()}] Application running in development mode!`);
+    console.log(
+      `[${new Date().toISOString()}] Application running in development mode!`,
+    );
   }
-  console.log(`[${new Date().toISOString()}] Database used: ${env.DATABASE_URL}`);
+  console.log(
+    `[${new Date().toISOString()}] Database used: ${env.DATABASE_URL}`,
+  );
 });

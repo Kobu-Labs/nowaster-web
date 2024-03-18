@@ -78,7 +78,6 @@ const scheduledSessions = [
   },
 ];
 
-
 const client = new PrismaClient();
 async function main() {
   scheduledSessions.map(async (session) => {
@@ -89,20 +88,18 @@ async function main() {
         category: {
           connectOrCreate: {
             where: {
-              name: category
+              name: category,
             },
             create: {
-              name: category
-
+              name: category,
             },
           },
-        }
-      }
+        },
+      },
     });
   });
   console.log("SEEDING SUCCESSFULL");
 }
-
 
 main()
   .then(async () => {

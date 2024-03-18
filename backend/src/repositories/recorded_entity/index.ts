@@ -7,7 +7,7 @@ const recordedSessionRepo = {
   create,
   read,
   remove,
-  update
+  update,
 };
 
 export default recordedSessionRepo;

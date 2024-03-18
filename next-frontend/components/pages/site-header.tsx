@@ -1,5 +1,5 @@
-import { MainNav } from "@/components/pages/main-nav";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/config/site"
+import { MainNav } from "@/components/pages/main-nav"
 
 export function SiteHeader() {
   return (
@@ -8,5 +8,5 @@ export function SiteHeader() {
         <MainNav items={siteConfig.mainNav} />
       </div>
     </header>
-  );
+  )
 }

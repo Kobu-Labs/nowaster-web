@@ -1,13 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
-import { cn, getFormattedTimeDifference } from "@/lib/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import { FC } from "react";
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
-import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { FC } from "react"
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing"
+import { VariantProps, cva } from "class-variance-authority"
 
+import { cn, getFormattedTimeDifference } from "@/lib/utils"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card"
+import { TagBadge } from "@/components/visualizers/tags/TagBadge"
 
 type SessionCardProps = {
-  session: ScheduledSession,
+  session: ScheduledSession
 } & VariantProps<typeof historyCardVariants>
 
 const historyCardVariants = cva(
@@ -23,7 +28,7 @@ const historyCardVariants = cva(
       variant: "default",
     },
   }
-);
+)
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
   return (
@@ -35,14 +40,23 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
       </CardHeader>
       <CardContent className="flex grow-0">
         <div>
-          <p className="text-sm text-muted-foreground">{props.session.description}</p>
-          <div className="mt-1 flex" >
-            {props.session.tags.map((val) => <TagBadge key={val.id} value={val.label} />)}
+          <p className="text-sm text-muted-foreground">
+            {props.session.description}
+          </p>
+          <div className="mt-1 flex">
+            {props.session.tags.map((val) => (
+              <TagBadge key={val.id} value={val.label} />
+            ))}
           </div>
         </div>
         <div className="grow" />
-        <div className="ml-4 text-xl font-medium">{getFormattedTimeDifference(props.session.startTime, props.session.endTime)}</div>
+        <div className="ml-4 text-xl font-medium">
+          {getFormattedTimeDifference(
+            props.session.startTime,
+            props.session.endTime
+          )}
+        </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}

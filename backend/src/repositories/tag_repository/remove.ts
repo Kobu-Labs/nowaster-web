@@ -4,17 +4,17 @@ import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
 
 type DeleteTagParams = {
-    id: string
-}
+  id: string;
+};
 
 // TODO: no endpoint is using this
-const remove = async (params: DeleteTagParams) : AsyncResult<Tag>=> { 
+const remove = async (params: DeleteTagParams): AsyncResult<Tag> => {
   try {
-    return await client.$transaction(async (tx)=>{
+    return await client.$transaction(async (tx) => {
       const deletedTag = await tx.tag.delete({
         where: {
           id: params.id,
-        }
+        },
       });
       return Result.ok(deletedTag);
     });

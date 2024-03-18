@@ -1,9 +1,11 @@
-import { handleOkResp, handleResultErrorResp } from "@/src/controllers/utils/handleResponse";
+import {
+  handleOkResp,
+  handleResultErrorResp,
+} from "@/src/controllers/utils/handleResponse";
 import statisticsRepo from "@/src/repositories/statistics_repository";
 import { Router } from "express";
 
 export const StatisticsController = Router();
-
 
 StatisticsController.get("/dashboard", async (_req, res) => {
   const dashboardData = await statisticsRepo.getDashboardData();
