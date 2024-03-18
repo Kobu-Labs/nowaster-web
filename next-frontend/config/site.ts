@@ -2,8 +2,7 @@ export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
   name: "Nowaster",
-  description:
-    "Track your time!",
+  description: "Track your time!",
   mainNav: [
     {
       title: "Home",
@@ -15,7 +14,7 @@ export const siteConfig = {
     },
     {
       title: "New Session",
-      href: "/new"
+      href: "/new",
     },
   ],
-};
+}

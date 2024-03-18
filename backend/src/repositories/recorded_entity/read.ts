@@ -4,13 +4,14 @@ import type { AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
 import type { RecordedSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
-
-const single = async (params: RecordedSessionRequest["readById"]): AsyncResult<RecordedEntity | null> => {
+const single = async (
+  params: RecordedSessionRequest["readById"],
+): AsyncResult<RecordedEntity | null> => {
   try {
     const recordedEntity = await client.recordedEntity.findFirst({
       where: {
         id: params.id,
-      }
+      },
     });
 
     return Result.ok(recordedEntity);
@@ -19,11 +20,13 @@ const single = async (params: RecordedSessionRequest["readById"]): AsyncResult<R
   }
 };
 
-const many = async (params: RecordedSessionRequest["readMany"]): AsyncResult<RecordedEntity[]> => {
+const many = async (
+  params: RecordedSessionRequest["readMany"],
+): AsyncResult<RecordedEntity[]> => {
   try {
     const recordedEntities = await client.recordedEntity.findMany({
       take: params.limit,
-      orderBy: { startTime: "desc" }
+      orderBy: { startTime: "desc" },
     });
 
     return Result.ok(recordedEntities);
@@ -31,7 +34,6 @@ const many = async (params: RecordedSessionRequest["readMany"]): AsyncResult<Rec
     return Result.err(error as Error);
   }
 };
-
 
 const read = {
   single,

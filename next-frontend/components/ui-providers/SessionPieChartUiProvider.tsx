@@ -1,18 +1,35 @@
-"use client";
+"use client"
 
-import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart";
-import { formatTime, randomColor } from "@/lib/utils";
-import { tagColors } from "@/state/tags";
-import { FC, useState } from "react";
-import { Cell, Label, Pie, PieChart, ResponsiveContainer, Sector } from "recharts";
-import { useRecoilState } from "recoil";
+import { FC, useState } from "react"
+import { tagColors } from "@/state/tags"
+import {
+  Cell,
+  Label,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Sector,
+} from "recharts"
+import { useRecoilState } from "recoil"
+
+import { formatTime, randomColor } from "@/lib/utils"
+import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart"
 
 type SessionPieChartUiProviderProps = {
-  data: AmountByCategory[],
+  data: AmountByCategory[]
 }
 
 const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
+  const {
+    cx,
+    cy,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+  } = props
 
   return (
     <g>
@@ -41,31 +58,30 @@ const renderActiveShape = (props: any) => {
         fill={fill}
       />
     </g>
-  );
-};
+  )
+}
 
-export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (props) => {
-  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
+  props
+) => {
+  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined)
 
-  const [colors, setColors] = useRecoilState(tagColors);
-  const result: { [label: string]: string } = {};
+  const [colors, setColors] = useRecoilState(tagColors)
+  const result: { [label: string]: string } = {}
 
-
-  (props.data).forEach(({ key }) => {
+  props.data.forEach(({ key }) => {
     if (colors[key] === undefined) {
-      result[key] = randomColor();
+      result[key] = randomColor()
     }
-  });
+  })
 
   if (Object.entries(result).length !== 0) {
-    setColors({ ...colors, ...result });
+    setColors({ ...colors, ...result })
   }
 
-
   return (
-    <ResponsiveContainer width={"100%"} height={180}  >
-      <PieChart
-        onMouseLeave={() => setActiveIndex(undefined)}>
+    <ResponsiveContainer width={"100%"} height={180}>
+      <PieChart onMouseLeave={() => setActiveIndex(undefined)}>
         <Pie
           data={props.data}
           dataKey="value"
@@ -79,16 +95,27 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (pr
           onMouseEnter={(_, i) => setActiveIndex(i)}
           activeIndex={activeIndex}
         >
-          {props.data.map(({key}, index) => {
-            return <Cell fillOpacity={0.4} stroke={colors[key]} key={`cell-${index}`} fill={colors[key]} />;
+          {props.data.map(({ key }, index) => {
+            return (
+              <Cell
+                fillOpacity={0.4}
+                stroke={colors[key]}
+                key={`cell-${index}`}
+                fill={colors[key]}
+              />
+            )
           })}
-          {activeIndex === undefined && <Label
-            value={formatTime(props.data.reduce((acc, curr) => acc + curr.value, 0))}
-            position="center"
-            fill={"#fff"}
-          />}
+          {activeIndex === undefined && (
+            <Label
+              value={formatTime(
+                props.data.reduce((acc, curr) => acc + curr.value, 0)
+              )}
+              position="center"
+              fill={"#fff"}
+            />
+          )}
         </Pie>
       </PieChart>
     </ResponsiveContainer>
-  );
-};
+  )
+}

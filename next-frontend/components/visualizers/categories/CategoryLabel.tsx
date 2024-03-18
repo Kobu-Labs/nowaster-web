@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { FC } from "react";
+import { FC } from "react"
+import Link from "next/link"
 
 type CategoryLabelProps = {
   label: string
@@ -8,8 +8,13 @@ type CategoryLabelProps = {
 export const CategoryLabel: FC<CategoryLabelProps> = (props) => {
   return (
     <Link href={`/session/${props.label}`}>
-      <p className={"underline hover:scale-110 hover:text-pink-300 hover:transition "}>
+      <p
+        className={
+          "underline hover:scale-110 hover:text-pink-300 hover:transition "
+        }
+      >
         {props.label}
       </p>
-    </Link>);
-};
+    </Link>
+  )
+}

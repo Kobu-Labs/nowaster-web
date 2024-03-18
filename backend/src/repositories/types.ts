@@ -1,7 +1,6 @@
 import type { Result } from "@badrap/result";
 
-export type AsyncResult<T> = Promise<Result<T>>
-
+export type AsyncResult<T> = Promise<Result<T>>;
 
 export class UserVisibleError extends Error {
   constructor(message: string) {

@@ -4,8 +4,9 @@ import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
 import type { RecordedSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
-
-const update = async (params: RecordedSessionRequest["updateById"]): AsyncResult<RecordedEntity> => {
+const update = async (
+  params: RecordedSessionRequest["updateById"],
+): AsyncResult<RecordedEntity> => {
   try {
     const { id, category, ...data } = params;
 
@@ -15,14 +16,13 @@ const update = async (params: RecordedSessionRequest["updateById"]): AsyncResult
       },
       data: {
         ...data,
-        ...category
-      }
+        ...category,
+      },
     });
     return Result.ok(recordedEntity);
   } catch (error) {
     return Result.err(error as Error);
   }
-
 };
 
 export default update;
