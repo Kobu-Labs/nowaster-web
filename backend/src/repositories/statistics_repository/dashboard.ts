@@ -6,7 +6,9 @@ import { addDays, differenceInMinutes, isSameDay, subDays } from "date-fns";
 
 const SESSION_PAGINATION = 45;
 
-export const getDashboardData = async (): AsyncResult<StatisticsResponse["getDashboardData"]> => {
+export const getDashboardData = async (): AsyncResult<
+  StatisticsResponse["getDashboardData"]
+> => {
   try {
     const session_count = await getAmountOfSessions();
     if (session_count.isErr) {
@@ -26,7 +28,7 @@ export const getDashboardData = async (): AsyncResult<StatisticsResponse["getDas
     return Result.ok({
       streak: streak.value,
       minutes: minutes.value,
-      session_count: session_count.value
+      session_count: session_count.value,
     });
   } catch (error) {
     return Result.err(error as Error);
@@ -36,8 +38,7 @@ export const getDashboardData = async (): AsyncResult<StatisticsResponse["getDas
 const getAmountOfSessions = async (): AsyncResult<number> => {
   try {
     return Result.ok(await client.scheduledEntity.count());
-  }
-  catch (error) {
+  } catch (error) {
     return Result.err(error as Error);
   }
 };
@@ -48,10 +49,13 @@ const sumSessionTimeInMinutes = async (): AsyncResult<number> => {
       select: {
         endTime: true,
         startTime: true,
-      }
+      },
     });
 
-    const timeInMinutes = session.reduce((acc, ses) => acc + differenceInMinutes(ses.endTime, ses.startTime), 0);
+    const timeInMinutes = session.reduce(
+      (acc, ses) => acc + differenceInMinutes(ses.endTime, ses.startTime),
+      0,
+    );
     return Result.ok(timeInMinutes);
   } catch (error) {
     return Result.err(error as Error);
@@ -73,7 +77,7 @@ const getCurrentStreak = async (): AsyncResult<number> => {
         where: {
           endTime: {
             lte: new Date(),
-          }
+          },
         },
         skip: currentSkip,
         take: SESSION_PAGINATION,

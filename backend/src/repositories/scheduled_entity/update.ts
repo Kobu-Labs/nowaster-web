@@ -1,10 +1,14 @@
 import { Result } from "@badrap/result";
 import client from "@/src/repositories/client";
 import type { AsyncResult } from "@/src/repositories/types";
-import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
+import type {
+  ScheduledSessionRequest,
+  ScheduledSessionResponse,
+} from "@kobu-labs/nowaster-js-typing";
 
-
-const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<ScheduledSessionResponse["update"]> => {
+const update = async (
+  params: ScheduledSessionRequest["update"],
+): AsyncResult<ScheduledSessionResponse["update"]> => {
   try {
     const { id, category, ...data } = params;
 
@@ -17,37 +21,36 @@ const update = async (params: ScheduledSessionRequest["update"]): AsyncResult<Sc
         tags: {
           select: {
             tag: {
-              include: { TagToAllowedCategory: true }
-            }
-          }
-        }
+              include: { TagToAllowedCategory: true },
+            },
+          },
+        },
       },
       data: {
         ...data,
         category: {
           connectOrCreate: {
             where: {
-              name: category.name
+              name: category.name,
             },
             create: {
-              name: category.name
+              name: category.name,
             },
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     const { tags, ...rest } = scheduledSession;
-    const mappedTags = tags.map(tagData => {
+    const mappedTags = tags.map((tagData) => {
       const { TagToAllowedCategory, ...data } = tagData.tag;
       return {
         ...data,
-        allowedCategories: TagToAllowedCategory
+        allowedCategories: TagToAllowedCategory,
       };
     });
 
     return Result.ok({ tags: mappedTags, ...rest });
-
   } catch (error) {
     return Result.err(error as Error);
   }

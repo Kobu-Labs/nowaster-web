@@ -1,35 +1,55 @@
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/shadcn/select";
-import { FC, HTMLAttributes, useState } from "react";
-import { Granularity } from "@/lib/session-grouping";
-import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
-import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
-import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
-import { cn } from "@/lib/utils";
+import { FC, HTMLAttributes, useState } from "react"
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
+
+import { Granularity } from "@/lib/session-grouping"
+import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader } from "@/components//shadcn/card"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select"
+import { DateTimePicker } from "@/components/visualizers/DateTimePicker"
+import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart"
 
 type FilteredSessionAreaChartProps = {
-  initialGranularity: keyof typeof Granularity,
+  initialGranularity: keyof typeof Granularity
   filter?: Partial<ScheduledSessionRequest["readMany"]>
 } & HTMLAttributes<HTMLDivElement>
 
-export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (props) => {
-  const [granularity, setGranularity] = useState<keyof typeof Granularity>(props.initialGranularity);
+export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
+  props
+) => {
+  const [granularity, setGranularity] = useState<keyof typeof Granularity>(
+    props.initialGranularity
+  )
 
-  const [fromTime, setFromTime] = useState<Date | undefined>();
-  const [toTime, setToTime] = useState<Date | undefined>();
+  const [fromTime, setFromTime] = useState<Date | undefined>()
+  const [toTime, setToTime] = useState<Date | undefined>()
 
   return (
     <Card className={cn("flex flex-col grow", props.className)}>
       <CardHeader className="flex flex-row items-center gap-2">
-        <Select onValueChange={(val: keyof typeof Granularity) => setGranularity(val)}>
+        <Select
+          onValueChange={(val: keyof typeof Granularity) => setGranularity(val)}
+        >
           <SelectTrigger className="w-fit">
             <SelectValue placeholder={Granularity[granularity]} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup defaultChecked>
-              {Object.entries(Granularity).map(([key, val]) =>
-                <SelectItem key={key} disabled={key === granularity} value={key}>{val}</SelectItem>
-              )}
+              {Object.entries(Granularity).map(([key, val]) => (
+                <SelectItem
+                  key={key}
+                  disabled={key === granularity}
+                  value={key}
+                >
+                  {val}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -53,5 +73,5 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (prop
         />
       </CardContent>
     </Card>
-  );
-};
+  )
+}

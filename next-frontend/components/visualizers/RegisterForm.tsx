@@ -1,8 +1,10 @@
+import { registrationSchema } from "@/validation/registerForm"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/shadcn/button"
+import { Card, CardContent } from "@/components/shadcn/card"
 import {
   Form,
   FormControl,
@@ -10,20 +12,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/shadcn/form";
-import { Input } from "@/components/shadcn/input";
-import { useForm } from "react-hook-form";
-import { Card, CardContent } from "@/components/shadcn/card";
-import { registrationSchema } from "@/validation/registerForm";
-
+} from "@/components/shadcn/form"
+import { Input } from "@/components/shadcn/input"
 
 export const RegisterForm = () => {
   const form = useForm<z.infer<typeof registrationSchema>>({
     resolver: zodResolver(registrationSchema),
-  });
+  })
 
   function onSubmit(values: z.infer<typeof registrationSchema>) {
-    console.log(values);
+    console.log(values)
   }
 
   return (
@@ -64,16 +62,16 @@ export const RegisterForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="password" type="password"{...field} />
+                    <Input placeholder="password" type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" >Register</Button>
+            <Button type="submit">Register</Button>
           </form>
         </Form>
       </CardContent>
     </Card>
-  );
-};
+  )
+}

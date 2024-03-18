@@ -14,7 +14,7 @@ export default function IndexPage() {
     retry: false,
   })
 
-  if (!stats.data || stats.isLoading || stats.isError ) {
+  if (!stats.data || stats.isLoading || stats.isError) {
     return <div>Something bad happenned</div>
   }
 

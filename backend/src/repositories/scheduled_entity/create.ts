@@ -1,24 +1,28 @@
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
 import client from "@/src/repositories/client";
-import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
-
+import type {
+  ScheduledSessionRequest,
+  ScheduledSessionResponse,
+} from "@kobu-labs/nowaster-js-typing";
 
 // tags passed in must already exists
-const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<ScheduledSessionResponse["create"]> => {
+const create = async (
+  params: ScheduledSessionRequest["create"],
+): AsyncResult<ScheduledSessionResponse["create"]> => {
   try {
     const scheduledEntity = await client.scheduledEntity.create({
       data: {
         tags: {
-          create: params.tags.map(t => {
+          create: params.tags.map((t) => {
             return {
               tag: {
                 connect: {
-                  id: t.id
-                }
-              }
+                  id: t.id,
+                },
+              },
             };
-          })
+          }),
         },
         startTime: params.startTime,
         endTime: params.endTime,
@@ -26,11 +30,10 @@ const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<Sc
         category: {
           connectOrCreate: {
             where: {
-              name: params.category.name
+              name: params.category.name,
             },
             create: {
-              name: params.category.name
-
+              name: params.category.name,
             },
           },
         },
@@ -40,19 +43,19 @@ const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<Sc
         tags: {
           select: {
             tag: {
-              include: { TagToAllowedCategory: true }
-            }
+              include: { TagToAllowedCategory: true },
+            },
           },
-        }
-      }
+        },
+      },
     });
 
     const { tags, ...rest } = scheduledEntity;
-    const mappedTags = tags.map(tagData => {
+    const mappedTags = tags.map((tagData) => {
       const { TagToAllowedCategory, ...data } = tagData.tag;
       return {
         ...data,
-        allowedCategories: TagToAllowedCategory
+        allowedCategories: TagToAllowedCategory,
       };
     });
 
@@ -60,7 +63,6 @@ const create = async (params: ScheduledSessionRequest["create"]): AsyncResult<Sc
   } catch (error) {
     return Result.err(error as Error);
   }
-
 };
 
 export default create;

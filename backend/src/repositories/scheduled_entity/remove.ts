@@ -2,9 +2,14 @@ import type { ScheduledEntity } from "@prisma/client";
 import client from "@/src/repositories/client";
 import { Result } from "@badrap/result";
 import type { AsyncResult } from "@/src/repositories/types";
-import type { ScheduledSessionRequest, ScheduledSessionResponse } from "@kobu-labs/nowaster-js-typing";
+import type {
+  ScheduledSessionRequest,
+  ScheduledSessionResponse,
+} from "@kobu-labs/nowaster-js-typing";
 
-const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<ScheduledSessionResponse["remove"]> => {
+const single = async (
+  params: ScheduledSessionRequest["remove"],
+): AsyncResult<ScheduledSessionResponse["remove"]> => {
   try {
     return await client.$transaction(async (tx) => {
       const scheduledEntity = await tx.scheduledEntity.findFirst({
@@ -26,26 +31,25 @@ const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<Sc
             select: {
               tag: {
                 include: {
-                  TagToAllowedCategory: true
-                }
-              }
-            }
+                  TagToAllowedCategory: true,
+                },
+              },
+            },
           },
           category: true,
-        }
+        },
       });
 
       const { tags, ...rest } = deletedEntity;
-      const mappedTags = tags.map(tagData => {
+      const mappedTags = tags.map((tagData) => {
         const { TagToAllowedCategory, ...data } = tagData.tag;
         return {
           ...data,
-          allowedCategories: TagToAllowedCategory
+          allowedCategories: TagToAllowedCategory,
         };
       });
 
       return Result.ok({ tags: mappedTags, ...rest });
-
     });
   } catch (error) {
     return Result.err(error as Error);
@@ -54,10 +58,12 @@ const single = async (params: ScheduledSessionRequest["remove"]): AsyncResult<Sc
 
 // TODO: no endpoint is actually using this
 type DeleteManyScheduledParams = {
-    ids: string[];
+  ids: string[];
 };
 
-const many = async (params: DeleteManyScheduledParams): AsyncResult<ScheduledEntity[]> => {
+const many = async (
+  params: DeleteManyScheduledParams,
+): AsyncResult<ScheduledEntity[]> => {
   try {
     return await client.$transaction(async (tx) => {
       const sessions = await tx.scheduledEntity.findMany({
@@ -67,29 +73,36 @@ const many = async (params: DeleteManyScheduledParams): AsyncResult<ScheduledEnt
         include: {
           tags: {
             select: {
-              tag: true
-            }
-          }
-        }
+              tag: true,
+            },
+          },
+        },
       });
 
-
-
       if (sessions.length !== params.ids.length) {
-        const missingIds = params.ids.filter(x => !sessions.map(obj => obj.id).includes(x));
-        return Result.err(new Error("Could not find scheduled entitites with id:" + missingIds.toString()));
+        const missingIds = params.ids.filter(
+          (x) => !sessions.map((obj) => obj.id).includes(x),
+        );
+        return Result.err(
+          new Error(
+            "Could not find scheduled entitites with id:" +
+              missingIds.toString(),
+          ),
+        );
       }
 
       await tx.scheduledEntity.deleteMany({
         where: {
           id: { in: params.ids },
-        }
+        },
       });
 
-      return Result.ok(sessions.map(session => {
-        const { tags, ...rest } = session;
-        return { tags: tags.map(t => t.tag), ...rest };
-      }));
+      return Result.ok(
+        sessions.map((session) => {
+          const { tags, ...rest } = session;
+          return { tags: tags.map((t) => t.tag), ...rest };
+        }),
+      );
     });
   } catch (error) {
     return Result.err(error as Error);

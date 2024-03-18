@@ -1,7 +1,7 @@
 name: Eslint Formatting Check
 
 on:
-  push: 
+  push:
   pull_request:
     types: [opened, reopened]
 
@@ -38,4 +38,3 @@ jobs:
         run: npm i
       - name: Eslint check for frontend
         run: npx eslint .
-

@@ -1,7 +1,7 @@
 name: Typecheck backend
 
 on:
-  push: 
+  push:
   pull_request:
     types: [opened, reopened]
 
