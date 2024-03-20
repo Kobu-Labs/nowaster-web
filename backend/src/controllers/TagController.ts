@@ -57,3 +57,18 @@ TagController.post(
     return handleOkResp(tags.value, res);
   },
 );
+
+// Remove allowed category
+TagController.post(
+  "/removeAllowedCategory",
+  validate({ body: TagRequestSchema.removeAllowedCategory }),
+  async (req, res) => {
+    const tag = await tagRepo.update.removeAllowedCategory(req.body);
+
+    if (tag.isErr) {
+      return handleResultErrorResp(500, res, tag.error);
+    }
+
+    return handleOkResp(tag.value, res);
+  },
+);
