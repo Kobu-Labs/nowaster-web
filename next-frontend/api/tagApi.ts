@@ -26,3 +26,10 @@ export const addAllowedCategory = async (
   const { data } = await baseApi.post("tags/addAllowedCategory", params)
   return await handleResponse(data, TagResponseSchema.addAllowedCategory)
 }
+
+export const removeAllowedCategory = async (
+  params: TagRequest["removeAllowedCategory"]
+): Promise<Result<TagResponse["removeAllowedCategory"]>> => {
+  const { data } = await baseApi.post("tags/removeAllowedCategory", params)
+  return await handleResponse(data, TagResponseSchema.removeAllowedCategory)
+}
