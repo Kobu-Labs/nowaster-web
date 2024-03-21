@@ -26,16 +26,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/shadcn/form"
-import { Input } from "@/components/shadcn/input"
-import { useToast } from "@/components/shadcn/use-toast"
-import {
-  DateTimePicker,
-  QuickOption,
-} from "@/components/visualizers/DateTimePicker"
-import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker"
-import { SessionCard } from "@/components/visualizers/categories/SessionCard"
-import { TagPicker } from "@/components/visualizers/tags/TagPicker"
+} from "@/components/shadcn/form";
+import { Input } from "@/components/shadcn/input";
+import { useToast } from "@/components/shadcn/use-toast";
+import { DateTimePicker, QuickOption } from "@/components/visualizers/DateTimePicker";
+import { SessionCard } from "@/components/visualizers/categories/SessionCard";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -204,9 +202,9 @@ export const ScheduledSessionCreationForm: FC = () => {
                 <FormItem>
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
-                    <TagPicker
-                      onTagSelected={(tags) => {
-                        field.onChange(tags)
+                    <SimpleTagPicker
+                      onSelectedTagsChanged={(tags) => {
+                        field.onChange(tags);
                       }}
                     />
                   </FormControl>

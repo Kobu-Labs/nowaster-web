@@ -1,6 +1,7 @@
-import { clsx, type ClassValue } from "clsx"
-import { differenceInMinutes } from "date-fns"
-import { twMerge } from "tailwind-merge"
+import { TagWithId } from "@kobu-labs/nowaster-js-typing";
+import { type ClassValue, clsx } from "clsx";
+import { differenceInMinutes } from "date-fns";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -30,5 +31,24 @@ export const getFormattedTimeDifference = (from: Date, to: Date) => {
 }
 
 export const randomColor = (): string => {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16)
+  return "#" + Math.floor(Math.random() * 16777215).toString(16);
+};
+
+export const showSelectedTagsFirst = (
+  selectedTags: TagWithId[],
+  availableTags: TagWithId[]
+) => {
+  return availableTags.sort((tag1, tag2) => {
+    if (selectedTags.some((t) => t.id === tag1.id)) {
+      if (selectedTags.some((t) => t.id === tag2.id)) {
+        return 0
+      }
+      return -1
+    }
+
+    if (selectedTags.some((t) => t.id === tag2.id)) {
+      return 1
+    }
+    return 0
+  })
 }
