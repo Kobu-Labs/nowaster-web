@@ -10,10 +10,17 @@ const many = async (
   params: ScheduledSessionRequest["readMany"],
 ): AsyncResult<ScheduledSessionResponse["readMany"]> => {
   try {
-    const filterTags =
-      params.tags !== undefined
-        ? { tags: { some: { tag: { label: { in: params.tags } } } } }
-        : {};
+    // TODO: too hacky
+    let tagsFilter = undefined;
+    if (params.tags?.label?.some) {
+      tagsFilter = {
+        some: { tag: { label: { in: params.tags.label.some } } },
+      };
+    } else if (params.tags?.label?.every) {
+      tagsFilter = {
+        every: { tag: { label: { in: params.tags.label.every } } },
+      };
+    }
 
     const scheduledEntity = await client.scheduledEntity.findMany({
       take: params.limit,
@@ -34,7 +41,7 @@ const many = async (
         category: {
           ...params.category,
         },
-        ...filterTags,
+        tags: tagsFilter,
         startTime: {
           gte: params.fromStartTime,
           lte: params.toStartTime,
