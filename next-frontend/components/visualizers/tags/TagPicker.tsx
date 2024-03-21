@@ -58,6 +58,7 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
       onSelectTag={onSelectTag}
       modal={props.modal}
       tagsDisplayStrategy={props.tagsDisplayStrategy}
+      tagMatchStrategy={props.tagMatchStrategy}
     />
   )
 }
