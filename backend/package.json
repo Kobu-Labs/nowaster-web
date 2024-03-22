@@ -35,7 +35,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@kobu-labs/nowaster-js-typing": "1.4.0",
+    "@kobu-labs/nowaster-js-typing": "1.4.1",
     "@prisma/client": "^4.12.0",
     "argon2": "^0.30.3",
     "cookie-parser": "^1.4.6",

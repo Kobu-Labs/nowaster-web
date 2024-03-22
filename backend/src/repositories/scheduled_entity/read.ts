@@ -22,6 +22,15 @@ const many = async (
       };
     }
 
+    // TODO: too hacky
+    let categoryFilter = undefined;
+    if (params.category?.label?.exact) {
+      categoryFilter = { name: params.category.label.exact };
+    }
+    if (params.category?.label?.some) {
+      categoryFilter = { name: { in: params.category.label.some } };
+    }
+
     const scheduledEntity = await client.scheduledEntity.findMany({
       take: params.limit,
       orderBy: { startTime: "desc" },
@@ -38,9 +47,7 @@ const many = async (
         category: true,
       },
       where: {
-        category: {
-          ...params.category,
-        },
+        category: categoryFilter,
         tags: tagsFilter,
         startTime: {
           gte: params.fromStartTime,
