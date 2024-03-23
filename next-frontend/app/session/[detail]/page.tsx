@@ -49,7 +49,7 @@ const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
 
 export default function Page(props: { params: { detail: string } }) {
   const categoryName = props.params.detail
-  const filter = { category: { name: categoryName } }
+  const filter = { category: { label: { exact: categoryName } } }
 
   return (
     <div className="grow">
