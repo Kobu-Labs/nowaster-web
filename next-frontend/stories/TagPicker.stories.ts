@@ -1,14 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
-import { TagPicker } from "@/components/visualizers/tags/TagPicker"
+import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker"
 
 const meta = {
   title: "TagPicker",
-  component: TagPicker,
+  component: SimpleTagPicker,
   tags: ["autodocs"],
-} satisfies Meta<typeof TagPicker>
+} satisfies Meta<typeof SimpleTagPicker>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const TagPickerBase: Story = {}
+export const TagPickerBase: Story = {
+  args: {
+    onSelectedTagsChanged: console.log
+  }
+}
