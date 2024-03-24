@@ -14,7 +14,7 @@ type SimpleTagPickerProps = {
   onSelectedTagsChanged: (newTags: TagWithId[]) => void
 } & Omit<
   TagPickerUiProviderProps,
-  "availableTags" | "selectedTags" | "onSelectTag"
+  "availableTags"
 >
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
@@ -56,6 +56,43 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
       availableTags={tags.value}
       selectedTags={selectedTags}
       onSelectTag={onSelectTag}
+      modal={props.modal}
+      tagsDisplayStrategy={props.tagsDisplayStrategy}
+      tagMatchStrategy={props.tagMatchStrategy}
+    />
+  )
+}
+
+type StatelessTagPickerProps = {
+} & Omit<
+  TagPickerUiProviderProps,
+  "availableTags"
+>
+
+export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
+  const {
+    data: tags,
+    isLoading,
+    isError,
+  } = useQuery({
+    ...queryKeys.tags.all,
+    retry: false,
+  })
+
+
+  if (!tags || isLoading || isError) {
+    return <div>Something bad happenned</div>
+  }
+
+  if (tags.isErr) {
+    return <div>{tags.error.message}</div>
+  }
+
+  return (
+    <TagPickerUiProvider
+      availableTags={tags.value}
+      selectedTags={props.selectedTags}
+      onSelectTag={props.onSelectTag}
       modal={props.modal}
       tagsDisplayStrategy={props.tagsDisplayStrategy}
       tagMatchStrategy={props.tagMatchStrategy}
