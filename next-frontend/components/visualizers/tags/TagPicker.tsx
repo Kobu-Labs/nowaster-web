@@ -14,7 +14,7 @@ type SimpleTagPickerProps = {
   onSelectedTagsChanged: (newTags: TagWithId[]) => void
 } & Omit<
   TagPickerUiProviderProps,
-  "availableTags"
+  "availableTags" | "selectedTags" | "onSelectTag"
 >
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
