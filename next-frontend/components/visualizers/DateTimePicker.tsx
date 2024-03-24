@@ -40,7 +40,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
 
   return (
     <Popover>
-      <div className="flex items-center rounded-md border border-input px-1">
+      <div className="flex items-center rounded-md border border-input px-1 min-w-[233.6px]">
         {props.selected && (
           <div
             onClick={() => props.onSelect(undefined)}
