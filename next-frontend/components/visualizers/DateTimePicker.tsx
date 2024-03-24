@@ -25,6 +25,7 @@ type DatePickerDemoProps = {
   selected: Date | undefined
   onSelect: (date: Date | undefined) => void
   quickOptions?: QuickOption[]
+  label?: string
 }
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
@@ -61,7 +62,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
             {props.selected ? (
               DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")
             ) : (
-              <span>Pick a date</span>
+              <span>{props.label ?? "Pick a date"}</span>
             )}
           </div>
         </PopoverTrigger>
