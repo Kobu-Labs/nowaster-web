@@ -26,14 +26,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/shadcn/form";
-import { Input } from "@/components/shadcn/input";
-import { useToast } from "@/components/shadcn/use-toast";
-import { DateTimePicker, QuickOption } from "@/components/visualizers/DateTimePicker";
-import { SessionCard } from "@/components/visualizers/categories/SessionCard";
-import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
-import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
-
+} from "@/components/shadcn/form"
+import { Input } from "@/components/shadcn/input"
+import { useToast } from "@/components/shadcn/use-toast"
+import {
+  DateTimePicker,
+  QuickOption,
+} from "@/components/visualizers/DateTimePicker"
+import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker"
+import { SessionCard } from "@/components/visualizers/categories/SessionCard"
+import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker"
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -103,8 +105,8 @@ export const ScheduledSessionCreationForm: FC = () => {
                 <FormItem>
                   <FormLabel className="block">Category</FormLabel>
                   <FormControl>
-                    <CategoryPicker
-                      onCategorySelected={(category) => {
+                    <SingleCategoryPicker
+                      onSelectedCategoriesChanged={(category) => {
                         if (category === undefined) {
                           form.resetField("category")
                         } else {
@@ -204,9 +206,8 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormControl>
                     <SimpleTagPicker
                       onSelectedTagsChanged={(tags) => {
-                        field.onChange(tags);
-                      }}
-                    />
+                        field.onChange(tags)
+                      } }                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
