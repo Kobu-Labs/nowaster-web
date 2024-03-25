@@ -14,5 +14,6 @@ type Story = StoryObj<typeof meta>
 export const MainForm: Story = {
   args: {
     selected: new Date(),
+    onSelect: console.log,
   },
 }
