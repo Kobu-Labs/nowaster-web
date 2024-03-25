@@ -1,14 +1,13 @@
 import { FC, useContext, useState } from "react"
 import { TagWithId } from "@kobu-labs/nowaster-js-typing"
 import { SessionFilterContext } from "components/visualizers/charts/FilteredSessionAreaChart"
+import { Filter } from "lucide-react"
 
+import { cn, countLeaves } from "@/lib/utils"
 import { Button } from "@/components/shadcn/button"
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -50,6 +49,7 @@ export const FilterSettings: FC<FilterSettingsProps> = () => {
     })
   }
 
+  // TODO: this should be refactored
   const onSelectTag = (tag: TagWithId) => {
     const t = filter.tags?.label?.some
     if (t === undefined) {
@@ -70,32 +70,42 @@ export const FilterSettings: FC<FilterSettingsProps> = () => {
     }
   }
 
+  const appliedFiltersCount = countLeaves(filter)
+
   return (
     <div className="flex flex-col">
       <Sheet modal={false}>
-        <SheetTrigger asChild>
-          <Button variant="outline">Open</Button>
+        <SheetTrigger asChild className="cursor-pointer group  relative">
+          <Button
+            variant="outline"
+            className="flex justify-center items-center"
+          >
+            <Filter className="group-hover:text-pink-300 ">Open</Filter>
+            {appliedFiltersCount > 0 && (
+              <div
+                className={cn(
+                  "absolute right-[10%] top-[-20%] text-shadow-neon-pink group-hover:text-pink-300 animate-blink"
+                )}
+              >
+                {appliedFiltersCount}
+              </div>
+            )}
+          </Button>
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="flex flex-col">
           <SheetHeader>
-            <SheetTitle>Edit profile</SheetTitle>
-            <SheetDescription>
-              Make changes to your profile here. Click save when you're done.
-            </SheetDescription>
+            <SheetTitle>Apply filter</SheetTitle>
           </SheetHeader>
-          <StatelessTagPicker
-            modal={false}
-            onSelectTag={onSelectTag}
-            selectedTags={selectedTags}
-          />
+          <div className="flex  ">
+            <StatelessTagPicker
+              modal={false}
+              onSelectTag={onSelectTag}
+              selectedTags={selectedTags}
+            />
+          </div>
           <MultipleCategoryPicker
             onSelectedCategoriesChanged={updateCategoryFilter}
           />
-          <SheetFooter>
-            <SheetClose asChild>
-              <Button type="submit">Save changes</Button>
-            </SheetClose>
-          </SheetFooter>
         </SheetContent>
       </Sheet>
     </div>

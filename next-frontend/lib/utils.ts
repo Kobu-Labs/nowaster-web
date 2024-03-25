@@ -52,3 +52,20 @@ export const showSelectedTagsFirst = (
     return 0
   })
 }
+
+export function countLeaves(val: any): number {
+  if (val === undefined) {
+    return 0
+  }
+  if (Array.isArray(val)) {
+    return val.length > 0 ? 1 : 0
+  }
+
+  if (Object.prototype.toString.call(val) !== "[object Object]") {
+    return 1
+  }
+
+  return Object.values(val)
+    .map(countLeaves)
+    .reduce((a, b) => a + b, 0)
+}
