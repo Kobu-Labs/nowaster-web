@@ -1,5 +1,6 @@
 import { FC, HTMLAttributes, createContext, useState } from "react"
 import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
+import { ArrowRight } from "lucide-react"
 
 import { Granularity } from "@/lib/session-grouping"
 import { cn } from "@/lib/utils"
@@ -13,8 +14,8 @@ import {
   SelectValue,
 } from "@/components/shadcn/select"
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker"
-import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart"
 import { FilterSettings } from "@/components/visualizers/charts/FilterSettings"
+import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart"
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity
@@ -37,12 +38,18 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   )
   const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>({})
 
-  const [fromTime, setFromTime] = useState<Date | undefined>()
-  const [toTime, setToTime] = useState<Date | undefined>()
-
   const ctx: SessionFilterType = {
     setFilter: setFilter,
     filter: filter,
+  }
+
+  const updateFromDate = (date: Date | undefined) => {
+    const { fromEndTime, ...rest } = filter
+    setFilter({ fromEndTime: date, ...rest })
+  }
+  const updateToDate = (date: Date | undefined) => {
+    const { toEndTime, ...rest } = filter
+    setFilter({ toEndTime: date, ...rest })
   }
 
   return (
@@ -72,11 +79,20 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
             </SelectContent>
           </Select>
           <div className="grow"></div>
-          <p>From:</p>
-          <DateTimePicker selected={fromTime} onSelect={setFromTime} />
-          <p>To:</p>
-          <DateTimePicker selected={toTime} onSelect={setToTime} />
-    <FilterSettings />
+          <div className="flex items-center gap-2">
+            <DateTimePicker
+              label="From"
+              selected={filter.fromEndTime}
+              onSelect={updateFromDate}
+            />
+            <ArrowRight />
+            <DateTimePicker
+              label="To"
+              selected={filter.toEndTime}
+              onSelect={updateToDate}
+            />
+          </div>
+          <FilterSettings />
         </CardHeader>
         <CardContent className="grow">
           <SessionBaseAreaChart
@@ -84,11 +100,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
               granularity: granularity,
               allKeys: true,
             }}
-            filter={{
-              fromEndTime: fromTime,
-              toEndTime: toTime,
-              ...filter,
-            }}
+            filter={filter}
           />
         </CardContent>
       </Card>
