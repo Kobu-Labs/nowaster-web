@@ -52,12 +52,20 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      boxShadow: {
+        "neon-pink":
+          "0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        blink: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0 },
+        },
         "accordion-down": {
           from: { height: 0 },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -68,10 +76,22 @@ module.exports = {
         },
       },
       animation: {
+        blink: "blink 1s infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        ".text-shadow-neon-pink": {
+          textShadow:
+            "0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff",
+        },
+      }
+      addUtilities(newUtilities, ["responsive", "hover"])
+    },
+  ],
 }
