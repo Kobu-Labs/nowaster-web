@@ -2,7 +2,10 @@
 
 import { FC, useState } from "react"
 import { tagColors } from "@/state/tags"
-import { TagWithId } from "@kobu-labs/nowaster-js-typing"
+import {
+  ScheduledSessionRequest,
+  TagWithId,
+} from "@kobu-labs/nowaster-js-typing"
 import { useQuery } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { HexColorPicker } from "react-colorful"
@@ -88,9 +91,20 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
 
 export default function Page() {
   const [selectedTag, setSelectedTag] = useState<TagWithId | undefined>()
-  const filter = {
-    tags: selectedTag?.label,
+
+  let filter: ScheduledSessionRequest["readMany"] = {}
+
+  // TODO check what happends when `some` is initialized as [undefined]
+  if (selectedTag?.label) {
+    filter = {
+      tags: {
+        label: {
+          some: [selectedTag.label],
+        },
+      },
+    }
   }
+
   const test = useQuery({
     ...queryKeys.tags.all,
   })
