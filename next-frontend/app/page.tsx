@@ -5,9 +5,7 @@ import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react"
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider"
-import { FilterSettings } from "@/components/visualizers/charts/FilterSettings"
 import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart"
-import { Overview } from "@/components/visualizers/charts/overview-chart"
 
 export default function IndexPage() {
   const stats = useQuery({
