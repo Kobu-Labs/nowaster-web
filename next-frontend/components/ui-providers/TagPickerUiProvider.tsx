@@ -1,48 +1,48 @@
-import { FC, useState } from "react"
-import { TagApi } from "@/api"
-import { Result } from "@badrap/result"
+import { FC, useState } from "react";
+import { TagApi } from "@/api";
+import { Result } from "@badrap/result";
 import {
   TagRequest,
   TagResponse,
   TagWithId,
-} from "@kobu-labs/nowaster-js-typing"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Check, ChevronsUpDown } from "lucide-react"
+} from "@kobu-labs/nowaster-js-typing";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { Button } from "@/components/shadcn/button"
+import { cn } from "@/lib/utils";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { Button } from "@/components/shadcn/button";
 import {
   Command,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/shadcn/command"
+} from "@/components/shadcn/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/shadcn/popover"
-import { ScrollArea } from "@/components/shadcn/scroll-area"
-import { TagBadge } from "@/components/visualizers/tags/TagBadge"
+} from "@/components/shadcn/popover";
+import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 export type TagPickerUiProviderProps = {
-  availableTags: TagWithId[]
-  selectedTags: TagWithId[]
-  onSelectTag: (tag: TagWithId) => void
+  availableTags: TagWithId[];
+  selectedTags: TagWithId[];
+  onSelectTag: (tag: TagWithId) => void;
   tagsDisplayStrategy?: (
     selectedTags: TagWithId[],
     availableTags: TagWithId[]
-  ) => TagWithId[]
-  tagMatchStrategy?: (tag: TagWithId, searchTerm: string) => number
-  modal?: boolean
-}
+  ) => TagWithId[];
+  tagMatchStrategy?: (tag: TagWithId, searchTerm: string) => number;
+  modal?: boolean;
+};
 
 export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // TODO move this higher
   const { mutate: createTag } = useMutation<
@@ -54,26 +54,26 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     retry: false,
     onSuccess: (tagResult) => {
       if (tagResult.isErr) {
-        return
+        return;
       }
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def })
-      props.onSelectTag(tagResult.value)
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      props.onSelectTag(tagResult.value);
     },
-  })
+  });
 
-  let tagsInDisplayOrder = props.availableTags
+  let tagsInDisplayOrder = props.availableTags;
   if (props.tagsDisplayStrategy) {
     tagsInDisplayOrder = props.tagsDisplayStrategy(
       props.selectedTags,
       props.availableTags
-    )
+    );
   }
 
   if (props.tagMatchStrategy) {
     tagsInDisplayOrder = tagsInDisplayOrder.filter((tag) =>
       props.tagMatchStrategy!(tag, searchTerm)
-    )
+    );
   }
 
   return (
@@ -82,9 +82,9 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
       open={isOpen}
       onOpenChange={(shouldOpen) => {
         if (!shouldOpen) {
-          setSearchTerm("")
+          setSearchTerm("");
         }
-        setIsOpen(shouldOpen)
+        setIsOpen(shouldOpen);
       }}
     >
       <PopoverTrigger asChild>
@@ -92,15 +92,19 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
-          className="w-[200px] justify-start"
+          className="justify-start grow max-w-full"
         >
-          {props.selectedTags.length === 0
-            ? "Select Tags"
-            : props.selectedTags.map((tag) => (
-                <TagBadge key={tag.id} value={tag.label} />
-              ))}
-          <div className="grow"></div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="mx-2 h-4 w-4 shrink-0 opacity-50" />
+          <ScrollArea  className="max-w-full  overflow-hidden flex ">
+            <div className="flex w-max max-w-full gap-1">
+              {props.selectedTags.length === 0
+                ? "Select Tags"
+                : props.selectedTags.map((tag) => (
+                    <TagBadge key={tag.id} value={tag.label} />
+                  ))}
+            </div>
+            <ScrollBar orientation="horizontal"  />
+          </ScrollArea>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -149,5 +153,5 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
         </Command>
       </PopoverContent>
     </Popover>
-  )
-}
+  );
+};
