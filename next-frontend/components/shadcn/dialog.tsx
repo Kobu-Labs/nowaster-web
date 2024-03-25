@@ -9,9 +9,11 @@ const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
 
 const DialogPortal = ({
+  //@ts-expect-error shadcn issue
   className,
   ...props
 }: DialogPrimitive.DialogPortalProps) => (
+  //@ts-expect-error shadcn issue
   <DialogPrimitive.Portal className={cn(className)} {...props} />
 )
 DialogPortal.displayName = DialogPrimitive.Portal.displayName
