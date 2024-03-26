@@ -1,21 +1,21 @@
-import type { Meta, StoryObj } from "@storybook/react"
-import { RecoilRoot } from "recoil"
+import type { Meta, StoryObj } from "@storybook/react";
+import { RecoilRoot } from "recoil";
 
-import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider"
+import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider";
 
 const meta = {
   title: "OverviewAreaChartVisualizer",
   component: SessionBaseAreaChartUiProvider,
   tags: ["autodocs"],
-} satisfies Meta<typeof SessionBaseAreaChartUiProvider>
+} satisfies Meta<typeof SessionBaseAreaChartUiProvider>;
 
 const createMockTags = (tagLabels: string[]) => {
   return tagLabels.map((label, i) => {
-    return { label, id: i.toString(), allowedCategories: [] }
-  })
-}
+    return { label, id: i.toString(), allowedCategories: [] };
+  });
+};
 
-export default meta
+export default meta;
 type Story = StoryObj<typeof meta>
 export const Weekly: Story = {
   render: (data) => {
@@ -23,7 +23,7 @@ export const Weekly: Story = {
       <RecoilRoot>
         <SessionBaseAreaChartUiProvider {...data} />
       </RecoilRoot>
-    )
+    );
   },
   args: {
     groupingOpts: {
@@ -49,7 +49,7 @@ export const Weekly: Story = {
       {
         tags: ["school", "pb138", "pb138/project", "focus", "testing"].map(
           (label, i) => {
-            return { label, id: i.toString(), allowedCategories: [] }
+            return { label, id: i.toString(), allowedCategories: [] };
           }
         ),
         startTime: new Date(2023, 5, 27, 19, 0),
@@ -80,7 +80,7 @@ export const Weekly: Story = {
       },
     ],
   },
-}
+};
 
 export const Monthly: Story = {
   render: (data) => {
@@ -88,7 +88,7 @@ export const Monthly: Story = {
       <RecoilRoot>
         <SessionBaseAreaChartUiProvider {...data} />
       </RecoilRoot>
-    )
+    );
   },
   args: {
     groupingOpts: { granularity: "perDayInMonth" },
@@ -137,7 +137,7 @@ export const Monthly: Story = {
       },
     ],
   },
-}
+};
 
 export const Yearly: Story = {
   render: (data) => {
@@ -145,7 +145,7 @@ export const Yearly: Story = {
       <RecoilRoot>
         <SessionBaseAreaChartUiProvider {...data} />
       </RecoilRoot>
-    )
+    );
   },
   args: {
     groupingOpts: {
@@ -196,4 +196,4 @@ export const Yearly: Story = {
       },
     ],
   },
-}
+};

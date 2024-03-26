@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { DateTimePicker } from "@/components/visualizers/DateTimePicker"
+import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 
 const meta = {
   title: "DateTimePicker",
   component: DateTimePicker,
   tags: ["autodocs"],
-} satisfies Meta<typeof DateTimePicker>
+} satisfies Meta<typeof DateTimePicker>;
 
-export default meta
+export default meta;
 type Story = StoryObj<typeof meta>
 
 export const MainForm: Story = {
@@ -16,4 +16,4 @@ export const MainForm: Story = {
     selected: new Date(),
     onSelect: console.log,
   },
-}
+};

@@ -1,11 +1,11 @@
-import { FC } from "react"
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
-import { differenceInMinutes } from "date-fns"
+import { FC } from "react";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
+import { differenceInMinutes } from "date-fns";
 
-import { formatTime } from "@/lib/utils"
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider"
+import { formatTime } from "@/lib/utils";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
 type TotalSessionTimeCardProps = {
   filter?: Partial<ScheduledSessionRequest["readMany"]>
@@ -16,14 +16,14 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
     retry: false,
     select: (data) => {
       if (data.isErr) {
-        return 0
+        return 0;
       }
       return data.value.reduce(
         (acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime),
         0
-      )
+      );
     },
-  })
+  });
 
   return (
     <KpiCardUiProvider
@@ -31,5 +31,5 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
       value={formatTime(result || 0)}
       title={"Total time"}
     />
-  )
-}
+  );
+};

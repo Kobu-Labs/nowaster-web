@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { FC, useState } from "react"
-import { tagColors } from "@/state/tags"
+import { FC, useState } from "react";
+import { tagColors } from "@/state/tags";
 import {
   Cell,
   Label,
@@ -9,11 +9,11 @@ import {
   PieChart,
   ResponsiveContainer,
   Sector,
-} from "recharts"
-import { useRecoilState } from "recoil"
+} from "recharts";
+import { useRecoilState } from "recoil";
 
-import { formatTime, randomColor } from "@/lib/utils"
-import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart"
+import { formatTime, randomColor } from "@/lib/utils";
+import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart";
 
 type SessionPieChartUiProviderProps = {
   data: AmountByCategory[]
@@ -29,7 +29,7 @@ const renderActiveShape = (props: any) => {
     endAngle,
     fill,
     payload,
-  } = props
+  } = props;
 
   return (
     <g>
@@ -58,25 +58,25 @@ const renderActiveShape = (props: any) => {
         fill={fill}
       />
     </g>
-  )
-}
+  );
+};
 
 export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   props
 ) => {
-  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined)
+  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
-  const [colors, setColors] = useRecoilState(tagColors)
-  const result: { [label: string]: string } = {}
+  const [colors, setColors] = useRecoilState(tagColors);
+  const result: { [label: string]: string } = {};
 
   props.data.forEach(({ key }) => {
     if (colors[key] === undefined) {
-      result[key] = randomColor()
+      result[key] = randomColor();
     }
-  })
+  });
 
   if (Object.entries(result).length !== 0) {
-    setColors({ ...colors, ...result })
+    setColors({ ...colors, ...result });
   }
 
   return (
@@ -103,7 +103,7 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
                 key={`cell-${index}`}
                 fill={colors[key]}
               />
-            )
+            );
           })}
           {activeIndex === undefined && (
             <Label
@@ -117,5 +117,5 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
         </Pie>
       </PieChart>
     </ResponsiveContainer>
-  )
-}
+  );
+};

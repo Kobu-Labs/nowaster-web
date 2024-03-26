@@ -1,14 +1,14 @@
-import { FC } from "react"
-import { VariantProps, cva } from "class-variance-authority"
+import { FC } from "react";
+import { VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/shadcn/card"
+} from "@/components/shadcn/card";
 
 interface KpiCardUiProviderProps extends VariantProps<typeof cardVariants> {
   value: string | number
@@ -30,7 +30,7 @@ const cardVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
 /* TODO: this should be refactored into separate components using forward ref to extend Card.* component */
 export const KpiCardUiProvider: FC<KpiCardUiProviderProps> = (props) => {
@@ -49,5 +49,5 @@ export const KpiCardUiProvider: FC<KpiCardUiProviderProps> = (props) => {
         </CardFooter>
       )}
     </Card>
-  )
-}
+  );
+};

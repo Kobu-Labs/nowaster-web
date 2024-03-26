@@ -1,8 +1,8 @@
-import { FC, useState } from "react"
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
+import { FC, useState } from "react";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
-import { Granularity, dateProcessors } from "@/lib/session-grouping"
-import { Card, CardContent, CardHeader } from "@/components/shadcn/card"
+import { Granularity, dateProcessors } from "@/lib/session-grouping";
+import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
 import {
   Select,
   SelectContent,
@@ -10,8 +10,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/shadcn/select"
-import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart"
+} from "@/components/shadcn/select";
+import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 
 type ClampedSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity
@@ -23,8 +23,8 @@ export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (
 ) => {
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
-  )
-  const processor = dateProcessors[granularity]
+  );
+  const processor = dateProcessors[granularity];
 
   return (
     <Card>
@@ -61,5 +61,5 @@ export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (
         />
       </CardContent>
     </Card>
-  )
-}
+  );
+};

@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import React, { FC } from "react"
-import { CalendarIcon } from "@radix-ui/react-icons"
-import { addMinutes } from "date-fns"
-import { X } from "lucide-react"
-import { DateTime } from "luxon"
-import { Label } from "recharts"
+import React, { FC } from "react";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { addMinutes } from "date-fns";
+import { X } from "lucide-react";
+import { DateTime } from "luxon";
+import { Label } from "recharts";
 
-import { Button } from "@/components/shadcn/button"
-import { Calendar } from "@/components/shadcn/calendar"
-import { Input } from "@/components/shadcn/input"
+import { Button } from "@/components/shadcn/button";
+import { Calendar } from "@/components/shadcn/calendar";
+import { Input } from "@/components/shadcn/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/shadcn/popover"
+} from "@/components/shadcn/popover";
 
 export type QuickOption = {
   label: string
@@ -30,17 +30,17 @@ type DatePickerDemoProps = {
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const { value } = e.target
-    const datetime = DateTime.fromJSDate(props.selected || new Date())
-    const hours = Number.parseInt(value.split(":")[0] || "00", 10)
-    const minutes = Number.parseInt(value.split(":")[1] || "00", 10)
-    const modifiedDay = datetime.set({ hour: hours, minute: minutes })
-    props.onSelect(modifiedDay.toJSDate())
-  }
+    const { value } = e.target;
+    const datetime = DateTime.fromJSDate(props.selected || new Date());
+    const hours = Number.parseInt(value.split(":")[0] || "00", 10);
+    const minutes = Number.parseInt(value.split(":")[1] || "00", 10);
+    const modifiedDay = datetime.set({ hour: hours, minute: minutes });
+    props.onSelect(modifiedDay.toJSDate());
+  };
 
   return (
     <Popover>
-      <div className="flex items-center rounded-md border border-input px-1 min-w-[233.6px]">
+      <div className="flex min-w-[233.6px] items-center rounded-md border border-input px-1">
         {props.selected && (
           <div
             onClick={() => props.onSelect(undefined)}
@@ -58,7 +58,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
           asChild
         >
           <div className="inline-flex w-full cursor-pointer  items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ">
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="size-4" />
             {props.selected ? (
               DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")
             ) : (
@@ -104,5 +104,5 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
         ))}
       </div>
     </Popover>
-  )
-}
+  );
+};

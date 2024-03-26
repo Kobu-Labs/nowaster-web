@@ -1,12 +1,12 @@
 import {
   ScheduledSession,
   ScheduledSessionRequest,
-} from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
-import { differenceInMinutes } from "date-fns"
+} from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
+import { differenceInMinutes } from "date-fns";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { SessionPieChartUiProvider } from "@/components/ui-providers/SessionPieChartUiProvider"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { SessionPieChartUiProvider } from "@/components/ui-providers/SessionPieChartUiProvider";
 
 type SessionPieChart = {
   filter?: Partial<ScheduledSessionRequest["readMany"]>
@@ -20,28 +20,28 @@ const groupData = (
   sessions: ScheduledSession[],
   groupingFn: (session: ScheduledSession) => string | string[]
 ): AmountByCategory[] => {
-  const result: { [key: string]: number } = {}
+  const result: { [key: string]: number } = {};
   sessions.forEach((session) => {
-    const key = groupingFn(session)
+    const key = groupingFn(session);
     if (Array.isArray(key)) {
       key.forEach((val) => {
         if (result[val] === undefined) {
-          result[val] = 0
+          result[val] = 0;
         }
-        result[val] += differenceInMinutes(session.endTime, session.startTime)
-      })
+        result[val] += differenceInMinutes(session.endTime, session.startTime);
+      });
     } else {
       if (result[key] === undefined) {
-        result[key] = 0
+        result[key] = 0;
       }
-      result[key] += differenceInMinutes(session.endTime, session.startTime)
+      result[key] += differenceInMinutes(session.endTime, session.startTime);
     }
-  })
+  });
 
   return Object.entries(result).map(([key, val]) => {
-    return { key: key, value: val }
-  })
-}
+    return { key: key, value: val };
+  });
+};
 
 export const SessionPieChart = (props: SessionPieChart) => {
   const { data: result } = useQuery({
@@ -49,14 +49,14 @@ export const SessionPieChart = (props: SessionPieChart) => {
     retry: false,
     select: (data) => {
       if (data.isErr) {
-        return []
+        return [];
       }
-      const groupedData = groupData(data.value, props.groupingFn)
-      return props.postProcess ? props.postProcess(groupedData) : groupedData
+      const groupedData = groupData(data.value, props.groupingFn);
+      return props.postProcess ? props.postProcess(groupedData) : groupedData;
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-  })
+  });
 
-  return <SessionPieChartUiProvider data={result || []} />
-}
+  return <SessionPieChartUiProvider data={result || []} />;
+};

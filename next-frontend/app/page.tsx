@@ -1,28 +1,28 @@
-"use client"
+"use client";
 
-import { useQuery } from "@tanstack/react-query"
-import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react"
+import { useQuery } from "@tanstack/react-query";
+import { AlignVerticalDistributeEnd, Calendar, Hourglass } from "lucide-react";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider"
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
+import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
 
 export default function IndexPage() {
   const stats = useQuery({
     ...queryKeys.statistics.dashboard,
     retry: false,
-  })
+  });
 
   if (!stats.data || stats.isLoading || stats.isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (stats.data.isErr) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   return (
-    <div className="grow p-8 flex flex-col">
+    <div className="flex grow flex-col p-8">
       <h2 className="mb-8 text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="flex gap-8 ">
         <KpiCardUiProvider
@@ -50,12 +50,12 @@ export default function IndexPage() {
           <Calendar />
         </KpiCardUiProvider>
       </div>
-      <div className="grow mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-7">
+      <div className="mt-8 grid grow gap-8 md:grid-cols-2 lg:grid-cols-7">
         <FilteredSessionAreaChart
           initialGranularity="perDayInMonth"
           className="col-span-full"
         />
       </div>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
+import { useState } from "react";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
 import {
   addDays,
   addMonths,
@@ -16,16 +16,16 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
-} from "date-fns"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+} from "date-fns";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/shadcn/card"
+} from "@/components/shadcn/card";
 import {
   Select,
   SelectContent,
@@ -33,13 +33,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/shadcn/select"
+} from "@/components/shadcn/select";
 
 export const Granularity = {
   week: "Past week",
   month: "Past month",
   year: "Past year",
-} as const
+} as const;
 
 const dateProcessors: {
   [K in keyof typeof Granularity]: {
@@ -67,7 +67,7 @@ const dateProcessors: {
     amount: () => 12,
     key: (value: Date) => (getMonth(value) + 1).toString(),
   },
-}
+};
 
 type OverviewProps = {
   granularity: keyof typeof Granularity
@@ -77,31 +77,31 @@ const preprocessData = (
   granularity: keyof typeof Granularity,
   data: (ScheduledSession & { id: string })[]
 ): { granularity: string; val: number }[] => {
-  const processor = dateProcessors[granularity]
+  const processor = dateProcessors[granularity];
   let processed = data.reduce((value: { [month: string]: number }, item) => {
-    const key = processor.key(item.endTime)
+    const key = processor.key(item.endTime);
     if (!value[key]) {
-      value[key] = 0
+      value[key] = 0;
     }
 
-    value[key] += differenceInMinutes(item.endTime, item.startTime)
-    return value
-  }, {})
+    value[key] += differenceInMinutes(item.endTime, item.startTime);
+    return value;
+  }, {});
 
-  let i = 0
-  let current = processor.start
+  let i = 0;
+  let current = processor.start;
   while (i < processor.amount()) {
-    i++
+    i++;
     if (!processed[processor.key(current)]) {
-      processed[processor.key(current)] = 0
+      processed[processor.key(current)] = 0;
     }
-    current = processor.next(current)
+    current = processor.next(current);
   }
 
   return Object.entries(processed).map((value) => {
-    return { granularity: value[0], val: value[1] }
-  })
-}
+    return { granularity: value[0], val: value[1] };
+  });
+};
 
 export function Overview(props: OverviewProps) {
   const {
@@ -110,17 +110,17 @@ export function Overview(props: OverviewProps) {
     isError,
   } = useQuery({
     ...queryKeys.sessions.filtered(),
-  })
+  });
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.granularity
-  )
+  );
 
   if (!sessions || isLoading || isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (sessions.isErr) {
-    return <div>{sessions.error.message}</div>
+    return <div>{sessions.error.message}</div>;
   }
 
   return (
@@ -130,7 +130,7 @@ export function Overview(props: OverviewProps) {
           <CardTitle>Past Activity Overview</CardTitle>
           <Select
             onValueChange={(a: keyof typeof Granularity) => {
-              setGranularity(a)
+              setGranularity(a);
             }}
           >
             <SelectTrigger className="w-[180px]">
@@ -174,5 +174,5 @@ export function Overview(props: OverviewProps) {
         </ResponsiveContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-import { FC, HTMLAttributes, createContext, useState } from "react"
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
-import { ArrowRight } from "lucide-react"
+import { FC, HTMLAttributes, createContext, useState } from "react";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { ArrowRight } from "lucide-react";
 
-import { Granularity } from "@/lib/session-grouping"
-import { cn } from "@/lib/utils"
-import { Card, CardContent, CardHeader } from "@/components//shadcn/card"
+import { Granularity } from "@/lib/session-grouping";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
 import {
   Select,
   SelectContent,
@@ -12,10 +12,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/shadcn/select"
-import { DateTimePicker } from "@/components/visualizers/DateTimePicker"
-import { FilterSettings } from "@/components/visualizers/charts/FilterSettings"
-import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart"
+} from "@/components/shadcn/select";
+import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
+import { FilterSettings } from "@/components/visualizers/charts/FilterSettings";
+import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity
@@ -28,33 +28,33 @@ type SessionFilterType = {
 
 export const SessionFilterContext = createContext<
   SessionFilterType | undefined
->(undefined)
+>(undefined);
 
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   props
 ) => {
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
-  )
-  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>({})
+  );
+  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>({});
 
   const ctx: SessionFilterType = {
     setFilter: setFilter,
     filter: filter,
-  }
+  };
 
   const updateFromDate = (date: Date | undefined) => {
-    const { fromEndTime, ...rest } = filter
-    setFilter({ fromEndTime: date, ...rest })
-  }
+    const { fromEndTime, ...rest } = filter;
+    setFilter({ fromEndTime: date, ...rest });
+  };
   const updateToDate = (date: Date | undefined) => {
-    const { toEndTime, ...rest } = filter
-    setFilter({ toEndTime: date, ...rest })
-  }
+    const { toEndTime, ...rest } = filter;
+    setFilter({ toEndTime: date, ...rest });
+  };
 
   return (
     <SessionFilterContext.Provider value={ctx}>
-      <Card className={cn("flex flex-col grow", props.className)}>
+      <Card className={cn("flex grow flex-col", props.className)}>
         <CardHeader className="flex flex-row items-center gap-2">
           <Select
             onValueChange={(val: keyof typeof Granularity) =>
@@ -105,5 +105,5 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
         </CardContent>
       </Card>
     </SessionFilterContext.Provider>
-  )
-}
+  );
+};
