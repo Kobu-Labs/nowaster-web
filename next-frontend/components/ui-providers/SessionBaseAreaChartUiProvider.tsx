@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { FC } from "react"
-import { categoryColors } from "@/state/categories"
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing"
+import { FC } from "react";
+import { categoryColors } from "@/state/categories";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import {
   Area,
   AreaChart,
@@ -10,12 +10,12 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts"
-import { useRecoilState } from "recoil"
+} from "recharts";
+import { useRecoilState } from "recoil";
 
-import { GroupingOptions, groupSessions } from "@/lib/session-grouping"
-import { formatTime, randomColor } from "@/lib/utils"
-import { Card } from "@/components/shadcn/card"
+import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
+import { formatTime, randomColor } from "@/lib/utils";
+import { Card } from "@/components/shadcn/card";
 
 type SessionBaseAreaChartUiProviderProps = {
   data: ScheduledSession[]
@@ -28,18 +28,18 @@ export const SessionBaseAreaChartUiProvider: FC<
   const { groupedSessions, uniqueCategories } = groupSessions(
     props.data,
     props.groupingOpts
-  )
+  );
 
-  const [colors, setColors] = useRecoilState(categoryColors)
-  const unsetCategoryColors: { [label: string]: string } = {}
+  const [colors, setColors] = useRecoilState(categoryColors);
+  const unsetCategoryColors: { [label: string]: string } = {};
   uniqueCategories.forEach((category) => {
     if (colors[category] === undefined) {
-      unsetCategoryColors[category] = randomColor()
+      unsetCategoryColors[category] = randomColor();
     }
-  })
+  });
 
   if (Object.entries(unsetCategoryColors).length !== 0) {
-    setColors({ ...colors, ...unsetCategoryColors })
+    setColors({ ...colors, ...unsetCategoryColors });
   }
 
   return (
@@ -60,28 +60,28 @@ export const SessionBaseAreaChartUiProvider: FC<
               strokeWidth={4}
               fillOpacity={0.4}
             />
-          )
+          );
         })}
       </AreaChart>
     </ResponsiveContainer>
-  )
-}
+  );
+};
 
 const customTooltip = (data: any, colors: { [category: string]: string }) => {
   if (!data.payload) {
-    return <></>
+    return <></>;
   }
 
-  const values: [string: number] = data.payload[0]?.payload
+  const values: [string: number] = data.payload[0]?.payload;
   if (!values) {
-    return <></>
+    return <></>;
   }
 
   const filteredValues = Object.entries(values).filter(
     ([key]) => key !== "granularity"
-  )
+  );
   if (filteredValues.length === 0) {
-    return <></>
+    return <></>;
   }
 
   return (
@@ -108,8 +108,8 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
               {formatTime(totalTime)}
             </p>
           </div>
-        )
+        );
       })}
     </Card>
-  )
-}
+  );
+};

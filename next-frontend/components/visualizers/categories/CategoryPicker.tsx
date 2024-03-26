@@ -1,13 +1,13 @@
-import { FC, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { FC, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import {
   MultipleCategoryPickerUiProvider,
   MultipleCategoryPickerUiProviderProps,
   SingleCategoryPickerUiProvider,
   SingleCategoryPickerUiProviderProps,
-} from "@/components/ui-providers/CategoryPickerUiProvider"
+} from "@/components/ui-providers/CategoryPickerUiProvider";
 
 type MultipleCategoryPickerProps = {
   onSelectedCategoriesChanged: (newCategories: string[]) => void
@@ -26,30 +26,30 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   } = useQuery({
     ...queryKeys.categories.all,
     retry: false,
-  })
+  });
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   if (!categories || isLoading || isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (categories.isErr) {
-    return <div>{categories.error.message}</div>
+    return <div>{categories.error.message}</div>;
   }
 
   const onSelectCategory = (category: string) => {
-    let newCategories
+    let newCategories;
     if (selectedCategories.some((t) => t === category)) {
       // deselect
-      newCategories = selectedCategories.filter((t) => t !== category)
+      newCategories = selectedCategories.filter((t) => t !== category);
     } else {
       // select
-      newCategories = [category, ...selectedCategories]
+      newCategories = [category, ...selectedCategories];
     }
-    setSelectedCategories(newCategories)
-    props.onSelectedCategoriesChanged(newCategories)
-  }
+    setSelectedCategories(newCategories);
+    props.onSelectedCategoriesChanged(newCategories);
+  };
 
   return (
     <MultipleCategoryPickerUiProvider
@@ -60,8 +60,8 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
       categoryMatchStrategy={props.categoryMatchStrategy}
       categoryDisplayStrategy={props.categoryDisplayStrategy}
     />
-  )
-}
+  );
+};
 
 type SingleCategoryPickerProps = {
   onSelectedCategoriesChanged: (newCategory: string) => void
@@ -79,22 +79,22 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.categories.all,
     retry: false,
-  })
+  });
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("")
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   if (!categories || isLoading || isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (categories.isErr) {
-    return <div>{categories.error.message}</div>
+    return <div>{categories.error.message}</div>;
   }
 
   const onSelectCategory = (category: string) => {
-    setSelectedCategory(category)
-    props.onSelectedCategoriesChanged(category)
-  }
+    setSelectedCategory(category);
+    props.onSelectedCategoriesChanged(category);
+  };
 
   return (
     <SingleCategoryPickerUiProvider
@@ -105,5 +105,5 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
       categoryMatchStrategy={props.categoryMatchStrategy}
       categoryDisplayStrategy={props.categoryDisplayStrategy}
     />
-  )
-}
+  );
+};

@@ -1,41 +1,41 @@
-"use client"
+"use client";
 
-import { FC } from "react"
-import { categoryColors } from "@/state/categories"
-import { Settings } from "lucide-react"
-import { HexColorPicker } from "react-colorful"
-import { useRecoilState } from "recoil"
+import { FC } from "react";
+import { categoryColors } from "@/state/categories";
+import { Settings } from "lucide-react";
+import { HexColorPicker } from "react-colorful";
+import { useRecoilState } from "recoil";
 
-import { randomColor } from "@/lib/utils"
-import { Card } from "@/components/shadcn/card"
+import { randomColor } from "@/lib/utils";
+import { Card } from "@/components/shadcn/card";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/shadcn/popover"
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel"
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart"
-import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard"
-import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard"
-import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart"
-import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard"
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns"
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable"
+} from "@/components/shadcn/popover";
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
+import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
+import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
+import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
+import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart";
+import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
 
 type CategoryColorPickerProps = {
   category: string
 }
 
 const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
-  const [colors, setColors] = useRecoilState(categoryColors)
+  const [colors, setColors] = useRecoilState(categoryColors);
 
   // colors[props.category] should be always defined at this point
-  const currentCategoryColors = colors[props.category] ?? randomColor()
+  const currentCategoryColors = colors[props.category] ?? randomColor();
 
   const setColorsGlobState = (value: string) => {
-    const { [props.category]: currentCategory, ...rest } = colors
-    setColors({ ...rest, [props.category]: value })
-  }
+    const { [props.category]: currentCategory, ...rest } = colors;
+    setColors({ ...rest, [props.category]: value });
+  };
 
   return (
     <Card>
@@ -44,12 +44,12 @@ const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
         onChange={setColorsGlobState}
       />
     </Card>
-  )
-}
+  );
+};
 
 export default function Page(props: { params: { detail: string } }) {
-  const categoryName = props.params.detail
-  const filter = { category: { label: { exact: categoryName } } }
+  const categoryName = props.params.detail;
+  const filter = { category: { label: { exact: categoryName } } };
 
   return (
     <div className="grow">
@@ -82,5 +82,5 @@ export default function Page(props: { params: { detail: string } }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

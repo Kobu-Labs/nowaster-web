@@ -1,18 +1,18 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel"
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
 
 const meta = {
   title: "CategoryLabel",
   component: CategoryLabel,
   tags: ["autodocs"],
-} satisfies Meta<typeof CategoryLabel>
+} satisfies Meta<typeof CategoryLabel>;
 
-export default meta
+export default meta;
 type Story = StoryObj<typeof meta>
 
 export const Basic: Story = {
   args: {
     label: "algo",
   },
-}
+};

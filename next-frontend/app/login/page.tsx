@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/shadcn/tabs"
-import { LoginForm } from "@/components/visualizers/LoginForm"
-import { RegisterForm } from "@/components/visualizers/RegisterForm"
+} from "@/components/shadcn/tabs";
+import { LoginForm } from "@/components/visualizers/LoginForm";
+import { RegisterForm } from "@/components/visualizers/RegisterForm";
 
 export default function LoginPage() {
   return (
@@ -25,5 +25,5 @@ export default function LoginPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

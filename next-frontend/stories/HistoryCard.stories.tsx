@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { SessionCard } from "@/components/visualizers/categories/SessionCard"
+import { SessionCard } from "@/components/visualizers/categories/SessionCard";
 
 const createMockTags = (tagLabels: string[]) => {
   return tagLabels.map((label, i) => {
-    return { label, id: i.toString(), allowedCategories: [] }
-  })
-}
+    return { label, id: i.toString(), allowedCategories: [] };
+  });
+};
 
 const meta = {
   title: "SessionCard",
   component: SessionCard,
   tags: ["autodocs"],
-} satisfies Meta<typeof SessionCard>
+} satisfies Meta<typeof SessionCard>;
 
-export default meta
+export default meta;
 type Story = StoryObj<typeof meta>
 
 export const TwoHours: Story = {
@@ -27,7 +27,7 @@ export const TwoHours: Story = {
       description: "Working on the project",
     },
   },
-}
+};
 
 export const NinetyMinutes: Story = {
   args: {
@@ -39,7 +39,7 @@ export const NinetyMinutes: Story = {
       description: "Working on the project",
     },
   },
-}
+};
 
 export const HalfHour: Story = {
   args: {
@@ -51,7 +51,7 @@ export const HalfHour: Story = {
       description: "Working on the project",
     },
   },
-}
+};
 
 export const NineMinutesNineSeconds: Story = {
   args: {
@@ -63,4 +63,4 @@ export const NineMinutesNineSeconds: Story = {
       description: "Working on the project",
     },
   },
-}
+};

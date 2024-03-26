@@ -92,16 +92,16 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
-          className="justify-start grow max-w-full"
+          className="max-w-full grow justify-start"
         >
-          <ChevronsUpDown className="mx-2 h-4 w-4 shrink-0 opacity-50" />
-          <ScrollArea  className="max-w-full  overflow-hidden flex ">
+          <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
+          <ScrollArea  className="flex  max-w-full overflow-hidden ">
             <div className="flex w-max max-w-full gap-1">
               {props.selectedTags.length === 0
                 ? "Select Tags"
                 : props.selectedTags.map((tag) => (
-                    <TagBadge key={tag.id} value={tag.label} />
-                  ))}
+                  <TagBadge key={tag.id} value={tag.label} />
+                ))}
             </div>
             <ScrollBar orientation="horizontal"  />
           </ScrollArea>
@@ -115,17 +115,17 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-              <CommandGroup>
-                <CommandItem
-                  className="flex"
-                  onSelect={() => createTag({ label: searchTerm })}
-                >
-                  <p>Create</p>
-                  <div className="grow"></div>
-                  <TagBadge value={searchTerm} />
-                </CommandItem>
-              </CommandGroup>
-            )}
+            <CommandGroup>
+              <CommandItem
+                className="flex"
+                onSelect={() => createTag({ label: searchTerm })}
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <TagBadge value={searchTerm} />
+              </CommandItem>
+            </CommandGroup>
+          )}
           <CommandGroup>
             <ScrollArea
               type="always"
@@ -139,7 +139,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 size-4",
                       props.selectedTags.some((t) => t.id === tag.id)
                         ? "opacity-100"
                         : "opacity-0"

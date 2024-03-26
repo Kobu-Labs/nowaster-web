@@ -1,49 +1,49 @@
-"use client"
+"use client";
 
-import { FC, useState } from "react"
-import { tagColors } from "@/state/tags"
+import { FC, useState } from "react";
+import { tagColors } from "@/state/tags";
 import {
   ScheduledSessionRequest,
   TagWithId,
-} from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
-import { Plus } from "lucide-react"
-import { HexColorPicker } from "react-colorful"
-import { useRecoilState } from "recoil"
+} from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { HexColorPicker } from "react-colorful";
+import { useRecoilState } from "recoil";
 
-import { cn, randomColor } from "@/lib/utils"
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { Button } from "@/components/shadcn/button"
-import { Card } from "@/components/shadcn/card"
+import { cn, randomColor } from "@/lib/utils";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { Button } from "@/components/shadcn/button";
+import { Card } from "@/components/shadcn/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/shadcn/tabs"
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel"
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart"
-import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard"
-import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard"
-import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard"
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns"
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable"
-import { TagBadge } from "@/components/visualizers/tags/TagBadge"
+} from "@/components/shadcn/tabs";
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
+import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
+import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
+import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
+import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type TagColorPickerProps = {
   tag: string
 }
 
 const TagColorPicker: FC<TagColorPickerProps> = (props) => {
-  const [colors, setColors] = useRecoilState(tagColors)
+  const [colors, setColors] = useRecoilState(tagColors);
 
   // colors[props.category] should be always defined at this point
-  const currentCategoryColors = colors[props.tag] ?? randomColor()
+  const currentCategoryColors = colors[props.tag] ?? randomColor();
 
   const setColorsGlobState = (value: string) => {
-    const { [props.tag]: currentCategory, ...rest } = colors
-    setColors({ ...rest, [props.tag]: value })
-  }
+    const { [props.tag]: currentCategory, ...rest } = colors;
+    setColors({ ...rest, [props.tag]: value });
+  };
 
   return (
     <Card>
@@ -52,18 +52,18 @@ const TagColorPicker: FC<TagColorPickerProps> = (props) => {
         onChange={setColorsGlobState}
       />
     </Card>
-  )
-}
+  );
+};
 
 const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
   const categories = useQuery({
     ...queryKeys.categories.all,
-  })
+  });
   if (!categories || !categories.data) {
-    return <div></div>
+    return <div></div>;
   }
   if (!categories.data.isOk) {
-    return <div></div>
+    return <div></div>;
   }
 
   return (
@@ -86,13 +86,13 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function Page() {
-  const [selectedTag, setSelectedTag] = useState<TagWithId | undefined>()
+  const [selectedTag, setSelectedTag] = useState<TagWithId | undefined>();
 
-  let filter: ScheduledSessionRequest["readMany"] = {}
+  let filter: ScheduledSessionRequest["readMany"] = {};
 
   // TODO check what happends when `some` is initialized as [undefined]
   if (selectedTag?.label) {
@@ -102,19 +102,19 @@ export default function Page() {
           some: [selectedTag.label],
         },
       },
-    }
+    };
   }
 
   const test = useQuery({
     ...queryKeys.tags.all,
-  })
+  });
 
   if (!test || !test.data) {
-    return <div></div>
+    return <div></div>;
   }
 
   if (!test.data.isOk) {
-    return <div></div>
+    return <div></div>;
   }
 
   return (
@@ -163,5 +163,5 @@ export default function Page() {
         )}
       </div>
     </div>
-  )
+  );
 }

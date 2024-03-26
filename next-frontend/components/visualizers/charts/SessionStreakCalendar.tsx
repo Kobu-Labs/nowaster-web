@@ -1,9 +1,9 @@
-import { cva } from "class-variance-authority"
-import { addDays, isSameDay, subDays } from "date-fns"
-import { DayContent, DayContentProps } from "react-day-picker"
+import { cva } from "class-variance-authority";
+import { addDays, isSameDay, subDays } from "date-fns";
+import { DayContent, DayContentProps } from "react-day-picker";
 
-import { Calendar } from "@/components/shadcn/calendar"
-import { Card, CardContent } from "@/components/shadcn/card"
+import { Calendar } from "@/components/shadcn/calendar";
+import { Card, CardContent } from "@/components/shadcn/card";
 
 export const dayCellVariants = cva(
   "m-[2px] inline-flex h-9 w-9 hover:cursor-pointer items-center justify-center rounded-3xl  p-0 text-sm font-normal",
@@ -18,7 +18,7 @@ export const dayCellVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
 type SessionStreakCalendarProps = {
   sessionsDates: Date[]
@@ -29,13 +29,13 @@ export const SessionStreakCalendar = ({
 }: SessionStreakCalendarProps) => {
   function StreakCalculator(props: DayContentProps) {
     // TODO: not very performance friendly
-    const isActiveDay = sessions.some((x) => isSameDay(x, props.date))
+    const isActiveDay = sessions.some((x) => isSameDay(x, props.date));
     const isNextDayActive = sessions.some((x) =>
       isSameDay(addDays(props.date, 1), x)
-    )
+    );
     const isPreviousDayActive = sessions.some((x) =>
       isSameDay(subDays(props.date, 1), x)
-    )
+    );
 
     return (
       <div
@@ -51,7 +51,7 @@ export const SessionStreakCalendar = ({
           <div className=" absolute left-0 top-1/2 h-1 w-[3px] bg-pink-500"></div>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -65,5 +65,5 @@ export const SessionStreakCalendar = ({
         />
       </CardContent>
     </Card>
-  )
-}
+  );
+};

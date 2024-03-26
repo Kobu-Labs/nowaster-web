@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import "@/styles/globals.css"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { RecoilRoot } from "recoil"
+import "@/styles/globals.css";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { RecoilRoot } from "recoil";
 
-import { fontSans } from "@/lib/fonts"
-import { cn } from "@/lib/utils"
-import { SiteHeader } from "@/components/pages/site-header"
-import { ThemeProvider } from "@/components/pages/theme-provider"
-import { Toaster } from "@/components/shadcn/toaster"
-import { ReactQueryProvider } from "@/app/ReactQueryProvider"
+import { fontSans } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
+import { SiteHeader } from "@/components/pages/site-header";
+import { ThemeProvider } from "@/components/pages/theme-provider";
+import { Toaster } from "@/components/shadcn/toaster";
+import { ReactQueryProvider } from "@/app/ReactQueryProvider";
 
 interface RootLayoutProps {
   children: React.ReactNode
@@ -39,5 +39,5 @@ export default function RootLayout({ children }: RootLayoutProps) {
         </html>
       </ReactQueryProvider>
     </RecoilRoot>
-  )
+  );
 }
