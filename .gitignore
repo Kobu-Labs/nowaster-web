@@ -1,6 +1,7 @@
 .env
 dist/
 next-frontend/storybook-static
+tsconfig.tsbuildinfo
 
 # Logs
 logs
