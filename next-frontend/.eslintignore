@@ -4,3 +4,6 @@ public
 node_modules
 *.esm.js
 components/ui/*
+storybook-static
+.next
+components/shadcn/

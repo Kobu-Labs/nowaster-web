@@ -11,3 +11,5 @@ node_modules
 .next
 build
 .contentlayer
+storybook-static
+components/shadcn/
