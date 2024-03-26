@@ -11,11 +11,11 @@ import {
 //TODO: extract the "selectedTags" to seprarat component
 
 type SimpleTagPickerProps = {
-  onSelectedTagsChanged: (newTags: TagWithId[]) => void
+  onSelectedTagsChanged: (newTags: TagWithId[]) => void;
 } & Omit<
   TagPickerUiProviderProps,
   "availableTags" | "selectedTags" | "onSelectTag"
->
+>;
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   const [selectedTags, setSelectedTags] = useState<TagWithId[]>([]);
@@ -28,7 +28,6 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
     ...queryKeys.tags.all,
     retry: false,
   });
-
 
   if (!tags || isLoading || isError) {
     return <div>Something bad happenned</div>;
@@ -63,11 +62,10 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   );
 };
 
-type StatelessTagPickerProps = {
-} & Omit<
+type StatelessTagPickerProps = {} & Omit<
   TagPickerUiProviderProps,
   "availableTags"
->
+>;
 
 export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
   const {
@@ -77,8 +75,8 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
-
 
   if (!tags || isLoading || isError) {
     return <div>Something bad happenned</div>;
@@ -90,7 +88,7 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
 
   return (
     <TagPickerUiProvider
-      availableTags={tags.value}
+      availableTags={tags?.isOk ? tags.value : []}
       selectedTags={props.selectedTags}
       onSelectTag={props.onSelectTag}
       modal={props.modal}
