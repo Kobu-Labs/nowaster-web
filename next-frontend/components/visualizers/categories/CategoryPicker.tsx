@@ -10,11 +10,11 @@ import {
 } from "@/components/ui-providers/CategoryPickerUiProvider";
 
 type MultipleCategoryPickerProps = {
-  onSelectedCategoriesChanged: (newCategories: string[]) => void
+  onSelectedCategoriesChanged: (newCategories: string[]) => void;
 } & Omit<
   MultipleCategoryPickerUiProviderProps,
   "availableCategories" | "selectedCategories" | "onSelectCategory"
->
+>;
 
 export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   props
@@ -26,6 +26,7 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   } = useQuery({
     ...queryKeys.categories.all,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -64,11 +65,11 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
 };
 
 type SingleCategoryPickerProps = {
-  onSelectedCategoriesChanged: (newCategory: string) => void
+  onSelectedCategoriesChanged: (newCategory: string) => void;
 } & Omit<
   SingleCategoryPickerUiProviderProps,
   "availableCategories" | "selectedCategory" | "onSelectCategory"
->
+>;
 
 // TODO: just dynamically allow only one element in selectedCategories[] you dumb ass
 export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
