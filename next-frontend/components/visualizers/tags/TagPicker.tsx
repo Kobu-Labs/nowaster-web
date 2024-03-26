@@ -1,12 +1,12 @@
-import { FC, useState } from "react"
-import { TagWithId } from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
+import { FC, useState } from "react";
+import { TagWithId } from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import {
   TagPickerUiProvider,
   TagPickerUiProviderProps,
-} from "@/components/ui-providers/TagPickerUiProvider"
+} from "@/components/ui-providers/TagPickerUiProvider";
 
 //TODO: extract the "selectedTags" to seprarat component
 
@@ -18,7 +18,7 @@ type SimpleTagPickerProps = {
 >
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
-  const [selectedTags, setSelectedTags] = useState<TagWithId[]>([])
+  const [selectedTags, setSelectedTags] = useState<TagWithId[]>([]);
 
   const {
     data: tags,
@@ -27,29 +27,29 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
-  })
+  });
 
 
   if (!tags || isLoading || isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (tags.isErr) {
-    return <div>{tags.error.message}</div>
+    return <div>{tags.error.message}</div>;
   }
 
   const onSelectTag = (tag: TagWithId) => {
-    let newTags
+    let newTags;
     if (selectedTags.some((t) => t.id === tag.id)) {
       // deselect
-      newTags = selectedTags.filter((t) => t.id !== tag.id)
+      newTags = selectedTags.filter((t) => t.id !== tag.id);
     } else {
       // select
-      newTags = [tag, ...selectedTags]
+      newTags = [tag, ...selectedTags];
     }
-    setSelectedTags(newTags)
-    props.onSelectedTagsChanged(newTags)
-  }
+    setSelectedTags(newTags);
+    props.onSelectedTagsChanged(newTags);
+  };
 
   return (
     <TagPickerUiProvider
@@ -60,8 +60,8 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
       tagsDisplayStrategy={props.tagsDisplayStrategy}
       tagMatchStrategy={props.tagMatchStrategy}
     />
-  )
-}
+  );
+};
 
 type StatelessTagPickerProps = {
 } & Omit<
@@ -77,15 +77,15 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
-  })
+  });
 
 
   if (!tags || isLoading || isError) {
-    return <div>Something bad happenned</div>
+    return <div>Something bad happenned</div>;
   }
 
   if (tags.isErr) {
-    return <div>{tags.error.message}</div>
+    return <div>{tags.error.message}</div>;
   }
 
   return (
@@ -97,5 +97,5 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
       tagsDisplayStrategy={props.tagsDisplayStrategy}
       tagMatchStrategy={props.tagMatchStrategy}
     />
-  )
-}
+  );
+};

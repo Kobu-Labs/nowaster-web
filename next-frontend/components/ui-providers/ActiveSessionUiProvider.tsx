@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { FC, useState } from "react"
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing"
+import { FC, useState } from "react";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 
-import { getFormattedTimeDifference } from "@/lib/utils"
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel"
-import { TagBadge } from "@/components/visualizers/tags/TagBadge"
+import { getFormattedTimeDifference } from "@/lib/utils";
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type ActiveSessionUiProviderProps = {
   session: ScheduledSession | null
@@ -19,18 +19,18 @@ export const ActiveSessionUiProvider: FC<ActiveSessionUiProviderProps> = ({
       session !== null ? session.endTime : new Date(),
       new Date()
     )
-  )
+  );
 
   if (session === null) {
-    return <></>
+    return <></>;
   }
 
   setTimeout(() => {
     const result = displayedTime.includes(":")
       ? displayedTime.replace(":", " ")
-      : getFormattedTimeDifference(session.endTime, new Date())
-    setDisplayedTime(result)
-  }, 500)
+      : getFormattedTimeDifference(session.endTime, new Date());
+    setDisplayedTime(result);
+  }, 500);
 
   return (
     <div>
@@ -46,5 +46,5 @@ export const ActiveSessionUiProvider: FC<ActiveSessionUiProviderProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

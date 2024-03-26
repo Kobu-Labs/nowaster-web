@@ -1,4 +1,4 @@
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing"
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import {
   addDays,
   addMonths,
@@ -11,13 +11,13 @@ import {
   startOfISOWeek,
   startOfMonth,
   startOfYear,
-} from "date-fns"
+} from "date-fns";
 
 export const Granularity = {
   perDayInWeek: "Per Day In Week",
   perDayInMonth: "Per Day In Month",
   perMonth: "Monthly",
-} as const
+} as const;
 
 export type CategoryPerGranularity = { [category: string]: string } & {
   granularity: string
@@ -61,7 +61,7 @@ export const dateProcessors: {
     end: (asOf) => endOfYear(asOf || Date.now()),
     amount: 12,
   },
-} as const
+} as const;
 
 /**
  * Calculates granularity key from given session
@@ -80,7 +80,7 @@ export const granularizers: {
   perMonth: {
     key: (value: Date) => format(value, "LLL"),
   },
-} as const
+} as const;
 
 /**
  * Specifies all available keys for every type of granularity
@@ -90,8 +90,8 @@ export const allKeys: {
 } = {
   perDayInWeek: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   perDayInMonth: (data) => {
-    const days = getDaysInMonth(data.at(0)?.endTime ?? new Date())
-    return Array.from({ length: days }, (_, i) => (i + 1).toString())
+    const days = getDaysInMonth(data.at(0)?.endTime ?? new Date());
+    return Array.from({ length: days }, (_, i) => (i + 1).toString());
   },
   perMonth: () => [
     "Jan",
@@ -107,7 +107,7 @@ export const allKeys: {
     "Nov",
     "Dec",
   ],
-}
+};
 
 const addGroupEntry = (
   result: Record<string, Record<string | number, number>>,
@@ -116,17 +116,17 @@ const addGroupEntry = (
   item: ScheduledSession
 ) => {
   if (!result[granularityKey]) {
-    result[granularityKey] = {}
+    result[granularityKey] = {};
   }
   if (!result[granularityKey]![sessionKey]) {
-    result[granularityKey]![sessionKey] = 0
+    result[granularityKey]![sessionKey] = 0;
   }
 
   result[granularityKey]![sessionKey] += differenceInMinutes(
     item.endTime,
     item.startTime
-  )
-}
+  );
+};
 
 /**
  * Groups categories by provided criteria
@@ -140,41 +140,41 @@ export const groupSessions = (
   groupedSessions: CategoryPerGranularity[]
   uniqueCategories: (string | number)[]
 } => {
-  const accumulator: { [tick: string]: {} } = {}
+  const accumulator: { [tick: string]: {} } = {};
   if (opts.allKeys) {
-    allKeys[opts.granularity](data).forEach((tick) => (accumulator[tick] = {}))
+    allKeys[opts.granularity](data).forEach((tick) => (accumulator[tick] = {}));
   }
 
   const sessionKeyGetter =
-    opts.sessionKey ?? ((session) => session.category.name)
-  const granulizers = granularizers[opts.granularity]
-  const uniques: Set<string | number> = new Set()
+    opts.sessionKey ?? ((session) => session.category.name);
+  const granulizers = granularizers[opts.granularity];
+  const uniques: Set<string | number> = new Set();
 
   const groupedData = data.reduce(
     (
       value: { [granularity: string]: { [category: string]: number } },
       item
     ) => {
-      const granularityKey = granulizers.key(item.endTime)
-      const sessionKey = sessionKeyGetter(item)
+      const granularityKey = granulizers.key(item.endTime);
+      const sessionKey = sessionKeyGetter(item);
       if (Array.isArray(sessionKey)) {
         sessionKey.forEach((key) => {
-          addGroupEntry(value, granularityKey, key, item)
-          uniques.add(key)
-        })
+          addGroupEntry(value, granularityKey, key, item);
+          uniques.add(key);
+        });
       } else {
-        addGroupEntry(value, granularityKey, sessionKey, item)
-        uniques.add(sessionKey)
+        addGroupEntry(value, granularityKey, sessionKey, item);
+        uniques.add(sessionKey);
       }
-      return value
+      return value;
     },
     accumulator
-  )
+  );
 
   return {
     groupedSessions: Object.entries(groupedData).map(([k, v]) => {
-      return { granularity: k, ...v }
+      return { granularity: k, ...v };
     }),
     uniqueCategories: Array.from(uniques),
-  }
-}
+  };
+};

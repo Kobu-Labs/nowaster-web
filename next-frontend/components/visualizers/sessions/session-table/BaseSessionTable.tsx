@@ -1,13 +1,13 @@
-import { FC } from "react"
+import { FC } from "react";
 import {
   ScheduledSessionRequest,
   ScheduledSessionWithId,
-} from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
-import { ColumnDef } from "@tanstack/react-table"
+} from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
+import { ColumnDef } from "@tanstack/react-table";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { DataTable } from "@/components/ui-providers/DataTable"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { DataTable } from "@/components/ui-providers/DataTable";
 
 type BaseSessionTableProps = {
   columns: ColumnDef<ScheduledSessionWithId>[]
@@ -18,9 +18,9 @@ export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
   const { data } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
-      return data.isOk ? data.value : []
+      return data.isOk ? data.value : [];
     },
-  })
+  });
 
-  return <DataTable columns={props.columns} data={data || []} />
-}
+  return <DataTable columns={props.columns} data={data || []} />;
+};

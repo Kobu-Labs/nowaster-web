@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { NavItem } from "@/types/nav"
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { ActiveSession } from "@/components/visualizers/sessions/ActiveSession"
+import { NavItem } from "@/types/nav";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
+import { ActiveSession } from "@/components/visualizers/sessions/ActiveSession";
 
 interface MainNavProps {
   items?: NavItem[]
 }
 
 export function MainNav({ items }: MainNavProps) {
-  const currentPath = usePathname()
+  const currentPath = usePathname();
 
   return (
     <div className="flex w-full flex-row gap-6">
@@ -44,5 +44,5 @@ export function MainNav({ items }: MainNavProps) {
       <div className="grow"></div>
       <ActiveSession />
     </div>
-  )
+  );
 }

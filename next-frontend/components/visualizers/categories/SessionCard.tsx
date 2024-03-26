@@ -1,15 +1,15 @@
-import { FC } from "react"
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing"
-import { VariantProps, cva } from "class-variance-authority"
+import { FC } from "react";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { VariantProps, cva } from "class-variance-authority";
 
-import { cn, getFormattedTimeDifference } from "@/lib/utils"
+import { cn, getFormattedTimeDifference } from "@/lib/utils";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/shadcn/card"
-import { TagBadge } from "@/components/visualizers/tags/TagBadge"
+} from "@/components/shadcn/card";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type SessionCardProps = {
   session: ScheduledSession
@@ -28,7 +28,7 @@ const historyCardVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
   return (
@@ -58,5 +58,5 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

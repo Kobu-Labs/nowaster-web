@@ -90,8 +90,8 @@ module.exports = {
           textShadow:
             "0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff",
         },
-      }
-      addUtilities(newUtilities, ["responsive", "hover"])
+      };
+      addUtilities(newUtilities, ["responsive", "hover"]);
     },
   ],
-}
+};

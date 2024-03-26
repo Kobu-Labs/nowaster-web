@@ -1,24 +1,24 @@
-import React, { FC } from "react"
-import { ScheduledSessionApi } from "@/api"
-import { zodResolver } from "@hookform/resolvers/zod"
+import React, { FC } from "react";
+import { ScheduledSessionApi } from "@/api";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ScheduledSessionRequest,
   ScheduledSessionRequestSchema,
-} from "@kobu-labs/nowaster-js-typing"
-import { useQueryClient } from "@tanstack/react-query"
+} from "@kobu-labs/nowaster-js-typing";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   addHours,
   addMinutes,
   setMinutes,
   subHours,
   subMinutes,
-} from "date-fns"
-import { ArrowBigRight } from "lucide-react"
-import { useForm } from "react-hook-form"
+} from "date-fns";
+import { ArrowBigRight } from "lucide-react";
+import { useForm } from "react-hook-form";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { Button } from "@/components/shadcn/button"
-import { Card, CardContent } from "@/components/shadcn/card"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { Button } from "@/components/shadcn/button";
+import { Card, CardContent } from "@/components/shadcn/card";
 import {
   Form,
   FormControl,
@@ -26,16 +26,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/shadcn/form"
-import { Input } from "@/components/shadcn/input"
-import { useToast } from "@/components/shadcn/use-toast"
+} from "@/components/shadcn/form";
+import { Input } from "@/components/shadcn/input";
+import { useToast } from "@/components/shadcn/use-toast";
 import {
   DateTimePicker,
   QuickOption,
-} from "@/components/visualizers/DateTimePicker"
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker"
-import { SessionCard } from "@/components/visualizers/categories/SessionCard"
-import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker"
+} from "@/components/visualizers/DateTimePicker";
+import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { SessionCard } from "@/components/visualizers/categories/SessionCard";
+import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -62,35 +62,35 @@ const creationFormQuickOptions: QuickOption[] = [
     label: "- 1h",
     increment: (date) => subHours(date, 1),
   },
-]
+];
 
 export const ScheduledSessionCreationForm: FC = () => {
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const form = useForm<ScheduledSessionRequest["create"]>({
     resolver: zodResolver(ScheduledSessionRequestSchema.create),
-  })
+  });
 
   async function onSubmit(values: ScheduledSessionRequest["create"]) {
-    const result = await ScheduledSessionApi.create(values)
-    queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def })
+    const result = await ScheduledSessionApi.create(values);
+    queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
     toast(
       result.isErr
         ? {
-            title: "Session creation failed",
-            description: result.error.message,
-            variant: "destructive",
-          }
+          title: "Session creation failed",
+          description: result.error.message,
+          variant: "destructive",
+        }
         : {
-            className: "text-[#adfa1d]",
-            title: "Session created successfully",
-            description: (
-              <SessionCard variant="borderless" session={result.value} />
-            ),
-            variant: "default",
-          }
-    )
+          className: "text-[#adfa1d]",
+          title: "Session created successfully",
+          description: (
+            <SessionCard variant="borderless" session={result.value} />
+          ),
+          variant: "default",
+        }
+    );
   }
 
   return (
@@ -108,9 +108,9 @@ export const ScheduledSessionCreationForm: FC = () => {
                     <SingleCategoryPicker
                       onSelectedCategoriesChanged={(category) => {
                         if (category === undefined) {
-                          form.resetField("category")
+                          form.resetField("category");
                         } else {
-                          field.onChange({ name: category })
+                          field.onChange({ name: category });
                         }
                       }}
                     />
@@ -153,12 +153,12 @@ export const ScheduledSessionCreationForm: FC = () => {
                           selected={field.value || undefined}
                           onSelect={(val) => {
                             if (val) {
-                              field.onChange(val)
+                              field.onChange(val);
                               if (!form.getValues("endTime")) {
-                                form.setValue("endTime", val)
+                                form.setValue("endTime", val);
                               }
                             } else {
-                              form.resetField("startTime")
+                              form.resetField("startTime");
                             }
                           }}
                         />
@@ -183,9 +183,9 @@ export const ScheduledSessionCreationForm: FC = () => {
                         selected={field.value}
                         onSelect={(val) => {
                           if (val) {
-                            field.onChange(val)
+                            field.onChange(val);
                           } else {
-                            form.resetField("endTime")
+                            form.resetField("endTime");
                           }
                         }}
                       />
@@ -206,7 +206,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormControl>
                     <SimpleTagPicker
                       onSelectedTagsChanged={(tags) => {
-                        field.onChange(tags)
+                        field.onChange(tags);
                       } }                    />
                   </FormControl>
                   <FormMessage />
@@ -219,5 +219,5 @@ export const ScheduledSessionCreationForm: FC = () => {
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

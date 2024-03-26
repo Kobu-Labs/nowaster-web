@@ -1,8 +1,8 @@
-import React, { FC } from "react"
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
+import React, { FC } from "react";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 
-import { Card, CardContent, CardHeader } from "@/components/shadcn/card"
-import { SessionPieChart } from "@/components/visualizers/charts/SessionPieChart"
+import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
+import { SessionPieChart } from "@/components/visualizers/charts/SessionPieChart";
 
 type TagsToSessionPieChartProps = {
   filter?: Partial<ScheduledSessionRequest["readMany"]>
@@ -25,5 +25,5 @@ export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
         />
       </CardContent>
     </Card>
-  )
-}
+  );
+};

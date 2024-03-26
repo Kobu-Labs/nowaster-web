@@ -8,23 +8,23 @@ export const prefixBasedMatch = (
   opts?: PrefixBasedMatchOpts
 ): boolean => {
   if (value === undefined || searchTerm === undefined) {
-    return false
+    return false;
   }
 
   if (opts?.caseInsensitive) {
-    value = value.toLowerCase()
-    searchTerm = searchTerm.toLowerCase()
+    value = value.toLowerCase();
+    searchTerm = searchTerm.toLowerCase();
   }
 
   if (searchTerm.length > value.length) {
-    return false
+    return false;
   }
 
   for (let i = 0; i < searchTerm.length; i++) {
     if (searchTerm[i] !== value[i]) {
-      return false
+      return false;
     }
   }
 
-  return true
-}
+  return true;
+};

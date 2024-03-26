@@ -1,10 +1,10 @@
-import { FC } from "react"
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing"
-import { useQuery } from "@tanstack/react-query"
-import { Sigma } from "lucide-react"
+import { FC } from "react";
+import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { useQuery } from "@tanstack/react-query";
+import { Sigma } from "lucide-react";
 
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys"
-import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider"
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
 type SessionCountCardProps = {
   filter?: Partial<ScheduledSessionRequest["readMany"]>
@@ -17,7 +17,7 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
     select: (data) => (data.isOk ? data.value.length : 0),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-  })
+  });
 
   return (
     <KpiCardUiProvider
@@ -27,5 +27,5 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
     >
       <Sigma />
     </KpiCardUiProvider>
-  )
-}
+  );
+};

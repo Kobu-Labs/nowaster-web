@@ -1,5 +1,5 @@
-import { FC } from "react"
-import Link from "next/link"
+import { FC } from "react";
+import Link from "next/link";
 
 type CategoryLabelProps = {
   label: string
@@ -16,5 +16,5 @@ export const CategoryLabel: FC<CategoryLabelProps> = (props) => {
         {props.label}
       </p>
     </Link>
-  )
-}
+  );
+};
