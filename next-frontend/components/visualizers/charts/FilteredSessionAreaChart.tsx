@@ -36,7 +36,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
   );
-  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>({});
+  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>(props.filter ?? {});
 
   const ctx: SessionFilterType = {
     setFilter: setFilter,
