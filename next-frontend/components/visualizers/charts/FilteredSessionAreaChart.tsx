@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
-import { FilterSettings } from "@/components/visualizers/charts/FilterSettings";
+import { ChartFilter } from "@/components/visualizers/charts/ChartFilter";
 import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 
 type FilteredSessionAreaChartProps = {
@@ -92,7 +92,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
               onSelect={updateToDate}
             />
           </div>
-          <FilterSettings />
+          <ChartFilter />
         </CardHeader>
         <CardContent className="grow">
           <SessionBaseAreaChart
