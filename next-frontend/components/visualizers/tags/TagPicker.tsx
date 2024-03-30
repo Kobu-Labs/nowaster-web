@@ -75,7 +75,6 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
-    staleTime: 5 * 60 * 1000,
   });
 
   if (!tags || isLoading || isError) {

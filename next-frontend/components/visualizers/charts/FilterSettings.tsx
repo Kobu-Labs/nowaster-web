@@ -15,16 +15,27 @@ import {
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { StatelessTagPicker } from "@/components/visualizers/tags/TagPicker";
 
-type FilterSettingsProps = {}
+type FilterSettingsProps = {};
 
 export const FilterSettings: FC<FilterSettingsProps> = () => {
-  const [selectedTags, setSelectedTags] = useState<TagWithId[]>([]);
   const context = useContext(SessionFilterContext);
   if (context === undefined) {
     throw new Error("Context must be set");
   }
-  const { filter, setFilter } = context;
 
+  const { filter, setFilter } = context;
+  let selectedCatFromContext: string[] = [];
+  if (filter.category?.label?.some) {
+    selectedCatFromContext = filter.category?.label?.some;
+  } else if (filter.category?.label?.exact) {
+    selectedCatFromContext = [filter.category?.label?.exact];
+  }
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    selectedCatFromContext
+  );
+
+  const [selectedTags, setSelectedTags] = useState<TagWithId[]>([]);
   const updateTagsFilter = (tags: string[]) => {
     const { tags: oldTags, ...rest } = filter;
     setFilter({
@@ -70,6 +81,32 @@ export const FilterSettings: FC<FilterSettingsProps> = () => {
     }
   };
 
+  // TODO: this is sooo bad - state is duplicated in filter and in this
+  const onSelectCategory = (category: string) => {
+    let newCategories;
+    if (selectedCategories.some((t) => t === category)) {
+      // deselect
+      newCategories = selectedCategories.filter((t) => t !== category);
+    } else {
+      // select
+      newCategories = [category, ...selectedCategories];
+    }
+    setSelectedCategories(newCategories);
+
+    const c = filter.category?.label?.some;
+    if (c === undefined) {
+      updateCategoryFilter([category]);
+    } else {
+      if (c.findIndex((cat) => cat === category) === -1) {
+        updateCategoryFilter([category, ...selectedCategories]);
+      } else {
+        updateCategoryFilter(
+          selectedCategories.filter((cat) => cat !== category)
+        );
+      }
+    }
+  };
+
   const appliedFiltersCount = countLeaves(filter);
 
   return (
@@ -103,9 +140,12 @@ export const FilterSettings: FC<FilterSettingsProps> = () => {
               selectedTags={selectedTags}
             />
           </div>
-          <MultipleCategoryPicker
-            onSelectedCategoriesChanged={updateCategoryFilter}
-          />
+          <div className="flex">
+            <MultipleCategoryPicker
+              selectedCategories={selectedCategories}
+              onSelectCategory={onSelectCategory}
+            />
+          </div>
         </SheetContent>
       </Sheet>
     </div>
