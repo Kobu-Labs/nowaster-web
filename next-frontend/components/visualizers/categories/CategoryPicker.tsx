@@ -10,10 +10,9 @@ import {
 } from "@/components/ui-providers/CategoryPickerUiProvider";
 
 type MultipleCategoryPickerProps = {
-  onSelectedCategoriesChanged: (newCategories: string[]) => void;
 } & Omit<
   MultipleCategoryPickerUiProviderProps,
-  "availableCategories" | "selectedCategories" | "onSelectCategory"
+  "availableCategories"
 >;
 
 export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
@@ -26,10 +25,8 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   } = useQuery({
     ...queryKeys.categories.all,
     retry: false,
-    staleTime: 5 * 60 * 1000,
   });
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   if (!categories || isLoading || isError) {
     return <div>Something bad happenned</div>;
@@ -39,25 +36,13 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
     return <div>{categories.error.message}</div>;
   }
 
-  const onSelectCategory = (category: string) => {
-    let newCategories;
-    if (selectedCategories.some((t) => t === category)) {
-      // deselect
-      newCategories = selectedCategories.filter((t) => t !== category);
-    } else {
-      // select
-      newCategories = [category, ...selectedCategories];
-    }
-    setSelectedCategories(newCategories);
-    props.onSelectedCategoriesChanged(newCategories);
-  };
 
   return (
     <MultipleCategoryPickerUiProvider
       modal={props.modal}
       availableCategories={categories.value.map((cat) => cat.name)}
-      selectedCategories={selectedCategories}
-      onSelectCategory={onSelectCategory}
+      selectedCategories={props.selectedCategories}
+      onSelectCategory={props.onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
       categoryDisplayStrategy={props.categoryDisplayStrategy}
     />

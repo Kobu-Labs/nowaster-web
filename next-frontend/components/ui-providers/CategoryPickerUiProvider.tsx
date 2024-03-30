@@ -19,16 +19,16 @@ import {
 import { ScrollArea } from "@/components/shadcn/scroll-area";
 
 export type MultipleCategoryPickerUiProviderProps = {
-  availableCategories: string[]
-  selectedCategories: string[]
-  onSelectCategory: (category: string) => void
+  availableCategories: string[];
+  selectedCategories: string[];
+  onSelectCategory: (category: string) => void;
   categoryDisplayStrategy?: (
     selectedCategories: string[],
     availableCategories: string[]
-  ) => string[]
-  categoryMatchStrategy?: (category: string, searchTerm: string) => number
-  modal?: boolean
-}
+  ) => string[];
+  categoryMatchStrategy?: (category: string, searchTerm: string) => number;
+  modal?: boolean;
+};
 
 export const MultipleCategoryPickerUiProvider: FC<
   MultipleCategoryPickerUiProviderProps
@@ -70,17 +70,20 @@ export const MultipleCategoryPickerUiProvider: FC<
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
-          className="w-[200px] justify-between"
+          className="max-w-full grow justify-start"
         >
-          {props.selectedCategories.length === 0
-            ? "Search Category"
-            : props.selectedCategories.map((category) => (
-              <Badge variant="outline" key={category}>
-                {category}
-              </Badge>
-            ))}
-          <div className="grow"></div>
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
+          <div className="flex  max-w-full overflow-hidden ">
+            <div className="flex w-max max-w-full gap-1">
+              {props.selectedCategories.length === 0
+                ? "Search Category"
+                : props.selectedCategories.map((category) => (
+                  <Badge variant="outline" key={category}>
+                    {category}
+                  </Badge>
+                ))}
+            </div>
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -126,16 +129,16 @@ export const MultipleCategoryPickerUiProvider: FC<
 };
 
 export type SingleCategoryPickerUiProviderProps = {
-  availableCategories: string[]
-  selectedCategory: string
-  onSelectCategory: (category: string) => void
+  availableCategories: string[];
+  selectedCategory: string;
+  onSelectCategory: (category: string) => void;
   categoryDisplayStrategy?: (
     selectedCategories: string,
     availableCategories: string[]
-  ) => string[]
-  categoryMatchStrategy?: (category: string, searchTerm: string) => number
-  modal?: boolean
-}
+  ) => string[];
+  categoryMatchStrategy?: (category: string, searchTerm: string) => number;
+  modal?: boolean;
+};
 
 // TODO: just dynamically allow only one element in selectedCategories[] you dumb ass
 export const SingleCategoryPickerUiProvider: FC<
