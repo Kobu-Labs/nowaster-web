@@ -15,9 +15,9 @@ import {
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { StatelessTagPicker } from "@/components/visualizers/tags/TagPicker";
 
-type FilterSettingsProps = {};
+type ChartFilterProps = {};
 
-export const FilterSettings: FC<FilterSettingsProps> = () => {
+export const ChartFilter: FC<ChartFilterProps> = () => {
   const context = useContext(SessionFilterContext);
   if (context === undefined) {
     throw new Error("Context must be set");
