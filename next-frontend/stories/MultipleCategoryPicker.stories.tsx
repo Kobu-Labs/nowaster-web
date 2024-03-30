@@ -15,7 +15,9 @@ type Story = StoryObj<typeof multipleCategoryMeta>
 
 export const Basic: Story = {
   args: {
-    onSelectedCategoriesChanged: console.log,
+    onSelectCategory: console.log,
+    selectedCategories: ["coding", "school", "work"]
+
   },
   render: (props) => {
     const queryClient = new QueryClient();
