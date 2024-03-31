@@ -1,13 +1,14 @@
 import { FC, useContext, useState } from "react";
 import { TagWithId } from "@kobu-labs/nowaster-js-typing";
 import { SessionFilterContext } from "components/visualizers/charts/FilteredSessionAreaChart";
-import { Filter } from "lucide-react";
+import { Filter, RotateCcw } from "lucide-react";
 
 import { cn, countLeaves } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -17,6 +18,8 @@ import { StatelessTagPicker } from "@/components/visualizers/tags/TagPicker";
 
 type ChartFilterProps = {};
 
+// TODO: currently the most disgusting component in the codebase
+// refactor it using Forms probably
 export const ChartFilter: FC<ChartFilterProps> = () => {
   const context = useContext(SessionFilterContext);
   if (context === undefined) {
@@ -107,6 +110,12 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
     }
   };
 
+  const resetFilter = () => {
+    setFilter({});
+    setSelectedTags([]);
+    setSelectedCategories([]);
+  };
+
   const appliedFiltersCount = countLeaves(filter);
 
   return (
@@ -146,6 +155,9 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
               onSelectCategory={onSelectCategory}
             />
           </div>
+          <Button variant="destructive" className="w-min" onClick={resetFilter}>
+            <RotateCcw />
+          </Button>
         </SheetContent>
       </Sheet>
     </div>
