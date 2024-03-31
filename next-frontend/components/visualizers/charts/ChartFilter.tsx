@@ -142,14 +142,22 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
           <SheetHeader>
             <SheetTitle>Apply filter</SheetTitle>
           </SheetHeader>
-          <div className="flex">
+          <div className="flex flex-col gap-1">
+            <SheetDescription>
+              Filter all sessions that contain at least one of the following
+              tags
+            </SheetDescription>
             <StatelessTagPicker
               modal={false}
               onSelectTag={onSelectTag}
               selectedTags={selectedTags}
             />
           </div>
-          <div className="flex">
+          <div className="flex flex-col gap-1">
+            <SheetDescription>
+              Filter all sessions that contain at least one of the following
+              categories
+            </SheetDescription>
             <MultipleCategoryPicker
               selectedCategories={selectedCategories}
               onSelectCategory={onSelectCategory}
