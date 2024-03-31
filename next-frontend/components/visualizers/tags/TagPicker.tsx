@@ -75,6 +75,7 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   if (!tags || isLoading || isError) {
@@ -87,7 +88,7 @@ export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
 
   return (
     <TagPickerUiProvider
-      availableTags={tags?.isOk ? tags.value : []}
+      availableTags={tags.value}
       selectedTags={props.selectedTags}
       onSelectTag={props.onSelectTag}
       modal={props.modal}
