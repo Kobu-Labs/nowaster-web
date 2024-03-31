@@ -25,6 +25,7 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   } = useQuery({
     ...queryKeys.categories.all,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
 
