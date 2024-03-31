@@ -133,7 +133,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
           <SheetHeader>
             <SheetTitle>Apply filter</SheetTitle>
           </SheetHeader>
-          <div className="flex  ">
+          <div className="flex">
             <StatelessTagPicker
               modal={false}
               onSelectTag={onSelectTag}
