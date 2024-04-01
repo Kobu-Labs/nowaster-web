@@ -18,13 +18,13 @@ import { ChartFilter } from "@/components/visualizers/charts/ChartFilter";
 import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 
 type FilteredSessionAreaChartProps = {
-  initialGranularity: keyof typeof Granularity
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-} & HTMLAttributes<HTMLDivElement>
+  initialGranularity: keyof typeof Granularity;
+  filter?: Partial<ScheduledSessionRequest["readMany"]>;
+} & HTMLAttributes<HTMLDivElement>;
 
 type SessionFilterType = {
-  setFilter: (filter: ScheduledSessionRequest["readMany"]) => void
-} & { filter: ScheduledSessionRequest["readMany"] }
+  setFilter: (filter: ScheduledSessionRequest["readMany"]) => void;
+} & { filter: ScheduledSessionRequest["readMany"] };
 
 export const SessionFilterContext = createContext<
   SessionFilterType | undefined
@@ -36,7 +36,12 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
   );
-  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>(props.filter ?? {});
+  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>(
+    props.filter ?? {
+      category: { label: { some: [] } },
+      tags: { label: { some: [] } },
+    }
+  );
 
   const ctx: SessionFilterType = {
     setFilter: setFilter,
