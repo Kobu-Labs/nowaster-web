@@ -1,5 +1,11 @@
-import { FC, HTMLAttributes, createContext, useState } from "react";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { FC, HTMLAttributes, useState } from "react";
+import {
+  SessionFilter,
+  enrichedChartFilterSate,
+  finalFilterState,
+  overwriteData,
+} from "@/state/chart-filter";
+import { Provider, useAtomValue, useSetAtom } from "jotai";
 import { ArrowRight } from "lucide-react";
 
 import { Granularity } from "@/lib/session-grouping";
@@ -19,16 +25,8 @@ import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBas
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity;
-  filter?: Partial<ScheduledSessionRequest["readMany"]>;
+  filter?: SessionFilter;
 } & HTMLAttributes<HTMLDivElement>;
-
-type SessionFilterType = {
-  setFilter: (filter: ScheduledSessionRequest["readMany"]) => void;
-} & { filter: ScheduledSessionRequest["readMany"] };
-
-export const SessionFilterContext = createContext<
-  SessionFilterType | undefined
->(undefined);
 
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   props
@@ -36,29 +34,25 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
   );
-  const [filter, setFilter] = useState<ScheduledSessionRequest["readMany"]>(
-    props.filter ?? {
-      category: { label: { some: [] } },
-      tags: { label: { some: [] } },
-    }
-  );
-
-  const ctx: SessionFilterType = {
-    setFilter: setFilter,
-    filter: filter,
-  };
+  const setChartFilter = useSetAtom(enrichedChartFilterSate);
+  const aplliedFilter = useAtomValue(finalFilterState);
 
   const updateFromDate = (date: Date | undefined) => {
-    const { fromEndTime, ...rest } = filter;
-    setFilter({ fromEndTime: date, ...rest });
+    setChartFilter((oldState) => {
+      const newSate = overwriteData(oldState, { endTimeFrom: date });
+      return newSate;
+    });
   };
+
   const updateToDate = (date: Date | undefined) => {
-    const { toEndTime, ...rest } = filter;
-    setFilter({ toEndTime: date, ...rest });
+    setChartFilter((oldState) => {
+      const newSate = overwriteData(oldState, { endTimeTo: date });
+      return newSate;
+    });
   };
 
   return (
-    <SessionFilterContext.Provider value={ctx}>
+    <Provider>
       <Card className={cn("flex grow flex-col", props.className)}>
         <CardHeader className="flex flex-row items-center gap-2">
           <Select
@@ -87,13 +81,13 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
           <div className="flex items-center gap-2">
             <DateTimePicker
               label="From"
-              selected={filter.fromEndTime}
+              selected={aplliedFilter.endTimeFrom?.value}
               onSelect={updateFromDate}
             />
             <ArrowRight />
             <DateTimePicker
               label="To"
-              selected={filter.toEndTime}
+              selected={aplliedFilter.endTimeTo?.value}
               onSelect={updateToDate}
             />
           </div>
@@ -105,10 +99,10 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
               granularity: granularity,
               allKeys: true,
             }}
-            filter={filter}
+            filter={aplliedFilter}
           />
         </CardContent>
       </Card>
-    </SessionFilterContext.Provider>
+    </Provider>
   );
 };
