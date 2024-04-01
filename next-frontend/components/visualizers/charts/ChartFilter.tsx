@@ -3,9 +3,9 @@ import {
   changeCategoryFilterMode,
   changeTagFilterMode,
   enrichedChartFilterSate,
-  resetFilterFull,
   handleSelectCategory,
   handleSelectTag,
+  resetFilterFull,
 } from "@/state/chart-filter";
 import { TagWithId } from "@kobu-labs/nowaster-js-typing";
 import { useAtom } from "jotai";
@@ -83,12 +83,12 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
               selectedTags={filter.data.tags}
             />
             <RadioGroup
-              onValueChange={(value: "some" | "every") => {
+              onValueChange={(value: "some" | "all") => {
                 setChartFilter((state) =>
                   changeCategoryFilterMode(state, value)
                 );
               }}
-              defaultValue={filter.filter.category.label.mode}
+              defaultValue={filter.filter.categories?.name?.mode}
               className="flex flex-col space-y-1"
             >
               <TooltipProvider delayDuration={350}>
@@ -127,10 +127,10 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
               onSelectCategory={onSelectCategory}
             />
             <RadioGroup
-              onValueChange={(value: "some" | "exact") => {
+              onValueChange={(value: "some" | "all") => {
                 setChartFilter((state) => changeTagFilterMode(state, value));
               }}
-              defaultValue={filter.filter.tags.label.mode}
+              defaultValue={filter.filter.tags?.label?.mode}
               className="flex flex-col space-y-1"
             >
               <TooltipProvider delayDuration={350}>
@@ -151,7 +151,9 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
                   <TooltipTrigger asChild>
                     <div className="flex items-center  gap-2">
                       <RadioGroupItem value="some" id="category-some" />
-                      <Label htmlFor="category-some">"One of" match</Label>
+                      <Label htmlFor="category-some">
+                        &rdquo;One of&rdquo; match
+                      </Label>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
