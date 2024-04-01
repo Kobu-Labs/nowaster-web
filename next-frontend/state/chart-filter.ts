@@ -1,31 +1,16 @@
-import { Category, TagWithId } from "@kobu-labs/nowaster-js-typing";
+import {
+  Category,
+  ScheduledSessionRequest,
+  TagWithId,
+} from "@kobu-labs/nowaster-js-typing";
 import { atom } from "jotai";
 
 /*
  * Object describing **how** to do filtering, now **what** is the value of the filter
  */
-export type FilterSettings = OmitValue<SessionFilter>;
+export type FilterSettings = NonNullable<OmitValue<SessionFilter>>
 
-export type SessionFilter = {
-  tags: {
-    label: {
-      mode: "exact" | "some";
-      value: string[];
-    };
-  };
-  category: {
-    label: {
-      mode: "every" | "some";
-      value: string[];
-    };
-  };
-  endTimeFrom: {
-    value: Date | undefined;
-  };
-  endTimeTo: {
-    value: Date | undefined;
-  };
-};
+export type SessionFilter = ScheduledSessionRequest["readMany"];
 
 /*
  * Object that will provide the values for filtering
@@ -44,23 +29,21 @@ export type SessionFilterPrecursor = {
 
 type OmitValue<T> = T extends object
   ? {
-      [K in keyof T as Exclude<K, "value">]: OmitValue<T[K]>;
-    }
+    [K in keyof T as Exclude<K, "value">]: OmitValue<T[K]>;
+  }
   : T;
 
 const defaultFilterSettings: FilterSettings = {
   tags: {
     label: {
-      mode: "exact",
+      mode: "all",
     },
   },
-  category: {
-    label: {
-      mode: "every",
+  categories: {
+    name: {
+      mode: "all",
     },
   },
-  endTimeTo: {},
-  endTimeFrom: {},
 };
 const defaultFilterData: FilterValueFiller = {
   tags: [],
@@ -76,26 +59,27 @@ export const enrichedChartFilterSate = atom<SessionFilterPrecursor>({
 export const finalFilterState = atom<Partial<SessionFilter>>((get) => {
   const {
     data,
-    filter: { tags, category },
+    filter: { tags, categories },
   } = get(enrichedChartFilterSate);
+
 
   const result: SessionFilter = {
     tags: {
       label: {
-        mode: tags.label.mode,
+        mode: tags?.label?.mode ?? "all",
         value: data.tags?.map((tag) => tag.label) ?? [],
       },
     },
-    category: {
-      label: {
-        mode: category.label.mode,
+    categories: {
+      name: {
+        mode: categories?.name?.mode ?? "all",
         value: data.categories?.map((category) => category.name) ?? [],
       },
     },
-    endTimeFrom: {
+    fromEndTime: {
       value: data.endTimeFrom,
     },
-    endTimeTo: {
+    toEndTime: {
       value: data.endTimeTo,
     },
   };
@@ -105,7 +89,7 @@ export const finalFilterState = atom<Partial<SessionFilter>>((get) => {
 
 export const changeTagFilterMode = (
   oldState: SessionFilterPrecursor,
-  mode: "exact" | "some"
+  mode:  "some" | "all"
 ): SessionFilterPrecursor => {
   const {
     filter: { tags, ...filterRest },
@@ -128,10 +112,10 @@ export const changeTagFilterMode = (
 
 export const changeCategoryFilterMode = (
   oldState: SessionFilterPrecursor,
-  mode: "every" | "some"
+  mode: "all" | "some"
 ): SessionFilterPrecursor => {
   const {
-    filter: { category, ...filterRest },
+    filter: { categories, ...filterRest },
     data,
   } = oldState ?? {};
 
@@ -139,9 +123,9 @@ export const changeCategoryFilterMode = (
     data,
     filter: {
       ...filterRest,
-      category: {
-        ...category,
-        label: {
+      categories: {
+        ...categories,
+        name: {
           mode: mode,
         },
       },
