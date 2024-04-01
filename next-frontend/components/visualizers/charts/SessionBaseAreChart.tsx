@@ -1,18 +1,20 @@
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
 import { useQuery } from "@tanstack/react-query";
 
 import { type GroupingOptions } from "@/lib/session-grouping";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider";
+import { SessionFilter } from "@/state/chart-filter";
 
 type SessionBaseChartProps = {
   groupingOpts: GroupingOptions
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
+  filter?: Partial<SessionFilter>
 }
 
 export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
+
   const { data: result } = useQuery({
-    ...queryKeys.sessions.filtered(props.filter),
+    // TODO: pass in the filter
+    ...queryKeys.sessions.filtered(),
     retry: false,
     staleTime: Infinity,
     select: (data) => {
