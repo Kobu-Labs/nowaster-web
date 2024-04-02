@@ -40,12 +40,12 @@ SessionsController.get("/active", async (_req, res) => {
 });
 
 // get users study sessions
-SessionsController.get(
-  "/",
-  validate({ query: ScheduledSessionRequestSchema.readMany }),
+SessionsController.post(
+  "/filter",
+  validate({ body: ScheduledSessionRequestSchema.readMany }),
   async (req, res) => {
     const scheduledSessionEntities = await scheduledSessionRepo.read.many(
-      req.query,
+      req.body,
     );
 
     if (scheduledSessionEntities.isErr) {
