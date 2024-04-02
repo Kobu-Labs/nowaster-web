@@ -31,8 +31,8 @@ import { BaseSessionTable } from "@/components/visualizers/sessions/session-tabl
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type TagColorPickerProps = {
-  tag: string
-}
+  tag: string;
+};
 
 const TagColorPicker: FC<TagColorPickerProps> = (props) => {
   const [colors, setColors] = useRecoilState(tagColors);
@@ -68,7 +68,7 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
 
   return (
     <div>
-      <TagColorPicker tag={props.tag.label}/>
+      <TagColorPicker tag={props.tag.label} />
       <div>
         Allowed Categories:
         {props.tag.allowedCategories.map((cat) => (
@@ -100,7 +100,8 @@ export default function Page() {
     filter = {
       tags: {
         label: {
-          some: [selectedTag.label],
+          value: [selectedTag.label],
+          mode: "some",
         },
       },
     };

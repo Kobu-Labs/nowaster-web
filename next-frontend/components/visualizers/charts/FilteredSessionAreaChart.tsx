@@ -81,13 +81,13 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
           <div className="flex items-center gap-2">
             <DateTimePicker
               label="From"
-              selected={aplliedFilter.endTimeFrom?.value}
+              selected={aplliedFilter.fromEndTime?.value}
               onSelect={updateFromDate}
             />
             <ArrowRight />
             <DateTimePicker
               label="To"
-              selected={aplliedFilter.endTimeTo?.value}
+              selected={aplliedFilter.toEndTime?.value}
               onSelect={updateToDate}
             />
           </div>

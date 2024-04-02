@@ -1,20 +1,18 @@
+import { SessionFilter } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 
 import { type GroupingOptions } from "@/lib/session-grouping";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider";
-import { SessionFilter } from "@/state/chart-filter";
 
 type SessionBaseChartProps = {
-  groupingOpts: GroupingOptions
-  filter?: Partial<SessionFilter>
-}
+  groupingOpts: GroupingOptions;
+  filter?: Partial<SessionFilter>;
+};
 
 export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
-
   const { data: result } = useQuery({
-    // TODO: pass in the filter
-    ...queryKeys.sessions.filtered(),
+    ...queryKeys.sessions.filtered(props.filter),
     retry: false,
     staleTime: Infinity,
     select: (data) => {
