@@ -2,6 +2,7 @@
 
 import { FC } from "react";
 import { categoryColors } from "@/state/categories";
+import { SessionFilter } from "@/state/chart-filter";
 import { Settings } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
 import { useRecoilState } from "recoil";
@@ -23,8 +24,8 @@ import { BaseSessionTableColumns } from "@/components/visualizers/sessions/sessi
 import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
 
 type CategoryColorPickerProps = {
-  category: string
-}
+  category: string;
+};
 
 const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
   const [colors, setColors] = useRecoilState(categoryColors);
@@ -49,7 +50,9 @@ const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
 
 export default function Page(props: { params: { detail: string } }) {
   const categoryName = props.params.detail;
-  const filter = { category: { label: { exact: categoryName } } };
+  const filter: Partial<SessionFilter> = {
+    categories: { name: { mode: "all", value: [categoryName] } },
+  };
 
   return (
     <div className="grow">
