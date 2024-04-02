@@ -29,9 +29,7 @@ export const getActiveSessions = async (): Promise<
 export const getSessions = async (
   params?: ScheduledSessionRequest["readMany"]
 ): Promise<Result<ScheduledSessionResponse["readMany"]>> => {
-  const { data } = await baseApi.get(BASE_URL + "sessions/", {
-    params: { ...params },
-  });
+  const { data } = await baseApi.post(BASE_URL + "sessions/filter", params);
   return await handleResponse(data, ScheduledSessionResponseSchema.readMany);
 };
 
