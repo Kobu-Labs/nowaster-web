@@ -14,9 +14,9 @@ import {
 import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 
 type ClampedSessionAreaChartProps = {
-  initialGranularity: keyof typeof Granularity
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-}
+  initialGranularity: keyof typeof Granularity;
+  filter?: Partial<ScheduledSessionRequest["readMany"]>;
+};
 
 export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (
   props
@@ -54,8 +54,8 @@ export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (
         <SessionBaseAreaChart
           groupingOpts={{ granularity: granularity, allKeys: true }}
           filter={{
-            fromEndTime: processor.start(),
-            toEndTime: processor.end(),
+            fromEndTime: { value: processor.start() },
+            toEndTime: { value: processor.end() },
             ...props.filter,
           }}
         />
