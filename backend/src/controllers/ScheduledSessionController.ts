@@ -29,8 +29,8 @@ SessionsController.post(
 // get currently running sessions
 SessionsController.get("/active", async (_req, res) => {
   const scheduledSessions = await scheduledSessionRepo.read.many({
-    toStartTime: new Date(),
-    fromEndTime: new Date(),
+    toStartTime: { value: new Date() },
+    fromEndTime: { value: new Date() },
   });
 
   if (scheduledSessions.isErr) {
