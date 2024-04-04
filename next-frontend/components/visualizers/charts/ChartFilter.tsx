@@ -128,7 +128,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) => changeTagFilterMode(state, value));
+                setChartFilter((state) => changeCategoryFilterMode(state, value));
               }}
               defaultValue={filter.filter.tags?.label?.mode}
               className="flex flex-col space-y-1"
