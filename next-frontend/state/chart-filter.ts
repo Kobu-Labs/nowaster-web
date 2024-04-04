@@ -36,12 +36,12 @@ type OmitValue<T> = T extends object
 const defaultFilterSettings: FilterSettings = {
   tags: {
     label: {
-      mode: "all",
+      mode: "some",
     },
   },
   categories: {
     name: {
-      mode: "all",
+      mode: "some",
     },
   },
 };
@@ -62,17 +62,16 @@ export const finalFilterState = atom<Partial<SessionFilter>>((get) => {
     filter: { tags, categories },
   } = get(enrichedChartFilterSate);
 
-
   const result: SessionFilter = {
     tags: {
       label: {
-        mode: tags?.label?.mode ?? "all",
+        mode: tags?.label?.mode ?? "some",
         value: data.tags?.map((tag) => tag.label) ?? [],
       },
     },
     categories: {
       name: {
-        mode: categories?.name?.mode ?? "all",
+        mode: categories?.name?.mode ?? "some",
         value: data.categories?.map((category) => category.name) ?? [],
       },
     },
