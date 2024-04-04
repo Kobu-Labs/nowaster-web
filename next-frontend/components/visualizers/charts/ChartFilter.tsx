@@ -85,7 +85,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
                 setChartFilter((state) =>
-                  changeCategoryFilterMode(state, value)
+                  changeTagFilterMode(state, value)
                 );
               }}
               defaultValue={filter.filter.categories?.name?.mode}
