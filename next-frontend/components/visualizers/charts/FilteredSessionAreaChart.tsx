@@ -38,17 +38,13 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   const aplliedFilter = useAtomValue(finalFilterState);
 
   const updateFromDate = (date: Date | undefined) => {
-    setChartFilter((oldState) => {
-      const newSate = overwriteData(oldState, { endTimeFrom: date });
-      return newSate;
-    });
+    setChartFilter((oldState) =>
+      overwriteData(oldState, { endTimeFrom: date })
+    );
   };
 
   const updateToDate = (date: Date | undefined) => {
-    setChartFilter((oldState) => {
-      const newSate = overwriteData(oldState, { endTimeTo: date });
-      return newSate;
-    });
+    setChartFilter((oldState) => overwriteData(oldState, { endTimeTo: date }));
   };
 
   return (
