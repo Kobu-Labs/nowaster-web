@@ -84,18 +84,16 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) =>
-                  changeTagFilterMode(state, value)
-                );
+                setChartFilter((state) => changeTagFilterMode(state, value));
               }}
-              defaultValue={filter.filter.categories?.name?.mode}
+              defaultValue={filter.filter.tags?.label?.mode}
               className="flex flex-col space-y-1"
             >
               <TooltipProvider delayDuration={350}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center  gap-2">
-                      <RadioGroupItem  value="all" id="category-exact" />
+                      <RadioGroupItem value="all" id="category-exact" />
                       <Label htmlFor="category-exact">Superset matching</Label>
                     </div>
                   </TooltipTrigger>
@@ -128,9 +126,11 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) => changeCategoryFilterMode(state, value));
+                setChartFilter((state) =>
+                  changeCategoryFilterMode(state, value)
+                );
               }}
-              defaultValue={filter.filter.tags?.label?.mode}
+              defaultValue={filter.filter.categories?.name?.mode}
               className="flex flex-col space-y-1"
             >
               <TooltipProvider delayDuration={350}>
