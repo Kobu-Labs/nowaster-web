@@ -31,6 +31,16 @@ type FilteredSessionAreaChartProps = {
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   props
 ) => {
+  return (
+    <Provider>
+      <FilteredSessionAreaChartInner {...props} />
+    </Provider>
+  );
+};
+
+const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
+  props
+) => {
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
   );
