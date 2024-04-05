@@ -137,7 +137,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center  gap-2">
-                      <RadioGroupItem value="exact" id="category-exact" />
+                      <RadioGroupItem value="all" id="category-exact" />
                       <Label htmlFor="category-exact">Exact match</Label>
                     </div>
                   </TooltipTrigger>
