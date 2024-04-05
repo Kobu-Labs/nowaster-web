@@ -58,57 +58,53 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   };
 
   return (
-    <Provider>
-      <Card className={cn("flex grow flex-col", props.className)}>
-        <CardHeader className="flex flex-row items-center gap-2">
-          <Select
-            onValueChange={(val: keyof typeof Granularity) =>
-              setGranularity(val)
-            }
-          >
-            <SelectTrigger className="w-fit">
-              <SelectValue placeholder={Granularity[granularity]} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup defaultChecked>
-                {Object.entries(Granularity).map(([key, val]) => (
-                  <SelectItem
-                    key={key}
-                    disabled={key === granularity}
-                    value={key}
-                  >
-                    {val}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <div className="grow"></div>
-          <div className="flex items-center gap-2">
-            <DateTimePicker
-              label="From"
-              selected={aplliedFilter.fromEndTime?.value}
-              onSelect={updateFromDate}
-            />
-            <ArrowRight />
-            <DateTimePicker
-              label="To"
-              selected={aplliedFilter.toEndTime?.value}
-              onSelect={updateToDate}
-            />
-          </div>
-          <ChartFilter />
-        </CardHeader>
-        <CardContent className="grow">
-          <SessionBaseAreaChart
-            groupingOpts={{
-              granularity: granularity,
-              allKeys: true,
-            }}
-            filter={aplliedFilter}
+    <Card className={cn("flex grow flex-col", props.className)}>
+      <CardHeader className="flex flex-row items-center gap-2">
+        <Select
+          onValueChange={(val: keyof typeof Granularity) => setGranularity(val)}
+        >
+          <SelectTrigger className="w-fit">
+            <SelectValue placeholder={Granularity[granularity]} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup defaultChecked>
+              {Object.entries(Granularity).map(([key, val]) => (
+                <SelectItem
+                  key={key}
+                  disabled={key === granularity}
+                  value={key}
+                >
+                  {val}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <div className="grow"></div>
+        <div className="flex items-center gap-2">
+          <DateTimePicker
+            label="From"
+            selected={aplliedFilter.fromEndTime?.value}
+            onSelect={updateFromDate}
           />
-        </CardContent>
-      </Card>
-    </Provider>
+          <ArrowRight />
+          <DateTimePicker
+            label="To"
+            selected={aplliedFilter.toEndTime?.value}
+            onSelect={updateToDate}
+          />
+        </div>
+        <ChartFilter />
+      </CardHeader>
+      <CardContent className="grow">
+        <SessionBaseAreaChart
+          groupingOpts={{
+            granularity: granularity,
+            allKeys: true,
+          }}
+          filter={aplliedFilter}
+        />
+      </CardContent>
+    </Card>
   );
 };
