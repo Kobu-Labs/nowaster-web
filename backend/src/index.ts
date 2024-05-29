@@ -12,7 +12,6 @@ import type { ApiResponse } from "@/src/controllers/types";
 import { CategoryController } from "@/src/controllers/CategoryController";
 
 const app = express();
-const port = env.PORT ?? 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,10 +34,4 @@ app.use((_req, res) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`[${new Date().toISOString()}] API listening on port ${port}`);
-  if (app.settings.env === "development") {
-    console.log(`[${new Date().toISOString()}] Application running in development mode!`);
-  }
-  console.log(`[${new Date().toISOString()}] Database used: ${env.DATABASE_URL}`);
-});
+module.exports = app;
