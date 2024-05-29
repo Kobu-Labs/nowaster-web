@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx nodemon src/index.ts",
     "prod": "NODE_ENV=production npx ts-node src/index.ts",
-    "build": "npx prisma generate && npx prisma migrate dev"
+    "build": "npx prisma generate && npx prisma migrate dev && npx tsc"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
