@@ -3,7 +3,6 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import { env } from "process";
 import { RecordedController } from "@/src/controllers/RecordedSessionController";
 import { ScheduledController } from "@/src/controllers/ScheduledSessionController";
 import { TagController } from "@/src/controllers/TagController";
