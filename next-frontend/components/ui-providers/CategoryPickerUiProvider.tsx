@@ -1,8 +1,13 @@
 import { FC, useState } from "react";
+import { CategoryApi } from "@/api";
+import { Result } from "@badrap/result";
+import { CategoryRequest } from "@kobu-labs/nowaster-js-typing";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import { prefixBasedMatch } from "@/lib/searching";
 import { cn } from "@/lib/utils";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -35,6 +40,25 @@ export const MultipleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const queryClient = useQueryClient();
+
+  // TODO move this higher
+  const { mutate: createCategory } = useMutation<
+    Result<CategoryRequest["create"]>,
+    unknown,
+    CategoryRequest["create"]
+  >({
+    mutationFn: async (params) => await CategoryApi.create(params),
+    retry: false,
+    onSuccess: (result) => {
+      if (result.isErr) {
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      props.onSelectCategory(result.value.name);
+    },
+  });
 
   let categoriesInDisplayOrder = props.availableCategories;
   if (props.categoryDisplayStrategy) {
@@ -95,7 +119,21 @@ export const MultipleCategoryPickerUiProvider: FC<
           />
           {!categoriesInDisplayOrder.length && (
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              {`Category '${searchTerm}' not found.`}
+              {searchTerm &&
+                props.availableCategories.every(
+                  (cat) => cat !== searchTerm
+                ) && (
+                <CommandGroup>
+                  <CommandItem
+                    className="flex"
+                    onSelect={() => createCategory({ name: searchTerm })}
+                  >
+                    <p>Create</p>
+                    <div className="grow"></div>
+                    <Badge variant="outline">{searchTerm}</Badge>
+                  </CommandItem>
+                </CommandGroup>
+              )}
             </CommandItem>
           )}
           <CommandGroup>
@@ -146,6 +184,26 @@ export const SingleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const queryClient = useQueryClient();
+
+  // TODO move this higher
+  const { mutate: createCategory } = useMutation<
+    Result<CategoryRequest["create"]>,
+    unknown,
+    CategoryRequest["create"]
+  >({
+    mutationFn: async (params) => await CategoryApi.create(params),
+    retry: false,
+    onSuccess: (result) => {
+      if (result.isErr) {
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      props.onSelectCategory(result.value.name);
+    },
+  });
 
   let categoriesInDisplayOrder = props.availableCategories;
   if (props.categoryDisplayStrategy) {
@@ -201,7 +259,21 @@ export const SingleCategoryPickerUiProvider: FC<
           />
           {!categoriesInDisplayOrder.length && (
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              {`Category '${searchTerm}' not found.`}
+              {searchTerm &&
+                props.availableCategories.every(
+                  (cat) => cat !== searchTerm
+                ) && (
+                <CommandGroup>
+                  <CommandItem
+                    className="flex"
+                    onSelect={() => createCategory({ name: searchTerm })}
+                  >
+                    <p>Create</p>
+                    <div className="grow"></div>
+                    <Badge variant="outline">{searchTerm}</Badge>
+                  </CommandItem>
+                </CommandGroup>
+              )}
             </CommandItem>
           )}
           <CommandGroup>
