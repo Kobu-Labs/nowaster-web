@@ -6,8 +6,12 @@ import type { TagRequest } from "@kobu-labs/nowaster-js-typing";
 
 const create = async (params: TagRequest["create"]): AsyncResult<Tag> => {
   try {
-    const result = await client.tag.create({ data: params });
-    return Result.ok(result);
+    const result = await client.tag.create({
+      data: {
+        label: params.label,
+      },
+    });
+    return Result.ok({...result});
   } catch (error) {
     return Result.err(error as Error);
   }
