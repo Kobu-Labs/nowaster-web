@@ -71,9 +71,6 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
       <TagColorPicker tag={props.tag.label} />
       <div>
         Allowed Categories:
-        {props.tag.allowedCategories.map((cat) => (
-          <CategoryLabel label={cat.name} key={cat.name} />
-        ))}
       </div>
       <div>
         All Categories:
