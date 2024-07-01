@@ -34,7 +34,7 @@ export type TagPickerUiProviderProps = {
     selectedTags: TagWithId[],
     availableTags: TagWithId[]
   ) => TagWithId[];
-  tagMatchStrategy?: (tag: TagWithId, searchTerm: string) => number;
+  tagMatchStrategy?: (tag: TagWithId, searchTerm: string) => boolean;
   modal?: boolean;
 };
 
