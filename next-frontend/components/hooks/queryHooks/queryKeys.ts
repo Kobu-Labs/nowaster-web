@@ -1,11 +1,19 @@
 import { CategoryApi, ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
-import { createQueryKeys, mergeQueryKeys } from "@lukemorales/query-key-factory";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
+import {
+  createQueryKeys,
+  mergeQueryKeys,
+} from "@lukemorales/query-key-factory";
+
+import { translateFilterPrecursor } from "@/lib/utils";
 
 const sessionkeys = createQueryKeys("sessions", {
-  filtered: (filters?: Partial<ScheduledSessionRequest["readMany"]>) => ({
-    queryKey: [filters ?? {}],
-    queryFn: async () => await ScheduledSessionApi.getSessions(filters),
+  filtered: (precursor?: SessionFilterPrecursor) => ({
+    queryKey: [precursor ?? {}],
+    queryFn: async () => {
+      const filter = translateFilterPrecursor(precursor);
+      return await ScheduledSessionApi.getSessions(filter);
+    },
   }),
   active: {
     queryKey: ["active"],

@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 
 import { Granularity, dateProcessors } from "@/lib/session-grouping";
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
@@ -15,7 +15,7 @@ import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBas
 
 type ClampedSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity;
-  filter?: Partial<ScheduledSessionRequest["readMany"]>;
+  filter?: SessionFilterPrecursor;
 };
 
 export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (
@@ -54,9 +54,12 @@ export const ClampedSessionAreaChart: FC<ClampedSessionAreaChartProps> = (
         <SessionBaseAreaChart
           groupingOpts={{ granularity: granularity, allKeys: true }}
           filter={{
-            fromEndTime: { value: processor.start() },
-            toEndTime: { value: processor.end() },
-            ...props.filter,
+            data: {
+              ...props.filter?.data,
+              endTimeTo: processor.end(),
+              endTimeFrom: processor.start(),
+            },
+            settings: props.filter?.settings ?? {},
           }}
         />
       </CardContent>

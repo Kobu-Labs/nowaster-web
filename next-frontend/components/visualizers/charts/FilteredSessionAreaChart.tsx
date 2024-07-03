@@ -1,11 +1,12 @@
 import { FC, HTMLAttributes, useState } from "react";
 import {
-  SessionFilter,
-  enrichedChartFilterSate,
-  finalFilterState,
+  SessionFilterPrecursor,
+  filterPrecursorAtom,
+  getDefaultFilter,
   overwriteData,
 } from "@/state/chart-filter";
-import { Provider, useAtomValue, useSetAtom } from "jotai";
+import { Provider, useAtom } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
 import { ArrowRight } from "lucide-react";
 
 import { Granularity } from "@/lib/session-grouping";
@@ -25,7 +26,7 @@ import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBas
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: keyof typeof Granularity;
-  filter?: SessionFilter;
+  filter?: SessionFilterPrecursor;
 } & HTMLAttributes<HTMLDivElement>;
 
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
@@ -44,8 +45,12 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
     props.initialGranularity
   );
-  const setChartFilter = useSetAtom(enrichedChartFilterSate);
-  const aplliedFilter = useAtomValue(finalFilterState);
+
+  useHydrateAtoms(
+    new Map([[filterPrecursorAtom, props.filter ?? getDefaultFilter()]])
+  );
+
+  const [filterPrecursor, setChartFilter] = useAtom(filterPrecursorAtom);
 
   const updateFromDate = (date: Date | undefined) => {
     setChartFilter((oldState) =>
@@ -84,13 +89,13 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
         <div className="flex items-center gap-2">
           <DateTimePicker
             label="From"
-            selected={aplliedFilter.fromEndTime?.value}
+            selected={filterPrecursor.data.endTimeFrom}
             onSelect={updateFromDate}
           />
           <ArrowRight />
           <DateTimePicker
             label="To"
-            selected={aplliedFilter.toEndTime?.value}
+            selected={filterPrecursor.data.endTimeTo}
             onSelect={updateToDate}
           />
         </div>
@@ -102,7 +107,7 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
             granularity: granularity,
             allKeys: true,
           }}
-          filter={aplliedFilter}
+          filter={filterPrecursor}
         />
       </CardContent>
     </Card>

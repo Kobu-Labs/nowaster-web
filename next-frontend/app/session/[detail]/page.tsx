@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { categoryColors } from "@/state/categories";
-import { SessionFilter } from "@/state/chart-filter";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { Settings } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
 import { useRecoilState } from "recoil";
@@ -50,8 +50,17 @@ const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
 
 export default function Page(props: { params: { detail: string } }) {
   const categoryName = props.params.detail;
-  const filter: Partial<SessionFilter> = {
-    categories: { name: { mode: "all", value: [categoryName] } },
+  const filter: SessionFilterPrecursor = {
+    settings: {
+      categories: {
+        name: {
+          mode: "all",
+        },
+      },
+    },
+    data: {
+      categories: [{ name: categoryName }],
+    },
   };
 
   return (
