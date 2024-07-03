@@ -54,21 +54,27 @@ export const showSelectedTagsFirst = (
   });
 };
 
-export function countLeaves(val: any): number {
-  if (val === undefined) {
-    return 0;
-  }
-  if (Array.isArray(val)) {
-    return val.length > 0 ? 1 : 0;
-  }
+export function countLeaves(obj: any): number {
+  const isObject = (val: any) => val && typeof val === "object";
 
-  if (Object.prototype.toString.call(val) !== "[object Object]") {
-    return 1;
-  }
+  const isTruthy = (val: any) => {
+    if (Array.isArray(val) && val.length === 0) return false;
+    return Boolean(val);
+  };
 
-  return Object.values(val)
-    .map(countLeaves)
-    .reduce((a, b) => a + b, 0);
+  const countValues = (obj: any): number => {
+    if (!isObject(obj)) {
+      return 0;
+    }
+
+    return Object.entries(obj).reduce((count, [key, value]) => {
+      // Check if the key is 'value' and the value is truthy
+      const keyCount = key === "value" && isTruthy(value) ? 1 : 0;
+      return count + keyCount + countValues(value);
+    }, 0);
+  };
+
+  return countValues(obj);
 }
 
 export const translateFilterPrecursor = (
