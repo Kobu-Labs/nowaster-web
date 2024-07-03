@@ -11,7 +11,7 @@ import { TagWithId } from "@kobu-labs/nowaster-js-typing";
 import { useAtom } from "jotai";
 import { Filter, RotateCcw } from "lucide-react";
 
-import { cn, countLeaves } from "@/lib/utils";
+import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
 import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
@@ -48,7 +48,8 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
 
   const resetFilter = () => setChartFilter(getDefaultFilter());
 
-  const appliedFiltersCount = countLeaves(filter.settings);
+  // TODO: memoize this
+  const appliedFiltersCount = countLeaves(translateFilterPrecursor(filter));
 
   return (
     <div className="flex flex-col">
