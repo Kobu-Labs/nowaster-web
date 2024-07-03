@@ -1,7 +1,5 @@
-import {
-  ScheduledSession,
-  ScheduledSessionRequest,
-} from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
+import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 
@@ -9,12 +7,12 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { SessionPieChartUiProvider } from "@/components/ui-providers/SessionPieChartUiProvider";
 
 type SessionPieChart = {
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-  groupingFn: (session: ScheduledSession) => string | string[]
-  postProcess?: (data: AmountByCategory[]) => AmountByCategory[]
-}
+  filter?: SessionFilterPrecursor;
+  groupingFn: (session: ScheduledSession) => string | string[];
+  postProcess?: (data: AmountByCategory[]) => AmountByCategory[];
+};
 
-export type AmountByCategory = { key: string; value: number }
+export type AmountByCategory = { key: string; value: number };
 
 const groupData = (
   sessions: ScheduledSession[],

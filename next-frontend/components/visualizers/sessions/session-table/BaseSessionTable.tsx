@@ -1,8 +1,6 @@
 import { FC } from "react";
-import {
-  ScheduledSessionRequest,
-  ScheduledSessionWithId,
-} from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
+import { ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -10,9 +8,9 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/ui-providers/DataTable";
 
 type BaseSessionTableProps = {
-  columns: ColumnDef<ScheduledSessionWithId>[]
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-}
+  columns: ColumnDef<ScheduledSessionWithId>[];
+  filter?: SessionFilterPrecursor;
+};
 
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
   const { data } = useQuery({

@@ -1,12 +1,12 @@
 import React, { FC } from "react";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
 import { SessionPieChart } from "@/components/visualizers/charts/SessionPieChart";
 
 type TagsToSessionPieChartProps = {
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-}
+  filter?: SessionFilterPrecursor;
+};
 
 export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
   props
