@@ -1,4 +1,4 @@
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 import { Hourglass } from "lucide-react";
@@ -8,8 +8,8 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
 type SessionAverageDurationProviderProps = {
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-}
+  filter?: SessionFilterPrecursor;
+};
 
 export const SessionAverageDurationProvider = (
   props: SessionAverageDurationProviderProps

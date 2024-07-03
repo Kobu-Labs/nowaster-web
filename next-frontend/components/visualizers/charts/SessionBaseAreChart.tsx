@@ -1,4 +1,4 @@
-import { SessionFilter } from "@/state/chart-filter";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 
 import { type GroupingOptions } from "@/lib/session-grouping";
@@ -7,7 +7,7 @@ import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/Sessio
 
 type SessionBaseChartProps = {
   groupingOpts: GroupingOptions;
-  filter?: Partial<SessionFilter>;
+  filter?: SessionFilterPrecursor;
 };
 
 export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {

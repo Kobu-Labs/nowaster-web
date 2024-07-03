@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { Sigma } from "lucide-react";
 
@@ -7,8 +7,8 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
 type SessionCountCardProps = {
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-}
+  filter?: SessionFilterPrecursor;
+};
 
 export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
   const { data: result } = useQuery({

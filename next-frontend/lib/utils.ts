@@ -1,5 +1,6 @@
-import { TagWithId } from "@kobu-labs/nowaster-js-typing";
-import { type ClassValue, clsx } from "clsx";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
+import { SessionFilter, TagWithId } from "@kobu-labs/nowaster-js-typing";
+import { clsx, type ClassValue } from "clsx";
 import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
@@ -69,3 +70,38 @@ export function countLeaves(val: any): number {
     .map(countLeaves)
     .reduce((a, b) => a + b, 0);
 }
+
+export const translateFilterPrecursor = (
+  precursor?: SessionFilterPrecursor
+): Partial<SessionFilter> => {
+  if (!precursor) {
+    return {};
+  }
+  const {
+    data,
+    settings: { tags, categories },
+  } = precursor;
+
+  const result: SessionFilter = {
+    tags: {
+      label: {
+        mode: tags?.label?.mode ?? "some",
+        value: data.tags?.map((tag) => tag.label) ?? [],
+      },
+    },
+    categories: {
+      name: {
+        mode: categories?.name?.mode ?? "some",
+        value: data.categories?.map((category) => category.name) ?? [],
+      },
+    },
+    fromEndTime: {
+      value: data.endTimeFrom,
+    },
+    toEndTime: {
+      value: data.endTimeTo,
+    },
+  };
+
+  return result;
+};

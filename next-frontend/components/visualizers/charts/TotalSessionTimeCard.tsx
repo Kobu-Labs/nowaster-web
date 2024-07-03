@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { ScheduledSessionRequest } from "@kobu-labs/nowaster-js-typing";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 
@@ -8,8 +8,9 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
 type TotalSessionTimeCardProps = {
-  filter?: Partial<ScheduledSessionRequest["readMany"]>
-}
+  filter?: SessionFilterPrecursor;
+};
+
 export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
   const { data: result } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),

@@ -2,10 +2,10 @@ import { FC } from "react";
 import {
   changeCategoryFilterMode,
   changeTagFilterMode,
-  enrichedChartFilterSate,
+  filterPrecursorAtom,
   handleSelectCategory,
   handleSelectTag,
-  resetFilterFull,
+  getDefaultFilter,
 } from "@/state/chart-filter";
 import { TagWithId } from "@kobu-labs/nowaster-js-typing";
 import { useAtom } from "jotai";
@@ -38,7 +38,7 @@ type ChartFilterProps = {};
 // TODO: currently the most disgusting component in the codebase
 // refactor it using Forms probably
 export const ChartFilter: FC<ChartFilterProps> = () => {
-  const [filter, setChartFilter] = useAtom(enrichedChartFilterSate);
+  const [filter, setChartFilter] = useAtom(filterPrecursorAtom);
 
   const onSelectTag = (tag: TagWithId) =>
     setChartFilter((state) => handleSelectTag(state, tag));
@@ -46,9 +46,9 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
   const onSelectCategory = (category: string) =>
     setChartFilter((state) => handleSelectCategory(state, { name: category }));
 
-  const resetFilter = () => setChartFilter(resetFilterFull());
+  const resetFilter = () => setChartFilter(getDefaultFilter());
 
-  const appliedFiltersCount = countLeaves(filter.filter);
+  const appliedFiltersCount = countLeaves(filter.settings);
 
   return (
     <div className="flex flex-col">
@@ -80,13 +80,13 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             <StatelessTagPicker
               modal={false}
               onSelectTag={onSelectTag}
-              selectedTags={filter.data.tags}
+              selectedTags={filter.data.tags ?? []}
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
                 setChartFilter((state) => changeTagFilterMode(state, value));
               }}
-              defaultValue={filter.filter.tags?.label?.mode}
+              defaultValue={filter.settings.tags?.label?.mode}
               className="flex flex-col space-y-1"
             >
               <TooltipProvider delayDuration={350}>
@@ -121,7 +121,9 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
           <div className="flex flex-col gap-1">
             <SheetDescription>Filter by categories</SheetDescription>
             <MultipleCategoryPicker
-              selectedCategories={filter.data.categories.map((c) => c.name)}
+              selectedCategories={
+                filter.data.categories?.map((c) => c.name) ?? []
+              }
               onSelectCategory={onSelectCategory}
             />
             <RadioGroup
@@ -130,7 +132,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
                   changeCategoryFilterMode(state, value)
                 );
               }}
-              defaultValue={filter.filter.categories?.name?.mode}
+              defaultValue={filter.settings.categories?.name?.mode}
               className="flex flex-col space-y-1"
             >
               <TooltipProvider delayDuration={350}>

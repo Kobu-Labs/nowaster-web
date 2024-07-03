@@ -1,9 +1,9 @@
 "use client";
 
 import { FC, useState } from "react";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { tagColors } from "@/state/tags";
 import {
-  ScheduledSessionRequest,
   TagWithId,
 } from "@kobu-labs/nowaster-js-typing";
 import { useQuery } from "@tanstack/react-query";
@@ -93,19 +93,18 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
 export default function Page() {
   const [selectedTag, setSelectedTag] = useState<TagWithId | undefined>();
 
-  let filter: ScheduledSessionRequest["readMany"] = {};
-
-  // TODO check what happends when `some` is initialized as [undefined]
-  if (selectedTag?.label) {
-    filter = {
+  const filter: SessionFilterPrecursor = {
+    settings: {
       tags: {
         label: {
-          value: [selectedTag.label],
           mode: "some",
         },
       },
-    };
-  }
+    },
+    data: {
+      tags: selectedTag ? [selectedTag] : [],
+    },
+  };
 
   const test = useQuery({
     ...queryKeys.tags.all,
