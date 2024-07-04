@@ -16,6 +16,8 @@ import {
 import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import { prefixBasedMatch } from "@/lib/searching";
+import { formatTime, showSelectedTagsFirst } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -205,9 +207,16 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
+                      tagMatchStrategy={(tag, term) =>
+                        prefixBasedMatch(tag.label, term, {
+                          caseInsensitive: true,
+                        })
+                      }
+                      tagsDisplayStrategy={showSelectedTagsFirst}
                       onSelectedTagsChanged={(tags) => {
                         field.onChange(tags);
-                      } }                    />
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
