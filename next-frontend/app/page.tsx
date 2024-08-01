@@ -52,7 +52,7 @@ export default function IndexPage() {
       </div>
       <div className="mt-8 grid grow gap-8 md:grid-cols-2 lg:grid-cols-7">
         <FilteredSessionAreaChart
-          initialGranularity="perDayInMonth"
+          initialGranularity="days-in-month"
           className="col-span-full"
         />
       </div>

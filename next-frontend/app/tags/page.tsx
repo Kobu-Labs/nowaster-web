@@ -144,7 +144,7 @@ export default function Page() {
               <SessionCountCard filter={filter} />
               <FilteredSessionAreaChart
                 filter={filter}
-                initialGranularity={"perDayInWeek"}
+                initialGranularity="days-in-month"
                 className="col-span-full h-[350px]"
               />
               <div className="col-span-full">
