@@ -85,7 +85,7 @@ export default function Page(props: { params: { detail: string } }) {
         <SessionAverageDurationProvider filter={filter} />
         <TagsToSessionPieChart filter={filter} />
         <FilteredSessionAreaChart
-          initialGranularity="perDayInMonth"
+          initialGranularity="days-in-month"
           filter={filter}
           className="col-span-full h-[350px]"
         />

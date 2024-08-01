@@ -27,7 +27,7 @@ export const Weekly: Story = {
   },
   args: {
     groupingOpts: {
-      granularity: "perDayInWeek",
+      granularity: "days-in-month",
       allKeys: true,
       sessionKey: (session) => session.tags.map((tag) => tag.label),
     },
@@ -91,7 +91,7 @@ export const Monthly: Story = {
     );
   },
   args: {
-    groupingOpts: { granularity: "perDayInMonth" },
+    groupingOpts: { granularity: "days-in-month" },
     data: [
       {
         tags: createMockTags(["school", "pb138", "pb138/project", "focus", "testing"]),
