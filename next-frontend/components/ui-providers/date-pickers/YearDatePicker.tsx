@@ -17,7 +17,7 @@ import {
 } from "@/components/shadcn/popover";
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
-import { type FC } from "react";
+import { useMemo, type FC } from "react";
 import { sk } from "date-fns/locale";
 
 type YearDatePickerProps = {
@@ -46,6 +46,11 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
     }
   }, []);
 
+  const years = useMemo(() => Array.from(
+    { length: 12 },
+    (_, i) => new Date().getFullYear() - 5 + i,
+  ), []);
+
   const handlePreviousYear = () => {
     handleSelect(subYears(date, 1));
   };
@@ -58,11 +63,6 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
     handleSelect(new Date(year, 0));
   };
 
-  const years = Array.from(
-    { length: 12 },
-    (_, i) => date.getFullYear() - 5 + i,
-  );
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -73,7 +73,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
             !date && "text-muted-foreground",
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 size-4" />
           {date ? (
             format(date, "yyyy", { locale: sk })
           ) : (
@@ -84,13 +84,13 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex items-center justify-between p-2">
           <Button variant="outline" size="icon" onClick={handlePreviousYear}>
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="size-4" />
           </Button>
           <div className="font-semibold">
             {format(date, "yyyy", { locale: sk })}
           </div>
           <Button variant="outline" size="icon" onClick={handleNextYear}>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="size-4" />
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2 p-2">
