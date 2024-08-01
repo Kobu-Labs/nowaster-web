@@ -1,3 +1,4 @@
+import { Granularity } from "@/components/visualizers/charts/GranularitySelect";
 import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
 import {
   addDays,
@@ -13,12 +14,6 @@ import {
   startOfYear,
 } from "date-fns";
 
-export const Granularity = {
-  perDayInWeek: "Per Day In Week",
-  perDayInMonth: "Per Day In Month",
-  perMonth: "Monthly",
-} as const;
-
 export type CategoryPerGranularity = { [category: string]: string } & {
   granularity: string
 }
@@ -33,29 +28,29 @@ export type GroupingOptions = Partial<{
   sessionKey: (
     session: ScheduledSession
   ) => string | number | string[] | number[]
-}> & { granularity: keyof typeof Granularity }
+}> & { granularity: Granularity }
 
 export const dateProcessors: {
-  [K in keyof typeof Granularity]: {
+  [K in Granularity]: {
     amount: number
     start: (asOf?: Date | undefined) => Date
     end: (asOf?: Date | undefined) => Date
     next: (value: Date) => Date
   }
 } = {
-  perDayInWeek: {
+  "days-in-week": {
     start: (asOf) => startOfISOWeek(asOf || Date.now()),
     next: (value) => addDays(value, 1),
     end: (asOf) => endOfISOWeek(asOf || Date.now()),
     amount: 7,
   },
-  perDayInMonth: {
+  "days-in-month": {
     start: (asOf) => startOfMonth(asOf || Date.now()),
     next: (value) => addDays(value, 1),
     end: (asOf) => endOfMonth(asOf || Date.now()),
     amount: getDaysInMonth(Date.now()),
   },
-  perMonth: {
+  "months-in-year": {
     start: (asOf) => startOfYear(asOf || Date.now()),
     next: (value) => addMonths(value, 1),
     end: (asOf) => endOfYear(asOf || Date.now()),
@@ -67,17 +62,17 @@ export const dateProcessors: {
  * Calculates granularity key from given session
  */
 export const granularizers: {
-  [K in keyof typeof Granularity]: {
+  [K in Granularity]: {
     key: (value: Date) => string
   }
 } = {
-  perDayInWeek: {
+  "days-in-week": {
     key: (value: Date) => format(value, "eee"),
   },
-  perDayInMonth: {
+  "days-in-month": {
     key: (value: Date) => value.getDate().toString(),
   },
-  perMonth: {
+  "months-in-year": {
     key: (value: Date) => format(value, "LLL"),
   },
 } as const;
@@ -86,14 +81,14 @@ export const granularizers: {
  * Specifies all available keys for every type of granularity
  */
 export const allKeys: {
-  [K in keyof typeof Granularity]: (data: ScheduledSession[]) => string[]
+  [K in Granularity]: (data: ScheduledSession[]) => string[]
 } = {
-  perDayInWeek: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  perDayInMonth: (data) => {
+  "days-in-week": () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  "days-in-month": (data) => {
     const days = getDaysInMonth(data.at(0)?.endTime ?? new Date());
     return Array.from({ length: days }, (_, i) => (i + 1).toString());
   },
-  perMonth: () => [
+  "months-in-year": () => [
     "Jan",
     "Feb",
     "Mar",
