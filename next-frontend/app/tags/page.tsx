@@ -76,7 +76,7 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
         All Categories:
         {categories.data.value.map((cat) => (
           <div className="flex gap-1">
-            <Button size="nosize" variant="outline">
+            <Button  variant="outline">
               <Plus />
             </Button>
             <CategoryLabel label={cat.name} key={cat.name} />
