@@ -18,7 +18,6 @@ import {
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
 import { useState, type FC } from "react";
-import { sk } from "date-fns/locale";
 
 type YearDatePickerProps = {
   onSelected?: (date: DeepRequired<DateRange>) => void;
@@ -93,9 +92,9 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
         >
           <CalendarIcon className="mr-2 size-4" />
           {date ? (
-            format(date, "yyyy", { locale: sk })
+            format(date, "yyyy")
           ) : (
-            <span>Vyberte rok</span>
+            <span>Pick a year</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -105,7 +104,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
             <ChevronLeft className="size-4" />
           </Button>
           <div className="font-semibold">
-            {format(date, "yyyy", { locale: sk })}
+            {format(date, "yyyy")}
           </div>
           <Button variant="outline" size="icon" onClick={handleNextYear}>
             <ChevronRight className="size-4" />

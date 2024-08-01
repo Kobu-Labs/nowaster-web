@@ -23,7 +23,6 @@ import {
 } from "@/components/shadcn/popover";
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
-import { sk } from "date-fns/locale";
 
 type MonthDatePickerProps = {
   onSelected?: (date: DeepRequired<DateRange>) => void;
@@ -82,9 +81,9 @@ export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
         >
           <CalendarIcon className="mr-2 size-4" />
           {date ? (
-            format(date, "MMMM yyyy", { locale: sk })
+            format(date, "MMMM yyyy")
           ) : (
-            <span>Vyberte mesiac</span>
+            <span>Pick a month</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -94,7 +93,7 @@ export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
             <ChevronLeft className="size-4" />
           </Button>
           <div className="font-semibold">
-            {format(date, "yyyy", { locale: sk })}
+            {format(date, "yyyy")}
           </div>
           <Button variant="outline" size="icon" onClick={handleNextMonth}>
             <ChevronRight className="size-4" />
@@ -108,7 +107,7 @@ export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
               className="text-sm"
               onClick={() => handleMonthSelect(i)}
             >
-              {format(new Date(date.getFullYear(), i), "MMM", { locale: sk })}
+              {format(new Date(date.getFullYear(), i), "MMM")}
             </Button>
           ))}
         </div>

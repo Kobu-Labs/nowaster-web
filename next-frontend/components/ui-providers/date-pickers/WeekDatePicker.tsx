@@ -14,7 +14,6 @@ import { Calendar } from "@/components/shadcn/calendar";
 import * as React from "react";
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
-import { sk } from "date-fns/locale";
 
 type MonthDatePickerProps = {
   onSelected?: (date: DeepRequired<DateRange>) => void;
@@ -57,10 +56,10 @@ export const WeekDatePicker: FC<MonthDatePickerProps> = (props) => {
               !date && "text-muted-foreground",
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {format(range.from, "PPP", { locale: sk }) +
+            <CalendarIcon className="mr-2 size-4" />
+            {format(range.from, "PPP") +
               " - " +
-              format(range.to, "PPP", { locale: sk })}
+              format(range.to, "PPP")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
