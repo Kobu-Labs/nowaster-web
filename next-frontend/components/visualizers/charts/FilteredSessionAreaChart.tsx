@@ -1,4 +1,5 @@
 import { FC, HTMLAttributes, useState } from "react";
+import { Granularity, GranularitySelect } from "@/components/visualizers/charts/GranularitySelect";
 import {
   SessionFilterPrecursor,
   filterPrecursorAtom,
@@ -7,25 +8,17 @@ import {
 } from "@/state/chart-filter";
 import { Provider, useAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import { ArrowRight } from "lucide-react";
 
-import { Granularity } from "@/lib/session-grouping";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
-import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { ChartFilter } from "@/components/visualizers/charts/ChartFilter";
 import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
+import { GranularityBasedDatePicker } from "@/components/ui-providers/date-pickers/GranularityBasedDatePicker";
+import { DeepRequired } from "react-hook-form";
+import { DateRange } from "react-day-picker";
 
 type FilteredSessionAreaChartProps = {
-  initialGranularity: keyof typeof Granularity;
+  initialGranularity: Granularity;
   filter?: SessionFilterPrecursor;
 } & HTMLAttributes<HTMLDivElement>;
 
@@ -42,7 +35,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
 const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   props
 ) => {
-  const [granularity, setGranularity] = useState<keyof typeof Granularity>(
+  const [granularity, setGranularity] = useState<Granularity>(
     props.initialGranularity
   );
 
@@ -52,51 +45,23 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
 
   const [filterPrecursor, setChartFilter] = useAtom(filterPrecursorAtom);
 
-  const updateFromDate = (date: Date | undefined) => {
+  const updateFilter = (range: DeepRequired<DateRange>) => {
     setChartFilter((oldState) =>
-      overwriteData(oldState, { endTimeFrom: date })
+      overwriteData(oldState, { endTimeFrom: range.from, endTimeTo: range.to })
     );
-  };
 
-  const updateToDate = (date: Date | undefined) => {
-    setChartFilter((oldState) => overwriteData(oldState, { endTimeTo: date }));
   };
 
   return (
     <Card className={cn("flex grow flex-col", props.className)}>
       <CardHeader className="flex flex-row items-center gap-2">
-        <Select
-          onValueChange={(val: keyof typeof Granularity) => setGranularity(val)}
-        >
-          <SelectTrigger className="w-fit">
-            <SelectValue placeholder={Granularity[granularity]} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup defaultChecked>
-              {Object.entries(Granularity).map(([key, val]) => (
-                <SelectItem
-                  key={key}
-                  disabled={key === granularity}
-                  value={key}
-                >
-                  {val}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <GranularitySelect onSelect={setGranularity} defaultValue={granularity} />
         <div className="grow"></div>
         <div className="flex items-center gap-2">
-          <DateTimePicker
-            label="From"
-            selected={filterPrecursor.data.endTimeFrom}
-            onSelect={updateFromDate}
-          />
-          <ArrowRight />
-          <DateTimePicker
-            label="To"
-            selected={filterPrecursor.data.endTimeTo}
-            onSelect={updateToDate}
+          <GranularityBasedDatePicker granularity={granularity} props={{
+            onSelected: updateFilter,
+            initialDate: filterPrecursor.data.endTimeTo
+          }}
           />
         </div>
         <ChartFilter />
