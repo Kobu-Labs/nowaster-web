@@ -17,7 +17,7 @@ import {
 } from "@/components/shadcn/popover";
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
-import { useMemo, type FC } from "react";
+import { useState, type FC } from "react";
 import { sk } from "date-fns/locale";
 
 type YearDatePickerProps = {
@@ -46,17 +46,35 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
     }
   }, []);
 
-  const years = useMemo(() => Array.from(
+  const [years, setYears] = useState(() => Array.from(
     { length: 12 },
     (_, i) => new Date().getFullYear() - 5 + i,
-  ), []);
+  ),);
 
   const handlePreviousYear = () => {
-    handleSelect(subYears(date, 1));
+    const newYear = subYears(date, 1);
+    const minYear = years.reduce((latest, current) => current < latest ? current : latest);
+    if (newYear.getFullYear() < minYear) {
+      setYears(() => Array.from(
+        { length: 12 },
+        (_, i) => newYear.getFullYear() - (11 - i)
+      ));
+
+    }
+    handleSelect(newYear);
   };
 
   const handleNextYear = () => {
-    handleSelect(addYears(date, 1));
+    const newYear = addYears(date, 1);
+    const maxYear = years.reduce((latest, current) => current > latest ? current : latest);
+    if (newYear.getFullYear() > maxYear) {
+      setYears(() => Array.from(
+        { length: 12 },
+        (_, i) => newYear.getFullYear() + i
+      ));
+
+    }
+    handleSelect(newYear);
   };
 
   const handleYearSelect = (year: number) => {
