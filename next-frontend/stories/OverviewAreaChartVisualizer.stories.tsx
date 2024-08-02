@@ -149,7 +149,7 @@ export const Yearly: Story = {
   },
   args: {
     groupingOpts: {
-      granularity: "perMonth",
+      granularity: "days-in-month",
     },
     data: [
       {
