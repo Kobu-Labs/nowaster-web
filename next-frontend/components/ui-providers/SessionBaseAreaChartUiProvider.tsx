@@ -43,6 +43,16 @@ export const SessionBaseAreaChartUiProvider: FC<
   if (Object.entries(unsetCategoryColors).length !== 0) {
     setColors({ ...colors, ...unsetCategoryColors });
   }
+  console.log(props.data);
+
+  if (props.data.length === 0) {
+    return (
+      <div className="flex size-full items-center justify-center">
+        <span>No results</span>
+      </div>
+    );
+
+  }
 
   return (
     <ResponsiveContainer>
