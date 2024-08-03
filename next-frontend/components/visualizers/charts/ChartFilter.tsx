@@ -33,7 +33,8 @@ import {
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { StatelessTagPicker } from "@/components/visualizers/tags/TagPicker";
 
-type ChartFilterProps = {};
+// TODO: empty props right now
+type ChartFilterProps = Record<string, never>;
 
 // TODO: currently the most disgusting component in the codebase
 // refactor it using Forms probably

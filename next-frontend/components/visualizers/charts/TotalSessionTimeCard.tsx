@@ -29,7 +29,7 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
   return (
     <KpiCardUiProvider
       variant={"big_value"}
-      value={formatTime(result || 0)}
+      value={formatTime(result ?? 0)}
       title={"Total time"}
     />
   );

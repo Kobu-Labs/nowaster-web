@@ -11,10 +11,10 @@ import {
 //TODO: extract the "selectedTags" to seprarat component
 
 type SimpleTagPickerProps = {
-  onSelectedTagsChanged: (newTags: TagWithId[]) => void;
+    onSelectedTagsChanged: (newTags: TagWithId[]) => void;
 } & Omit<
-  TagPickerUiProviderProps,
-  "availableTags" | "selectedTags" | "onSelectTag"
+    TagPickerUiProviderProps,
+    "availableTags" | "selectedTags" | "onSelectTag"
 >;
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
@@ -62,9 +62,9 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   );
 };
 
-type StatelessTagPickerProps = {} & Omit<
-  TagPickerUiProviderProps,
-  "availableTags"
+type StatelessTagPickerProps = Omit<
+    TagPickerUiProviderProps,
+    "availableTags"
 >;
 
 export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {

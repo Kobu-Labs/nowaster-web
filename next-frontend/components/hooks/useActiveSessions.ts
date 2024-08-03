@@ -12,5 +12,5 @@ export const useActiveSession = (): ScheduledSessionWithId[] => {
     },
   });
 
-  return result || [];
+  return result ?? [];
 };

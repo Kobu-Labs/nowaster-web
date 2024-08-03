@@ -55,14 +55,14 @@ export const showSelectedTagsFirst = (
 };
 
 export function countLeaves(obj: any): number {
-  const isObject = (val: any) => val && typeof val === "object";
+  const isObject = (val: any): val is object => typeof val === "object";
 
   const isTruthy = (val: any) => {
     if (Array.isArray(val) && val.length === 0) return false;
     return Boolean(val);
   };
 
-  const countValues = (obj: any): number => {
+  const countValues = (obj: unknown): number => {
     if (!isObject(obj)) {
       return 0;
     }

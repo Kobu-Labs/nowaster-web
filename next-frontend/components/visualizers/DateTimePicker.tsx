@@ -31,9 +31,9 @@ type DatePickerDemoProps = {
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const { value } = e.target;
-    const datetime = DateTime.fromJSDate(props.selected || new Date());
-    const hours = Number.parseInt(value.split(":")[0] || "00", 10);
-    const minutes = Number.parseInt(value.split(":")[1] || "00", 10);
+    const datetime = DateTime.fromJSDate(props.selected ?? new Date());
+    const hours = Number.parseInt(value.split(":")[0] ?? "00", 10);
+    const minutes = Number.parseInt(value.split(":")[1] ?? "00", 10);
     const modifiedDay = datetime.set({ hour: hours, minute: minutes });
     props.onSelect(modifiedDay.toJSDate());
   };
@@ -52,7 +52,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
         <PopoverTrigger
           onWheel={(e) =>
             props.onSelect(
-              addMinutes(props.selected || new Date(), e.deltaY > 0 ? -1 : 1)
+              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1)
             )
           }
           asChild
@@ -96,7 +96,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
             variant={"secondary"}
             type="button"
             onClick={() =>
-              props.onSelect(val.increment(props.selected || new Date()))
+              props.onSelect(val.increment(props.selected ?? new Date()))
             }
           >
             {val.label}
