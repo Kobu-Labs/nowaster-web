@@ -20,5 +20,5 @@ export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
     },
   });
 
-  return <DataTable columns={props.columns} data={data || []} />;
+  return <DataTable columns={props.columns} data={data ?? []} />;
 };

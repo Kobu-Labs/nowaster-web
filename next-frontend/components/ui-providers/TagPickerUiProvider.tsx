@@ -52,12 +52,12 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   >({
     mutationFn: async (params) => await TagApi.create(params),
     retry: false,
-    onSuccess: (tagResult) => {
+    onSuccess: async (tagResult) => {
       if (tagResult.isErr) {
         return;
       }
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
       props.onSelectTag(tagResult.value);
     },
   });

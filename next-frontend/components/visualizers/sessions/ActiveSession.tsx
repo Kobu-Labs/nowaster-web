@@ -6,5 +6,5 @@ import { ActiveSessionUiProvider } from "@/components/ui-providers/ActiveSession
 export const ActiveSession: FC = () => {
   const sessions = useActiveSession();
 
-  return <ActiveSessionUiProvider session={sessions.at(0) || null} />;
+  return <ActiveSessionUiProvider session={sessions.at(0) ?? null} />;
 };

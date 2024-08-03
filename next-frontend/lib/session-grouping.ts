@@ -15,7 +15,7 @@ import {
 } from "date-fns";
 
 export type CategoryPerGranularity = { [category: string]: string } & {
-  granularity: string
+    granularity: string
 }
 
 /**
@@ -24,36 +24,36 @@ export type CategoryPerGranularity = { [category: string]: string } & {
  * @type granularity
  */
 export type GroupingOptions = Partial<{
-  allKeys: boolean
-  sessionKey: (
-    session: ScheduledSession
-  ) => string | number | string[] | number[]
+    allKeys: boolean
+    sessionKey: (
+        session: ScheduledSession
+    ) => string | number | string[] | number[]
 }> & { granularity: Granularity }
 
 export const dateProcessors: {
-  [K in Granularity]: {
-    amount: number
-    start: (asOf?: Date | undefined) => Date
-    end: (asOf?: Date | undefined) => Date
-    next: (value: Date) => Date
-  }
+    [K in Granularity]: {
+        amount: number
+        start: (asOf?: Date | undefined) => Date
+        end: (asOf?: Date | undefined) => Date
+        next: (value: Date) => Date
+    }
 } = {
   "days-in-week": {
-    start: (asOf) => startOfISOWeek(asOf || Date.now()),
+    start: (asOf) => startOfISOWeek(asOf ?? Date.now()),
     next: (value) => addDays(value, 1),
-    end: (asOf) => endOfISOWeek(asOf || Date.now()),
+    end: (asOf) => endOfISOWeek(asOf ?? Date.now()),
     amount: 7,
   },
   "days-in-month": {
-    start: (asOf) => startOfMonth(asOf || Date.now()),
+    start: (asOf) => startOfMonth(asOf ?? Date.now()),
     next: (value) => addDays(value, 1),
-    end: (asOf) => endOfMonth(asOf || Date.now()),
+    end: (asOf) => endOfMonth(asOf ?? Date.now()),
     amount: getDaysInMonth(Date.now()),
   },
   "months-in-year": {
-    start: (asOf) => startOfYear(asOf || Date.now()),
+    start: (asOf) => startOfYear(asOf ?? Date.now()),
     next: (value) => addMonths(value, 1),
-    end: (asOf) => endOfYear(asOf || Date.now()),
+    end: (asOf) => endOfYear(asOf ?? Date.now()),
     amount: 12,
   },
 } as const;
@@ -62,9 +62,9 @@ export const dateProcessors: {
  * Calculates granularity key from given session
  */
 export const granularizers: {
-  [K in Granularity]: {
-    key: (value: Date) => string
-  }
+    [K in Granularity]: {
+        key: (value: Date) => string
+    }
 } = {
   "days-in-week": {
     key: (value: Date) => format(value, "eee"),
@@ -81,7 +81,7 @@ export const granularizers: {
  * Specifies all available keys for every type of granularity
  */
 export const allKeys: {
-  [K in Granularity]: (data: ScheduledSession[]) => string[]
+    [K in Granularity]: (data: ScheduledSession[]) => string[]
 } = {
   "days-in-week": () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   "days-in-month": (data) => {
@@ -113,11 +113,11 @@ const addGroupEntry = (
   if (!result[granularityKey]) {
     result[granularityKey] = {};
   }
-  if (!result[granularityKey]![sessionKey]) {
-    result[granularityKey]![sessionKey] = 0;
+  if (!result[granularityKey][sessionKey]) {
+    result[granularityKey][sessionKey] = 0;
   }
 
-  result[granularityKey]![sessionKey] += differenceInMinutes(
+  result[granularityKey][sessionKey] += differenceInMinutes(
     item.endTime,
     item.startTime
   );
@@ -132,18 +132,18 @@ export const groupSessions = (
   data: ScheduledSession[],
   opts: GroupingOptions
 ): {
-  groupedSessions: CategoryPerGranularity[]
-  uniqueCategories: (string | number)[]
+    groupedSessions: CategoryPerGranularity[]
+    uniqueCategories: (string | number)[]
 } => {
-  const accumulator: { [tick: string]: {} } = {};
+  const accumulator: { [tick: string]: Record<string, number> } = {};
   if (opts.allKeys) {
     allKeys[opts.granularity](data).forEach((tick) => (accumulator[tick] = {}));
   }
 
   const sessionKeyGetter =
-    opts.sessionKey ?? ((session) => session.category.name);
+        opts.sessionKey ?? ((session) => session.category.name);
   const granulizers = granularizers[opts.granularity];
-  const uniques: Set<string | number> = new Set();
+  const uniques = new Set<string | number>();
 
   const groupedData = data.reduce(
     (

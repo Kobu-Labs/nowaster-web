@@ -31,7 +31,7 @@ import { BaseSessionTable } from "@/components/visualizers/sessions/session-tabl
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type TagColorPickerProps = {
-  tag: string;
+    tag: string;
 };
 
 const TagColorPicker: FC<TagColorPickerProps> = (props) => {
@@ -41,8 +41,7 @@ const TagColorPicker: FC<TagColorPickerProps> = (props) => {
   const currentCategoryColors = colors[props.tag] ?? randomColor();
 
   const setColorsGlobState = (value: string) => {
-    const { [props.tag]: currentCategory, ...rest } = colors;
-    setColors({ ...rest, [props.tag]: value });
+    setColors({ ...colors, [props.tag]: value });
   };
 
   return (
@@ -59,7 +58,7 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
   const categories = useQuery({
     ...queryKeys.categories.all,
   });
-  if (!categories || !categories.data) {
+  if (!categories?.data) {
     return <div></div>;
   }
   if (!categories.data.isOk) {
@@ -70,13 +69,13 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
     <div>
       <TagColorPicker tag={props.tag.label} />
       <div>
-        Allowed Categories:
+                Allowed Categories:
       </div>
       <div>
-        All Categories:
+                All Categories:
         {categories.data.value.map((cat) => (
-          <div className="flex gap-1">
-            <Button  variant="outline">
+          <div className="flex gap-1" key={cat.name}>
+            <Button variant="outline">
               <Plus />
             </Button>
             <CategoryLabel label={cat.name} key={cat.name} />
@@ -107,7 +106,7 @@ export default function Page() {
     ...queryKeys.tags.all,
   });
 
-  if (!test || !test.data) {
+  if (!test?.data) {
     return <div></div>;
   }
 

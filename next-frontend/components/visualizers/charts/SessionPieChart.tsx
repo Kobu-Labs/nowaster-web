@@ -56,5 +56,5 @@ export const SessionPieChart = (props: SessionPieChart) => {
     refetchOnReconnect: false,
   });
 
-  return <SessionPieChartUiProvider data={result || []} />;
+  return <SessionPieChartUiProvider data={result ?? []} />;
 };

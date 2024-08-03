@@ -30,7 +30,7 @@ export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
 
   return (
     <SessionBaseAreaChartUiProvider
-      data={result?.data || []}
+      data={result?.data ?? []}
       groupingOpts={props.groupingOpts}
     />
   );

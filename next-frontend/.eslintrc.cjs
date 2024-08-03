@@ -25,6 +25,7 @@ const config = {
         ],
         "react-hooks/exhaustive-deps": "off",
         "@typescript-eslint/unbound-method": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/array-type": "off",
         "@typescript-eslint/consistent-type-definitions": "off",

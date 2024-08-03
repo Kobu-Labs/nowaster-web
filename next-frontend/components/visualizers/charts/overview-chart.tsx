@@ -78,7 +78,7 @@ const preprocessData = (
   data: (ScheduledSession & { id: string })[]
 ): { granularity: string; val: number }[] => {
   const processor = dateProcessors[granularity];
-  let processed = data.reduce((value: { [month: string]: number }, item) => {
+  const processed = data.reduce((value: { [month: string]: number }, item) => {
     const key = processor.key(item.endTime);
     if (!value[key]) {
       value[key] = 0;
