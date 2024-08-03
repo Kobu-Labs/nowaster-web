@@ -33,7 +33,7 @@ export const SessionAverageDurationProvider = (
   return (
     <KpiCardUiProvider
       variant={"big_value"}
-      value={formatTime(sessions || 0)}
+      value={formatTime(sessions ?? 0)}
       title={"Average session duration"}
     >
       <Hourglass />

@@ -22,7 +22,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   const { mutate: deleteSession } = useMutation({
     mutationFn: async () =>
       await ScheduledSessionApi.deleteSingle({ id: props.sessionId }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.isErr) {
         toast({
           title: "Session deletion failed",
@@ -34,7 +34,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
           title: "Session deleted succesfully",
           variant: "default",
         });
-        queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
       }
     },
   });
@@ -64,7 +64,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       return (
         <div className="flex">
           {tags.map((tag) => (
-            <TagBadge value={tag.label} />
+            <TagBadge value={tag.label} key={tag.id}/>
           ))}
         </div>
       );

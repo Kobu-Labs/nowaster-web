@@ -24,7 +24,7 @@ import { BaseSessionTableColumns } from "@/components/visualizers/sessions/sessi
 import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
 
 type CategoryColorPickerProps = {
-  category: string;
+    category: string;
 };
 
 const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
@@ -34,8 +34,7 @@ const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
   const currentCategoryColors = colors[props.category] ?? randomColor();
 
   const setColorsGlobState = (value: string) => {
-    const { [props.category]: currentCategory, ...rest } = colors;
-    setColors({ ...rest, [props.category]: value });
+    setColors({ ...colors, [props.category]: value });
   };
 
   return (
@@ -67,7 +66,7 @@ export default function Page(props: { params: { detail: string } }) {
     <div className="grow">
       <div className="mt-8 pl-8 ">
         <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
-          Details page for
+                    Details page for
           <CategoryLabel label={categoryName} />
           <Popover>
             <PopoverTrigger asChild className="cursor-pointer">

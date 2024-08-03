@@ -1,3 +1,6 @@
+// INFO: this is due to the untyped nature of recharts
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
 import { FC, useState } from "react";

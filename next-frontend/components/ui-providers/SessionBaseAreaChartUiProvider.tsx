@@ -1,3 +1,5 @@
+// INFO: disabled due to recharts
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
 import { FC } from "react";
@@ -18,12 +20,12 @@ import { formatTime, randomColor } from "@/lib/utils";
 import { Card } from "@/components/shadcn/card";
 
 type SessionBaseAreaChartUiProviderProps = {
-  data: ScheduledSession[]
-  groupingOpts: GroupingOptions
+    data: ScheduledSession[]
+    groupingOpts: GroupingOptions
 }
 
 export const SessionBaseAreaChartUiProvider: FC<
-  SessionBaseAreaChartUiProviderProps
+    SessionBaseAreaChartUiProviderProps
 > = (props) => {
   const { groupedSessions, uniqueCategories } = groupSessions(
     props.data,
@@ -46,7 +48,7 @@ export const SessionBaseAreaChartUiProvider: FC<
     <ResponsiveContainer>
       <AreaChart data={groupedSessions}>
         <XAxis includeHidden dataKey="granularity" />
-        <YAxis tickFormatter={(x) => formatTime(x)} />
+        <YAxis tickFormatter={(x: number) => formatTime(x)} />
         <Tooltip content={(data) => customTooltip(data, colors)} />
         {uniqueCategories.map((category) => {
           return (
@@ -55,7 +57,7 @@ export const SessionBaseAreaChartUiProvider: FC<
               fill={colors[category]}
               type="monotone"
               stackId="1"
-              dataKey={(v) => v[category] || 0}
+              dataKey={(v: Record<string, number>) => v[category] ?? 0}
               stroke={colors[category]}
               strokeWidth={4}
               fillOpacity={0.4}
@@ -92,7 +94,7 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
             <p
               key={category + "category"}
               style={
-                { "--legend-color": colors[category] } as React.CSSProperties
+                                { "--legend-color": colors[category] } as React.CSSProperties
               }
               className={"text-[var(--legend-color)]"}
             >
@@ -101,7 +103,7 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
             <p
               key={category + "time"}
               style={
-                { "--legend-color": colors[category] } as React.CSSProperties
+                                { "--legend-color": colors[category] } as React.CSSProperties
               }
               className={"text-[var(--legend-color)]"}
             >

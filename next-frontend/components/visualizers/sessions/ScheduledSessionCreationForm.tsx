@@ -76,7 +76,7 @@ export const ScheduledSessionCreationForm: FC = () => {
 
   async function onSubmit(values: ScheduledSessionRequest["create"]) {
     const result = await ScheduledSessionApi.create(values);
-    queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
     toast(
       result.isErr
         ? {
@@ -132,7 +132,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormControl>
                     <Input
                       placeholder="Insert your description"
-                      value={field.value || ""}
+                      value={field.value ?? ""}
                       onChange={field.onChange}
                     />
                   </FormControl>

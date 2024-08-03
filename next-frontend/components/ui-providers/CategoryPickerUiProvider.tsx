@@ -50,12 +50,12 @@ export const MultipleCategoryPickerUiProvider: FC<
   >({
     mutationFn: async (params) => await CategoryApi.create(params),
     retry: false,
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.isErr) {
         return;
       }
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
       props.onSelectCategory(result.value.name);
     },
   });
@@ -195,12 +195,12 @@ export const SingleCategoryPickerUiProvider: FC<
   >({
     mutationFn: async (params) => await CategoryApi.create(params),
     retry: false,
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.isErr) {
         return;
       }
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
       props.onSelectCategory(result.value.name);
     },
   });
