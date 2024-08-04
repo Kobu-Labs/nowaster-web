@@ -4,8 +4,6 @@ import { Result } from "@badrap/result";
 import { CategoryRequest } from "@kobu-labs/nowaster-js-typing";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
-
-import { prefixBasedMatch } from "@/lib/searching";
 import { cn } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Badge } from "@/components/shadcn/badge";
@@ -22,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { ScrollArea } from "@/components/shadcn/scroll-area";
+import FuzzySearch from "fuzzy-search";
 
 export type MultipleCategoryPickerUiProviderProps = {
   availableCategories: string[];
@@ -34,6 +33,12 @@ export type MultipleCategoryPickerUiProviderProps = {
   categoryMatchStrategy?: (category: string, searchTerm: string) => number;
   modal?: boolean;
 };
+
+const fuzzyFindStrategy = (category: string, searchTerm: string): boolean => {
+  const searcher = new FuzzySearch([category], []);
+  const result = searcher.search(searchTerm);
+  return result.length !== 0
+}
 
 export const MultipleCategoryPickerUiProvider: FC<
   MultipleCategoryPickerUiProviderProps
@@ -68,15 +73,10 @@ export const MultipleCategoryPickerUiProvider: FC<
     );
   }
 
-  if (props.categoryMatchStrategy) {
-    categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
-      props.categoryMatchStrategy!(category, searchTerm)
-    );
-  } else {
-    categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
-      prefixBasedMatch(category, searchTerm, { caseInsensitive: true })
-    );
-  }
+  const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
+  categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
+    matchStrategy(category, searchTerm)
+  );
 
   return (
     <Popover
@@ -213,15 +213,10 @@ export const SingleCategoryPickerUiProvider: FC<
     );
   }
 
-  if (props.categoryMatchStrategy) {
-    categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
-      props.categoryMatchStrategy!(category, searchTerm)
-    );
-  } else {
-    categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
-      prefixBasedMatch(category, searchTerm, { caseInsensitive: true })
-    );
-  }
+  const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
+  categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
+    matchStrategy(category, searchTerm)
+  );
 
   return (
     <Popover
