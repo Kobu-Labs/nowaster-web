@@ -17,7 +17,7 @@ import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { prefixBasedMatch } from "@/lib/searching";
-import { showSelectedTagsFirst } from "@/lib/utils";
+import { getFormattedTimeDifference, showSelectedTagsFirst } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -65,6 +65,15 @@ const creationFormQuickOptions: QuickOption[] = [
     increment: (date) => subHours(date, 1),
   },
 ];
+
+const DurationLabel: FC<{ from?: Date, to?: Date }> = (props) => {
+  if (!props.from || !props.to) {
+    return <span>--:--</span>
+  }
+
+  const result = getFormattedTimeDifference(props.from, props.to)
+  return <span>{result}</span>
+}
 
 export const ScheduledSessionCreationForm: FC = () => {
   const { toast } = useToast();
@@ -141,7 +150,7 @@ export const ScheduledSessionCreationForm: FC = () => {
               )}
             />
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
               <FormField
                 name="startTime"
                 control={form.control}
@@ -171,7 +180,10 @@ export const ScheduledSessionCreationForm: FC = () => {
                 )}
               />
 
-              <ArrowBigRight className="m-10" />
+              <div className="flex flex-col items-center justify-center">
+                <DurationLabel from={form.watch("startTime")} to={form.watch("endTime")} />
+                <ArrowBigRight />
+              </div>
 
               <FormField
                 name="endTime"
