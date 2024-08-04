@@ -16,7 +16,6 @@ import {
 import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { prefixBasedMatch } from "@/lib/searching";
 import { getFormattedTimeDifference, showSelectedTagsFirst } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
