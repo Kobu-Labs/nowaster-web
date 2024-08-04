@@ -25,6 +25,7 @@ import {
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import FuzzySearch from "fuzzy-search";
 
 export type TagPickerUiProviderProps = {
   availableTags: TagWithId[];
@@ -37,6 +38,13 @@ export type TagPickerUiProviderProps = {
   tagMatchStrategy?: (tag: TagWithId, searchTerm: string) => boolean;
   modal?: boolean;
 };
+
+
+const fuzzyFindStrategy = (tags: TagWithId, searchTerm: string): boolean => {
+  const searcher = new FuzzySearch([tags.label], []);
+  const result = searcher.search(searchTerm);
+  return result.length !== 0
+}
 
 export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   const queryClient = useQueryClient();
@@ -70,11 +78,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     );
   }
 
-  if (props.tagMatchStrategy) {
-    tagsInDisplayOrder = tagsInDisplayOrder.filter((tag) =>
-      props.tagMatchStrategy!(tag, searchTerm)
-    );
-  }
+  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy
+  tagsInDisplayOrder = tagsInDisplayOrder.filter((tag) => matchStrategy(tag, searchTerm));
 
   return (
     <Popover

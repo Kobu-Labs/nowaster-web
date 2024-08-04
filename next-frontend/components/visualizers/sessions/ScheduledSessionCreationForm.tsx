@@ -219,11 +219,6 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
-                      tagMatchStrategy={(tag, term) =>
-                        prefixBasedMatch(tag.label, term, {
-                          caseInsensitive: true,
-                        })
-                      }
                       tagsDisplayStrategy={showSelectedTagsFirst}
                       onSelectedTagsChanged={(tags) => {
                         field.onChange(tags);
