@@ -1,5 +1,5 @@
 .eslintrc.cjs
-postcss.config.js
+postcss.config.cjs
 tailwind.config.js
 prettier.config.js
 dist/*
