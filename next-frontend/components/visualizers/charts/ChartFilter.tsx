@@ -9,7 +9,7 @@ import {
 } from "@/state/chart-filter";
 import { TagWithId } from "@/api/definitions";
 import { useAtom } from "jotai";
-import { Filter, RotateCcw } from "lucide-react";
+import { CircleHelp, Filter, RotateCcw } from "lucide-react";
 
 import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
@@ -64,7 +64,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             {appliedFiltersCount > 0 && (
               <div
                 className={cn(
-                  "absolute right-[10%] top-[-20%] animate-blink text-shadow-neon-pink group-hover:text-pink-300"
+                  "absolute right-[10%] top-[-20%] animate-blink text-shadow-neon-pink group-hover:text-pink-300",
                 )}
               >
                 {appliedFiltersCount}
@@ -91,32 +91,36 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
               defaultValue={filter.settings.tags?.label?.mode}
               className="flex flex-col space-y-1"
             >
-              <TooltipProvider delayDuration={350}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center  gap-2">
-                      <RadioGroupItem value="all" id="category-exact" />
-                      <Label htmlFor="category-exact">Superset matching</Label>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Filtered sessions will contain all of these tags</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider delayDuration={350}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center  gap-2">
-                      <RadioGroupItem value="some" id="category-some" />
-                      <Label htmlFor="category-some">Subset matching</Label>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Filtered sessions will contain a subset of these tags</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div className="flex items-center  gap-2">
+                <RadioGroupItem value="all" id="category-exact" />
+                <Label htmlFor="category-exact">Superset matching</Label>
+                <TooltipProvider delayDuration={350}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Filtered sessions will contain all of these tags</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="flex items-center  gap-2">
+                <RadioGroupItem value="some" id="category-some" />
+                <Label htmlFor="category-some">Subset matching</Label>
+                <TooltipProvider delayDuration={350}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Filtered sessions will contain a subset of these tags
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </RadioGroup>
           </div>
           <Separator />
@@ -131,40 +135,42 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
                 setChartFilter((state) =>
-                  changeCategoryFilterMode(state, value)
+                  changeCategoryFilterMode(state, value),
                 );
               }}
               defaultValue={filter.settings.categories?.name?.mode}
               className="flex flex-col space-y-1"
             >
-              <TooltipProvider delayDuration={350}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center  gap-2">
-                      <RadioGroupItem value="all" id="category-exact" />
-                      <Label htmlFor="category-exact">Exact match</Label>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Filtered sessions will have exactly this category</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider delayDuration={350}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center  gap-2">
-                      <RadioGroupItem value="some" id="category-some" />
-                      <Label htmlFor="category-some">
-                        &rdquo;One of&rdquo; match
-                      </Label>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Filtered sessions will have one of these categories</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div className="flex items-center  gap-2">
+                <RadioGroupItem value="all" id="category-exact" />
+                <Label htmlFor="category-exact">Exact match</Label>
+                <TooltipProvider delayDuration={350}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Filtered sessions will have exactly this category</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="some" id="category-some" />
+                <Label htmlFor="category-some">
+                  &rdquo;One of&rdquo; match
+                </Label>
+                <TooltipProvider delayDuration={350}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Filtered sessions will have one of these categories</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </RadioGroup>
             <Separator className="my-2" />
           </div>
