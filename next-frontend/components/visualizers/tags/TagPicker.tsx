@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { TagWithId } from "@kobu-labs/nowaster-js-typing";
+import { TagWithId } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";

@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { ScheduledSessionApi } from "@/api";
-import { ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSessionWithId } from "@/api/definitions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { differenceInMinutes, format } from "date-fns";

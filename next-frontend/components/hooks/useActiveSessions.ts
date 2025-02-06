@@ -1,4 +1,4 @@
-import { ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSessionWithId } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";

@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSession } from "@/api/definitions";
 
 import { getFormattedTimeDifference } from "@/lib/utils";
 import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";

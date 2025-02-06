@@ -1,5 +1,5 @@
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { SessionFilter, TagWithId } from "@kobu-labs/nowaster-js-typing";
+import { SessionFilter, TagWithId } from "@/api/definitions";
 import { clsx, type ClassValue } from "clsx";
 import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
