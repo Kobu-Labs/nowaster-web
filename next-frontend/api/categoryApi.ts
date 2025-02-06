@@ -4,9 +4,9 @@ import {
   CategoryRequest,
   CategoryResponse,
   CategoryResponseSchema,
-} from "@kobu-labs/nowaster-js-typing";
+} from "@/api/definitions";
 
-const BASE_URL = "category/";
+const BASE_URL = "/category";
 
 export const getCategories = async (): Promise<
   Result<CategoryResponse["readMany"]>

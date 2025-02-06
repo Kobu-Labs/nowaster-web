@@ -10,7 +10,7 @@ import { ScheduledSessionRequestSchema } from "@kobu-labs/nowaster-js-typing";
 export const ScheduledController = Router();
 const SessionsController = Router();
 
-ScheduledController.use("/sessions", SessionsController);
+ScheduledController.use("/session", SessionsController);
 
 // create new study session
 SessionsController.post(

@@ -2,7 +2,7 @@ import {
   Category,
   ScheduledSessionRequest,
   TagWithId,
-} from "@kobu-labs/nowaster-js-typing";
+} from "@/api/definitions";
 import { atom } from "jotai";
 
 /*

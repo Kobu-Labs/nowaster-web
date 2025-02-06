@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSession } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
 import {
   addDays,

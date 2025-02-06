@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
 import { CategoryApi } from "@/api";
 import { Result } from "@badrap/result";
-import { CategoryRequest } from "@kobu-labs/nowaster-js-typing";
+import { CategoryRequest } from "api/definitions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";

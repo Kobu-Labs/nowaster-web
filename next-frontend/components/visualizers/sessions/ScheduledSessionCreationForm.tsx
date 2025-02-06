@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ScheduledSessionRequest,
   ScheduledSessionRequestSchema,
-} from "@kobu-labs/nowaster-js-typing";
+} from "@/api/definitions";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   addHours,

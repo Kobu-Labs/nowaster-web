@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSession } from "@/api/definitions";
 import { VariantProps, cva } from "class-variance-authority";
 
 import { cn, getFormattedTimeDifference } from "@/lib/utils";

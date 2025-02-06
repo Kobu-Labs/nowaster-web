@@ -1,5 +1,5 @@
 import { Granularity } from "@/components/visualizers/charts/GranularitySelect";
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSession } from "@/api/definitions";
 import {
   addDays,
   addMonths,
