@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { ScheduledSessionWithId } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSessionWithId } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 

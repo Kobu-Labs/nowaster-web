@@ -5,7 +5,7 @@ import {
   TagRequest,
   TagResponse,
   TagWithId,
-} from "@kobu-labs/nowaster-js-typing";
+} from "@/api/definitions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 

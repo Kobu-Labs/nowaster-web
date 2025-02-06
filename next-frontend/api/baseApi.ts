@@ -1,11 +1,11 @@
 import * as process from "process";
 import { Result } from "@badrap/result";
-import { ResponseSchema } from "@kobu-labs/nowaster-js-typing";
+import { ResponseSchema } from "@/api/definitions";
 import axios from "axios";
 import { ZodType } from "zod";
 
 const baseApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:4001",
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3030",
   validateStatus: () => true,
 });
 

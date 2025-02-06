@@ -5,7 +5,7 @@ import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { tagColors } from "@/state/tags";
 import {
   TagWithId,
-} from "@kobu-labs/nowaster-js-typing";
+} from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { HexColorPicker } from "react-colorful";

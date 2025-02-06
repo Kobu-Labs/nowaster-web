@@ -7,7 +7,7 @@ import {
   handleSelectTag,
   getDefaultFilter,
 } from "@/state/chart-filter";
-import { TagWithId } from "@kobu-labs/nowaster-js-typing";
+import { TagWithId } from "@/api/definitions";
 import { useAtom } from "jotai";
 import { Filter, RotateCcw } from "lucide-react";
 

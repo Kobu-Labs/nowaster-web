@@ -3,7 +3,7 @@ import { Result } from "@badrap/result";
 import {
   StatisticsResponse,
   StatisticsResponseSchema,
-} from "@kobu-labs/nowaster-js-typing";
+} from "@/api/definitions";
 
 export const getDashboardData = async (): Promise<
   Result<StatisticsResponse["getDashboardData"]>

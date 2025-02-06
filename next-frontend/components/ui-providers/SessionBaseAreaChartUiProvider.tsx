@@ -4,7 +4,7 @@
 
 import { FC } from "react";
 import { categoryColors } from "@/state/categories";
-import { ScheduledSession } from "@kobu-labs/nowaster-js-typing";
+import { ScheduledSession } from "@/api/definitions";
 import {
   Area,
   AreaChart,
