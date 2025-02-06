@@ -98,7 +98,7 @@ export const allKeys: {
     "Jul",
     "Aug",
     "Sep",
-    "Okt",
+    "Oct",
     "Nov",
     "Dec",
   ],
