@@ -1,11 +1,11 @@
-import * as process from "process";
 import { Result } from "@badrap/result";
 import { ResponseSchema } from "@/api/definitions";
 import axios from "axios";
 import { ZodType } from "zod";
+import { env } from "@/env";
 
 const baseApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3030",
+  baseURL: env.NEXT_PUBLIC_API_URL,
   validateStatus: () => true,
 });
 
