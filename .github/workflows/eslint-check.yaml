@@ -1,5 +1,8 @@
 name: Eslint Formatting Check
 
+env:
+  SKIP_ENV_VALIDATION: true
+
 on:
   push:
   pull_request:

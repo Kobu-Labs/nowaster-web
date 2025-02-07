@@ -1,5 +1,8 @@
 name: Check NextJs build
 
+env:
+  SKIP_ENV_VALIDATION: true
+
 on:
   push:
   pull_request:
