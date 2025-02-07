@@ -37,7 +37,7 @@ export const randomColor = (): string => {
 
 export const showSelectedTagsFirst = (
   selectedTags: TagWithId[],
-  availableTags: TagWithId[]
+  availableTags: TagWithId[],
 ) => {
   return availableTags.sort((tag1, tag2) => {
     if (selectedTags.some((t) => t.id === tag1.id)) {
@@ -78,7 +78,7 @@ export function countLeaves(obj: any): number {
 }
 
 export const translateFilterPrecursor = (
-  precursor?: SessionFilterPrecursor
+  precursor?: SessionFilterPrecursor,
 ): Partial<SessionFilter> => {
   if (!precursor) {
     return {};
@@ -89,18 +89,6 @@ export const translateFilterPrecursor = (
   } = precursor;
 
   const result: SessionFilter = {
-    tags: {
-      label: {
-        mode: tags?.label?.mode ?? "some",
-        value: data.tags?.map((tag) => tag.label) ?? [],
-      },
-    },
-    categories: {
-      name: {
-        mode: categories?.name?.mode ?? "some",
-        value: data.categories?.map((category) => category.name) ?? [],
-      },
-    },
     fromEndTime: {
       value: data.endTimeFrom,
     },
@@ -108,6 +96,22 @@ export const translateFilterPrecursor = (
       value: data.endTimeTo,
     },
   };
+
+  if (data.tags && data.tags?.length > 0) {
+    result.tags = result.tags ?? {};
+    result.tags.label = {
+      mode: tags?.label?.mode ?? "some",
+      value: data.tags?.map((tag) => tag.label) ?? [],
+    };
+  }
+
+  if (data.categories && data.categories?.length > 0) {
+    result.categories = result.categories ?? {};
+    result.categories.name = {
+      mode: categories?.name?.mode ?? "some",
+      value: data.categories?.map((category) => category.name) ?? [],
+    };
+  }
 
   return result;
 };
