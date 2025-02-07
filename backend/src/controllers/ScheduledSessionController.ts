@@ -7,10 +7,7 @@ import {
 import { validate } from "@/src/middleware/validation";
 import { ScheduledSessionRequestSchema } from "@kobu-labs/nowaster-js-typing";
 
-export const ScheduledController = Router();
-const SessionsController = Router();
-
-ScheduledController.use("/session", SessionsController);
+export const SessionsController = Router();
 
 // create new study session
 SessionsController.post(
