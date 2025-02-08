@@ -18,8 +18,8 @@ export type SessionFilter = ScheduledSessionRequest["readMany"];
 export type FilterValueFiller = {
   tags?: TagWithId[];
   categories?: Category[];
-  endTimeFrom?: Date;
-  endTimeTo?: Date;
+  endTimeFrom?: { value: Date };
+  endTimeTo?: { value: Date };
 };
 
 export type SessionFilterPrecursor = {
@@ -58,7 +58,7 @@ export const filterPrecursorAtom = atom<SessionFilterPrecursor>({
 
 export const changeTagFilterMode = (
   oldState: SessionFilterPrecursor,
-  mode: "some" | "all"
+  mode: "some" | "all",
 ): SessionFilterPrecursor => {
   const {
     settings: { tags, ...filterRest },
@@ -81,7 +81,7 @@ export const changeTagFilterMode = (
 
 export const changeCategoryFilterMode = (
   oldState: SessionFilterPrecursor,
-  mode: "all" | "some"
+  mode: "all" | "some",
 ): SessionFilterPrecursor => {
   const {
     settings: { categories, ...filterRest },
@@ -104,7 +104,7 @@ export const changeCategoryFilterMode = (
 
 export const overwriteData = (
   oldState: SessionFilterPrecursor,
-  newData: Partial<FilterValueFiller>
+  newData: Partial<FilterValueFiller>,
 ): SessionFilterPrecursor => {
   const { data, ...rest } = oldState;
   return {
@@ -118,7 +118,7 @@ export const overwriteData = (
 
 export const overwriteFilter = (
   oldState: SessionFilterPrecursor,
-  newFilter: Partial<FilterSettings>
+  newFilter: Partial<FilterSettings>,
 ): SessionFilterPrecursor => {
   const { settings: filter, ...rest } = oldState;
   return {
@@ -132,7 +132,7 @@ export const overwriteFilter = (
 
 export const handleSelectTag = (
   oldState: SessionFilterPrecursor,
-  tag: TagWithId
+  tag: TagWithId,
 ): SessionFilterPrecursor => {
   const {
     data: { tags = [], ...data },
@@ -157,7 +157,7 @@ export const handleSelectTag = (
 
 export const handleSelectCategory = (
   oldState: SessionFilterPrecursor,
-  category: Category
+  category: Category,
 ): SessionFilterPrecursor => {
   const {
     data: { categories = [], ...data },
