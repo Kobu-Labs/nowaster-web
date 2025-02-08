@@ -2,7 +2,7 @@ use anyhow::{anyhow, Ok, Result};
 use uuid::Uuid;
 
 use crate::{
-    dto::tag::{create_tag::CreateTagDto, filter_tags::TagFilterDto, read_tag::ReadTagDto},
+    dto::tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto, read_tag::ReadTagDto},
     entity::{category::Category, tag::Tag},
     repository::tag::{TagRepository, TagRepositoryTrait},
 };
@@ -17,7 +17,7 @@ impl TagService {
         Self { repo }
     }
 
-    pub async fn upsert_tag(&self, dto: CreateTagDto) -> Result<ReadTagDto> {
+    pub async fn upsert_tag(&self, dto: UpsertTagDto) -> Result<ReadTagDto> {
         let res = self.repo.upsert(dto).await?;
         Ok(ReadTagDto::from(res))
     }
