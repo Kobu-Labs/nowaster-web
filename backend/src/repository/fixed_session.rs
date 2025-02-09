@@ -186,7 +186,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 c.name as category,
 
                 t.id as tag_id,
-                t.label as tag_label,
+                t.label as tag_label
             FROM session s
             JOIN category c
                 on c.id = s.category_id
