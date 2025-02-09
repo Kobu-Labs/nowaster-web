@@ -48,11 +48,7 @@ impl SessionService {
             .await?;
 
         // TODO: this will be pulled from auth headers
-        let user_id = dto.user_id;
-        let res = self
-            .fixed_repo
-            .create(dto, user_id, category.id, tag_ids)
-            .await?;
+        let res = self.fixed_repo.create(dto, category.id, tag_ids).await?;
 
         Ok(ReadFixedSessionDto::from(res))
     }

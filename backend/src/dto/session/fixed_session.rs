@@ -20,7 +20,6 @@ pub struct CreateFixedSessionDto {
     pub start_time: DateTime<Local>,
     #[serde(rename = "endTime")]
     pub end_time: DateTime<Local>,
-    pub user_id: Uuid,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate)]
