@@ -9,7 +9,6 @@ pub struct FixedSession {
 
     pub category: Category,
     pub tags: Vec<Tag>,
-    pub user: User,
 
     pub start_time: DateTime<Local>,
     pub end_time: DateTime<Local>,
