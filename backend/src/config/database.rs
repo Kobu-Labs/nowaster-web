@@ -7,7 +7,7 @@ pub struct Database {
 
 #[async_trait]
 pub trait DatabaseTrait {
-    async fn init(database_url:String) -> Result<Self, Error>
+    async fn init(database_url: String) -> Result<Self, Error>
     where
         Self: Sized;
     fn get_pool(&self) -> &PgPool;

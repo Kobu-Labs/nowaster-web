@@ -13,7 +13,7 @@ pub struct UserRepository {
     db_conn: Arc<Database>,
 }
 
-struct ReadUserRow {
+pub struct ReadUserRow {
     id: Uuid,
     username: String,
 }
