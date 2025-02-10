@@ -26,3 +26,8 @@ jobs:
         working-directory: backend
         run: cargo clippy -- -D warnings
 
+      - name: Run Rustfmt
+        working-directory: backend
+        run: cargo fmt -- --check
+
+
