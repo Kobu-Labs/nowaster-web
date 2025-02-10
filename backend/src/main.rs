@@ -10,7 +10,6 @@ mod entity;
 mod repository;
 mod router;
 mod service;
-mod state;
 
 #[tokio::main]
 async fn main() {
