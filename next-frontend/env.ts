@@ -28,7 +28,7 @@ export const env = createEnv({
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
    * useful for Docker builds.
    */
-    // TODO: temporarily disabled to allow for docker builds until better solution is found
+  // TODO: temporarily disabled to allow for docker builds until better solution is found
   skipValidation: true,
   /**
    * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
