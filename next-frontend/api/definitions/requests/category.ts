@@ -5,7 +5,7 @@ export type CategoryRequest = {
 };
 
 const create = z.object({
-  name: z.string()
+  name: z.string().trim().min(1),
 });
 
 const update = z.object({

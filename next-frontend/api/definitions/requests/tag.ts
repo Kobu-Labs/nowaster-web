@@ -3,7 +3,7 @@ import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
 const create = z.object({
-  label: z.string(),
+  label: z.string().trim().min(1),
   allowedCategories: z.array(CategorySchema).optional(),
 });
 
