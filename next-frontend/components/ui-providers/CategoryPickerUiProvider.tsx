@@ -60,7 +60,7 @@ export const MultipleCategoryPickerUiProvider: FC<
         return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.categories._def });
       props.onSelectCategory(result.value.name);
     },
   });
@@ -200,7 +200,7 @@ export const SingleCategoryPickerUiProvider: FC<
         return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.categories._def });
       props.onSelectCategory(result.value.name);
     },
   });
