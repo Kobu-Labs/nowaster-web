@@ -40,11 +40,15 @@ const categoryKeys = createQueryKeys("categories", {
     queryKey: null,
     queryFn: async () => await CategoryApi.getCategories(),
   },
+  byId: (id: string) => ({
+    queryKey: [id],
+    queryFn: async () => await CategoryApi.readById({ id: id }),
+  }),
 });
 
 export const queryKeys = mergeQueryKeys(
   sessionkeys,
   tagKeys,
   statisticsKeys,
-  categoryKeys
+  categoryKeys,
 );
