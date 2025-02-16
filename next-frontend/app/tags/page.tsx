@@ -78,7 +78,7 @@ const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
             <Button variant="outline">
               <Plus />
             </Button>
-            <CategoryLabel label={cat.name} key={cat.name} />
+            <CategoryLabel category={cat} key={cat.name} />
           </div>
         ))}
       </div>

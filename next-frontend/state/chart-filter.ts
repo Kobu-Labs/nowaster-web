@@ -1,5 +1,6 @@
 import {
   Category,
+  CategoryWithId,
   ScheduledSessionRequest,
   TagWithId,
 } from "@/api/definitions";
@@ -17,7 +18,7 @@ export type SessionFilter = ScheduledSessionRequest["readMany"];
  */
 export type FilterValueFiller = {
   tags?: TagWithId[];
-  categories?: Category[];
+  categories?: CategoryWithId[];
   endTimeFrom?: { value: Date };
   endTimeTo?: { value: Date };
 };
