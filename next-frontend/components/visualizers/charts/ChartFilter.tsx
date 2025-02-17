@@ -7,7 +7,7 @@ import {
   handleSelectTag,
   getDefaultFilter,
 } from "@/state/chart-filter";
-import { TagWithId } from "@/api/definitions";
+import { CategoryWithId, TagWithId } from "@/api/definitions";
 import { useAtom } from "jotai";
 import { CircleHelp, Filter, RotateCcw } from "lucide-react";
 
@@ -44,8 +44,8 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
   const onSelectTag = (tag: TagWithId) =>
     setChartFilter((state) => handleSelectTag(state, tag));
 
-  const onSelectCategory = (category: string) =>
-    setChartFilter((state) => handleSelectCategory(state, { name: category }));
+  const onSelectCategory = (category: CategoryWithId) =>
+    setChartFilter((state) => handleSelectCategory(state, category));
 
   const resetFilter = () => setChartFilter(getDefaultFilter());
 
@@ -127,9 +127,7 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
           <div className="flex flex-col gap-1">
             <SheetDescription>Filter by categories</SheetDescription>
             <MultipleCategoryPicker
-              selectedCategories={
-                filter.data.categories?.map((c) => c.name) ?? []
-              }
+              selectedCategories={filter.data.categories ?? []}
               onSelectCategory={onSelectCategory}
             />
             <RadioGroup

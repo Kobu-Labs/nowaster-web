@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot } from "recoil";
 
-
 const multipleCategoryMeta = {
   title: "Category/CategoryPicker/Multiple",
   component: MultipleCategoryPicker,
@@ -11,13 +10,21 @@ const multipleCategoryMeta = {
 } satisfies Meta<typeof MultipleCategoryPicker>;
 
 export default multipleCategoryMeta;
-type Story = StoryObj<typeof multipleCategoryMeta>
+type Story = StoryObj<typeof multipleCategoryMeta>;
 
 export const Basic: Story = {
   args: {
     onSelectCategory: console.log,
-    selectedCategories: ["coding", "school", "work"],
-
+    selectedCategories: [
+      {
+        name: "pb138",
+        id: "pb138",
+      },
+      {
+        name: "testing",
+        id: "testing",
+      },
+    ],
   },
   render: (props) => {
     const queryClient = new QueryClient();
