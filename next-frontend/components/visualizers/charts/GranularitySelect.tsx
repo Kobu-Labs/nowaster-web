@@ -4,7 +4,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue, } from "@/components/shadcn/select";
+  SelectValue } from "@/components/shadcn/select";
 import { type FC, useState } from "react";
 
 export type Granularity = "days-in-week" | "days-in-month" | "months-in-year";

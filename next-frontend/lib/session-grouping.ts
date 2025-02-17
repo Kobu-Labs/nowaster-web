@@ -108,7 +108,7 @@ const addGroupEntry = (
   result: Record<string, Record<string | number, number>>,
   granularityKey: string,
   sessionKey: string | number,
-  item: ScheduledSession
+  item: ScheduledSession,
 ) => {
   if (!result[granularityKey]) {
     result[granularityKey] = {};
@@ -119,7 +119,7 @@ const addGroupEntry = (
 
   result[granularityKey][sessionKey] += differenceInMinutes(
     item.endTime,
-    item.startTime
+    item.startTime,
   );
 };
 
@@ -130,7 +130,7 @@ const addGroupEntry = (
  */
 export const groupSessions = (
   data: ScheduledSession[],
-  opts: GroupingOptions
+  opts: GroupingOptions,
 ): {
     groupedSessions: CategoryPerGranularity[]
     uniqueCategories: (string | number)[]
@@ -148,7 +148,7 @@ export const groupSessions = (
   const groupedData = data.reduce(
     (
       value: { [granularity: string]: { [category: string]: number } },
-      item
+      item,
     ) => {
       const granularityKey = granulizers.key(item.endTime);
       const sessionKey = sessionKeyGetter(item);
@@ -163,7 +163,7 @@ export const groupSessions = (
       }
       return value;
     },
-    accumulator
+    accumulator,
   );
 
   return {

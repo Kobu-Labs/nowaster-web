@@ -29,7 +29,7 @@ export const SessionBaseAreaChartUiProvider: FC<
 > = (props) => {
   const { groupedSessions, uniqueCategories } = groupSessions(
     props.data,
-    props.groupingOpts
+    props.groupingOpts,
   );
 
   const [colors, setColors] = useRecoilState(categoryColors);
@@ -89,7 +89,7 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
   }
 
   const filteredValues = Object.entries(values).filter(
-    ([key]) => key !== "granularity"
+    ([key]) => key !== "granularity",
   );
   if (filteredValues.length === 0) {
     return <></>;

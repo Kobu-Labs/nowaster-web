@@ -5,7 +5,7 @@ const tagLabelFilter = z.object({
     .object({
       value: z.array(z.string()),
       mode: z.union([z.literal("all"), z.literal("some")]),
-    })
+    }),
 });
 
 const tagIdFilter = z.object({
@@ -13,7 +13,7 @@ const tagIdFilter = z.object({
     .object({
       value: z.array(z.string()),
       mode: z.union([z.literal("all"), z.literal("some")]),
-    })
+    }),
 });
 
 export const tagFilter = z

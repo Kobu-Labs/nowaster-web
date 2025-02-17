@@ -52,7 +52,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
         <PopoverTrigger
           onWheel={(e) =>
             props.onSelect(
-              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1)
+              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
             )
           }
           asChild
