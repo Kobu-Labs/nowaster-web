@@ -48,7 +48,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
   const [years, setYears] = useState(() => Array.from(
     { length: 12 },
     (_, i) => new Date().getFullYear() - 5 + i,
-  ),);
+  ));
 
   const handlePreviousYear = () => {
     const newYear = subYears(date, 1);
@@ -56,7 +56,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
     if (newYear.getFullYear() < minYear) {
       setYears(() => Array.from(
         { length: 12 },
-        (_, i) => newYear.getFullYear() - (11 - i)
+        (_, i) => newYear.getFullYear() - (11 - i),
       ));
 
     }
@@ -69,7 +69,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
     if (newYear.getFullYear() > maxYear) {
       setYears(() => Array.from(
         { length: 12 },
-        (_, i) => newYear.getFullYear() + i
+        (_, i) => newYear.getFullYear() + i,
       ));
 
     }

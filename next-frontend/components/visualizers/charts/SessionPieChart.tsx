@@ -16,7 +16,7 @@ export type AmountByCategory = { key: string; value: number };
 
 const groupData = (
   sessions: ScheduledSession[],
-  groupingFn: (session: ScheduledSession) => string | string[]
+  groupingFn: (session: ScheduledSession) => string | string[],
 ): AmountByCategory[] => {
   const result: { [key: string]: number } = {};
   sessions.forEach((session) => {

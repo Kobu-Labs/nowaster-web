@@ -67,12 +67,12 @@ const creationFormQuickOptions: QuickOption[] = [
 
 const DurationLabel: FC<{ from?: Date, to?: Date }> = (props) => {
   if (!props.from || !props.to) {
-    return <span>--:--</span>
+    return <span>--:--</span>;
   }
 
-  const result = getFormattedTimeDifference(props.from, props.to)
-  return <span>{result}</span>
-}
+  const result = getFormattedTimeDifference(props.from, props.to);
+  return <span>{result}</span>;
+};
 
 export const ScheduledSessionCreationForm: FC = () => {
   const { toast } = useToast();
@@ -99,7 +99,7 @@ export const ScheduledSessionCreationForm: FC = () => {
             <SessionCard variant="borderless" session={result.value} />
           ),
           variant: "default",
-        }
+        },
     );
   }
 

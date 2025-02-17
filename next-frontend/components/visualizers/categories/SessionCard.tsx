@@ -27,7 +27,7 @@ const historyCardVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
@@ -53,7 +53,7 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
         <div className="ml-4 text-xl font-medium">
           {getFormattedTimeDifference(
             props.session.startTime,
-            props.session.endTime
+            props.session.endTime,
           )}
         </div>
       </CardContent>

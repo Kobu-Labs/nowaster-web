@@ -5,7 +5,7 @@ const categoryNameFilter = z.object({
     .object({
       value: z.array(z.string()),
       mode: z.union([z.literal("all"), z.literal("some")]),
-    })
+    }),
 });
 
 const categoryIdFilter = z.object({
@@ -13,7 +13,7 @@ const categoryIdFilter = z.object({
     .object({
       value: z.array(z.string()),
       mode: z.union([z.literal("all"), z.literal("some")]),
-    })
+    }),
 });
 
 export const categoryFilter = z

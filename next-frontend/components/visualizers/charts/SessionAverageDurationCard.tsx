@@ -12,7 +12,7 @@ type SessionAverageDurationProviderProps = {
 };
 
 export const SessionAverageDurationProvider = (
-  props: SessionAverageDurationProviderProps
+  props: SessionAverageDurationProviderProps,
 ) => {
   const { data: sessions } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
@@ -22,7 +22,7 @@ export const SessionAverageDurationProvider = (
       }
       const totalAmount = data.value.reduce(
         (acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime),
-        0
+        0,
       );
       return totalAmount / data.value.length;
     },

@@ -16,21 +16,21 @@ export const getCategories = async (): Promise<
 };
 
 export const create = async (
-  params: CategoryRequest["create"]
+  params: CategoryRequest["create"],
 ): Promise<Result<CategoryResponse["create"]>> => {
   const { data } = await baseApi.post(BASE_URL, params);
   return await handleResponse(data, CategoryResponseSchema.create);
 };
 
 export const readMany = async (
-  params: CategoryRequest["readMany"]
+  params: CategoryRequest["readMany"],
 ): Promise<Result<CategoryResponse["readMany"]>> => {
   const { data } = await baseApi.get(BASE_URL, { params: { ...params } });
   return await handleResponse(data, CategoryResponseSchema.readMany);
 };
 
 export const update = async (
-  params: CategoryRequest["update"]
+  params: CategoryRequest["update"],
 ): Promise<Result<CategoryResponse["update"]>> => {
   const { data } = await baseApi.put(BASE_URL, { ...params });
   return await handleResponse(data, CategoryResponseSchema.update);

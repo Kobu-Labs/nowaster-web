@@ -26,7 +26,7 @@ export const TotalSessionTimeKpiCard: FC<TotalSessionTimeKpiCardProps> = () => {
       value={stats.data.value.minutes.toFixed(0)}
       title="Total Minutes Spent"
       description={`That's almost ${Math.ceil(
-        stats.data.value.minutes / 60
+        stats.data.value.minutes / 60,
       ).toFixed(2)} hours!`}
     >
 

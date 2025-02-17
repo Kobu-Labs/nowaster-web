@@ -65,7 +65,7 @@ const renderActiveShape = (props: any) => {
 };
 
 export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
-  props
+  props,
 ) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
@@ -111,7 +111,7 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           {activeIndex === undefined && (
             <Label
               value={formatTime(
-                props.data.reduce((acc, curr) => acc + curr.value, 0)
+                props.data.reduce((acc, curr) => acc + curr.value, 0),
               )}
               position="center"
               fill={"#fff"}

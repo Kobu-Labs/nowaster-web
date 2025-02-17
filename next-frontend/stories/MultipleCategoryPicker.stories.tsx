@@ -16,7 +16,7 @@ type Story = StoryObj<typeof multipleCategoryMeta>
 export const Basic: Story = {
   args: {
     onSelectCategory: console.log,
-    selectedCategories: ["coding", "school", "work"]
+    selectedCategories: ["coding", "school", "work"],
 
   },
   render: (props) => {

@@ -5,7 +5,7 @@ type PrefixBasedMatchOpts = Partial<{
 export const prefixBasedMatch = (
   value: string | undefined,
   searchTerm: string | undefined,
-  opts?: PrefixBasedMatchOpts
+  opts?: PrefixBasedMatchOpts,
 ): boolean => {
   if (value === undefined || searchTerm === undefined) {
     return false;
