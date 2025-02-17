@@ -8,10 +8,11 @@ import {
   SingleCategoryPickerUiProvider,
   SingleCategoryPickerUiProviderProps,
 } from "@/components/ui-providers/CategoryPickerUiProvider";
+import { CategoryWithId } from "@/api/definitions";
 
 type MultipleCategoryPickerProps = Omit<
-    MultipleCategoryPickerUiProviderProps,
-    "availableCategories"
+  MultipleCategoryPickerUiProviderProps,
+  "availableCategories"
 >;
 
 export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
@@ -27,7 +28,6 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
     staleTime: 5 * 60 * 1000,
   });
 
-
   if (!categories || isLoading || isError) {
     return <div>Something bad happenned</div>;
   }
@@ -36,11 +36,10 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
     return <div>{categories.error.message}</div>;
   }
 
-
   return (
     <MultipleCategoryPickerUiProvider
       modal={props.modal}
-      availableCategories={categories.value.map((cat) => cat.name)}
+      availableCategories={categories.value}
       selectedCategories={props.selectedCategories}
       onSelectCategory={props.onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
@@ -50,10 +49,10 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
 };
 
 type SingleCategoryPickerProps = {
-    onSelectedCategoriesChanged: (newCategory: string) => void;
+  onSelectedCategoriesChanged: (newCategory: CategoryWithId) => void;
 } & Omit<
-    SingleCategoryPickerUiProviderProps,
-    "availableCategories" | "selectedCategory" | "onSelectCategory"
+  SingleCategoryPickerUiProviderProps,
+  "availableCategories" | "selectedCategory" | "onSelectCategory"
 >;
 
 // TODO: just dynamically allow only one element in selectedCategories[] you dumb ass
@@ -67,7 +66,9 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
     retry: false,
   });
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<
+    CategoryWithId | undefined
+  >();
 
   if (!categories || isLoading || isError) {
     return <div>Something bad happenned</div>;
@@ -77,7 +78,7 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
     return <div>{categories.error.message}</div>;
   }
 
-  const onSelectCategory = (category: string) => {
+  const onSelectCategory = (category: CategoryWithId) => {
     setSelectedCategory(category);
     props.onSelectedCategoriesChanged(category);
   };
@@ -85,7 +86,7 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
   return (
     <SingleCategoryPickerUiProvider
       modal={props.modal}
-      availableCategories={categories.value.map((cat) => cat.name)}
+      availableCategories={categories.value}
       selectedCategory={selectedCategory}
       onSelectCategory={onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
