@@ -1,19 +1,10 @@
 "use client";
 
-import { FC } from "react";
 import { categoryColors } from "@/state/categories";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { Settings } from "lucide-react";
-import { HexColorPicker } from "react-colorful";
 import { useRecoilState } from "recoil";
 
 import { randomColor } from "@/lib/utils";
-import { Card } from "@/components/shadcn/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/popover";
 import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
 import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
 import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
@@ -24,36 +15,15 @@ import { BaseSessionTableColumns } from "@/components/visualizers/sessions/sessi
 import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-
-type CategoryColorPickerProps = {
-  category: string;
-};
-
-const CategoryColorPicker: FC<CategoryColorPickerProps> = (props) => {
-  const [colors, setColors] = useRecoilState(categoryColors);
-
-  // colors[props.category] should be always defined at this point
-  const currentCategoryColors = colors[props.category] ?? randomColor();
-
-  const setColorsGlobState = (value: string) => {
-    setColors({ ...colors, [props.category]: value });
-  };
-
-  return (
-    <Card>
-      <HexColorPicker
-        color={currentCategoryColors}
-        onChange={setColorsGlobState}
-      />
-    </Card>
-  );
-};
+import { ColorPicker } from "@/components/visualizers/ColorPicker";
 
 export default function Page(props: { params: { detail: string } }) {
-  const categoryName = props.params.detail;
+  const categoryId = props.params.detail;
   const query = useQuery({
-    ...queryKeys.categories.byId(categoryName),
+    ...queryKeys.categories.byId(categoryId),
   });
+
+  const [colors, setColors] = useRecoilState(categoryColors);
 
   if (query.isLoading || query.isError || !query.data || query.data.isErr) {
     return <div className="m-8">Loading...</div>;
@@ -71,6 +41,12 @@ export default function Page(props: { params: { detail: string } }) {
       categories: [query.data.value],
     },
   };
+  const categoryLabel = query.data.value.name;
+  const currentCategoryColors = colors[categoryLabel] ?? randomColor();
+
+  const setColorsGlobState = (value: string) => {
+    setColors({ ...colors, [categoryLabel]: value });
+  };
 
   return (
     <div className="grow">
@@ -78,14 +54,10 @@ export default function Page(props: { params: { detail: string } }) {
         <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
           Details page for
           <CategoryLabel category={query.data.value} />
-          <Popover>
-            <PopoverTrigger asChild className="cursor-pointer">
-              <Settings />
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <CategoryColorPicker category={query.data.value.name} />
-            </PopoverContent>
-          </Popover>
+          <ColorPicker
+            initialColor={currentCategoryColors}
+            onSelect={setColorsGlobState}
+          />
         </h2>
       </div>
       <div className="m-8 grid grid-cols-4 gap-8">
