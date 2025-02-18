@@ -9,7 +9,7 @@ import {
 } from "@/components/shadcn/popover";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
-import { LucidePipette } from "lucide-react";
+import { LucidePipette, RotateCcw } from "lucide-react";
 
 type ColorPickerProps = {
   onSelect: (color: string) => void;
@@ -56,11 +56,16 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
               color={colors}
               onChange={handleColorChange}
             />
-            <Input
-              value={inputColor}
-              onChange={(e) => handleInputChange(e.target.value)}
-              className="mt-2"
-            />
+            <div className="flex items-center justify-center mt-2 gap-2">
+              <Input
+                value={inputColor}
+                onChange={(e) => handleInputChange(e.target.value)}
+                className="w-32"
+              />
+              <Button onClick={() => handleColorChange(randomColor())}>
+                <RotateCcw />
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </PopoverContent>
