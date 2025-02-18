@@ -67,6 +67,22 @@ impl TagRepositoryTrait for TagRepository {
         .fetch_one(self.db_conn.get_pool())
         .await?;
 
+        let query = r#"
+            INSERT INTO tag_category (tag_id, category_id)
+            SELECT $1, category_id FROM UNNEST($2::uuid[]) AS category_id
+            "#;
+
+        sqlx::query(query)
+            .bind(row.id)
+            .bind(
+                dto.allowed_categories
+                    .iter()
+                    .map(|cat| cat.id)
+                    .collect::<Vec<Uuid>>(),
+            )
+            .execute(self.db_conn.get_pool())
+            .await?;
+
         let categories = sqlx::query_as!(
             ReadCategoryDto,
             r#"
