@@ -1,3 +1,4 @@
+"use client";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { HexColorPicker } from "react-colorful";
 import { FC, useState } from "react";
@@ -14,22 +15,32 @@ import { LucidePipette, RotateCcw } from "lucide-react";
 type ColorPickerProps = {
   onSelect: (color: string) => void;
   initialColor?: string;
+  value?: string;
 };
 
 export const ColorPicker: FC<ColorPickerProps> = (props) => {
-  const initialColor = props.initialColor ?? randomColor();
-  const [colors, setColors] = useState(initialColor);
-  const [inputColor, setInputColor] = useState(initialColor);
+  const [internalColor, setInternalColors] = useState(
+    props.initialColor ?? randomColor(),
+  );
+
+  const isControlled = props.value !== undefined;
+  const color = isControlled ? props.value : internalColor;
+  const [inputColor, setInputColor] = useState(color);
 
   const handleColorChange = (color: string) => {
-    setColors(color);
-    setInputColor(color);
     props.onSelect(color);
+    setInputColor(color);
+
+    if (!isControlled) {
+      setInternalColors(color);
+    }
   };
 
   const handleInputChange = (value: string) => {
     if (isHexColor(value)) {
-      setColors(value);
+      if (!isControlled) {
+        setInternalColors(internalColor);
+      }
       props.onSelect(value);
     }
     setInputColor(value);
@@ -41,8 +52,8 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
         <Button
           variant="outline"
           style={{
-            backgroundColor: colors + "80",
-            border: "3px solid " + colors,
+            backgroundColor: color + "80",
+            border: "3px solid " + color,
           }}
         >
           <LucidePipette />
@@ -53,7 +64,7 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
           <CardContent>
             <HexColorPicker
               className="pt-4"
-              color={colors}
+              color={color}
               onChange={handleColorChange}
             />
             <div className="flex items-center justify-center mt-2 gap-2">
