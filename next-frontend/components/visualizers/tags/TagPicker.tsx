@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { TagWithId } from "@/api/definitions";
+import { TagDetails } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
@@ -11,14 +11,14 @@ import {
 //TODO: extract the "selectedTags" to seprarat component
 
 type SimpleTagPickerProps = {
-    onSelectedTagsChanged: (newTags: TagWithId[]) => void;
+  onSelectedTagsChanged: (newTags: TagDetails[]) => void;
 } & Omit<
-    TagPickerUiProviderProps,
-    "availableTags" | "selectedTags" | "onSelectTag"
+  TagPickerUiProviderProps,
+  "availableTags" | "selectedTags" | "onSelectTag"
 >;
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
-  const [selectedTags, setSelectedTags] = useState<TagWithId[]>([]);
+  const [selectedTags, setSelectedTags] = useState<TagDetails[]>([]);
 
   const {
     data: tags,
@@ -37,7 +37,7 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
     return <div>{tags.error.message}</div>;
   }
 
-  const onSelectTag = (tag: TagWithId) => {
+  const onSelectTag = (tag: TagDetails) => {
     let newTags;
     if (selectedTags.some((t) => t.id === tag.id)) {
       // deselect
@@ -52,7 +52,9 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
 
   return (
     <TagPickerUiProvider
+      disabled={props.disabled}
       availableTags={tags.value}
+      forCategory={props.forCategory}
       selectedTags={selectedTags}
       onSelectTag={onSelectTag}
       modal={props.modal}
@@ -62,10 +64,7 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   );
 };
 
-type StatelessTagPickerProps = Omit<
-    TagPickerUiProviderProps,
-    "availableTags"
->;
+type StatelessTagPickerProps = Omit<TagPickerUiProviderProps, "availableTags">;
 
 export const StatelessTagPicker: FC<StatelessTagPickerProps> = (props) => {
   const {

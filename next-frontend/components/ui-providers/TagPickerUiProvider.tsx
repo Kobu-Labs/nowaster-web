@@ -2,14 +2,26 @@ import { FC, useState } from "react";
 import { TagApi } from "@/api";
 import { Result } from "@badrap/result";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/alert-dialog";
+import {
+  Category,
+  TagDetails,
   TagRequest,
   TagResponse,
-  TagWithId,
 } from "@/api/definitions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, showSelectedTagsFirst } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -28,22 +40,41 @@ import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import FuzzySearch from "fuzzy-search";
 
 export type TagPickerUiProviderProps = {
-  availableTags: TagWithId[];
-  selectedTags: TagWithId[];
-  onSelectTag: (tag: TagWithId) => void;
+  availableTags: TagDetails[];
+  selectedTags: TagDetails[];
+  forCategory?: Category;
+  onSelectTag: (tag: TagDetails) => void;
   tagsDisplayStrategy?: (
-    selectedTags: TagWithId[],
-    availableTags: TagWithId[]
-  ) => TagWithId[];
-  tagMatchStrategy?: (tag: TagWithId, searchTerm: string) => boolean;
+    selectedTags: TagDetails[],
+    availableTags: TagDetails[],
+  ) => TagDetails[];
+  tagMatchStrategy?: (tag: TagDetails, searchTerm: string) => boolean;
   modal?: boolean;
+  disabled?: boolean;
 };
 
-
-const fuzzyFindStrategy = (tags: TagWithId, searchTerm: string): boolean => {
+const fuzzyFindStrategy = (tags: TagDetails, searchTerm: string): boolean => {
   const searcher = new FuzzySearch([tags.label], []);
   const result = searcher.search(searchTerm);
   return result.length !== 0;
+};
+
+const orderCategories = (
+  selectedCategory: Category,
+  categories: [string, TagDetails[]][],
+): [string, TagDetails[]][] => {
+  const selected = categories.find(([name]) => name === selectedCategory.name);
+  const unspecified = categories.find(([name]) => name === "-");
+
+  const rest = categories.filter(
+    ([name]) => name !== selectedCategory.name && name !== "-",
+  );
+
+  if (selected) {
+    return unspecified ? [selected, unspecified, ...rest] : [selected, ...rest];
+  }
+
+  return unspecified ? [unspecified, ...rest] : categories;
 };
 
 export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
@@ -70,16 +101,31 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     },
   });
 
-  let tagsInDisplayOrder = props.availableTags;
-  if (props.tagsDisplayStrategy) {
-    tagsInDisplayOrder = props.tagsDisplayStrategy(
-      props.selectedTags,
-      props.availableTags,
-    );
-  }
-
   const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy;
-  tagsInDisplayOrder = tagsInDisplayOrder.filter((tag) => matchStrategy(tag, searchTerm));
+
+  let tagsToDisplay = props.availableTags;
+  tagsToDisplay = tagsToDisplay.filter((tag) => matchStrategy(tag, searchTerm));
+
+  // group tags based on their allowed categories
+  const categories = new Map<string, TagDetails[]>([["-", []]]);
+  tagsToDisplay.forEach((tag) => {
+    const categoryNames =
+      tag.allowedCategories.length > 0
+        ? tag.allowedCategories.map((c) => c.name)
+        : ["-"];
+
+    categoryNames.forEach((name) => {
+      const group = categories.get(name) ?? [];
+      group.push(tag);
+      categories.set(name, group);
+    });
+  });
+
+  let categoriesInOrder = Array.from(categories.entries());
+  if (props.forCategory) {
+    categoriesInOrder = orderCategories(props.forCategory, categoriesInOrder);
+  }
+  const tagsOrderStrategy = props.tagsDisplayStrategy ?? showSelectedTagsFirst;
 
   return (
     <Popover
@@ -94,13 +140,14 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     >
       <PopoverTrigger asChild>
         <Button
+          disabled={props.disabled}
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
           className="max-w-full grow justify-start"
         >
           <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
-          <ScrollArea  className="flex  max-w-full overflow-hidden ">
+          <ScrollArea className="flex  max-w-full overflow-hidden ">
             <div className="flex w-max max-w-full gap-1">
               {props.selectedTags.length === 0
                 ? "Select Tags"
@@ -108,7 +155,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                   <TagBadge key={tag.id} value={tag.label} />
                 ))}
             </div>
-            <ScrollBar orientation="horizontal"  />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </Button>
       </PopoverTrigger>
@@ -131,32 +178,57 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               </CommandItem>
             </CommandGroup>
           )}
-          <CommandGroup>
-            <ScrollArea
-              type="always"
-              className="max-h-48 overflow-y-auto rounded-md border-none"
-            >
-              {tagsInDisplayOrder.map((tag) => (
-                <CommandItem
-                  value={tag.label}
-                  key={tag.id}
-                  onSelect={() => props.onSelectTag(tag)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      props.selectedTags.some((t) => t.id === tag.id)
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <TagBadge value={tag.label} />
-                </CommandItem>
-              ))}
-            </ScrollArea>
-          </CommandGroup>
+          <ScrollArea
+            type="always"
+            className="max-h-48 overflow-y-auto rounded-md border-none"
+          >
+            {categoriesInOrder.map(([category, tags]) => (
+              <CommandGroup heading={category} key={category}>
+                {tagsOrderStrategy(props.selectedTags, tags).map((tag) => (
+                  <CommandItem
+                    value={tag.label}
+                    key={tag.id}
+                    onSelect={() => props.onSelectTag(tag)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 size-4",
+                        props.selectedTags.some((t) => t.id === tag.id)
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    <TagBadge value={tag.label} />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>
+  );
+};
+
+const IncorrectTagCategoryDialog = () => {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline">Show Dialog</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction>Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
