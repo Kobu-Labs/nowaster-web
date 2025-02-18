@@ -16,7 +16,7 @@ import {
 import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { getFormattedTimeDifference, showSelectedTagsFirst } from "@/lib/utils";
+import { getFormattedTimeDifference } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -224,7 +224,8 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
-                      tagsDisplayStrategy={showSelectedTagsFirst}
+                      forCategory={form.watch("category")}
+                      disabled={form.getValues("category") === undefined}
                       onSelectedTagsChanged={(tags) => {
                         field.onChange(tags);
                       }}
