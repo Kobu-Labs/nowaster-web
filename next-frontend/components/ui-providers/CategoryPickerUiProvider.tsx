@@ -23,7 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-import { ScrollArea } from "@/components/shadcn/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import FuzzySearch from "fuzzy-search";
 
 export type MultipleCategoryPickerUiProviderProps = {
@@ -111,13 +111,19 @@ export const MultipleCategoryPickerUiProvider: FC<
           <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
           <div className="flex  max-w-full overflow-hidden ">
             <div className="flex w-max max-w-full gap-1">
-              {props.selectedCategories.length === 0
-                ? "Search Category"
-                : props.selectedCategories.map((category) => (
-                  <Badge variant="outline" key={category.id}>
-                    {category.name}
-                  </Badge>
-                ))}
+              <ScrollArea
+                type="hover"
+                className="max-w-fit overflow-y-auto rounded-md border-none"
+              >
+                <ScrollBar orientation="horizontal" className="top-4" />
+                {props.selectedCategories.length === 0
+                  ? "Search Category"
+                  : props.selectedCategories.map((category) => (
+                      <Badge variant="outline" key={category.id}>
+                        {category.name}
+                      </Badge>
+                    ))}
+              </ScrollArea>
             </div>
           </div>
         </Button>
