@@ -10,7 +10,7 @@ import {
 } from "@/components/shadcn/popover";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
-import { LucidePipette, RotateCcw } from "lucide-react";
+import { Dices, LucidePipette } from "lucide-react";
 
 type ColorPickerProps = {
   onSelect: (color: string) => void;
@@ -74,7 +74,7 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
                 className="w-32"
               />
               <Button onClick={() => handleColorChange(randomColor())}>
-                <RotateCcw />
+                <Dices />
               </Button>
             </div>
           </CardContent>
