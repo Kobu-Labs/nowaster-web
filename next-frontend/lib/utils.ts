@@ -1,5 +1,5 @@
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { SessionFilter, TagDetails, TagWithId } from "@/api/definitions";
+import { SessionFilter, TagDetails } from "@/api/definitions";
 import { clsx, type ClassValue } from "clsx";
 import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
@@ -34,6 +34,8 @@ export const getFormattedTimeDifference = (from: Date, to: Date) => {
 export const randomColor = (): string => {
   return "#" + Math.floor(Math.random() * 16777215).toString(16);
 };
+
+export const isHexColor = (str: string) => /^#([0-9A-F]{3}){2}$/i.test(str);
 
 export const showSelectedTagsFirst = (
   selectedTags: TagDetails[],
