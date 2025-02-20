@@ -132,7 +132,7 @@ impl TagRepositoryTrait for TagRepository {
                     tag.label AS tag_label,
                     category.id AS category_id,
                     category.name AS category_name,
-                    COALESCE(usages.usages, 0) AS usages
+                    COALESCE(usage_vals.usages, 0) AS usages
                 FROM tag
                 LEFT OUTER JOIN tag_category ON tag_category.tag_id = tag.id
                 LEFT OUTER JOIN category ON category.id = tag_category.category_id
@@ -140,7 +140,7 @@ impl TagRepositoryTrait for TagRepository {
                     SELECT tag_id, COUNT(*) AS usages
                     FROM tag_to_session
                     GROUP BY tag_id
-                ) AS usages ON usages.tag_id = tag.id
+                ) AS usage_vals ON usage_vals.tag_id = tag.id
                 WHERE 1=1
             ",
         );
@@ -153,12 +153,14 @@ impl TagRepositoryTrait for TagRepository {
             query.push(" and tag.label = ").push_bind(label);
         }
 
+        query.push(" ORDER BY usages DESC");
+
         let rows = query
             .build_query_as::<ReadTagDetailsRow>()
             .fetch_all(self.db_conn.get_pool())
             .await?;
 
-        let mut tags_map: HashMap<Uuid, TagDetails> = HashMap::new();
+        let mut tags_map: IndexMap<Uuid, TagDetails> = IndexMap::new();
 
         for row in rows {
             let tag = tags_map.entry(row.tag_id).or_insert_with(|| TagDetails {
