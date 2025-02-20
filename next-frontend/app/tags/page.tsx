@@ -1,164 +1,156 @@
 "use client";
 
-import { FC, useState } from "react";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { tagColors } from "@/state/tags";
-import {
-  TagWithId,
-} from "@/api/definitions";
+import { useState } from "react";
+import { TagDetails } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { HexColorPicker } from "react-colorful";
-import { useRecoilState } from "recoil";
-
-import { cn, randomColor } from "@/lib/utils";
+import { Edit, Plus, TagIcon, Trash2 } from "lucide-react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
-import { Card } from "@/components/shadcn/card";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn/tabs";
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
-import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
-import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
-import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
+import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
+import { Badge } from "@/components/shadcn/badge";
+import { Dialog, DialogContent } from "@/components/shadcn/dialog";
+import { Input } from "@/components/shadcn/input";
+import FuzzySearch from "fuzzy-search";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { CreateTagForm } from "@/components/visualizers/tags/TagCreateForm";
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
 
-type TagColorPickerProps = {
-    tag: string;
+const fuzzyFindStrategy = (
+  category: TagDetails,
+  searchTerm: string,
+): boolean => {
+  const searcher = new FuzzySearch([category.label], []);
+  const result = searcher.search(searchTerm);
+  return result.length !== 0;
 };
 
-const TagColorPicker: FC<TagColorPickerProps> = (props) => {
-  const [colors, setColors] = useRecoilState(tagColors);
-
-  // colors[props.category] should be always defined at this point
-  const currentCategoryColors = colors[props.tag] ?? randomColor();
-
-  const setColorsGlobState = (value: string) => {
-    setColors({ ...colors, [props.tag]: value });
-  };
-
-  return (
-    <Card>
-      <HexColorPicker
-        color={currentCategoryColors}
-        onChange={setColorsGlobState}
-      />
-    </Card>
-  );
-};
-
-const SettingsTab: FC<{ tag: TagWithId }> = (props) => {
-  const categories = useQuery({
-    ...queryKeys.categories.all,
-  });
-  if (!categories?.data) {
-    return <div></div>;
-  }
-  if (!categories.data.isOk) {
-    return <div></div>;
-  }
-
-  return (
-    <div>
-      <TagColorPicker tag={props.tag.label} />
-      <div>
-                Allowed Categories:
-      </div>
-      <div>
-                All Categories:
-        {categories.data.value.map((cat) => (
-          <div className="flex gap-1" key={cat.name}>
-            <Button variant="outline">
-              <Plus />
-            </Button>
-            <CategoryLabel category={cat} key={cat.name} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default function Page() {
-  const [selectedTag, setSelectedTag] = useState<TagWithId | undefined>();
-
-  const filter: SessionFilterPrecursor = {
-    settings: {
-      tags: {
-        label: {
-          mode: "some",
-        },
-      },
-    },
-    data: {
-      tags: selectedTag ? [selectedTag] : [],
-    },
-  };
-
-  const test = useQuery({
+export default function TagsManagement() {
+  const { data: tags, isLoading } = useQuery({
     ...queryKeys.tags.all,
+    retry: false,
   });
 
-  if (!test?.data) {
-    return <div></div>;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
+  if (!tags || tags.isErr) {
+    return <div>Something bad happenned</div>;
   }
-
-  if (!test.data.isOk) {
-    return <div></div>;
-  }
+  const filteredTags = tags.value.filter((tag) =>
+    fuzzyFindStrategy(tag, searchQuery),
+  );
 
   return (
-    <div className="m-10">
-      <div className="grid w-full grid-cols-10 gap-3 align-middle">
-        <Card className="col-span-1 flex w-min flex-col pt-2">
-          {test.data.value.map((tag) => (
-            <div
-              className={cn(
-                "flex w-full cursor-pointer rounded-lg px-4 py-1 hover:bg-accent hover:text-accent-foreground",
-                selectedTag?.label === tag.label && "bg-accent",
-              )}
-              key={tag.id}
-              onClick={() => setSelectedTag({ ...tag })}
-            >
-              <TagBadge value={tag.label} />
-            </div>
-          ))}
-        </Card>
-        {selectedTag && (
-          <Tabs defaultValue="general" className="col-span-9">
-            <TabsList className="p-1">
-              <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-            <TabsContent value="general" className="grid grid-cols-3 gap-4">
-              <TotalSessionTimeCard filter={filter} />
-              <SessionAverageDurationProvider filter={filter} />
-              <SessionCountCard filter={filter} />
-              <FilteredSessionAreaChart
-                filter={filter}
-                initialGranularity="days-in-month"
-                className="col-span-full h-[350px]"
-              />
-              <div className="col-span-full">
-                <BaseSessionTable
-                  columns={BaseSessionTableColumns}
-                  filter={filter}
-                />
-              </div>
-            </TabsContent>
-            <TabsContent value="settings">
-              <SettingsTab tag={selectedTag} />
-            </TabsContent>
-          </Tabs>
-        )}
+    <div className="w-[80%] flex justify-center flex-grow items-center flex-col">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="relative w-full sm:w-64">
+          <Input
+            placeholder="Search tags..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="text-white placeholder:text-gray-500"
+          />
+        </div>
+        <Dialog
+          open={addTagDialogOpen}
+          onOpenChange={setAddTagDialogOpen}
+          modal={false}
+        >
+          <DialogContent
+            className="border-none p-0 w-fit"
+            onInteractOutside={() => false}
+          >
+            <CreateTagForm onSave={() => setAddTagDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
+
+        <Button
+          className="w-full sm:w-auto"
+          onClick={() => setAddTagDialogOpen(true)}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add New Tag
+        </Button>
       </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p>Loading tags...</p>
+        </div>
+      ) : filteredTags.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center h-64">
+            <TagIcon className="h-12 w-12  mb-4" />
+            <p className="text-center">
+              {searchQuery
+                ? "No tags match your search"
+                : "No tags found. Create your first tag to get started."}
+            </p>
+            {searchQuery && (
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => setSearchQuery("")}
+              >
+                Clear Search
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-xl font-mono">Your Tags</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px] pr-4">
+              <div className="space-y-4">
+                {filteredTags.map((tag) => (
+                  <div
+                    key={tag.id}
+                    className="flex items-center justify-between p-3 rounded-md  border "
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full`}></div>
+                      <TagBadge value={tag.label} />
+                      <Badge variant="outline" className="text-xs">
+                        {tag.usages}
+                        {" sessions"}
+                      </Badge>
+                      <ScrollArea className="min-w-48 max-w-[80%]">
+                        <div className="px-4 flex gap-2">
+                          {tag.allowedCategories.map((c) => (
+                            <CategoryLabel category={c} key={c.id} />
+                          ))}
+                        </div>
+                        <ScrollBar orientation="horizontal" />
+                      </ScrollArea>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title={
+                          1 > 0 ? "Cannot delete tags in use" : "Delete tag"
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
