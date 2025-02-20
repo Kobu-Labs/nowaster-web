@@ -17,9 +17,10 @@ export const SessionAverageDurationProvider = (
   const { data: sessions } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
-      if (data.isErr) {
+      if (data.isErr || data.value.length === 0) {
         return 0;
       }
+
       const totalAmount = data.value.reduce(
         (acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime),
         0,
