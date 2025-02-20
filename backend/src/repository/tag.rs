@@ -138,7 +138,7 @@ impl TagRepositoryTrait for TagRepository {
                 LEFT OUTER JOIN category ON category.id = tag_category.category_id
                 LEFT OUTER JOIN (
                     SELECT tag_id, COUNT(*) AS usages
-                    FROM tag_category
+                    FROM tag_to_session
                     GROUP BY tag_id
                 ) AS usages ON usages.tag_id = tag.id
                 WHERE 1=1
