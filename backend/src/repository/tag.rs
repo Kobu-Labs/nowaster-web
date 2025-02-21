@@ -124,6 +124,20 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
+    async fn find_by_id(&self, id: Uuid) -> Result<TagDetails> {
+        let result = self
+            .filter_tags(TagFilterDto {
+                id: Some(id),
+                label: None,
+            })
+            .await?;
+
+        if let Some(tag) = result.first() {
+            return Ok(tag.clone());
+        }
+        Err(anyhow::anyhow!("Tag not found"))
+    }
+
     async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
