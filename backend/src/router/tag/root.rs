@@ -1,3 +1,4 @@
+use anyhow::Result;
 use axum::extract::{Path, Query};
 use axum::routing::delete;
 use axum::{extract::State, routing::post, Router};
@@ -5,7 +6,7 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
-use crate::dto::tag::create_tag::UpsertTagDto;
+use crate::dto::tag::create_tag::{UpdateTagDto, UpsertTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
 use crate::dto::tag::read_tag::ReadTagDetailsDto;
 use crate::router::request::ValidatedRequest;
@@ -19,7 +20,21 @@ pub fn tag_router() -> Router<AppState> {
             post(add_allowed_category_handler).delete(remove_allowed_category_handler),
         )
         .route("/", post(create_tag_handler).get(filter_tags_handler))
-        .route("/{tag_id}", delete(delete_tag_handler))
+        .route(
+            "/{tag_id}",
+            delete(delete_tag_handler)
+                .get(get_tag_handler)
+                .patch(update_tag_handler),
+        )
+}
+
+async fn update_tag_handler(
+    State(state): State<AppState>,
+    Path(tag_id): Path<Uuid>,
+    ValidatedRequest(payload): ValidatedRequest<UpdateTagDto>,
+) -> ApiResponse<ReadTagDetailsDto> {
+    let res = state.tag_service.update_tag(tag_id, payload).await;
+    ApiResponse::from_result(res)
 }
 
 async fn add_allowed_category_handler(
