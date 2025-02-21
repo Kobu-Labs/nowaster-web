@@ -48,6 +48,15 @@ async fn add_allowed_category_handler(
     ApiResponse::from_result(res)
 }
 
+async fn get_tag_handler(
+    State(state): State<AppState>,
+    Path(tag_id): Path<Uuid>,
+) -> ApiResponse<ReadTagDetailsDto> {
+    let res = state.tag_service.get_by_id(tag_id).await;
+    let dto: Result<ReadTagDetailsDto> = res.map(ReadTagDetailsDto::from);
+    ApiResponse::from_result(dto)
+}
+
 async fn remove_allowed_category_handler(
     State(state): State<AppState>,
     ValidatedRequest(payload): ValidatedRequest<AddAllowedCategoryDto>,
