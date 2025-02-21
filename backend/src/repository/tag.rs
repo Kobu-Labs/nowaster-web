@@ -1,13 +1,17 @@
 use anyhow::{Ok, Result};
+use indexmap::IndexMap;
 use sqlx::{Postgres, QueryBuilder};
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
     dto::{
         category::read_category::ReadCategoryDto,
-        tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto},
+        tag::{
+            create_tag::{UpdateTagDto, UpsertTagDto},
+            filter_tags::TagFilterDto,
+        },
     },
     entity::{category::Category, tag::TagDetails},
 };
@@ -33,6 +37,8 @@ struct ReadTagDetailsRow {
 }
 
 pub trait TagRepositoryTrait {
+    async fn find_by_id(&self, id: Uuid) -> Result<TagDetails>;
+    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto) -> Result<TagDetails>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn upsert(&self, dto: UpsertTagDto) -> Result<TagDetails>;
     async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>>;
@@ -224,5 +230,50 @@ impl TagRepositoryTrait for TagRepository {
         .await?;
 
         Ok(())
+    }
+
+    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto) -> Result<TagDetails> {
+        let row = sqlx::query_as!(
+            ReadTagRow,
+            r#"
+                UPDATE tag
+                SET label = $1
+                WHERE id = $2
+                RETURNING id, label
+            "#,
+            dto.label,
+            id
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        if let Some(allowed_categories) = dto.allowed_categories {
+            sqlx::query!(
+                r#"
+                DELETE FROM tag_category
+                WHERE tag_id = $1
+            "#,
+                row.id
+            )
+            .execute(self.db_conn.get_pool())
+            .await?;
+            let categoories = allowed_categories
+                .iter()
+                .map(|cat| cat.id)
+                .collect::<Vec<Uuid>>();
+
+            let query = r#"
+                    INSERT INTO tag_category (tag_id, category_id)
+                    SELECT $1, category_id FROM UNNEST($2::uuid[]) AS category_id
+                "#;
+
+            sqlx::query(query)
+                .bind(id)
+                .bind(categoories)
+                .execute(self.db_conn.get_pool())
+                .await?;
+        }
+
+        self.find_by_id(row.id).await
     }
 }
