@@ -44,19 +44,7 @@ impl TagService {
     }
 
     pub async fn get_by_id(&self, id: Uuid) -> Result<TagDetails> {
-        let res = self
-            .repo
-            .filter_tags(TagFilterDto {
-                id: Some(id),
-                label: None,
-            })
-            .await?;
-
-        if res.is_empty() {
-            return Err(anyhow!("Tag not found"));
-        }
-
-        Ok(res[0].clone())
+        self.repo.find_by_id(id).await
     }
 
     pub async fn delete_tag(&self, id: Uuid) -> Result<()> {
