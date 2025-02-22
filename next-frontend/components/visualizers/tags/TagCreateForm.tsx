@@ -25,7 +25,7 @@ type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
 };
 
-export const CreateTagForm: FC<CreateTagDialogProps> = (props) => {
+export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("#00f00f");
   const { toast } = useToast();

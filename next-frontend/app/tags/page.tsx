@@ -13,7 +13,7 @@ import { Dialog, DialogContent } from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
 import FuzzySearch from "fuzzy-search";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
-import { CreateTagForm } from "@/components/visualizers/tags/TagCreateForm";
+import { TagCreateForm } from "@/components/visualizers/tags/TagCreateForm";
 import { Separator } from "@/components/shadcn/separator";
 import { TagDetailsOverview } from "@/components/visualizers/tags/TagDetailsOverview";
 import { cn } from "@/lib/utils";
@@ -76,7 +76,7 @@ export default function TagsManagement() {
                   className="border-none p-0 w-fit"
                   onInteractOutside={() => false}
                 >
-                  <CreateTagForm onSave={() => setAddTagDialogOpen(false)} />
+                  <TagCreateForm onSave={() => setAddTagDialogOpen(false)} />
                 </DialogContent>
               </Dialog>
               <Dialog
