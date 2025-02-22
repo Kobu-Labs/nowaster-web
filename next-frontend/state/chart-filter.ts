@@ -1,7 +1,7 @@
 import {
   CategoryWithId,
   ScheduledSessionRequest,
-  TagWithId,
+  TagDetails,
 } from "@/api/definitions";
 import { atom } from "jotai";
 
@@ -16,7 +16,7 @@ export type SessionFilter = ScheduledSessionRequest["readMany"];
  * Object that will provide the values for filtering
  */
 export type FilterValueFiller = {
-  tags?: TagWithId[];
+  tags?: TagDetails[];
   categories?: CategoryWithId[];
   endTimeFrom?: { value: Date };
   endTimeTo?: { value: Date };
@@ -132,7 +132,7 @@ export const overwriteFilter = (
 
 export const handleSelectTag = (
   oldState: SessionFilterPrecursor,
-  tag: TagWithId,
+  tag: TagDetails,
 ): SessionFilterPrecursor => {
   const {
     data: { tags = [], ...data },
