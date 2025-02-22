@@ -1,4 +1,4 @@
-export type SiteConfig = typeof siteConfig
+export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Nowaster",
@@ -16,5 +16,9 @@ export const siteConfig = {
       title: "New Session",
       href: "/new",
     },
+    {
+      title: "Tags",
+      href: "/tags",
+    },
   ],
-};
+} as const;
