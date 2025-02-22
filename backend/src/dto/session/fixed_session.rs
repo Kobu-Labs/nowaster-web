@@ -6,15 +6,20 @@ use validator::Validate;
 use crate::{
     dto::{
         category::{create_category::CreateCategoryDto, read_category::ReadCategoryDto},
-        tag::{create_tag::UpsertTagDto, read_tag::ReadTagDto},
+        tag::read_tag::ReadTagDto,
     },
     entity::session::FixedSession,
 };
 
+#[derive(Clone, Deserialize, Serialize, Debug, Validate)]
+pub struct AddTagDto {
+    pub id: Uuid,
+}
+
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct CreateFixedSessionDto {
     pub category: CreateCategoryDto,
-    pub tags: Vec<UpsertTagDto>,
+    pub tags: Vec<AddTagDto>,
     pub description: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: DateTime<Local>,

@@ -36,19 +36,20 @@ impl SessionService {
         &self,
         dto: CreateFixedSessionDto,
     ) -> Result<ReadFixedSessionDto> {
-        let mut tag_ids = vec![];
-        for tag in dto.tags.clone() {
-            let tag_id = self.tag_service.upsert_tag(tag).await?;
-            tag_ids.push(tag_id.id);
-        }
-
         let category = self
             .category_service
             .upsert_category(dto.category.clone())
             .await?;
 
         // TODO: this will be pulled from auth headers
-        let res = self.fixed_repo.create(dto, category.id, tag_ids).await?;
+        let res = self
+            .fixed_repo
+            .create(
+                dto.clone(),
+                category.id,
+                dto.tags.iter().map(|t| t.id).collect(),
+            )
+            .await?;
 
         Ok(ReadFixedSessionDto::from(res))
     }
