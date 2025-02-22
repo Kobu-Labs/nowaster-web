@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { ActiveSession } from "@/components/visualizers/sessions/ActiveSession";
 
 interface MainNavProps {
-  items?: NavItem[]
+  items?: readonly NavItem[]
 }
 
 export function MainNav({ items }: MainNavProps) {
