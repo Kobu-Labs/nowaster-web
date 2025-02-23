@@ -20,6 +20,8 @@ import { MultipleCategoryPicker } from "@/components/visualizers/categories/Cate
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { Save } from "lucide-react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { tagColors } from "@/state/tags";
 
 type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
@@ -27,7 +29,6 @@ type CreateTagDialogProps = {
 
 export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
   const [newTagName, setNewTagName] = useState("");
-  const [selectedColor, setSelectedColor] = useState("#00f00f");
   const { toast } = useToast();
   const [randomColors, setRandomColors] = useState<string[]>([]);
   const queryClient = useQueryClient();
@@ -39,6 +40,9 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
   useEffect(() => {
     setRandomColors(Array.from({ length: 10 }, () => randomColor()));
   }, []);
+
+  const setColors = useSetRecoilState(tagColors);
+  const [selectedColor, setSelectedColor] = useState(randomColor());
 
   const handleSelectCategory = (category: CategoryWithId) => {
     const isSelected = selectedCategories.some((cat) => cat.id === category.id);
@@ -70,6 +74,10 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
           variant: "destructive",
         });
       } else {
+        setColors((prev) => ({
+          ...prev,
+          [data.value.label]: selectedColor,
+        }));
         toast({
           title: "Tag created",
           description: (
