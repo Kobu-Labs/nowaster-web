@@ -194,6 +194,8 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                     <TooltipContent className="text-nowrap">
                       Read more about category specific tags on our{" "}
                       <Link
+                        rel="noopener noreferrer"
+                        target="_blank"
                         className="text-nowrap underline hover:text-blue-500"
                         href={
                           "https://github.com/Kobu-Labs/nowaster-web/wiki/Category-specific-tags"
