@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     dto::tag::{
-        create_tag::{UpdateTagDto, UpsertTagDto},
+        create_tag::{CreateTagDto, UpdateTagDto},
         filter_tags::TagFilterDto,
         read_tag::ReadTagDetailsDto,
     },
@@ -21,8 +21,8 @@ impl TagService {
         Self { repo }
     }
 
-    pub async fn upsert_tag(&self, dto: UpsertTagDto) -> Result<ReadTagDetailsDto> {
-        let res = self.repo.upsert(dto).await?;
+    pub async fn create_tag(&self, dto: CreateTagDto) -> Result<ReadTagDetailsDto> {
+        let res = self.repo.create(dto).await?;
         Ok(ReadTagDetailsDto::from(res))
     }
 

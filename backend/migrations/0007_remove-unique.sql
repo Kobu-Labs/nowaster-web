@@ -1,0 +1,2 @@
+ALTER TABLE tag
+DROP CONSTRAINT IF EXISTS tag_label_key;
