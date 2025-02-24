@@ -9,7 +9,7 @@ import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { ScrollArea } from "@/components/shadcn/scroll-area";
 import { Badge } from "@/components/shadcn/badge";
-import { Dialog, DialogContent, DialogTitle } from "@/components/shadcn/dialog";
+import { Dialog, DialogContent } from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
 import FuzzySearch from "fuzzy-search";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
