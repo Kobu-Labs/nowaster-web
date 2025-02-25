@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 import { NavItem } from "@/types/nav";
 import { siteConfig } from "@/config/site";
@@ -10,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ActiveSession } from "@/components/visualizers/sessions/ActiveSession";
 
 interface MainNavProps {
-  items?: readonly NavItem[]
+  items?: readonly NavItem[];
 }
 
 export function MainNav({ items }: MainNavProps) {
@@ -42,6 +43,12 @@ export function MainNav({ items }: MainNavProps) {
         </nav>
       ) : null}
       <div className="grow"></div>
+      <SignedOut>
+        <SignInButton />
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
       <ActiveSession />
     </div>
   );
