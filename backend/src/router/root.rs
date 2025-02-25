@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::{routing::IntoMakeService, Router};
+use clerk_rs::{clerk::Clerk, validators::{axum::ClerkLayer, jwks::MemoryCacheJwksProvider}};
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 
@@ -36,7 +37,7 @@ pub struct AppState {
     pub statistics_service: StatisticsService,
 }
 
-pub fn get_router(db: Arc<Database>) -> IntoMakeService<Router> {
+pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
@@ -72,6 +73,11 @@ pub fn get_router(db: Arc<Database>) -> IntoMakeService<Router> {
 
     Router::new()
         .nest("/api", api_router)
+        .layer(ClerkLayer::new(
+            MemoryCacheJwksProvider::new(clerk),
+            None,
+            false,
+        ))
         .layer(tower_http::cors::CorsLayer::permissive())
         .layer(
             ServiceBuilder::new().layer(
