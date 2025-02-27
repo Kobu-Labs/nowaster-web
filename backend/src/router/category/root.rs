@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
-    routing::{delete, post},
+    routing::{delete, get},
     Router,
 };
 use thiserror::Error;
@@ -11,14 +11,14 @@ use crate::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
         read_category::ReadCategoryDto,
     },
-    router::{request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 pub fn category_router() -> Router<AppState> {
     Router::new()
         .route(
             "/",
-            post(create_category_handler).get(filter_categories_handler),
+            get(filter_categories_handler).post(create_category_handler),
         )
         .route(
             "/{category_id}",
@@ -28,9 +28,10 @@ pub fn category_router() -> Router<AppState> {
 
 async fn create_category_handler(
     State(state): State<AppState>,
+    actor: ClerkUser,
     ValidatedRequest(payload): ValidatedRequest<CreateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
-    let res = state.category_service.upsert_category(payload).await;
+    let res = state.category_service.upsert_category(payload, actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -45,21 +46,29 @@ async fn delete_category_handler(
 async fn filter_categories_handler(
     State(state): State<AppState>,
     Query(payload): Query<FilterCategoryDto>,
+    actor: ClerkUser,
 ) -> ApiResponse<Vec<ReadCategoryDto>> {
-    let res = state.category_service.filter_categories(payload).await;
+    let res = state
+        .category_service
+        .filter_categories(payload, actor)
+        .await;
     ApiResponse::from_result(res)
 }
 
 async fn get_category_by_id_handler(
     State(state): State<AppState>,
     Path(category_id): Path<Uuid>,
+    actor: ClerkUser,
 ) -> ApiResponse<Option<ReadCategoryDto>> {
     let res = state
         .category_service
-        .filter_categories(FilterCategoryDto {
-            id: Some(category_id),
-            name: None,
-        })
+        .filter_categories(
+            FilterCategoryDto {
+                id: Some(category_id),
+                name: None,
+            },
+            actor,
+        )
         .await
         .map(|val| val.first().cloned());
     ApiResponse::from_result(res)
