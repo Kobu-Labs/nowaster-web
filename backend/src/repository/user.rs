@@ -1,6 +1,5 @@
 use anyhow::Result;
 use std::sync::Arc;
-use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
@@ -13,14 +12,15 @@ pub struct UserRepository {
     db_conn: Arc<Database>,
 }
 
+#[derive(sqlx::FromRow, Debug)]
 pub struct ReadUserRow {
-    id: Uuid,
-    username: String,
+    id: String,
+    displayname: String,
 }
 
 pub trait UserRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: CreateUserDto) -> Result<User>;
+    async fn create(&self, dto: CreateUserDto) -> Result<User>;
     fn mapper(&self, row: ReadUserRow) -> User;
 }
 
@@ -31,15 +31,16 @@ impl UserRepositoryTrait for UserRepository {
         }
     }
 
-    async fn upsert(&self, dto: CreateUserDto) -> Result<User> {
+    async fn create(&self, dto: CreateUserDto) -> Result<User> {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                    INSERT INTO users (display_name)
-                    VALUES ($1)
-                    RETURNING users.id, users.display_name as username
+                    INSERT INTO "user" (id, displayname)
+                    VALUES ($1, $2)
+                    RETURNING id, displayname
             "#,
-            dto.username
+            dto.clerk_user_id,
+            dto.displayname
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -50,7 +51,7 @@ impl UserRepositoryTrait for UserRepository {
     fn mapper(&self, row: ReadUserRow) -> User {
         User {
             id: row.id,
-            username: row.username,
+            username: row.displayname,
         }
     }
 }

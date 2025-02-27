@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::entity::user::User;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ReadUserDto {
-    id: Uuid,
+    id: String,
     username: String,
 }
 
