@@ -8,6 +8,7 @@ use crate::{
     },
     entity::category::Category,
     repository::category::{CategoryRepository, CategoryRepositoryTrait},
+    router::clerk::ClerkUser,
 };
 
 #[derive(Clone)]
@@ -20,8 +21,12 @@ impl CategoryService {
         Self { repo }
     }
 
-    pub async fn upsert_category(&self, dto: CreateCategoryDto) -> Result<ReadCategoryDto> {
-        let res = self.repo.upsert(dto).await?;
+    pub async fn upsert_category(
+        &self,
+        dto: CreateCategoryDto,
+        actor: ClerkUser,
+    ) -> Result<ReadCategoryDto> {
+        let res = self.repo.upsert(dto, actor).await?;
         Ok(ReadCategoryDto::from(res))
     }
 
@@ -33,18 +38,22 @@ impl CategoryService {
     pub async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
+        actor: ClerkUser,
     ) -> Result<Vec<ReadCategoryDto>> {
-        let res = self.repo.filter_categories(filter).await?;
+        let res = self.repo.filter_categories(filter, actor).await?;
         Ok(res.into_iter().map(ReadCategoryDto::from).collect())
     }
 
-    pub async fn get_by_id(&self, category_id: Uuid) -> Result<Category> {
+    pub async fn get_by_id(&self, category_id: Uuid, actor: ClerkUser) -> Result<Category> {
         let res = self
             .repo
-            .filter_categories(FilterCategoryDto {
-                id: Some(category_id),
-                name: None,
-            })
+            .filter_categories(
+                FilterCategoryDto {
+                    id: Some(category_id),
+                    name: None,
+                },
+                actor,
+            )
             .await?;
 
         if res.is_empty() {
