@@ -31,7 +31,7 @@ pub trait SessionRepositoryTrait {
     type SessionType;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
-    async fn find_by_id(&self, id: Uuid) -> Result<Vec<Self::SessionType>>;
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Vec<Self::SessionType>>;
     async fn create(
         &self,
         dto: CreateFixedSessionDto,
@@ -44,6 +44,7 @@ pub trait SessionRepositoryTrait {
 #[derive(Clone, Serialize, Deserialize, FromRow)]
 pub struct GenericFullRowSession {
     pub id: Uuid,
+    pub user_id: String,
     start_time: DateTime<Utc>,
     end_time: Option<DateTime<Utc>>,
     session_type: String,
@@ -58,6 +59,7 @@ pub struct GenericFullRowSession {
 
 fn map_read_to_session(row: &PgRow) -> Result<GenericFullRowSession> {
     Ok(GenericFullRowSession {
+        user_id: row.try_get("user_id")?,
         id: row.try_get("id")?,
         start_time: row.try_get("start_time")?,
         end_time: row.try_get("end_time")?,
@@ -88,9 +90,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
             let entry = grouped_tags.entry(session.id).or_insert(FixedSession {
                 id: session.id,
+                user_id: session.user_id.clone(),
                 category: Category {
                     id: session.category_id,
                     name: session.category,
+                    created_by: session.user_id,
                 },
                 tags: vec![],
                 start_time: DateTime::from(session.start_time),
@@ -105,11 +109,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
-    async fn find_by_id(&self, id: Uuid) -> Result<Vec<Self::SessionType>> {
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Vec<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
             r#"SELECT 
                 s.id,
+                s.user_id as "user_id!",
                 s.start_time,
                 s.description,
                 s.end_time,
@@ -129,8 +134,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.tag_id = t.id
             WHERE 
                 s.id = $1
-                AND type = 'fixed'"#,
-            id
+                AND type = 'fixed' 
+                AND s.user_id = $2"#,
+            id,
+            actor.user_id
         )
         .fetch_all(self.db_conn.get_pool())
         .await?;
@@ -175,7 +182,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             .await?;
         }
 
-        let session = self.find_by_id(result.id).await?;
+        let session = self.find_by_id(result.id, actor.clone()).await?;
         match session.first().cloned() {
             Some(val) => Ok(val),
             None => Err(anyhow!("Error creating the session")),
@@ -190,6 +197,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT 
                 s.id,
+                s.user_id,
                 s.start_time,
                 s.description,
                 s.end_time,

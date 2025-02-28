@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Ok, Result};
+use anyhow::{Ok, Result};
 use uuid::Uuid;
 
 use crate::{
@@ -45,21 +45,6 @@ impl CategoryService {
     }
 
     pub async fn get_by_id(&self, category_id: Uuid, actor: ClerkUser) -> Result<Category> {
-        let res = self
-            .repo
-            .filter_categories(
-                FilterCategoryDto {
-                    id: Some(category_id),
-                    name: None,
-                },
-                actor,
-            )
-            .await?;
-
-        if res.is_empty() {
-            return Err(anyhow!("Category not found"));
-        }
-
-        Ok(res[0].clone())
+        self.repo.find_by_id(category_id, actor).await
     }
 }

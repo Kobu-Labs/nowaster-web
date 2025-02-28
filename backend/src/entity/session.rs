@@ -14,6 +14,7 @@ pub struct FixedSession {
     pub end_time: DateTime<Local>,
 
     pub description: Option<String>,
+    pub user_id: String,
 }
 
 #[derive(Clone, Debug)]
