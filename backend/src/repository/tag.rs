@@ -14,6 +14,7 @@ use crate::{
         },
     },
     entity::{category::Category, tag::TagDetails},
+    router::clerk::ClerkUser,
 };
 
 #[derive(Clone)]
@@ -25,10 +26,12 @@ pub struct TagRepository {
 pub struct ReadTagRow {
     id: Uuid,
     label: String,
+    created_by: String,
 }
 
 #[derive(sqlx::FromRow)]
 struct ReadTagDetailsRow {
+    created_by: String,
     tag_id: Uuid,
     tag_label: String,
     category_id: Option<Uuid>,
@@ -37,12 +40,13 @@ struct ReadTagDetailsRow {
 }
 
 pub trait TagRepositoryTrait {
-    async fn find_by_id(&self, id: Uuid) -> Result<TagDetails>;
-    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto) -> Result<TagDetails>;
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<TagDetails>;
+    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: ClerkUser)
+        -> Result<TagDetails>;
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn create(&self, dto: CreateTagDto) -> Result<TagDetails>;
-    async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>>;
-    async fn delete_tag(&self, id: Uuid) -> Result<()>;
+    async fn create(&self, dto: CreateTagDto, actor: ClerkUser) -> Result<TagDetails>;
+    async fn filter_tags(&self, filter: TagFilterDto, actor: ClerkUser) -> Result<Vec<TagDetails>>;
+    async fn delete_tag(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
     async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
 }
@@ -54,20 +58,21 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
-    async fn create(&self, dto: CreateTagDto) -> Result<TagDetails> {
+    async fn create(&self, dto: CreateTagDto, actor: ClerkUser) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
                 WITH inserted AS (
-                    INSERT INTO tag (label)
-                    VALUES ($1)
-                    RETURNING tag.id, tag.label
+                    INSERT INTO tag (label, created_by)
+                    VALUES ($1, $2)
+                    RETURNING tag.id, tag.label, tag.created_by
                 )
-                SELECT i.id as "id!", i.label as "label!" FROM inserted i
+                SELECT i.id as "id!", i.label as "label!", i.created_by as "created_by!" FROM inserted i
                 UNION ALL
-                SELECT c.id, c.label FROM tag c WHERE c.label = $1
+                SELECT c.id, c.label, c.created_by FROM tag c WHERE c.label = $1 and c.created_by = $2
             "#,
-            dto.label
+            dto.label,
+            actor.user_id
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -104,24 +109,27 @@ impl TagRepositoryTrait for TagRepository {
         Ok(TagDetails {
             id: row.id,
             label: row.label,
+            created_by: row.created_by,
             allowed_categories: categories
                 .into_iter()
                 .map(|cat| Category {
                     id: cat.id,
                     name: cat.name,
+                    created_by: actor.user_id.clone(),
                 })
                 .collect(),
             usages: 0,
         })
     }
 
-    async fn delete_tag(&self, id: Uuid) -> Result<()> {
+    async fn delete_tag(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM tag
-                WHERE tag.id = $1
+                WHERE tag.id = $1 AND tag.created_by = $2
             "#,
-            id
+            id,
+            actor.user_id
         )
         .execute(self.db_conn.get_pool())
         .await?;
@@ -129,12 +137,15 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    async fn find_by_id(&self, id: Uuid) -> Result<TagDetails> {
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<TagDetails> {
         let result = self
-            .filter_tags(TagFilterDto {
-                id: Some(id),
-                label: None,
-            })
+            .filter_tags(
+                TagFilterDto {
+                    id: Some(id),
+                    label: None,
+                },
+                actor,
+            )
             .await?;
 
         if let Some(tag) = result.first() {
@@ -143,12 +154,13 @@ impl TagRepositoryTrait for TagRepository {
         Err(anyhow::anyhow!("Tag not found"))
     }
 
-    async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>> {
+    async fn filter_tags(&self, filter: TagFilterDto, actor: ClerkUser) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
-            "
+            r#"
                 SELECT 
                     tag.id AS tag_id,
                     tag.label AS tag_label,
+                    tag.created_by AS "created_by",
                     category.id AS category_id,
                     category.name AS category_name,
                     COALESCE(usage_vals.usages, 0) AS usages
@@ -160,9 +172,10 @@ impl TagRepositoryTrait for TagRepository {
                     FROM tag_to_session
                     GROUP BY tag_id
                 ) AS usage_vals ON usage_vals.tag_id = tag.id
-                WHERE 1=1
-            ",
+                WHERE tag.created_by = 
+            "#,
         );
+        query.push_bind(actor.user_id);
 
         if let Some(id) = filter.id {
             query.push(" and tag.id = ").push_bind(id);
@@ -171,7 +184,6 @@ impl TagRepositoryTrait for TagRepository {
         if let Some(label) = filter.label {
             query.push(" and tag.label = ").push_bind(label);
         }
-
         query.push(" ORDER BY usages DESC");
 
         let rows = query
@@ -186,6 +198,7 @@ impl TagRepositoryTrait for TagRepository {
                 id: row.tag_id,
                 label: row.tag_label.clone(),
                 allowed_categories: Vec::new(),
+                created_by: row.created_by.clone(),
                 usages: row.usages,
             });
 
@@ -193,6 +206,7 @@ impl TagRepositoryTrait for TagRepository {
                 tag.allowed_categories.push(Category {
                     id: cat_id,
                     name: cat_name,
+                    created_by: row.created_by.clone(),
                 });
             }
         }
@@ -231,17 +245,23 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto) -> Result<TagDetails> {
+    async fn update_tag(
+        &self,
+        id: Uuid,
+        dto: UpdateTagDto,
+        actor: ClerkUser,
+    ) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
                 UPDATE tag
                 SET label = $1
-                WHERE id = $2
-                RETURNING id, label
+                WHERE tag.id = $2 and tag.created_by = $3
+                RETURNING id, label, created_by as "created_by!"
             "#,
             dto.label,
-            id
+            id,
+            actor.user_id
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -273,6 +293,6 @@ impl TagRepositoryTrait for TagRepository {
                 .await?;
         }
 
-        self.find_by_id(row.id).await
+        self.find_by_id(row.id, actor).await
     }
 }

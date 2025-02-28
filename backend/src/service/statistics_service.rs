@@ -1,4 +1,4 @@
-use crate::repository::statistics::sessions::StatisticsRepository;
+use crate::{repository::statistics::sessions::StatisticsRepository, router::clerk::ClerkUser};
 use anyhow::Result;
 
 #[derive(Clone)]
@@ -13,15 +13,15 @@ impl StatisticsService {
         }
     }
 
-    pub async fn get_amount_of_sessions(&self) -> Result<u16> {
-        self.repo.get_amount_of_sessions().await
+    pub async fn get_amount_of_sessions(&self, actor: ClerkUser) -> Result<u16> {
+        self.repo.get_amount_of_sessions(actor).await
     }
 
-    pub async fn get_total_session_time(&self) -> Result<f64> {
-        self.repo.get_total_session_time().await
+    pub async fn get_total_session_time(&self, actor: ClerkUser) -> Result<f64> {
+        self.repo.get_total_session_time(actor).await
     }
 
-    pub async fn get_current_streak(&self) -> Result<u16> {
-        self.repo.get_current_streak().await
+    pub async fn get_current_streak(&self, actor: ClerkUser) -> Result<u16> {
+        self.repo.get_current_streak(actor).await
     }
 }
