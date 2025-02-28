@@ -13,6 +13,7 @@ use crate::{
         fixed_session::CreateFixedSessionDto,
     },
     entity::{category::Category, session::FixedSession, tag::Tag},
+    router::clerk::ClerkUser,
 };
 
 #[derive(Clone)]
@@ -21,8 +22,12 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
-    async fn delete_session(&self, id: Uuid) -> Result<()>;
-    async fn filter_sessions(&self, dto: FilterSessionDto) -> Result<Vec<Self::SessionType>>;
+    async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
+    async fn filter_sessions(
+        &self,
+        dto: FilterSessionDto,
+        actor: ClerkUser,
+    ) -> Result<Vec<Self::SessionType>>;
     type SessionType;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
@@ -32,6 +37,7 @@ pub trait SessionRepositoryTrait {
         dto: CreateFixedSessionDto,
         category_id: Uuid,
         tag_ids: Vec<Uuid>,
+        actor: ClerkUser,
     ) -> Result<FixedSession>;
 }
 
@@ -137,18 +143,20 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         dto: CreateFixedSessionDto,
         category_id: Uuid,
         tag_ids: Vec<Uuid>,
+        actor: ClerkUser,
     ) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
-                INSERT INTO session (category_id, type, start_time, end_time, description)
-                VALUES ($1, $2,$3,$4,$5)
+                INSERT INTO session (category_id, type, start_time, end_time, description, user_id)
+                VALUES ($1, $2,$3,$4,$5, $6)
                 RETURNING session.id
             "#,
             category_id,
             String::from("fixed"),
             dto.start_time,
             dto.end_time,
-            dto.description
+            dto.description,
+            actor.user_id
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -174,7 +182,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
-    async fn filter_sessions(&self, dto: FilterSessionDto) -> Result<Vec<Self::SessionType>> {
+    async fn filter_sessions(
+        &self,
+        dto: FilterSessionDto,
+        actor: ClerkUser,
+    ) -> Result<Vec<Self::SessionType>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT 
                 s.id,
@@ -196,8 +208,9 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             LEFT JOIN tag t
                 on tts.tag_id = t.id
             WHERE 
-                1=1"#,
+                s.user_id = "#,
         );
+        query.push_bind(actor.user_id);
 
         if let Some(from_endtime) = dto.from_end_time {
             query
@@ -313,13 +326,14 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(sessions)
     }
 
-    async fn delete_session(&self, id: Uuid) -> Result<()> {
+    async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM session
-                WHERE session.id = $1
+                WHERE session.id = $1 and session.user_id = $2
             "#,
-            id
+            id,
+            actor.user_id
         )
         .execute(self.db_conn.get_pool())
         .await?;
