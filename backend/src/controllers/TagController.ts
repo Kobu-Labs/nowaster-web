@@ -45,7 +45,7 @@ TagController.get(
 
 // Add allowed category
 TagController.post(
-  "/addAllowedCategory",
+  "/category",
   validate({ body: TagRequestSchema.addAllowedCategory }),
   async (req, res) => {
     const tags = await tagRepo.update.addAllowedCategory(req.body);
@@ -59,8 +59,8 @@ TagController.post(
 );
 
 // Remove allowed category
-TagController.post(
-  "/removeAllowedCategory",
+TagController.delete(
+  "/category",
   validate({ body: TagRequestSchema.removeAllowedCategory }),
   async (req, res) => {
     const tag = await tagRepo.update.removeAllowedCategory(req.body);
