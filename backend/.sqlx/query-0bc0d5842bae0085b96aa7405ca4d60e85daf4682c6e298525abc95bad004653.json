@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH inserted AS (\n                    INSERT INTO tag (label, created_by)\n                    VALUES ($1, $2)\n                    RETURNING tag.id, tag.label, tag.created_by\n                )\n                SELECT i.id as \"id!\", i.label as \"label!\", i.created_by as \"created_by!\" FROM inserted i\n                UNION ALL\n                SELECT c.id, c.label, c.created_by FROM tag c WHERE c.label = $1 and c.created_by = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_by!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "0bc0d5842bae0085b96aa7405ca4d60e85daf4682c6e298525abc95bad004653"
+}
