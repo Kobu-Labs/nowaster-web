@@ -49,6 +49,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 WITH inserted AS (
                     INSERT INTO category (name, created_by)
                     VALUES ($1, $2)
+                    ON CONFLICT (name, created_by) DO NOTHING
                     RETURNING category.id, category.name, category.created_by
                 )
                 SELECT i.id as "id!", i.name as "name!", i.created_by as "created_by!" FROM inserted i
