@@ -3,26 +3,25 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import { env } from "process";
 import { RecordedController } from "@/src/controllers/RecordedSessionController";
-import { ScheduledController } from "@/src/controllers/ScheduledSessionController";
+import { SessionsController } from "@/src/controllers/ScheduledSessionController";
 import { TagController } from "@/src/controllers/TagController";
 import { StatisticsController } from "@/src/controllers/StatisticsController";
 import type { ApiResponse } from "@/src/controllers/types";
 import { CategoryController } from "@/src/controllers/CategoryController";
+import { env } from "@/src/env";
 
 const app = express();
-const port = env.PORT ?? 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-app.use("/recorded", RecordedController);
-app.use("/scheduled", ScheduledController);
-app.use("/category", CategoryController);
-app.use("/tags", TagController);
-app.use("/statistics", StatisticsController);
+app.use("/api/recorded", RecordedController);
+app.use("/api/session", SessionsController);
+app.use("/api/category", CategoryController);
+app.use("/api/tag", TagController);
+app.use("/api/statistics", StatisticsController);
 
 app.use((_req, res) => {
   const response: ApiResponse<null> = {
@@ -34,8 +33,10 @@ app.use((_req, res) => {
   return res.status(404).send(response);
 });
 
-app.listen(port, () => {
-  console.log(`[${new Date().toISOString()}] API listening on port ${port}`);
+app.listen(env.PORT, () => {
+  console.log(
+    `[${new Date().toISOString()}] API listening on port ${env.PORT}`,
+  );
   if (app.settings.env === "development") {
     console.log(
       `[${new Date().toISOString()}] Application running in development mode!`,
