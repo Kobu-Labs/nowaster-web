@@ -38,6 +38,7 @@
   "dependencies": {
     "@kobu-labs/nowaster-js-typing": "1.5.4",
     "@prisma/client": "^4.12.0",
+    "@t3-oss/env-core": "^0.12.0",
     "argon2": "^0.30.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -46,6 +47,6 @@
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "tsconfig-paths": "^4.2.0",
-    "zod": "^3.21.4"
+    "zod": "^3.24.2"
   }
 }
