@@ -2,7 +2,6 @@ use std::{env, sync::Arc};
 
 use clerk_rs::{clerk::Clerk, ClerkConfiguration};
 use config::database::{Database, DatabaseTrait};
-use dotenv::{dotenv, from_path};
 use router::root::get_router;
 
 mod config;
@@ -14,9 +13,11 @@ mod service;
 
 #[tokio::main]
 async fn main() {
-    from_path("../../deploy/.env").ok();
+    #[cfg(debug_assertions)]
+    {
+        dotenv::dotenv().ok();
+    }
 
-    dotenv().ok();
     let port = env::var("BACKEND_PORT").unwrap_or("4005".to_string());
     let database_url = env::var("DATABASE_URL")
         .unwrap_or("postgres://devuser:devpass@localhost:5432/postgres".to_string());
