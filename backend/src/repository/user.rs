@@ -1,9 +1,10 @@
 use anyhow::Result;
+use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::user::create_user::CreateUserDto,
+    dto::user::{create_user::CreateUserDto, update_user::UpdateUserDto},
     entity::user::User,
 };
 
@@ -19,6 +20,7 @@ pub struct ReadUserRow {
 }
 
 pub trait UserRepositoryTrait {
+    async fn update(&self, dto: UpdateUserDto) -> Result<User>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn create(&self, dto: CreateUserDto) -> Result<User>;
     async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>>;
@@ -45,6 +47,38 @@ impl UserRepositoryTrait for UserRepository {
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
+
+        Ok(self.mapper(row))
+    }
+
+    async fn update(&self, dto: UpdateUserDto) -> Result<User> {
+        let mut should_execute = false;
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+                UPDATE "user" SET
+            "#,
+        );
+
+        if let Some(displayname) = dto.displayname {
+            if displayname.is_empty() {
+                return Err(anyhow::anyhow!("Display name cannot be empty"));
+            }
+            query.push(" displayname = ");
+            query.push_bind(displayname);
+            should_execute = true;
+        }
+        query.push(" WHERE id = ");
+        query.push_bind(dto.id);
+        query.push(" RETURNING id, displayname");
+
+        if !should_execute {
+            return Err(anyhow::anyhow!("No fields to update"));
+        }
+
+        let row = query
+            .build_query_as::<ReadUserRow>()
+            .fetch_one(self.db_conn.get_pool())
+            .await?;
 
         Ok(self.mapper(row))
     }
