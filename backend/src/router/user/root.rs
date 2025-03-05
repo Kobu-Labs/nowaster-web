@@ -1,6 +1,5 @@
 use crate::dto::user::read_user::ReadUserDto;
 use crate::dto::user::update_user::UpdateUserDto;
-use crate::router::clerk::ClerkUser;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::{dto::user::create_user::CreateUserDto, router::root::AppState};
@@ -21,10 +20,11 @@ async fn crate_user_handler(
 
 async fn update_user_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
     ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,
 ) -> ApiResponse<ReadUserDto> {
-    let res = state.user_service.update_user(payload, actor).await;
+    // TODO: this is insecure, this handler should only be used to 'notify' of a change
+    // and the user should be pulled from clerk database and updated in our db
+    let res = state.user_service.update_user(payload).await;
     ApiResponse::from_result(res)
 }
 
