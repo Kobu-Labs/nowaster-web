@@ -20,6 +20,7 @@ pub struct ReadCategoryRow {
     id: Uuid,
     name: String,
     created_by: String,
+    color: String,
 }
 
 pub trait CategoryRepositoryTrait {
@@ -47,17 +48,18 @@ impl CategoryRepositoryTrait for CategoryRepository {
             ReadCategoryRow,
             r#"
                 WITH inserted AS (
-                    INSERT INTO category (name, created_by)
-                    VALUES ($1, $2)
+                    INSERT INTO category (name, created_by, color)
+                    VALUES ($1, $2, $3)
                     ON CONFLICT (name, created_by) DO NOTHING
-                    RETURNING category.id, category.name, category.created_by
+                    RETURNING category.id, category.name, category.created_by, category.color
                 )
-                SELECT i.id as "id!", i.name as "name!", i.created_by as "created_by!" FROM inserted i
+                SELECT i.id as "id!", i.name as "name!", i.created_by as "created_by!", i.color as "color!" FROM inserted i
                 UNION ALL
-                SELECT c.id, c.name, c.created_by FROM category c WHERE c.name = $1 and c.created_by = $2
+                SELECT c.id, c.name, c.created_by, c.color FROM category c WHERE c.name = $1 and c.created_by = $2
             "#,
             dto.name,
-            actor.user_id
+            actor.user_id,
+            dto.color
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -70,6 +72,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
             id: row.id,
             name: row.name,
             created_by: row.created_by,
+            color: row.color,
         }
     }
 
@@ -80,7 +83,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
     ) -> Result<Vec<Category>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
-                SELECT category.id, category.name, category.created_by
+                SELECT category.id, category.name, category.created_by, category.color
                 FROM category
                 WHERE category.created_by = 
             ",

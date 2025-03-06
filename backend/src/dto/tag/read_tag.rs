@@ -11,6 +11,7 @@ use crate::{
 pub struct ReadTagDto {
     pub id: Uuid,
     pub label: String,
+    pub color: String,
 }
 
 impl ReadTagDto {
@@ -18,6 +19,7 @@ impl ReadTagDto {
         Self {
             id: entity.id,
             label: entity.label,
+            color: entity.color,
         }
     }
 }
@@ -30,6 +32,7 @@ pub struct ReadTagDetailsDto {
     pub allowed_categories: Vec<ReadCategoryDto>,
     pub usages: i64,
     pub created_by: String,
+    pub color: String,
 }
 
 impl ReadTagDetailsDto {
@@ -44,6 +47,7 @@ impl ReadTagDetailsDto {
                 .map(ReadCategoryDto::from)
                 .collect(),
             usages: entity.usages,
+            color: entity.color,
         }
     }
 }

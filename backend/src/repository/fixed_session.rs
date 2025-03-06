@@ -52,9 +52,11 @@ pub struct GenericFullRowSession {
 
     category_id: Uuid,
     category: String,
+    category_color: String,
 
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
+    tag_color: Option<String>,
 }
 
 fn map_read_to_session(row: &PgRow) -> Result<GenericFullRowSession> {
@@ -69,6 +71,8 @@ fn map_read_to_session(row: &PgRow) -> Result<GenericFullRowSession> {
         category: row.try_get("category")?,
         tag_id: row.try_get("tag_id")?,
         tag_label: row.try_get("tag_label")?,
+        tag_color: row.try_get("tag_color")?,
+        category_color: row.try_get("category_color")?,
     })
 }
 
@@ -95,6 +99,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                     id: session.category_id,
                     name: session.category,
                     created_by: session.user_id,
+                    color: session.category_color,
                 },
                 tags: vec![],
                 start_time: DateTime::from(session.start_time),
@@ -102,8 +107,14 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 description: session.description,
             });
 
-            if let (Some(id), Some(label)) = (session.tag_id, session.tag_label) {
-                entry.tags.push(Tag { id, label });
+            if let (Some(id), Some(label), Some(tag_color)) =
+                (session.tag_id, session.tag_label, session.tag_color)
+            {
+                entry.tags.push(Tag {
+                    id,
+                    label,
+                    color: tag_color,
+                });
             }
         }
         Ok(grouped_tags.into_values().collect())
@@ -122,9 +133,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 s.category_id,
                 c.name as category,
+                c.color as category_color,
 
                 t.id as "tag_id?",
-                t.label as "tag_label?"
+                t.label as "tag_label?",
+                t.color as "tag_color?"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
