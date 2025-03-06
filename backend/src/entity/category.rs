@@ -6,4 +6,5 @@ pub struct Category {
     pub id: Uuid,
     pub name: String,
     pub created_by: String,
+    pub color: String,
 }
