@@ -11,7 +11,7 @@ use crate::{
         filter_session::{FilterSessionDto, Mode},
         fixed_session::CreateFixedSessionDto,
     },
-    entity::{category::Category, session::FixedSession, tag::Tag, user::User},
+    entity::{category::Category, session::FixedSession, tag::Tag},
 };
 
 #[derive(Clone)]
@@ -29,7 +29,6 @@ pub trait SessionRepositoryTrait {
     async fn create(
         &self,
         dto: CreateFixedSessionDto,
-        user_id: Uuid,
         category_id: Uuid,
         tag_ids: Vec<Uuid>,
     ) -> Result<FixedSession>;
@@ -46,9 +45,6 @@ pub struct GenericFullRowSession {
     category_id: Uuid,
     category: String,
 
-    user_id: Uuid,
-    username: String,
-
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
 }
@@ -62,8 +58,6 @@ fn map_read_to_session(row: &PgRow) -> Result<GenericFullRowSession> {
         description: row.try_get("description")?,
         category_id: row.try_get("category_id")?,
         category: row.try_get("category")?,
-        user_id: row.try_get("user_id")?,
-        username: row.try_get("username")?,
         tag_id: row.try_get("tag_id")?,
         tag_label: row.try_get("tag_label")?,
     })
@@ -92,10 +86,6 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                     name: session.category,
                 },
                 tags: vec![],
-                user: User {
-                    id: session.user_id,
-                    username: session.username,
-                },
                 start_time: DateTime::from(session.start_time),
                 end_time: DateTime::from(session.end_time.unwrap()), // INFO: fixed sessions cannot have nullable end_time
                 description: session.description,
@@ -122,10 +112,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 c.name as category,
 
                 t.id as "tag_id?",
-                t.label as "tag_label?",
-
-                u.id as user_id,
-                u.display_name as username
+                t.label as "tag_label?"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -133,8 +120,6 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
-            JOIN users u
-                on u.id = s.user_id
             WHERE 
                 s.id = $1
                 AND type = 'fixed'"#,
@@ -142,26 +127,23 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         )
         .fetch_all(self.db_conn.get_pool())
         .await?;
-        let data = self.convert(sessions);
 
-        data
+        self.convert(sessions)
     }
 
     async fn create(
         &self,
         dto: CreateFixedSessionDto,
-        user_id: Uuid,
         category_id: Uuid,
         tag_ids: Vec<Uuid>,
     ) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
-                INSERT INTO session (category_id, user_id, type, start_time, end_time, description)
-                VALUES ($1, $2,$3,$4,$5,$6)
+                INSERT INTO session (category_id, type, start_time, end_time, description)
+                VALUES ($1, $2,$3,$4,$5)
                 RETURNING session.id
             "#,
             category_id,
-            user_id,
             String::from("fixed"),
             dto.start_time,
             dto.end_time,
@@ -205,9 +187,6 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 t.id as tag_id,
                 t.label as tag_label,
-
-                u.id as user_id,
-                u.display_name as username
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -215,8 +194,6 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
-            JOIN users u
-                on u.id = s.user_id
             WHERE 
                 1=1"#,
         );
