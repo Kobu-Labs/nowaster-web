@@ -70,6 +70,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
       return await TagApi.create({
         label: data.tagLabel,
         allowedCategories: data.allowedCategories,
+        color: selectedColor,
       });
     },
     onSuccess: async (data) => {
