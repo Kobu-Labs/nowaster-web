@@ -88,18 +88,18 @@ export const ScheduledSessionCreationForm: FC = () => {
     toast(
       result.isErr
         ? {
-            title: "Session creation failed",
-            description: result.error.message,
-            variant: "destructive",
-          }
+          title: "Session creation failed",
+          description: result.error.message,
+          variant: "destructive",
+        }
         : {
-            className: "text-[#adfa1d]",
-            title: "Session created successfully",
-            description: (
-              <SessionCard variant="borderless" session={result.value} />
-            ),
-            variant: "default",
-          },
+          className: "text-[#adfa1d]",
+          title: "Session created successfully",
+          description: (
+            <SessionCard variant="borderless" session={result.value} />
+          ),
+          variant: "default",
+        },
     );
   }
 
