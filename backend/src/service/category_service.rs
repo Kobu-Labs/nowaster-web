@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::ReadCategoryDto,
+        read_category::ReadCategoryDto, update_category::UpdateCategoryDto,
     },
     entity::category::Category,
     repository::category::{CategoryRepository, CategoryRepositoryTrait},
@@ -46,5 +46,20 @@ impl CategoryService {
 
     pub async fn get_by_id(&self, category_id: Uuid, actor: ClerkUser) -> Result<Category> {
         self.repo.find_by_id(category_id, actor).await
+    }
+
+    pub async fn update_category(
+        &self,
+        dto: UpdateCategoryDto,
+        actor: ClerkUser,
+    ) -> Result<ReadCategoryDto> {
+        let category = self.repo.find_by_id(dto.id, actor.clone()).await?;
+        if category.created_by != actor.user_id {
+            return Err(anyhow::anyhow!(
+                "You are not allowed to update this category"
+            ));
+        }
+        let res = self.repo.update(dto).await?;
+        Ok(ReadCategoryDto::from(res))
     }
 }
