@@ -3,13 +3,9 @@ use chrono::DateTime;
 use uuid::Uuid;
 
 use crate::{
-    dto::{
-        category::create_category::CreateCategoryDto,
-        session::{
-            filter_session::{DateFilter, FilterSessionDto},
-            fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto},
-        },
-        tag::create_tag::CreateTagDto,
+    dto::session::{
+        filter_session::{DateFilter, FilterSessionDto},
+        fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto},
     },
     repository::fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
 };
