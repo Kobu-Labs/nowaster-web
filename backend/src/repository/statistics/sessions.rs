@@ -28,16 +28,16 @@ impl StatisticsRepository {
     }
 
     pub async fn get_total_session_time(&self) -> Result<f64> {
-        let sum: f64 = sqlx::query_scalar(
+        let sum: Option<f64> = sqlx::query_scalar(
             r#"
-                SELECT CAST(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60 AS FLOAT8) as "sum!"
+                SELECT CAST(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60 AS FLOAT8) as "sum"
                 FROM session
             "#,
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
 
-        Ok(sum)
+        Ok(sum.unwrap_or(0 as f64))
     }
 
     pub async fn get_current_streak(&self) -> Result<u16> {
