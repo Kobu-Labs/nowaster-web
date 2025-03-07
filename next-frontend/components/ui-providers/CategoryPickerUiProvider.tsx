@@ -316,7 +316,7 @@ export const SingleCategoryPickerUiProvider: FC<
                   <Check
                     className={cn(
                       "mr-2 size-4",
-                      category === props.selectedCategory
+                      category.id === props.selectedCategory?.id
                         ? "opacity-100"
                         : "opacity-0",
                     )}
