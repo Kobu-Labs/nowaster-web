@@ -218,9 +218,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 s.category_id,
                 c.name as category,
+                c.color as category_color,
 
                 t.id as tag_id,
-                t.label as tag_label
+                t.label as tag_label,
+                t.color as tag_color
             FROM session s
             JOIN category c
                 on c.id = s.category_id
