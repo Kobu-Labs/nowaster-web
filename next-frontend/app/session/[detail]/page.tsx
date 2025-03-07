@@ -1,10 +1,6 @@
 "use client";
 
-import { categoryColors } from "@/state/categories";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { useRecoilState } from "recoil";
-
-import { randomColor } from "@/lib/utils";
 import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
 import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
 import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
@@ -16,6 +12,7 @@ import { BaseSessionTable } from "@/components/visualizers/sessions/session-tabl
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
+import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
 
 export default function Page(props: { params: { detail: string } }) {
   const categoryId = props.params.detail;
@@ -23,7 +20,7 @@ export default function Page(props: { params: { detail: string } }) {
     ...queryKeys.categories.byId(categoryId),
   });
 
-  const [colors, setColors] = useRecoilState(categoryColors);
+  const updateCategoryColor = useUpdateCategory({});
 
   if (query.isLoading || query.isError || !query.data || query.data.isErr) {
     return <div className="m-8">Loading...</div>;
@@ -41,12 +38,6 @@ export default function Page(props: { params: { detail: string } }) {
       categories: [query.data.value],
     },
   };
-  const categoryLabel = query.data.value.name;
-  const currentCategoryColors = colors[categoryLabel] ?? randomColor();
-
-  const setColorsGlobState = (value: string) => {
-    setColors({ ...colors, [categoryLabel]: value });
-  };
 
   return (
     <div className="grow">
@@ -55,8 +46,13 @@ export default function Page(props: { params: { detail: string } }) {
           Details page for
           <CategoryLabel category={query.data.value} />
           <ColorPicker
-            initialColor={currentCategoryColors}
-            onSelect={setColorsGlobState}
+            initialColor={query.data.value.color}
+            onSelect={(color) =>
+              updateCategoryColor.mutate({
+                id: categoryId,
+                color: color,
+              })
+            }
           />
         </h2>
       </div>
