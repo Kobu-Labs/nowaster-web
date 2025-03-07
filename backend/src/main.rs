@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use config::database::{Database, DatabaseTrait};
-use dotenv::dotenv;
+use dotenv::{dotenv, from_path};
 use router::root::get_router;
 
 mod config;
@@ -14,16 +14,20 @@ mod state;
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
+    from_path("../../deploy/.env").ok();
 
-    let db = Database::init()
+    dotenv().ok();
+    let port = env::var("BACKEND_PORT").unwrap();
+    let database_url = env::var("DATABASE_URL").unwrap();
+    let addr = env::var("BACKEND_ADDRESS").unwrap();
+
+    let db = Database::init(database_url)
         .await
         .unwrap_or_else(|e| panic!("Database error: {}", e));
 
     let router = get_router(Arc::new(db));
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3030")
-        .await
-        .unwrap();
+    let addr = format!("{}:{}", addr, port);
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, router).await.unwrap()

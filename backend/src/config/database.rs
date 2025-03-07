@@ -7,7 +7,7 @@ pub struct Database {
 
 #[async_trait]
 pub trait DatabaseTrait {
-    async fn init() -> Result<Self, Error>
+    async fn init(database_url:String) -> Result<Self, Error>
     where
         Self: Sized;
     fn get_pool(&self) -> &PgPool;
@@ -15,8 +15,7 @@ pub trait DatabaseTrait {
 
 #[async_trait]
 impl DatabaseTrait for Database {
-    async fn init() -> Result<Self, Error> {
-        let database_url = std::env::var("DATABASE_URL").unwrap();
+    async fn init(database_url: String) -> Result<Self, Error> {
         let pool = sqlx::postgres::PgPool::connect(database_url.as_str()).await?;
         sqlx::migrate!("./migrations").run(&pool).await?;
 
