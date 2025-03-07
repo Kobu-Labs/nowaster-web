@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::tag::{create_tag::CreateTagDto, filter_tags::TagFilterDto},
+    dto::tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto},
     entity::tag::Tag,
 };
 
@@ -22,7 +22,7 @@ pub struct ReadTagRow {
 
 pub trait TagRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: CreateTagDto) -> Result<Tag>;
+    async fn upsert(&self, dto: UpsertTagDto) -> Result<Tag>;
     fn mapper(&self, row: ReadTagRow) -> Tag;
     async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<Tag>>;
     async fn delete_tag(&self, id: Uuid) -> Result<()>;
@@ -37,7 +37,7 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
-    async fn upsert(&self, dto: CreateTagDto) -> Result<Tag> {
+    async fn upsert(&self, dto: UpsertTagDto) -> Result<Tag> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
