@@ -8,11 +8,13 @@ export type CategoryRequest = {
 
 const create = z.object({
   name: z.string().trim().min(1),
+  color: z.string().trim().min(1),
 });
 
 const update = z.object({
-  originalName: z.string(),
-  name: z.string(),
+  id: z.string(),
+  label: z.string().optional(),
+  color: z.string().trim().min(1).optional(),
 });
 
 const readByName = z.object({
