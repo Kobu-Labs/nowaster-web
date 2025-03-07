@@ -1,5 +1,8 @@
 import { FC, HTMLAttributes, useState } from "react";
-import { Granularity, GranularitySelect } from "@/components/visualizers/charts/GranularitySelect";
+import {
+  Granularity,
+  GranularitySelect,
+} from "@/components/visualizers/charts/GranularitySelect";
 import {
   SessionFilterPrecursor,
   filterPrecursorAtom,
@@ -23,7 +26,7 @@ type FilteredSessionAreaChartProps = {
 } & HTMLAttributes<HTMLDivElement>;
 
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
-  props
+  props,
 ) => {
   return (
     <Provider>
@@ -33,35 +36,42 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
 };
 
 const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
-  props
+  props,
 ) => {
   const [granularity, setGranularity] = useState<Granularity>(
-    props.initialGranularity
+    props.initialGranularity,
   );
 
   useHydrateAtoms(
-    new Map([[filterPrecursorAtom, props.filter ?? getDefaultFilter()]])
+    new Map([[filterPrecursorAtom, props.filter ?? getDefaultFilter()]]),
   );
 
   const [filterPrecursor, setChartFilter] = useAtom(filterPrecursorAtom);
 
   const updateFilter = (range: DeepRequired<DateRange>) => {
     setChartFilter((oldState) =>
-      overwriteData(oldState, { endTimeFrom: range.from, endTimeTo: range.to })
+      overwriteData(oldState, {
+        endTimeFrom: { value: range.from },
+        endTimeTo: { value: range.to },
+      }),
     );
-
   };
 
   return (
     <Card className={cn("flex grow flex-col", props.className)}>
       <CardHeader className="flex flex-row items-center gap-2">
-        <GranularitySelect onSelect={setGranularity} defaultValue={granularity} />
+        <GranularitySelect
+          onSelect={setGranularity}
+          defaultValue={granularity}
+        />
         <div className="grow"></div>
         <div className="flex items-center gap-2">
-          <GranularityBasedDatePicker granularity={granularity} props={{
-            onSelected: updateFilter,
-            initialDate: filterPrecursor.data.endTimeTo
-          }}
+          <GranularityBasedDatePicker
+            granularity={granularity}
+            props={{
+              onSelected: updateFilter,
+              initialDate: filterPrecursor.data.endTimeTo?.value,
+            }}
           />
         </div>
         <ChartFilter />
