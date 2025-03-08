@@ -35,9 +35,10 @@ import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { CircleHelp, Save, Trash2 } from "lucide-react";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { tagColors } from "@/state/tags";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { useUpdateTag } from "@/components/hooks/tag/useUpdateTag";
 
 type TagEditFormProps = {
   tag: TagDetails;
@@ -47,7 +48,7 @@ type TagEditFormProps = {
 
 export const TagEditForm: FC<TagEditFormProps> = (props) => {
   const [newTagName, setNewTagName] = useState(props.tag.label);
-  const [colors, setColors] = useRecoilState(tagColors);
+  const colors = useRecoilValue(tagColors);
   const tagColor = colors[props.tag.label];
   const queryClient = useQueryClient();
   const [newColor, setNewColor] = useState<string>(tagColor ?? "#00f00f");
@@ -84,7 +85,11 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
           title: "Tag deleted",
           description: (
             <>
-              <TagBadge value={props.tag.label} />
+              <TagBadge
+                variant="manual"
+                value={props.tag.label}
+                colors={props.tag.color}
+              />
               deleted successfully!
             </>
           ),
@@ -102,45 +107,8 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
     onSettled: props.onDelete,
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      tagLabel: string;
-      allowedCategories: CategoryWithId[];
-      tagColor: string;
-    }) => {
-      setColors((prev) => ({
-        ...prev,
-        [data.tagLabel]: data.tagColor,
-      }));
-      return await TagApi.update({
-        id: props.tag.id,
-        label: data.tagLabel,
-        allowedCategories: data.allowedCategories,
-        color: data.tagColor,
-      });
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
-      if (data.isErr) {
-        toast({
-          title: "Error editing tag",
-          description: data.error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Tag edited",
-          description: (
-            <>
-              <TagBadge value={data.value.label} />
-              edit successfully!
-            </>
-          ),
-          variant: "default",
-        });
-        props.onEdit(data.value);
-      }
-    },
+  const mutation = useUpdateTag({
+    onSuccess: props.onEdit,
   });
 
   return (
@@ -149,7 +117,11 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
         <CardHeader>
           <CardTitle className="font-mono flex items-center gap-2">
             Edit
-            <TagBadge value={props.tag.label} colors={newColor} />
+            <TagBadge
+              value={props.tag.label}
+              colors={newColor}
+              variant="manual"
+            />
           </CardTitle>
         </CardHeader>
         <div className="space-y-4 py-4">
@@ -169,7 +141,11 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                 className="w-48"
               />
               {newTagName.length > 0 && (
-                <TagBadge value={newTagName} colors={newColor} />
+                <TagBadge
+                  value={newTagName}
+                  colors={newColor}
+                  variant="manual"
+                />
               )}
             </div>
           </div>
@@ -245,9 +221,10 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
             disabled={newTagName.length === 0}
             onClick={() =>
               mutation.mutate({
-                tagLabel: newTagName,
+                id: props.tag.id,
+                label: newTagName,
                 allowedCategories: selectedCategories,
-                tagColor: newColor,
+                color: newColor,
               })
             }
           >
