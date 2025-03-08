@@ -32,7 +32,12 @@ export const getFormattedTimeDifference = (from: Date, to: Date) => {
 };
 
 export const randomColor = (): string => {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16);
+  return (
+    "#" +
+    Math.floor(Math.random() * 0xffffff)
+      .toString(16)
+      .padStart(6, "0")
+  );
 };
 
 export const isHexColor = (str: string) => /^#([0-9A-F]{3}){2}$/i.test(str);
