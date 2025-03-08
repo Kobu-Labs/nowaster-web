@@ -87,7 +87,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                 className="w-48"
               />
               {newTagName.length > 0 && (
-                <TagBadge value={newTagName} colors={selectedColor} />
+                <TagBadge variant="manual" value={newTagName} colors={selectedColor} />
               )}
             </div>
           </div>
