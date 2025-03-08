@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from "react";
 import { CategoryWithId, TagWithId } from "@/api/definitions";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { randomColor } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
@@ -12,16 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/card";
-import { TagApi } from "@/api";
-import { useToast } from "@/components/shadcn/use-toast";
 import { Input } from "@/components/shadcn/input";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { CircleHelp, Save } from "lucide-react";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { useSetRecoilState } from "recoil";
-import { tagColors } from "@/state/tags";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import Link from "next/link";
+import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 
 type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
@@ -36,9 +31,7 @@ type CreateTagDialogProps = {
 
 export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
   const [newTagName, setNewTagName] = useState("");
-  const { toast } = useToast();
   const [randomColors, setRandomColors] = useState<string[]>([]);
-  const queryClient = useQueryClient();
   const [selectedCategories, setSelectedCategories] = useState<
     CategoryWithId[]
   >([]);
@@ -48,7 +41,6 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
     setRandomColors(Array.from({ length: 10 }, () => randomColor()));
   }, []);
 
-  const setColors = useSetRecoilState(tagColors);
   const [selectedColor, setSelectedColor] = useState(randomColor());
 
   const handleSelectCategory = (category: CategoryWithId) => {
@@ -62,43 +54,10 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
     }
   };
 
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      tagLabel: string;
-      allowedCategories: CategoryWithId[];
-    }) => {
-      return await TagApi.create({
-        label: data.tagLabel,
-        allowedCategories: data.allowedCategories,
-        color: selectedColor,
-      });
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
-      if (data.isErr) {
-        toast({
-          title: "Error creating tag",
-          description: data.error.message,
-          variant: "destructive",
-        });
-      } else {
-        setColors((prev) => ({
-          ...prev,
-          [data.value.label]: selectedColor,
-        }));
-        toast({
-          title: "Tag created",
-          description: (
-            <>
-              <TagBadge value={data.value.label} colors={selectedColor} />
-              created successfully!
-            </>
-          ),
-          variant: "default",
-        });
-        setNewTagName("");
-        props.onSave(data.value);
-      }
+  const mutation = useCreateTag({
+    onSuccess: (data) => {
+      setNewTagName("");
+      props.onSave(data);
     },
   });
 
@@ -194,8 +153,9 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
             disabled={newTagName.length === 0}
             onClick={() =>
               mutation.mutate({
-                tagLabel: newTagName,
+                label: newTagName,
                 allowedCategories: selectedCategories,
+                color: selectedColor,
               })
             }
           >
