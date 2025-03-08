@@ -1,17 +1,8 @@
 import { FC, useState } from "react";
-import { TagApi } from "@/api";
-import { Result } from "@badrap/result";
-import {
-  Category,
-  TagDetails,
-  TagRequest,
-  TagResponse,
-} from "@/api/definitions";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Category, TagDetails } from "@/api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import {
   Command,
@@ -27,6 +18,7 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import FuzzySearch from "fuzzy-search";
+import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 
 export type TagPickerUiProviderProps = {
   availableTags: TagDetails[];
@@ -67,26 +59,16 @@ const orderCategories = (
 };
 
 export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
-  const queryClient = useQueryClient();
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  // this is used if the user is creating a new tag
+  const [newTagColor, setNewTagColor] = useState(randomColor());
 
   // TODO move this higher
-  const { mutate: createTag } = useMutation<
-    Result<TagResponse["create"]>,
-    unknown,
-    TagRequest["create"]
-  >({
-    mutationFn: async (params) => await TagApi.create(params),
-    retry: false,
-    onSuccess: async (tagResult) => {
-      if (tagResult.isErr) {
-        return;
-      }
-
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
-      props.onSelectTag(tagResult.value);
+  const { mutate: createTag } = useCreateTag({
+    onSuccess: (tag) => {
+      props.onSelectTag(tag);
+      setNewTagColor(randomColor());
     },
   });
 
@@ -141,8 +123,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {props.selectedTags.length === 0
                 ? "Select Tags"
                 : props.selectedTags.map((tag) => (
-                  <TagBadge key={tag.id} value={tag.label} />
-                ))}
+                    <TagBadge key={tag.id} value={tag.label} />
+                  ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -156,23 +138,23 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-            <CommandGroup>
-              <CommandItem
-                className="flex"
-                onSelect={() =>
-                  createTag({
-                    color: randomColor(),
-                    label: searchTerm,
-                    allowedCategories: [],
-                  })
-                }
-              >
-                <p>Create</p>
-                <div className="grow"></div>
-                <TagBadge value={searchTerm} />
-              </CommandItem>
-            </CommandGroup>
-          )}
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() =>
+                    createTag({
+                      color: newTagColor,
+                      label: searchTerm,
+                      allowedCategories: [],
+                    })
+                  }
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <TagBadge value={searchTerm} colors={newTagColor} />
+                </CommandItem>
+              </CommandGroup>
+            )}
           <ScrollArea
             type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
@@ -193,7 +175,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                           : "opacity-0",
                       )}
                     />
-                    <TagBadge value={tag.label} />
+                    <TagBadge value={tag.label} colors={tag.color} />
                   </CommandItem>
                 ))}
               </CommandGroup>
