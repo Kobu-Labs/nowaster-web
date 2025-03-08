@@ -12,8 +12,8 @@ import {
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type SessionCardProps = {
-  session: ScheduledSession
-} & VariantProps<typeof historyCardVariants>
+  session: ScheduledSession;
+} & VariantProps<typeof historyCardVariants>;
 
 const historyCardVariants = cva(
   "hover:bg-accent hover:text-accent-foreground hover:cursor-pointer",
@@ -44,8 +44,8 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
             {props.session.description}
           </p>
           <div className="mt-1 flex">
-            {props.session.tags.map((val) => (
-              <TagBadge key={val.id} value={val.label} />
+            {props.session.tags.map((tag) => (
+              <TagBadge tag={tag} variant="auto" key={tag.id} />
             ))}
           </div>
         </div>

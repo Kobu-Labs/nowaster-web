@@ -8,8 +8,8 @@ import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type ActiveSessionUiProviderProps = {
-  session: ScheduledSession | null
-}
+  session: ScheduledSession | null;
+};
 
 export const ActiveSessionUiProvider: FC<ActiveSessionUiProviderProps> = ({
   session,
@@ -40,8 +40,8 @@ export const ActiveSessionUiProvider: FC<ActiveSessionUiProviderProps> = ({
           <div className="font-medium">{displayedTime}</div>
         </div>
         <div className="flex gap-1">
-          {session.tags.map((val) => (
-            <TagBadge key={val.id} value={val.label} />
+          {session.tags.map((tag) => (
+            <TagBadge tag={tag} variant="auto" key={tag.id} />
           ))}
         </div>
       </div>
