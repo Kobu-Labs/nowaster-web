@@ -3,6 +3,7 @@ use crate::{
     router::clerk::ClerkUser,
 };
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -10,11 +11,46 @@ pub struct StatisticsRepository {
     db_conn: Arc<Database>,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ReadColorsDto {
+    pub category_colors: Vec<(String, String)>,
+    pub tag_colors: Vec<(String, String)>,
+}
+
 impl StatisticsRepository {
     pub fn new(db_conn: &Arc<Database>) -> Self {
         Self {
             db_conn: Arc::clone(db_conn),
         }
+    }
+
+    pub async fn get_colors(&self, actor: ClerkUser) -> Result<ReadColorsDto> {
+        let tag_colors = sqlx::query_as::<_, (String, String)>(
+            r#"
+                SELECT tag.color, tag.label
+                FROM tag
+                WHERE tag.created_by = $1
+            "#,
+        )
+        .bind(actor.user_id.clone())
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        let category_colors = sqlx::query_as::<_, (String, String)>(
+            r#"
+                SELECT category.color, category.name
+                FROM category
+                WHERE category.created_by = $1
+            "#,
+        )
+        .bind(actor.user_id.clone())
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        Ok(ReadColorsDto {
+            category_colors,
+            tag_colors,
+        })
     }
 
     pub async fn get_amount_of_sessions(&self, actor: ClerkUser) -> Result<u16> {
