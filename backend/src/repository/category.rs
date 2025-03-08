@@ -142,35 +142,34 @@ impl CategoryRepositoryTrait for CategoryRepository {
     }
 
     async fn update(&self, dto: UpdateCategoryDto) -> Result<Category> {
-        let mut should_execute = false;
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 UPDATE "category" SET
             "#,
         );
 
-        if let Some(name) = dto.name {
-            if name.is_empty() {
-                return Err(anyhow::anyhow!("Name cannot be empty"));
-            }
-            query.push(" name = ");
-            query.push_bind(name);
-            should_execute = true;
+        let mut fields = vec![];
+
+        if let Some(label) = dto.name {
+            fields.push(("label", label));
         }
+
         if let Some(color) = dto.color {
-            if color.is_empty() {
-                return Err(anyhow::anyhow!("Color cannot be empty"));
+            fields.push(("color", color));
+        }
+
+        for (i, (field, value)) in fields.clone().into_iter().enumerate() {
+            if i > 0 {
+                query.push(", ");
             }
-            query.push(" color = ");
-            query.push_bind(color);
-            should_execute = true;
+            query.push(format!("{field} = ")).push_bind(value);
         }
 
         query.push(" WHERE id = ");
         query.push_bind(dto.id);
         query.push(" RETURNING category.id, category.name, category.created_by, category.color");
 
-        if !should_execute {
+        if fields.is_empty() {
             return Err(anyhow::anyhow!("No fields to update"));
         }
 
