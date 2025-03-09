@@ -13,14 +13,14 @@ import {
   ResponsiveContainer,
   Sector,
 } from "recharts";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 
 import { formatTime, randomColor } from "@/lib/utils";
 import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart";
 
 type SessionPieChartUiProviderProps = {
-  data: AmountByCategory[]
-}
+  data: AmountByCategory[];
+};
 
 const renderActiveShape = (props: any) => {
   const {
@@ -68,19 +68,8 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   props,
 ) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
-
-  const [colors, setColors] = useRecoilState(tagColors);
-  const result: { [label: string]: string } = {};
-
-  props.data.forEach(({ key }) => {
-    if (colors[key] === undefined) {
-      result[key] = randomColor();
-    }
-  });
-
-  if (Object.entries(result).length !== 0) {
-    setColors({ ...colors, ...result });
-  }
+  const [fallbackColor] = useState(randomColor());
+  const colors = useRecoilValue(tagColors);
 
   return (
     <ResponsiveContainer width={"100%"} height={180}>
@@ -102,9 +91,9 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
             return (
               <Cell
                 fillOpacity={0.4}
-                stroke={colors[key]}
+                stroke={colors[key] ?? fallbackColor}
                 key={`cell-${index}`}
-                fill={colors[key]}
+                fill={colors[key] ?? fallbackColor}
               />
             );
           })}
