@@ -14,6 +14,7 @@ import { setupAxiosInterceptors } from "@/api/baseApi";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { LoaderCircle } from "lucide-react";
+import { useColors } from "@/components/hooks/useColors";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -22,7 +23,11 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <ClerkProvider>
-      <AxiosInterceptorWrapper>{children}</AxiosInterceptorWrapper>
+      <RecoilRoot>
+        <ReactQueryProvider>
+          <AxiosInterceptorWrapper>{children}</AxiosInterceptorWrapper>
+        </ReactQueryProvider>
+      </RecoilRoot>
     </ClerkProvider>
   );
 }
@@ -36,39 +41,39 @@ const AxiosInterceptorWrapper = ({ children }: RootLayoutProps) => {
     setReady(true);
   }, [auth]);
 
+  // load initial colors
+  useColors();
+
   return (
-    <RecoilRoot>
-      <ReactQueryProvider>
-        <html lang="en" suppressHydrationWarning>
-          <head />
-          <body
-            className={cn(
-              "min-h-screen bg-background font-sans antialiased",
-              fontSans.variable,
-            )}
-          >
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-              <div className="relative flex min-h-screen flex-col">
-                <SiteHeader />
-                <main className="flex grow">
-                  {ready ? (
-                    children
-                  ) : (
-                    <Skeleton className="flex items-center justify-center  w-full grow h-screen m-20">
-                      <LoaderCircle
-                        strokeWidth={1}
-                        className="h-1/2 w-1/2 animate-spin"
-                      />
-                    </Skeleton>
-                  )}
-                </main>
-                <Toaster />
-                <ReactQueryDevtools initialIsOpen={false} />
-              </div>
-            </ThemeProvider>
-          </body>
-        </html>
-      </ReactQueryProvider>
-    </RecoilRoot>
+
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable,
+        )}
+      >
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <div className="relative flex min-h-screen flex-col">
+            <SiteHeader />
+            <main className="flex grow">
+              {ready ? (
+                children
+              ) : (
+                <Skeleton className="flex items-center justify-center  w-full grow h-screen m-20">
+                  <LoaderCircle
+                    strokeWidth={1}
+                    className="h-1/2 w-1/2 animate-spin"
+                  />
+                </Skeleton>
+              )}
+            </main>
+            <Toaster />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </div>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 };

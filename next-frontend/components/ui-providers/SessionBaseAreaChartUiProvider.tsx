@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import { categoryColors } from "@/state/categories";
 import { ScheduledSession } from "@/api/definitions";
 import {
@@ -16,7 +16,7 @@ import {
 import { useRecoilValue } from "recoil";
 
 import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
-import { formatTime } from "@/lib/utils";
+import { formatTime, randomColor } from "@/lib/utils";
 import { Card } from "@/components/shadcn/card";
 
 type SessionBaseAreaChartUiProviderProps = {
@@ -31,7 +31,7 @@ export const SessionBaseAreaChartUiProvider: FC<
     props.data,
     props.groupingOpts,
   );
-
+  const [fallbackColor] = useState(randomColor());
   const colors = useRecoilValue(categoryColors);
 
   if (props.data.length === 0) {
@@ -52,11 +52,11 @@ export const SessionBaseAreaChartUiProvider: FC<
           return (
             <Area
               key={category}
-              fill={colors[category]}
+              fill={colors[category] ?? fallbackColor}
               type="monotone"
               stackId="1"
               dataKey={(v: Record<string, number>) => v[category] ?? 0}
-              stroke={colors[category]}
+              stroke={colors[category] ?? fallbackColor}
               strokeWidth={4}
               fillOpacity={0.4}
             />
