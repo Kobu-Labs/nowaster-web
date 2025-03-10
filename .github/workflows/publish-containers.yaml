@@ -6,6 +6,8 @@ on:
 
 jobs:
   build-and-push:
+    # disable this job for now as we are not using docker images
+    if: false
     runs-on: ubuntu-latest
 
     permissions:
