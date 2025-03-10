@@ -19,10 +19,12 @@ export const Basic: Story = {
       {
         name: "pb138",
         id: "pb138",
+        color: "#0f0f0f",
       },
       {
         name: "testing",
         id: "testing",
+        color: "#ff0fbf",
       },
     ],
   },
