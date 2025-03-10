@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH inserted AS (\n                    INSERT INTO tag (label)\n                    VALUES ($1)\n                    ON CONFLICT (label) DO NOTHING\n                    RETURNING tag.id, tag.label\n                )\n                SELECT i.id as \"id!\", i.label as \"label!\" FROM inserted i\n                UNION ALL\n                SELECT c.id, c.label FROM tag c WHERE c.label = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "c18df91d815d700c43673cf0576828ee27598bef2d8433bfb4ef63243d9c632d"
+}

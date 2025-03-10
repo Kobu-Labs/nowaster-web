@@ -88,14 +88,19 @@ export const translateFilterPrecursor = (
     settings: { tags, categories },
   } = precursor;
 
-  const result: SessionFilter = {
-    fromEndTime: {
-      value: data.endTimeFrom,
-    },
-    toEndTime: {
-      value: data.endTimeTo,
-    },
-  };
+  const result: SessionFilter = {};
+
+  if (data.endTimeTo?.value) {
+    result.toEndTime = {
+      value: data.endTimeTo.value,
+    };
+  }
+
+  if (data.endTimeFrom?.value) {
+    result.fromEndTime = {
+      value: data.endTimeFrom.value,
+    };
+  }
 
   if (data.tags && data.tags?.length > 0) {
     result.tags = result.tags ?? {};

@@ -1,4 +1,5 @@
 .env
+target
 dist/
 next-frontend/storybook-static
 tsconfig.tsbuildinfo

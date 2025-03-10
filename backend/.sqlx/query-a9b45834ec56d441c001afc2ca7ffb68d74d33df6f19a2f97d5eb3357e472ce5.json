@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM tag_category\n                WHERE tag_id = $1 AND category_id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a9b45834ec56d441c001afc2ca7ffb68d74d33df6f19a2f97d5eb3357e472ce5"
+}
