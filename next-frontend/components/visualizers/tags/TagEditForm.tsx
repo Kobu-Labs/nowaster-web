@@ -84,14 +84,14 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
         toast({
           title: "Tag deleted",
           description: (
-            <>
+            <div className="flex items-center gap-2">
               <TagBadge
                 variant="manual"
                 value={props.tag.label}
                 colors={props.tag.color}
               />
               deleted successfully!
-            </>
+            </div>
           ),
           variant: "default",
         });
