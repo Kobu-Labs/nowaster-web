@@ -9,6 +9,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   addHours,
   addMinutes,
+  isBefore,
+  isEqual,
   setMinutes,
   subHours,
   subMinutes,
@@ -84,6 +86,15 @@ export const ScheduledSessionCreationForm: FC = () => {
   });
 
   async function onSubmit(values: ScheduledSessionRequest["create"]) {
+    if (
+      isBefore(values.endTime, values.startTime) ||
+      isEqual(values.endTime, values.startTime)
+    ) {
+      form.setError("endTime", {
+        message: "End time must be after start time",
+      });
+      return;
+    }
     setLoading(true);
     const result = await ScheduledSessionApi.create(values);
     await queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
