@@ -1,4 +1,4 @@
-name: Check NextJs build
+name: Eslint Formatting Check
 
 env:
   SKIP_ENV_VALIDATION: true
@@ -9,7 +9,7 @@ on:
     types: [opened, reopened]
 
 jobs:
-  build:
+  check-frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,8 +21,8 @@ jobs:
       - name: Check for frontend changes
         id: changes
         run: |
-          echo "Checking for changes in next_frontend..."
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^next_frontend/'; then
+          echo "Checking for changes in next-frontend..."
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^next-frontend/'; then
             echo "frontend_changed=true" >> $GITHUB_OUTPUT
           else
             echo "No changes in next_frontend directory."
@@ -39,6 +39,6 @@ jobs:
         if: steps.changes.outputs.frontend_changed == 'true'
         run: npm i
 
-      - name: Build with Next.js
+      - name: Eslint check for frontend
         if: steps.changes.outputs.frontend_changed == 'true'
-        run: npm run build
+        run: npx eslint .
