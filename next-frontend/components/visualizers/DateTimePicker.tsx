@@ -15,18 +15,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
+import { Matcher } from "react-day-picker";
 
 export type QuickOption = {
-  label: string
-  increment: (date: Date) => Date
-}
+  label: string;
+  increment: (date: Date) => Date;
+};
 
 type DatePickerDemoProps = {
-  selected: Date | undefined
-  onSelect: (date: Date | undefined) => void
-  quickOptions?: QuickOption[]
-  label?: string
-}
+  selected: Date | undefined;
+  onSelect: (date: Date | undefined) => void;
+  quickOptions?: QuickOption[];
+  label?: string;
+  disabled?: Matcher;
+};
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -69,6 +71,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
       </div>
       <PopoverContent className="w-auto p-0">
         <Calendar
+          disabled={props.disabled}
           weekStartsOn={1}
           mode="single"
           selected={props.selected}
