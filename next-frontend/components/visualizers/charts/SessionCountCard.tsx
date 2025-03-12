@@ -11,18 +11,29 @@ type SessionCountCardProps = {
 };
 
 export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
-  const { data: result } = useQuery({
+  const {
+    data: result,
+    isError,
+    isLoading,
+  } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     retry: false,
-    select: (data) => (data.isOk ? data.value.length : 0),
+    select: (data) => {
+      if (data.isErr) {
+        throw new Error(data.error.message);
+      }
+      return data.value.length;
+    },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
   return (
     <KpiCardUiProvider
+      error={isError}
+      loading={isLoading}
       variant={"big_value"}
-      value={result ?? 0}
+      value={result}
       title={"Total sessions"}
     >
       <Sigma />
