@@ -13,12 +13,14 @@ type BaseSessionTableProps = {
 };
 
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
       return data.isOk ? data.value : [];
     },
   });
 
-  return <DataTable columns={props.columns} data={data ?? []} />;
+  return (
+    <DataTable loading={isLoading} columns={props.columns} data={data ?? []} />
+  );
 };
