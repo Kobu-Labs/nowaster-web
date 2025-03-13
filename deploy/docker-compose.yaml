@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: rust_backend
+    depends_on:
+      - postgres
+      - migrator
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    entrypoint: ["./axum-test"]
+
+  frontend:
+    env_file:
+      - .env
+    build:
+      context: ../next-frontend
+      dockerfile: Dockerfile
+    container_name: nextjs_frontend
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    entrypoint: ["/bin/sh", "-c", "npm run start"]
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+  migrator:
+    build: ../backend
+    container_name: sqlx_migrator
+    depends_on:
+      - postgres
+    working_dir: /app
+    env_file:
+      - .env
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "sleep 5 && sqlx migrate run",
+      ]
+
+volumes:
+  postgres_data:

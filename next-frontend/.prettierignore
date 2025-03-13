@@ -1,0 +1,15 @@
+cache
+.cache
+package.json
+package-lock.json
+./components/ui/*
+public
+CHANGELOG.md
+.yarn
+dist
+node_modules
+.next
+build
+.contentlayer
+storybook-static
+components/shadcn/

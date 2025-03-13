@@ -1,0 +1,44 @@
+name: Eslint Formatting Check
+
+env:
+  SKIP_ENV_VALIDATION: true
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  check-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./next-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for frontend changes
+        id: changes
+        run: |
+          echo "Checking for changes in next-frontend..."
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^next-frontend/'; then
+            echo "frontend_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes in next_frontend directory."
+            echo "frontend_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node
+        if: steps.changes.outputs.frontend_changed == 'true'
+        uses: actions/setup-node@v3
+        with:
+          node-version: "21"
+
+      - name: Install dependencies
+        if: steps.changes.outputs.frontend_changed == 'true'
+        run: npm i
+
+      - name: Eslint check for frontend
+        if: steps.changes.outputs.frontend_changed == 'true'
+        run: npx eslint .
