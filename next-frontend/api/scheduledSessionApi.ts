@@ -19,7 +19,7 @@ export const create = async (
 };
 
 export const getActiveSessions = async (): Promise<
-    Result<ScheduledSessionWithId[]>
+  Result<ScheduledSessionWithId[]>
 > => {
   const { data } = await baseApi.get(BASE_URL + "/active");
   //TODO: extract this to /api/definitions as a separate response
@@ -43,8 +43,6 @@ export const update = async (
 export const deleteSingle = async (
   params: ScheduledSessionRequest["remove"],
 ): Promise<Result<ScheduledSessionResponse["remove"]>> => {
-  const { data } = await baseApi.delete(BASE_URL, {
-    data: params,
-  });
+  const { data } = await baseApi.delete(BASE_URL + "/" + params.id);
   return await handleResponse(data, ScheduledSessionResponseSchema.remove);
 };
