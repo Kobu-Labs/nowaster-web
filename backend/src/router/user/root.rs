@@ -30,6 +30,8 @@ async fn update_user_handler(
 
 #[derive(Error, Debug)]
 pub enum UserError {
+    #[error("User not found")]
+    UserNotFound,
     #[error("Something went wrong")]
     UnknownError(String),
     #[error("Unauthorized")]
