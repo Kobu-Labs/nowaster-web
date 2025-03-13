@@ -1,0 +1,36 @@
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    # disable this job for now as we are not using docker images
+    if: false
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build and push backend image
+        run: |
+          docker build -t ghcr.io/kobu-labs/nowaster-web/backend:latest ./backend
+          docker push ghcr.io/kobu-labs/nowaster-web/backend:latest
+
+      - name: Build and push frontend image
+        run: |
+          docker build -t ghcr.io/kobu-labs/nowaster-web/frontend:latest ./next-frontend
+          docker push ghcr.io/kobu-labs/nowaster-web/frontend:latest

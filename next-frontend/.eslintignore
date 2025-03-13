@@ -1,0 +1,13 @@
+.eslintrc.cjs
+postcss.config.cjs
+tailwind.config.js
+prettier.config.js
+dist/*
+.cache
+public
+node_modules
+*.esm.js
+components/ui/*
+storybook-static
+.next
+components/shadcn/

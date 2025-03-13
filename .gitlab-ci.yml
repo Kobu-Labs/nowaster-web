@@ -1,0 +1,32 @@
+variables:
+  ALLOWED_TOKENS: "^((feat)|(refactor)|(fix)|(build)|(chore)|(ci)|(dosc)|(style)|(perf)|(test))"
+
+mr-title-check:
+  tags:
+    - shared-fi
+  script:
+    - echo $CI_MERGE_REQUEST_TITLE | grep -E "${ALLOWED_TOKENS}[:] .*"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+# eslint-check:
+# image: gitlab.fi.muni.cz:5050/pb138/ci/iteration-06:latest
+# tags:
+# - shared-fi
+# script:
+# - cd backend
+# - npm ci --cache /npm/npm-cache --no-audit --prefer-offline
+# - touch src && npx eslint src/
+# rules:
+# - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+type-check:
+  image: gitlab.fi.muni.cz:5050/pb138/ci/iteration-06:latest
+  tags:
+    - shared-fi
+  script:
+    - cd backend
+    - npm ci --cache /npm/npm-cache --no-audit --prefer-offline
+    - npx tsc --noEmit
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'

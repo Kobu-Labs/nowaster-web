@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS "user" (
+    id VARCHAR PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    displayname VARCHAR NOT NULL
+);
+
+ALTER TABLE session
+ADD COLUMN IF NOT EXISTS user_id VARCHAR,
+ADD CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES "user"(id);
+
+ALTER TABLE category
+ADD COLUMN IF NOT EXISTS created_by VARCHAR,
+ADD CONSTRAINT fk_category_user FOREIGN KEY (created_by) REFERENCES "user"(id);
+
+ALTER TABLE tag
+ADD COLUMN IF NOT EXISTS created_by VARCHAR,
+ADD CONSTRAINT fk_tag_user FOREIGN KEY (created_by) REFERENCES "user"(id);
+
+DROP TABLE IF EXISTS "users";
