@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id, requestor_id, recipient_id, created_at, introduction_message, status as \"status: FriendRequestStatus\"\n                FROM friend_request\n                WHERE id = $1 AND (recipient_id = $2 OR requestor_id = $2)\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "requestor_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "recipient_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "introduction_message",
+        "type_info": "Bpchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "status: FriendRequestStatus",
+        "type_info": {
+          "Custom": {
+            "name": "friend_request_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "accepted",
+                "rejected",
+                "cancelled"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "35e18db3629521de0ca9af9380578040a94d54b666c825a6bff62f96dfb17a34"
+}
