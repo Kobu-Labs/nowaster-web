@@ -223,20 +223,41 @@ impl FriendsRepository {
         data: CreateFriendRequestDto,
         actor: ClerkUser,
     ) -> Result<ReadFriendRequestDto> {
+        let mut tx = self.db.get_pool().begin().await?;
         let exising_request = sqlx::query!(
             r#"
                 SELECT id
                 FROM friend_request
-                WHERE (requestor_id = $1 AND recipient_id = $2) OR (requestor_id = $2 AND recipient_id = $1)
+                WHERE 
+                    ((requestor_id = $1 AND recipient_id = $2) OR (requestor_id = $2 AND recipient_id = $1))
+                    AND status = 'pending'
             "#,
             actor.user_id,
             data.recipient_id
         )
-        .fetch_optional(self.db.get_pool())
+        .fetch_optional(tx.as_mut())
         .await?;
 
         if exising_request.is_some() {
             return Err(anyhow::anyhow!("Friend request already exists"));
+        }
+
+        let exisitng_friend = sqlx::query!(
+            r#"
+                SELECT id
+                FROM friend
+                WHERE 
+                    ((friend_1_id = $1 AND friend_2_id = $2) OR (friend_1_id = $2 AND friend_2_id = $1))
+                    AND deleted is not true
+            "#,
+            actor.user_id,
+            data.recipient_id
+        )
+        .fetch_optional(tx.as_mut())
+        .await?;
+
+        if exisitng_friend.is_some() {
+            return Err(anyhow::anyhow!("You are already friends"));
         }
 
         let result = sqlx::query(
@@ -250,13 +271,13 @@ impl FriendsRepository {
                         recipient_id,
                         created_at,
                         introduction_message,
-                        status as "status: FriendRequestStatus"
+                        status
                 )
                 SELECT 
                     i.id, 
                     i.created_at,
                     i.introduction_message, 
-                    i.status as "status: FriendRequestStatus",
+                    i.status,
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
@@ -270,8 +291,10 @@ impl FriendsRepository {
         .bind(actor.user_id)
         .bind(data.recipient_id)
         .bind(data.introduction_message)
-        .fetch_one(self.db.get_pool())
+        .fetch_one(tx.as_mut())
         .await?;
+
+        tx.commit().await?;
 
         let result = ReadFriendRequestDto::from_row(&result)?;
 
