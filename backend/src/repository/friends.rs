@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use sqlx::PgConnection;
+use sqlx::{FromRow, PgConnection};
 use uuid::Uuid;
 use validator::Validate;
 
@@ -40,7 +40,13 @@ impl FriendsRepository {
         let result = sqlx::query_as!(
             ReadFriendRequestDto,
             r#"
-                SELECT id, requestor_id, recipient_id, created_at, introduction_message, status as "status: FriendRequestStatus"
+                SELECT 
+                    id, 
+                    requestor_id,
+                    recipient_id,
+                    created_at,
+                    introduction_message, 
+                    status as "status: FriendRequestStatus"
                 FROM friend_request
                 WHERE id = $1 AND (recipient_id = $2 OR requestor_id = $2)
             "#,
@@ -64,7 +70,13 @@ impl FriendsRepository {
                 UPDATE friend_request
                 SET status = ($1::text)::friend_request_status
                 WHERE id = $2 
-                RETURNING id, requestor_id, recipient_id, created_at, introduction_message, status as "status: FriendRequestStatus"
+                RETURNING 
+                    id, 
+                    requestor_id, 
+                    recipient_id,
+                    created_at,
+                    introduction_message,
+                    status as "status: FriendRequestStatus"
             "#,
             dto.status as FriendRequestStatus,
             dto.id,
@@ -99,34 +111,59 @@ impl FriendsRepository {
         recipient_id: String,
         tx: &mut PgConnection,
     ) -> Result<ReadFriendshipDto> {
-        let result = sqlx::query_as!(
-            ReadFriendshipDto,
+        let result = sqlx::query(
             r#"
-                INSERT INTO friend (friend_1_id, friend_2_id)
-                VALUES ($1, $2)
-                RETURNING id, friend_1_id as "friend1_id", friend_2_id as "friend2_id", created_at
+                WITH inserted as (
+                    INSERT INTO friend (friend_1_id, friend_2_id)
+                    VALUES ($1, $2)
+                    RETURNING id, friend_1_id , friend_2_id , created_at
+                )
+                SELECT 
+                    inserted.id,
+                    inserted.friend_1_id AS friend1_id,
+                    inserted.friend_2_id AS friend2_id,
+                    inserted.created_at,
+                    u1.displayname AS friend1_username,
+                    u2.displayname AS friend2_username
+                FROM inserted
+                LEFT JOIN "user" u1 ON u1.id = inserted.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = inserted.friend_2_id
             "#,
-            requestor_id,
-            recipient_id
         )
+        .bind(requestor_id)
+        .bind(recipient_id)
         .fetch_one(tx.as_mut())
         .await?;
+
+        let result = ReadFriendshipDto::from_row(&result)?;
 
         Ok(result)
     }
 
     pub async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
-        let result = sqlx::query_as!(
-            ReadFriendshipDto,
+        let result = sqlx::query(
             r#"
-                SELECT id, friend_1_id as "friend1_id", friend_2_id as "friend2_id", created_at
-                FROM friend
-                WHERE friend_1_id = $1 OR friend_2_id = $1
+                SELECT 
+                    f.id,
+                    f.friend_1_id as "friend1_id",
+                    f.friend_2_id as "friend2_id", 
+                    f.created_at,
+                    u1.displayname AS friend1_username,
+                    u2.displayname AS friend2_username
+                FROM friend f
+                LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
+                WHERE f.friend_1_id = $1 OR f.friend_2_id = $1 AND f.deleted is not true
             "#,
-            actor.user_id
         )
+        .bind(actor.user_id)
         .fetch_all(self.db.get_pool())
         .await?;
+
+        let result = result
+            .into_iter()
+            .map(|row| Ok(ReadFriendshipDto::from_row(&row)?))
+            .collect::<Result<Vec<ReadFriendshipDto>>>()?;
 
         Ok(result)
     }
@@ -136,18 +173,32 @@ impl FriendsRepository {
         dto: RemoveFriendDto,
         actor: ClerkUser,
     ) -> Result<ReadFriendshipDto> {
-        let result = sqlx::query_as!(
-            ReadFriendshipDto,
+        let row = sqlx::query(
             r#"
-                DELETE FROM friend
-                WHERE id = $1 AND (friend_1_id = $2 OR friend_2_id = $2)
-                RETURNING id, friend_1_id as "friend1_id", friend_2_id as "friend2_id", created_at
+                WITH deleted AS (
+                    UPDATE friend
+                    SET deleted = true
+                    WHERE id = $1 AND (friend_1_id = $2 OR friend_2_id = $2)
+                    RETURNING id, friend_1_id, friend_2_id, created_at
+                )
+                SELECT 
+                    deleted.id,
+                    deleted.friend_1_id AS friend1_id,
+                    deleted.friend_2_id AS friend2_id,
+                    deleted.created_at,
+                    u1.displayname AS friend1_username,
+                    u2.displayname AS friend2_username
+                FROM deleted
+                LEFT JOIN "user" u1 ON u1.id = deleted.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = deleted.friend_2_id
             "#,
-            dto.friendship_id,
-            actor.user_id
         )
+        .bind(dto.friendship_id)
+        .bind(actor.user_id)
         .fetch_one(self.db.get_pool())
         .await?;
+
+        let result = ReadFriendshipDto::from_row(&row)?;
 
         Ok(result)
     }
@@ -178,7 +229,13 @@ impl FriendsRepository {
             r#"
                 INSERT INTO friend_request (requestor_id, recipient_id, introduction_message)
                 VALUES ($1, $2, $3)
-                RETURNING id, requestor_id, recipient_id, created_at, introduction_message, status as "status: FriendRequestStatus"
+                RETURNING
+                    id,
+                    requestor_id,
+                    recipient_id,
+                    created_at,
+                    introduction_message,
+                    status as "status: FriendRequestStatus"
             "#,
             actor.user_id,
             data.recipient_id,
@@ -198,7 +255,13 @@ impl FriendsRepository {
         let result = sqlx::query_as!(
             ReadFriendRequestDto,
             r#"
-                SELECT id, requestor_id, recipient_id, created_at, introduction_message, status as "status: FriendRequestStatus"
+                SELECT
+                    id,
+                    requestor_id, 
+                    recipient_id, 
+                    created_at, 
+                    introduction_message, 
+                    status as "status: FriendRequestStatus"
                 FROM friend_request
                 WHERE (recipient_id = $1 AND $2 = 'incoming') or (requestor_id = $1 AND $2 = 'outgoing') AND status = 'pending'
             "#,

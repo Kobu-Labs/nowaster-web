@@ -1,10 +1,12 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use sqlx::{postgres::PgRow, prelude::FromRow, Row};
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
+    dto::user::read_user::ReadUserDto,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
 };
@@ -12,7 +14,7 @@ use crate::{
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ReadFriendshipAsActorDto {
     pub id: Uuid,
-    pub friend_id: String,
+    pub friend: ReadUserDto,
     pub created_at: DateTime<Local>,
 }
 
@@ -31,9 +33,32 @@ pub struct CreateFriendRequestDto {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ReadFriendshipDto {
     pub id: Uuid,
-    pub friend1_id: String,
-    pub friend2_id: String,
+    pub friend1: ReadUserDto,
+    pub friend2: ReadUserDto,
     pub created_at: DateTime<Local>,
+}
+
+impl FromRow<'_, PgRow> for ReadFriendshipDto {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        let friend1 = ReadUserDto {
+            id: row.try_get("friend1_id")?,
+            username: row.try_get("friend1_username")?,
+        };
+
+        let friend2 = ReadUserDto {
+            id: row.try_get("friend2_id")?,
+            username: row.try_get("friend2_username")?,
+        };
+
+        let created_at: DateTime<Local> = row.try_get("created_at")?;
+        let id: Uuid = row.try_get("id")?;
+        Ok(Self {
+            id,
+            friend1,
+            friend2,
+            created_at,
+        })
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -220,10 +245,10 @@ impl FriendService {
             .into_iter()
             .map(|friendship| ReadFriendshipAsActorDto {
                 id: friendship.id,
-                friend_id: if friendship.friend1_id == actor.user_id {
-                    friendship.friend2_id
+                friend: if friendship.friend1.id == actor.user_id {
+                    friendship.friend2
                 } else {
-                    friendship.friend1_id
+                    friendship.friend1
                 },
                 created_at: friendship.created_at,
             })
