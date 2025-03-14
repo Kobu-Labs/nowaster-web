@@ -10,7 +10,7 @@ use crate::{
     service::friend_service::{
         AcceptFriendRequestDto, CancelFriendRequestDto, CreateFriendRequestDto,
         FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto, ReadFriendRequestsDto,
-        ReadFriendshipAsActorDto, RejectFriendRequestDto, RemoveFriendDto,
+        ReadFriendshipDto, RejectFriendRequestDto, RemoveFriendDto,
     },
 };
 
@@ -122,8 +122,8 @@ async fn list_friend_requests_handler(
 async fn list_friends_handler(
     State(state): State<AppState>,
     actor: ClerkUser,
-) -> ApiResponse<Vec<ReadFriendshipAsActorDto>> {
-    let result = state.friend_service.list_friends_as_actor(actor).await;
+) -> ApiResponse<Vec<ReadFriendshipDto>> {
+    let result = state.friend_service.list_friends(actor).await;
     ApiResponse::from_result(result)
 }
 
