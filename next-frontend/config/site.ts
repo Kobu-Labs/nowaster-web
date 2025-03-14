@@ -5,10 +5,6 @@ export const siteConfig = {
   description: "Track your time!",
   mainNav: [
     {
-      title: "Home",
-      href: "/",
-    },
-    {
       title: "History",
       href: "/history",
     },
