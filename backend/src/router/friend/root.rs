@@ -1,5 +1,5 @@
 use axum::{
-    extract::State,
+    extract::{Query, State},
     routing::{delete, patch},
     Router,
 };
@@ -9,8 +9,8 @@ use crate::{
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
     service::friend_service::{
         AcceptFriendRequestDto, CancelFriendRequestDto, CreateFriendRequestDto,
-        FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto, ReadFriendRequestsDto,
-        ReadFriendshipDto, RejectFriendRequestDto, RemoveFriendDto,
+        FriendRequestDirection, FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto,
+        ReadFriendRequestsDto, ReadFriendshipDto, RejectFriendRequestDto, RemoveFriendDto,
     },
 };
 
@@ -39,7 +39,7 @@ async fn update_friend_request_handler(
                 .friend_service
                 .accept_friend_request(
                     AcceptFriendRequestDto {
-                        request_id: payload.id,
+                        request_id: payload.request_id,
                     },
                     actor,
                 )
@@ -50,7 +50,7 @@ async fn update_friend_request_handler(
                 .friend_service
                 .reject_friend_request(
                     RejectFriendRequestDto {
-                        request_id: payload.id,
+                        request_id: payload.request_id,
                     },
                     actor,
                 )
@@ -61,7 +61,7 @@ async fn update_friend_request_handler(
                 .friend_service
                 .cancel_friend_request(
                     CancelFriendRequestDto {
-                        request_id: payload.id,
+                        request_id: payload.request_id,
                     },
                     actor,
                 )
@@ -109,12 +109,17 @@ async fn create_friend_request_handler(
 
 async fn list_friend_requests_handler(
     State(state): State<AppState>,
+    Query(direction): Query<ReadFriendRequestsDto>,
     actor: ClerkUser,
-    ValidatedRequest(payload): ValidatedRequest<ReadFriendRequestsDto>,
 ) -> ApiResponse<Vec<ReadFriendRequestDto>> {
     let result = state
         .friend_service
-        .list_friend_requests(actor, payload)
+        .list_friend_requests(
+            actor,
+            ReadFriendRequestsDto {
+                direction: direction.direction,
+            },
+        )
         .await;
     ApiResponse::from_result(result)
 }
