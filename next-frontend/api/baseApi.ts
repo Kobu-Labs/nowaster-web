@@ -30,6 +30,7 @@ export const handleResponse = async <T>(
 ): Promise<Result<T>> => {
   const request = await ResponseSchema.safeParseAsync(data);
   if (!request.success) {
+    console.error(request.error);
     return Result.err(new Error("Response is of unexpected structure!"));
   }
 
