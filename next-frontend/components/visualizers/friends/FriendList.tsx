@@ -86,7 +86,7 @@ export default function FriendsList() {
       friendship.friend.username
         .toLowerCase()
         .includes(searchQuery.toLowerCase()),
-    ) || [];
+    ) ?? [];
 
   return (
     <div className="space-y-4">
