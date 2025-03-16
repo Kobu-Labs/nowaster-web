@@ -16,5 +16,9 @@ export const siteConfig = {
       title: "Tags",
       href: "/tags",
     },
+    {
+      title: "Friends",
+      href: "/friends",
+    },
   ],
 } as const;
