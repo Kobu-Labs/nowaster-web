@@ -26,40 +26,13 @@ import {
   AlertDialogTitle,
 } from "@/components/shadcn/alert-dialog";
 import { Search, MoreHorizontal, UserMinus } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FriendsApi } from "@/api";
-import { useAuth } from "@clerk/nextjs";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Image from "next/image";
+import { useMyFriends } from "@/components/hooks/friends/useMyFriends";
 
-const useMyFriends = () => {
-  const { userId } = useAuth();
-
-  const query = useQuery({
-    queryKey: ["friends", "my"],
-    queryFn: async () => {
-      const data = await FriendsApi.read();
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value.map((friendship) => {
-        return {
-          id: friendship.id,
-          friend:
-            friendship.friend1.id === userId
-              ? friendship.friend2
-              : friendship.friend1,
-          cratedAt: friendship.created_at,
-        };
-      });
-    },
-  });
-
-  return query;
-};
-
-export default function FriendsList() {
+export const FriendsList = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [friendToRemove, setFriendToRemove] = useState<string | null>(null);
@@ -192,4 +165,4 @@ export default function FriendsList() {
       </AlertDialog>
     </div>
   );
-}
+};
