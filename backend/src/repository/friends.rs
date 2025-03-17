@@ -74,7 +74,10 @@ impl FriendsRepository {
             r#"
                 WITH updated AS (
                     UPDATE friend_request
-                    SET status = $1
+                    SET 
+                        status = $1,
+                        updated_at = now(),
+                        updated_to_status = $1
                     WHERE id = $2 
                     RETURNING 
                         id, 
