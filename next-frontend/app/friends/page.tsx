@@ -5,7 +5,7 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/tabs";
 import { FriendsList } from "@/components/visualizers/friends/FriendList";
-import { FriendRequests } from "@/components/visualizers/friends/FriendRequestManagement";
+import { FriendRequestsManagement } from "@/components/visualizers/friends/FriendRequestManagement";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -33,7 +33,7 @@ export default function FriendsPage() {
             <FriendsList />
           </TabsContent>
           <TabsContent value="requests" className="space-y-4">
-            <FriendRequests />
+            <FriendRequestsManagement />
           </TabsContent>
         </Tabs>
       </div>
