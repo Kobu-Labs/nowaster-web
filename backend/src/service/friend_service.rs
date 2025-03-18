@@ -37,6 +37,22 @@ pub struct ReadFriendshipDto {
     pub friend2: ReadUserDto,
     pub created_at: DateTime<Local>,
 }
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ReadFriendshipWithAvatarDto {
+    pub id: Uuid,
+    pub friend1: ReadUserAvatarDto,
+    pub friend2: ReadUserAvatarDto,
+    pub created_at: DateTime<Local>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ReadUserAvatarDto {
+    pub id: String,
+    pub username: String,
+    pub avatar_url: Option<String>,
+}
+
 impl FromRow<'_, PgRow> for ReadFriendRequestDto {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         let requestor = ReadUserDto {

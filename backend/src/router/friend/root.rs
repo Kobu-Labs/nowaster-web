@@ -9,8 +9,9 @@ use crate::{
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
     service::friend_service::{
         AcceptFriendRequestDto, CancelFriendRequestDto, CreateFriendRequestDto,
-        FriendRequestDirection, FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto,
-        ReadFriendRequestsDto, ReadFriendshipDto, RejectFriendRequestDto, RemoveFriendDto,
+        FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto, ReadFriendRequestsDto,
+        ReadFriendshipDto, ReadFriendshipWithAvatarDto, ReadUserAvatarDto, RejectFriendRequestDto,
+        RemoveFriendDto,
     },
 };
 
@@ -124,12 +125,95 @@ async fn list_friend_requests_handler(
     ApiResponse::from_result(result)
 }
 
+fn get_other_friend_id(user_id: String, friendship: ReadFriendshipDto) -> String {
+    if friendship.friend1.id == user_id {
+        friendship.friend2.id
+    } else {
+        friendship.friend1.id
+    }
+}
+
 async fn list_friends_handler(
     State(state): State<AppState>,
     actor: ClerkUser,
-) -> ApiResponse<Vec<ReadFriendshipDto>> {
-    let result = state.friend_service.list_friends(actor).await;
-    ApiResponse::from_result(result)
+) -> ApiResponse<Vec<ReadFriendshipWithAvatarDto>> {
+    let result = state.friend_service.list_friends(actor.clone()).await;
+
+    let Ok(friends) = result else {
+        return ApiResponse::Error {
+            message: "No friends found".to_string(),
+        };
+    };
+
+    let ids = friends
+        .iter()
+        .cloned()
+        .map(|friend| get_other_friend_id(actor.clone().user_id.clone(), friend))
+        .collect::<Vec<String>>();
+
+    if ids.is_empty() {
+        return ApiResponse::Success { data: vec![] };
+    }
+
+    let data = clerk_rs::apis::users_api::User::get_user_list(
+        &state.clerk,
+        None,
+        None,
+        None,
+        None,
+        None,
+        Some(ids),
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+    .await;
+    let clerk_users = match data {
+        Ok(users) => users,
+        Err(e) => {
+            return ApiResponse::Error {
+                message: e.to_string(),
+            }
+        }
+    };
+
+    let mut mapped: Vec<ReadFriendshipWithAvatarDto> = Vec::new();
+    for user in clerk_users {
+        let user_id = user.id.unwrap_or("".to_string());
+        let avatar_url = user.image_url;
+        let friendship = friends.iter().find(|friend| {
+            get_other_friend_id(actor.clone().user_id.clone(), friend.to_owned().clone()) == user_id
+        });
+
+        let friendship = match friendship {
+            Some(friendship) => friendship.clone(),
+            None => {
+                return ApiResponse::Error {
+                    message: "Friendship not found".to_string(),
+                };
+            }
+        };
+        let friendship_with_avatar = ReadFriendshipWithAvatarDto {
+            id: friendship.id,
+            created_at: friendship.created_at,
+            friend1: ReadUserAvatarDto {
+                id: friendship.friend1.id,
+                username: friendship.friend1.username,
+                avatar_url: avatar_url.clone(),
+            },
+            friend2: ReadUserAvatarDto {
+                id: friendship.friend2.id,
+                username: friendship.friend2.username,
+                avatar_url: avatar_url.clone(),
+            },
+        };
+
+        mapped.push(friendship_with_avatar);
+    }
+
+    ApiResponse::Success { data: (mapped) }
 }
 
 async fn remove_friend_handler(
