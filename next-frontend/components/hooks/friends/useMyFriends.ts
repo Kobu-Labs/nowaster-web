@@ -24,6 +24,7 @@ export const useMyFriends = () => {
         };
       });
     },
+    enabled: !!userId,
   });
 
   return query;
