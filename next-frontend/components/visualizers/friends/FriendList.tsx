@@ -74,7 +74,7 @@ export const FriendsList = () => {
         />
       </div>
 
-      {query.isLoading ? (
+      {!query.isSuccess ? (
         <div className="flex items-center justify-center py-10">
           <Skeleton className="w-full h-32" />
         </div>
