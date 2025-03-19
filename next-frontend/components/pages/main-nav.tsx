@@ -55,13 +55,13 @@ export function MainNav({ items }: MainNavProps) {
         </nav>
       ) : null}
       <div className="grow"></div>
+      <ActiveSession />
       <SignedOut>
         <SignInButton />
       </SignedOut>
       <SignedIn>
         <UserButton />
       </SignedIn>
-      <ActiveSession />
     </div>
   );
 }
