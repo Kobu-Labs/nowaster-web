@@ -122,7 +122,7 @@ export const MultipleCategoryPickerUiProvider: FC<
                 ) && (
                 <CommandGroup>
                   <CommandItem
-                    className="flex"
+                    className="flex gap-2"
                     onSelect={() =>
                       createCategory({
                         color: randomColor(),
@@ -250,14 +250,14 @@ export const SingleCategoryPickerUiProvider: FC<
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
               <CommandGroup>
                 <CommandItem
-                  className="flex"
+                  className="flex gap-2"
                   onSelect={() =>
                     createCategory({ color: randomColor(), name: searchTerm })
                   }
                 >
                   <p>Create</p>
                   <div className="grow"></div>
-                  <Badge variant="outline">{searchTerm}</Badge>
+                  <Badge>{searchTerm}</Badge>
                 </CommandItem>
               </CommandGroup>
             </CommandItem>
