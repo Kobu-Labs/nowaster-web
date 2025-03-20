@@ -126,8 +126,8 @@ export const ScheduledSessionCreationForm: FC = () => {
               control={form.control}
               name="category"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block">Category</FormLabel>
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Category</FormLabel>
                   <FormControl>
                     <SingleCategoryPicker
                       onSelectedCategoriesChanged={(category) => {
@@ -149,7 +149,7 @@ export const ScheduledSessionCreationForm: FC = () => {
               name="description"
               defaultValue={null}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-2">
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Input
@@ -168,28 +168,26 @@ export const ScheduledSessionCreationForm: FC = () => {
                 name="startTime"
                 control={form.control}
                 render={({ field }) => (
-                  <div>
-                    <FormItem>
-                      <FormLabel className="block">Start Time</FormLabel>
-                      <FormControl>
-                        <DateTimePicker
-                          quickOptions={creationFormQuickOptions}
-                          selected={field.value || undefined}
-                          onSelect={(val) => {
-                            if (val) {
-                              field.onChange(val);
-                              if (!form.getValues("endTime")) {
-                                form.setValue("endTime", val);
-                              }
-                            } else {
-                              form.resetField("startTime");
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="block">Start Time</FormLabel>
+                    <FormControl>
+                      <DateTimePicker
+                        quickOptions={creationFormQuickOptions}
+                        selected={field.value || undefined}
+                        onSelect={(val) => {
+                          if (val) {
+                            field.onChange(val);
+                            if (!form.getValues("endTime")) {
+                              form.setValue("endTime", val);
                             }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </div>
+                          } else {
+                            form.resetField("startTime");
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
 
@@ -205,7 +203,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                 name="endTime"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
@@ -231,7 +229,7 @@ export const ScheduledSessionCreationForm: FC = () => {
               name="tags"
               control={form.control}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-2">
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
