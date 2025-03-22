@@ -1,7 +1,8 @@
 import { Badge } from "@/components/shadcn/badge";
 import { cn } from "@/lib/utils";
+import { FC } from "react";
 
-export const CategoryBadge = (props: { color: string; name: string }) => {
+export const CategoryBadge: FC<{ color: string; name: string }> = (props) => {
   return (
     <Badge
       variant="outline"
