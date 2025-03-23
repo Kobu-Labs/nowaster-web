@@ -2,7 +2,6 @@ import { FC, useState } from "react";
 import { CategoryWithId } from "api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn, randomColor } from "@/lib/utils";
-import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
   Command,
@@ -18,6 +17,7 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import FuzzySearch from "fuzzy-search";
 import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 
 export type MultipleCategoryPickerUiProviderProps = {
   availableCategories: CategoryWithId[];
@@ -48,11 +48,14 @@ export const MultipleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [newCategoryColor, setNewCategoryColor] =
+    useState<string>(randomColor());
 
   // TODO move this higher
   const { mutate: createCategory } = useCreateCategory({
     onSuccess: (cat) => {
       props.onSelectCategory(cat);
+      setNewCategoryColor(newCategoryColor);
     },
   });
 
@@ -98,10 +101,12 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <Badge variant="outline" key={category.id}>
-                      {category.name}
-                    </Badge>
-                  ))}
+                      <CategoryBadge
+                        key={category.id}
+                        name={category.name}
+                        color={category.color}
+                      />
+                    ))}
               </ScrollArea>
             </div>
           </div>
@@ -120,22 +125,25 @@ export const MultipleCategoryPickerUiProvider: FC<
                 props.availableCategories.every(
                   (cat) => cat.name !== searchTerm,
                 ) && (
-                <CommandGroup>
-                  <CommandItem
-                    className="flex gap-2"
-                    onSelect={() =>
-                      createCategory({
-                        color: randomColor(),
-                        name: searchTerm,
-                      })
-                    }
-                  >
-                    <p>Create</p>
-                    <div className="grow"></div>
-                    <Badge variant="outline">{searchTerm}</Badge>
-                  </CommandItem>
-                </CommandGroup>
-              )}
+                  <CommandGroup>
+                    <CommandItem
+                      className="flex gap-2"
+                      onSelect={() =>
+                        createCategory({
+                          color: newCategoryColor,
+                          name: searchTerm,
+                        })
+                      }
+                    >
+                      <p>Create</p>
+                      <div className="grow"></div>
+                      <CategoryBadge
+                        color={newCategoryColor}
+                        name={searchTerm}
+                      />
+                    </CommandItem>
+                  </CommandGroup>
+                )}
             </CommandItem>
           )}
           <CommandGroup>
@@ -159,7 +167,7 @@ export const MultipleCategoryPickerUiProvider: FC<
                         : "opacity-0",
                     )}
                   />
-                  <Badge variant="outline">{category.name}</Badge>
+                  <CategoryBadge color={category.color} name={category.name} />
                 </CommandItem>
               ))}
             </ScrollArea>
@@ -191,9 +199,14 @@ export const SingleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [newCategoryColor, setNewCategoryColor] =
+    useState<string>(randomColor());
 
   const { mutate: createCategory } = useCreateCategory({
-    onSuccess: props.onSelectCategory,
+    onSuccess: (cat) => {
+      props.onSelectCategory(cat);
+      setNewCategoryColor(randomColor());
+    },
   });
 
   let categoriesInDisplayOrder = props.availableCategories;
@@ -230,7 +243,10 @@ export const SingleCategoryPickerUiProvider: FC<
           {!props.selectedCategory ? (
             "Search Category"
           ) : (
-            <Badge variant="outline">{props.selectedCategory.name}</Badge>
+            <CategoryBadge
+              name={props.selectedCategory.name}
+              color={props.selectedCategory.color}
+            />
           )}
           <div className="grow"></div>
           <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
@@ -247,21 +263,24 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              <CommandGroup>
-                <CommandItem
-                  className="flex gap-2"
-                  onSelect={() =>
-                    createCategory({ color: randomColor(), name: searchTerm })
-                  }
-                >
-                  <p>Create</p>
-                  <div className="grow"></div>
-                  <Badge>{searchTerm}</Badge>
-                </CommandItem>
-              </CommandGroup>
-            </CommandItem>
-          )}
+              <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
+                <CommandGroup>
+                  <CommandItem
+                    className="flex gap-2"
+                    onSelect={() =>
+                      createCategory({
+                        color: newCategoryColor,
+                        name: searchTerm,
+                      })
+                    }
+                  >
+                    <p>Create</p>
+                    <div className="grow"></div>
+                    <CategoryBadge color={newCategoryColor} name={searchTerm} />
+                  </CommandItem>
+                </CommandGroup>
+              </CommandItem>
+            )}
           <CommandGroup>
             <ScrollArea
               type="always"
@@ -281,7 +300,7 @@ export const SingleCategoryPickerUiProvider: FC<
                         : "opacity-0",
                     )}
                   />
-                  <Badge variant="outline">{category.name}</Badge>
+                  <CategoryBadge color={category.color} name={category.name} />
                 </CommandItem>
               ))}
             </ScrollArea>
