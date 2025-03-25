@@ -8,6 +8,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandSeparator,
 } from "@/components/shadcn/command";
 import {
   Popover,
@@ -119,59 +120,63 @@ export const MultipleCategoryPickerUiProvider: FC<
             placeholder={"Search categories"}
             value={searchTerm}
           />
-          {!categoriesInDisplayOrder.length && (
-            <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              {searchTerm &&
-                props.availableCategories.every(
-                  (cat) => cat.name !== searchTerm,
-                ) && (
-                  <CommandGroup>
-                    <CommandItem
-                      className="flex gap-2"
-                      onSelect={() =>
-                        createCategory({
-                          color: newCategoryColor,
-                          name: searchTerm,
-                        })
-                      }
-                    >
-                      <p>Create</p>
-                      <div className="grow"></div>
-                      <CategoryBadge
-                        color={newCategoryColor}
-                        name={searchTerm}
-                      />
-                    </CommandItem>
-                  </CommandGroup>
-                )}
-            </CommandItem>
+          {searchTerm &&
+            props.availableCategories.every(
+              (cat) => cat.name !== searchTerm,
+            ) && (
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={() =>
+                  createCategory({
+                    color: newCategoryColor,
+                    name: searchTerm,
+                  })
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
+          <CommandSeparator />
+          {categoriesInDisplayOrder.length > 0 && (
+            <CommandGroup heading="Existing Categories">
+              <ScrollArea
+                type="always"
+                className="max-h-48 overflow-y-auto rounded-md border-none"
+              >
+                {categoriesInDisplayOrder.map((category) => (
+                  <CommandItem
+                    value={category.name}
+                    key={category.id}
+                    onSelect={() => props.onSelectCategory(category)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 size-4",
+                        props.selectedCategories.some(
+                          (cat) => cat.id === category.id,
+                        )
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    <CategoryBadge
+                      color={category.color}
+                      name={category.name}
+                    />
+                  </CommandItem>
+                ))}
+              </ScrollArea>
+            </CommandGroup>
           )}
-          <CommandGroup>
-            <ScrollArea
-              type="always"
-              className="max-h-48 overflow-y-auto rounded-md border-none"
-            >
-              {categoriesInDisplayOrder.map((category) => (
-                <CommandItem
-                  value={category.name}
-                  key={category.id}
-                  onSelect={() => props.onSelectCategory(category)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      props.selectedCategories.some(
-                        (cat) => cat.id === category.id,
-                      )
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <CategoryBadge color={category.color} name={category.name} />
-                </CommandItem>
-              ))}
-            </ScrollArea>
-          </CommandGroup>
+          {categoriesInDisplayOrder.length === 0 &&
+            searchTerm.trim().length === 0 && (
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+                Type to create!
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
@@ -263,48 +268,57 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-              <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-                <CommandGroup>
-                  <CommandItem
-                    className="flex gap-2"
-                    onSelect={() =>
-                      createCategory({
-                        color: newCategoryColor,
-                        name: searchTerm,
-                      })
-                    }
-                  >
-                    <p>Create</p>
-                    <div className="grow"></div>
-                    <CategoryBadge color={newCategoryColor} name={searchTerm} />
-                  </CommandItem>
-                </CommandGroup>
-              </CommandItem>
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={() =>
+                  createCategory({
+                    color: newCategoryColor,
+                    name: searchTerm,
+                  })
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
             )}
-          <CommandGroup>
-            <ScrollArea
-              type="always"
-              className="max-h-48 overflow-y-auto rounded-md border-none"
-            >
-              {categoriesInDisplayOrder.map((category) => (
-                <CommandItem
-                  value={category.name}
-                  key={category.id}
-                  onSelect={() => props.onSelectCategory(category)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      category.id === props.selectedCategory?.id
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <CategoryBadge color={category.color} name={category.name} />
-                </CommandItem>
-              ))}
-            </ScrollArea>
-          </CommandGroup>
+          <CommandSeparator />
+          {categoriesInDisplayOrder.length > 0 && (
+            <CommandGroup heading="Existing Categories">
+              <ScrollArea
+                type="always"
+                className="max-h-48 overflow-y-auto rounded-md border-none"
+              >
+                {categoriesInDisplayOrder.map((category) => (
+                  <CommandItem
+                    value={category.name}
+                    key={category.id}
+                    onSelect={() => props.onSelectCategory(category)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 size-4",
+                        category.id === props.selectedCategory?.id
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    <CategoryBadge
+                      color={category.color}
+                      name={category.name}
+                    />
+                  </CommandItem>
+                ))}
+              </ScrollArea>
+            </CommandGroup>
+          )}
+          {categoriesInDisplayOrder.length === 0 &&
+            searchTerm.trim().length === 0 && (
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+                Type to create!
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
