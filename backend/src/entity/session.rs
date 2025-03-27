@@ -4,6 +4,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum SessionType {
+    #[serde(rename = "fixed")]
+    FixedSession,
+    #[serde(rename = "stopwatch")]
+    StopwatchSession,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FixedSession {
     pub id: Uuid,
 
