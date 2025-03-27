@@ -3,9 +3,7 @@ import { z } from "zod";
 
 const create = z.object({
   category: CategoryRequestSchema.create,
-  description: z.string()
-    .max(50)
-    .nullable(),
+  description: z.string().nullable(),
   startTime: z.coerce.date(),
 });
 
@@ -20,9 +18,7 @@ const readById = z.object({
 const updateById = z.object({
   id: z.string().uuid(),
   category: CategoryRequestSchema.create,
-  description: z.string()
-    .max(50)
-    .optional(),
+  description: z.string().optional(),
   startTime: z.coerce.date().optional(),
 });
 
@@ -30,10 +26,11 @@ const removeById = z.object({
   id: z.string().uuid(),
 });
 
-
 export type RecordedSessionRequest = {
-    [Property in (keyof typeof RecordedSessionRequestSchema)]: z.infer<typeof RecordedSessionRequestSchema[Property]>
-}
+  [Property in keyof typeof RecordedSessionRequestSchema]: z.infer<
+    (typeof RecordedSessionRequestSchema)[Property]
+  >;
+};
 
 export const RecordedSessionRequestSchema = {
   readById,
