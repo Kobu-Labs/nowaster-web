@@ -14,6 +14,7 @@ pub enum SessionType {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FixedSession {
     pub id: Uuid,
+    pub session_type: SessionType,
 
     pub category: Category,
     pub tags: Vec<Tag>,
@@ -25,13 +26,14 @@ pub struct FixedSession {
     pub user_id: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StopwatchSession {
     pub id: Uuid,
+    pub session_type: SessionType,
 
-    pub category: Category,
-    pub tags: Vec<Tag>,
-    pub user: User,
+    pub category: Option<Category>,
+    pub tags: Option<Vec<Tag>>,
+    pub user: Option<User>,
 
     pub start_time: chrono::NaiveDate,
     pub description: Option<String>,
