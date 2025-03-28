@@ -1,11 +1,11 @@
 CREATE TABLE "stopwatch_session" (
     "id" uuid DEFAULT gen_random_uuid() NOT NULL,
-    "category_id" uuid NOT NULL,
-    "type" text NOT NULL,
-    "start_time" timestamptz,
-    "description" text DEFAULT 'stopwatch',
-    "created_at" timestamptz DEFAULT now(),
-    "user_id" character varying,
+    "category_id" uuid,
+    "type" text NOT NULL DEFAULT 'stopwatch',
+    "start_time" timestamptz NOT NULL,
+    "description" text,
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "user_id" character varying NOT NULL,
     CONSTRAINT "stopwatch_session_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
@@ -15,10 +15,10 @@ ALTER TABLE ONLY "stopwatch_session" ADD CONSTRAINT "fk_session_user" FOREIGN KE
 
 CREATE TABLE "tag_to_stopwatch_session" (
     "id" uuid DEFAULT gen_random_uuid() NOT NULL,
-    "created_at" timestamptz DEFAULT now(),
-    "tag_id" uuid,
-    "session_id" uuid,
-    CONSTRAINT "tag_to_session_pkey" PRIMARY KEY ("id")
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "tag_id" uuid NOT NULL,
+    "session_id" uuid NOT NULL,
+    CONSTRAINT "tag_to_stopwatch_session_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
 
