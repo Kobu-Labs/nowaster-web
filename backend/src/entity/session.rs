@@ -3,7 +3,7 @@ use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, sqlx::Type, PartialEq)]
 pub enum SessionType {
     #[serde(rename = "fixed")]
     FixedSession,
