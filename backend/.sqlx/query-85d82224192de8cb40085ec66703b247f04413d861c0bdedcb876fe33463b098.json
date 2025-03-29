@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO stopwatch_session (category_id, start_time, description, user_id)\n                VALUES ($1, $2, $3, $4)\n                RETURNING stopwatch_session.id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "85d82224192de8cb40085ec66703b247f04413d861c0bdedcb876fe33463b098"
+}
