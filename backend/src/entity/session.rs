@@ -1,5 +1,5 @@
 use super::{category::Category, tag::Tag, user::User};
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -46,8 +46,8 @@ pub struct StopwatchSession {
 
     pub category: Option<Category>,
     pub tags: Option<Vec<Tag>>,
-    pub user: Option<User>,
+    pub user: User,
 
-    pub start_time: chrono::NaiveDate,
+    pub start_time: DateTime<Utc>,
     pub description: Option<String>,
 }
