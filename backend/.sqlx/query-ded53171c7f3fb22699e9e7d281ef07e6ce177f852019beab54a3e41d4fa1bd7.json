@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n                s.id,\n\n                s.user_id,\n                u.displayname as user_name,\n\n                s.start_time,\n                s.description,\n                s.type as session_type,\n\n                s.category_id,\n                c.name as category_name,\n                c.color as category_color,\n\n                t.id as \"tag_id\",\n                t.label as \"tag_label\",\n                t.color as \"tag_color\"\n            FROM stopwatch_session s\n            JOIN category c\n                on c.id = s.category_id\n            LEFT JOIN tag_to_stopwatch_session tts\n                on tts.session_id = s.id\n            LEFT JOIN tag t\n                on tts.tag_id = t.id\n            LEFT JOIN \"user\" u\n                on u.id = s.user_id\n            WHERE \n                s.user_id = $1",
+  "query": "SELECT \n                s.id,\n\n                s.user_id,\n                u.displayname as user_name,\n\n                s.start_time,\n                s.description,\n                s.type as session_type,\n\n                s.category_id as \"category_id?\",\n                c.name as category_name,\n                c.color as category_color,\n\n                t.id as \"tag_id\",\n                t.label as \"tag_label\",\n                t.color as \"tag_color\"\n            FROM stopwatch_session s\n            INNER JOIN \"user\" u\n                on u.id = s.user_id\n            LEFT JOIN category c\n                on c.id = s.category_id\n            LEFT JOIN tag_to_stopwatch_session tts\n                on tts.session_id = s.id\n            LEFT JOIN tag t\n                on tts.tag_id = t.id\n            WHERE \n                s.user_id = $1",
   "describe": {
     "columns": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "ordinal": 6,
-        "name": "category_id",
+        "name": "category_id?",
         "type_info": "Uuid"
       },
       {
@@ -84,5 +84,5 @@
       false
     ]
   },
-  "hash": "d93c572555902fda50e40daab730efb11bdfe5792d25c0ba8fca7da88135b794"
+  "hash": "ded53171c7f3fb22699e9e7d281ef07e6ce177f852019beab54a3e41d4fa1bd7"
 }
