@@ -7,6 +7,7 @@ use crate::{
         category::{create_category::CreateCategoryDto, read_category::ReadCategoryDto},
         tag::read_tag::ReadTagDto,
     },
+    entity::session::SessionType,
     service::friend_service::ReadUserAvatarDto,
 };
 
@@ -24,6 +25,7 @@ pub struct CreateStopwatchSessionDto {
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct ReadStopwatchSessionDto {
     pub category: Option<ReadCategoryDto>,
+    pub session_type: SessionType,
     pub tags: Option<Vec<ReadTagDto>>,
     pub description: Option<String>,
     #[serde(rename = "startTime")]
