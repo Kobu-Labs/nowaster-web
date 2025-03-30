@@ -36,7 +36,6 @@ impl From<String> for SessionType {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FixedSession {
     pub id: Uuid,
-    pub session_type: SessionType,
 
     pub category: Category,
     pub tags: Vec<Tag>,
@@ -51,7 +50,6 @@ pub struct FixedSession {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StopwatchSession {
     pub id: Uuid,
-    pub session_type: SessionType,
 
     pub category: Option<Category>,
     pub tags: Option<Vec<Tag>>,
@@ -63,7 +61,8 @@ pub struct StopwatchSession {
 
 impl From<StopwatchSession> for ReadStopwatchSessionDto {
     fn from(session: StopwatchSession) -> Self {
-        let res = Self {
+        Self {
+            session_type: SessionType::StopwatchSession,
             category: session.category.map(ReadCategoryDto::from),
             tags: session.tags.map(|tags| {
                 tags.iter()
@@ -73,7 +72,6 @@ impl From<StopwatchSession> for ReadStopwatchSessionDto {
             description: session.description,
             start_time: session.start_time,
             user: ReadUserAvatarDto::from(session.user),
-        };
-        res
+        }
     }
 }

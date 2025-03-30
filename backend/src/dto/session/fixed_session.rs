@@ -8,7 +8,7 @@ use crate::{
         category::{create_category::CreateCategoryDto, read_category::ReadCategoryDto},
         tag::read_tag::ReadTagDto,
     },
-    entity::session::FixedSession,
+    entity::session::{FixedSession, SessionType},
 };
 
 #[derive(Clone, Deserialize, Serialize, Debug, Validate)]
@@ -31,6 +31,7 @@ pub struct CreateFixedSessionDto {
 pub struct ReadFixedSessionDto {
     pub id: Uuid,
     pub category: ReadCategoryDto,
+    pub session_type: SessionType,
     pub tags: Vec<ReadTagDto>,
     #[serde(rename = "startTime")]
     pub start_time: DateTime<Local>,
@@ -44,6 +45,7 @@ impl ReadFixedSessionDto {
         Self {
             id: entity.id,
             category: ReadCategoryDto::from(entity.category),
+            session_type: SessionType::FixedSession,
             tags: entity
                 .tags
                 .iter()
