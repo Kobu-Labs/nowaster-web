@@ -157,6 +157,7 @@ impl StopwatchSessionRepository {
                 .await?;
             }
         }
+        tx.commit().await?;
 
         let session = self.read_stopwatch(actor.clone()).await?;
 
