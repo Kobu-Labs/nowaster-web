@@ -15,13 +15,17 @@ use crate::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
         statistics::sessions::StatisticsRepository,
+        stopwatch_session::StopwatchSessionRepository,
         tag::{TagRepository, TagRepositoryTrait},
         user::{UserRepository, UserRepositoryTrait},
     },
     service::{
-        category_service::CategoryService, friend_service::FriendService,
-        session_service::SessionService, statistics_service::StatisticsService,
-        tag_service::TagService, user_service::UserService,
+        category_service::CategoryService,
+        friend_service::FriendService,
+        session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
+        statistics_service::StatisticsService,
+        tag_service::TagService,
+        user_service::UserService,
     },
 };
 
@@ -36,7 +40,8 @@ use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 #[derive(Clone)]
 pub struct AppState {
     pub clerk: Clerk,
-    pub session_service: SessionService,
+    pub session_service: FixedSessionService,
+    pub stopwatch_service: StopwatchSessionService,
     pub tag_service: TagService,
     pub category_service: CategoryService,
     pub user_service: UserService,
@@ -51,14 +56,17 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let user_repo = UserRepository::new(&db);
     let statistics_repo = StatisticsRepository::new(&db);
     let friend_repo = FriendsRepository::new(&db);
+    let stopwatch_repo = StopwatchSessionRepository::new(&db);
 
     let category_service = CategoryService::new(category_repo.clone());
     let user_service = UserService::new(user_repo.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let session_service =
-        SessionService::new(session_repo, category_service.clone(), tag_service.clone());
+        FixedSessionService::new(session_repo, category_service.clone(), stopwatch_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);
     let friend_service = FriendService::new(friend_repo);
+    let stopwatch_service =
+        StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
 
     let state = AppState {
         clerk: clerk.clone(),
@@ -68,6 +76,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         category_service,
         user_service,
         statistics_service,
+        stopwatch_service,
     };
 
     tracing_subscriber::registry()
