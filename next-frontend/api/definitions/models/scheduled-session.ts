@@ -9,6 +9,7 @@ export const ScheduledSessionSchema = z.object({
   category: CategoryWithIdSchema,
   description: z.string().nullable(),
   tags: z.array(TagWithIdSchema),
+  session_type: z.literal("fixed"),
 });
 export const ScheduledSessionWithIdSchema = ScheduledSessionSchema.merge(HasID);
 
