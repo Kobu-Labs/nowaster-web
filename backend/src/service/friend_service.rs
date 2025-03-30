@@ -7,6 +7,7 @@ use validator::Validate;
 
 use crate::{
     dto::user::read_user::ReadUserDto,
+    entity::user::User,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
 };
@@ -51,6 +52,16 @@ pub struct ReadUserAvatarDto {
     pub id: String,
     pub username: String,
     pub avatar_url: Option<String>,
+}
+
+impl From<User> for ReadUserAvatarDto {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            username: user.username,
+            avatar_url: None,
+        }
+    }
 }
 
 impl FromRow<'_, PgRow> for ReadFriendRequestDto {

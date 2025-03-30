@@ -65,7 +65,7 @@ fn map_read_to_session(row: &PgRow) -> Result<StopwatchFullRow> {
 }
 
 impl StopwatchSessionRepository {
-    fn new(db_conn: &Arc<Database>) -> Self {
+    pub fn new(db_conn: &Arc<Database>) -> Self {
         Self {
             db_conn: Arc::clone(db_conn),
         }
@@ -89,7 +89,7 @@ impl StopwatchSessionRepository {
                 },
                 category: None,
                 tags: None,
-                start_time: session.start_time,
+                start_time: DateTime::from(session.start_time),
                 description: session.description,
             });
 
@@ -120,7 +120,7 @@ impl StopwatchSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
-    async fn create(
+    pub async fn create(
         &self,
         dto: CreateStopwatchSessionDto,
         category_id: Option<Uuid>,
@@ -167,7 +167,7 @@ impl StopwatchSessionRepository {
     }
 
     // INFO: only one stopwatch session can be active at a time
-    async fn read_stopwatch(&self, actor: ClerkUser) -> Result<Option<StopwatchSession>> {
+    pub async fn read_stopwatch(&self, actor: ClerkUser) -> Result<Option<StopwatchSession>> {
         let sessions = sqlx::query_as!(
             StopwatchFullRow,
             r#"SELECT 
@@ -211,7 +211,7 @@ impl StopwatchSessionRepository {
         }
     }
 
-    async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM stopwatch_session s
