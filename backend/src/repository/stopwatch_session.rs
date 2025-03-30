@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgRow, prelude::FromRow, Row};
+use sqlx::prelude::FromRow;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -41,27 +41,6 @@ pub struct StopwatchFullRow {
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
     tag_color: Option<String>,
-}
-
-fn map_read_to_session(row: &PgRow) -> Result<StopwatchFullRow> {
-    Ok(StopwatchFullRow {
-        id: row.try_get("id")?,
-
-        user_id: row.try_get("user_id")?,
-        user_name: row.try_get("username")?,
-
-        start_time: row.try_get("start_time")?,
-        session_type: row.try_get("session_type")?,
-        description: row.try_get("description")?,
-
-        category_id: row.try_get("category_id")?,
-        category_name: row.try_get("category")?,
-        category_color: row.try_get("color")?,
-
-        tag_id: row.try_get("tag_id")?,
-        tag_label: row.try_get("tag_label")?,
-        tag_color: row.try_get("tag_color")?,
-    })
 }
 
 impl StopwatchSessionRepository {
