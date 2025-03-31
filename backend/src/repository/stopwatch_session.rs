@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::session::stopwatch_session::CreateStopwatchSessionDto,
+    dto::session::stopwatch_session::{CreateStopwatchSessionDto, UpdateStopwatchSessionDto},
     entity::{
         category::Category,
         session::{SessionType, StopwatchSession},
@@ -203,5 +203,60 @@ impl StopwatchSessionRepository {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn update_session(
+        &self,
+        dto: UpdateStopwatchSessionDto,
+        actor: ClerkUser,
+    ) -> Result<StopwatchSession> {
+        let mut tx = self.db_conn.get_pool().begin().await?;
+        sqlx::query(
+            r#"
+                UPDATE "stopwatch_session" s SET
+                    description = COALESCE($1, s.description),
+                    start_time = COALESCE($2, s.start_time),
+                    category_id = COALESCE($3, s.category_id)
+                WHERE s.id = $4
+            "#,
+        )
+        .bind(dto.description)
+        .bind(dto.start_time)
+        .bind(dto.category_id)
+        .bind(dto.id)
+        .execute(tx.as_mut())
+        .await?;
+
+        println!("Tags: {:?}", dto.tag_ids);
+        if let Some(tags) = dto.tag_ids {
+            sqlx::query!(
+                r#"
+                DELETE FROM tag_to_stopwatch_session
+                WHERE session_id = $1
+            "#,
+                dto.id
+            )
+            .execute(tx.as_mut())
+            .await?;
+
+            let query = r#"
+                    INSERT INTO tag_to_stopwatch_session (session_id, tag_id)
+                    SELECT $1, tag_id FROM UNNEST($2::uuid[]) AS tag_id
+                "#;
+
+            sqlx::query(query)
+                .bind(dto.id)
+                .bind(tags)
+                .execute(tx.as_mut())
+                .await?;
+        }
+        tx.commit().await?;
+
+        let session = self.read_stopwatch(actor.clone()).await;
+        match session {
+            Ok(Some(session)) => Ok(session),
+            Ok(None) => Err(anyhow!("Failed to update stopwatch session")),
+            Err(e) => Err(e),
+        }
     }
 }
