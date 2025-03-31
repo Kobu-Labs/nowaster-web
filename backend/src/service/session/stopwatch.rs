@@ -1,5 +1,7 @@
 use crate::{
-    dto::session::stopwatch_session::{CreateStopwatchSessionDto, ReadStopwatchSessionDto},
+    dto::session::stopwatch_session::{
+        CreateStopwatchSessionDto, ReadStopwatchSessionDto, UpdateStopwatchSessionDto,
+    },
     repository::stopwatch_session::StopwatchSessionRepository,
     router::clerk::ClerkUser,
     service::category_service::CategoryService,
@@ -64,5 +66,18 @@ impl StopwatchSessionService {
         let res = self.stopwatch_repo.read_stopwatch(actor).await?;
 
         Ok(res.map(ReadStopwatchSessionDto::from))
+    }
+
+    pub async fn update_stopwatch_session(
+        &self,
+        dto: UpdateStopwatchSessionDto,
+        actor: ClerkUser,
+    ) -> Result<ReadStopwatchSessionDto> {
+        let res = self
+            .stopwatch_repo
+            .update_session(dto.clone(), actor)
+            .await?;
+
+        Ok(ReadStopwatchSessionDto::from(res))
     }
 }
