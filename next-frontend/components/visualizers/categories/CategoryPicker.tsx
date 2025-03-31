@@ -56,7 +56,9 @@ type SingleCategoryPickerProps = {
 >;
 
 // TODO: just dynamically allow only one element in selectedCategories[] you dumb ass
-export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
+export const SingleCategoryPicker: FC<
+  SingleCategoryPickerProps & { value?: CategoryWithId }
+> = (props) => {
   const {
     data: categories,
     isLoading,
@@ -69,6 +71,8 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
   const [selectedCategory, setSelectedCategory] = useState<
     CategoryWithId | undefined
   >();
+  const isControlled = props.value !== undefined;
+  const value = isControlled ? props.value : selectedCategory;
 
   if (!categories || isLoading || isError) {
     return <div>Something bad happenned</div>;
@@ -79,7 +83,9 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
   }
 
   const onSelectCategory = (category: CategoryWithId) => {
-    setSelectedCategory(category);
+    if (!isControlled) {
+      setSelectedCategory(category);
+    }
     props.onSelectedCategoriesChanged(category);
   };
 
@@ -87,7 +93,7 @@ export const SingleCategoryPicker: FC<SingleCategoryPickerProps> = (props) => {
     <SingleCategoryPickerUiProvider
       modal={props.modal}
       availableCategories={categories.value}
-      selectedCategory={selectedCategory}
+      selectedCategory={value}
       onSelectCategory={onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
       categoryDisplayStrategy={props.categoryDisplayStrategy}
