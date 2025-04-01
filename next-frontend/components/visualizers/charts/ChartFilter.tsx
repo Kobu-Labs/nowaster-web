@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import {
   changeCategoryFilterMode,
   changeTagFilterMode,
@@ -49,8 +49,10 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
 
   const resetFilter = () => setChartFilter(getDefaultFilter());
 
-  // TODO: memoize this
-  const appliedFiltersCount = countLeaves(translateFilterPrecursor(filter));
+  const appliedFiltersCount = useMemo(
+    () => countLeaves(translateFilterPrecursor(filter)),
+    [filter],
+  );
 
   return (
     <div className="flex flex-col">
