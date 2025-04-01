@@ -241,9 +241,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                     <SimpleTagPicker
                       forCategory={form.watch("category")}
                       disabled={form.getValues("category") === undefined}
-                      onSelectedTagsChanged={(tags) => {
-                        field.onChange(tags);
-                      }}
+                      onNewTagsSelected={(tags) => field.onChange(tags)}
                     />
                   </FormControl>
                   <FormMessage />

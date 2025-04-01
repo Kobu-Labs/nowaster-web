@@ -1,5 +1,4 @@
-import { FC, useState } from "react";
-import { TagDetails } from "@/api/definitions";
+import { FC } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
@@ -8,18 +7,12 @@ import {
   TagPickerUiProviderProps,
 } from "@/components/ui-providers/TagPickerUiProvider";
 
-//TODO: extract the "selectedTags" to seprarat component
-
-type SimpleTagPickerProps = {
-  onSelectedTagsChanged: (newTags: TagDetails[]) => void;
-} & Omit<
+type SimpleTagPickerProps = {} & Omit<
   TagPickerUiProviderProps,
-  "availableTags" | "selectedTags" | "onSelectTag"
+  "availableTags"
 >;
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
-  const [selectedTags, setSelectedTags] = useState<TagDetails[]>([]);
-
   const {
     data: tags,
     isLoading,
@@ -37,26 +30,13 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
     return <div>{tags.error.message}</div>;
   }
 
-  const onSelectTag = (tag: TagDetails) => {
-    let newTags;
-    if (selectedTags.some((t) => t.id === tag.id)) {
-      // deselect
-      newTags = selectedTags.filter((t) => t.id !== tag.id);
-    } else {
-      // select
-      newTags = [tag, ...selectedTags];
-    }
-    setSelectedTags(newTags);
-    props.onSelectedTagsChanged(newTags);
-  };
-
   return (
     <TagPickerUiProvider
       disabled={props.disabled}
       availableTags={tags.value}
       forCategory={props.forCategory}
-      selectedTags={selectedTags}
-      onSelectTag={onSelectTag}
+      selectedTags={props.selectedTags}
+      onNewTagsSelected={props.onNewTagsSelected}
       modal={props.modal}
       tagsDisplayStrategy={props.tagsDisplayStrategy}
       tagMatchStrategy={props.tagMatchStrategy}
