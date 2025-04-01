@@ -354,7 +354,7 @@ const EditStopwatchSession = React.forwardRef<FormHandle, FormComponentProps>(
         tag_ids: values.tags?.map((tag) => tag.id),
       };
 
-      updateSession.mutateAsync(updateData);
+      await updateSession.mutateAsync(updateData);
     }
 
     return (
