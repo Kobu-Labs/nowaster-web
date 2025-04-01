@@ -9,7 +9,7 @@ export const siteConfig = {
       href: "/history",
     },
     {
-      title: "New Session",
+      title: "Plan",
       href: "/new",
     },
     {
