@@ -9,14 +9,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useUpdateSession(
   sessionType: "stopwatch",
-): ReturnType<typeof updateStopwatchSession>;
+): ReturnType<typeof useUpdateStopwatchSession>;
 export function useUpdateSession(
   sessionType: "scheduled",
-): ReturnType<typeof updateScheduledSession>;
+): ReturnType<typeof useUpdateScheduledSession>;
 
 export function useUpdateSession(sessionType: "stopwatch" | "scheduled") {
-  const updateStopwatch = updateStopwatchSession();
-  const updateScheduled = updateScheduledSession();
+  const updateStopwatch = useUpdateStopwatchSession();
+  const updateScheduled = useUpdateScheduledSession();
 
   if (sessionType === "stopwatch") {
     return updateStopwatch;
@@ -28,7 +28,7 @@ export function useUpdateSession(sessionType: "stopwatch" | "scheduled") {
   throw new Error("Invalid session type");
 }
 
-const updateStopwatchSession = () => {
+const useUpdateStopwatchSession = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -60,7 +60,7 @@ const updateStopwatchSession = () => {
   return updateSessionMutation;
 };
 
-const updateScheduledSession = () => {
+const useUpdateScheduledSession = () => {
   const { toast } = useToast();
 
   const updateSessionMutation = useMutation({
