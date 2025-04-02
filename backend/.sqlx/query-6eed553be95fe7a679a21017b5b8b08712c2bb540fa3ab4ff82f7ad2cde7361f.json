@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM tag_to_stopwatch_session\n                WHERE session_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6eed553be95fe7a679a21017b5b8b08712c2bb540fa3ab4ff82f7ad2cde7361f"
+}
