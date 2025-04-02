@@ -3,10 +3,18 @@ import {
   ScheduledSessionRequest,
   StopwatchSessionRequest,
 } from "@/api/definitions";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useUpdateSession = (sessionType: "stopwatch" | "scheduled") => {
+export function useUpdateSession(
+  sessionType: "stopwatch",
+): ReturnType<typeof useUpdateStopwatchSession>;
+export function useUpdateSession(
+  sessionType: "scheduled",
+): ReturnType<typeof useUpdateScheduledSession>;
+
+export function useUpdateSession(sessionType: "stopwatch" | "scheduled") {
   if (sessionType === "stopwatch") {
     return useUpdateStopwatchSession();
   }
@@ -14,10 +22,11 @@ export const useUpdateSession = (sessionType: "stopwatch" | "scheduled") => {
     return useUpdateScheduledSession();
   }
   throw new Error("Invalid session type");
-};
+}
 
 const useUpdateStopwatchSession = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const updateSessionMutation = useMutation({
     mutationFn: async (data: StopwatchSessionRequest["update"]) => {
@@ -28,6 +37,9 @@ const useUpdateStopwatchSession = () => {
       return result.value;
     },
     onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.sessions.active._def,
+      });
       toast({
         description: `Session updated successfully!`,
         variant: "default",
