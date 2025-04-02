@@ -245,13 +245,13 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
               </TooltipContent>
             </Tooltip>
           </DialogTrigger>
-            {open && (
-              <div
-                className={cn(
-                  "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-                )}
-              />
-            )}
+          {open && (
+            <div
+              className={cn(
+                "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+              )}
+            />
+          )}
           <DialogContent onInteractOutside={onInteractOutside}>
             <DialogHeader>
               <DialogTitle className="m-1">Edit session data</DialogTitle>
