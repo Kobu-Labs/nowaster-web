@@ -7,10 +7,7 @@ import {
   TagPickerUiProviderProps,
 } from "@/components/ui-providers/TagPickerUiProvider";
 
-type SimpleTagPickerProps = {} & Omit<
-  TagPickerUiProviderProps,
-  "availableTags"
->;
+type SimpleTagPickerProps = Omit<TagPickerUiProviderProps, "availableTags">;
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   const {
