@@ -1,15 +1,7 @@
-import {
-  CategoryWithIdSchema,
-  TagWithIdSchema,
-} from "@/api/definitions/models";
 import { z } from "zod";
 
 const create = z.object({
   startTime: z.coerce.date(),
-  category: CategoryWithIdSchema.nullable(),
-  description: z.string().nullish(),
-  tags: z.array(TagWithIdSchema).nullable(),
-  session_type: z.literal("stopwatch"),
 });
 
 const update = z.object({
