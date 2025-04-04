@@ -212,12 +212,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
   }, [session]);
 
   return (
-    <Card
-      className={cn(
-        "px-2 flex items-center justify-center gap-2",
-        finishSession.isError && "border-red-400",
-      )}
-    >
+    <Card className="px-2 flex items-center justify-center gap-2">
       <TooltipProvider delayDuration={50}>
         <Dialog modal={false} open={open} onOpenChange={setOpen}>
           <DialogTrigger className="p-1">
@@ -226,7 +221,11 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
                 <Button
                   onClick={() => setOpen(true)}
                   variant="ghost"
-                  className="flex items-center px-1 m-0 gap-2"
+                  className={cn(
+                    "flex items-center px-1 m-0 gap-2 relative",
+                    finishSession.isError &&
+                      "border-2 animate-[border-pulse_0.5s_ease-in-out_infinite]",
+                  )}
                 >
                   {session.category && (
                     <CategoryBadge
