@@ -285,9 +285,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
                 <EditStopwatchSession
                   ref={formRef}
                   session={session}
-                  hideBorder
                 />
-                <Separator className="w-full" />
                 <h2 className="text-bold text-xl my-4">
                   Some of the last sessions you had in the past 48 hours!
                 </h2>
