@@ -276,7 +276,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
           )}
           <DialogContent
             onInteractOutside={onInteractOutside}
-            className="max-w-[60%] w-full"
+            className="[&>button]:hidden max-w-[60%] w-full"
           >
             <DialogHeader>
               <DialogTitle className="m-1">Edit session data</DialogTitle>
