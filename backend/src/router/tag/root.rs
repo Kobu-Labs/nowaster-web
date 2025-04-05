@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
 use crate::dto::tag::create_tag::UpsertTagDto;
 use crate::dto::tag::filter_tags::TagFilterDto;
-use crate::dto::tag::read_tag::ReadTagDto;
+use crate::dto::tag::read_tag::ReadTagDetailsDto;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
@@ -77,7 +77,7 @@ async fn remove_allowed_category_handler(
 async fn create_tag_handler(
     State(state): State<AppState>,
     ValidatedRequest(payload): ValidatedRequest<UpsertTagDto>,
-) -> ApiResponse<ReadTagDto> {
+) -> ApiResponse<ReadTagDetailsDto> {
     let res = state.tag_service.upsert_tag(payload).await;
     ApiResponse::from_result(res)
 }
@@ -85,7 +85,7 @@ async fn create_tag_handler(
 async fn filter_tags_handler(
     State(state): State<AppState>,
     Query(payload): Query<TagFilterDto>,
-) -> ApiResponse<Vec<ReadTagDto>> {
+) -> ApiResponse<Vec<ReadTagDetailsDto>> {
     let res = state.tag_service.filter_tags(payload).await;
     ApiResponse::from_result(res)
 }

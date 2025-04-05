@@ -1,11 +1,11 @@
-import { TagWithIdSchema } from "@/api/definitions/models";
+import { TagDetailsSchema } from "@/api/definitions/models";
 import { z } from "zod";
 
-const readMany = z.array(TagWithIdSchema);
-const create = TagWithIdSchema;
-const update = TagWithIdSchema;
-const addAllowedCategory = TagWithIdSchema;
-const removeAllowedCategory = TagWithIdSchema;
+const readMany = z.array(TagDetailsSchema);
+const create = TagDetailsSchema;
+const update = TagDetailsSchema;
+const addAllowedCategory = TagDetailsSchema;
+const removeAllowedCategory = TagDetailsSchema;
 
 export type TagResponse = {
   [Property in keyof typeof TagResponseSchema]: z.infer<
