@@ -2,8 +2,8 @@ use anyhow::{anyhow, Ok, Result};
 use uuid::Uuid;
 
 use crate::{
-    dto::tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto, read_tag::ReadTagDto},
-    entity::{category::Category, tag::Tag},
+    dto::tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto, read_tag::ReadTagDetailsDto},
+    entity::{category::Category, tag::TagDetails},
     repository::tag::{TagRepository, TagRepositoryTrait},
 };
 
@@ -17,29 +17,33 @@ impl TagService {
         Self { repo }
     }
 
-    pub async fn upsert_tag(&self, dto: UpsertTagDto) -> Result<ReadTagDto> {
+    pub async fn upsert_tag(&self, dto: UpsertTagDto) -> Result<ReadTagDetailsDto> {
         let res = self.repo.upsert(dto).await?;
-        Ok(ReadTagDto::from(res))
+        Ok(ReadTagDetailsDto::from(res))
     }
 
-    pub async fn add_allowed_category(&self, tag: &Tag, category: &Category) -> Result<()> {
+    pub async fn add_allowed_category(&self, tag: &TagDetails, category: &Category) -> Result<()> {
         self.repo.add_allowed_category(tag.id, category.id).await?;
         Ok(())
     }
 
-    pub async fn remove_allowed_category(&self, tag: &Tag, category: &Category) -> Result<()> {
+    pub async fn remove_allowed_category(
+        &self,
+        tag: &TagDetails,
+        category: &Category,
+    ) -> Result<()> {
         self.repo
             .remove_allowed_category(tag.id, category.id)
             .await?;
         Ok(())
     }
 
-    pub async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<ReadTagDto>> {
+    pub async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<ReadTagDetailsDto>> {
         let res = self.repo.filter_tags(filter).await?;
-        Ok(res.into_iter().map(ReadTagDto::from).collect())
+        Ok(res.into_iter().map(ReadTagDetailsDto::from).collect())
     }
 
-    pub async fn get_by_id(&self, id: Uuid) -> Result<Tag> {
+    pub async fn get_by_id(&self, id: Uuid) -> Result<TagDetails> {
         let res = self
             .repo
             .filter_tags(TagFilterDto {

@@ -1,12 +1,15 @@
 use anyhow::{Ok, Result};
 use sqlx::{Postgres, QueryBuilder};
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto},
-    entity::tag::Tag,
+    dto::{
+        category::read_category::ReadCategoryDto,
+        tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto},
+    },
+    entity::{category::Category, tag::TagDetails},
 };
 
 #[derive(Clone)]
@@ -20,11 +23,19 @@ pub struct ReadTagRow {
     label: String,
 }
 
+#[derive(sqlx::FromRow)]
+struct ReadTagDetailsRow {
+    tag_id: Uuid,
+    tag_label: String,
+    category_id: Option<Uuid>,
+    category_name: Option<String>,
+}
+
 pub trait TagRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: UpsertTagDto) -> Result<Tag>;
-    fn mapper(&self, row: ReadTagRow) -> Tag;
-    async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<Tag>>;
+    async fn upsert(&self, dto: UpsertTagDto) -> Result<TagDetails>;
+    fn mapper(&self, row: ReadTagRow, allowed_categories: Vec<ReadCategoryDto>) -> TagDetails;
+    async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>>;
     async fn delete_tag(&self, id: Uuid) -> Result<()>;
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
     async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
@@ -37,7 +48,7 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
-    async fn upsert(&self, dto: UpsertTagDto) -> Result<Tag> {
+    async fn upsert(&self, dto: UpsertTagDto) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
@@ -56,7 +67,20 @@ impl TagRepositoryTrait for TagRepository {
         .fetch_one(self.db_conn.get_pool())
         .await?;
 
-        Ok(self.mapper(row))
+        let categories = sqlx::query_as!(
+            ReadCategoryDto,
+            r#"
+            SELECT cat.id, cat.name
+            FROM category cat
+            JOIN tag_category tc ON tc.category_id = cat.id
+            WHERE tc.tag_id = $1
+        "#,
+            row.id
+        )
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        Ok(self.mapper(row, categories))
     }
 
     async fn delete_tag(&self, id: Uuid) -> Result<()> {
@@ -73,11 +97,17 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<Tag>> {
+    async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
-                SELECT tag.id, tag.label
+                SELECT 
+                    tag.id AS tag_id,
+                    tag.label AS tag_label,
+                    category.id AS category_id,
+                    category.name AS category_name
                 FROM tag
+                LEFT OUTER JOIN tag_category ON tag_category.tag_id = tag.id
+                LEFT OUTER JOIN category ON category.id = tag_category.category_id
                 WHERE 1=1
             ",
         );
@@ -90,18 +120,43 @@ impl TagRepositoryTrait for TagRepository {
             query.push(" and tag.label = ").push_bind(label);
         }
 
-        let result = query
-            .build_query_as::<ReadTagRow>()
+        let rows = query
+            .build_query_as::<ReadTagDetailsRow>()
             .fetch_all(self.db_conn.get_pool())
             .await?;
 
-        Ok(result.into_iter().map(|row| self.mapper(row)).collect())
+        let mut tags_map: HashMap<Uuid, TagDetails> = HashMap::new();
+
+        for row in rows {
+            let tag = tags_map.entry(row.tag_id).or_insert_with(|| TagDetails {
+                id: row.tag_id,
+                label: row.tag_label.clone(),
+                allowed_categories: Vec::new(),
+            });
+
+            if let (Some(cat_id), Some(cat_name)) = (row.category_id, row.category_name.clone()) {
+                tag.allowed_categories.push(Category {
+                    id: cat_id,
+                    name: cat_name,
+                });
+            }
+        }
+
+        let tags: Vec<TagDetails> = tags_map.into_values().collect();
+        Ok(tags)
     }
 
-    fn mapper(&self, row: ReadTagRow) -> Tag {
-        Tag {
+    fn mapper(&self, row: ReadTagRow, allowed_categories: Vec<ReadCategoryDto>) -> TagDetails {
+        TagDetails {
             id: row.id,
             label: row.label,
+            allowed_categories: allowed_categories
+                .into_iter()
+                .map(|cat| Category {
+                    id: cat.id,
+                    name: cat.name,
+                })
+                .collect(),
         }
     }
 
