@@ -53,20 +53,18 @@ services:
       ADMINER_DEFAULT_SERVER: postgres
 
   migrator:
-    image: rust:latest
+    build: ../backend
     container_name: sqlx_migrator
     depends_on:
       - postgres
     working_dir: /app
     env_file:
       - .env
-    volumes:
-      - ../backend:/app # Mount backend source code
     entrypoint:
       [
         "/bin/sh",
         "-c",
-        "sleep 5 && cargo install sqlx-cli --no-default-features --features postgres && sqlx migrate run",
+        "sleep 5 && sqlx migrate run",
       ]
 
 volumes:

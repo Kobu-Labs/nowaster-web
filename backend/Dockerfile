@@ -27,7 +27,11 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/axum-test /app/axum-test
 COPY --from=builder /app/.sqlx /app/.sqlx
-RUN apt-get update && apt install -y openssl
+
+# Add backend application files, including migration files
+COPY ./migrations /app/migrations
+
+COPY --from=builder /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
 
 EXPOSE ${BACKEND_PORT}
 
