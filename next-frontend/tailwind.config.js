@@ -74,6 +74,25 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        pulse: {
+          "0%, 100%": {
+            opacity: "0.7",
+            transform: "scale(0.98)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.03)",
+          },
+        },
+        "border-pulse": {
+          "0%, 100%": {
+            borderColor: "hsl(var(--destructive) / 0.5)",
+          },
+          "50%": {
+            borderColor: "hsl(var(--destructive))",
+            boxShadow: "0 0 0 1px hsl(var(--destructive) / 0.3)",
+          },
+        },
       },
       animation: {
         blink: "blink 1s infinite",

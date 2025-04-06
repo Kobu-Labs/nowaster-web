@@ -6,10 +6,12 @@ import {
   ScheduledSessionResponseSchema,
   ScheduledSessionWithId,
   ScheduledSessionWithIdSchema,
+  StopwatchSessionWithId,
+  StopwatchSessionWithIdSchema,
 } from "@/api/definitions";
 import { z } from "zod";
 
-const BASE_URL = "/session";
+const BASE_URL = "/session/fixed";
 
 export const create = async (
   params: ScheduledSessionRequest["create"],
@@ -19,11 +21,13 @@ export const create = async (
 };
 
 export const getActiveSessions = async (): Promise<
-  Result<ScheduledSessionWithId[]>
+  Result<(ScheduledSessionWithId | StopwatchSessionWithId)[]>
 > => {
   const { data } = await baseApi.get(BASE_URL + "/active");
-  //TODO: extract this to /api/definitions as a separate response
-  return await handleResponse(data, z.array(ScheduledSessionWithIdSchema));
+  return await handleResponse(
+    data,
+    z.array(ScheduledSessionWithIdSchema.or(StopwatchSessionWithIdSchema)),
+  );
 };
 
 export const getSessions = async (

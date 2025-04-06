@@ -1,11 +1,11 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import {
   changeCategoryFilterMode,
   changeTagFilterMode,
   filterPrecursorAtom,
   handleSelectCategory,
-  handleSelectTag,
   getDefaultFilter,
+  overwriteData,
 } from "@/state/chart-filter";
 import { CategoryWithId, TagDetails } from "@/api/definitions";
 import { useAtom } from "jotai";
@@ -31,26 +31,25 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
-import { StatelessTagPicker } from "@/components/visualizers/tags/TagPicker";
-
-// TODO: empty props right now
-type ChartFilterProps = Record<string, never>;
+import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 
 // TODO: currently the most disgusting component in the codebase
 // refactor it using Forms probably
-export const ChartFilter: FC<ChartFilterProps> = () => {
+export const ChartFilter: FC = () => {
   const [filter, setChartFilter] = useAtom(filterPrecursorAtom);
 
-  const onSelectTag = (tag: TagDetails) =>
-    setChartFilter((state) => handleSelectTag(state, tag));
+  const onSelectTag = (tags: TagDetails[]) =>
+    setChartFilter((state) => overwriteData(state, { tags }));
 
   const onSelectCategory = (category: CategoryWithId) =>
     setChartFilter((state) => handleSelectCategory(state, category));
 
   const resetFilter = () => setChartFilter(getDefaultFilter());
 
-  // TODO: memoize this
-  const appliedFiltersCount = countLeaves(translateFilterPrecursor(filter));
+  const appliedFiltersCount = useMemo(
+    () => countLeaves(translateFilterPrecursor(filter)),
+    [filter],
+  );
 
   return (
     <div className="flex flex-col">
@@ -79,9 +78,9 @@ export const ChartFilter: FC<ChartFilterProps> = () => {
           <div className="flex flex-col gap-1">
             <SheetDescription>Filter by tags</SheetDescription>
 
-            <StatelessTagPicker
+            <SimpleTagPicker
               modal={false}
-              onSelectTag={onSelectTag}
+              onNewTagsSelected={onSelectTag}
               selectedTags={filter.data.tags ?? []}
             />
             <RadioGroup

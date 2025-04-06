@@ -21,6 +21,7 @@ export const TotalSessionTimeKpiCard: FC<TotalSessionTimeKpiCardProps> = () => {
   return (
     <KpiCardUiProvider
       loading={stats.isLoading}
+      error={stats.isError}
       value={stats.data}
       mapper={(val) => val.toFixed(0)}
       title="Total Minutes Spent"

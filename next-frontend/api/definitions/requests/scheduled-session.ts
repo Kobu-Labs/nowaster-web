@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const create = z.object({
   category: CategoryWithIdSchema,
-  description: z.string().max(50).nullable(),
+  description: z.string().nullable(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
   tags: z.array(
@@ -28,7 +28,7 @@ const readMany = z
 const update = z.object({
   id: z.string().uuid(),
   category: CategoryRequestSchema.create,
-  description: z.string().max(50).optional(),
+  description: z.string().optional(),
   startTime: z.coerce.date().optional(),
   endTime: z.coerce.date().optional(),
 });

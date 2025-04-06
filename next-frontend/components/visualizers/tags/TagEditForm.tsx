@@ -107,9 +107,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
     onSettled: props.onDelete,
   });
 
-  const saveMutation = useUpdateTag({
-    onSuccess: props.onEdit,
-  });
+  const saveMutation = useUpdateTag();
 
   return (
     <Card className="h-fit">
@@ -224,12 +222,17 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
             loading={saveMutation.isPending}
             disabled={newTagName.length === 0}
             onClick={() =>
-              saveMutation.mutate({
-                id: props.tag.id,
-                label: newTagName,
-                allowedCategories: selectedCategories,
-                color: newColor,
-              })
+              saveMutation.mutate(
+                {
+                  id: props.tag.id,
+                  label: newTagName,
+                  allowedCategories: selectedCategories,
+                  color: newColor,
+                },
+                {
+                  onSuccess: props.onEdit,
+                },
+              )
             }
           >
             <Save className="mr-2 h-4 w-4" /> Save

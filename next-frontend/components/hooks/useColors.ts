@@ -28,7 +28,6 @@ export const useColors = () => {
       });
       setTagColors(tagColors);
       setCategoryColors(category_colors);
-      console.log("tagColors", category_colors);
       return data.value;
     },
     queryKey: ["colors"],

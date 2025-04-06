@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   addHours,
   addMinutes,
+  differenceInMinutes,
   isBefore,
   isEqual,
   setMinutes,
@@ -18,7 +19,7 @@ import {
 import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { getFormattedTimeDifference } from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -72,8 +73,13 @@ const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
     return <span>--:--</span>;
   }
 
-  const result = getFormattedTimeDifference(props.from, props.to);
-  return <span>{result}</span>;
+  const duration = differenceInMinutes(props.to, props.from);
+  if (duration < 0) {
+    return <span>--:--</span>;
+  }
+
+  const formatted = formatTime(duration);
+  return <span>{formatted}</span>;
 };
 
 export const ScheduledSessionCreationForm: FC = () => {
@@ -126,8 +132,8 @@ export const ScheduledSessionCreationForm: FC = () => {
               control={form.control}
               name="category"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block">Category</FormLabel>
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Category</FormLabel>
                   <FormControl>
                     <SingleCategoryPicker
                       onSelectedCategoriesChanged={(category) => {
@@ -149,8 +155,8 @@ export const ScheduledSessionCreationForm: FC = () => {
               name="description"
               defaultValue={null}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Insert your description"
@@ -168,28 +174,26 @@ export const ScheduledSessionCreationForm: FC = () => {
                 name="startTime"
                 control={form.control}
                 render={({ field }) => (
-                  <div>
-                    <FormItem>
-                      <FormLabel className="block">Start Time</FormLabel>
-                      <FormControl>
-                        <DateTimePicker
-                          quickOptions={creationFormQuickOptions}
-                          selected={field.value || undefined}
-                          onSelect={(val) => {
-                            if (val) {
-                              field.onChange(val);
-                              if (!form.getValues("endTime")) {
-                                form.setValue("endTime", val);
-                              }
-                            } else {
-                              form.resetField("startTime");
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="block">Start Time</FormLabel>
+                    <FormControl>
+                      <DateTimePicker
+                        quickOptions={creationFormQuickOptions}
+                        selected={field.value || undefined}
+                        onSelect={(val) => {
+                          if (val) {
+                            field.onChange(val);
+                            if (!form.getValues("endTime")) {
+                              form.setValue("endTime", val);
                             }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </div>
+                          } else {
+                            form.resetField("startTime");
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
 
@@ -205,7 +209,7 @@ export const ScheduledSessionCreationForm: FC = () => {
                 name="endTime"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
@@ -231,15 +235,13 @@ export const ScheduledSessionCreationForm: FC = () => {
               name="tags"
               control={form.control}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-2">
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
                       forCategory={form.watch("category")}
                       disabled={form.getValues("category") === undefined}
-                      onSelectedTagsChanged={(tags) => {
-                        field.onChange(tags);
-                      }}
+                      onNewTagsSelected={(tags) => field.onChange(tags)}
                     />
                   </FormControl>
                   <FormMessage />
