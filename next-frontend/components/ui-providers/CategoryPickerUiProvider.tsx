@@ -2,13 +2,13 @@ import { FC, useState } from "react";
 import { CategoryWithId } from "api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn, randomColor } from "@/lib/utils";
-import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
   Command,
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandSeparator,
 } from "@/components/shadcn/command";
 import {
   Popover,
@@ -18,6 +18,7 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import FuzzySearch from "fuzzy-search";
 import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 
 export type MultipleCategoryPickerUiProviderProps = {
   availableCategories: CategoryWithId[];
@@ -48,11 +49,14 @@ export const MultipleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [newCategoryColor, setNewCategoryColor] =
+    useState<string>(randomColor());
 
   // TODO move this higher
   const { mutate: createCategory } = useCreateCategory({
     onSuccess: (cat) => {
       props.onSelectCategory(cat);
+      setNewCategoryColor(newCategoryColor);
     },
   });
 
@@ -98,9 +102,11 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <Badge variant="outline" key={category.id}>
-                      {category.name}
-                    </Badge>
+                    <CategoryBadge
+                      key={category.id}
+                      name={category.name}
+                      color={category.color}
+                    />
                   ))}
               </ScrollArea>
             </div>
@@ -114,56 +120,63 @@ export const MultipleCategoryPickerUiProvider: FC<
             placeholder={"Search categories"}
             value={searchTerm}
           />
-          {!categoriesInDisplayOrder.length && (
-            <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              {searchTerm &&
-                props.availableCategories.every(
-                  (cat) => cat.name !== searchTerm,
-                ) && (
-                <CommandGroup>
-                  <CommandItem
-                    className="flex"
-                    onSelect={() =>
-                      createCategory({
-                        color: randomColor(),
-                        name: searchTerm,
-                      })
-                    }
-                  >
-                    <p>Create</p>
-                    <div className="grow"></div>
-                    <Badge variant="outline">{searchTerm}</Badge>
-                  </CommandItem>
-                </CommandGroup>
-              )}
-            </CommandItem>
-          )}
-          <CommandGroup>
-            <ScrollArea
-              type="always"
-              className="max-h-48 overflow-y-auto rounded-md border-none"
+          {searchTerm &&
+            props.availableCategories.every(
+              (cat) => cat.name !== searchTerm,
+            ) && (
+            <Button
+              variant="ghost"
+              className="m-0"
+              onClick={() =>
+                createCategory({
+                  color: newCategoryColor,
+                  name: searchTerm,
+                })
+              }
             >
-              {categoriesInDisplayOrder.map((category) => (
-                <CommandItem
-                  value={category.name}
-                  key={category.id}
-                  onSelect={() => props.onSelectCategory(category)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      props.selectedCategories.some(
-                        (cat) => cat.id === category.id,
-                      )
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <Badge variant="outline">{category.name}</Badge>
-                </CommandItem>
-              ))}
-            </ScrollArea>
-          </CommandGroup>
+              <p>Create</p>
+              <div className="grow"></div>
+              <CategoryBadge color={newCategoryColor} name={searchTerm} />
+            </Button>
+          )}
+          <CommandSeparator />
+          {categoriesInDisplayOrder.length > 0 && (
+            <CommandGroup heading="Existing Categories">
+              <ScrollArea
+                type="always"
+                className="max-h-48 overflow-y-auto rounded-md border-none"
+              >
+                {categoriesInDisplayOrder.map((category) => (
+                  <CommandItem
+                    value={category.name}
+                    key={category.id}
+                    onSelect={() => props.onSelectCategory(category)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 size-4",
+                        props.selectedCategories.some(
+                          (cat) => cat.id === category.id,
+                        )
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    <CategoryBadge
+                      color={category.color}
+                      name={category.name}
+                    />
+                  </CommandItem>
+                ))}
+              </ScrollArea>
+            </CommandGroup>
+          )}
+          {categoriesInDisplayOrder.length === 0 &&
+            searchTerm.trim().length === 0 && (
+            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+                Type to create!
+            </div>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
@@ -191,9 +204,14 @@ export const SingleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [newCategoryColor, setNewCategoryColor] =
+    useState<string>(randomColor());
 
   const { mutate: createCategory } = useCreateCategory({
-    onSuccess: props.onSelectCategory,
+    onSuccess: (cat) => {
+      props.onSelectCategory(cat);
+      setNewCategoryColor(randomColor());
+    },
   });
 
   let categoriesInDisplayOrder = props.availableCategories;
@@ -230,7 +248,10 @@ export const SingleCategoryPickerUiProvider: FC<
           {!props.selectedCategory ? (
             "Search Category"
           ) : (
-            <Badge variant="outline">{props.selectedCategory.name}</Badge>
+            <CategoryBadge
+              name={props.selectedCategory.name}
+              color={props.selectedCategory.color}
+            />
           )}
           <div className="grow"></div>
           <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
@@ -247,45 +268,57 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              <CommandGroup>
-                <CommandItem
-                  className="flex"
-                  onSelect={() =>
-                    createCategory({ color: randomColor(), name: searchTerm })
-                  }
-                >
-                  <p>Create</p>
-                  <div className="grow"></div>
-                  <Badge variant="outline">{searchTerm}</Badge>
-                </CommandItem>
-              </CommandGroup>
-            </CommandItem>
-          )}
-          <CommandGroup>
-            <ScrollArea
-              type="always"
-              className="max-h-48 overflow-y-auto rounded-md border-none"
+            <Button
+              variant="ghost"
+              className="m-0"
+              onClick={() =>
+                createCategory({
+                  color: newCategoryColor,
+                  name: searchTerm,
+                })
+              }
             >
-              {categoriesInDisplayOrder.map((category) => (
-                <CommandItem
-                  value={category.name}
-                  key={category.id}
-                  onSelect={() => props.onSelectCategory(category)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      category.id === props.selectedCategory?.id
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <Badge variant="outline">{category.name}</Badge>
-                </CommandItem>
-              ))}
-            </ScrollArea>
-          </CommandGroup>
+              <p>Create</p>
+              <div className="grow"></div>
+              <CategoryBadge color={newCategoryColor} name={searchTerm} />
+            </Button>
+          )}
+          <CommandSeparator />
+          {categoriesInDisplayOrder.length > 0 && (
+            <CommandGroup heading="Existing Categories">
+              <ScrollArea
+                type="always"
+                className="max-h-48 overflow-y-auto rounded-md border-none"
+              >
+                {categoriesInDisplayOrder.map((category) => (
+                  <CommandItem
+                    value={category.name}
+                    key={category.id}
+                    onSelect={() => props.onSelectCategory(category)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 size-4",
+                        category.id === props.selectedCategory?.id
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    <CategoryBadge
+                      color={category.color}
+                      name={category.name}
+                    />
+                  </CommandItem>
+                ))}
+              </ScrollArea>
+            </CommandGroup>
+          )}
+          {categoriesInDisplayOrder.length === 0 &&
+            searchTerm.trim().length === 0 && (
+            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+                Type to create!
+            </div>
+          )}
         </Command>
       </PopoverContent>
     </Popover>

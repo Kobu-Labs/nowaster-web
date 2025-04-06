@@ -42,33 +42,30 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
 
   return (
     <Popover>
-      <div className="flex min-w-[233.6px] items-center rounded-md border border-input px-1">
-        {props.selected && (
-          <div
-            onClick={() => props.onSelect(undefined)}
-            className="cursor-pointer rounded-md hover:bg-accent hover:text-accent-foreground"
-          >
-            <X />
-          </div>
-        )}
-        <PopoverTrigger
-          onWheel={(e) =>
-            props.onSelect(
-              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
-            )
-          }
-          asChild
-        >
-          <div className="inline-flex w-full cursor-pointer  items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ">
-            <CalendarIcon className="size-4" />
-            {props.selected ? (
-              DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")
-            ) : (
-              <span>{props.label ?? "Pick a date"}</span>
-            )}
-          </div>
-        </PopoverTrigger>
-      </div>
+      <PopoverTrigger
+        onWheel={(e) =>
+          props.onSelect(
+            addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
+          )
+        }
+        asChild
+      >
+        <Button variant="outline" className="w-full gap-2">
+          <CalendarIcon className="size-4" />
+          {props.selected ? (
+            <>
+              <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
+              <div className="grow"></div>
+              <X
+                onClick={() => props.onSelect(undefined)}
+                className="cursor-pointer rounded-md hover:bg-destructive "
+              />
+            </>
+          ) : (
+            <span>{props.label ?? "Pick a date"}</span>
+          )}
+        </Button>
+      </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           disabled={props.disabled}

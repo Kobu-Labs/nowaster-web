@@ -127,3 +127,19 @@ export const translateFilterPrecursor = (
 
   return result;
 };
+
+export const emptyStringToUndefined = (
+  value: string | undefined | null,
+  options?: { trim?: boolean },
+): string | undefined => {
+  let workingValue = value;
+  if (options?.trim) {
+    workingValue = value?.trim();
+  }
+
+  if (workingValue === "" || workingValue === null) {
+    return undefined;
+  }
+
+  return workingValue;
+};

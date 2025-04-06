@@ -35,10 +35,11 @@ struct ReadTagDetailsRow {
     created_by: String,
     tag_id: Uuid,
     tag_label: String,
+    tag_color: String,
     category_id: Option<Uuid>,
     category_name: Option<String>,
+    category_color: Option<String>,
     usages: i64,
-    color: String,
 }
 
 pub trait TagRepositoryTrait {
@@ -166,9 +167,10 @@ impl TagRepositoryTrait for TagRepository {
                     tag.id AS tag_id,
                     tag.label AS tag_label,
                     tag.created_by AS "created_by",
-                    tag.color,
+                    tag.color as tag_color,
                     category.id AS category_id,
                     category.name AS category_name,
+                    category.color AS category_color,
                     COALESCE(usage_vals.usages, 0) AS usages
                 FROM tag
                 LEFT OUTER JOIN tag_category ON tag_category.tag_id = tag.id
@@ -203,17 +205,21 @@ impl TagRepositoryTrait for TagRepository {
             let tag = tags_map.entry(row.tag_id).or_insert_with(|| TagDetails {
                 id: row.tag_id,
                 label: row.tag_label.clone(),
-                color: row.color.clone(),
+                color: row.tag_color.clone(),
                 allowed_categories: Vec::new(),
                 created_by: row.created_by.clone(),
                 usages: row.usages,
             });
 
-            if let (Some(cat_id), Some(cat_name)) = (row.category_id, row.category_name.clone()) {
+            if let (Some(cat_id), Some(cat_name), Some(cat_color)) = (
+                row.category_id,
+                row.category_name.clone(),
+                row.category_color.clone(),
+            ) {
                 tag.allowed_categories.push(Category {
                     id: cat_id,
                     name: cat_name,
-                    color: row.color.clone(),
+                    color: cat_color,
                     created_by: row.created_by.clone(),
                 });
             }

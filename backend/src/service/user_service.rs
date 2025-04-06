@@ -36,4 +36,12 @@ impl UserService {
             Err(e) => Err(UserError::UnknownError(e.to_string())),
         }
     }
+
+    pub async fn get_user_by_name(&self, username: String) -> Result<ReadUserDto, UserError> {
+        let res = self.repo.get_user_by_username(username).await;
+        match res {
+            Ok(u) => Ok(ReadUserDto::from(u)),
+            Err(_e) => Err(UserError::UserNotFound),
+        }
+    }
 }

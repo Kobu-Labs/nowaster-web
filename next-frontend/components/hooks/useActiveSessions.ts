@@ -1,16 +1,19 @@
-import { ScheduledSessionWithId } from "@/api/definitions";
 import { useQuery } from "@tanstack/react-query";
-
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
-export const useActiveSession = (): ScheduledSessionWithId[] => {
-  const { data: result } = useQuery({
+export const useActiveSessions = () => {
+  const query = useQuery({
     ...queryKeys.sessions.active,
-    retry: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     select: (data) => {
-      return data.isOk ? data.value : [];
+      if (data.isErr) {
+        throw new Error(data.error.message);
+      }
+
+      return data.value;
     },
   });
 
-  return result ?? [];
+  return query;
 };

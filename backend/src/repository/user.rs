@@ -24,6 +24,7 @@ pub trait UserRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn create(&self, dto: CreateUserDto) -> Result<User>;
     async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>>;
+    async fn get_user_by_username(&self, username: String) -> Result<User>;
     fn mapper(&self, row: ReadUserRow) -> User;
 }
 
@@ -32,6 +33,22 @@ impl UserRepositoryTrait for UserRepository {
         Self {
             db_conn: Arc::clone(db_conn),
         }
+    }
+
+    async fn get_user_by_username(&self, username: String) -> Result<User> {
+        let row = sqlx::query_as!(
+            ReadUserRow,
+            r#"
+                SELECT id, displayname
+                FROM "user"
+                WHERE displayname = $1
+            "#,
+            username
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        Ok(self.mapper(row))
     }
 
     async fn create(&self, dto: CreateUserDto) -> Result<User> {

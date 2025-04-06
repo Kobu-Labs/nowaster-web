@@ -30,11 +30,12 @@ export const handleResponse = async <T>(
 ): Promise<Result<T>> => {
   const request = await ResponseSchema.safeParseAsync(data);
   if (!request.success) {
+    console.error(request.error);
     return Result.err(new Error("Response is of unexpected structure!"));
   }
 
   if (request.data.status === "fail") {
-    return Result.err(new Error("Request failed!"));
+    return Result.err(new Error(request.data.message));
   }
 
   const requestBody = await schema.safeParseAsync(request.data.data);
