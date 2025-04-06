@@ -186,6 +186,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
   const queryClient = useQueryClient();
 
   const finishSession = useFinishStopwatchSession();
+  const [globalErr, setGlobalErr] = useState(false);
   const formRef = useRef<FormHandle>(null);
   const filter = useMemo(
     () => ({
@@ -210,14 +211,17 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
   const onInteractOutside = async () => {
     const isValid = await formRef.current?.validate();
     if (!isValid) {
+      setGlobalErr(true);
       return;
     }
     const formValues = formRef.current?.prepareData();
     if (!formValues) {
+      setGlobalErr(true);
       return;
     }
 
     const result = await StopwatchApi.update(formValues);
+    setGlobalErr(result.isErr);
     if (result.isOk) {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions.active._def,
@@ -246,7 +250,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
                   variant="ghost"
                   className={cn(
                     "flex items-center px-1 m-0 gap-2 relative",
-                    finishSession.isError &&
+                    globalErr &&
                       "border-2 animate-[border-pulse_0.5s_ease-in-out_infinite]",
                   )}
                 >
@@ -282,10 +286,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
               <DialogTitle className="m-1">Edit session data</DialogTitle>
               <Separator className="w-full" />
               <DialogDescription>
-                <EditStopwatchSession
-                  ref={formRef}
-                  session={session}
-                />
+                <EditStopwatchSession ref={formRef} session={session} />
                 <h2 className="text-bold text-xl my-4">
                   Some of the last sessions you had in the past 48 hours!
                 </h2>
@@ -307,7 +308,12 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
             <Button
               variant="ghost"
               className="group p-1 m-0 aspect-square"
-              onClick={() => finishSession.mutate(session)}
+              onClick={() =>
+                finishSession.mutate(session, {
+                  onSuccess: () => setGlobalErr(false),
+                  onError: () => setGlobalErr(true),
+                })
+              }
               loading={finishSession.isPending}
             >
               {!finishSession.isPending && (
@@ -406,13 +412,9 @@ const EditStopwatchSession = React.forwardRef<FormHandle, FormComponentProps>(
                     <FormControl>
                       <SingleCategoryPicker
                         value={field.value ?? undefined}
-                        onSelectedCategoriesChanged={(category) => {
-                          if (category === undefined) {
-                            form.resetField("category");
-                          } else {
-                            field.onChange(category);
-                          }
-                        }}
+                        onSelectedCategoriesChanged={(category) =>
+                          field.onChange(category)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -457,7 +459,18 @@ const EditStopwatchSession = React.forwardRef<FormHandle, FormComponentProps>(
                           <DateTimePicker
                             quickOptions={creationFormQuickOptions}
                             selected={value ?? undefined}
-                            onSelect={(val) => field.onChange(val)}
+                            onSelect={(val) => {
+                              if (val) {
+                                if (val && isBefore(new Date(), val)) {
+                                  form.setError("startTime", {
+                                    message: "Start time must be in the past",
+                                  });
+                                  return;
+                                }
+                              }
+
+                              field.onChange(val);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
