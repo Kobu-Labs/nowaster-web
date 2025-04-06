@@ -18,7 +18,7 @@ COPY .sqlx .sqlx
 
 RUN unset DATABASE_URL
 # Build the backend
-RUN cargo build --release
+RUN SQLX_OFFLINE=true cargo build --release
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Final runtime image
