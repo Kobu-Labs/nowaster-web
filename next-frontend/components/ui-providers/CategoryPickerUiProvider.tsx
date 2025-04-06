@@ -28,7 +28,7 @@ export type MultipleCategoryPickerUiProviderProps = {
   onSelectCategory: (category: string) => void;
   categoryDisplayStrategy?: (
     selectedCategories: string[],
-    availableCategories: string[]
+    availableCategories: string[],
   ) => string[];
   categoryMatchStrategy?: (category: string, searchTerm: string) => number;
   modal?: boolean;
@@ -37,8 +37,8 @@ export type MultipleCategoryPickerUiProviderProps = {
 const fuzzyFindStrategy = (category: string, searchTerm: string): boolean => {
   const searcher = new FuzzySearch([category], []);
   const result = searcher.search(searchTerm);
-  return result.length !== 0
-}
+  return result.length !== 0;
+};
 
 export const MultipleCategoryPickerUiProvider: FC<
   MultipleCategoryPickerUiProviderProps
@@ -69,13 +69,13 @@ export const MultipleCategoryPickerUiProvider: FC<
   if (props.categoryDisplayStrategy) {
     categoriesInDisplayOrder = props.categoryDisplayStrategy(
       props.selectedCategories,
-      props.availableCategories
+      props.availableCategories,
     );
   }
 
   const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
   categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
-    matchStrategy(category, searchTerm)
+    matchStrategy(category, searchTerm),
   );
 
   return (
@@ -121,7 +121,7 @@ export const MultipleCategoryPickerUiProvider: FC<
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
               {searchTerm &&
                 props.availableCategories.every(
-                  (cat) => cat !== searchTerm
+                  (cat) => cat !== searchTerm,
                 ) && (
                 <CommandGroup>
                   <CommandItem
@@ -152,7 +152,7 @@ export const MultipleCategoryPickerUiProvider: FC<
                       "mr-2 size-4",
                       props.selectedCategories.some((cat) => cat === category)
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0",
                     )}
                   />
                   <Badge variant="outline">{category}</Badge>
@@ -172,7 +172,7 @@ export type SingleCategoryPickerUiProviderProps = {
   onSelectCategory: (category: string) => void;
   categoryDisplayStrategy?: (
     selectedCategories: string,
-    availableCategories: string[]
+    availableCategories: string[],
   ) => string[];
   categoryMatchStrategy?: (category: string, searchTerm: string) => number;
   modal?: boolean;
@@ -209,13 +209,13 @@ export const SingleCategoryPickerUiProvider: FC<
   if (props.categoryDisplayStrategy) {
     categoriesInDisplayOrder = props.categoryDisplayStrategy(
       props.selectedCategory,
-      props.availableCategories
+      props.availableCategories,
     );
   }
 
   const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
   categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
-    matchStrategy(category, searchTerm)
+    matchStrategy(category, searchTerm),
   );
 
   return (
@@ -252,23 +252,18 @@ export const SingleCategoryPickerUiProvider: FC<
             placeholder={"Search categories"}
             value={searchTerm}
           />
-          {!categoriesInDisplayOrder.length && (
+          {props.availableCategories.every((cat) => cat !== searchTerm) && (
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              {searchTerm &&
-                props.availableCategories.every(
-                  (cat) => cat !== searchTerm
-                ) && (
-                <CommandGroup>
-                  <CommandItem
-                    className="flex"
-                    onSelect={() => createCategory({ name: searchTerm })}
-                  >
-                    <p>Create</p>
-                    <div className="grow"></div>
-                    <Badge variant="outline">{searchTerm}</Badge>
-                  </CommandItem>
-                </CommandGroup>
-              )}
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() => createCategory({ name: searchTerm })}
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <Badge variant="outline">{searchTerm}</Badge>
+                </CommandItem>
+              </CommandGroup>
             </CommandItem>
           )}
           <CommandGroup>
@@ -287,7 +282,7 @@ export const SingleCategoryPickerUiProvider: FC<
                       "mr-2 size-4",
                       category === props.selectedCategory
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0",
                     )}
                   />
                   <Badge variant="outline">{category}</Badge>
