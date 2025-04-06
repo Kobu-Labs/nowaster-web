@@ -1,12 +1,7 @@
-use super::category::root::CategoryError;
-use super::session::root::SessionError;
-use super::tag::root::TagError;
-use super::user::root::UserError;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use thiserror::Error;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "status", rename_all = "lowercase")]
@@ -45,16 +40,4 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
         }
         .into_response()
     }
-}
-
-#[derive(Error, Debug)]
-pub enum ApiError {
-    #[error(transparent)]
-    TagError(#[from] TagError),
-    #[error(transparent)]
-    CategoryError(#[from] CategoryError),
-    #[error(transparent)]
-    SessionError(#[from] SessionError),
-    #[error(transparent)]
-    UserError(#[from] UserError),
 }
