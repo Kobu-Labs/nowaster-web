@@ -31,7 +31,7 @@ pub trait SessionRepositoryTrait {
     type SessionType;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Vec<Self::SessionType>>;
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>>;
     async fn create(
         &self,
         dto: CreateFixedSessionDto,
@@ -120,7 +120,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Vec<Self::SessionType>> {
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
             r#"SELECT 
@@ -152,10 +152,16 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             id,
             actor.user_id
         )
-        .fetch_all(self.db_conn.get_pool())
+        .fetch_optional(self.db_conn.get_pool())
         .await?;
 
-        self.convert(sessions)
+        match sessions {
+            Some(session) => {
+                let result = self.convert(vec![session])?;
+                Ok(result.first().cloned())
+            }
+            None => Ok(None),
+        }
     }
 
     async fn create(
@@ -196,7 +202,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
 
         let session = self.find_by_id(result.id, actor.clone()).await?;
-        match session.first().cloned() {
+        match session {
             Some(val) => Ok(val),
             None => Err(anyhow!("Error creating the session")),
         }
