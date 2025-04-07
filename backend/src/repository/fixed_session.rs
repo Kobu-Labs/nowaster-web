@@ -10,7 +10,7 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::session::{
         filter_session::{FilterSessionDto, Mode},
-        fixed_session::CreateFixedSessionDto,
+        fixed_session::{CreateFixedSessionDto, UpdateFixedSessionDto},
     },
     entity::{category::Category, session::FixedSession, tag::Tag},
     router::clerk::ClerkUser,
@@ -22,6 +22,11 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
+    async fn update_session(
+        &self,
+        dto: UpdateFixedSessionDto,
+        actor: ClerkUser,
+    ) -> Result<Self::SessionType>;
     async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
     async fn filter_sessions(
         &self,
@@ -152,14 +157,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             id,
             actor.user_id
         )
-        .fetch_optional(self.db_conn.get_pool())
+        .fetch_all(self.db_conn.get_pool())
         .await?;
 
-        match sessions {
-            Some(session) => {
-                let result = self.convert(vec![session])?;
-                Ok(result.first().cloned())
-            }
+        let result = self.convert(sessions)?;
+        match result.first() {
+            Some(val) => Ok(Some(val.clone())),
             None => Ok(None),
         }
     }
@@ -368,5 +371,60 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         .await?;
 
         Ok(())
+    }
+
+    async fn update_session(
+        &self,
+        dto: UpdateFixedSessionDto,
+        actor: ClerkUser,
+    ) -> Result<Self::SessionType> {
+        let mut tx = self.db_conn.get_pool().begin().await?;
+        sqlx::query(
+            r#"
+                UPDATE "session" s SET
+                    description = COALESCE($1, s.description),
+                    start_time = COALESCE($2, s.start_time),
+                    end_time = COALESCE($3, s.start_time),
+                    category_id = COALESCE($4, s.category_id)
+                WHERE s.id = $5
+            "#,
+        )
+        .bind(dto.description)
+        .bind(dto.start_time)
+        .bind(dto.end_time)
+        .bind(dto.category_id)
+        .bind(dto.id)
+        .execute(tx.as_mut())
+        .await?;
+
+        if let Some(tags) = dto.tag_ids {
+            sqlx::query!(
+                r#"
+                DELETE FROM tag_to_session
+                WHERE session_id = $1
+            "#,
+                dto.id
+            )
+            .execute(tx.as_mut())
+            .await?;
+
+            let query = r#"
+                    INSERT INTO tag_to_session (session_id, tag_id)
+                    SELECT $1, tag_id FROM UNNEST($2::uuid[]) AS tag_id
+                "#;
+
+            sqlx::query(query)
+                .bind(dto.id)
+                .bind(tags)
+                .execute(tx.as_mut())
+                .await?;
+        }
+        tx.commit().await?;
+
+        let session = self.find_by_id(dto.id, actor).await?;
+        match session {
+            Some(val) => Ok(val),
+            None => Err(anyhow!("Error updating the session")),
+        }
     }
 }
