@@ -13,7 +13,8 @@ import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type SessionCardProps = {
   session: ScheduledSession;
-} & VariantProps<typeof historyCardVariants>;
+} & VariantProps<typeof historyCardVariants> &
+  React.HTMLAttributes<HTMLDivElement>;
 
 const historyCardVariants = cva(
   "hover:bg-accent hover:text-accent-foreground hover:cursor-pointer",
@@ -32,7 +33,14 @@ const historyCardVariants = cva(
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
   return (
-    <Card className={cn(historyCardVariants({ variant: props.variant }))}>
+    <Card
+      {...props}
+      className={cn(
+        historyCardVariants({ variant: props.variant }),
+        props.className,
+        "text-nowrap",
+      )}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-2xl font-bold">
           {props.session.category.name}
