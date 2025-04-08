@@ -18,7 +18,7 @@ export const useCreateScheduledSession = () => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.sessions.active._def,
+        queryKey: queryKeys.sessions._def,
       });
       toast({
         description: `Session created successfully!`,
