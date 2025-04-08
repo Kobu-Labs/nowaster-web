@@ -252,7 +252,7 @@ export const SingleCategoryPickerUiProvider: FC<
             placeholder={"Search categories"}
             value={searchTerm}
           />
-          {props.availableCategories.every((cat) => cat !== searchTerm) && (
+          {searchTerm.trim().length > 0 && props.availableCategories.every((cat) => cat !== searchTerm) && (
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
               <CommandGroup>
                 <CommandItem
