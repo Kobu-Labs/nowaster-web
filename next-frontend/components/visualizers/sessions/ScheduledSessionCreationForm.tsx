@@ -1,11 +1,9 @@
 import React, { FC } from "react";
-import { ScheduledSessionApi } from "@/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ScheduledSessionRequest,
   ScheduledSessionRequestSchema,
 } from "@/api/definitions";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   addHours,
   addMinutes,
@@ -20,7 +18,6 @@ import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { formatTime } from "@/lib/utils";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
@@ -32,14 +29,14 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
-import { useToast } from "@/components/shadcn/use-toast";
 import {
   DateTimePicker,
   QuickOption,
 } from "@/components/visualizers/DateTimePicker";
 import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
-import { SessionCard } from "@/components/visualizers/categories/SessionCard";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { SessionPrecursor } from "@/components/visualizers/SessionTimeline";
+import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -82,14 +79,20 @@ export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
   return <span>{formatted}</span>;
 };
 
-export const ScheduledSessionCreationForm: FC = () => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = React.useState(false);
+type ScheduledSessionCreationFormProps = {
+  precursor?: SessionPrecursor;
+  onSave?: () => void;
+};
 
+export const ScheduledSessionCreationForm: FC<
+  ScheduledSessionCreationFormProps
+> = (props) => {
   const form = useForm<ScheduledSessionRequest["create"]>({
     resolver: zodResolver(ScheduledSessionRequestSchema.create),
+    defaultValues: props.precursor,
   });
+
+  const createSession = useCreateScheduledSession();
 
   async function onSubmit(values: ScheduledSessionRequest["create"]) {
     if (
@@ -101,26 +104,14 @@ export const ScheduledSessionCreationForm: FC = () => {
       });
       return;
     }
-    setLoading(true);
-    const result = await ScheduledSessionApi.create(values);
-    await queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
-    toast(
-      result.isErr
-        ? {
-          title: "Session creation failed",
-          description: result.error.message,
-          variant: "destructive",
+
+    await createSession.mutateAsync(values, {
+      onSuccess: () => {
+        if (props.onSave) {
+          props.onSave();
         }
-        : {
-          className: "text-[#adfa1d]",
-          title: "Session created successfully",
-          description: (
-            <SessionCard variant="borderless" session={result.value} />
-          ),
-          variant: "default",
-        },
-    );
-    setLoading(false);
+      },
+    });
   }
 
   return (
@@ -249,7 +240,7 @@ export const ScheduledSessionCreationForm: FC = () => {
               )}
             />
 
-            <Button type="submit" loading={loading}>
+            <Button type="submit" loading={createSession.isPending}>
               Submit
             </Button>
           </form>
