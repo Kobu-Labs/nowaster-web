@@ -1,8 +1,9 @@
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, prelude::FromRow, Postgres, QueryBuilder, Row};
-use std::{collections::HashMap, sync::Arc, vec};
+use std::{sync::Arc, vec};
 use uuid::Uuid;
 
 use crate::{
@@ -73,7 +74,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     fn convert(&self, sessions: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>> {
-        let mut grouped_tags: HashMap<Uuid, FixedSession> = HashMap::new();
+        let mut grouped_tags: IndexMap<Uuid, FixedSession> = IndexMap::new();
         for session in sessions {
             if session.session_type != "fixed" {
                 return Err(anyhow!("Fixed session must have 'fixed' session type"));
@@ -221,6 +222,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 .push(" and s.start_time <= ")
                 .push_bind(to_starttime.value);
         }
+
+        query.push(" ORDER BY s.start_time DESC");
 
         let rows = query
             .build_query_as::<GenericFullRowSession>()
