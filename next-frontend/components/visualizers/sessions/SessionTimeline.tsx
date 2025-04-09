@@ -1,47 +1,33 @@
 "use client";
 
-import type React from "react";
-
-import {
-  useState,
-  useEffect,
-  useRef,
-  FC,
-  PropsWithChildren,
-  useMemo,
-} from "react";
-import { Card, CardContent } from "@/components/shadcn/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shadcn/dialog";
-import { Button } from "@/components/shadcn/button";
-import { cn } from "@/lib/utils";
-import {
-  format,
-  addHours,
-  differenceInMilliseconds,
-  addMilliseconds,
-  areIntervalsOverlapping,
-} from "date-fns";
 import {
   CategoryWithIdSchema,
   ScheduledSessionWithId,
   TagWithIdSchema,
 } from "@/api/definitions";
-import { z } from "zod";
-import { SessionCard } from "@/components/visualizers/categories/SessionCard";
+import { Card, CardContent } from "@/components/shadcn/card";
+import { DialogHeader } from "@/components/shadcn/dialog";
+import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
 import { EditScheduledSession } from "@/components/visualizers/sessions/EditScheduledSessionForm";
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
+import { sessionToNonIntersection } from "@/lib/sessions/intervals";
+import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import {
+  addHours,
+  addMilliseconds,
+  differenceInMilliseconds,
+  format,
+} from "date-fns";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "react-day-picker";
+import { z } from "zod";
 
 interface DateTimelineProps {
   activities: ScheduledSessionWithId[];
   startDate: Date;
   endDate: Date;
   onActivitiesChange?: (activities: ScheduledSessionWithId[]) => void;
-  markerStep?: number; // in hours
 }
 
 export const sessionPrecursor = z.object({
@@ -53,101 +39,12 @@ export const sessionPrecursor = z.object({
   session_type: z.literal("fixed"),
 });
 
-const hasIntersection = (
-  session1: ScheduledSessionWithId,
-  session2: ScheduledSessionWithId,
-): boolean => {
-  return areIntervalsOverlapping(
-    {
-      start: session1.startTime,
-      end: session1.endTime,
-    },
-    {
-      start: session2.startTime,
-      end: session2.endTime,
-    },
-    { inclusive: true },
-  );
-};
-
-const sessionToNonIntersection = (
-  sessions: ScheduledSessionWithId[],
-): ScheduledSessionWithId[][] => {
-  const groupedSessions: ScheduledSessionWithId[][] = [];
-
-  sessions.forEach((session) => {
-    let nextGroup;
-    for (const group of groupedSessions) {
-      const hasOverlap = group.some((s) => hasIntersection(s, session));
-      if (!hasOverlap) {
-        nextGroup = group;
-        break;
-      }
-    }
-
-    if (nextGroup) {
-      nextGroup.push(session);
-    } else {
-      groupedSessions.push([session]);
-    }
-  });
-
-  return groupedSessions;
-};
-// add props with children
-type HoverPercentageBarProps = {
-  formatter: (percentage: number) => string;
-};
-const HoverPercentageBar: FC<PropsWithChildren<HoverPercentageBarProps>> = (
-  props,
-) => {
-  const [hoverX, setHoverX] = useState<number | null>(null);
-  const [percentage, setPercentage] = useState<number | null>(null);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    setHoverX(x);
-    setPercentage(Math.min(100, Math.max(0, (x / rect.width) * 100)));
-  };
-
-  const handleMouseLeave = () => {
-    setHoverX(null);
-    setPercentage(null);
-  };
-
-  return (
-    <div
-      className="relative w-full h-full border rounded-2xl overflow-hidden"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      {hoverX !== null && (
-        <>
-          <div
-            className="absolute top-0 bottom-0 w-0 border-2 border-dashed"
-            style={{ left: hoverX }}
-          />
-          <div
-            className="absolute top-0 bottom-0 text-nowrap"
-            style={{ left: hoverX + 10 }}
-          >
-            {percentage && props.formatter(percentage)}
-          </div>
-        </>
-      )}
-      {props.children}
-    </div>
-  );
-};
-
 export type SessionPrecursor = z.infer<typeof sessionPrecursor>;
 export function SessionTimeline({
   activities,
-  startDate,
-  endDate,
+  startDate: startDateExternal,
+  endDate: endDateExternal,
   onActivitiesChange,
-  markerStep, // Default to 2-hour markers
 }: DateTimelineProps) {
   const [selectedActivity, setSelectedActivity] =
     useState<ScheduledSessionWithId | null>(null);
@@ -162,7 +59,6 @@ export function SessionTimeline({
     useState<SessionPrecursor | null>();
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  const totalDuration = differenceInMilliseconds(endDate, startDate);
   const groupedActivities = useMemo(() => {
     return sessionToNonIntersection(activities);
   }, [activities]);
@@ -173,6 +69,9 @@ export function SessionTimeline({
     }
   }, [activities, onActivitiesChange]);
 
+  const [startDate, setStartInterval] = useState<Date>(startDateExternal);
+  const [endDate, setEndInterval] = useState<Date>(endDateExternal);
+  const totalDuration = differenceInMilliseconds(endDate, startDate);
   const calculateWidth = (
     activityStartDate: Date,
     activityEndDate: Date,
@@ -295,21 +194,15 @@ export function SessionTimeline({
   };
 
   const getMarkerSetp = () => {
-    if (!markerStep) {
-      return 2; // Default to 2 hours if not provided
-    }
-    if (markerStep < 1) {
-      return 1; // Minimum step of 1 hour
-    }
-    return markerStep;
+    const diffInHours = Math.floor(totalDuration / (1000 * 60 * 60));
+    return Math.floor(diffInHours / 5);
   };
 
   // Generate time markers for the timeline
   const generateTimeMarkers = () => {
     const markerStep = getMarkerSetp();
-    // Calculate how many markers to show based on the timeline duration and marker step
     const totalHours = totalDuration / (1000 * 60 * 60);
-    const numMarkers = Math.ceil(totalHours / markerStep) + 1;
+    const numMarkers = Math.floor(totalHours / 5);
 
     return Array.from({ length: numMarkers }, (_, i) => {
       const markerDate = addHours(startDate, i * markerStep);
@@ -414,12 +307,24 @@ export function SessionTimeline({
 
   return (
     <Card>
+      <div className="flex items-center justify-between gap-2">
+        <DateTimePicker
+          selected={startDate}
+          onSelect={(date) => {
+            setStartInterval(date ?? startDateExternal);
+          }}
+        />
+        <DateTimePicker
+          selected={endDate}
+          onSelect={(date) => {
+            setEndInterval(date ?? endDateExternal);
+          }}
+        />
+      </div>
       <CardContent className="p-6">
         <div className="relative mt-8 mb-4 h-full">
-          {/* Time markers */}
           {generateTimeMarkers()}
 
-          {/* Timeline bar */}
           <HoverPercentageBar formatter={timeFormatter}>
             <div
               className="h-full relative"
@@ -429,14 +334,12 @@ export function SessionTimeline({
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
-              {/* Timeline background for click detection */}
               <div className="timeline-bg absolute inset-0"></div>
 
-              {/* Drag selection area */}
               {isDragging && <div style={dragSelectionStyle}></div>}
-              {groupedActivities.map((activity) => {
-                return <TimelineRow sessions={activity} />;
-              })}
+              {groupedActivities.map((activity) => (
+                <TimelineRow sessions={activity} />
+              ))}
             </div>
           </HoverPercentageBar>
         </div>
