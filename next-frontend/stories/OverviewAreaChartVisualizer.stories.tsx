@@ -50,7 +50,7 @@ export const Weekly: Story = {
         tags: ["school", "pb138", "pb138/project", "focus", "testing"].map(
           (label, i) => {
             return { label, id: i.toString(), allowedCategories: [] };
-          }
+          },
         ),
         startTime: new Date(2023, 5, 27, 19, 0),
         endTime: new Date(2023, 5, 27, 21, 0),

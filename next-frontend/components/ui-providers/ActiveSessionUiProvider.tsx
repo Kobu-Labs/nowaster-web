@@ -17,8 +17,8 @@ export const ActiveSessionUiProvider: FC<ActiveSessionUiProviderProps> = ({
   const [displayedTime, setDisplayedTime] = useState(
     getFormattedTimeDifference(
       session !== null ? session.endTime : new Date(),
-      new Date()
-    )
+      new Date(),
+    ),
   );
 
   if (session === null) {

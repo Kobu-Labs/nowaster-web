@@ -32,12 +32,12 @@ export function MainNav({ items }: MainNavProps) {
                   className={cn(
                     "flex items-center text-sm font-medium text-muted-foreground hover:text-white",
                     item.disabled && "cursor-not-allowed opacity-80",
-                    currentPath === item.href && "text-white"
+                    currentPath === item.href && "text-white",
                   )}
                 >
                   {item.title}
                 </Link>
-              )
+              ),
           )}
         </nav>
       ) : null}

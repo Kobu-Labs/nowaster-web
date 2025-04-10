@@ -43,8 +43,8 @@ export type TagPickerUiProviderProps = {
 const fuzzyFindStrategy = (tags: TagWithId, searchTerm: string): boolean => {
   const searcher = new FuzzySearch([tags.label], []);
   const result = searcher.search(searchTerm);
-  return result.length !== 0
-}
+  return result.length !== 0;
+};
 
 export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   const queryClient = useQueryClient();
@@ -74,11 +74,11 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   if (props.tagsDisplayStrategy) {
     tagsInDisplayOrder = props.tagsDisplayStrategy(
       props.selectedTags,
-      props.availableTags
+      props.availableTags,
     );
   }
 
-  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy
+  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy;
   tagsInDisplayOrder = tagsInDisplayOrder.filter((tag) => matchStrategy(tag, searchTerm));
 
   return (
@@ -147,7 +147,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                       "mr-2 size-4",
                       props.selectedTags.some((t) => t.id === tag.id)
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0",
                     )}
                   />
                   <TagBadge value={tag.label} />

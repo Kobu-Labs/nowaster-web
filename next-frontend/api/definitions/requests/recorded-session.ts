@@ -6,11 +6,11 @@ const create = z.object({
   description: z.string()
     .max(50)
     .nullable(),
-  startTime: z.coerce.date()
+  startTime: z.coerce.date(),
 });
 
 const readMany = z.object({
-  limit: z.coerce.number().optional()
+  limit: z.coerce.number().optional(),
 });
 
 const readById = z.object({
@@ -23,7 +23,7 @@ const updateById = z.object({
   description: z.string()
     .max(50)
     .optional(),
-  startTime: z.coerce.date().optional()
+  startTime: z.coerce.date().optional(),
 });
 
 const removeById = z.object({
@@ -40,5 +40,5 @@ export const RecordedSessionRequestSchema = {
   removeById,
   create,
   readMany,
-  updateById
+  updateById,
 } as const;

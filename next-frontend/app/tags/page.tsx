@@ -122,7 +122,7 @@ export default function Page() {
             <div
               className={cn(
                 "flex w-full cursor-pointer rounded-lg px-4 py-1 hover:bg-accent hover:text-accent-foreground",
-                selectedTag?.label === tag.label && "bg-accent"
+                selectedTag?.label === tag.label && "bg-accent",
               )}
               key={tag.id}
               onClick={() => setSelectedTag({ ...tag })}

@@ -29,7 +29,7 @@ const cardVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 /* TODO: this should be refactored into separate components using forward ref to extend Card.* component */
