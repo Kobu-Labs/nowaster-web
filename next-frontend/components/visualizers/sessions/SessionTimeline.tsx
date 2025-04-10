@@ -41,7 +41,7 @@ export const SessionTimeline: FC<SessionTimelineProps> = (props) => {
 
   return (
     <SessionTimelineUiProvider
-      activities={sessions.data}
+      sessions={sessions.data}
       startDate={data.startDate}
       endDate={data.endDate}
     />
