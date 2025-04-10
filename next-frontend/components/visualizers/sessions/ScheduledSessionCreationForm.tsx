@@ -120,7 +120,10 @@ export const ScheduledSessionCreationForm: FC = () => {
                         if (category === undefined) {
                           form.resetField("category");
                         } else {
-                          field.onChange({ name: category });
+                          field.onChange({
+                            name: category.name,
+                            id: category.id,
+                          });
                         }
                       }}
                     />
