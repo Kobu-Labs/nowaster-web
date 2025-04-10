@@ -20,7 +20,10 @@ pub fn category_router() -> Router<AppState> {
             "/",
             post(create_category_handler).get(filter_categories_handler),
         )
-        .route("/{category_id}", delete(delete_category_handler))
+        .route(
+            "/{category_id}",
+            delete(delete_category_handler).get(get_category_by_id_handler),
+        )
 }
 
 async fn create_category_handler(
@@ -44,6 +47,21 @@ async fn filter_categories_handler(
     Query(payload): Query<FilterCategoryDto>,
 ) -> ApiResponse<Vec<ReadCategoryDto>> {
     let res = state.category_service.filter_categories(payload).await;
+    ApiResponse::from_result(res)
+}
+
+async fn get_category_by_id_handler(
+    State(state): State<AppState>,
+    Path(category_id): Path<Uuid>,
+) -> ApiResponse<Option<ReadCategoryDto>> {
+    let res = state
+        .category_service
+        .filter_categories(FilterCategoryDto {
+            id: Some(category_id),
+            name: None,
+        })
+        .await
+        .map(|val| val.first().cloned());
     ApiResponse::from_result(res)
 }
 
