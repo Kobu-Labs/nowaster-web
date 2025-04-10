@@ -15,7 +15,7 @@ type MultipleCategoryPickerProps = Omit<
 >;
 
 export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
-  props
+  props,
 ) => {
   const {
     data: categories,

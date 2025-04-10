@@ -9,7 +9,7 @@ type TagsToSessionPieChartProps = {
 };
 
 export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
-  props
+  props,
 ) => {
   return (
     <Card>

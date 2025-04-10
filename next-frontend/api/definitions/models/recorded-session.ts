@@ -5,7 +5,7 @@ import { z } from "zod";
 export const RecordedSessionSchema = z.object({
   startTime: z.coerce.date(),
   category: CategorySchema,
-  description: z.string().nullable()
+  description: z.string().nullable(),
 });
 export const RecordedSessionWithIdSchema = RecordedSessionSchema.merge(HasID);
 

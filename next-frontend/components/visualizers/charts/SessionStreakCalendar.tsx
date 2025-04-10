@@ -17,7 +17,7 @@ export const dayCellVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 type SessionStreakCalendarProps = {
@@ -31,10 +31,10 @@ export const SessionStreakCalendar = ({
     // TODO: not very performance friendly
     const isActiveDay = sessions.some((x) => isSameDay(x, props.date));
     const isNextDayActive = sessions.some((x) =>
-      isSameDay(addDays(props.date, 1), x)
+      isSameDay(addDays(props.date, 1), x),
     );
     const isPreviousDayActive = sessions.some((x) =>
-      isSameDay(subDays(props.date, 1), x)
+      isSameDay(subDays(props.date, 1), x),
     );
 
     return (

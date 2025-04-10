@@ -20,7 +20,7 @@ export const TagBadge: FC<TagBadgeProps> = (props) => {
     <Badge
       style={{ "--tag-color": colors[props.value] } as React.CSSProperties}
       className={cn(
-        "h-min bg-[var(--tag-color)] text-white hover:scale-110 hover:bg-[var(--tag-color)] hover:transition "
+        "h-min bg-[var(--tag-color)] text-white hover:scale-110 hover:bg-[var(--tag-color)] hover:transition ",
       )}
     >
       {props.value}

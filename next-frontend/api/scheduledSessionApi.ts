@@ -12,7 +12,7 @@ import { z } from "zod";
 const BASE_URL = "/session";
 
 export const create = async (
-  params: ScheduledSessionRequest["create"]
+  params: ScheduledSessionRequest["create"],
 ): Promise<Result<ScheduledSessionResponse["create"]>> => {
   const { data } = await baseApi.post(BASE_URL, params);
   return await handleResponse(data, ScheduledSessionResponseSchema.create);
@@ -27,21 +27,21 @@ export const getActiveSessions = async (): Promise<
 };
 
 export const getSessions = async (
-  params?: ScheduledSessionRequest["readMany"]
+  params?: ScheduledSessionRequest["readMany"],
 ): Promise<Result<ScheduledSessionResponse["readMany"]>> => {
   const { data } = await baseApi.post(BASE_URL + "/filter", params);
   return await handleResponse(data, ScheduledSessionResponseSchema.readMany);
 };
 
 export const update = async (
-  params: ScheduledSessionRequest["update"]
+  params: ScheduledSessionRequest["update"],
 ): Promise<Result<ScheduledSessionResponse["update"]>> => {
   const { data } = await baseApi.put(BASE_URL, { ...params });
   return await handleResponse(data, ScheduledSessionResponseSchema.update);
 };
 
 export const deleteSingle = async (
-  params: ScheduledSessionRequest["remove"]
+  params: ScheduledSessionRequest["remove"],
 ): Promise<Result<ScheduledSessionResponse["remove"]>> => {
   const { data } = await baseApi.delete(BASE_URL, {
     data: params,

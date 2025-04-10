@@ -75,7 +75,7 @@ type OverviewProps = {
 
 const preprocessData = (
   granularity: keyof typeof Granularity,
-  data: (ScheduledSession & { id: string })[]
+  data: (ScheduledSession & { id: string })[],
 ): { granularity: string; val: number }[] => {
   const processor = dateProcessors[granularity];
   const processed = data.reduce((value: { [month: string]: number }, item) => {
@@ -112,7 +112,7 @@ export function Overview(props: OverviewProps) {
     ...queryKeys.sessions.filtered(),
   });
   const [granularity, setGranularity] = useState<keyof typeof Granularity>(
-    props.granularity
+    props.granularity,
   );
 
   if (!sessions || isLoading || isError) {

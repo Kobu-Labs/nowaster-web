@@ -11,7 +11,7 @@ const baseApi = axios.create({
 
 export const handleResponse = async <T>(
   data: any,
-  schema: ZodType<T>
+  schema: ZodType<T>,
 ): Promise<Result<T>> => {
   const request = await ResponseSchema.safeParseAsync(data);
   if (!request.success) {
@@ -25,7 +25,7 @@ export const handleResponse = async <T>(
   const requestBody = await schema.safeParseAsync(request.data.data);
   if (!requestBody.success) {
     return Result.err(
-      new Error("Parsing data failed!\n" + requestBody.error.message)
+      new Error("Parsing data failed!\n" + requestBody.error.message),
     );
   }
 

@@ -21,7 +21,7 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
       }
       return data.value.reduce(
         (acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime),
-        0
+        0,
       );
     },
   });

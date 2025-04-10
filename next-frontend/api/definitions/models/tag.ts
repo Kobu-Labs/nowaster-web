@@ -2,7 +2,7 @@ import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
 export const TagSchema = z.object({
-  label: z.string().trim().min(1)
+  label: z.string().trim().min(1),
   //INFO: temporary remove this: allowedCategories: z.array(CategorySchema),
 });
 
