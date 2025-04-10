@@ -1,7 +1,11 @@
 import { FC, useState } from "react";
 import { CategoryApi } from "@/api";
 import { Result } from "@badrap/result";
-import { CategoryRequest } from "api/definitions";
+import {
+  CategoryRequest,
+  CategoryResponse,
+  CategoryWithId,
+} from "api/definitions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,19 +27,25 @@ import { ScrollArea } from "@/components/shadcn/scroll-area";
 import FuzzySearch from "fuzzy-search";
 
 export type MultipleCategoryPickerUiProviderProps = {
-  availableCategories: string[];
-  selectedCategories: string[];
-  onSelectCategory: (category: string) => void;
+  availableCategories: CategoryWithId[];
+  selectedCategories: CategoryWithId[];
+  onSelectCategory: (category: CategoryWithId) => void;
   categoryDisplayStrategy?: (
-    selectedCategories: string[],
-    availableCategories: string[],
-  ) => string[];
-  categoryMatchStrategy?: (category: string, searchTerm: string) => number;
+    selectedCategories: CategoryWithId[],
+    availableCategories: CategoryWithId[],
+  ) => CategoryWithId[];
+  categoryMatchStrategy?: (
+    category: CategoryWithId,
+    searchTerm: string,
+  ) => number;
   modal?: boolean;
 };
 
-const fuzzyFindStrategy = (category: string, searchTerm: string): boolean => {
-  const searcher = new FuzzySearch([category], []);
+const fuzzyFindStrategy = (
+  category: CategoryWithId,
+  searchTerm: string,
+): boolean => {
+  const searcher = new FuzzySearch([category.name], []);
   const result = searcher.search(searchTerm);
   return result.length !== 0;
 };
@@ -49,7 +59,7 @@ export const MultipleCategoryPickerUiProvider: FC<
 
   // TODO move this higher
   const { mutate: createCategory } = useMutation<
-    Result<CategoryRequest["create"]>,
+    Result<CategoryResponse["create"]>,
     unknown,
     CategoryRequest["create"]
   >({
@@ -60,8 +70,10 @@ export const MultipleCategoryPickerUiProvider: FC<
         return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: queryKeys.categories._def });
-      props.onSelectCategory(result.value.name);
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.categories._def,
+      });
+      props.onSelectCategory(result.value);
     },
   });
 
@@ -102,8 +114,8 @@ export const MultipleCategoryPickerUiProvider: FC<
               {props.selectedCategories.length === 0
                 ? "Search Category"
                 : props.selectedCategories.map((category) => (
-                  <Badge variant="outline" key={category}>
-                    {category}
+                  <Badge variant="outline" key={category.id}>
+                    {category.name}
                   </Badge>
                 ))}
             </div>
@@ -121,7 +133,7 @@ export const MultipleCategoryPickerUiProvider: FC<
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
               {searchTerm &&
                 props.availableCategories.every(
-                  (cat) => cat !== searchTerm,
+                  (cat) => cat.name !== searchTerm,
                 ) && (
                 <CommandGroup>
                   <CommandItem
@@ -143,8 +155,8 @@ export const MultipleCategoryPickerUiProvider: FC<
             >
               {categoriesInDisplayOrder.map((category) => (
                 <CommandItem
-                  value={category}
-                  key={category}
+                  value={category.name}
+                  key={category.id}
                   onSelect={() => props.onSelectCategory(category)}
                 >
                   <Check
@@ -155,7 +167,7 @@ export const MultipleCategoryPickerUiProvider: FC<
                         : "opacity-0",
                     )}
                   />
-                  <Badge variant="outline">{category}</Badge>
+                  <Badge variant="outline">{category.name}</Badge>
                 </CommandItem>
               ))}
             </ScrollArea>
@@ -167,14 +179,17 @@ export const MultipleCategoryPickerUiProvider: FC<
 };
 
 export type SingleCategoryPickerUiProviderProps = {
-  availableCategories: string[];
-  selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+  availableCategories: CategoryWithId[];
+  selectedCategory: CategoryWithId | undefined;
+  onSelectCategory: (category: CategoryWithId) => void;
   categoryDisplayStrategy?: (
-    selectedCategories: string,
-    availableCategories: string[],
-  ) => string[];
-  categoryMatchStrategy?: (category: string, searchTerm: string) => number;
+    selectedCategories: CategoryWithId,
+    availableCategories: CategoryWithId[],
+  ) => CategoryWithId[];
+  categoryMatchStrategy?: (
+    category: CategoryWithId,
+    searchTerm: string,
+  ) => number;
   modal?: boolean;
 };
 
@@ -189,7 +204,7 @@ export const SingleCategoryPickerUiProvider: FC<
 
   // TODO move this higher
   const { mutate: createCategory } = useMutation<
-    Result<CategoryRequest["create"]>,
+    Result<CategoryResponse["create"]>,
     unknown,
     CategoryRequest["create"]
   >({
@@ -200,13 +215,15 @@ export const SingleCategoryPickerUiProvider: FC<
         return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: queryKeys.categories._def });
-      props.onSelectCategory(result.value.name);
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.categories._def,
+      });
+      props.onSelectCategory(result.value);
     },
   });
 
   let categoriesInDisplayOrder = props.availableCategories;
-  if (props.categoryDisplayStrategy) {
+  if (props.categoryDisplayStrategy && props.selectedCategory) {
     categoriesInDisplayOrder = props.categoryDisplayStrategy(
       props.selectedCategory,
       props.availableCategories,
@@ -239,7 +256,7 @@ export const SingleCategoryPickerUiProvider: FC<
           {!props.selectedCategory ? (
             "Search Category"
           ) : (
-            <Badge variant="outline">{props.selectedCategory}</Badge>
+            <Badge variant="outline">{props.selectedCategory.name}</Badge>
           )}
           <div className="grow"></div>
           <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
@@ -252,7 +269,10 @@ export const SingleCategoryPickerUiProvider: FC<
             placeholder={"Search categories"}
             value={searchTerm}
           />
-          {searchTerm.trim().length > 0 && props.availableCategories.every((cat) => cat !== searchTerm) && (
+          {searchTerm.trim().length > 0 &&
+            props.availableCategories.every(
+              (cat) => cat.name !== searchTerm,
+            ) && (
             <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
               <CommandGroup>
                 <CommandItem
@@ -273,8 +293,8 @@ export const SingleCategoryPickerUiProvider: FC<
             >
               {categoriesInDisplayOrder.map((category) => (
                 <CommandItem
-                  value={category}
-                  key={category}
+                  value={category.name}
+                  key={category.id}
                   onSelect={() => props.onSelectCategory(category)}
                 >
                   <Check
@@ -285,7 +305,7 @@ export const SingleCategoryPickerUiProvider: FC<
                         : "opacity-0",
                     )}
                   />
-                  <Badge variant="outline">{category}</Badge>
+                  <Badge variant="outline">{category.name}</Badge>
                 </CommandItem>
               ))}
             </ScrollArea>

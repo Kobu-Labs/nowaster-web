@@ -1,10 +1,10 @@
 import { sessionFilter } from "@/api/definitions/filters";
-import { TagWithIdSchema } from "@/api/definitions/models";
+import { CategoryWithIdSchema, TagWithIdSchema } from "@/api/definitions/models";
 import { CategoryRequestSchema } from "@/api/definitions/requests/category";
 import { z } from "zod";
 
 const create = z.object({
-  category: CategoryRequestSchema.create,
+  category: CategoryWithIdSchema,
   description: z.string().max(50).nullable(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),

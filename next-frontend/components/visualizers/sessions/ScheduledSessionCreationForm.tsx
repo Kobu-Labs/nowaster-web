@@ -65,7 +65,7 @@ const creationFormQuickOptions: QuickOption[] = [
   },
 ];
 
-const DurationLabel: FC<{ from?: Date, to?: Date }> = (props) => {
+const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
   if (!props.from || !props.to) {
     return <span>--:--</span>;
   }
@@ -88,18 +88,18 @@ export const ScheduledSessionCreationForm: FC = () => {
     toast(
       result.isErr
         ? {
-          title: "Session creation failed",
-          description: result.error.message,
-          variant: "destructive",
-        }
+            title: "Session creation failed",
+            description: result.error.message,
+            variant: "destructive",
+          }
         : {
-          className: "text-[#adfa1d]",
-          title: "Session created successfully",
-          description: (
-            <SessionCard variant="borderless" session={result.value} />
-          ),
-          variant: "default",
-        },
+            className: "text-[#adfa1d]",
+            title: "Session created successfully",
+            description: (
+              <SessionCard variant="borderless" session={result.value} />
+            ),
+            variant: "default",
+          },
     );
   }
 
@@ -183,7 +183,10 @@ export const ScheduledSessionCreationForm: FC = () => {
               />
 
               <div className="flex flex-col items-center justify-center">
-                <DurationLabel from={form.watch("startTime")} to={form.watch("endTime")} />
+                <DurationLabel
+                  from={form.watch("startTime")}
+                  to={form.watch("endTime")}
+                />
                 <ArrowBigRight />
               </div>
 

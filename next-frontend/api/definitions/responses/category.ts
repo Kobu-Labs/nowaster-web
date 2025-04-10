@@ -1,11 +1,10 @@
 import {
-  CategorySchema,
   CategoryWithIdSchema,
 } from "@/api/definitions/models/category";
 import { z } from "zod";
 
 export const CategoryResponseSchema = {
-  create: CategorySchema,
+  create: CategoryWithIdSchema,
   readMany: z.array(CategoryWithIdSchema),
   readByName: CategoryWithIdSchema.nullable(),
   update: CategoryWithIdSchema,

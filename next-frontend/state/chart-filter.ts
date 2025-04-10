@@ -1,5 +1,4 @@
 import {
-  Category,
   CategoryWithId,
   ScheduledSessionRequest,
   TagWithId,
@@ -158,7 +157,7 @@ export const handleSelectTag = (
 
 export const handleSelectCategory = (
   oldState: SessionFilterPrecursor,
-  category: Category,
+  category: CategoryWithId,
 ): SessionFilterPrecursor => {
   const {
     data: { categories = [], ...data },
