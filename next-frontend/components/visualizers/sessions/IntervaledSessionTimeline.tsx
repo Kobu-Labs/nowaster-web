@@ -3,7 +3,7 @@ import { Separator } from "@/components/shadcn/separator";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { SessionTimeline } from "@/components/visualizers/sessions/SessionTimeline";
 import { subHours } from "date-fns";
-import { ArrowBigRight, ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowBigRight, RotateCcw } from "lucide-react";
 import { FC, useState } from "react";
 
 type IntervaledSessionTimelineProps = {
@@ -35,7 +35,7 @@ export const IntervaledSessionTimeline: FC<IntervaledSessionTimelineProps> = (
             onSelect={(date) => setEndDate(date ?? props.endDate ?? new Date())}
           />
           <RotateCcw
-                        className="w-20 cursor-pointer text-muted-foreground hover:text-primary"
+            className="w-20 cursor-pointer text-muted-foreground hover:text-primary"
             onClick={() => {
               setStartDate(props.startDate ?? subHours(new Date(), 48));
               setEndDate(props.endDate ?? new Date());
