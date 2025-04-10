@@ -16,7 +16,7 @@ import {
 import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { getFormattedTimeDifference, showSelectedTagsFirst } from "@/lib/utils";
+import { getFormattedTimeDifference } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -88,18 +88,18 @@ export const ScheduledSessionCreationForm: FC = () => {
     toast(
       result.isErr
         ? {
-          title: "Session creation failed",
-          description: result.error.message,
-          variant: "destructive",
-        }
+            title: "Session creation failed",
+            description: result.error.message,
+            variant: "destructive",
+          }
         : {
-          className: "text-[#adfa1d]",
-          title: "Session created successfully",
-          description: (
-            <SessionCard variant="borderless" session={result.value} />
-          ),
-          variant: "default",
-        },
+            className: "text-[#adfa1d]",
+            title: "Session created successfully",
+            description: (
+              <SessionCard variant="borderless" session={result.value} />
+            ),
+            variant: "default",
+          },
     );
   }
 
@@ -224,7 +224,8 @@ export const ScheduledSessionCreationForm: FC = () => {
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
-                      tagsDisplayStrategy={showSelectedTagsFirst}
+                      forCategory={form.watch("category")}
+                      disabled={form.getValues("category") === undefined}
                       onSelectedTagsChanged={(tags) => {
                         field.onChange(tags);
                       }}

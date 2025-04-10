@@ -1,5 +1,5 @@
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { SessionFilter, TagWithId } from "@/api/definitions";
+import { SessionFilter, TagDetails, TagWithId } from "@/api/definitions";
 import { clsx, type ClassValue } from "clsx";
 import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
@@ -36,8 +36,8 @@ export const randomColor = (): string => {
 };
 
 export const showSelectedTagsFirst = (
-  selectedTags: TagWithId[],
-  availableTags: TagWithId[],
+  selectedTags: TagDetails[],
+  availableTags: TagDetails[],
 ) => {
   return availableTags.sort((tag1, tag2) => {
     if (selectedTags.some((t) => t.id === tag1.id)) {
