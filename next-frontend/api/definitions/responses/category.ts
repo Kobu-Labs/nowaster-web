@@ -1,14 +1,19 @@
-import { CategorySchema } from "@/api/definitions/models/category";
+import {
+  CategorySchema,
+  CategoryWithIdSchema,
+} from "@/api/definitions/models/category";
 import { z } from "zod";
 
 export const CategoryResponseSchema = {
   create: CategorySchema,
-  readMany: z.array(CategorySchema),
-  readByName: CategorySchema.nullable(),
-  update: CategorySchema,
+  readMany: z.array(CategoryWithIdSchema),
+  readByName: CategoryWithIdSchema.nullable(),
+  update: CategoryWithIdSchema,
+  readById: CategoryWithIdSchema,
 };
 
 export type CategoryResponse = {
-    [Property in (keyof typeof CategoryResponseSchema)]: z.infer<typeof CategoryResponseSchema[Property]>;
+  [Property in keyof typeof CategoryResponseSchema]: z.infer<
+    (typeof CategoryResponseSchema)[Property]
+  >;
 };
-

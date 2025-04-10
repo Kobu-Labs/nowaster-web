@@ -35,3 +35,10 @@ export const update = async (
   const { data } = await baseApi.put(BASE_URL, { ...params });
   return await handleResponse(data, CategoryResponseSchema.update);
 };
+
+export const readById = async (
+  params: CategoryRequest["readById"],
+): Promise<Result<CategoryResponse["readById"]>> => {
+  const { data } = await baseApi.get(BASE_URL + "/" + params.id);
+  return await handleResponse(data, CategoryResponseSchema.readById);
+};
