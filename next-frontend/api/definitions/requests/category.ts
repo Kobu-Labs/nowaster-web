@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 export type CategoryRequest = {
-    [Property in (keyof typeof CategoryRequestSchema)]: z.infer<typeof CategoryRequestSchema[Property]>;
+  [Property in keyof typeof CategoryRequestSchema]: z.infer<
+    (typeof CategoryRequestSchema)[Property]
+  >;
 };
 
 const create = z.object({
@@ -22,10 +24,12 @@ const remove = z.object({
 });
 
 const readMany = z.object({
-  nameLike: z.string().optional()
+  nameLike: z.string().optional(),
 });
 
-
+const readById = z.object({
+  id: z.string().uuid(),
+});
 
 export const CategoryRequestSchema = {
   create,
@@ -33,4 +37,5 @@ export const CategoryRequestSchema = {
   readMany,
   readByName,
   remove,
+  readById,
 };

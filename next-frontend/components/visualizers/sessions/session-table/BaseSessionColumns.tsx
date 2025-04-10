@@ -52,7 +52,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
     accessorKey: "category",
     header: "Category",
     cell: (data) => {
-      return <CategoryLabel label={data.row.original.category.name} />;
+      return <CategoryLabel category={data.row.original.category} />;
     },
   },
   {
