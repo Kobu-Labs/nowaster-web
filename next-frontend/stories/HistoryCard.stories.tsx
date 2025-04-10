@@ -15,7 +15,7 @@ const meta = {
 } satisfies Meta<typeof SessionCard>;
 
 export default meta;
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 export const TwoHours: Story = {
   args: {
@@ -23,7 +23,10 @@ export const TwoHours: Story = {
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
       startTime: new Date(2023, 5, 27, 19, 0),
       endTime: new Date(2023, 5, 27, 21, 0),
-      category: { name: "pb138" },
+      category: {
+        name: "pb138",
+        id: "pb138",
+      },
       description: "Working on the project",
     },
   },
@@ -35,7 +38,7 @@ export const NinetyMinutes: Story = {
       startTime: new Date(2023, 5, 27, 19, 0),
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
       endTime: new Date(2023, 5, 27, 20, 30),
-      category: { name: "pb138" },
+      category: { name: "pb138", id: "pb138" },
       description: "Working on the project",
     },
   },
@@ -47,7 +50,7 @@ export const HalfHour: Story = {
       startTime: new Date(2023, 5, 27, 20, 0),
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
       endTime: new Date(2023, 5, 27, 20, 30),
-      category: { name: "pb138" },
+      category: { name: "pb138", id: "pb138" },
       description: "Working on the project",
     },
   },
@@ -59,7 +62,7 @@ export const NineMinutesNineSeconds: Story = {
       startTime: new Date(2023, 5, 27, 20, 0, 0),
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
       endTime: new Date(2023, 5, 27, 20, 9, 9),
-      category: { name: "pb138" },
+      category: { name: "pb138", id: "pb138" },
       description: "Working on the project",
     },
   },
