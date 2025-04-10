@@ -1,9 +1,8 @@
-import React, { FC } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ScheduledSessionRequest,
   ScheduledSessionRequestSchema,
 } from "@/api/definitions";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addHours,
   addMinutes,
@@ -15,9 +14,10 @@ import {
   subMinutes,
 } from "date-fns";
 import { ArrowBigRight } from "lucide-react";
+import { FC } from "react";
 import { useForm } from "react-hook-form";
 
-import { formatTime } from "@/lib/utils";
+import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
@@ -35,8 +35,8 @@ import {
 } from "@/components/visualizers/DateTimePicker";
 import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
-import { SessionPrecursor } from "@/components/visualizers/SessionTimeline";
-import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
+import { formatTime } from "@/lib/utils";
+import { SessionPrecursor } from "@/validation/session/creation";
 
 const creationFormQuickOptions: QuickOption[] = [
   {
