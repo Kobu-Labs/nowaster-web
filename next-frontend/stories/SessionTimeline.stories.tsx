@@ -1,5 +1,5 @@
 import { ScheduledSessionWithId } from "@/api/definitions";
-import { SessionTimeline } from "@/components/visualizers/SessionTimeline";
+import { SessionTimelineUiProvider } from "@/components/ui-providers/session/SessionTimelineUiProvider";
 import { randomColor } from "@/lib/utils";
 import type { Meta, StoryObj } from "@storybook/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,9 +8,9 @@ import { RecoilRoot } from "recoil";
 
 const sessionTimelineMeta = {
   title: "SessionTimeline",
-  component: SessionTimeline,
+  component: SessionTimelineUiProvider,
   tags: ["autodocs"],
-} satisfies Meta<typeof SessionTimeline>;
+} satisfies Meta<typeof SessionTimelineUiProvider>;
 
 const createMockTags = (tagLabels: string[]) => {
   return tagLabels.map((label, i) => {
@@ -216,17 +216,17 @@ type Story = StoryObj<typeof sessionTimelineMeta>;
 
 export const Basic: Story = {
   args: {
-    startDate: subDays(new Date(), 1),
+    startDate: subDays(new Date(), 4),
     endDate: new Date(),
-    activities: sessionsPastTwoDays,
-    onActivitiesChange: () => {},
+    sessions: sessionsPastTwoDays,
+    onSessionsChange: console.log,
   },
   render: (props) => {
     const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
-          <SessionTimeline {...props} />
+          <SessionTimelineUiProvider {...props} />
         </RecoilRoot>
       </QueryClientProvider>
     );
