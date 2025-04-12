@@ -1,8 +1,12 @@
-use anyhow::{anyhow, Ok, Result};
+use anyhow::{Ok, Result};
 use uuid::Uuid;
 
 use crate::{
-    dto::tag::{create_tag::UpsertTagDto, filter_tags::TagFilterDto, read_tag::ReadTagDetailsDto},
+    dto::tag::{
+        create_tag::{UpdateTagDto, UpsertTagDto},
+        filter_tags::TagFilterDto,
+        read_tag::ReadTagDetailsDto,
+    },
     entity::{category::Category, tag::TagDetails},
     repository::tag::{TagRepository, TagRepositoryTrait},
 };
@@ -50,5 +54,10 @@ impl TagService {
     pub async fn delete_tag(&self, id: Uuid) -> Result<()> {
         self.repo.delete_tag(id).await?;
         Ok(())
+    }
+
+    pub async fn update_tag(&self, id: Uuid, dto: UpdateTagDto) -> Result<ReadTagDetailsDto> {
+        let res = self.repo.update_tag(id, dto).await?;
+        Ok(ReadTagDetailsDto::from(res))
     }
 }
