@@ -1,4 +1,4 @@
-import { CategorySchema } from "@/api/definitions/models/category";
+import { CategoryWithIdSchema } from "@/api/definitions/models/category";
 import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
@@ -8,7 +8,8 @@ export const TagSchema = z.object({
 
 export const TagWithIdSchema = TagSchema.merge(HasID);
 export const TagDetailsSchema = TagWithIdSchema.extend({
-  allowedCategories: z.array(CategorySchema),
+  allowedCategories: z.array(CategoryWithIdSchema),
+  usages: z.number(),
 });
 
 export type Tag = z.infer<typeof TagSchema>;

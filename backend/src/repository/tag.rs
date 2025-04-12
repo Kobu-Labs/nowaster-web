@@ -29,12 +29,12 @@ struct ReadTagDetailsRow {
     tag_label: String,
     category_id: Option<Uuid>,
     category_name: Option<String>,
+    usages: i64,
 }
 
 pub trait TagRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn upsert(&self, dto: UpsertTagDto) -> Result<TagDetails>;
-    fn mapper(&self, row: ReadTagRow, allowed_categories: Vec<ReadCategoryDto>) -> TagDetails;
     async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>>;
     async fn delete_tag(&self, id: Uuid) -> Result<()>;
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
@@ -96,7 +96,18 @@ impl TagRepositoryTrait for TagRepository {
         .fetch_all(self.db_conn.get_pool())
         .await?;
 
-        Ok(self.mapper(row, categories))
+        Ok(TagDetails {
+            id: row.id,
+            label: row.label,
+            allowed_categories: categories
+                .into_iter()
+                .map(|cat| Category {
+                    id: cat.id,
+                    name: cat.name,
+                })
+                .collect(),
+            usages: 0,
+        })
     }
 
     async fn delete_tag(&self, id: Uuid) -> Result<()> {
@@ -120,10 +131,16 @@ impl TagRepositoryTrait for TagRepository {
                     tag.id AS tag_id,
                     tag.label AS tag_label,
                     category.id AS category_id,
-                    category.name AS category_name
+                    category.name AS category_name,
+                    COALESCE(usages.usages, 0) AS usages
                 FROM tag
                 LEFT OUTER JOIN tag_category ON tag_category.tag_id = tag.id
                 LEFT OUTER JOIN category ON category.id = tag_category.category_id
+                LEFT OUTER JOIN (
+                    SELECT tag_id, COUNT(*) AS usages
+                    FROM tag_category
+                    GROUP BY tag_id
+                ) AS usages ON usages.tag_id = tag.id
                 WHERE 1=1
             ",
         );
@@ -148,6 +165,7 @@ impl TagRepositoryTrait for TagRepository {
                 id: row.tag_id,
                 label: row.tag_label.clone(),
                 allowed_categories: Vec::new(),
+                usages: row.usages,
             });
 
             if let (Some(cat_id), Some(cat_name)) = (row.category_id, row.category_name.clone()) {
@@ -160,20 +178,6 @@ impl TagRepositoryTrait for TagRepository {
 
         let tags: Vec<TagDetails> = tags_map.into_values().collect();
         Ok(tags)
-    }
-
-    fn mapper(&self, row: ReadTagRow, allowed_categories: Vec<ReadCategoryDto>) -> TagDetails {
-        TagDetails {
-            id: row.id,
-            label: row.label,
-            allowed_categories: allowed_categories
-                .into_iter()
-                .map(|cat| Category {
-                    id: cat.id,
-                    name: cat.name,
-                })
-                .collect(),
-        }
     }
 
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
