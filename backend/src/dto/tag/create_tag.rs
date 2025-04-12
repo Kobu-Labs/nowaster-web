@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::dto::category::read_category::ReadCategoryDto;
+
 #[derive(Clone, Deserialize, Serialize, Debug, Validate)]
 pub struct CreateTagDto {
     pub id: Uuid,
@@ -9,9 +11,9 @@ pub struct CreateTagDto {
     pub label: String,
 }
 
-#[derive(Clone, Deserialize, Serialize, Debug, Validate)]
+#[derive(Clone, Deserialize, Serialize, Validate)]
 pub struct UpsertTagDto {
-    pub id: Option<Uuid>,
-    #[validate(length(min = 1))]
     pub label: String,
+    #[serde(rename = "allowedCategories")]
+    pub allowed_categories: Vec<ReadCategoryDto>,
 }
