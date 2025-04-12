@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 import { FC, PropsWithChildren } from "react";
+import { ThemeToggle } from "@/components/pages/ThemeToggle";
 
 interface NavigationProps {
   items?: readonly NavItem[];
@@ -28,12 +29,19 @@ export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
               key={index}
               href={item.href}
               className={cn(
-                "flex items-center text-sm font-medium text-muted-foreground hover:text-white",
+                "flex items-center text-sm font-medium text-muted-foreground hover:text-primary",
                 item.disabled && "cursor-not-allowed opacity-80",
-                currentPath === item.href && "text-white",
               )}
             >
-              {item.title}
+              <div className={cn("group rounded transition duration-200")}>
+                {item.title}
+                <span
+                  className={cn(
+                    "block h-0.5 max-w-0 bg-accent-foreground transition-all duration-200 group-hover:max-w-full",
+                    currentPath === item.href && "max-w-full",
+                  )}
+                ></span>
+              </div>
             </Link>
           ),
       )}
@@ -64,16 +72,16 @@ export function MainNavigation({ items }: NavigationProps) {
   return (
     <div className="flex w-full flex-row gap-6">
       <NowasterLogo />
-      <Navigation items={items}>
-        <div className="grow"></div>
-        <SessionTimer />
-        <SignedOut>
-          <SignInButton />
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-      </Navigation>
+      <Navigation items={items} />
+      <div className="grow"></div>
+      <SessionTimer />
+      <ThemeToggle />
+      <SignedOut>
+        <SignInButton />
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
     </div>
   );
-} 
+}

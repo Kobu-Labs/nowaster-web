@@ -4,9 +4,9 @@ import { GoToAppButton } from "@/components/pages/GoToAppButton";
 import { SignInButton } from "@/components/pages/SignInButton";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
 import {
-    Avatar,
-    AvatarImage,
-    AvatarFallback,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
 } from "@/components/shadcn/avatar";
 
 export default async function LandingPage() {
@@ -47,7 +47,7 @@ export default async function LandingPage() {
                     src="/nowaster-landing-2.png"
                     alt="Time tracking dashboard"
                     fill
-                    className="object-contain rounded-lg "
+                    className="object-contain"
                     priority
                   />
                 </div>
