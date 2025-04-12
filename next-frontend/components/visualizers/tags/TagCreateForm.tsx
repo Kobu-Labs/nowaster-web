@@ -20,7 +20,7 @@ import { MultipleCategoryPicker } from "@/components/visualizers/categories/Cate
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { Save } from "lucide-react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { tagColors } from "@/state/tags";
 
 type CreateTagDialogProps = {
