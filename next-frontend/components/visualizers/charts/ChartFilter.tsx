@@ -7,7 +7,7 @@ import {
   handleSelectTag,
   getDefaultFilter,
 } from "@/state/chart-filter";
-import { CategoryWithId, TagWithId } from "@/api/definitions";
+import { CategoryWithId, TagDetails } from "@/api/definitions";
 import { useAtom } from "jotai";
 import { CircleHelp, Filter, RotateCcw } from "lucide-react";
 
@@ -41,7 +41,7 @@ type ChartFilterProps = Record<string, never>;
 export const ChartFilter: FC<ChartFilterProps> = () => {
   const [filter, setChartFilter] = useAtom(filterPrecursorAtom);
 
-  const onSelectTag = (tag: TagWithId) =>
+  const onSelectTag = (tag: TagDetails) =>
     setChartFilter((state) => handleSelectTag(state, tag));
 
   const onSelectCategory = (category: CategoryWithId) =>

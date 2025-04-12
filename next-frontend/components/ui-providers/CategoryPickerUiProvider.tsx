@@ -119,10 +119,10 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                      <Badge variant="outline" key={category.id}>
-                        {category.name}
-                      </Badge>
-                    ))}
+                    <Badge variant="outline" key={category.id}>
+                      {category.name}
+                    </Badge>
+                  ))}
               </ScrollArea>
             </div>
           </div>
