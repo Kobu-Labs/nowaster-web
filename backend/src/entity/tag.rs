@@ -14,4 +14,5 @@ pub struct TagDetails {
     pub id: Uuid,
     pub label: String,
     pub allowed_categories: Vec<Category>,
+    pub usages: i64,
 }
