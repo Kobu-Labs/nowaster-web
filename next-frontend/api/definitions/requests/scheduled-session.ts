@@ -1,5 +1,5 @@
 import { sessionFilter } from "@/api/definitions/filters";
-import { CategoryWithIdSchema, TagWithIdSchema } from "@/api/definitions/models";
+import { CategoryWithIdSchema } from "@/api/definitions/models";
 import { CategoryRequestSchema } from "@/api/definitions/requests/category";
 import { z } from "zod";
 
@@ -8,17 +8,22 @@ const create = z.object({
   description: z.string().max(50).nullable(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
-  tags: z.array(TagWithIdSchema),
+  tags: z.array(
+    z.object({
+      id: z.string().uuid(),
+    }),
+  ),
 });
 
 const readById = z.object({
   id: z.string().uuid(),
 });
 
-const readMany = z.object({
-  limit: z.coerce.number().optional(),
-}).merge(sessionFilter);
-
+const readMany = z
+  .object({
+    limit: z.coerce.number().optional(),
+  })
+  .merge(sessionFilter);
 
 const update = z.object({
   id: z.string().uuid(),
