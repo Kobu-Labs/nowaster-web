@@ -7,10 +7,7 @@ import "@/styles/globals.css";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { RecoilRoot } from "recoil";
 
-import { fontSans } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
 import { SiteHeader } from "@/components/pages/site-header";
-import { ThemeProvider } from "@/components/pages/theme-provider";
 import { Toaster } from "@/components/shadcn/toaster";
 import { ReactQueryProvider } from "@/app/ReactQueryProvider";
 import { useAuth } from "@clerk/nextjs";
@@ -19,7 +16,6 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { LoaderCircle } from "lucide-react";
 import { useColors } from "@/components/hooks/useColors";
-import Head from "next/head";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 

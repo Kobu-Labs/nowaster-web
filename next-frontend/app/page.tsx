@@ -240,8 +240,8 @@ export default async function LandingPage() {
                   What Our Users Say
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Don't just take our word for it. Here's what our customers
-                  have to say.
+                  Don&apos;t just take our word for it. Here&apos;s what our
+                  customers have to say.
                 </p>
               </div>
             </div>
@@ -258,8 +258,8 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-muted-foreground">
-                  "I can see how much I procrastinate thanks to beautiful
-                  charts"
+                  &lsquo;I can see how much I procrastinate thanks to beautiful
+                  charts.&lsquo;
                 </p>
               </div>
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
@@ -281,9 +281,9 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-muted-foreground">
-                  "Nowaster made me realize, how much time I was spending on
-                  each activity and it gave me motivation to keep my
-                  productivity high."
+                  &lsquo;Nowaster made me realize, how much time I was spending
+                  on each activity and it gave me motivation to keep my
+                  productivity high.&lsquo;
                 </p>
               </div>
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
@@ -305,7 +305,7 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-muted-foreground">
-                  "I made this, so I have like it."
+                  &lsquo;I made this, so I have like it.&lsquo;
                 </p>
               </div>
             </div>
