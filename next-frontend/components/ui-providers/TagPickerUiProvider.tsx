@@ -141,8 +141,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {props.selectedTags.length === 0
                 ? "Select Tags"
                 : props.selectedTags.map((tag) => (
-                    <TagBadge key={tag.id} value={tag.label} />
-                  ))}
+                  <TagBadge key={tag.id} value={tag.label} />
+                ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -156,19 +156,19 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-              <CommandGroup>
-                <CommandItem
-                  className="flex"
-                  onSelect={() =>
-                    createTag({ label: searchTerm, allowedCategories: [] })
-                  }
-                >
-                  <p>Create</p>
-                  <div className="grow"></div>
-                  <TagBadge value={searchTerm} />
-                </CommandItem>
-              </CommandGroup>
-            )}
+            <CommandGroup>
+              <CommandItem
+                className="flex"
+                onSelect={() =>
+                  createTag({ label: searchTerm, allowedCategories: [] })
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <TagBadge value={searchTerm} />
+              </CommandItem>
+            </CommandGroup>
+          )}
           <ScrollArea
             type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
