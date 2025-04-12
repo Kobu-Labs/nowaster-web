@@ -71,7 +71,8 @@ export const CreateTagForm: FC<CreateTagDialogProps> = (props) => {
           title: "Tag created",
           description: (
             <>
-              <TagBadge value={data.value.label} /> created successfully!
+              <TagBadge value={data.value.label} colors={selectedColor} />
+              created successfully!
             </>
           ),
           variant: "default",
