@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button, ButtonProps } from "@/components/shadcn/button";
 import { cn } from "@/lib/utils";
 import { SignedIn } from "@clerk/nextjs";
