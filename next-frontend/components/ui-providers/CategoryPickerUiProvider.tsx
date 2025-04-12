@@ -168,7 +168,9 @@ export const MultipleCategoryPickerUiProvider: FC<
                   <Check
                     className={cn(
                       "mr-2 size-4",
-                      props.selectedCategories.some((cat) => cat === category)
+                      props.selectedCategories.some(
+                        (cat) => cat.id === category.id,
+                      )
                         ? "opacity-100"
                         : "opacity-0",
                     )}
