@@ -1,4 +1,4 @@
-import { CategorySchema, TagSchema } from "@/api/definitions/models";
+import { CategorySchema, TagDetailsSchema } from "@/api/definitions/models";
 import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
@@ -7,22 +7,30 @@ const create = z.object({
   allowedCategories: z.array(CategorySchema).optional(),
 });
 
+const deleteTag = z.object({
+  id: z.string().uuid(),
+});
+
 const readMany = z.object({
   limit: z.coerce.number().optional(),
   allowedCategories: z.array(CategorySchema).optional(),
 });
 
 const removeAllowedCategory = z.object({
-  category: z.string(),
+  categoryId: z.string(),
   tagId: z.string(),
 });
 
 const addAllowedCategory = z.object({
-  category: z.string(),
+  categoryId: z.string(),
   tagId: z.string(),
 });
 
-const update = TagSchema.deepPartial().merge(HasID);
+const getById = z.object({
+  id: z.string(),
+});
+
+const update = TagDetailsSchema.deepPartial().merge(HasID);
 
 export type TagRequest = {
   [Property in keyof typeof TagRequestSchema]: z.infer<
@@ -31,9 +39,11 @@ export type TagRequest = {
 };
 
 export const TagRequestSchema = {
+  getById,
   create,
   readMany,
   update,
   addAllowedCategory,
   removeAllowedCategory,
+  deleteTag,
 } as const;
