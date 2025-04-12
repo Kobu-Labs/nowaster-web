@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { CategoryWithId, TagWithId } from "@/api/definitions";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { randomColor } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
@@ -19,6 +19,7 @@ import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { Save } from "lucide-react";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
@@ -29,6 +30,7 @@ export const CreateTagForm: FC<CreateTagDialogProps> = (props) => {
   const [selectedColor, setSelectedColor] = useState("#00f00f");
   const { toast } = useToast();
   const [randomColors, setRandomColors] = useState<string[]>([]);
+  const queryClient = useQueryClient();
   const [selectedCategories, setSelectedCategories] = useState<
     CategoryWithId[]
   >([]);
@@ -59,7 +61,8 @@ export const CreateTagForm: FC<CreateTagDialogProps> = (props) => {
         allowedCategories: data.allowedCategories,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
       if (data.isErr) {
         toast({
           title: "Error creating tag",
