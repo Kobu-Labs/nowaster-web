@@ -17,3 +17,10 @@ pub struct UpsertTagDto {
     #[serde(rename = "allowedCategories")]
     pub allowed_categories: Vec<ReadCategoryDto>,
 }
+
+#[derive(Clone, Deserialize, Serialize, Validate)]
+pub struct UpdateTagDto {
+    pub label: Option<String>,
+    #[serde(rename = "allowedCategories")]
+    pub allowed_categories: Option<Vec<ReadCategoryDto>>,
+}
