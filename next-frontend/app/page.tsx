@@ -309,7 +309,7 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-muted-foreground">
-                  &lsquo;I made this, so I have like it.&lsquo;
+                  &lsquo;I made this, so I have to like it.&lsquo;
                 </p>
               </div>
             </div>
