@@ -1,6 +1,7 @@
 import { sessionFilter } from "@/api/definitions/filters";
-import { CategoryWithIdSchema } from "@/api/definitions/models";
-import { CategoryRequestSchema } from "@/api/definitions/requests/category";
+import {
+  CategoryWithIdSchema,
+} from "@/api/definitions/models";
 import { z } from "zod";
 
 const create = z.object({
@@ -27,10 +28,11 @@ const readMany = z
 
 const update = z.object({
   id: z.string().uuid(),
-  category: CategoryRequestSchema.create,
-  description: z.string().optional(),
+  category_id: z.string().uuid().optional(),
+  description: z.string().nullish(),
   startTime: z.coerce.date().optional(),
   endTime: z.coerce.date().optional(),
+  tag_ids: z.array(z.string().uuid()).optional(),
 });
 
 const remove = z.object({

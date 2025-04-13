@@ -62,6 +62,7 @@ const useUpdateStopwatchSession = () => {
 
 const useUpdateScheduledSession = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const updateSessionMutation = useMutation({
     mutationFn: async (data: ScheduledSessionRequest["update"]) => {
@@ -72,6 +73,9 @@ const useUpdateScheduledSession = () => {
       return result.value;
     },
     onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.sessions._def,
+      });
       toast({
         description: `Session updated successfully!`,
         variant: "default",

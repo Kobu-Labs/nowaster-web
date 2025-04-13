@@ -1,21 +1,22 @@
 "use client";
 
-import React, { FC } from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { addMinutes } from "date-fns";
 import { X } from "lucide-react";
 import { DateTime } from "luxon";
-import { Label } from "recharts";
+import { FC, useEffect, useState } from "react";
 
 import { Button } from "@/components/shadcn/button";
 import { Calendar } from "@/components/shadcn/calendar";
-import { Input } from "@/components/shadcn/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
+import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
+import { cn } from "@/lib/utils";
 import { Matcher } from "react-day-picker";
+import { Separator } from "@/components/shadcn/separator";
 
 export type QuickOption = {
   label: string;
@@ -31,26 +32,53 @@ type DatePickerDemoProps = {
 };
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
-  const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const { value } = e.target;
-    const datetime = DateTime.fromJSDate(props.selected ?? new Date());
-    const hours = Number.parseInt(value.split(":")[0] ?? "00", 10);
-    const minutes = Number.parseInt(value.split(":")[1] ?? "00", 10);
-    const modifiedDay = datetime.set({ hour: hours, minute: minutes });
-    props.onSelect(modifiedDay.toJSDate());
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    const preventScroll = (e: WheelEvent) => {
+      if (isHovered) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", preventScroll, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+    };
+  }, [isHovered]);
+
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  const handleTimeChange = (type: "hour" | "minute", value: string) => {
+    if (props.selected) {
+      const newDate = new Date(props.selected);
+      if (type === "hour") {
+        newDate.setHours(parseInt(value));
+      } else if (type === "minute") {
+        newDate.setMinutes(parseInt(value));
+      }
+      props.onSelect(newDate);
+    }
   };
 
   return (
     <Popover>
-      <PopoverTrigger
-        onWheel={(e) =>
-          props.onSelect(
-            addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
-          )
-        }
-        asChild
-      >
-        <Button variant="outline" className="w-full gap-2">
+      <PopoverTrigger asChild>
+        <Button
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          variant="outline"
+          className={cn(
+            "w-full text-center font-normal gap-2",
+            !props.selected && "text-muted-foreground",
+          )}
+          onWheel={(e) =>
+            props.onSelect(
+              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
+            )
+          }
+        >
           <CalendarIcon className="size-4" />
           {props.selected ? (
             <>
@@ -67,25 +95,63 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar
-          disabled={props.disabled}
-          weekStartsOn={1}
-          mode="single"
-          selected={props.selected}
-          onSelect={(v) => v && props.onSelect(v)}
-          initialFocus
-        />
-        <div className="px-4 pb-4 pt-0">
-          <Label>Time</Label>
-          <Input
-            type="time"
-            onChange={handleChange}
-            value={
-              props.selected
-                ? DateTime.fromJSDate(props.selected).toFormat("HH:mm")
-                : "Nothing"
-            }
+        <div className="sm:flex">
+          <Calendar
+            disabled={props.disabled}
+            weekStartsOn={1}
+            mode="single"
+            selected={props.selected}
+            onSelect={(v) => v && props.onSelect(v)}
+            initialFocus
           />
+          <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
+            <ScrollArea className="w-64 sm:w-auto">
+              <div className="flex sm:flex-col p-2 items-center">
+                <p className="text-muted-foreground">HH</p>
+                <Separator />
+                {hours.reverse().map((hour) => (
+                  <Button
+                    key={hour}
+                    size="icon"
+                    variant={
+                      props.selected && props.selected.getHours() === hour
+                        ? "default"
+                        : "ghost"
+                    }
+                    className="sm:w-full shrink-0 aspect-square"
+                    onClick={() => handleTimeChange("hour", hour.toString())}
+                  >
+                    {hour}
+                  </Button>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" className="sm:hidden" />
+            </ScrollArea>
+            <ScrollArea className="w-64 sm:w-auto">
+              <div className="flex sm:flex-col p-2 items-center">
+                <p className="text-muted-foreground">MM</p>
+                <Separator />
+                {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
+                  <Button
+                    key={minute}
+                    size="icon"
+                    variant={
+                      props.selected && props.selected.getMinutes() === minute
+                        ? "default"
+                        : "ghost"
+                    }
+                    className="sm:w-full shrink-0 aspect-square"
+                    onClick={() =>
+                      handleTimeChange("minute", minute.toString())
+                    }
+                  >
+                    {minute.toString().padStart(2, "0")}
+                  </Button>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" className="sm:hidden" />
+            </ScrollArea>
+          </div>
         </div>
       </PopoverContent>
       <div className="flex gap-1">

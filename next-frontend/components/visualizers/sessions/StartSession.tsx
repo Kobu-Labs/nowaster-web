@@ -463,13 +463,15 @@ const EditStopwatchSession = React.forwardRef<FormHandle, FormComponentProps>(
                               if (val) {
                                 if (val && isBefore(new Date(), val)) {
                                   form.setError("startTime", {
-                                    message: "Start time must be in the past",
+                                    message:
+                                      "Cannot set start time in the future",
                                   });
                                   return;
                                 }
                               }
 
                               field.onChange(val);
+                              form.clearErrors("startTime");
                             }}
                           />
                         </FormControl>

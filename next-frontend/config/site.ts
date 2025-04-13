@@ -6,19 +6,19 @@ export const siteConfig = {
   mainNav: [
     {
       title: "History",
-      href: "/history",
+      href: "/home/history",
     },
     {
       title: "Plan",
-      href: "/new",
+      href: "/home/new",
     },
     {
       title: "Tags",
-      href: "/tags",
+      href: "/home/tags",
     },
     {
       title: "Friends",
-      href: "/friends",
+      href: "/home/friends",
     },
   ],
 } as const;
