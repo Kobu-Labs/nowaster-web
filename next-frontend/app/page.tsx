@@ -9,7 +9,6 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
-import Image from "next/image";
 
 export default async function LandingPage() {
   return (
