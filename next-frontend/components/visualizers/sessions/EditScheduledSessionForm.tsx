@@ -1,25 +1,24 @@
+"use client";
 import {
-  ScheduledSessionRequest,
-  ScheduledSessionRequestSchema,
-} from "@/api/definitions";
-import { zodResolver } from "@hookform/resolvers/zod";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/shadcn/alert-dialog";
+import { useForm } from "react-hook-form";
 import {
   addHours,
   addMinutes,
-  differenceInMinutes,
   isBefore,
-  isEqual,
   setMinutes,
   subHours,
   subMinutes,
 } from "date-fns";
-import { ArrowBigRight } from "lucide-react";
-import { FC } from "react";
-import { useForm } from "react-hook-form";
-
-import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
-import { Button } from "@/components/shadcn/button";
-import { Card, CardContent } from "@/components/shadcn/card";
+import { FC, useState } from "react";
 import {
   Form,
   FormControl,
@@ -28,15 +27,27 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
+
+import {
+  ScheduledSessionWithId,
+  ScheduledSessionWithIdSchema,
+} from "@/api/definitions";
+import { cn } from "@/lib/utils";
+import { ArrowBigRight } from "lucide-react";
+import { Button } from "@/components/shadcn/button";
+import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { Input } from "@/components/shadcn/input";
 import {
   DateTimePicker,
   QuickOption,
 } from "@/components/visualizers/DateTimePicker";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
-import { formatTime } from "@/lib/utils";
-import { SessionPrecursor } from "@/validation/session/creation";
+import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
+import { ScheduledSessionRequest } from "@/api/definitions";
+import { DurationLabel } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
+import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -65,60 +76,58 @@ const creationFormQuickOptions: QuickOption[] = [
   },
 ];
 
-export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
-  if (!props.from || !props.to) {
-    return <span>--:--</span>;
-  }
-
-  const duration = differenceInMinutes(props.to, props.from);
-  if (duration < 0) {
-    return <span>--:--</span>;
-  }
-
-  const formatted = formatTime(duration);
-  return <span>{formatted}</span>;
-};
-
-type ScheduledSessionCreationFormProps = {
-  precursor?: SessionPrecursor;
+type EditStopwatchSessionProps = {
+  session: ScheduledSessionWithId;
+  onDelete?: () => void;
   onSave?: () => void;
+  onCancel?: () => void;
 };
 
-export const ScheduledSessionCreationForm: FC<
-  ScheduledSessionCreationFormProps
-> = (props) => {
-  const form = useForm<ScheduledSessionRequest["create"]>({
-    resolver: zodResolver(ScheduledSessionRequestSchema.create),
-    defaultValues: props.precursor,
+export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
+  const form = useForm<ScheduledSessionWithId>({
+    resolver: zodResolver(ScheduledSessionWithIdSchema),
+    defaultValues: { ...props.session },
   });
 
-  const createSession = useCreateScheduledSession();
+  const updateSession = useUpdateSession("scheduled");
+  const deleteSession = useDeleteScheduledSession();
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
-  async function onSubmit(values: ScheduledSessionRequest["create"]) {
+  async function onSubmit(values: ScheduledSessionWithId) {
     if (
-      isBefore(values.endTime, values.startTime) ||
-      isEqual(values.endTime, values.startTime)
+      values.endTime &&
+      values.startTime &&
+      isBefore(values.endTime, values.startTime)
     ) {
-      form.setError("endTime", {
-        message: "End time must be after start time",
+      form.setError("startTime", {
+        message: "Start time must be before end time",
       });
       return;
     }
+    if (props.onSave) {
+      props.onSave();
+    }
 
-    await createSession.mutateAsync(values, {
-      onSuccess: () => {
-        if (props.onSave) {
-          props.onSave();
-        }
-      },
-    });
+    const data: ScheduledSessionRequest["update"] = {
+      id: values.id,
+      startTime: values.startTime,
+      endTime: values.endTime,
+      category_id: values.category.id,
+      description: values.description,
+      tag_ids: values.tags.map((tag) => tag.id),
+    };
+
+    await updateSession.mutateAsync(data);
   }
 
   return (
-    <Card>
-      <CardContent className="mt-3 ">
+    <Card className={cn("border-0")}>
+      <CardContent className="mt-3">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit, console.log)}
+            className="space-y-8"
+          >
             <FormField
               control={form.control}
               name="category"
@@ -127,13 +136,10 @@ export const ScheduledSessionCreationForm: FC<
                   <FormLabel>Category</FormLabel>
                   <FormControl>
                     <SingleCategoryPicker
-                      onSelectedCategoriesChanged={(category) => {
-                        if (category === undefined) {
-                          form.resetField("category");
-                        } else {
-                          field.onChange(category);
-                        }
-                      }}
+                      value={field.value ?? undefined}
+                      onSelectedCategoriesChanged={(category) =>
+                        field.onChange(category)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -144,7 +150,6 @@ export const ScheduledSessionCreationForm: FC<
             <FormField
               control={form.control}
               name="description"
-              defaultValue={null}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Description (Optional)</FormLabel>
@@ -222,7 +227,6 @@ export const ScheduledSessionCreationForm: FC<
             </div>
 
             <FormField
-              defaultValue={[]}
               name="tags"
               control={form.control}
               render={({ field }) => (
@@ -230,7 +234,14 @@ export const ScheduledSessionCreationForm: FC<
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
-                      forCategory={form.watch("category")}
+                      selectedTags={
+                        field.value?.map((t) => ({
+                          ...t,
+                          usages: 0,
+                          allowedCategories: [],
+                        })) ?? []
+                      }
+                      forCategory={form.watch("category") ?? undefined}
                       disabled={form.getValues("category") === undefined}
                       onNewTagsSelected={(tags) => field.onChange(tags)}
                     />
@@ -239,13 +250,60 @@ export const ScheduledSessionCreationForm: FC<
                 </FormItem>
               )}
             />
+            <CardFooter className="flex justify-between">
+              <Button
+                variant="destructive"
+                type="button"
+                onClick={() => setIsDeleteAlertOpen(true)}
+              >
+                Delete
+              </Button>
 
-            <Button type="submit" loading={createSession.isPending}>
-              Submit
-            </Button>
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={props.onCancel}
+                  className="mr-2"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Save</Button>
+              </div>
+            </CardFooter>
           </form>
         </Form>
       </CardContent>
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete session</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this session? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () =>
+                await deleteSession.mutateAsync(props.session.id, {
+                  onSuccess: () => {
+                    if (props.onDelete) {
+                      props.onDelete();
+                    }
+
+                    setIsDeleteAlertOpen(false);
+                  },
+                })
+              }
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

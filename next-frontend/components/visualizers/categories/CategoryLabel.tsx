@@ -8,7 +8,7 @@ type CategoryLabelProps = {
 
 export const CategoryLabel: FC<CategoryLabelProps> = (props) => {
   return (
-    <Link href={`/session/${props.category.id}`}>
+    <Link href={`/home/session/${props.category.id}`}>
       <p
         className={
           "underline hover:scale-110 hover:text-pink-300 hover:transition "
