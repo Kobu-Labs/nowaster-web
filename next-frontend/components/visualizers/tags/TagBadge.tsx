@@ -1,23 +1,27 @@
 import { FC } from "react";
-import { tagColors } from "@/state/tags";
-import { useRecoilState } from "recoil";
-
 import { cn, randomColor } from "@/lib/utils";
 import { Badge } from "@/components/shadcn/badge";
+import { useTagColors } from "@/components/hooks/useTagColors";
+import { TagWithId } from "@/api/definitions";
 
 type TagBadgeProps = {
   value: string;
-  colors?: string;
+  color?: string;
+  tag?: TagWithId;
 };
 
 export const TagBadge: FC<TagBadgeProps> = (props) => {
-  const [colors, setColors] = useRecoilState(tagColors);
+  const { setColor, colors } = useTagColors();
 
-  if (colors[props.value] === undefined && !props.colors) {
-    setColors({ ...colors, [props.value]: randomColor() });
+  let color = props.color;
+  if (props.tag) {
+    color = colors[props.tag.label];
   }
+  color = color ?? randomColor();
 
-  const color = props.colors ?? colors[props.value];
+  if (props.tag) {
+    setColor({ key: props.tag.id, color });
+  }
 
   return (
     <Badge

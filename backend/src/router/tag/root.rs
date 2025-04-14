@@ -6,7 +6,7 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
-use crate::dto::tag::create_tag::{UpdateTagDto, CreateTagDto};
+use crate::dto::tag::create_tag::{CreateTagDto, UpdateTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
 use crate::dto::tag::read_tag::ReadTagDetailsDto;
 use crate::router::request::ValidatedRequest;

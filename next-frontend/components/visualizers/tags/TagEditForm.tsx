@@ -28,9 +28,8 @@ import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { Save, Trash2 } from "lucide-react";
-import { useRecoilState } from "recoil";
-import { tagColors } from "@/state/tags";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { useTagColors } from "@/components/hooks/useTagColors";
 
 type TagEditFormProps = {
   tag: TagDetails;
@@ -40,7 +39,7 @@ type TagEditFormProps = {
 
 export const TagEditForm: FC<TagEditFormProps> = (props) => {
   const [newTagName, setNewTagName] = useState(props.tag.label);
-  const [colors, setColors] = useRecoilState(tagColors);
+  const { setColor, colors } = useTagColors();
   const tagColor = colors[props.tag.label];
   const queryClient = useQueryClient();
   const [newColor, setNewColor] = useState<string>(tagColor ?? "#00f00f");
@@ -101,10 +100,10 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
       allowedCategories: CategoryWithId[];
       tagColor: string;
     }) => {
-      setColors((prev) => ({
-        ...prev,
-        [data.tagLabel]: data.tagColor,
-      }));
+      setColor({
+        key: props.tag.id,
+        color: data.tagColor,
+      });
       return await TagApi.update({
         id: props.tag.id,
         label: data.tagLabel,
@@ -141,7 +140,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
         <CardHeader>
           <CardTitle className="font-mono flex items-center gap-2">
             Edit
-            <TagBadge value={props.tag.label} colors={newColor} />
+            <TagBadge value={props.tag.label} color={newColor} />
           </CardTitle>
         </CardHeader>
         <div className="space-y-4 py-4">
@@ -161,7 +160,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                 className="w-48"
               />
               {newTagName.length > 0 && (
-                <TagBadge value={newTagName} colors={newColor} />
+                <TagBadge value={newTagName} color={newColor} />
               )}
             </div>
           </div>

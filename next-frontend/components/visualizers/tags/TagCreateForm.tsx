@@ -20,8 +20,7 @@ import { MultipleCategoryPicker } from "@/components/visualizers/categories/Cate
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { Save } from "lucide-react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { useSetRecoilState } from "recoil";
-import { tagColors } from "@/state/tags";
+import { useTagColors } from "@/components/hooks/useTagColors";
 
 type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
@@ -41,7 +40,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
     setRandomColors(Array.from({ length: 10 }, () => randomColor()));
   }, []);
 
-  const setColors = useSetRecoilState(tagColors);
+  const { setColor } = useTagColors();
   const [selectedColor, setSelectedColor] = useState(randomColor());
 
   const handleSelectCategory = (category: CategoryWithId) => {
@@ -74,15 +73,15 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
           variant: "destructive",
         });
       } else {
-        setColors((prev) => ({
-          ...prev,
-          [data.value.label]: selectedColor,
-        }));
+        setColor({
+          key: data.value.id,
+          color: selectedColor,
+        });
         toast({
           title: "Tag created",
           description: (
             <>
-              <TagBadge value={data.value.label} colors={selectedColor} />
+              <TagBadge value={data.value.label} color={selectedColor} />
               created successfully!
             </>
           ),
@@ -120,7 +119,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                 className="w-48"
               />
               {newTagName.length > 0 && (
-                <TagBadge value={newTagName} colors={selectedColor} />
+                <TagBadge value={newTagName} color={selectedColor} />
               )}
             </div>
           </div>

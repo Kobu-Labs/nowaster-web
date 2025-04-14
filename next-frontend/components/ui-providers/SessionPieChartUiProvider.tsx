@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
-import { FC, useState } from "react";
-import { tagColors } from "@/state/tags";
+import { FC, useEffect, useState } from "react";
 import {
   Cell,
   Label,
@@ -13,14 +12,14 @@ import {
   ResponsiveContainer,
   Sector,
 } from "recharts";
-import { useRecoilState } from "recoil";
 
-import { formatTime, randomColor } from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart";
+import { useTagColors } from "@/components/hooks/useTagColors";
 
 type SessionPieChartUiProviderProps = {
-  data: AmountByCategory[]
-}
+  data: AmountByCategory[];
+};
 
 const renderActiveShape = (props: any) => {
   const {
@@ -69,18 +68,8 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
 ) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
-  const [colors, setColors] = useRecoilState(tagColors);
-  const result: { [label: string]: string } = {};
-
-  props.data.forEach(({ key }) => {
-    if (colors[key] === undefined) {
-      result[key] = randomColor();
-    }
-  });
-
-  if (Object.entries(result).length !== 0) {
-    setColors({ ...colors, ...result });
-  }
+  const { upsertColors, colors } = useTagColors();
+  upsertColors(props.data.map(({ key }) => key));
 
   return (
     <ResponsiveContainer width={"100%"} height={180}>

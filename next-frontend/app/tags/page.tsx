@@ -123,7 +123,7 @@ export default function TagsManagement() {
                             : "opacity-0",
                         )}
                       />
-                      <TagBadge value={tag.label} />
+                      <TagBadge tag={tag} value={tag.label} />
                       <Badge variant="outline" className="text-xs">
                         {tag.usages}
                         {" sessions"}
