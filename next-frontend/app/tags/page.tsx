@@ -18,6 +18,12 @@ import { Separator } from "@/components/shadcn/separator";
 import { TagDetailsOverview } from "@/components/visualizers/tags/TagDetailsOverview";
 import { cn } from "@/lib/utils";
 import { TagEditForm } from "@/components/visualizers/tags/TagEditForm";
+import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/shadcn/popover";
 
 const fuzzyFindStrategy = (
   category: TagDetails,
@@ -48,7 +54,7 @@ export default function TagsManagement() {
 
   return (
     <div className="p-8 gap-8 flex-grow grid grid-cols-7 items-start justify-center">
-      <div className="flex justify-center flex-grow items-center flex-col col-span-2">
+      <div className="flex justify-center flex-grow items-center flex-col col-span-3">
         <Card className="w-full ">
           <CardContent>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4">
@@ -105,39 +111,67 @@ export default function TagsManagement() {
             <ScrollArea className="h-[500px] pr-4">
               <div className="space-y-4">
                 {filteredTags.map((tag) => (
-                  <Button
+                  <div
+                    className="flex items-center justify-between gap-2"
                     key={tag.id}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-md  border w-full",
-                      tag.id === selectedTag?.id && "border-accent-foreground",
-                    )}
-                    onClick={() => setSelectedTag(tag)}
-                    variant="ghost"
                   >
-                    <div className="flex items-center space-x-3">
-                      <Check
-                        className={cn(
-                          "mr-2 size-4",
-                          tag.id === selectedTag?.id
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
-                      />
-                      <TagBadge value={tag.label} />
-                      <Badge variant="outline" className="text-xs">
-                        {tag.usages}
-                        {" sessions"}
-                      </Badge>
-                    </div>
                     <Button
-                      className="hover:bg-slate-400"
+                      key={tag.id}
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-md  border w-full",
+                        tag.id === selectedTag?.id &&
+                          "border-accent-foreground",
+                      )}
+                      onClick={() => setSelectedTag(tag)}
+                      variant="ghost"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Check
+                          className={cn(
+                            "mr-2 size-4",
+                            tag.id === selectedTag?.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        <TagBadge value={tag.label} />
+                        <Badge variant="outline" className="text-xs">
+                          {tag.usages}
+                          {" sessions"}
+                        </Badge>
+                        {tag.allowedCategories.length > 0 && (
+                          <Popover>
+                            <PopoverTrigger>
+                              <Badge className="flex  gap-2 ">
+                                {tag.allowedCategories.length}
+                                {" categor" +
+                                  (tag.allowedCategories.length > 1
+                                    ? "ies"
+                                    : "y")}
+                              </Badge>
+                            </PopoverTrigger>
+                            <PopoverContent>
+                              <div className="flex flex-col gap-2">
+                                {tag.allowedCategories.map((category) => (
+                                  <CategoryLabel
+                                    category={category}
+                                    key={category.id}
+                                  />
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
+                    </Button>
+                    <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setEditTagDialogOpen(true)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                  </Button>
+                  </div>
                 ))}
               </div>
             </ScrollArea>
@@ -145,7 +179,7 @@ export default function TagsManagement() {
         </Card>
       </div>
       {selectedTag && (
-        <div className="col-span-5">
+        <div className="col-span-4">
           <TagDetailsOverview tag={selectedTag} />
         </div>
       )}
