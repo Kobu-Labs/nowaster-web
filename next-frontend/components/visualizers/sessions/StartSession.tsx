@@ -234,6 +234,9 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
     const interval = setInterval(() => {
       const newTime = differenceInSeconds(new Date(), session.startTime);
       setDisplayedTime(newTime);
+      const formatted = formatTimeDifference(newTime);
+      const category = session.category ? ` [${session.category.name}]` : "";
+      document.title = `${formatted}${category}`;
     }, 1000);
     return () => clearInterval(interval);
   }, [session]);
@@ -310,7 +313,10 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
               className="group p-1 m-0 aspect-square"
               onClick={() =>
                 finishSession.mutate(session, {
-                  onSuccess: () => setGlobalErr(false),
+                  onSuccess: () => {
+                    document.title = "Nowaster";
+                    setGlobalErr(false);
+                  },
                   onError: () => setGlobalErr(true),
                 })
               }
