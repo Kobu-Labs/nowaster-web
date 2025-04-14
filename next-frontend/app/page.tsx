@@ -1,4 +1,3 @@
-"use server";
 import { ThemedImage } from "@/app/ThemedImage";
 import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
 import { GoToAppButton } from "@/components/pages/GoToAppButton";
@@ -9,6 +8,13 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Nowaster - Time Tracking Made Easy",
+  description:
+    "Effortlessly track time, manage projects, and analyze productivity with our intuitive time tracking solution.",
+};
 
 export default async function LandingPage() {
   return (
@@ -16,8 +22,8 @@ export default async function LandingPage() {
       <div className="flex flex-col min-h-screen">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-background to-muted">
           <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
+            <div className="grid gap-6  md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px]">
+              <div className="flex flex-col justify-center space-y-4 ">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Track Your Time, Boost Your Productivity
@@ -43,16 +49,14 @@ export default async function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center justify-center">
-                <div className="mx-10 absolute w-full h-[300px] md:h-[400px] lg:h-[500px]">
-                  <ThemedImage
-                    lightUrl="/nowaster-landing-1-light.png"
-                    darkUrl="/nowaster-landing-1-dark.png"
-                    alt="Time tracking dashboard"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
+                <ThemedImage
+                  lightUrl="/nowaster-landing-1-light.png"
+                  darkUrl="/nowaster-landing-1-dark.jpg"
+                  alt="Time tracking dashboard"
+                  width={1320}
+                  height={990}
+                  priority
+                />
               </div>
             </div>
           </div>
@@ -74,18 +78,16 @@ export default async function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
+            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:gird-cols[1fr_600px] lg:gap-12">
               <div className="flex items-center justify-center">
-                <div className="mx-10 absolute w-full h-[300px] md:h-[400px] lg:h-[500px] right-96 top-36">
-                  <ThemedImage
-                    lightUrl="/nowaster-landing-2-light.png"
-                    darkUrl="/nowaster-landing-2-dark.png"
-                    alt="Time tracking dashboard"
-                    fill
-                    className="object-contain rounded-2xl "
-                    priority
-                  />
-                </div>
+                <ThemedImage
+                  lightUrl="/nowaster-landing-2-light.png"
+                  darkUrl="/nowaster-landing-2-dark.png"
+                  alt="Time tracking dashboard"
+                  width={1320}
+                  height={990}
+                  priority
+                />
               </div>
               <div className="flex flex-col justify-center space-y-4 m-10">
                 <ul className="grid gap-6">
