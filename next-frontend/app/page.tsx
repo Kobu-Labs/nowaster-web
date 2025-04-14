@@ -1,4 +1,3 @@
-"use server";
 import { ThemedImage } from "@/app/ThemedImage";
 import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
 import { GoToAppButton } from "@/components/pages/GoToAppButton";
@@ -9,6 +8,13 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Nowaster - Time Tracking Made Easy",
+  description:
+    "Effortlessly track time, manage projects, and analyze productivity with our intuitive time tracking solution.",
+};
 
 export default async function LandingPage() {
   return (
