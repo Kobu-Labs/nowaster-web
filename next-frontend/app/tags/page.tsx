@@ -9,7 +9,7 @@ import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { ScrollArea } from "@/components/shadcn/scroll-area";
 import { Badge } from "@/components/shadcn/badge";
-import { Dialog, DialogContent } from "@/components/shadcn/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
 import FuzzySearch from "fuzzy-search";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
@@ -116,7 +116,6 @@ export default function TagsManagement() {
                     key={tag.id}
                   >
                     <Button
-                      key={tag.id}
                       className={cn(
                         "flex items-center justify-between p-3 rounded-md  border w-full",
                         tag.id === selectedTag?.id &&
@@ -167,7 +166,10 @@ export default function TagsManagement() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setEditTagDialogOpen(true)}
+                      onClick={() => {
+                        setSelectedTag(tag);
+                        setEditTagDialogOpen(true);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
