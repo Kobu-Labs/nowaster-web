@@ -18,10 +18,17 @@ import { Input } from "@/components/shadcn/input";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
-import { Save } from "lucide-react";
+import { CircleHelp, Save } from "lucide-react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useSetRecoilState } from "recoil";
 import { tagColors } from "@/state/tags";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import Link from "next/link";
 
 type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
@@ -146,9 +153,29 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
           </div>
           <div className="space-y-2">
             <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-300">
-                Allowed Categories
-              </label>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Allowed Categories
+                </label>
+                <TooltipProvider delayDuration={250}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-nowrap">
+                      Read more about category specific tags on our{" "}
+                      <Link
+                        className="text-nowrap underline hover:text-blue-500"
+                        href={
+                          "https://github.com/Kobu-Labs/nowaster-web/wiki/Category-specific-tags"
+                        }
+                      >
+                        wiki
+                      </Link>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <div className="flex-grow-0 max-w-64">
                 <MultipleCategoryPicker
                   onSelectCategory={handleSelectCategory}
