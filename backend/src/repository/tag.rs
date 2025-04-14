@@ -9,7 +9,7 @@ use crate::{
     dto::{
         category::read_category::ReadCategoryDto,
         tag::{
-            create_tag::{UpdateTagDto, CreateTagDto},
+            create_tag::{CreateTagDto, UpdateTagDto},
             filter_tags::TagFilterDto,
         },
     },
