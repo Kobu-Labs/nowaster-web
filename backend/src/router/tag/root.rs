@@ -6,7 +6,7 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
-use crate::dto::tag::create_tag::{UpdateTagDto, UpsertTagDto};
+use crate::dto::tag::create_tag::{UpdateTagDto, CreateTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
 use crate::dto::tag::read_tag::ReadTagDetailsDto;
 use crate::router::request::ValidatedRequest;
@@ -100,9 +100,9 @@ async fn remove_allowed_category_handler(
 
 async fn create_tag_handler(
     State(state): State<AppState>,
-    ValidatedRequest(payload): ValidatedRequest<UpsertTagDto>,
+    ValidatedRequest(payload): ValidatedRequest<CreateTagDto>,
 ) -> ApiResponse<ReadTagDetailsDto> {
-    let res = state.tag_service.upsert_tag(payload).await;
+    let res = state.tag_service.create_tag(payload).await;
     ApiResponse::from_result(res)
 }
 

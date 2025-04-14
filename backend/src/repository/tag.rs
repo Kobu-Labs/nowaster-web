@@ -9,7 +9,7 @@ use crate::{
     dto::{
         category::read_category::ReadCategoryDto,
         tag::{
-            create_tag::{UpdateTagDto, UpsertTagDto},
+            create_tag::{UpdateTagDto, CreateTagDto},
             filter_tags::TagFilterDto,
         },
     },
@@ -40,7 +40,7 @@ pub trait TagRepositoryTrait {
     async fn find_by_id(&self, id: Uuid) -> Result<TagDetails>;
     async fn update_tag(&self, id: Uuid, dto: UpdateTagDto) -> Result<TagDetails>;
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: UpsertTagDto) -> Result<TagDetails>;
+    async fn create(&self, dto: CreateTagDto) -> Result<TagDetails>;
     async fn filter_tags(&self, filter: TagFilterDto) -> Result<Vec<TagDetails>>;
     async fn delete_tag(&self, id: Uuid) -> Result<()>;
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
@@ -54,14 +54,13 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
-    async fn upsert(&self, dto: UpsertTagDto) -> Result<TagDetails> {
+    async fn create(&self, dto: CreateTagDto) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
                 WITH inserted AS (
                     INSERT INTO tag (label)
                     VALUES ($1)
-                    ON CONFLICT (label) DO NOTHING
                     RETURNING tag.id, tag.label
                 )
                 SELECT i.id as "id!", i.label as "label!" FROM inserted i
