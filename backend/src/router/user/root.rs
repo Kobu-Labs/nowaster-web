@@ -13,7 +13,7 @@ async fn crate_user_handler(
     State(state): State<AppState>,
     ValidatedRequest(payload): ValidatedRequest<CreateUserDto>,
 ) -> ApiResponse<ReadUserDto> {
-    let res = state.user_service.upsert_user(payload).await;
+    let res = state.user_service.create(payload).await;
     ApiResponse::from_result(res)
 }
 
