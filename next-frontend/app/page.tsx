@@ -43,7 +43,7 @@ export default async function LandingPage() {
                   <GoToAppButton
                     asChild
                     size="lg"
-                    label="Start now"
+                    label="Go to application"
                     variant="default"
                   />
                 </div>
@@ -225,10 +225,14 @@ export default async function LandingPage() {
                     <span>Basic reporting</span>
                   </li>
                 </ul>
-                <SignInButton variant="outline" className="mt-8" asChild />
+                <SignInButton
+                  variant="outline"
+                  className="mt-8"
+                  label="Get Started"
+                />
                 <GoToAppButton
                   className="mt-8"
-                  label="Get started"
+                  label="Go to application"
                   variant="outline"
                 />
               </div>
@@ -254,7 +258,7 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage src={undefined} alt={"d"} />
+                    <AvatarImage alt={"d"} />
                     <AvatarFallback>{"D"}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -330,11 +334,11 @@ export default async function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <SignInButton variant="secondary" />
-                <GoToAppButton
-                  label="Start your journey now"
+                <SignInButton
                   variant="secondary"
+                  label="Start your journey now"
                 />
+                <GoToAppButton label="Go to application" variant="secondary" />
               </div>
             </div>
           </div>
