@@ -7,6 +7,7 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::category::{create_category::CreateCategoryDto, filter_category::FilterCategoryDto},
     entity::category::Category,
+    router::clerk::ClerkUser,
 };
 
 #[derive(Clone)]
@@ -18,13 +19,18 @@ pub struct CategoryRepository {
 pub struct ReadCategoryRow {
     id: Uuid,
     name: String,
+    created_by: String,
 }
 
 pub trait CategoryRepositoryTrait {
     async fn delete_category(&self, id: Uuid) -> Result<()>;
-    async fn filter_categories(&self, filter: FilterCategoryDto) -> Result<Vec<Category>>;
+    async fn filter_categories(
+        &self,
+        filter: FilterCategoryDto,
+        actor: ClerkUser,
+    ) -> Result<Vec<Category>>;
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: CreateCategoryDto) -> Result<Category>;
+    async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
 }
 
@@ -35,21 +41,21 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
-    async fn upsert(&self, dto: CreateCategoryDto) -> Result<Category> {
+    async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category> {
         let row = sqlx::query_as!(
             ReadCategoryRow,
             r#"
                 WITH inserted AS (
-                    INSERT INTO category (name)
-                    VALUES ($1)
-                    ON CONFLICT (name) DO NOTHING
-                    RETURNING category.id, category.name
+                    INSERT INTO category (name, created_by)
+                    VALUES ($1, $2)
+                    RETURNING category.id, category.name, category.created_by
                 )
-                SELECT i.id as "id!", i.name as "name!" FROM inserted i
+                SELECT i.id as "id!", i.name as "name!", i.created_by as "created_by!" FROM inserted i
                 UNION ALL
-                SELECT c.id, c.name FROM category c WHERE c.name = $1
+                SELECT c.id, c.name, c.created_by FROM category c WHERE c.name = $1 and c.created_by = $2
             "#,
-            dto.name
+            dto.name,
+            actor.user_id
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -64,21 +70,26 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
-    async fn filter_categories(&self, filter: FilterCategoryDto) -> Result<Vec<Category>> {
+    async fn filter_categories(
+        &self,
+        filter: FilterCategoryDto,
+        actor: ClerkUser,
+    ) -> Result<Vec<Category>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
-                SELECT category.id, category.name
+                SELECT category.id, category.name, category.created_by
                 FROM category
-                WHERE 1=1
+                WHERE category.created_by = 
             ",
         );
+        query.push_bind(actor.user_id);
 
         if let Some(name) = filter.name {
-            query.push("AND category.name = ").push_bind(name);
+            query.push(" AND category.name = ").push_bind(name);
         }
 
         if let Some(id) = filter.id {
-            query.push("AND category.id = ").push_bind(id);
+            query.push(" AND category.id = ").push_bind(id);
         }
 
         let rows = query
