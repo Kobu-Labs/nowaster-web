@@ -46,7 +46,7 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
 
   if (isPending) {
     return (
-      <Skeleton className="flex items-center justify-center  w-full grow  m-10"></Skeleton>
+      <Skeleton className="flex items-center justify-center w-full grow  h-10"></Skeleton>
     );
   }
 
@@ -104,7 +104,7 @@ export const SingleCategoryPicker: FC<
 
   if (isPending) {
     return (
-      <Skeleton className="flex w-full items-center justify-center h-10 grow"/ >
+      <Skeleton className="flex w-full items-center justify-center h-10 grow" />
     );
   }
 
