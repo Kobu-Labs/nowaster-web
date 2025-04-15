@@ -1,4 +1,4 @@
-CREATE TABLE "user" (
+CREATE TABLE IF NOT EXISTS "user" (
     id VARCHAR PRIMARY KEY,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     displayname VARCHAR NOT NULL
@@ -15,3 +15,5 @@ ADD CONSTRAINT fk_category_user FOREIGN KEY (created_by) REFERENCES "user"(id);
 ALTER TABLE tag
 ADD COLUMN created_by VARCHAR,
 ADD CONSTRAINT fk_tag_user FOREIGN KEY (created_by) REFERENCES "user"(id);
+
+DROP TABLE IF EXISTS "user";
