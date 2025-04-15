@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use axum::{routing::IntoMakeService, Router};
-use clerk_rs::{clerk::Clerk, validators::{axum::ClerkLayer, jwks::MemoryCacheJwksProvider}};
+use clerk_rs::{
+    clerk::Clerk,
+    validators::{axum::ClerkLayer, jwks::MemoryCacheJwksProvider},
+};
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 

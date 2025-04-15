@@ -8,6 +8,7 @@ use crate::{
         fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto},
     },
     repository::fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+    router::clerk::ClerkUser,
 };
 
 use super::{category_service::CategoryService, tag_service::TagService};
@@ -35,10 +36,11 @@ impl SessionService {
     pub async fn create_fixed_session(
         &self,
         dto: CreateFixedSessionDto,
+        actor: ClerkUser,
     ) -> Result<ReadFixedSessionDto> {
         let category = self
             .category_service
-            .upsert_category(dto.category.clone())
+            .upsert_category(dto.category.clone(), actor.clone())
             .await?;
 
         // TODO: this will be pulled from auth headers
@@ -48,6 +50,7 @@ impl SessionService {
                 dto.clone(),
                 category.id,
                 dto.tags.iter().map(|t| t.id).collect(),
+                actor.clone(),
             )
             .await?;
 
@@ -57,17 +60,18 @@ impl SessionService {
     pub async fn filter_fixed_sessions(
         &self,
         dto: FilterSessionDto,
+        actor: ClerkUser,
     ) -> Result<Vec<ReadFixedSessionDto>> {
-        let res = self.fixed_repo.filter_sessions(dto).await?;
+        let res = self.fixed_repo.filter_sessions(dto, actor).await?;
         Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
     }
 
-    pub async fn delete_session(&self, id: Uuid) -> Result<()> {
-        self.fixed_repo.delete_session(id).await?;
+    pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+        self.fixed_repo.delete_session(id, actor).await?;
         Ok(())
     }
 
-    pub async fn get_active_sessions(&self) -> Result<Vec<ReadFixedSessionDto>> {
+    pub async fn get_active_sessions(&self, actor: ClerkUser) -> Result<Vec<ReadFixedSessionDto>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {
             from_end_time: Some(DateFilter {
@@ -82,7 +86,7 @@ impl SessionService {
 
         let res = self
             .fixed_repo
-            .filter_sessions(active_session_filter)
+            .filter_sessions(active_session_filter, actor)
             .await?;
         Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
     }

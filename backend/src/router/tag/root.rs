@@ -9,6 +9,7 @@ use crate::dto::tag::add_category::AddAllowedCategoryDto;
 use crate::dto::tag::create_tag::{CreateTagDto, UpdateTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
 use crate::dto::tag::read_tag::ReadTagDetailsDto;
+use crate::router::clerk::ClerkUser;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
@@ -39,6 +40,7 @@ async fn update_tag_handler(
 
 async fn add_allowed_category_handler(
     State(state): State<AppState>,
+    actor: ClerkUser,
     ValidatedRequest(payload): ValidatedRequest<AddAllowedCategoryDto>,
 ) -> ApiResponse<()> {
     let tag = state.tag_service.get_by_id(payload.tag_id).await;
@@ -48,7 +50,10 @@ async fn add_allowed_category_handler(
         };
     };
 
-    let category = state.category_service.get_by_id(payload.category_id).await;
+    let category = state
+        .category_service
+        .get_by_id(payload.category_id, actor)
+        .await;
     let Ok(category) = category else {
         return ApiResponse::Error {
             message: "Category not found".to_string(),
@@ -74,6 +79,7 @@ async fn get_tag_handler(
 
 async fn remove_allowed_category_handler(
     State(state): State<AppState>,
+    actor: ClerkUser,
     ValidatedRequest(payload): ValidatedRequest<AddAllowedCategoryDto>,
 ) -> ApiResponse<()> {
     let tag = state.tag_service.get_by_id(payload.tag_id).await;
@@ -83,7 +89,10 @@ async fn remove_allowed_category_handler(
         };
     };
 
-    let category = state.category_service.get_by_id(payload.category_id).await;
+    let category = state
+        .category_service
+        .get_by_id(payload.category_id, actor)
+        .await;
     let Ok(category) = category else {
         return ApiResponse::Error {
             message: "Category not found".to_string(),
