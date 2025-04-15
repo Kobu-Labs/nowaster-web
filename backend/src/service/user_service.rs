@@ -14,7 +14,7 @@ impl UserService {
         Self { repo }
     }
     pub async fn upsert_user(&self, dto: CreateUserDto) -> Result<ReadUserDto, UserError> {
-        let res = self.repo.upsert(dto).await;
+        let res = self.repo.create(dto).await;
         match res {
             Ok(u) => Ok(ReadUserDto::from(u)),
             Err(e) => Err(UserError::UnknownError(e.to_string())),
