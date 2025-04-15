@@ -29,6 +29,7 @@ pub struct ReadTagDetailsDto {
     #[serde(rename = "allowedCategories")]
     pub allowed_categories: Vec<ReadCategoryDto>,
     pub usages: i64,
+    pub created_by: String,
 }
 
 impl ReadTagDetailsDto {
@@ -36,6 +37,7 @@ impl ReadTagDetailsDto {
         Self {
             id: entity.id,
             label: entity.label,
+            created_by: entity.created_by,
             allowed_categories: entity
                 .allowed_categories
                 .into_iter()
