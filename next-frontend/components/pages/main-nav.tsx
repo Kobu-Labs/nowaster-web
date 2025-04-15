@@ -1,17 +1,17 @@
 "use client";
 
-import * as React from "react";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
-import { NavItem } from "@/types/nav";
+import { SignInButton } from "@/components/pages/SignInButton";
+import { ThemeToggle } from "@/components/pages/ThemeToggle";
+import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { NavItem } from "@/types/nav";
 import Image from "next/image";
-import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 import { FC, PropsWithChildren } from "react";
-import { ThemeToggle } from "@/components/pages/ThemeToggle";
 
 interface NavigationProps {
   items?: readonly NavItem[];
@@ -76,9 +76,7 @@ export function MainNavigation({ items }: NavigationProps) {
       <div className="grow"></div>
       <SessionTimer />
       <ThemeToggle />
-      <SignedOut>
-        <SignInButton />
-      </SignedOut>
+      <SignInButton />
       <SignedIn>
         <UserButton />
       </SignedIn>

@@ -6,31 +6,43 @@ import {
   TagPickerUiProvider,
   TagPickerUiProviderProps,
 } from "@/components/ui-providers/TagPickerUiProvider";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Frown } from "lucide-react";
 
 type SimpleTagPickerProps = Omit<TagPickerUiProviderProps, "availableTags">;
 
 export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   const {
     data: tags,
-    isLoading,
+    isPending,
     isError,
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
+    select: (data) => {
+      if (data.isErr) {
+        throw new Error(data.error.message);
+      }
+      return data.value;
+    },
   });
 
-  if (!tags || isLoading || isError) {
-    return <div>Something bad happenned</div>;
+  if (isError) {
+    return (
+      <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
+    );
   }
 
-  if (tags.isErr) {
-    return <div>{tags.error.message}</div>;
+  if (isPending) {
+    return (
+      <Skeleton className="flex items-center justify-center w-full grow h-10" />
+    );
   }
 
   return (
     <TagPickerUiProvider
       disabled={props.disabled}
-      availableTags={tags.value}
+      availableTags={tags}
       forCategory={props.forCategory}
       selectedTags={props.selectedTags}
       onNewTagsSelected={props.onNewTagsSelected}
