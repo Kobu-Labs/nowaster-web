@@ -95,37 +95,45 @@ export const translateFilterPrecursor = (
     settings: { tags, categories },
   } = precursor;
 
-  const result: SessionFilter = {};
+  const filter: SessionFilter = {};
 
   if (data.endTimeTo?.value) {
-    result.toEndTime = {
+    filter.toEndTime = {
       value: data.endTimeTo.value,
     };
   }
 
   if (data.endTimeFrom?.value) {
-    result.fromEndTime = {
+    filter.fromEndTime = {
       value: data.endTimeFrom.value,
     };
   }
 
   if (data.tags && data.tags?.length > 0) {
-    result.tags = result.tags ?? {};
-    result.tags.label = {
-      mode: tags?.label?.mode ?? "some",
-      value: data.tags?.map((tag) => tag.label) ?? [],
-    };
+    filter.tags = filter.tags ?? {};
+    if (tags?.id?.mode) {
+      filter.tags.id = {
+        mode: tags.id.mode,
+        value: data.tags?.map((tag) => tag.id) ?? [],
+      };
+    }
+    if (tags?.label?.mode) {
+      filter.tags.label = {
+        mode: tags.label.mode,
+        value: data.tags?.map((tag) => tag.label) ?? [],
+      };
+    }
   }
 
-  if (data.categories && data.categories?.length > 0) {
-    result.categories = result.categories ?? {};
-    result.categories.name = {
+  if (data.categories && data.categories.length > 0) {
+    filter.categories = filter.categories ?? {};
+    filter.categories.name = {
       mode: categories?.name?.mode ?? "some",
       value: data.categories?.map((category) => category.name) ?? [],
     };
   }
 
-  return result;
+  return filter;
 };
 
 export const emptyStringToUndefined = (
