@@ -37,7 +37,7 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
 
   if (isPending) {
     return (
-      <Skeleton className="flex items-center justify-center  w-full grow  m-10"></Skeleton>
+      <Skeleton className="flex items-center justify-center w-full grow h-10"></Skeleton>
     );
   }
 
