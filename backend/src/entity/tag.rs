@@ -15,4 +15,5 @@ pub struct TagDetails {
     pub label: String,
     pub allowed_categories: Vec<Category>,
     pub usages: i64,
+    pub created_by: String,
 }

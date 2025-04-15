@@ -23,6 +23,7 @@ pub struct ReadCategoryRow {
 }
 
 pub trait CategoryRepositoryTrait {
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Category>;
     async fn delete_category(&self, id: Uuid) -> Result<()>;
     async fn filter_categories(
         &self,
@@ -67,6 +68,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Category {
             id: row.id,
             name: row.name,
+            created_by: row.created_by,
         }
     }
 
@@ -112,5 +114,22 @@ impl CategoryRepositoryTrait for CategoryRepository {
         .await?;
 
         Ok(())
+    }
+
+    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Category> {
+        let result = self
+            .filter_categories(
+                FilterCategoryDto {
+                    id: Some(id),
+                    name: None,
+                },
+                actor,
+            )
+            .await?;
+
+        if let Some(category) = result.first() {
+            return Ok(category.clone());
+        }
+        Err(anyhow::anyhow!("Category not found"))
     }
 }
