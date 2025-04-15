@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH RECURSIVE consecutive_days AS (\n                    SELECT CAST(CURRENT_DATE AS DATE) AS date_day, 1 AS consecutive_count\n                    UNION ALL\n                    SELECT CAST(date_day - INTERVAL '1 day' AS DATE), consecutive_count + 1\n                    FROM consecutive_days\n                    WHERE EXISTS (\n                        SELECT 1\n                        FROM session\n                        WHERE CAST(start_time AS DATE) = date_day - INTERVAL '1 day'\n                        AND session.user_id = $1\n                    )\n                )\n\n                SELECT MAX(consecutive_count) AS consecutive_days_count\n                FROM consecutive_days;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "consecutive_days_count",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e3b3060f650ac3947cc5664b5328570e705059f61a6d749ffbde4d1f4f777efe"
+}
