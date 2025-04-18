@@ -2,8 +2,6 @@ import { Result } from "@badrap/result";
 import { ResponseSchema } from "@/api/definitions";
 import axios from "axios";
 import { ZodType } from "zod";
-import { useAuth } from "@clerk/nextjs";
-import { useEffect } from "react";
 import { env } from "@/env";
 
 const baseApi = axios.create({
@@ -11,29 +9,19 @@ const baseApi = axios.create({
   validateStatus: () => true,
 });
 
-export const AxiosInterceptor = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const auth = useAuth();
-
-  useEffect(() => {
-    baseApi.interceptors.request.use(
-      async (config) => {
-        const token = await auth.getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      },
-    );
-  }, [auth]);
-
-  return children;
+export const setupAxiosInterceptors = (
+  getToken: () => Promise<string | null>,
+) => {
+  baseApi.interceptors.request.use(
+    async (config) => {
+      const token = await getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
 };
 
 export const handleResponse = async <T>(
