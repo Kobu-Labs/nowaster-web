@@ -4,5 +4,5 @@ use validator::Validate;
 #[derive(Clone, Deserialize, Serialize, Debug, Validate)]
 pub struct UpdateUserDto {
     pub id: String,
-    pub displayname: Option<String>,
+    pub username: Option<String>,
 }

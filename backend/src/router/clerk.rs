@@ -24,8 +24,8 @@ impl FromRequestParts<AppState> for ClerkUser {
             state
                 .user_service
                 .upsert(CreateUserDto {
-                    displayname: "unspecified".to_string(),
-                    clerk_user_id: session.sub.clone(),
+                    username: "unspecified".to_string(),
+                    id: session.sub.clone(),
                 })
                 .await
                 .map_err(|e| {
