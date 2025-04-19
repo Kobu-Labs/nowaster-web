@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::{
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::ReadCategoryDto,
+        read_category::ReadCategoryDto, update_category::UpdateCategoryDto,
     },
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
@@ -18,7 +18,9 @@ pub fn category_router() -> Router<AppState> {
     Router::new()
         .route(
             "/",
-            get(filter_categories_handler).post(create_category_handler),
+            get(filter_categories_handler)
+                .post(create_category_handler)
+                .patch(update_category_handler),
         )
         .route(
             "/{category_id}",
@@ -71,6 +73,15 @@ async fn get_category_by_id_handler(
         )
         .await
         .map(|val| val.first().cloned());
+    ApiResponse::from_result(res)
+}
+
+async fn update_category_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<UpdateCategoryDto>,
+) -> ApiResponse<ReadCategoryDto> {
+    let res = state.category_service.update_category(payload, actor).await;
     ApiResponse::from_result(res)
 }
 
