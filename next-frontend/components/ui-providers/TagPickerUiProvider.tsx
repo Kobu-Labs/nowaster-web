@@ -123,8 +123,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {props.selectedTags.length === 0
                 ? "Select Tags"
                 : props.selectedTags.map((tag) => (
-                    <TagBadge key={tag.id} value={tag.label} />
-                  ))}
+                  <TagBadge tag={tag} variant="auto" key={tag.id}/>
+                ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -138,23 +138,27 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-              <CommandGroup>
-                <CommandItem
-                  className="flex"
-                  onSelect={() =>
-                    createTag({
-                      color: newTagColor,
-                      label: searchTerm,
-                      allowedCategories: [],
-                    })
-                  }
-                >
-                  <p>Create</p>
-                  <div className="grow"></div>
-                  <TagBadge value={searchTerm} colors={newTagColor} />
-                </CommandItem>
-              </CommandGroup>
-            )}
+            <CommandGroup>
+              <CommandItem
+                className="flex"
+                onSelect={() =>
+                  createTag({
+                    color: newTagColor,
+                    label: searchTerm,
+                    allowedCategories: [],
+                  })
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <TagBadge
+                  variant="manual"
+                  value={searchTerm}
+                  colors={newTagColor}
+                />
+              </CommandItem>
+            </CommandGroup>
+          )}
           <ScrollArea
             type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
@@ -175,7 +179,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                           : "opacity-0",
                       )}
                     />
-                    <TagBadge value={tag.label} colors={tag.color} />
+                    <TagBadge variant="auto" tag={tag} />
                   </CommandItem>
                 ))}
               </CommandGroup>

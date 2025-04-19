@@ -14,8 +14,8 @@ import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 type DeleteSessionIconProps = {
-  sessionId: string
-}
+  sessionId: string;
+};
 
 const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   const { toast } = useToast();
@@ -34,7 +34,9 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
           title: "Session deleted succesfully",
           variant: "default",
         });
-        await queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.sessions._def,
+        });
       }
     },
   });
@@ -64,7 +66,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       return (
         <div className="flex">
           {tags.map((tag) => (
-            <TagBadge value={tag.label} key={tag.id}/>
+            <TagBadge tag={tag} variant="auto" key={tag.id} />
           ))}
         </div>
       );
