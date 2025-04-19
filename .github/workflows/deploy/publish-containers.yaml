@@ -34,4 +34,3 @@ jobs:
         run: |
           docker build -t ghcr.io/kobu-labs/nowaster-web/frontend:latest ./next-frontend
           docker push ghcr.io/kobu-labs/nowaster-web/frontend:latest
-
