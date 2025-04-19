@@ -1,5 +1,5 @@
 import { TagApi } from "@/api";
-import { CategoryWithId, TagDetails, TagRequest } from "@/api/definitions";
+import { TagDetails, TagRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
@@ -44,7 +44,7 @@ export const useCreateTag = ({
       toast({
         description: (
           <>
-            <TagBadge value={data.value.label} />
+            <TagBadge tag={data.value} variant="auto" />
             created successfully!
           </>
         ),
