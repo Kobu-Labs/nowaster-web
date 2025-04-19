@@ -1,4 +1,7 @@
-use crate::{repository::statistics::sessions::StatisticsRepository, router::clerk::ClerkUser};
+use crate::{
+    repository::statistics::sessions::{ReadColorsDto, StatisticsRepository},
+    router::clerk::ClerkUser,
+};
 use anyhow::Result;
 
 #[derive(Clone)]
@@ -23,5 +26,9 @@ impl StatisticsService {
 
     pub async fn get_current_streak(&self, actor: ClerkUser) -> Result<u16> {
         self.repo.get_current_streak(actor).await
+    }
+
+    pub async fn get_colors(&self, actor: ClerkUser) -> Result<ReadColorsDto> {
+        self.repo.get_colors(actor).await
     }
 }
