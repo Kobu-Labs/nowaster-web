@@ -37,6 +37,7 @@ export const update = async (
 ): Promise<Result<TagResponse["update"]>> => {
   const { data } = await baseApi.patch(BASE_URL + "/" + params.id, {
     label: params.label,
+    color: params.color,
     allowedCategories: params.allowedCategories,
   });
   return await handleResponse(data, TagResponseSchema.addAllowedCategory);
