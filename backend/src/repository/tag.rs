@@ -166,6 +166,7 @@ impl TagRepositoryTrait for TagRepository {
                     tag.id AS tag_id,
                     tag.label AS tag_label,
                     tag.created_by AS "created_by",
+                    tag.color,
                     category.id AS category_id,
                     category.name AS category_name,
                     COALESCE(usage_vals.usages, 0) AS usages
