@@ -5,7 +5,10 @@ use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::category::{create_category::CreateCategoryDto, filter_category::FilterCategoryDto},
+    dto::category::{
+        create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
+        update_category::UpdateCategoryDto,
+    },
     entity::category::Category,
     router::clerk::ClerkUser,
 };
@@ -24,6 +27,7 @@ pub struct ReadCategoryRow {
 }
 
 pub trait CategoryRepositoryTrait {
+    async fn update(&self, dto: UpdateCategoryDto) -> Result<Category>;
     async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Category>;
     async fn delete_category(&self, id: Uuid) -> Result<()>;
     async fn filter_categories(
@@ -135,5 +139,46 @@ impl CategoryRepositoryTrait for CategoryRepository {
             return Ok(category.clone());
         }
         Err(anyhow::anyhow!("Category not found"))
+    }
+
+    async fn update(&self, dto: UpdateCategoryDto) -> Result<Category> {
+        let mut should_execute = false;
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+                UPDATE "category" SET
+            "#,
+        );
+
+        if let Some(name) = dto.name {
+            if name.is_empty() {
+                return Err(anyhow::anyhow!("Name cannot be empty"));
+            }
+            query.push(" name = ");
+            query.push_bind(name);
+            should_execute = true;
+        }
+        if let Some(color) = dto.color {
+            if color.is_empty() {
+                return Err(anyhow::anyhow!("Color cannot be empty"));
+            }
+            query.push(" color = ");
+            query.push_bind(color);
+            should_execute = true;
+        }
+
+        query.push(" WHERE id = ");
+        query.push_bind(dto.id);
+        query.push(" RETURNING category.id, category.name, category.created_by, category.color");
+
+        if !should_execute {
+            return Err(anyhow::anyhow!("No fields to update"));
+        }
+
+        let row = query
+            .build_query_as::<ReadCategoryRow>()
+            .fetch_one(self.db_conn.get_pool())
+            .await?;
+
+        Ok(self.mapper(row))
     }
 }
