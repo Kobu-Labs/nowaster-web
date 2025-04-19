@@ -77,12 +77,14 @@ const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
 export const ScheduledSessionCreationForm: FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [loading, setLoading] = React.useState(false);
 
   const form = useForm<ScheduledSessionRequest["create"]>({
     resolver: zodResolver(ScheduledSessionRequestSchema.create),
   });
 
   async function onSubmit(values: ScheduledSessionRequest["create"]) {
+    setLoading(true);
     const result = await ScheduledSessionApi.create(values);
     await queryClient.invalidateQueries({ queryKey: queryKeys.sessions._def });
     toast(
@@ -101,6 +103,7 @@ export const ScheduledSessionCreationForm: FC = () => {
           variant: "default",
         },
     );
+    setLoading(false);
   }
 
   return (
@@ -233,7 +236,9 @@ export const ScheduledSessionCreationForm: FC = () => {
               )}
             />
 
-            <Button type="submit">Submit</Button>
+            <Button type="submit" loading={loading}>
+              Submit
+            </Button>
           </form>
         </Form>
       </CardContent>
