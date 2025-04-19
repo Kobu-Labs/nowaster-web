@@ -87,7 +87,11 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                 className="w-48"
               />
               {newTagName.length > 0 && (
-                <TagBadge variant="manual" value={newTagName} colors={selectedColor} />
+                <TagBadge
+                  variant="manual"
+                  value={newTagName}
+                  colors={selectedColor}
+                />
               )}
             </div>
           </div>
@@ -150,6 +154,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
         <CardFooter className="flex gap-2">
           <div className="flex-grow"></div>
           <Button
+            loading={mutation.isPending}
             disabled={newTagName.length === 0}
             onClick={() =>
               mutation.mutate({

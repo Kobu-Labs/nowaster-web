@@ -107,7 +107,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
     onSettled: props.onDelete,
   });
 
-  const mutation = useUpdateTag({
+  const saveMutation = useUpdateTag({
     onSuccess: props.onEdit,
   });
 
@@ -197,7 +197,10 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
           <div className="flex-grow"></div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">
+              <Button
+                variant="destructive"
+                loading={deleteTagMutation.isPending}
+              >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
             </AlertDialogTrigger>
@@ -218,9 +221,10 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
             </AlertDialogContent>
           </AlertDialog>
           <Button
+            loading={saveMutation.isPending}
             disabled={newTagName.length === 0}
             onClick={() =>
-              mutation.mutate({
+              saveMutation.mutate({
                 id: props.tag.id,
                 label: newTagName,
                 allowedCategories: selectedCategories,
