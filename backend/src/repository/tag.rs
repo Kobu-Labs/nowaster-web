@@ -259,20 +259,43 @@ impl TagRepositoryTrait for TagRepository {
         dto: UpdateTagDto,
         actor: ClerkUser,
     ) -> Result<TagDetails> {
-        let row = sqlx::query_as!(
-            ReadTagRow,
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
-                UPDATE tag
-                SET label = $1
-                WHERE tag.id = $2 and tag.created_by = $3
-                RETURNING id, label, created_by as "created_by!", color
+                UPDATE "tag" SET
             "#,
-            dto.label,
-            id,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+        );
+
+        let mut fields = vec![];
+
+        if let Some(label) = dto.label {
+            fields.push(("label", label));
+        }
+
+        if let Some(color) = dto.color {
+            fields.push(("color", color));
+        }
+
+        for (i, (field, value)) in fields.clone().into_iter().enumerate() {
+            if i > 0 {
+                query.push(", ");
+            }
+            query.push(format!("{field} = ")).push_bind(value);
+        }
+
+        query.push(" WHERE id = ").push_bind(id);
+        query
+            .push(" AND created_by = ")
+            .push_bind(actor.user_id.clone());
+        query.push(" RETURNING tag.id, tag.label, tag.created_by, tag.color ");
+
+        if fields.is_empty() && dto.allowed_categories.is_none() {
+            return Err(anyhow::anyhow!("No fields to update"));
+        }
+
+        let row = query
+            .build_query_as::<ReadTagRow>()
+            .fetch_one(self.db_conn.get_pool())
+            .await?;
 
         if let Some(allowed_categories) = dto.allowed_categories {
             sqlx::query!(
@@ -301,6 +324,6 @@ impl TagRepositoryTrait for TagRepository {
                 .await?;
         }
 
-        self.find_by_id(row.id, actor).await
+        self.find_by_id(id, actor.clone()).await
     }
 }
