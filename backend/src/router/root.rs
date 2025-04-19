@@ -67,20 +67,23 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .with(EnvFilter::new("info"))
         .init();
 
-    let api_router = Router::new()
+    let user_route = Router::new().nest("/user", user_router().with_state(state.clone()));
+
+    let protected_routes = Router::new()
         .nest("/session", session_router().with_state(state.clone()))
         .nest("/tag", tag_router().with_state(state.clone()))
         .nest("/category", category_router().with_state(state.clone()))
-        .nest("/user", user_router().with_state(state.clone()))
-        .nest("/statistics", statistics_router().with_state(state.clone()));
-
-    Router::new()
-        .nest("/api", api_router)
+        .nest("/statistics", statistics_router().with_state(state.clone()))
         .layer(ClerkLayer::new(
             MemoryCacheJwksProvider::new(clerk),
             None,
             false,
-        ))
+        ));
+
+    let api_router = Router::new().merge(user_route).merge(protected_routes);
+
+    Router::new()
+        .nest("/api", api_router)
         .layer(tower_http::cors::CorsLayer::permissive())
         .layer(
             ServiceBuilder::new().layer(
