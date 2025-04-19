@@ -8,7 +8,7 @@ import {
 } from "api/definitions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, randomColor } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
@@ -119,10 +119,10 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <Badge variant="outline" key={category.id}>
-                      {category.name}
-                    </Badge>
-                  ))}
+                      <Badge variant="outline" key={category.id}>
+                        {category.name}
+                      </Badge>
+                    ))}
               </ScrollArea>
             </div>
           </div>
@@ -141,17 +141,22 @@ export const MultipleCategoryPickerUiProvider: FC<
                 props.availableCategories.every(
                   (cat) => cat.name !== searchTerm,
                 ) && (
-                <CommandGroup>
-                  <CommandItem
-                    className="flex"
-                    onSelect={() => createCategory({ name: searchTerm })}
-                  >
-                    <p>Create</p>
-                    <div className="grow"></div>
-                    <Badge variant="outline">{searchTerm}</Badge>
-                  </CommandItem>
-                </CommandGroup>
-              )}
+                  <CommandGroup>
+                    <CommandItem
+                      className="flex"
+                      onSelect={() =>
+                        createCategory({
+                          color: randomColor(),
+                          name: searchTerm,
+                        })
+                      }
+                    >
+                      <p>Create</p>
+                      <div className="grow"></div>
+                      <Badge variant="outline">{searchTerm}</Badge>
+                    </CommandItem>
+                  </CommandGroup>
+                )}
             </CommandItem>
           )}
           <CommandGroup>
@@ -220,6 +225,7 @@ export const SingleCategoryPickerUiProvider: FC<
     retry: false,
     onSuccess: async (result) => {
       if (result.isErr) {
+        console.error(result.error.message);
         return;
       }
 
@@ -281,19 +287,21 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-              <CommandGroup>
-                <CommandItem
-                  className="flex"
-                  onSelect={() => createCategory({ name: searchTerm })}
-                >
-                  <p>Create</p>
-                  <div className="grow"></div>
-                  <Badge variant="outline">{searchTerm}</Badge>
-                </CommandItem>
-              </CommandGroup>
-            </CommandItem>
-          )}
+              <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
+                <CommandGroup>
+                  <CommandItem
+                    className="flex"
+                    onSelect={() =>
+                      createCategory({ color: randomColor(), name: searchTerm })
+                    }
+                  >
+                    <p>Create</p>
+                    <div className="grow"></div>
+                    <Badge variant="outline">{searchTerm}</Badge>
+                  </CommandItem>
+                </CommandGroup>
+              </CommandItem>
+            )}
           <CommandGroup>
             <ScrollArea
               type="always"

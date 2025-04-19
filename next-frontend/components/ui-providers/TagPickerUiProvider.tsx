@@ -10,7 +10,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn, showSelectedTagsFirst } from "@/lib/utils";
+import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -160,7 +160,11 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               <CommandItem
                 className="flex"
                 onSelect={() =>
-                  createTag({ label: searchTerm, allowedCategories: [] })
+                  createTag({
+                    color: randomColor(),
+                    label: searchTerm,
+                    allowedCategories: [],
+                  })
                 }
               >
                 <p>Create</p>

@@ -5,6 +5,7 @@ import { z } from "zod";
 const create = z.object({
   label: z.string().trim().min(1),
   allowedCategories: z.array(CategorySchema),
+  color: z.string().trim().min(1),
 });
 
 const deleteTag = z.object({

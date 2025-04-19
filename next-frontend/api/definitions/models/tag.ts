@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export const TagSchema = z.object({
   label: z.string().trim().min(1),
+  color: z.string().trim().min(1),
 });
 
 export const TagWithIdSchema = TagSchema.merge(HasID);
