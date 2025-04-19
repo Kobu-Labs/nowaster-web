@@ -32,7 +32,7 @@ export const readMany = async (
 export const update = async (
   params: CategoryRequest["update"],
 ): Promise<Result<CategoryResponse["update"]>> => {
-  const { data } = await baseApi.put(BASE_URL, { ...params });
+  const { data } = await baseApi.patch(BASE_URL, { ...params });
   return await handleResponse(data, CategoryResponseSchema.update);
 };
 

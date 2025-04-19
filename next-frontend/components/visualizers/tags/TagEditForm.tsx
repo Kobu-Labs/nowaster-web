@@ -116,6 +116,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
         id: props.tag.id,
         label: data.tagLabel,
         allowedCategories: data.allowedCategories,
+        color: data.tagColor,
       });
     },
     onSuccess: async (data) => {
