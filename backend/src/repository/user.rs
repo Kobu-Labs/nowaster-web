@@ -42,8 +42,8 @@ impl UserRepositoryTrait for UserRepository {
                     VALUES ($1, $2)
                     RETURNING id, displayname
             "#,
-            dto.clerk_user_id,
-            dto.displayname
+            dto.id,
+            dto.username
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -59,7 +59,7 @@ impl UserRepositoryTrait for UserRepository {
             "#,
         );
 
-        if let Some(displayname) = dto.displayname {
+        if let Some(displayname) = dto.username {
             if displayname.is_empty() {
                 return Err(anyhow::anyhow!("Display name cannot be empty"));
             }
@@ -99,8 +99,8 @@ impl UserRepositoryTrait for UserRepository {
                 ON CONFLICT (id) DO NOTHING
                 RETURNING id, displayname
             "#,
-            dto.clerk_user_id,
-            dto.displayname
+            dto.id,
+            dto.username
         )
         .fetch_optional(self.db_conn.get_pool())
         .await?;
