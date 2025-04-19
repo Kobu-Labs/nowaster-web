@@ -43,10 +43,10 @@ export const useCreateTag = ({
 
       toast({
         description: (
-          <>
+          <div className="flex items-center gap-2">
             <TagBadge tag={data.value} variant="auto" />
             created successfully!
-          </>
+          </div>
         ),
         variant: "default",
       });
