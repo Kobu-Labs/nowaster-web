@@ -1,15 +1,7 @@
 import { FC, useState } from "react";
-import { CategoryApi } from "@/api";
-import { Result } from "@badrap/result";
-import {
-  CategoryRequest,
-  CategoryResponse,
-  CategoryWithId,
-} from "api/definitions";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CategoryWithId } from "api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn, randomColor } from "@/lib/utils";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -25,6 +17,7 @@ import {
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import FuzzySearch from "fuzzy-search";
+import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
 
 export type MultipleCategoryPickerUiProviderProps = {
   availableCategories: CategoryWithId[];
@@ -55,25 +48,11 @@ export const MultipleCategoryPickerUiProvider: FC<
 > = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const queryClient = useQueryClient();
 
   // TODO move this higher
-  const { mutate: createCategory } = useMutation<
-    Result<CategoryResponse["create"]>,
-    unknown,
-    CategoryRequest["create"]
-  >({
-    mutationFn: async (params) => await CategoryApi.create(params),
-    retry: false,
-    onSuccess: async (result) => {
-      if (result.isErr) {
-        return;
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.categories._def,
-      });
-      props.onSelectCategory(result.value);
+  const { mutate: createCategory } = useCreateCategory({
+    onSuccess: (cat) => {
+      props.onSelectCategory(cat);
     },
   });
 
@@ -119,10 +98,10 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                      <Badge variant="outline" key={category.id}>
-                        {category.name}
-                      </Badge>
-                    ))}
+                    <Badge variant="outline" key={category.id}>
+                      {category.name}
+                    </Badge>
+                  ))}
               </ScrollArea>
             </div>
           </div>
@@ -141,22 +120,22 @@ export const MultipleCategoryPickerUiProvider: FC<
                 props.availableCategories.every(
                   (cat) => cat.name !== searchTerm,
                 ) && (
-                  <CommandGroup>
-                    <CommandItem
-                      className="flex"
-                      onSelect={() =>
-                        createCategory({
-                          color: randomColor(),
-                          name: searchTerm,
-                        })
-                      }
-                    >
-                      <p>Create</p>
-                      <div className="grow"></div>
-                      <Badge variant="outline">{searchTerm}</Badge>
-                    </CommandItem>
-                  </CommandGroup>
-                )}
+                <CommandGroup>
+                  <CommandItem
+                    className="flex"
+                    onSelect={() =>
+                      createCategory({
+                        color: randomColor(),
+                        name: searchTerm,
+                      })
+                    }
+                  >
+                    <p>Create</p>
+                    <div className="grow"></div>
+                    <Badge variant="outline">{searchTerm}</Badge>
+                  </CommandItem>
+                </CommandGroup>
+              )}
             </CommandItem>
           )}
           <CommandGroup>
@@ -213,27 +192,8 @@ export const SingleCategoryPickerUiProvider: FC<
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const queryClient = useQueryClient();
-
-  // TODO move this higher
-  const { mutate: createCategory } = useMutation<
-    Result<CategoryResponse["create"]>,
-    unknown,
-    CategoryRequest["create"]
-  >({
-    mutationFn: async (params) => await CategoryApi.create(params),
-    retry: false,
-    onSuccess: async (result) => {
-      if (result.isErr) {
-        console.error(result.error.message);
-        return;
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.categories._def,
-      });
-      props.onSelectCategory(result.value);
-    },
+  const { mutate: createCategory } = useCreateCategory({
+    onSuccess: props.onSelectCategory,
   });
 
   let categoriesInDisplayOrder = props.availableCategories;
@@ -287,21 +247,21 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-              <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
-                <CommandGroup>
-                  <CommandItem
-                    className="flex"
-                    onSelect={() =>
-                      createCategory({ color: randomColor(), name: searchTerm })
-                    }
-                  >
-                    <p>Create</p>
-                    <div className="grow"></div>
-                    <Badge variant="outline">{searchTerm}</Badge>
-                  </CommandItem>
-                </CommandGroup>
-              </CommandItem>
-            )}
+            <CommandItem className="cursor-pointer py-6 text-center text-sm hover:bg-accent">
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() =>
+                    createCategory({ color: randomColor(), name: searchTerm })
+                  }
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <Badge variant="outline">{searchTerm}</Badge>
+                </CommandItem>
+              </CommandGroup>
+            </CommandItem>
+          )}
           <CommandGroup>
             <ScrollArea
               type="always"
