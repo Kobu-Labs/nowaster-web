@@ -27,6 +27,7 @@ pub struct ReadTagRow {
     id: Uuid,
     label: String,
     created_by: String,
+    color: String,
 }
 
 #[derive(sqlx::FromRow)]
@@ -37,6 +38,7 @@ struct ReadTagDetailsRow {
     category_id: Option<Uuid>,
     category_name: Option<String>,
     usages: i64,
+    color: String,
 }
 
 pub trait TagRepositoryTrait {
@@ -63,16 +65,17 @@ impl TagRepositoryTrait for TagRepository {
             ReadTagRow,
             r#"
                 WITH inserted AS (
-                    INSERT INTO tag (label, created_by)
-                    VALUES ($1, $2)
-                    RETURNING tag.id, tag.label, tag.created_by
+                    INSERT INTO tag (label, created_by, color)
+                    VALUES ($1, $2, $3)
+                    RETURNING tag.id, tag.label, tag.created_by, tag.color
                 )
-                SELECT i.id as "id!", i.label as "label!", i.created_by as "created_by!" FROM inserted i
+                SELECT i.id as "id!", i.label as "label!", i.created_by as "created_by!", i.color as "color!" FROM inserted i
                 UNION ALL
-                SELECT c.id, c.label, c.created_by FROM tag c WHERE c.label = $1 and c.created_by = $2
+                SELECT c.id, c.label, c.created_by, c.color FROM tag c WHERE c.label = $1 and c.created_by = $2
             "#,
             dto.label,
-            actor.user_id
+            actor.user_id,
+            dto.color
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -96,7 +99,7 @@ impl TagRepositoryTrait for TagRepository {
         let categories = sqlx::query_as!(
             ReadCategoryDto,
             r#"
-            SELECT cat.id, cat.name
+            SELECT cat.id, cat.name, cat.color
             FROM category cat
             JOIN tag_category tc ON tc.category_id = cat.id
             WHERE tc.tag_id = $1
@@ -109,12 +112,14 @@ impl TagRepositoryTrait for TagRepository {
         Ok(TagDetails {
             id: row.id,
             label: row.label,
+            color: row.color,
             created_by: row.created_by,
             allowed_categories: categories
                 .into_iter()
                 .map(|cat| Category {
                     id: cat.id,
                     name: cat.name,
+                    color: cat.color,
                     created_by: actor.user_id.clone(),
                 })
                 .collect(),
@@ -197,6 +202,7 @@ impl TagRepositoryTrait for TagRepository {
             let tag = tags_map.entry(row.tag_id).or_insert_with(|| TagDetails {
                 id: row.tag_id,
                 label: row.tag_label.clone(),
+                color: row.color.clone(),
                 allowed_categories: Vec::new(),
                 created_by: row.created_by.clone(),
                 usages: row.usages,
@@ -206,6 +212,7 @@ impl TagRepositoryTrait for TagRepository {
                 tag.allowed_categories.push(Category {
                     id: cat_id,
                     name: cat_name,
+                    color: row.color.clone(),
                     created_by: row.created_by.clone(),
                 });
             }
@@ -257,7 +264,7 @@ impl TagRepositoryTrait for TagRepository {
                 UPDATE tag
                 SET label = $1
                 WHERE tag.id = $2 and tag.created_by = $3
-                RETURNING id, label, created_by as "created_by!"
+                RETURNING id, label, created_by as "created_by!", color
             "#,
             dto.label,
             id,

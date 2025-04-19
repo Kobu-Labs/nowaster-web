@@ -8,6 +8,7 @@ use crate::entity::category::Category;
 pub struct ReadCategoryDto {
     pub id: Uuid,
     pub name: String,
+    pub color: String,
 }
 
 impl ReadCategoryDto {
@@ -15,6 +16,7 @@ impl ReadCategoryDto {
         Self {
             id: entity.id,
             name: entity.name,
+            color: entity.color,
         }
     }
 }
