@@ -133,7 +133,7 @@ export default function TagsManagement() {
                               : "opacity-0",
                           )}
                         />
-                        <TagBadge  variant="auto" tag={tag}/>
+                        <TagBadge variant="auto" tag={tag} />
                         <Badge variant="outline" className="text-xs">
                           {tag.usages}
                           {" sessions"}
