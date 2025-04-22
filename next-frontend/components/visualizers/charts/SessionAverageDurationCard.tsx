@@ -14,10 +14,18 @@ type SessionAverageDurationProviderProps = {
 export const SessionAverageDurationProvider = (
   props: SessionAverageDurationProviderProps,
 ) => {
-  const { data: sessions } = useQuery({
+  const {
+    data: sessions,
+    isLoading,
+    isError,
+  } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
-      if (data.isErr || data.value.length === 0) {
+      if (data.isErr) {
+        throw new Error(data.error.message);
+      }
+
+      if (data.value.length === 0) {
         return 0;
       }
 
@@ -33,8 +41,11 @@ export const SessionAverageDurationProvider = (
 
   return (
     <KpiCardUiProvider
+      loading={isLoading}
+      error={isError}
+      mapper={formatTime}
       variant={"big_value"}
-      value={formatTime(sessions ?? 0)}
+      value={sessions}
       title={"Average session duration"}
     >
       <Hourglass />
