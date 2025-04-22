@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { LoaderCircle } from "lucide-react";
 import { useColors } from "@/components/hooks/useColors";
 import Head from "next/head";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <ClerkProvider>
       <RecoilRoot>
         <ReactQueryProvider>
+          <SpeedInsights />
           <AxiosInterceptorWrapper>{children}</AxiosInterceptorWrapper>
         </ReactQueryProvider>
       </RecoilRoot>
