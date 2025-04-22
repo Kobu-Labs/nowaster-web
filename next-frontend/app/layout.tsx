@@ -17,6 +17,7 @@ import { LoaderCircle } from "lucide-react";
 import { useColors } from "@/components/hooks/useColors";
 import Head from "next/head";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <RecoilRoot>
         <ReactQueryProvider>
           <SpeedInsights />
+          <Analytics />
           <AxiosInterceptorWrapper>{children}</AxiosInterceptorWrapper>
         </ReactQueryProvider>
       </RecoilRoot>
