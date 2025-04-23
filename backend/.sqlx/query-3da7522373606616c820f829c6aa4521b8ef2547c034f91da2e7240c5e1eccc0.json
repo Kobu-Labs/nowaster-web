@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM friend\n                WHERE id = $1 AND (friend_1_id = $2 OR friend_2_id = $2)\n                RETURNING id, friend_1_id as \"friend1_id\", friend_2_id as \"friend2_id\", created_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "friend1_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "friend2_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3da7522373606616c820f829c6aa4521b8ef2547c034f91da2e7240c5e1eccc0"
+}

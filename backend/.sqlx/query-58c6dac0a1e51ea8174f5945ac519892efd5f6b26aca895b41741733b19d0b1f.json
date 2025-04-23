@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE friend_request\n                SET status = ($1::text)::friend_request_status\n                WHERE id = $2 \n                RETURNING id, requestor_id, recipient_id, created_at, introduction_message, status as \"status: FriendRequestStatus\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "requestor_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "recipient_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "introduction_message",
+        "type_info": "Bpchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "status: FriendRequestStatus",
+        "type_info": {
+          "Custom": {
+            "name": "friend_request_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "accepted",
+                "rejected",
+                "cancelled"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "58c6dac0a1e51ea8174f5945ac519892efd5f6b26aca895b41741733b19d0b1f"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id\n                FROM friend_request\n                WHERE (requestor_id = $1 AND recipient_id = $2) OR (requestor_id = $2 AND recipient_id = $1)\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ebf5edcd338a642d82d4ec4215debf4c8ee78c9442c2d74993ea0be1b06b8164"
+}
