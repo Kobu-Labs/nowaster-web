@@ -4,8 +4,8 @@ use crate::entity::user::User;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ReadUserDto {
-    id: String,
-    username: String,
+    pub id: String,
+    pub username: String,
 }
 
 impl ReadUserDto {
