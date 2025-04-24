@@ -30,6 +30,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FriendsApi } from "@/api";
 import { useAuth } from "@clerk/nextjs";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import Image from "next/image";
 
 const useMyFriends = () => {
   const { userId } = useAuth();
@@ -105,8 +106,14 @@ export default function FriendsList() {
           <Skeleton className="w-full h-32" />
         </div>
       ) : filteredFriends.length === 0 ? (
-        <div className="text-center py-10">
-          <p className="text-muted-foreground">No friends found</p>
+        <div className="text-center gap-10 flex flex-col items-center justify-center">
+          <p className="text-muted-foreground">No friends found :(</p>
+          <Image
+            src={"/forever-alone.png"}
+            alt={""}
+            width={200}
+            height={200}
+          ></Image>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
