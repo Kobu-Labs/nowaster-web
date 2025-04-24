@@ -9,6 +9,7 @@ import { NavItem } from "@/types/nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { ActiveSession } from "@/components/visualizers/sessions/ActiveSession";
+import Image from "next/image";
 
 interface MainNavProps {
   items?: readonly NavItem[];
@@ -19,9 +20,20 @@ export function MainNav({ items }: MainNavProps) {
 
   return (
     <div className="flex w-full flex-row gap-6">
-      <Link href="/" className="flex items-center space-x-2">
+      <Link
+        href="/"
+        className="flex items-center space-x-2 hover:scale-110 hover:transition"
+      >
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          className="h-8 w-8"
+          width={80}
+          height={80}
+        />
         <span className="inline-block font-bold">{siteConfig.name}</span>
       </Link>
+
       {items?.length ? (
         <nav className="flex gap-6">
           {items?.map(
