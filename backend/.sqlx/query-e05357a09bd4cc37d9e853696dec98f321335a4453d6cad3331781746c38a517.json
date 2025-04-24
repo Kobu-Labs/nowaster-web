@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id\n                FROM friend_request\n                WHERE \n                    ((requestor_id = $1 AND recipient_id = $2) OR (requestor_id = $2 AND recipient_id = $1))\n                    AND status = 'pending'\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e05357a09bd4cc37d9e853696dec98f321335a4453d6cad3331781746c38a517"
+}
