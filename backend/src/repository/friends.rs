@@ -168,7 +168,7 @@ impl FriendsRepository {
                 FROM friend f
                 LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
-                WHERE f.friend_1_id = $1 OR f.friend_2_id = $1 AND f.deleted is not true
+                WHERE (f.friend_1_id = $1 OR f.friend_2_id = $1) AND f.deleted is not true
             "#,
         )
         .bind(actor.user_id)
