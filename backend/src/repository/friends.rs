@@ -43,7 +43,7 @@ impl FriendsRepository {
                     fr.id, 
                     fr.created_at,
                     fr.introduction_message, 
-                    fr.status as "status: FriendRequestStatus",
+                    fr.status,
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
@@ -72,9 +72,9 @@ impl FriendsRepository {
         let mut tx = self.db.get_pool().begin().await?;
         let request = sqlx::query(
             r#"
-                WTHN updated AS (
+                WITH updated AS (
                     UPDATE friend_request
-                    SET status = ($1::text)::friend_request_status
+                    SET status = $1
                     WHERE id = $2 
                     RETURNING 
                         id, 
@@ -82,13 +82,13 @@ impl FriendsRepository {
                         recipient_id,
                         created_at,
                         introduction_message,
-                        status as "status: FriendRequestStatus"
+                        status
                     )
                 SELECT
                     u.id, 
                     u.created_at,
                     u.introduction_message, 
-                    u.status as "status: FriendRequestStatus",
+                    u.status,
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
@@ -99,7 +99,7 @@ impl FriendsRepository {
                 JOIN "user" u2 ON u2.id = u.recipient_id
             "#,
         )
-        .bind(dto.status as FriendRequestStatus)
+        .bind(dto.status)
         .bind(dto.id)
         .fetch_one(tx.as_mut())
         .await?;
@@ -312,7 +312,7 @@ impl FriendsRepository {
                     fr.id, 
                     fr.created_at,
                     fr.introduction_message, 
-                    fr.status as "status: FriendRequestStatus",
+                    fr.status,
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
