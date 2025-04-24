@@ -38,6 +38,8 @@ export const AddFriend = () => {
       await queryClient.invalidateQueries({
         queryKey: ["friends", "requests"],
       });
+      setUsername("");
+      setIntroductionMessage(undefined);
       toast({
         title: "Friend request sent",
         description: "Your friend request has been sent successfully.",
