@@ -188,7 +188,10 @@ impl FriendService {
             status: FriendRequestStatus::Accepted,
         };
 
-        let request = self.repo.get_friend_request(dto.request_id, actor.clone()).await?;
+        let request = self
+            .repo
+            .get_friend_request(dto.request_id, actor.clone())
+            .await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
@@ -216,7 +219,10 @@ impl FriendService {
             status: FriendRequestStatus::Rejected,
         };
 
-        let request = self.repo.get_friend_request(dto.request_id, actor.clone()).await?;
+        let request = self
+            .repo
+            .get_friend_request(dto.request_id, actor.clone())
+            .await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
@@ -244,7 +250,10 @@ impl FriendService {
             status: FriendRequestStatus::Cancelled,
         };
 
-        let request = self.repo.get_friend_request(dto.request_id, actor.clone()).await?;
+        let request = self
+            .repo
+            .get_friend_request(dto.request_id, actor.clone())
+            .await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
