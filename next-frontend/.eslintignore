@@ -1,3 +1,4 @@
+.env.local
 .eslintrc.cjs
 postcss.config.cjs
 tailwind.config.js
