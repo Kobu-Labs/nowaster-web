@@ -262,24 +262,9 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn list_friends_as_actor(
-        &self,
-        actor: ClerkUser,
-    ) -> Result<Vec<ReadFriendshipAsActorDto>> {
+    pub async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
         let result = self.repo.list_friends(actor.clone()).await?;
-        let data = result
-            .into_iter()
-            .map(|friendship| ReadFriendshipAsActorDto {
-                id: friendship.id,
-                friend: if friendship.friend1.id == actor.user_id {
-                    friendship.friend2
-                } else {
-                    friendship.friend1
-                },
-                created_at: friendship.created_at,
-            })
-            .collect();
-        Ok(data)
+        Ok(result)
     }
 
     pub async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
