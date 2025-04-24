@@ -184,11 +184,11 @@ impl FriendService {
         actor: ClerkUser,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
-            id: dto.request_id,
+            request_id: dto.request_id,
             status: FriendRequestStatus::Accepted,
         };
 
-        let request = self.repo.get_friend_request(dto.id, actor.clone()).await?;
+        let request = self.repo.get_friend_request(dto.request_id, actor.clone()).await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
@@ -212,11 +212,11 @@ impl FriendService {
         actor: ClerkUser,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
-            id: dto.request_id,
+            request_id: dto.request_id,
             status: FriendRequestStatus::Rejected,
         };
 
-        let request = self.repo.get_friend_request(dto.id, actor.clone()).await?;
+        let request = self.repo.get_friend_request(dto.request_id, actor.clone()).await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
@@ -240,11 +240,11 @@ impl FriendService {
         actor: ClerkUser,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
-            id: dto.request_id,
+            request_id: dto.request_id,
             status: FriendRequestStatus::Cancelled,
         };
 
-        let request = self.repo.get_friend_request(dto.id, actor.clone()).await?;
+        let request = self.repo.get_friend_request(dto.request_id, actor.clone()).await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
