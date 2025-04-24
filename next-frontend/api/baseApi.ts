@@ -34,7 +34,7 @@ export const handleResponse = async <T>(
   }
 
   if (request.data.status === "fail") {
-    return Result.err(new Error("Request failed!"));
+    return Result.err(new Error(request.data.message));
   }
 
   const requestBody = await schema.safeParseAsync(request.data.data);
