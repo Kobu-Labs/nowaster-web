@@ -37,6 +37,32 @@ pub struct ReadFriendshipDto {
     pub friend2: ReadUserDto,
     pub created_at: DateTime<Local>,
 }
+impl FromRow<'_, PgRow> for ReadFriendRequestDto {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        let requestor = ReadUserDto {
+            id: row.try_get("requestor_id")?,
+            username: row.try_get("requestor_username")?,
+        };
+
+        let recipient = ReadUserDto {
+            id: row.try_get("recipient_id")?,
+            username: row.try_get("recipient_username")?,
+        };
+
+        let created_at: DateTime<Local> = row.try_get("created_at")?;
+        let id: Uuid = row.try_get("id")?;
+        let status: FriendRequestStatus = row.try_get("status")?;
+        let introduction_message: Option<String> = row.try_get("introduction_message")?;
+        Ok(Self {
+            id,
+            status,
+            requestor,
+            recipient,
+            introduction_message,
+            created_at,
+        })
+    }
+}
 
 impl FromRow<'_, PgRow> for ReadFriendshipDto {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
@@ -121,8 +147,8 @@ pub struct ReadFriendRequestsDto {
 pub struct ReadFriendRequestDto {
     pub id: Uuid,
     pub status: FriendRequestStatus,
-    pub requestor_id: String,
-    pub recipient_id: String,
+    pub requestor: ReadUserDto,
+    pub recipient: ReadUserDto,
     pub created_at: DateTime<Local>,
     pub introduction_message: Option<String>,
 }
@@ -170,7 +196,7 @@ impl FriendService {
             ));
         }
 
-        if request.recipient_id != actor.user_id {
+        if request.recipient.id != actor.user_id {
             return Err(anyhow::anyhow!(
                 "You are not allowed to accept this friend request"
             ));
@@ -198,7 +224,7 @@ impl FriendService {
             ));
         }
 
-        if request.recipient_id != actor.user_id {
+        if request.recipient.id != actor.user_id {
             return Err(anyhow::anyhow!(
                 "You are not allowed to reject this friend request"
             ));
@@ -226,7 +252,7 @@ impl FriendService {
             ));
         }
 
-        if request.requestor_id != actor.user_id {
+        if request.requestor.id != actor.user_id {
             return Err(anyhow::anyhow!(
                 "You are not allowed to cancel this friend request"
             ));
