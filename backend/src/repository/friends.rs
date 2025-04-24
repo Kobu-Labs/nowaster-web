@@ -37,24 +37,30 @@ impl FriendsRepository {
         id: Uuid,
         actor: ClerkUser,
     ) -> Result<ReadFriendRequestDto> {
-        let result = sqlx::query_as!(
-            ReadFriendRequestDto,
+        let result = sqlx::query(
             r#"
                 SELECT 
-                    id, 
-                    requestor_id,
-                    recipient_id,
-                    created_at,
-                    introduction_message, 
-                    status as "status: FriendRequestStatus"
-                FROM friend_request
-                WHERE id = $1 AND (recipient_id = $2 OR requestor_id = $2)
+                    fr.id, 
+                    fr.created_at,
+                    fr.introduction_message, 
+                    fr.status as "status: FriendRequestStatus",
+
+                    u1.displayname AS requestor_username,
+                    u1.id AS requestor_id,
+                    u2.displayname AS recipient_username,
+                    u2.id AS recipient_id
+                FROM friend_request fr
+                JOIN "user" u1 ON u1.id = requestor_id
+                JOIN "user" u2 ON u2.id = recipient_id
+                WHERE fr.id = $1 AND (fr.recipient_id = $2 OR fr.requestor_id = $2)
             "#,
-            id,
-            actor.user_id
         )
+        .bind(id)
+        .bind(actor.user_id)
         .fetch_one(self.db.get_pool())
         .await?;
+
+        let result = ReadFriendRequestDto::from_row(&result)?;
 
         Ok(result)
     }
@@ -64,30 +70,46 @@ impl FriendsRepository {
         dto: UpdateFriendRequestDto,
     ) -> Result<ReadFriendRequestDto> {
         let mut tx = self.db.get_pool().begin().await?;
-        let request = sqlx::query_as!(
-            ReadFriendRequestDto,
+        let request = sqlx::query(
             r#"
-                UPDATE friend_request
-                SET status = ($1::text)::friend_request_status
-                WHERE id = $2 
-                RETURNING 
-                    id, 
-                    requestor_id, 
-                    recipient_id,
-                    created_at,
-                    introduction_message,
-                    status as "status: FriendRequestStatus"
+                WTHN updated AS (
+                    UPDATE friend_request
+                    SET status = ($1::text)::friend_request_status
+                    WHERE id = $2 
+                    RETURNING 
+                        id, 
+                        requestor_id, 
+                        recipient_id,
+                        created_at,
+                        introduction_message,
+                        status as "status: FriendRequestStatus"
+                    )
+                SELECT
+                    u.id, 
+                    u.created_at,
+                    u.introduction_message, 
+                    u.status as "status: FriendRequestStatus",
+
+                    u1.displayname AS requestor_username,
+                    u1.id AS requestor_id,
+                    u2.displayname AS recipient_username,
+                    u2.id AS recipient_id
+                FROM updated u
+                JOIN "user" u1 ON u1.id = u.requestor_id
+                JOIN "user" u2 ON u2.id = u.recipient_id
             "#,
-            dto.status as FriendRequestStatus,
-            dto.id,
         )
+        .bind(dto.status as FriendRequestStatus)
+        .bind(dto.id)
         .fetch_one(tx.as_mut())
         .await?;
 
+        let request = ReadFriendRequestDto::from_row(&request)?;
+
         if request.status == FriendRequestStatus::Accepted {
             self.create_friend_relationship(
-                request.requestor_id.clone(),
-                request.recipient_id.clone(),
+                request.requestor.id.clone(),
+                request.recipient.id.clone(),
                 tx.as_mut(),
             )
             .await?;
@@ -95,14 +117,7 @@ impl FriendsRepository {
 
         tx.commit().await?;
 
-        Ok(ReadFriendRequestDto {
-            id: request.id,
-            status: request.status,
-            requestor_id: request.requestor_id,
-            recipient_id: request.recipient_id,
-            created_at: request.created_at,
-            introduction_message: request.introduction_message,
-        })
+        Ok(request)
     }
 
     async fn create_friend_relationship(
@@ -119,15 +134,15 @@ impl FriendsRepository {
                     RETURNING id, friend_1_id , friend_2_id , created_at
                 )
                 SELECT 
-                    inserted.id,
-                    inserted.friend_1_id AS friend1_id,
-                    inserted.friend_2_id AS friend2_id,
-                    inserted.created_at,
+                    i.id,
+                    i.friend_1_id AS friend1_id,
+                    i.friend_2_id AS friend2_id,
+                    i.created_at,
                     u1.displayname AS friend1_username,
                     u2.displayname AS friend2_username
-                FROM inserted
-                LEFT JOIN "user" u1 ON u1.id = inserted.friend_1_id
-                LEFT JOIN "user" u2 ON u2.id = inserted.friend_2_id
+                FROM inserted i
+                LEFT JOIN "user" u1 ON u1.id = i.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = i.friend_2_id
             "#,
         )
         .bind(requestor_id)
@@ -182,15 +197,15 @@ impl FriendsRepository {
                     RETURNING id, friend_1_id, friend_2_id, created_at
                 )
                 SELECT 
-                    deleted.id,
-                    deleted.friend_1_id AS friend1_id,
-                    deleted.friend_2_id AS friend2_id,
-                    deleted.created_at,
+                    d.id,
+                    d.friend_1_id AS friend1_id,
+                    d.friend_2_id AS friend2_id,
+                    d.created_at,
                     u1.displayname AS friend1_username,
                     u2.displayname AS friend2_username
-                FROM deleted
-                LEFT JOIN "user" u1 ON u1.id = deleted.friend_1_id
-                LEFT JOIN "user" u2 ON u2.id = deleted.friend_2_id
+                FROM deleted d
+                LEFT JOIN "user" u1 ON u1.id = d.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = d.friend_2_id
             "#,
         )
         .bind(dto.friendship_id)
@@ -224,25 +239,41 @@ impl FriendsRepository {
             return Err(anyhow::anyhow!("Friend request already exists"));
         }
 
-        let result = sqlx::query_as!(
-            ReadFriendRequestDto,
+        let result = sqlx::query(
             r#"
-                INSERT INTO friend_request (requestor_id, recipient_id, introduction_message)
-                VALUES ($1, $2, $3)
-                RETURNING
-                    id,
-                    requestor_id,
-                    recipient_id,
-                    created_at,
-                    introduction_message,
-                    status as "status: FriendRequestStatus"
+                WITH inserted AS (
+                    INSERT INTO friend_request (requestor_id, recipient_id, introduction_message)
+                    VALUES ($1, $2, $3)
+                    RETURNING
+                        id,
+                        requestor_id,
+                        recipient_id,
+                        created_at,
+                        introduction_message,
+                        status as "status: FriendRequestStatus"
+                )
+                SELECT 
+                    i.id, 
+                    i.created_at,
+                    i.introduction_message, 
+                    i.status as "status: FriendRequestStatus",
+
+                    u1.displayname AS requestor_username,
+                    u1.id AS requestor_id,
+                    u2.displayname AS recipient_username,
+                    u2.id AS recipient_id
+                FROM inserted i
+                JOIN "user" u1 ON u1.id = i.requestor_id
+                JOIN "user" u2 ON u2.id = i.recipient_id
             "#,
-            actor.user_id,
-            data.recipient_id,
-            data.introduction_message
         )
+        .bind(actor.user_id)
+        .bind(data.recipient_id)
+        .bind(data.introduction_message)
         .fetch_one(self.db.get_pool())
         .await?;
+
+        let result = ReadFriendRequestDto::from_row(&result)?;
 
         Ok(result)
     }
@@ -252,24 +283,35 @@ impl FriendsRepository {
         data: ReadFriendRequestsDto,
         actor: ClerkUser,
     ) -> Result<Vec<ReadFriendRequestDto>> {
-        let result = sqlx::query_as!(
-            ReadFriendRequestDto,
+        let result = sqlx::query(
             r#"
                 SELECT
-                    id,
-                    requestor_id, 
-                    recipient_id, 
-                    created_at, 
-                    introduction_message, 
-                    status as "status: FriendRequestStatus"
-                FROM friend_request
-                WHERE (recipient_id = $1 AND $2 = 'incoming') or (requestor_id = $1 AND $2 = 'outgoing') AND status = 'pending'
+                    fr.id, 
+                    fr.created_at,
+                    fr.introduction_message, 
+                    fr.status as "status: FriendRequestStatus",
+
+                    u1.displayname AS requestor_username,
+                    u1.id AS requestor_id,
+                    u2.displayname AS recipient_username,
+                    u2.id AS recipient_id
+                FROM friend_request fr
+                JOIN "user" u1 ON u1.id = requestor_id
+                JOIN "user" u2 ON u2.id = recipient_id
+                WHERE 
+                    ((fr.recipient_id = $1 AND $2 = 'incoming') OR (fr.requestor_id = $1 AND $2 = 'outgoing'))
+                    AND fr.status = 'pending'
             "#,
-            actor.user_id,
-            data.direction.to_string(),
         )
+            .bind(actor.user_id)
+            .bind(data.direction.to_string())
         .fetch_all(self.db.get_pool())
         .await?;
+
+        let result = result
+            .into_iter()
+            .map(|row| Ok(ReadFriendRequestDto::from_row(&row)?))
+            .collect::<Result<Vec<ReadFriendRequestDto>>>()?;
 
         Ok(result)
     }
