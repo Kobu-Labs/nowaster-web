@@ -22,7 +22,7 @@ pub struct FriendsRepository {
 
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct UpdateFriendRequestDto {
-    pub id: Uuid,
+    pub request_id: Uuid,
     pub status: FriendRequestStatus,
 }
 
@@ -100,7 +100,7 @@ impl FriendsRepository {
             "#,
         )
         .bind(dto.status)
-        .bind(dto.id)
+        .bind(dto.request_id)
         .fetch_one(tx.as_mut())
         .await?;
 

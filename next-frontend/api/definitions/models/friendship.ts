@@ -23,7 +23,7 @@ export const FriendRequestSchema = z.object({
   requestor: UserSchema,
   recipient: UserSchema,
   created_at: z.coerce.date(),
-  introduction_message: z.string().optional(),
+  introduction_message: z.string().nullable(),
 });
 
 export type Friendship = z.infer<typeof FriendshipSchema>;
