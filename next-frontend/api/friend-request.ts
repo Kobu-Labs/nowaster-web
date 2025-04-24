@@ -11,7 +11,7 @@ const BASE_URL = "/friends/request";
 export const update = async (
   params: FriendRequestRequest["update"],
 ): Promise<Result<FriendRequestResponse["update"]>> => {
-  const { data } = await baseApi.patch(BASE_URL, { params: { ...params } });
+  const { data } = await baseApi.patch(BASE_URL, params);
   return await handleResponse(data, FriendRequestResponseSchema.update);
 };
 
