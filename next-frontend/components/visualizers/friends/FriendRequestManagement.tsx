@@ -18,8 +18,10 @@ import { Check, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FriendRequestApi } from "@/api";
 import { AddFriend } from "@/components/visualizers/friends/AddFriend";
+import { formatDistanceToNow } from "date-fns";
+import { RelativeDate } from "@/components/ui-providers/RelativeDate";
 
-export default function FriendRequests() {
+export const FriendRequests = () => {
   const incomingRequests = useQuery({
     queryKey: ["friends", "requests", "incoming"],
     queryFn: async () => {
@@ -122,7 +124,12 @@ export default function FriendRequests() {
                           .join("")}
                       </AvatarFallback>
                     </Avatar>
-                    <p className="font-medium">{request.requestor.username}</p>
+                    <div>
+                      <p className="font-medium">
+                        {request.requestor.username}
+                      </p>
+                      <RelativeDate date={request.created_at} />
+                    </div>
                     {request.introduction_message && (
                       <>
                         <div className="grow"></div>
@@ -191,7 +198,16 @@ export default function FriendRequests() {
                           .join("")}
                       </AvatarFallback>
                     </Avatar>
-                    <p className="font-medium">{request.recipient.username}</p>
+                    <div>
+                      <p className="font-medium">
+                        {request.requestor.username}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(request.created_at, {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
                     {request.introduction_message && (
                       <>
                         <div className="grow"></div>
@@ -223,4 +239,4 @@ export default function FriendRequests() {
       </TabsContent>
     </Tabs>
   );
-}
+};

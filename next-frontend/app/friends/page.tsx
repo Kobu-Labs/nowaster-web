@@ -4,8 +4,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/shadcn/tabs";
-import FriendsList from "@/components/visualizers/friends/FriendList";
-import FriendRequests from "@/components/visualizers/friends/FriendRequest";
+import { FriendsList } from "@/components/visualizers/friends/FriendList";
+import { FriendRequests } from "@/components/visualizers/friends/FriendRequestManagement";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
