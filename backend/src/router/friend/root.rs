@@ -10,7 +10,7 @@ use crate::{
     service::friend_service::{
         AcceptFriendRequestDto, CancelFriendRequestDto, CreateFriendRequestDto,
         FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto, ReadFriendRequestsDto,
-        ReadFriendshipAsActorDto, ReadFriendshipDto, RejectFriendRequestDto, RemoveFriendDto,
+        ReadFriendshipAsActorDto, RejectFriendRequestDto, RemoveFriendDto,
     },
 };
 
