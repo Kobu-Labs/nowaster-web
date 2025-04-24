@@ -21,6 +21,9 @@ export const AddFriend = () => {
 
   const sendRequest = useMutation({
     mutationFn: async () => {
+      if (!username) {
+        throw new Error("Username is required");
+      }
       const data = await FriendRequestApi.create({
         recipient_name: username,
         introduction_message: emptyStringToUndefined(introductionMessage, {
