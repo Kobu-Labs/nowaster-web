@@ -16,6 +16,6 @@ export const read = async (): Promise<Result<FriendResponse["read"]>> => {
 export const remove = async (
   params: FriendRequest["remove"],
 ): Promise<Result<FriendResponse["remove"]>> => {
-  const { data } = await baseApi.delete(BASE_URL, { params: { ...params } });
+  const { data } = await baseApi.delete(BASE_URL, { data: { ...params } });
   return await handleResponse(data, FriendResponseSchema.remove);
 };
