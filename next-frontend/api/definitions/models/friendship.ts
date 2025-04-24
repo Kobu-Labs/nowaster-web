@@ -3,8 +3,8 @@ import { z } from "zod";
 
 export const FriendshipSchema = z.object({
   id: z.string().uuid(),
-  friend1: UserSchema,
-  friend2: UserSchema,
+  friend1: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
+  friend2: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
   created_at: z.coerce.date(),
 });
 

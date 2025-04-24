@@ -98,7 +98,7 @@ export const FriendsList = () => {
                     <div className="relative">
                       <Avatar>
                         <AvatarImage
-                          src={"/placeholder.svg"}
+                          src={friendship.friend.avatar_url ?? undefined}
                           alt={friendship.friend.username}
                         />
                         <AvatarFallback>

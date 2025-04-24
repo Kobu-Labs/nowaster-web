@@ -35,6 +35,7 @@ use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 #[derive(Clone)]
 pub struct AppState {
+    pub clerk: Clerk,
     pub session_service: SessionService,
     pub tag_service: TagService,
     pub category_service: CategoryService,
@@ -60,6 +61,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let friend_service = FriendService::new(friend_repo);
 
     let state = AppState {
+        clerk: clerk.clone(),
         friend_service,
         session_service,
         tag_service,
