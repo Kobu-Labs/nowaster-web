@@ -75,19 +75,19 @@ const AxiosInterceptorWrapper = ({ children }: RootLayoutProps) => {
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <div className="relative flex min-h-screen flex-col">
-            <SiteHeader />
-            <main className="flex grow">
-              {ready ? (
-                children
-              ) : (
-                <Skeleton className="flex items-center justify-center  w-full grow h-screen m-20">
-                  <LoaderCircle
-                    strokeWidth={1}
-                    className="h-1/2 w-1/2 animate-spin"
-                  />
-                </Skeleton>
-              )}
-            </main>
+            {ready ? (
+              <>
+                <SiteHeader />
+                <main className="flex grow">{children}</main>
+              </>
+            ) : (
+              <Skeleton className="flex items-center justify-center  w-full grow h-screen m-20">
+                <LoaderCircle
+                  strokeWidth={1}
+                  className="h-1/2 w-1/2 animate-spin"
+                />
+              </Skeleton>
+            )}
             <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
           </div>
