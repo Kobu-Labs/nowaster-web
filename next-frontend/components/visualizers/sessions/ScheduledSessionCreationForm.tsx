@@ -150,7 +150,7 @@ export const ScheduledSessionCreationForm: FC = () => {
               defaultValue={null}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Insert your description"
