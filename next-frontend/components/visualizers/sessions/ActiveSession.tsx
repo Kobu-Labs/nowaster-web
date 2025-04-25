@@ -1,10 +1,14 @@
 import { FC } from "react";
 
-import { useActiveSession } from "@/components/hooks/useActiveSessions";
+import { useActiveSessions } from "@/components/hooks/useActiveSessions";
 import { ActiveSessionUiProvider } from "@/components/ui-providers/ActiveSessionUiProvider";
 
 export const ActiveSession: FC = () => {
-  const sessions = useActiveSession();
+  const sessions = useActiveSessions();
 
-  return <ActiveSessionUiProvider session={sessions.at(0) ?? null} />;
+  if (!sessions.isSuccess) {
+    return null;
+  }
+
+  return <ActiveSessionUiProvider session={sessions.data.at(0) ?? null} />;
 };
