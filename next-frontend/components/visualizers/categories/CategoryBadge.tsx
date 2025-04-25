@@ -10,7 +10,7 @@ export const CategoryBadge = (props: { color: string; name: string }) => {
         "border-2 h-min border-[var(--category-color)] text-[var(--category-color)] hover:scale-110 hover:transition ",
       )}
     >
-      {props.name}test
+      {props.name}
     </Badge>
   );
 };
