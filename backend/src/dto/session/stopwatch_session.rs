@@ -1,5 +1,6 @@
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
@@ -24,6 +25,7 @@ pub struct CreateStopwatchSessionDto {
 
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct ReadStopwatchSessionDto {
+    pub id: Uuid,
     pub category: Option<ReadCategoryDto>,
     pub session_type: SessionType,
     pub tags: Option<Vec<ReadTagDto>>,

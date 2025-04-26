@@ -62,6 +62,7 @@ pub struct StopwatchSession {
 impl From<StopwatchSession> for ReadStopwatchSessionDto {
     fn from(session: StopwatchSession) -> Self {
         Self {
+            id: session.id,
             session_type: SessionType::StopwatchSession,
             category: session.category.map(ReadCategoryDto::from),
             tags: session.tags.map(|tags| {
