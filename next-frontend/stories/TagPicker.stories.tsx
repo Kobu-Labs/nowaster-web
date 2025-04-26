@@ -11,11 +11,11 @@ const meta = {
 } satisfies Meta<typeof SimpleTagPicker>;
 
 export default meta;
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 export const SimpleTagPickerBase: Story = {
   args: {
-    onSelectedTagsChanged: (tag) => console.log(tag),
+    onNewTagsSelected: (tag) => console.log(tag),
   },
 
   render: (props) => {
@@ -24,9 +24,7 @@ export const SimpleTagPickerBase: Story = {
     return (
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
-          <SimpleTagPicker
-            onSelectedTagsChanged={props.onSelectedTagsChanged}
-          />
+          <SimpleTagPicker onNewTagsSelected={props.onNewTagsSelected} />
         </RecoilRoot>
       </QueryClientProvider>
     );
