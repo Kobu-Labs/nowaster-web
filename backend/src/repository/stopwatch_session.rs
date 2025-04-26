@@ -160,22 +160,22 @@ impl StopwatchSessionRepository {
                 s.description,
                 s.type as session_type,
 
-                s.category_id,
-                c.name as category_name,
-                c.color as category_color,
+                s.category_id as "category_id?",
+                c.name as "category_name?",
+                c.color as "category_color?",
 
-                t.id as "tag_id",
-                t.label as "tag_label",
-                t.color as "tag_color"
+                t.id as "tag_id?",
+                t.label as "tag_label?",
+                t.color as "tag_color?"
             FROM stopwatch_session s
-            JOIN category c
+            INNER JOIN "user" u
+                on u.id = s.user_id
+            LEFT JOIN category c
                 on c.id = s.category_id
             LEFT JOIN tag_to_stopwatch_session tts
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
-            LEFT JOIN "user" u
-                on u.id = s.user_id
             WHERE 
                 s.user_id = $1"#,
             actor.user_id
