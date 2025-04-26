@@ -14,16 +14,6 @@ pub struct ReadTagDto {
     pub color: String,
 }
 
-impl ReadTagDto {
-    pub fn from(entity: Tag) -> ReadTagDto {
-        Self {
-            id: entity.id,
-            label: entity.label,
-            color: entity.color,
-        }
-    }
-}
-
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct ReadTagDetailsDto {
     pub id: Uuid,

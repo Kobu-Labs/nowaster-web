@@ -1,3 +1,12 @@
+use crate::{
+    dto::{
+        category::read_category::ReadCategoryDto,
+        session::stopwatch_session::ReadStopwatchSessionDto, tag::read_tag::ReadTagDto,
+        user::read_user::ReadUserDto,
+    },
+    service::friend_service::ReadUserAvatarDto,
+};
+
 use super::{category::Category, tag::Tag, user::User};
 use chrono::{DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
@@ -48,6 +57,23 @@ pub struct StopwatchSession {
     pub tags: Option<Vec<Tag>>,
     pub user: User,
 
-    pub start_time: DateTime<Utc>,
+    pub start_time: DateTime<Local>,
     pub description: Option<String>,
+}
+
+impl From<StopwatchSession> for ReadStopwatchSessionDto {
+    fn from(session: StopwatchSession) -> Self {
+        let res = Self {
+            category: session.category.map(ReadCategoryDto::from),
+            tags: session.tags.map(|tags| {
+                tags.iter()
+                    .map(|tag| ReadTagDto::from(tag.clone()))
+                    .collect()
+            }),
+            description: session.description,
+            start_time: session.start_time,
+            user: ReadUserAvatarDto::from(session.user),
+        };
+        res
+    }
 }

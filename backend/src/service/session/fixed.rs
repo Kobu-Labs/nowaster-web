@@ -1,35 +1,46 @@
 use anyhow::Result;
 use chrono::DateTime;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
     dto::session::{
         filter_session::{DateFilter, FilterSessionDto},
         fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto},
+        stopwatch_session::ReadStopwatchSessionDto,
     },
-    repository::fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+    repository::{
+        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+        stopwatch_session::StopwatchSessionRepository,
+    },
     router::clerk::ClerkUser,
+    service::category_service::CategoryService,
 };
 
-use super::{category_service::CategoryService, tag_service::TagService};
-
 #[derive(Clone)]
-pub struct SessionService {
+pub struct FixedSessionService {
     fixed_repo: FixedSessionRepository,
     category_service: CategoryService,
-    tag_service: TagService,
+    stopwatch_repo: StopwatchSessionRepository,
 }
 
-impl SessionService {
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ActiveSession {
+    FixedSession(ReadFixedSessionDto),
+    StopwatchSession(ReadStopwatchSessionDto),
+}
+
+impl FixedSessionService {
     pub fn new(
         repo: FixedSessionRepository,
         cat_serv: CategoryService,
-        tag_serv: TagService,
+        stopwatch_repo: StopwatchSessionRepository,
     ) -> Self {
         Self {
             fixed_repo: repo,
             category_service: cat_serv,
-            tag_service: tag_serv,
+            stopwatch_repo,
         }
     }
 
@@ -43,7 +54,6 @@ impl SessionService {
             .upsert_category(dto.category.clone(), actor.clone())
             .await?;
 
-        // TODO: this will be pulled from auth headers
         let res = self
             .fixed_repo
             .create(
@@ -71,7 +81,7 @@ impl SessionService {
         Ok(())
     }
 
-    pub async fn get_active_sessions(&self, actor: ClerkUser) -> Result<Vec<ReadFixedSessionDto>> {
+    pub async fn get_active_sessions(&self, actor: ClerkUser) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {
             from_end_time: Some(DateFilter {
@@ -84,10 +94,24 @@ impl SessionService {
             ..Default::default()
         };
 
-        let res = self
+        let fixed_sessions = self
             .fixed_repo
-            .filter_sessions(active_session_filter, actor)
+            .filter_sessions(active_session_filter, actor.clone())
             .await?;
-        Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
+
+        let stopwatch_sessions = self.stopwatch_repo.read_stopwatch(actor.clone()).await?;
+
+        let mut all_sessions: Vec<ActiveSession> = fixed_sessions
+            .into_iter()
+            .map(|va| ActiveSession::FixedSession(ReadFixedSessionDto::from(va)))
+            .collect();
+
+        all_sessions.extend(
+            stopwatch_sessions
+                .into_iter()
+                .map(|va| ActiveSession::StopwatchSession(ReadStopwatchSessionDto::from(va))),
+        );
+
+        Ok(all_sessions)
     }
 }
