@@ -61,7 +61,6 @@ impl StopwatchSessionRepository {
 
             let entry = grouped_tags.entry(session.id).or_insert(StopwatchSession {
                 id: session.id,
-                session_type: SessionType::StopwatchSession,
                 user: User {
                     id: session.user_id.clone(),
                     username: session.user_name.clone(),

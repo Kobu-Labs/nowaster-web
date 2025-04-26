@@ -12,11 +12,7 @@ use crate::{
         filter_session::{FilterSessionDto, Mode},
         fixed_session::CreateFixedSessionDto,
     },
-    entity::{
-        category::Category,
-        session::{FixedSession, SessionType},
-        tag::Tag,
-    },
+    entity::{category::Category, session::FixedSession, tag::Tag},
     router::clerk::ClerkUser,
 };
 
@@ -98,7 +94,6 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
             let entry = grouped_tags.entry(session.id).or_insert(FixedSession {
                 id: session.id,
-                session_type: SessionType::FixedSession,
                 user_id: session.user_id.clone(),
                 category: Category {
                     id: session.category_id,
