@@ -34,3 +34,13 @@ pub struct ReadStopwatchSessionDto {
     pub start_time: DateTime<Local>,
     pub user: ReadUserAvatarDto,
 }
+
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct UpdateStopwatchSessionDto {
+    pub id: Uuid,
+    pub category_id: Option<Uuid>,
+    pub tag_ids: Option<Vec<Uuid>>,
+    pub description: Option<String>,
+    #[serde(rename = "startTime")]
+    pub start_time: Option<DateTime<Local>>,
+}
