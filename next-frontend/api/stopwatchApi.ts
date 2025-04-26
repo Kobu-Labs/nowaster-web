@@ -18,7 +18,7 @@ export const create = async (
 export const remove = async (
   params: StopwatchSessionRequest["remove"],
 ): Promise<Result<StopwatchSessionResponse["remove"]>> => {
-  const { data } = await baseApi.delete(BASE_URL, { data: params });
+  const { data } = await baseApi.delete(BASE_URL + "/" + params.id);
   return await handleResponse(data, StopwatchSessionResponseSchema.remove);
 };
 
