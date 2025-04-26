@@ -45,6 +45,7 @@ export const Weekly: Story = {
     },
     data: [
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -58,6 +59,7 @@ export const Weekly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -71,6 +73,7 @@ export const Weekly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -84,6 +87,7 @@ export const Weekly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -97,6 +101,7 @@ export const Weekly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -110,6 +115,7 @@ export const Weekly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -138,6 +144,7 @@ export const Monthly: Story = {
     groupingOpts: { granularity: "days-in-month" },
     data: [
       {
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -152,6 +159,7 @@ export const Monthly: Story = {
       },
       {
         startTime: new Date(2023, 5, 29, 19, 0),
+        session_type: "fixed",
         tags: createMockTags([
           "school",
           "pb138",
@@ -164,6 +172,7 @@ export const Monthly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 27, 19, 0),
         tags: createMockTags([
           "school",
@@ -177,6 +186,7 @@ export const Monthly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 30, 19, 0),
         tags: createMockTags([
           "school",
@@ -190,6 +200,7 @@ export const Monthly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 4, 19, 0),
         tags: createMockTags([
           "school",
@@ -203,6 +214,7 @@ export const Monthly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 27, 19, 0),
         tags: createMockTags([
           "school",
@@ -233,6 +245,7 @@ export const Yearly: Story = {
     },
     data: [
       {
+        session_type: "fixed",
         startTime: new Date(2023, 6, 28, 19, 0),
         tags: createMockTags([
           "school",
@@ -246,6 +259,7 @@ export const Yearly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 29, 19, 0),
         tags: createMockTags([
           "school",
@@ -259,6 +273,7 @@ export const Yearly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 27, 19, 0),
         tags: createMockTags([
           "school",
@@ -272,6 +287,7 @@ export const Yearly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 5, 30, 19, 0),
         tags: createMockTags([
           "school",
@@ -285,6 +301,7 @@ export const Yearly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 8, 4, 19, 0),
         tags: createMockTags([
           "school",
@@ -298,6 +315,7 @@ export const Yearly: Story = {
         description: "Working on the project",
       },
       {
+        session_type: "fixed",
         startTime: new Date(2023, 1, 27, 19, 0),
         tags: createMockTags([
           "school",
