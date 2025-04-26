@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import {
   Form,
   FormControl,
@@ -61,8 +61,11 @@ import { useFinishStopwatchSession } from "@/components/hooks/session/stopwatch/
 import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
 import React from "react";
 import { StopwatchApi } from "@/api";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { DataTable } from "@/components/ui-providers/DataTable";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 
 const formatTimeDifference = (seconds: number) => {
   const diffInSeconds = seconds;
@@ -184,6 +187,26 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
 
   const finishSession = useFinishStopwatchSession();
   const formRef = useRef<FormHandle>(null);
+  const filter = useMemo(
+    () => ({
+      endTimeTo: { value: new Date() },
+      endTimeFrom: { value: subHours(new Date(), 48) },
+    }),
+    [],
+  );
+  const pastSessionQuery = useQuery({
+    ...queryKeys.sessions.filtered({
+      settings: {},
+      data: filter,
+    }),
+    select: (data) => {
+      if (data.isErr) {
+        throw new Error(data.error.message);
+      }
+      return data.value.slice(0, 20);
+    },
+  });
+
   const onInteractOutside = async () => {
     const isValid = await formRef.current?.validate();
     if (!isValid) {
@@ -251,7 +274,10 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
               )}
             />
           )}
-          <DialogContent onInteractOutside={onInteractOutside}>
+          <DialogContent
+            onInteractOutside={onInteractOutside}
+            className="max-w-[60%] w-full"
+          >
             <DialogHeader>
               <DialogTitle className="m-1">Edit session data</DialogTitle>
               <Separator className="w-full" />
@@ -261,6 +287,18 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
                   session={session}
                   hideBorder
                 />
+                <Separator className="w-full" />
+                <h2 className="text-bold text-xl my-4">
+                  Some of the last sessions you had in the past 48 hours!
+                </h2>
+                <ScrollArea className="h-64" type="always">
+                  <DataTable
+                    loading={pastSessionQuery.isLoading}
+                    columns={BaseSessionTableColumns}
+                    data={pastSessionQuery.data ?? []}
+                  />
+                  <ScrollBar />
+                </ScrollArea>
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
