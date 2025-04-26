@@ -9,7 +9,7 @@ import {
 } from "@/api/definitions";
 import { z } from "zod";
 
-const BASE_URL = "/session";
+const BASE_URL = "/session/fixed";
 
 export const create = async (
   params: ScheduledSessionRequest["create"],
