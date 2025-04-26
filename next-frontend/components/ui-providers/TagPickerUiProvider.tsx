@@ -22,9 +22,9 @@ import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 
 export type TagPickerUiProviderProps = {
   availableTags: TagDetails[];
-  selectedTags: TagDetails[];
+  selectedTags?: TagDetails[];
   forCategory?: Category;
-  onSelectTag: (tag: TagDetails) => void;
+  onNewTagsSelected?: (tags: TagDetails[]) => void;
   tagsDisplayStrategy?: (
     selectedTags: TagDetails[],
     availableTags: TagDetails[],
@@ -61,16 +61,33 @@ const orderCategories = (
 export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  // this is used if the user is creating a new tag
   const [newTagColor, setNewTagColor] = useState(randomColor());
+  const [selectedTagsInternal, setSelectedTagsInternal] = useState<
+    TagDetails[]
+  >([]);
+
+  const tagsValue = props.selectedTags ?? selectedTagsInternal;
+  const isControlled = props.selectedTags !== undefined;
 
   // TODO move this higher
   const { mutate: createTag } = useCreateTag({
     onSuccess: (tag) => {
-      props.onSelectTag(tag);
+      handleTagSelect(tag);
       setNewTagColor(randomColor());
     },
   });
+
+  const handleTagSelect = (tag: TagDetails) => {
+    const newTags = tagsValue.some((t) => t.id === tag.id)
+      ? tagsValue.filter((t) => t.id !== tag.id)
+      : [tag, ...tagsValue];
+    if (!isControlled) {
+      setSelectedTagsInternal(newTags);
+    }
+    if (props.onNewTagsSelected) {
+      props.onNewTagsSelected(newTags);
+    }
+  };
 
   const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy;
 
@@ -120,11 +137,11 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
           <ScrollArea className="flex  max-w-full overflow-hidden ">
             <div className="flex w-max max-w-full gap-1">
-              {props.selectedTags.length === 0
+              {tagsValue.length === 0
                 ? "Select Tags"
-                : props.selectedTags.map((tag) => (
-                  <TagBadge tag={tag} variant="auto" key={tag.id}/>
-                ))}
+                : tagsValue.map((tag) => (
+                    <TagBadge tag={tag} variant="auto" key={tag.id} />
+                  ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -138,43 +155,43 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-            <CommandGroup>
-              <CommandItem
-                className="flex"
-                onSelect={() =>
-                  createTag({
-                    color: newTagColor,
-                    label: searchTerm,
-                    allowedCategories: [],
-                  })
-                }
-              >
-                <p>Create</p>
-                <div className="grow"></div>
-                <TagBadge
-                  variant="manual"
-                  value={searchTerm}
-                  colors={newTagColor}
-                />
-              </CommandItem>
-            </CommandGroup>
-          )}
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() =>
+                    createTag({
+                      color: newTagColor,
+                      label: searchTerm,
+                      allowedCategories: [],
+                    })
+                  }
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <TagBadge
+                    variant="manual"
+                    value={searchTerm}
+                    colors={newTagColor}
+                  />
+                </CommandItem>
+              </CommandGroup>
+            )}
           <ScrollArea
             type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
           >
             {categoriesInOrder.map(([category, tags]) => (
               <CommandGroup heading={category} key={category}>
-                {tagsOrderStrategy(props.selectedTags, tags).map((tag) => (
+                {tagsOrderStrategy(tags, tags).map((tag) => (
                   <CommandItem
                     value={tag.label}
                     key={tag.id}
-                    onSelect={() => props.onSelectTag(tag)}
+                    onSelect={() => handleTagSelect(tag)}
                   >
                     <Check
                       className={cn(
                         "mr-2 size-4",
-                        props.selectedTags.some((t) => t.id === tag.id)
+                        tagsValue.some((t) => t.id === tag.id)
                           ? "opacity-100"
                           : "opacity-0",
                       )}
