@@ -12,6 +12,7 @@ import { DataTableColumnHeader } from "@/components/shadcn/column-header";
 import { useToast } from "@/components/shadcn/use-toast";
 import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { Button } from "@/components/shadcn/button";
 
 type DeleteSessionIconProps = {
   sessionId: string;
@@ -43,9 +44,13 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   const queryClient = useQueryClient();
 
   return (
-    <div onClick={() => deleteSession()} className="cursor-pointer">
-      <Trash2 />
-    </div>
+    <Button
+      onClick={() => deleteSession()}
+      className="group cursor-pointer p-0 m-0 aspect-square"
+      variant="ghost"
+    >
+      <Trash2 className="group-hover:text-red-500 group-hover:scale-110 group-hover:transition" />
+    </Button>
   );
 };
 
