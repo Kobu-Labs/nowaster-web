@@ -130,7 +130,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           </ScrollArea>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[200px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             onValueChange={setSearchTerm}
