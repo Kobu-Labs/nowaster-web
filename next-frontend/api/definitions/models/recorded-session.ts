@@ -5,9 +5,10 @@ import { z } from "zod";
 
 export const StopwatchSessionSchema = z.object({
   startTime: z.coerce.date(),
-  category: CategoryWithIdSchema.optional(),
-  description: z.string().optional(),
-  tags: z.array(TagWithIdSchema).optional(),
+  category: CategoryWithIdSchema.nullable(),
+  description: z.string().nullish(),
+  tags: z.array(TagWithIdSchema).nullable(),
+  session_type: z.literal("stopwatch"),
 });
 export const StopwatchSessionWithIdSchema = StopwatchSessionSchema.merge(HasID);
 
