@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import {
   Form,
   FormControl,
@@ -37,13 +37,12 @@ import { useActiveSessions } from "@/components/hooks/useActiveSessions";
 import { differenceInSeconds } from "date-fns";
 import {
   CategoryWithIdSchema,
-  ScheduledSessionWithId,
   StopwatchSessionWithId,
   TagWithIdSchema,
 } from "@/api/definitions";
 import { cn, formatTime } from "@/lib/utils";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, Play } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { StopwatchSessionRequest } from "@/api/definitions/requests/stopwatch-session";
@@ -59,8 +58,11 @@ import { z } from "zod";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Separator } from "@/components/shadcn/separator";
 import { useFinishStopwatchSession } from "@/components/hooks/session/stopwatch/useFinishStopwatchSession";
-
-type StartSessionProps = {};
+import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
+import React from "react";
+import { StopwatchApi } from "@/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 const formatTimeDifference = (seconds: number) => {
   const diffInSeconds = seconds;
@@ -74,6 +76,7 @@ const formatTimeDifference = (seconds: number) => {
     seconds2.toString().padStart(2, "0"),
   ].join(":");
 };
+
 const creationFormQuickOptions: QuickOption[] = [
   {
     label: "now",
@@ -101,20 +104,11 @@ const creationFormQuickOptions: QuickOption[] = [
   },
 ];
 
-export const SessionTimer: FC<StartSessionProps> = () => {
+export const SessionTimer: FC = () => {
   const activeSessions = useActiveSessions();
 
   if (!activeSessions.isSuccess) {
     return null;
-  }
-
-  const session = activeSessions.data.at(0);
-  if (!session) {
-    return <NoActiveSession />;
-  }
-
-  if (session.session_type === "stopwatch") {
-    return <StopwatchSessionActive session={session} />;
   }
 
   const stopwatchCandidate = activeSessions.data.find(
@@ -124,8 +118,7 @@ export const SessionTimer: FC<StartSessionProps> = () => {
   if (stopwatchCandidate) {
     return <StopwatchSessionActive session={stopwatchCandidate} />;
   }
-
-  return <FixedSessionActive session={session} />;
+  return <NoActiveSession />;
 };
 
 type TimerProps = {
@@ -142,17 +135,42 @@ const Timer: FC<TimerProps> = (props) => {
 };
 
 const NoActiveSession: FC = ({}) => {
-  return (
-    <div className="flex items-center justify-center">
-      <Timer durationInSeconds={0} />
-    </div>
-  );
-};
+  const createSession = useCreateStopwatchSession();
 
-const FixedSessionActive: FC<{ session: ScheduledSessionWithId }> = ({
-  session,
-}) => {
-  return <div></div>;
+  return (
+    <Card
+      className={cn(
+        "px-2 p-1 flex items-center justify-center gap-2",
+        createSession.isError && "border-red-400",
+      )}
+    >
+      <TooltipProvider delayDuration={50}>
+        <div className="flex items-center px-1 m-0 gap-3 rounded-md text-sm ">
+          <Timer
+            durationInSeconds={0}
+            formatingFunction={formatTimeDifference}
+          />
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              className="group p-1 m-0 aspect-square"
+              onClick={() => createSession.mutate({ startTime: new Date() })}
+              loading={createSession.isPending}
+            >
+              {!createSession.isPending && (
+                <Play className="group-hover:text-green-500" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="text-nowrap">
+            Start a session
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </Card>
+  );
 };
 
 const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
@@ -161,8 +179,29 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
   const [displayedTime, setDisplayedTime] = useState<number>(
     differenceInSeconds(new Date(), session.startTime),
   );
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const finishSession = useFinishStopwatchSession();
+  const formRef = useRef<FormHandle>(null);
+  const onInteractOutside = async () => {
+    const isValid = await formRef.current?.validate();
+    if (!isValid) {
+      return;
+    }
+    const formValues = formRef.current?.prepareData();
+    if (!formValues) {
+      return;
+    }
+
+    const result = await StopwatchApi.update(formValues);
+    if (result.isOk) {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.sessions.active._def,
+      });
+    }
+    setOpen(false);
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -180,11 +219,12 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
       )}
     >
       <TooltipProvider delayDuration={50}>
-        <Dialog modal={false}>
+        <Dialog modal={false} open={open} onOpenChange={setOpen}>
           <DialogTrigger className="p-1">
             <Tooltip>
               <TooltipTrigger>
                 <Button
+                  onClick={() => setOpen(true)}
                   variant="ghost"
                   className="flex items-center px-1 m-0 gap-2"
                 >
@@ -205,12 +245,23 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
               </TooltipContent>
             </Tooltip>
           </DialogTrigger>
-          <DialogContent>
+            {open && (
+              <div
+                className={cn(
+                  "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+                )}
+              />
+            )}
+          <DialogContent onInteractOutside={onInteractOutside}>
             <DialogHeader>
               <DialogTitle className="m-1">Edit session data</DialogTitle>
               <Separator className="w-full" />
               <DialogDescription>
-                <EditStopwatchSession session={session} hideBorder />
+                <EditStopwatchSession
+                  ref={formRef}
+                  session={session}
+                  hideBorder
+                />
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
@@ -246,150 +297,170 @@ const updatePrecursor = z.object({
   tags: z.array(TagWithIdSchema).nullish(),
 });
 
-const EditStopwatchSession: FC<{
+export type FormHandle = {
+  validate: () => Promise<boolean>;
+  prepareData: () => StopwatchSessionRequest["update"];
+};
+
+interface FormComponentProps {
+  onSubmit?: (values: z.infer<typeof updatePrecursor>) => void;
   session: StopwatchSessionWithId;
   hideBorder?: boolean;
-}> = ({ session, hideBorder }) => {
-  const form = useForm<z.infer<typeof updatePrecursor>>({
-    resolver: zodResolver(updatePrecursor),
-    defaultValues: {
-      id: session.id,
-      startTime: session.startTime,
-      category: session.category,
-      description: session.description,
-      tags: session.tags ?? [],
-    },
-  });
-  const updateSession = useUpdateSession("stopwatch");
+}
 
-  async function onSubmit(values: z.infer<typeof updatePrecursor>) {
-    if (values.startTime && isBefore(new Date(), values.startTime)) {
-      form.setError("startTime", {
-        message: "Start time must be in the past",
-      });
-      return;
+const EditStopwatchSession = React.forwardRef<FormHandle, FormComponentProps>(
+  ({ session, hideBorder }, ref) => {
+    const form = useForm<z.infer<typeof updatePrecursor>>({
+      resolver: zodResolver(updatePrecursor),
+      defaultValues: {
+        id: session.id,
+        startTime: session.startTime,
+        category: session.category,
+        description: session.description,
+        tags: session.tags ?? [],
+      },
+    });
+
+    // Expose the validate method to the parent
+    React.useImperativeHandle(ref, () => ({
+      validate: async () => await form.trigger(),
+      prepareData: () => {
+        const values = form.getValues();
+        const updateData: StopwatchSessionRequest["update"] = {
+          id: values.id,
+          startTime: values.startTime,
+          category_id: values.category?.id,
+          description: values.description,
+          tag_ids: values.tags?.map((tag) => tag.id),
+        };
+        return updateData;
+      },
+    }));
+    const updateSession = useUpdateSession("stopwatch");
+
+    async function onSubmit(values: z.infer<typeof updatePrecursor>) {
+      if (values.startTime && isBefore(new Date(), values.startTime)) {
+        form.setError("startTime", {
+          message: "Start time must be in the past",
+        });
+        return;
+      }
+
+      const updateData: StopwatchSessionRequest["update"] = {
+        id: values.id,
+        startTime: values.startTime,
+        category_id: values.category?.id,
+        description: values.description,
+        tag_ids: values.tags?.map((tag) => tag.id),
+      };
+
+      updateSession.mutateAsync(updateData);
     }
 
-    const updateData: StopwatchSessionRequest["update"] = {
-      id: values.id,
-      startTime: values.startTime,
-      category_id: values.category?.id,
-      description: values.description,
-      tag_ids: values.tags?.map((tag) => tag.id),
-    };
-
-    updateSession.mutateAsync(updateData);
-  }
-
-  return (
-    <Card className={cn(hideBorder && "border-0")}>
-      <CardContent className="mt-3">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <SingleCategoryPicker
-                      value={field.value ?? undefined}
-                      onSelectedCategoriesChanged={(category) => {
-                        if (category === undefined) {
-                          form.resetField("category");
-                        } else {
-                          field.onChange(category);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Insert your description"
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-center gap-4">
+    return (
+      <Card className={cn(hideBorder && "border-0")}>
+        <CardContent className="mt-3">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
-                name="startTime"
                 control={form.control}
-                render={({ field }) => {
-                  const value = form.watch("startTime");
-
-                  return (
-                    <FormItem className="flex flex-col gap-2">
-                      <FormLabel className="flex items-center gap-2">
-                        {`Start Time`}
-                        {value &&
-                          isAfter(new Date(), value) &&
-                          ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
-                      </FormLabel>
-                      <FormControl>
-                        <DateTimePicker
-                          quickOptions={creationFormQuickOptions}
-                          selected={value ?? undefined}
-                          onSelect={(val) => field.onChange(val)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
+                name="category"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <SingleCategoryPicker
+                        value={field.value ?? undefined}
+                        onSelectedCategoriesChanged={(category) => {
+                          if (category === undefined) {
+                            form.resetField("category");
+                          } else {
+                            field.onChange(category);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <FormField
-              name="tags"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="block">Tags</FormLabel>
-                  <FormControl>
-                    <SimpleTagPicker
-                      selectedTags={
-                        field.value?.map((t) => ({
-                          ...t,
-                          usages: 0,
-                          allowedCategories: [],
-                        })) ?? []
-                      }
-                      forCategory={form.watch("category") ?? undefined}
-                      disabled={form.getValues("category") === undefined}
-                      onNewTagsSelected={(tags) => field.onChange(tags)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Insert your description"
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="flex ">
-              <div className="grow"></div>
-              <Button type="submit" loading={updateSession.isPending}>
-                Update
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-};
+              <div className="flex items-center gap-4">
+                <FormField
+                  name="startTime"
+                  control={form.control}
+                  render={({ field }) => {
+                    const value = form.watch("startTime");
+
+                    return (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel className="flex items-center gap-2">
+                          {`Start Time`}
+                          {value &&
+                            isAfter(new Date(), value) &&
+                            ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
+                        </FormLabel>
+                        <FormControl>
+                          <DateTimePicker
+                            quickOptions={creationFormQuickOptions}
+                            selected={value ?? undefined}
+                            onSelect={(val) => field.onChange(val)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
+
+              <FormField
+                name="tags"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="block">Tags</FormLabel>
+                    <FormControl>
+                      <SimpleTagPicker
+                        selectedTags={
+                          field.value?.map((t) => ({
+                            ...t,
+                            usages: 0,
+                            allowedCategories: [],
+                          })) ?? []
+                        }
+                        forCategory={form.watch("category") ?? undefined}
+                        disabled={form.getValues("category") === undefined}
+                        onNewTagsSelected={(tags) => field.onChange(tags)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+EditStopwatchSession.displayName = "EditStopwatchSession";
