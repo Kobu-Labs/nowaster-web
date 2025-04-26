@@ -3,7 +3,7 @@ CREATE TABLE "stopwatch_session" (
     "category_id" uuid NOT NULL,
     "type" text NOT NULL,
     "start_time" timestamptz,
-    "description" text,
+    "description" text DEFAULT 'stopwatch',
     "created_at" timestamptz DEFAULT now(),
     "user_id" character varying,
     CONSTRAINT "stopwatch_session_pkey" PRIMARY KEY ("id")
