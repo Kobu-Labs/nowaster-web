@@ -6,13 +6,20 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    dto::session::stopwatch_session::{CreateStopwatchSessionDto, ReadStopwatchSessionDto},
+    dto::session::stopwatch_session::{
+        CreateStopwatchSessionDto, ReadStopwatchSessionDto, UpdateStopwatchSessionDto,
+    },
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 pub fn stopwatch_session_router() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_stopwatch_session_handler).post(create_handler))
+        .route(
+            "/",
+            get(get_stopwatch_session_handler)
+                .post(create_handler)
+                .patch(update_handler),
+        )
         .route("/{session_id}", delete(delete_handler))
 }
 
@@ -45,5 +52,18 @@ async fn delete_handler(
         .stopwatch_service
         .delete_stopwatch_session(session_id, actor)
         .await;
+    ApiResponse::from_result(res)
+}
+
+async fn update_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<UpdateStopwatchSessionDto>,
+) -> ApiResponse<ReadStopwatchSessionDto> {
+    let res = state
+        .stopwatch_service
+        .update_stopwatch_session(payload, actor)
+        .await;
+
     ApiResponse::from_result(res)
 }
