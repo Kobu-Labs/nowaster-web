@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM stopwatch_session s\n                WHERE s.id = $1 and s.user_id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9258fb659e7ad8439ad87ee90a57569657ac976bc8db3aa103d6d0065f24dd99"
+}
