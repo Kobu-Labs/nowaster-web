@@ -179,15 +179,11 @@ impl StopwatchSessionRepository {
                 s.user_id = $1"#,
             actor.user_id
         )
-        .fetch_optional(self.db_conn.get_pool())
+        .fetch_all(self.db_conn.get_pool())
         .await?;
 
-        if let Some(session) = sessions {
-            let result = self.convert(vec![session])?;
-            Ok(result.into_iter().next())
-        } else {
-            Ok(None)
-        }
+        let result = self.convert(sessions)?;
+        Ok(result.first().cloned())
     }
 
     pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
