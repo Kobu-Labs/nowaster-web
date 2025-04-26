@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   addHours,
   addMinutes,
+  differenceInMinutes,
   isBefore,
   isEqual,
   setMinutes,
@@ -18,7 +19,7 @@ import {
 import { ArrowBigRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { getFormattedTimeDifference } from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -72,8 +73,13 @@ const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
     return <span>--:--</span>;
   }
 
-  const result = getFormattedTimeDifference(props.from, props.to);
-  return <span>{result}</span>;
+  const duration = differenceInMinutes(props.to, props.from);
+  if (duration < 0) {
+    return <span>--:--</span>;
+  }
+
+  const formatted = formatTime(duration);
+  return <span>{formatted}</span>;
 };
 
 export const ScheduledSessionCreationForm: FC = () => {
