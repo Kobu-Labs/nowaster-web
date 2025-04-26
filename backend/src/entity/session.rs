@@ -6,9 +6,22 @@ use uuid::Uuid;
 #[derive(Clone, Serialize, Deserialize, Debug, sqlx::Type, PartialEq)]
 pub enum SessionType {
     #[serde(rename = "fixed")]
+    #[sqlx(rename = "fixed")]
     FixedSession,
+
     #[serde(rename = "stopwatch")]
+    #[sqlx(rename = "stopwatch")]
     StopwatchSession,
+}
+
+impl From<String> for SessionType {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "fixed" => SessionType::FixedSession,
+            "stopwatch" => SessionType::StopwatchSession,
+            _ => panic!("Invalid session type"),
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
