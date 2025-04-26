@@ -8,8 +8,8 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { NavItem } from "@/types/nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
-import { ActiveSession } from "@/components/visualizers/sessions/ActiveSession";
 import Image from "next/image";
+import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 
 interface MainNavProps {
   items?: readonly NavItem[];
@@ -55,7 +55,7 @@ export function MainNav({ items }: MainNavProps) {
         </nav>
       ) : null}
       <div className="grow"></div>
-      <ActiveSession />
+      <SessionTimer />
       <SignedOut>
         <SignInButton />
       </SignedOut>
