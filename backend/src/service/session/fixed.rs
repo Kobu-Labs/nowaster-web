@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     dto::session::{
         filter_session::{DateFilter, FilterSessionDto},
-        fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto},
+        fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
         stopwatch_session::ReadStopwatchSessionDto,
     },
     repository::{
@@ -113,5 +113,15 @@ impl FixedSessionService {
         );
 
         Ok(all_sessions)
+    }
+
+    pub async fn update_fixed_session(
+        &self,
+        dto: UpdateFixedSessionDto,
+        actor: ClerkUser,
+    ) -> Result<ReadFixedSessionDto> {
+        let res = self.fixed_repo.update_session(dto, actor).await?;
+
+        Ok(ReadFixedSessionDto::from(res))
     }
 }
