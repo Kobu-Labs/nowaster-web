@@ -40,7 +40,7 @@ export const getSessions = async (
 export const update = async (
   params: ScheduledSessionRequest["update"],
 ): Promise<Result<ScheduledSessionResponse["update"]>> => {
-  const { data } = await baseApi.put(BASE_URL, { ...params });
+  const { data } = await baseApi.patch(BASE_URL, params);
   return await handleResponse(data, ScheduledSessionResponseSchema.update);
 };
 
