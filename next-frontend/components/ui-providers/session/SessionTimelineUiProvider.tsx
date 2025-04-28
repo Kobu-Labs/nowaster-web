@@ -297,7 +297,7 @@ export function SessionTimelineUiProvider({
         {/* Timeline bar */}
         <HoverPercentageBar formatter={timeFormatter}>
           <div
-            className="h-full relative"
+            className="h-full relative cursor-crosshair"
             ref={timelineRef}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
