@@ -1,11 +1,11 @@
 import { Button, ButtonProps } from "@/components/shadcn/button";
-import { SignedOut } from "@clerk/nextjs";
+import { SignedOut, SignInButton as SignInButtonClerk } from "@clerk/nextjs";
 import { FC } from "react";
 
-export const SignInButton: FC<ButtonProps & {label?:string}> = (props) => {
+export const SignInButton: FC<ButtonProps & { label?: string }> = (props) => {
   return (
     <SignedOut>
-      <SignInButton>
+      <SignInButtonClerk>
         <Button
           variant={props.variant ?? "outline"}
           size={props.size ?? "sm"}
@@ -13,7 +13,7 @@ export const SignInButton: FC<ButtonProps & {label?:string}> = (props) => {
         >
           {props.label ?? "Start your journey now"}
         </Button>
-      </SignInButton>
+      </SignInButtonClerk>
     </SignedOut>
   );
 };
