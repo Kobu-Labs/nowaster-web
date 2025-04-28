@@ -11,7 +11,7 @@ import { useMemo } from "react";
 export default function IndexPage() {
   const filter = useMemo(
     () => ({
-      startDate: subHours(new Date(), 48),
+      startDate: subHours(new Date(), 24),
       endDate: new Date(),
     }),
     [],
