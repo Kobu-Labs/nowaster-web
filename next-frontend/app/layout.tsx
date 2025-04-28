@@ -3,8 +3,8 @@ import "@/styles/globals.css";
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "next-themes";
 import Head from "next/head";
+import { ThemeProvider } from "@/components/pages/theme-provider";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           )}
         >
           <main>
-            <ThemeProvider attribute="dark" defaultTheme="dark" enableSystem>
+            <ThemeProvider attribute="class" defaultTheme="dark" >
               {children}
             </ThemeProvider>
           </main>
