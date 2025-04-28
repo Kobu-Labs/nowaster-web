@@ -3,7 +3,7 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useDeleteSession = () => {
+export const useDeleteScheduledSession = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const mutation = useMutation({
