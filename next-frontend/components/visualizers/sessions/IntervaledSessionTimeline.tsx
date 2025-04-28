@@ -15,7 +15,7 @@ export const IntervaledSessionTimeline: FC<IntervaledSessionTimelineProps> = (
   props,
 ) => {
   const [startDate, setStartDate] = useState<Date>(
-    props.startDate ?? subHours(new Date(), 48),
+    props.startDate ?? subHours(new Date(), 24),
   );
   const [endDate, setEndDate] = useState<Date>(props.endDate ?? new Date());
 
