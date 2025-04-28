@@ -68,7 +68,7 @@ const creationFormQuickOptions: QuickOption[] = [
   },
 ];
 
-const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
+export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
   if (!props.from || !props.to) {
     return <span>--:--</span>;
   }
