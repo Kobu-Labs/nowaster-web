@@ -31,7 +31,7 @@ export function UnknownUserNavbar({ children }: { children: React.ReactNode }) {
               </Button>
             </SignedIn>
             <SignedOut>
-              <SignInButton>
+              <SignInButton forceRedirectUrl={"/home"}>
                 <Button variant="outline" size="sm">
                   Sign In
                 </Button>
