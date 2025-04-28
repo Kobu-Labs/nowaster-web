@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, FC, PropsWithChildren } from "react";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
   Tooltip,
@@ -15,33 +15,30 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/shadcn/dialog";
 import { Button } from "@/components/shadcn/button";
-import { Input } from "@/components/shadcn/input";
-import { Label } from "@/components/shadcn/label";
+import { cn } from "@/lib/utils";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
-import { cn, randomColor } from "@/lib/utils";
-import { v4 as uuidv4 } from "uuid";
+  format,
+  addHours,
+  differenceInMilliseconds,
+  addMilliseconds,
+} from "date-fns";
 import {
   CategoryWithIdSchema,
-  ScheduledSession,
   ScheduledSessionWithId,
   TagWithIdSchema,
 } from "@/api/definitions";
-import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { z } from "zod";
+import { SessionCard } from "@/components/visualizers/categories/SessionCard";
+import { EditScheduledSession } from "@/components/visualizers/sessions/EditScheduledSessionForm";
 
-interface ResponsiveTimelineProps {
+interface DateTimelineProps {
   activities: ScheduledSessionWithId[];
-  hourStep?: number; // Allow custom hour step
+  startDate: Date;
+  endDate: Date;
   onActivitiesChange?: (activities: ScheduledSessionWithId[]) => void;
+  markerStep?: number; // in hours
 }
 
 export const sessionPrecursor = z.object({
@@ -53,68 +50,75 @@ export const sessionPrecursor = z.object({
   session_type: z.literal("fixed"),
 });
 
+// add props with children
+type HoverPercentageBarProps = {
+  formatter: (percentage: number) => string;
+};
+const HoverPercentageBar: FC<PropsWithChildren<HoverPercentageBarProps>> = (
+  props,
+) => {
+  const [hoverX, setHoverX] = useState<number | null>(null);
+  const [percentage, setPercentage] = useState<number | null>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    setHoverX(x);
+    setPercentage(Math.min(100, Math.max(0, (x / rect.width) * 100)));
+  };
+
+  const handleMouseLeave = () => {
+    setHoverX(null);
+    setPercentage(null);
+  };
+
+  return (
+    <div
+      className="relative w-full h-full border rounded-2xl overflow-hidden"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {hoverX !== null && (
+        <>
+          <div
+            className="absolute top-0 bottom-0 w-0 border-2  border-dashed"
+            style={{ left: hoverX }}
+          />
+          <div
+            className="absolute top-0 bottom-0"
+            style={{ left: hoverX + 10 }}
+          >
+            {percentage && props.formatter(percentage)}
+          </div>
+        </>
+      )}
+      {props.children}
+    </div>
+  );
+};
+
 type SessionPrecursor = z.infer<typeof sessionPrecursor>;
-
-// Available color options
-const colorOptions = [
-  { value: "bg-blue-500", label: "Blue" },
-  { value: "bg-green-500", label: "Green" },
-  { value: "bg-yellow-500", label: "Yellow" },
-  { value: "bg-purple-500", label: "Purple" },
-  { value: "bg-red-500", label: "Red" },
-  { value: "bg-indigo-500", label: "Indigo" },
-  { value: "bg-pink-500", label: "Pink" },
-  { value: "bg-orange-500", label: "Orange" },
-  { value: "bg-teal-500", label: "Teal" },
-  { value: "bg-cyan-500", label: "Cyan" },
-];
-
 export function SessionTimeline({
-  activities: initialActivities,
-  hourStep: customHourStep,
+  activities,
+  startDate,
+  endDate,
   onActivitiesChange,
-}: ResponsiveTimelineProps) {
-  const [activities, setActivities] =
-    useState<ScheduledSessionWithId[]>(initialActivities);
-  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
-  const [hourStep, setHourStep] = useState(1);
+  markerStep, // Default to 2-hour markers
+}: DateTimelineProps) {
+  const [selectedActivity, setSelectedActivity] =
+    useState<ScheduledSessionWithId | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [activityToEdit, setActivityToEdit] = useState<SessionPrecursor | null>(
-    null,
-  );
+  const [activityToEdit, setActivityToEdit] =
+    useState<ScheduledSessionWithId | null>(null);
+  const [activityToCreate, setActivityToCreate] =
+    useState<SessionPrecursor | null>();
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  // Function to determine hour step based on viewport width
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      if (width < 480) {
-        setHourStep(6); // Every 6 hours on very small screens
-      } else if (width < 640) {
-        setHourStep(4); // Every 4 hours on small screens
-      } else if (width < 768) {
-        setHourStep(3); // Every 3 hours on medium screens
-      } else if (width < 1024) {
-        setHourStep(2); // Every 2 hours on larger screens
-      } else {
-        setHourStep(1); // Every hour on very large screens
-      }
-    };
-
-    // Initial check
-    handleResize();
-
-    // Add event listener
-    window.addEventListener("resize", handleResize);
-
-    // Clean up
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  // Calculate total duration of the timeline in milliseconds
+  const totalDuration = differenceInMilliseconds(endDate, startDate);
 
   // Notify parent component when activities change
   useEffect(() => {
@@ -123,42 +127,39 @@ export function SessionTimeline({
     }
   }, [activities, onActivitiesChange]);
 
-  // Use custom hour step if provided
-  const effectiveHourStep = customHourStep || hourStep;
-
-  // Function to convert time string (HH:MM) to minutes since midnight
-  const timeToMinutes = (time: string): number => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 60 + minutes;
-  };
-
-  // Function to convert minutes since midnight to time string (HH:MM)
-  const minutesToTime = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60) % 24;
-    const mins = Math.floor(minutes % 60);
-    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-  };
-
   // Function to calculate width percentage based on activity duration
-  const calculateWidth = (startTime: string, endTime: string): number => {
-    const startMinutes = timeToMinutes(startTime);
-    const endMinutes = timeToMinutes(endTime);
-    const duration = endMinutes - startMinutes;
+  const calculateWidth = (
+    activityStartDate: Date,
+    activityEndDate: Date,
+  ): number => {
+    // Ensure dates are within the timeline bounds
+    const clampedStartDate =
+      activityStartDate < startDate ? startDate : activityStartDate;
+    const clampedEndDate =
+      activityEndDate > endDate ? endDate : activityEndDate;
 
-    // 24 hours = 1440 minutes, so percentage is (duration / 1440) * 100
-    return (duration / 1440) * 100;
+    const duration = differenceInMilliseconds(clampedEndDate, clampedStartDate);
+    return (duration / totalDuration) * 100;
   };
 
-  // Function to calculate left position percentage based on start time
-  const calculateLeft = (startTime: string): number => {
-    const startMinutes = timeToMinutes(startTime);
-    return (startMinutes / 1440) * 100;
+  // Function to calculate left position percentage based on start date
+  const calculateLeft = (activityStartDate: Date): number => {
+    // If activity starts before timeline, clamp to timeline start
+    if (activityStartDate < startDate) return 0;
+
+    const offset = differenceInMilliseconds(activityStartDate, startDate);
+    return (offset / totalDuration) * 100;
   };
 
-  // Function to convert percentage position to time
-  const percentToTime = (percent: number): string => {
-    const minutes = Math.floor((percent / 100) * 1440);
-    return minutesToTime(minutes);
+  // Function to convert percentage position to date
+  const percentToDate = (percent: number): Date => {
+    const milliseconds = (percent / 100) * totalDuration;
+    return addMilliseconds(startDate, milliseconds);
+  };
+
+  // Function to format date for display
+  const formatDateTime = (date: Date): string => {
+    return format(date, "MMM d, h:mm a");
   };
 
   // Function to handle mouse down on timeline
@@ -189,8 +190,6 @@ export function SessionTimeline({
     setDragEnd(clampedPercent);
   };
 
-  const createSession = useCreateScheduledSession();
-
   // Function to handle mouse up after drag
   const handleMouseUp = () => {
     if (isDragging && dragStart !== null && dragEnd !== null) {
@@ -199,19 +198,19 @@ export function SessionTimeline({
         const startPercent = Math.min(dragStart, dragEnd);
         const endPercent = Math.max(dragStart, dragEnd);
 
-        const startTime = percentToTime(startPercent);
-        const endTime = percentToTime(endPercent);
+        const activityStartDate = percentToDate(startPercent);
+        const activityEndDate = percentToDate(endPercent);
 
         // Create new activity
         const newActivity: SessionPrecursor = {
-          startTime: new Date(),
-          endTime: new Date(),
+          startTime: activityStartDate,
           category: undefined,
           description: null,
-          tags: [],
+          endTime: activityEndDate,
           session_type: "fixed",
+          tags: [],
         };
-        setActivityToEdit(newActivity);
+        setActivityToCreate(newActivity);
         setIsEditDialogOpen(true);
       }
     }
@@ -222,20 +221,15 @@ export function SessionTimeline({
   };
 
   // Function to edit an activity
-  const handleEditActivity = (activity: Activity) => {
+  const handleEditActivity = (activity: ScheduledSessionWithId) => {
     setActivityToEdit({ ...activity });
     setIsEditDialogOpen(true);
   };
 
   // Function to save edited activity
-  const handleSaveActivity = () => {
+  const handleSaveEditedActivity = () => {
     if (!activityToEdit) return;
 
-    const updatedActivities = activities.map((activity) =>
-      activity.id === activityToEdit.id ? activityToEdit : activity,
-    );
-
-    setActivities(updatedActivities);
     setIsEditDialogOpen(false);
     setActivityToEdit(null);
   };
@@ -244,36 +238,52 @@ export function SessionTimeline({
   const handleDeleteActivity = () => {
     if (!activityToEdit) return;
 
-    const updatedActivities = activities.filter(
-      (activity) => activity.id !== activityToEdit.id,
-    );
-
-    setActivities(updatedActivities);
     setIsEditDialogOpen(false);
     setActivityToEdit(null);
     setSelectedActivity(null);
   };
 
-  // Generate hour markers for the timeline
-  const hourMarkers = Array.from(
-    { length: Math.ceil(25 / effectiveHourStep) },
-    (_, i) => {
-      const hour = (i * effectiveHourStep) % 24;
-      const formattedHour = hour.toString().padStart(2, "0") + ":00";
+  const getMarkerSetp = () => {
+    if (!markerStep) {
+      return 2; // Default to 2 hours if not provided
+    }
+    if (markerStep < 1) {
+      return 1; // Minimum step of 1 hour
+    }
+    return markerStep;
+  };
+
+  // Generate time markers for the timeline
+  const generateTimeMarkers = () => {
+    const markerStep = getMarkerSetp();
+    // Calculate how many markers to show based on the timeline duration and marker step
+    const totalHours = totalDuration / (1000 * 60 * 60);
+    const numMarkers = Math.ceil(totalHours / markerStep) + 1;
+
+    return Array.from({ length: numMarkers }, (_, i) => {
+      const markerDate = addHours(startDate, i * markerStep);
+
+      // Skip if marker is beyond the end date
+      if (markerDate > endDate) return null;
+
+      const percent = calculateLeft(markerDate);
+      const formattedTime = format(markerDate, "MMM d, h:mm a");
+
       return (
         <div
-          key={`hour-${i}`}
+          key={`marker-${i}`}
           className="absolute top-0 bottom-0 border-l border-gray-300 dark:border-gray-700"
-          style={{ left: `${(hour / 24) * 100}%` }}
+          style={{ left: `${percent}%` }}
         >
-          <span className="absolute -top-6 -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400">
-            {formattedHour}
+          <span className="absolute -top-6 -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+            {formattedTime}
           </span>
         </div>
       );
-    },
-  );
+    }).filter(Boolean);
+  };
 
+  const [hoveredSession, setHoveredSession] = useState<string | null>(null);
   // Calculate drag selection area
   const dragSelectionStyle =
     isDragging && dragStart !== null && dragEnd !== null
@@ -289,233 +299,144 @@ export function SessionTimeline({
         }
       : {};
 
+  const timeFormatter = (percentage: number) => {
+    const totalDurationMs = differenceInMilliseconds(endDate, startDate);
+    const elapsedMs = (percentage / 100) * totalDurationMs;
+    const result = addMilliseconds(startDate, elapsedMs);
+    return formatDateTime(result);
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
-        <TooltipProvider>
-          <div className="relative mt-8 mb-4 h-20">
-            {/* Hour markers */}
-            {hourMarkers}
+        <TooltipProvider delayDuration={0}>
+          <div className="relative mt-8 mb-4 h-52">
+            {/* Time markers */}
+            {generateTimeMarkers()}
 
             {/* Timeline bar */}
-            <div
-              ref={timelineRef}
-              className="absolute top-8 left-0 right-0 h-16 bg-gray-100 dark:bg-gray-800 rounded-md cursor-crosshair"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            >
-              {/* Timeline background for click detection */}
-              <div className="timeline-bg absolute inset-0"></div>
+            <HoverPercentageBar formatter={timeFormatter}>
+              <div
+                ref={timelineRef}
+                className="absolute top-8 left-0 right-0 h-40 bg-gray-100 dark:bg-transparent rounded-md cursor-crosshair"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                {/* Timeline background for click detection */}
+                <div className="timeline-bg absolute inset-0"></div>
 
-              {/* Drag selection area */}
-              {isDragging && <div style={dragSelectionStyle}></div>}
+                {/* Drag selection area */}
+                {isDragging && <div style={dragSelectionStyle}></div>}
 
-              {/* Activities */}
-              {activities.map((activity) => {
-                const width = calculateWidth(
-                  activity.startTime,
-                  activity.endTime,
-                );
-                const left = calculateLeft(activity.startTime);
+                {/* Activities */}
+                {activities.map((activity) => {
+                  const width = calculateWidth(
+                    activity.startTime,
+                    activity.endTime,
+                  );
+                  const left = calculateLeft(activity.startTime);
 
-                return (
-                  <Tooltip key={activity.id}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className={cn(
-                          "absolute h-16 rounded-md cursor-pointer transition-all",
-                          activity.color,
-                          selectedActivity === activity.id
-                            ? "ring-2 ring-offset-2 ring-black dark:ring-white"
-                            : "opacity-80 hover:opacity-100",
-                        )}
-                        style={{
-                          width: `${width}%`,
-                          left: `${left}%`,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedActivity(
-                            activity.id === selectedActivity
-                              ? null
-                              : activity.id,
-                          );
-                        }}
-                        onDoubleClick={(e) => {
-                          e.stopPropagation();
-                          handleEditActivity(activity);
-                        }}
+                  // Skip if activity is completely outside the timeline
+                  if (width <= 0 || left >= 100 || left + width <= 0)
+                    return null;
+
+                  return (
+                    <Tooltip key={activity.id}>
+                      <TooltipTrigger
+                        asChild
+                        className="relative overflow-hidden "
                       >
-                        <div className="p-2 text-white truncate text-xs md:text-sm">
-                          {activity.title}
+                        <SessionCard
+                          onMouseEnter={() => setHoveredSession(activity.id)}
+                          onMouseLeave={() => setHoveredSession(null)}
+                          session={activity}
+                          className={cn(
+                            "absolute overflow-hidden rounded-md cursor-pointer transition-all",
+                            "hover:z-50 hover:border-green-200 hover:border-2",
+                            selectedActivity?.id === activity.id
+                              ? "ring-2 ring-offset-2 ring-black dark:ring-white"
+                              : "opacity-80 hover:opacity-100",
+                          )}
+                          style={{
+                            width:
+                              hoveredSession === activity.id
+                                ? undefined
+                                : `${width}%`,
+                            left: `${left}%`,
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedActivity(
+                              activity.id === selectedActivity?.id
+                                ? null
+                                : activity,
+                            );
+                          }}
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            handleEditActivity(activity);
+                          }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="space-y-1">
+                          <p className="font-medium">
+                            {activity.category.name}
+                          </p>
+                          <p className="text-sm">{activity.description}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatDateTime(activity.startTime)} -{" "}
+                            {formatDateTime(activity.endTime)}
+                          </p>
+                          <p className="text-xs italic">Double-click to edit</p>
                         </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="space-y-1">
-                        <p className="font-medium">{activity.title}</p>
-                        <p className="text-sm">{activity.description}</p>
-                        <p className="text-xs text-gray-500">
-                          {activity.startTime} - {activity.endTime}
-                        </p>
-                        <p className="text-xs italic">Double-click to edit</p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
-            </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </HoverPercentageBar>
           </div>
         </TooltipProvider>
 
         {/* Activity details section */}
         {selectedActivity && (
           <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
-            {activities
-              .filter((activity) => activity.id === selectedActivity)
-              .map((activity) => (
-                <div key={activity.id} className="space-y-2">
-                  <h3 className="text-lg font-medium">{activity.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {activity.description}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {activity.startTime} - {activity.endTime}
-                  </p>
-                  <div className="pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditActivity(activity)}
-                    >
-                      Edit Activity
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-2">
+              <SessionCard session={selectedActivity} />
+              <div className="pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditActivity(selectedActivity)}
+                >
+                  Edit Activity
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Edit Activity Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+        <Dialog
+          modal={false}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+        >
+          <DialogContent className="w-full max-w-[60%]">
             <DialogHeader>
               <DialogTitle>Edit Activity</DialogTitle>
             </DialogHeader>
             {activityToEdit && (
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="title" className="text-right">
-                    Title
-                  </Label>
-                  <Input
-                    id="title"
-                    value={activityToEdit.title}
-                    onChange={(e) =>
-                      setActivityToEdit({
-                        ...activityToEdit,
-                        title: e.target.value,
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
-                    Description
-                  </Label>
-                  <Input
-                    id="description"
-                    value={activityToEdit.description}
-                    onChange={(e) =>
-                      setActivityToEdit({
-                        ...activityToEdit,
-                        description: e.target.value,
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="startTime" className="text-right">
-                    Start Time
-                  </Label>
-                  <Input
-                    id="startTime"
-                    type="time"
-                    value={activityToEdit.startTime}
-                    onChange={(e) =>
-                      setActivityToEdit({
-                        ...activityToEdit,
-                        startTime: e.target.value,
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="endTime" className="text-right">
-                    End Time
-                  </Label>
-                  <Input
-                    id="endTime"
-                    type="time"
-                    value={activityToEdit.endTime}
-                    onChange={(e) =>
-                      setActivityToEdit({
-                        ...activityToEdit,
-                        endTime: e.target.value,
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="color" className="text-right">
-                    Color
-                  </Label>
-                  <Select
-                    value={activityToEdit.color}
-                    onValueChange={(value) =>
-                      setActivityToEdit({ ...activityToEdit, color: value })
-                    }
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select a color" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colorOptions.map((color) => (
-                        <SelectItem key={color.value} value={color.value}>
-                          <div className="flex items-center">
-                            <div
-                              className={`w-4 h-4 rounded-full mr-2 ${color.value}`}
-                            ></div>
-                            {color.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <EditScheduledSession
+                session={activityToEdit}
+                onSave={handleSaveEditedActivity}
+                onDelete={handleDeleteActivity}
+                onCancel={() => setIsEditDialogOpen(false)}
+              />
             )}
-            <DialogFooter className="flex justify-between">
-              <Button variant="destructive" onClick={handleDeleteActivity}>
-                Delete
-              </Button>
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditDialogOpen(false)}
-                  className="mr-2"
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveActivity}>Save</Button>
-              </div>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardContent>
