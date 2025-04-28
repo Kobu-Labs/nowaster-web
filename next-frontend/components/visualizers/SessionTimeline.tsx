@@ -32,6 +32,7 @@ import {
 import { z } from "zod";
 import { SessionCard } from "@/components/visualizers/categories/SessionCard";
 import { EditScheduledSession } from "@/components/visualizers/sessions/EditScheduledSessionForm";
+import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
 
 interface DateTimelineProps {
   activities: ScheduledSessionWithId[];
@@ -44,7 +45,7 @@ interface DateTimelineProps {
 export const sessionPrecursor = z.object({
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
-  category: CategoryWithIdSchema.nullish(),
+  category: CategoryWithIdSchema.optional(),
   description: z.string().nullable(),
   tags: z.array(TagWithIdSchema),
   session_type: z.literal("fixed"),
@@ -97,7 +98,7 @@ const HoverPercentageBar: FC<PropsWithChildren<HoverPercentageBarProps>> = (
   );
 };
 
-type SessionPrecursor = z.infer<typeof sessionPrecursor>;
+export type SessionPrecursor = z.infer<typeof sessionPrecursor>;
 export function SessionTimeline({
   activities,
   startDate,
@@ -111,6 +112,7 @@ export function SessionTimeline({
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activityToEdit, setActivityToEdit] =
     useState<ScheduledSessionWithId | null>(null);
   const [activityToCreate, setActivityToCreate] =
@@ -211,7 +213,7 @@ export function SessionTimeline({
           tags: [],
         };
         setActivityToCreate(newActivity);
-        setIsEditDialogOpen(true);
+        setIsCreateDialogOpen(true);
       }
     }
 
@@ -346,15 +348,22 @@ export function SessionTimeline({
                     <Tooltip key={activity.id}>
                       <TooltipTrigger
                         asChild
-                        className="relative overflow-hidden "
+                        style={{
+                          maxWidth: `${width}%`,
+                          width:
+                            hoveredSession === activity.id
+                              ? undefined
+                              : `${width}%`,
+                          left: `${left}%`,
+                        }}
                       >
                         <SessionCard
                           onMouseEnter={() => setHoveredSession(activity.id)}
                           onMouseLeave={() => setHoveredSession(null)}
                           session={activity}
                           className={cn(
-                            "absolute overflow-hidden rounded-md cursor-pointer transition-all",
-                            "hover:z-50 hover:border-green-200 hover:border-2",
+                            "w-full absolute overflow-hidden rounded-md cursor-pointer transition-all",
+                            "hover:z-50 hover:border-green-200 hover:border-2 hover:shrink-0",
                             selectedActivity?.id === activity.id
                               ? "ring-2 ring-offset-2 ring-black dark:ring-white"
                               : "opacity-80 hover:opacity-100",
@@ -417,6 +426,24 @@ export function SessionTimeline({
               </div>
             </div>
           </div>
+        )}
+
+        {activityToCreate && (
+          <Dialog
+            modal={false}
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
+            <DialogContent className="w-full max-w-[60%]">
+              <DialogHeader>
+                <DialogTitle>Create Activity</DialogTitle>
+              </DialogHeader>
+              <ScheduledSessionCreationForm
+                precursor={activityToCreate}
+                onSave={() => setIsCreateDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
         )}
 
         {/* Edit Activity Dialog */}
