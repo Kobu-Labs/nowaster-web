@@ -2,7 +2,14 @@
 
 import type React from "react";
 
-import { useState, useEffect, useRef, FC, PropsWithChildren } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  FC,
+  PropsWithChildren,
+  useMemo,
+} from "react";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
   Dialog,
@@ -17,6 +24,7 @@ import {
   addHours,
   differenceInMilliseconds,
   addMilliseconds,
+  areIntervalsOverlapping,
 } from "date-fns";
 import {
   CategoryWithIdSchema,
@@ -45,6 +53,47 @@ export const sessionPrecursor = z.object({
   session_type: z.literal("fixed"),
 });
 
+const hasIntersection = (
+  session1: ScheduledSessionWithId,
+  session2: ScheduledSessionWithId,
+): boolean => {
+  return areIntervalsOverlapping(
+    {
+      start: session1.startTime,
+      end: session1.endTime,
+    },
+    {
+      start: session2.startTime,
+      end: session2.endTime,
+    },
+    { inclusive: true },
+  );
+};
+
+const sessionToNonIntersection = (
+  sessions: ScheduledSessionWithId[],
+): ScheduledSessionWithId[][] => {
+  const groupedSessions: ScheduledSessionWithId[][] = [];
+
+  sessions.forEach((session) => {
+    let nextGroup;
+    for (const group of groupedSessions) {
+      const hasOverlap = group.some((s) => hasIntersection(s, session));
+      if (!hasOverlap) {
+        nextGroup = group;
+        break;
+      }
+    }
+
+    if (nextGroup) {
+      nextGroup.push(session);
+    } else {
+      groupedSessions.push([session]);
+    }
+  });
+
+  return groupedSessions;
+};
 // add props with children
 type HoverPercentageBarProps = {
   formatter: (percentage: number) => string;
@@ -76,7 +125,7 @@ const HoverPercentageBar: FC<PropsWithChildren<HoverPercentageBarProps>> = (
       {hoverX !== null && (
         <>
           <div
-            className="absolute top-0 bottom-0 w-0 border-2  border-dashed"
+            className="absolute top-0 bottom-0 w-0 border-2 border-dashed"
             style={{ left: hoverX }}
           />
           <div
@@ -114,6 +163,9 @@ export function SessionTimeline({
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const totalDuration = differenceInMilliseconds(endDate, startDate);
+  const groupedActivities = useMemo(() => {
+    return sessionToNonIntersection(activities);
+  }, [activities]);
 
   useEffect(() => {
     if (onActivitiesChange) {
@@ -157,16 +209,22 @@ export function SessionTimeline({
 
   // Function to handle mouse down on timeline
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!timelineRef.current) return;
+    if (!timelineRef.current) {
+      console.error("Timeline ref is not set");
+      return;
+    }
 
     // Only start drag if clicking directly on the timeline background (not on an activity)
     if ((e.target as HTMLElement).classList.contains("timeline-bg")) {
+      console.log("Clicked on timeline background");
       const rect = timelineRef.current.getBoundingClientRect();
       const percent = ((e.clientX - rect.left) / rect.width) * 100;
 
       setIsDragging(true);
       setDragStart(percent);
       setDragEnd(percent);
+    } else {
+      console.log("Clicked on an activity");
     }
   };
 
@@ -260,15 +318,25 @@ export function SessionTimeline({
       if (markerDate > endDate) return null;
 
       const percent = calculateLeft(markerDate);
-      const formattedTime = format(markerDate, "MMM d, h:mm a");
+      const formattedTime = format(markerDate, "MMM d, HH:mm");
 
       return (
         <div
           key={`marker-${i}`}
-          className="absolute top-0 bottom-0 border-l border-gray-300 dark:border-gray-700"
+          className={cn(
+            "absolute top-0 bottom-0 border-l border-gray-300 dark:border-gray-700",
+            (i === 0 || i === numMarkers - 1) && "border-0",
+          )}
           style={{ left: `${percent}%` }}
         >
-          <span className="absolute -top-6 -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+          <span
+            className={cn(
+              "absolute -top-6 -translate-x-1/4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap overflow-hidden",
+
+              i === 0 && "left-2",
+              i === numMarkers - 1 && "-right-5",
+            )}
+          >
             {formattedTime}
           </span>
         </div>
@@ -283,7 +351,8 @@ export function SessionTimeline({
       ? {
           left: `${Math.min(dragStart, dragEnd)}%`,
           width: `${Math.abs(dragEnd - dragStart)}%`,
-          height: "80%",
+          bottom: "5%",
+          height: "90%",
           position: "absolute" as const,
           backgroundColor: "rgba(59, 130, 246, 0.3)",
           border: "2px dashed #3b82f6",
@@ -299,18 +368,62 @@ export function SessionTimeline({
     return formatDateTime(result);
   };
 
+  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[] }> = ({
+    sessions,
+  }) => {
+    return (
+      <div className="flex items-center h-36 bg-transparent rounded-md cursor-crosshair">
+        {/* Activities */}
+        {sessions.map((activity) => {
+          const width = calculateWidth(activity.startTime, activity.endTime);
+          const left = calculateLeft(activity.startTime);
+
+          // Skip if activity is completely outside the timeline
+          if (width <= 0 || left >= 100 || left + width <= 0) return null;
+
+          return (
+            <SessionCard
+              onMouseEnter={() => setHoveredSession(activity.id)}
+              onMouseLeave={() => setHoveredSession(null)}
+              session={activity}
+              className={cn(
+                "absolute overflow-hidden rounded-md cursor-pointer transition-all",
+                "hover:z-50 hover:border-green-200 hover:border-2",
+                selectedActivity?.id === activity.id
+                  ? "ring-2 ring-offset-2 ring-black dark:ring-white"
+                  : "opacity-80 hover:opacity-100",
+                (isDragging || isEditDialogOpen || isCreateDialogOpen) &&
+                  "pointer-events-none",
+              )}
+              style={{
+                minWidth:
+                  hoveredSession === activity.id ? `${width}%` : undefined,
+                width: hoveredSession === activity.id ? undefined : `${width}%`,
+                left: `${left}%`,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditActivity(activity);
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="relative mt-8 mb-4 h-40 ">
+        <div className="relative mt-8 mb-4 h-full">
           {/* Time markers */}
           {generateTimeMarkers()}
 
           {/* Timeline bar */}
           <HoverPercentageBar formatter={timeFormatter}>
             <div
+              className="h-full relative"
               ref={timelineRef}
-              className="absolute flex items-center p-2 left-0 right-0 h-full bg-transparent rounded-md cursor-crosshair"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -321,47 +434,8 @@ export function SessionTimeline({
 
               {/* Drag selection area */}
               {isDragging && <div style={dragSelectionStyle}></div>}
-
-              {/* Activities */}
-              {activities.map((activity) => {
-                const width = calculateWidth(
-                  activity.startTime,
-                  activity.endTime,
-                );
-                const left = calculateLeft(activity.startTime);
-
-                // Skip if activity is completely outside the timeline
-                if (width <= 0 || left >= 100 || left + width <= 0) return null;
-
-                return (
-                  <SessionCard
-                    onMouseEnter={() => setHoveredSession(activity.id)}
-                    onMouseLeave={() => setHoveredSession(null)}
-                    session={activity}
-                    className={cn(
-                      "absolute overflow-hidden rounded-md cursor-pointer transition-all",
-                      "hover:z-50 hover:border-green-200 hover:border-2",
-                      selectedActivity?.id === activity.id
-                        ? "ring-2 ring-offset-2 ring-black dark:ring-white"
-                        : "opacity-80 hover:opacity-100",
-                    )}
-                    style={{
-                      minWidth:
-                        hoveredSession === activity.id
-                          ? `${width}%`
-                          : undefined,
-                      width:
-                        hoveredSession === activity.id
-                          ? undefined
-                          : `${width}%`,
-                      left: `${left}%`,
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditActivity(activity);
-                    }}
-                  />
-                );
+              {groupedActivities.map((activity) => {
+                return <TimelineRow sessions={activity} />;
               })}
             </div>
           </HoverPercentageBar>
