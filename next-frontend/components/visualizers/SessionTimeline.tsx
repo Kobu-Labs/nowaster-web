@@ -5,12 +5,6 @@ import type React from "react";
 import { useState, useEffect, useRef, FC, PropsWithChildren } from "react";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -86,7 +80,7 @@ const HoverPercentageBar: FC<PropsWithChildren<HoverPercentageBarProps>> = (
             style={{ left: hoverX }}
           />
           <div
-            className="absolute top-0 bottom-0"
+            className="absolute top-0 bottom-0 text-nowrap"
             style={{ left: hoverX + 10 }}
           >
             {percentage && props.formatter(percentage)}
@@ -119,17 +113,14 @@ export function SessionTimeline({
     useState<SessionPrecursor | null>();
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  // Calculate total duration of the timeline in milliseconds
   const totalDuration = differenceInMilliseconds(endDate, startDate);
 
-  // Notify parent component when activities change
   useEffect(() => {
     if (onActivitiesChange) {
       onActivitiesChange(activities);
     }
   }, [activities, onActivitiesChange]);
 
-  // Function to calculate width percentage based on activity duration
   const calculateWidth = (
     activityStartDate: Date,
     activityEndDate: Date,
@@ -292,7 +283,7 @@ export function SessionTimeline({
       ? {
           left: `${Math.min(dragStart, dragEnd)}%`,
           width: `${Math.abs(dragEnd - dragStart)}%`,
-          height: "100%",
+          height: "80%",
           position: "absolute" as const,
           backgroundColor: "rgba(59, 130, 246, 0.3)",
           border: "2px dashed #3b82f6",
@@ -311,104 +302,70 @@ export function SessionTimeline({
   return (
     <Card>
       <CardContent className="p-6">
-        <TooltipProvider delayDuration={0}>
-          <div className="relative mt-8 mb-4 h-52">
-            {/* Time markers */}
-            {generateTimeMarkers()}
+        <div className="relative mt-8 mb-4 h-40 ">
+          {/* Time markers */}
+          {generateTimeMarkers()}
 
-            {/* Timeline bar */}
-            <HoverPercentageBar formatter={timeFormatter}>
-              <div
-                ref={timelineRef}
-                className="absolute top-8 left-0 right-0 h-40 bg-gray-100 dark:bg-transparent rounded-md cursor-crosshair"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-              >
-                {/* Timeline background for click detection */}
-                <div className="timeline-bg absolute inset-0"></div>
+          {/* Timeline bar */}
+          <HoverPercentageBar formatter={timeFormatter}>
+            <div
+              ref={timelineRef}
+              className="absolute flex items-center p-2 left-0 right-0 h-full bg-transparent rounded-md cursor-crosshair"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {/* Timeline background for click detection */}
+              <div className="timeline-bg absolute inset-0"></div>
 
-                {/* Drag selection area */}
-                {isDragging && <div style={dragSelectionStyle}></div>}
+              {/* Drag selection area */}
+              {isDragging && <div style={dragSelectionStyle}></div>}
 
-                {/* Activities */}
-                {activities.map((activity) => {
-                  const width = calculateWidth(
-                    activity.startTime,
-                    activity.endTime,
-                  );
-                  const left = calculateLeft(activity.startTime);
+              {/* Activities */}
+              {activities.map((activity) => {
+                const width = calculateWidth(
+                  activity.startTime,
+                  activity.endTime,
+                );
+                const left = calculateLeft(activity.startTime);
 
-                  // Skip if activity is completely outside the timeline
-                  if (width <= 0 || left >= 100 || left + width <= 0)
-                    return null;
+                // Skip if activity is completely outside the timeline
+                if (width <= 0 || left >= 100 || left + width <= 0) return null;
 
-                  return (
-                    <Tooltip key={activity.id}>
-                      <TooltipTrigger
-                        asChild
-                        style={{
-                          maxWidth: `${width}%`,
-                          width:
-                            hoveredSession === activity.id
-                              ? undefined
-                              : `${width}%`,
-                          left: `${left}%`,
-                        }}
-                      >
-                        <SessionCard
-                          onMouseEnter={() => setHoveredSession(activity.id)}
-                          onMouseLeave={() => setHoveredSession(null)}
-                          session={activity}
-                          className={cn(
-                            "w-full absolute overflow-hidden rounded-md cursor-pointer transition-all",
-                            "hover:z-50 hover:border-green-200 hover:border-2 hover:shrink-0",
-                            selectedActivity?.id === activity.id
-                              ? "ring-2 ring-offset-2 ring-black dark:ring-white"
-                              : "opacity-80 hover:opacity-100",
-                          )}
-                          style={{
-                            width:
-                              hoveredSession === activity.id
-                                ? undefined
-                                : `${width}%`,
-                            left: `${left}%`,
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedActivity(
-                              activity.id === selectedActivity?.id
-                                ? null
-                                : activity,
-                            );
-                          }}
-                          onDoubleClick={(e) => {
-                            e.stopPropagation();
-                            handleEditActivity(activity);
-                          }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <div className="space-y-1">
-                          <p className="font-medium">
-                            {activity.category.name}
-                          </p>
-                          <p className="text-sm">{activity.description}</p>
-                          <p className="text-xs text-gray-500">
-                            {formatDateTime(activity.startTime)} -{" "}
-                            {formatDateTime(activity.endTime)}
-                          </p>
-                          <p className="text-xs italic">Double-click to edit</p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            </HoverPercentageBar>
-          </div>
-        </TooltipProvider>
+                return (
+                  <SessionCard
+                    onMouseEnter={() => setHoveredSession(activity.id)}
+                    onMouseLeave={() => setHoveredSession(null)}
+                    session={activity}
+                    className={cn(
+                      "absolute overflow-hidden rounded-md cursor-pointer transition-all",
+                      "hover:z-50 hover:border-green-200 hover:border-2",
+                      selectedActivity?.id === activity.id
+                        ? "ring-2 ring-offset-2 ring-black dark:ring-white"
+                        : "opacity-80 hover:opacity-100",
+                    )}
+                    style={{
+                      minWidth:
+                        hoveredSession === activity.id
+                          ? `${width}%`
+                          : undefined,
+                      width:
+                        hoveredSession === activity.id
+                          ? undefined
+                          : `${width}%`,
+                      left: `${left}%`,
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditActivity(activity);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </HoverPercentageBar>
+        </div>
 
         {/* Activity details section */}
         {selectedActivity && (
