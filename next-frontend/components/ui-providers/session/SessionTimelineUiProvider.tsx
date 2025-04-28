@@ -66,8 +66,7 @@ export function SessionTimelineUiProvider({
     // Ensure dates are within the timeline bounds
     const clampedStartDate =
       sessionStartDate < startDate ? startDate : sessionStartDate;
-    const clampedEndDate =
-      sessionEndDate > endDate ? endDate : sessionEndDate;
+    const clampedEndDate = sessionEndDate > endDate ? endDate : sessionEndDate;
 
     const duration = differenceInMilliseconds(clampedEndDate, clampedStartDate);
     return (duration / totalDuration) * 100;
@@ -226,16 +225,16 @@ export function SessionTimelineUiProvider({
   const dragSelectionStyle =
     isDragging && dragStart !== null && dragEnd !== null
       ? {
-          left: `${Math.min(dragStart, dragEnd)}%`,
-          width: `${Math.abs(dragEnd - dragStart)}%`,
-          bottom: "5%",
-          height: "90%",
-          position: "absolute" as const,
-          backgroundColor: "rgba(59, 130, 246, 0.3)",
-          border: "2px dashed #3b82f6",
-          zIndex: 5,
-          pointerEvents: "none" as const,
-        }
+        left: `${Math.min(dragStart, dragEnd)}%`,
+        width: `${Math.abs(dragEnd - dragStart)}%`,
+        bottom: "5%",
+        height: "90%",
+        position: "absolute" as const,
+        backgroundColor: "rgba(59, 130, 246, 0.3)",
+        border: "2px dashed #3b82f6",
+        zIndex: 5,
+        pointerEvents: "none" as const,
+      }
       : {};
 
   const timeFormatter = (percentage: number) => {
@@ -259,6 +258,7 @@ export function SessionTimelineUiProvider({
 
           return (
             <SessionCard
+              key={session.id}
               onMouseEnter={() => setHoveredSession(session.id)}
               onMouseLeave={() => setHoveredSession(null)}
               session={session}
