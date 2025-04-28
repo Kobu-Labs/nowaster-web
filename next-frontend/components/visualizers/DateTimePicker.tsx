@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { addMinutes } from "date-fns";
 import { X } from "lucide-react";
@@ -31,6 +31,23 @@ type DatePickerDemoProps = {
 };
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Add event listener to prevent scrolling on the document level when hovered
+  useEffect(() => {
+    const preventScroll = (e: WheelEvent) => {
+      if (isHovered) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", preventScroll, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+    };
+  }, [isHovered]);
+
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const { value } = e.target;
     const datetime = DateTime.fromJSDate(props.selected ?? new Date());
@@ -42,15 +59,18 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
 
   return (
     <Popover>
-      <PopoverTrigger
-        onWheel={(e) =>
-          props.onSelect(
-            addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
-          )
-        }
-        asChild
-      >
-        <Button variant="outline" className="w-full gap-2">
+      <PopoverTrigger asChild>
+        <Button
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          variant="outline"
+          className="w-full gap-2"
+          onWheel={(e) =>
+            props.onSelect(
+              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
+            )
+          }
+        >
           <CalendarIcon className="size-4" />
           {props.selected ? (
             <>
