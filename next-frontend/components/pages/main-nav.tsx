@@ -50,10 +50,10 @@ export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
   );
 };
 
-export const NowasterLogo = () => {
+export const NowasterLogo: FC<{ href?: string }> = (props) => {
   return (
     <Link
-      href="/"
+      href={props.href ?? "/"}
       className="flex items-center space-x-2 hover:scale-110 hover:transition"
     >
       <Image
@@ -71,7 +71,7 @@ export const NowasterLogo = () => {
 export function MainNavigation({ items }: NavigationProps) {
   return (
     <div className="flex w-full flex-row gap-6">
-      <NowasterLogo />
+      <NowasterLogo href="/home/" />
       <Navigation items={items} />
       <div className="grow"></div>
       <SessionTimer />
