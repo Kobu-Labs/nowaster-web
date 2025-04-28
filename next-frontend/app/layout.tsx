@@ -37,7 +37,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           )}
         >
           <main>
-            <ThemeProvider attribute="class" defaultTheme="dark" >
+            <ThemeProvider attribute="class" defaultTheme="dark">
               {children}
             </ThemeProvider>
           </main>
