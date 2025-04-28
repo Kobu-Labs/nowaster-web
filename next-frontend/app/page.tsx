@@ -1,4 +1,5 @@
 "use server";
+import { ThemedImage } from "@/app/ThemedImage";
 import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
 import { GoToAppButton } from "@/components/pages/GoToAppButton";
 import { SignInButton } from "@/components/pages/SignInButton";
@@ -44,8 +45,9 @@ export default async function LandingPage() {
               </div>
               <div className="flex items-center justify-center">
                 <div className="mx-10 absolute w-full h-[300px] md:h-[400px] lg:h-[500px]">
-                  <Image
-                    src="/nowaster-landing-2.png"
+                  <ThemedImage
+                    lightUrl="/nowaster-landing-1-light.png"
+                    darkUrl="/nowaster-landing-1-dark.png"
                     alt="Time tracking dashboard"
                     fill
                     className="object-contain"
@@ -76,8 +78,9 @@ export default async function LandingPage() {
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
               <div className="flex items-center justify-center">
                 <div className="mx-10 absolute w-full h-[300px] md:h-[400px] lg:h-[500px] right-96 top-36">
-                  <Image
-                    src="/nowaster-landing-1.png"
+                  <ThemedImage
+                    lightUrl="/nowaster-landing-2-light.png"
+                    darkUrl="/nowaster-landing-2-dark.png"
                     alt="Time tracking dashboard"
                     fill
                     className="object-contain rounded-2xl "
