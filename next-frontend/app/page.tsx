@@ -1,13 +1,14 @@
-import Image from "next/image";
+"use server";
 import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
 import { GoToAppButton } from "@/components/pages/GoToAppButton";
 import { SignInButton } from "@/components/pages/SignInButton";
-import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
 import {
   Avatar,
-  AvatarImage,
   AvatarFallback,
+  AvatarImage,
 } from "@/components/shadcn/avatar";
+import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
+import Image from "next/image";
 
 export default async function LandingPage() {
   return (
