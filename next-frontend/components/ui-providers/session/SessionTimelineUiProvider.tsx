@@ -183,6 +183,7 @@ export function SessionTimelineUiProvider({
 
   // Generate time markers for the timeline
   const generateTimeMarkers = () => {
+    if (groupedActivities.length === 0) return null;
     const markerStep = getMarkerSetp();
     // Calculate how many markers to show based on the timeline duration and marker step
     const totalHours = totalDuration / (1000 * 60 * 60);
@@ -309,9 +310,14 @@ export function SessionTimelineUiProvider({
 
             {/* Drag selection area */}
             {isDragging && <div style={dragSelectionStyle}></div>}
-            {groupedActivities.map((activity) => {
-              return <TimelineRow sessions={activity} />;
-            })}
+            {groupedActivities.length === 0 && (
+              <div className="h-36  flex items-center justify-center text-gray-500">
+                No activities available
+              </div>
+            )}
+            {groupedActivities.map((group, index) => (
+              <TimelineRow sessions={group} key={index} />
+            ))}
           </div>
         </HoverPercentageBar>
       </div>
