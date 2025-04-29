@@ -7,7 +7,7 @@ import { FC } from "react";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/ui-providers/DataTable";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 
 type BaseSessionTableProps = {
   columns?: ColumnDef<ScheduledSessionWithId>[];
