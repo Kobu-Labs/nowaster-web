@@ -4,8 +4,8 @@ import { SessionAverageDurationProvider } from "@/components/visualizers/charts/
 import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
 import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { FC } from "react";
 

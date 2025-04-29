@@ -2,7 +2,7 @@
 
 import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
 import { CurrentStreakKpiCard } from "@/components/visualizers/CurrentStreakKpiCard";
-import { IntervaledSessionTimeline } from "@/components/visualizers/sessions/IntervaledSessionTimeline";
+import { IntervaledSessionTimeline } from "@/components/visualizers/sessions/timeline/IntervaledSessionTimeline";
 import { TotalSessionTimeKpiCard } from "@/components/visualizers/TotalMinutesSpentKpiCard";
 import { TotalSessionsKpiCard } from "@/components/visualizers/TotalSessionsKpiCard";
 import { subHours } from "date-fns";

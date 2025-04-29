@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
-import { SessionTimeline } from "@/components/visualizers/sessions/SessionTimeline";
+import { SessionTimeline } from "@/components/visualizers/sessions/timeline/SessionTimeline";
 import { subHours } from "date-fns";
 import { ArrowBigRight, RotateCcw } from "lucide-react";
 import { FC, useState } from "react";

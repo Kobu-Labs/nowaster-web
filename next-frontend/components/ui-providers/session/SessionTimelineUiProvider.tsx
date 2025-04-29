@@ -8,8 +8,8 @@ import {
 } from "@/components/shadcn/dialog";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
 import { SessionCard } from "@/components/visualizers/categories/SessionCard";
-import { EditScheduledSession } from "@/components/visualizers/sessions/EditScheduledSessionForm";
-import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
+import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
+import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { sessionToNonIntersection } from "@/lib/sessions/intervals";
 import { cn } from "@/lib/utils";
 import {

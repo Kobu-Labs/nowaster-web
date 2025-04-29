@@ -26,7 +26,7 @@ import {
   DialogTrigger,
 } from "@/components/shadcn/dialog";
 import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
-import { EditScheduledSession } from "@/components/visualizers/sessions/EditScheduledSessionForm";
+import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
 

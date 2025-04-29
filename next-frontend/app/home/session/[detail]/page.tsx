@@ -7,8 +7,8 @@ import { SessionAverageDurationProvider } from "@/components/visualizers/charts/
 import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
 import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart";
 import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
