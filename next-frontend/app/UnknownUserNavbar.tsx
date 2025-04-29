@@ -1,10 +1,12 @@
 "use client";
+
+import { GoToAppButton } from "@/components/pages/GoToAppButton";
 import { Navigation, NowasterLogo } from "@/components/pages/main-nav";
+import { SignInButton } from "@/components/pages/SignInButton";
 import { ThemeToggle } from "@/components/pages/ThemeToggle";
 import { Button } from "@/components/shadcn/button";
 import { NavItem } from "@/types/nav";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { ArrowBigRight, Clock, Github } from "lucide-react";
+import { Clock, Github } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 
@@ -20,23 +22,8 @@ export function UnknownUserNavbar({ children }: { children: React.ReactNode }) {
             <Navigation items={landingPageNav}></Navigation>
             <div className="grow"></div>
             <ThemeToggle />
-            <SignedIn>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center justify-center gap-2"
-              >
-                <Link href="/home/">Go to application</Link>
-                <ArrowBigRight />
-              </Button>
-            </SignedIn>
-            <SignedOut>
-              <SignInButton forceRedirectUrl={"/home"}>
-                <Button variant="outline" size="sm">
-                  Sign In
-                </Button>
-              </SignInButton>
-            </SignedOut>
+            <SignInButton label="Sign In" />
+            <GoToAppButton label="Go to application" />
           </div>
         </div>
       </header>
