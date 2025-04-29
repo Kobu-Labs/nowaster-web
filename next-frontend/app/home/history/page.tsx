@@ -1,4 +1,4 @@
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

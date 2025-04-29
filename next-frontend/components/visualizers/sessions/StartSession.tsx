@@ -64,7 +64,7 @@ import { StopwatchApi } from "@/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/ui-providers/DataTable";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 
 const formatTimeDifference = (seconds: number) => {
