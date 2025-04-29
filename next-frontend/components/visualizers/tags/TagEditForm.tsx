@@ -72,30 +72,22 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
     mutationFn: async () => {
       return await TagApi.deleteTag({ id: props.tag.id });
     },
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
-      if (data.isErr) {
-        toast({
-          title: "Error deleting tag",
-          description: data.error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Tag deleted",
-          description: (
-            <div className="flex items-center gap-2">
-              <TagBadge
-                variant="manual"
-                value={props.tag.label}
-                colors={props.tag.color}
-              />
-              deleted successfully!
-            </div>
-          ),
-          variant: "default",
-        });
-      }
+      toast({
+        title: "Tag deleted",
+        description: (
+          <div className="flex items-center gap-2">
+            <TagBadge
+              variant="manual"
+              value={props.tag.label}
+              colors={props.tag.color}
+            />
+            deleted successfully!
+          </div>
+        ),
+        variant: "default",
+      });
     },
     onError: (error) => {
       toast({
