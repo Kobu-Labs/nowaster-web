@@ -17,8 +17,8 @@ export const TagDetailsOverview: FC<TagsDetailsPageProps> = ({ tag }) => {
   const filter: SessionFilterPrecursor = {
     settings: {
       tags: {
-        label: {
-          mode: "some",
+        id: {
+          mode: "all",
         },
       },
     },
