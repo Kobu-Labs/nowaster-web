@@ -11,7 +11,7 @@ export const SignInButton: FC<ButtonProps & { label?: string }> = (props) => {
           size={props.size ?? "sm"}
           className={props.className}
         >
-          {props.label ?? "Start your journey now"}
+          {props.label ?? "Sign in"}
         </Button>
       </SignInButtonClerk>
     </SignedOut>

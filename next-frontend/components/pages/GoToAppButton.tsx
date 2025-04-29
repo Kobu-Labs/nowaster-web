@@ -10,6 +10,7 @@ export const GoToAppButton: FC<ButtonProps & { label?: string }> = (props) => {
   return (
     <SignedIn>
       <Button
+        asChild
         variant={props.variant ?? "outline"}
         size={props.size ?? "sm"}
         className={cn(
@@ -17,8 +18,10 @@ export const GoToAppButton: FC<ButtonProps & { label?: string }> = (props) => {
           props.className,
         )}
       >
-        <Link href="/home/">{props.label ?? "Go to application"}</Link>
-        <ArrowBigRight />
+        <Link href="/home/">
+          <p>{props.label ?? "Go to application"}</p>
+          <ArrowBigRight />
+        </Link>
       </Button>
     </SignedIn>
   );
