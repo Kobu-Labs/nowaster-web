@@ -200,12 +200,6 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
       settings: {},
       data: filter,
     }),
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value.slice(0, 20);
-    },
   });
 
   const onInteractOutside = async () => {
@@ -220,13 +214,11 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
       return;
     }
 
-    const result = await StopwatchApi.update(formValues);
-    setGlobalErr(result.isErr);
-    if (result.isOk) {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.sessions.active._def,
-      });
-    }
+    // TODO: api called directly with unsage parse
+    await StopwatchApi.update(formValues);
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.sessions.active._def,
+    });
     setOpen(false);
   };
 

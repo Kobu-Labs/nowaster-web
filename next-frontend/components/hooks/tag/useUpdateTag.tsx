@@ -22,11 +22,7 @@ export const useUpdateTag = () => {
 
   const mutation = useMutation({
     mutationFn: async (data: TagRequest["update"]) => {
-      const result = await TagApi.update(data);
-      if (result.isErr) {
-        throw new Error(result.error.message);
-      }
-      return result.value;
+      return await TagApi.update(data);
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });

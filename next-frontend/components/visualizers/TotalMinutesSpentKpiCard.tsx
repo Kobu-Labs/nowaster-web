@@ -10,12 +10,7 @@ export const TotalSessionTimeKpiCard: FC<TotalSessionTimeKpiCardProps> = () => {
   const stats = useQuery({
     ...queryKeys.statistics.dashboard,
     retry: false,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value.minutes;
-    },
+    select: (data) => data.minutes,
   });
 
   return (

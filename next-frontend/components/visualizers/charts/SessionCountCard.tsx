@@ -18,12 +18,7 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
   } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     retry: false,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value.length;
-    },
+    select: (data) => data.length,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

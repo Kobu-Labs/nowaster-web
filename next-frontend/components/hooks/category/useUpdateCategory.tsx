@@ -29,25 +29,21 @@ export const useUpdateCategory = ({
       return await CategoryApi.update(params);
     },
     onSuccess: async (data) => {
-      if (data.isErr) {
-        toastError(data.error.message);
-        return;
-      }
 
       await queryClient.invalidateQueries(queryKeys.categories.all);
       setColors((prev) => ({
         ...prev,
-        [data.value.name]: data.value.color,
+        [data.name]: data.color,
       }));
 
       if (onSuccess) {
-        onSuccess(data.value);
+        onSuccess(data);
       }
       toast({
         description: (
           <div className="flex items-center gap-2">
             Category
-            <CategoryBadge name={data.value.name} color={data.value.color} />
+            <CategoryBadge name={data.name} color={data.color} />
             created
           </div>
         ),
