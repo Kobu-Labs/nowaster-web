@@ -18,17 +18,12 @@ export async function POST(req: Request) {
         return new Response("Username is required", { status: 400 });
       }
 
-      const result = await UserApi.create({
+      await UserApi.create({
         id: evt.data.id,
         username: evt.data.username,
       });
 
-      if (result.isOk) {
-        return new Response("User created", { status: 200 });
-      } else {
-        console.error("User creation failed:", result.error);
-        return new Response("User failed to create", { status: 400 });
-      }
+      return new Response("User created", { status: 200 });
     }
 
     if (eventType === "user.updated") {
@@ -37,17 +32,12 @@ export async function POST(req: Request) {
         return new Response("Username is required", { status: 400 });
       }
 
-      const result = await UserApi.update({
+      await UserApi.update({
         id: evt.data.id,
         username: evt.data.username,
       });
 
-      if (result.isOk) {
-        return new Response("User updated", { status: 200 });
-      } else {
-        console.error("User update failed:", result.error);
-        return new Response("User failed to update", { status: 400 });
-      }
+      return new Response("User updated", { status: 200 });
     }
 
     return new Response("Webhook received", { status: 200 });
