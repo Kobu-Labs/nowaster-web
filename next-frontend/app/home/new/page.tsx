@@ -2,8 +2,8 @@
 
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { Separator } from "@/components/shadcn/separator";
-import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
+import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { subHours } from "date-fns";
 import { useMemo } from "react";
 

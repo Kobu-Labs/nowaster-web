@@ -46,7 +46,7 @@ import {
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { ScheduledSessionRequest } from "@/api/definitions";
-import { DurationLabel } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
+import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 
 const creationFormQuickOptions: QuickOption[] = [
