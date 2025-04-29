@@ -24,7 +24,8 @@ export const setupAxiosInterceptors = (
   );
 };
 
-export const handleResponse = async <T>(
+// INFO: this is usefull in react-query usage when dealing with isError prop
+export const parseResponseToResult = async <T>(
   data: any,
   schema: ZodType<T>,
 ): Promise<Result<T>> => {
@@ -46,6 +47,31 @@ export const handleResponse = async <T>(
   }
 
   return Result.ok(requestBody.data);
+};
+
+// INFO: this could be usefull when calling the API directly, like from backend
+export const parseResponseUnsafe = async <T>(
+  data: any,
+  schema: ZodType<T>,
+): Promise<T> => {
+  const request = await ResponseSchema.safeParseAsync(data);
+  if (!request.success) {
+    console.error(request.error);
+    throw new Error("Response is of unexpected structure!");
+  }
+
+  if (request.data.status === "fail") {
+    console.error(request.data.message);
+    throw new Error(request.data.message);
+  }
+
+  const requestBody = await schema.safeParseAsync(request.data.data);
+  if (!requestBody.success) {
+    console.error(requestBody.error.message);
+    throw new Error("Parsing data failed!\n" + requestBody.error.message);
+  }
+
+  return requestBody.data;
 };
 
 export default baseApi;

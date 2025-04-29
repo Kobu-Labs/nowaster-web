@@ -8,11 +8,7 @@ export const useDeleteScheduledSession = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const result = await ScheduledSessionApi.deleteSingle({ id: sessionId });
-      if (result.isErr) {
-        throw new Error(result.error.message);
-      }
-      return result.value;
+      return await ScheduledSessionApi.deleteSingle({ id: sessionId });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({

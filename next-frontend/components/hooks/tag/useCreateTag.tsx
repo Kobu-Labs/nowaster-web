@@ -16,14 +16,6 @@ export const useCreateTag = ({
   const queryClient = useQueryClient();
   const setColors = useSetRecoilState(tagColors);
 
-  const toastError = (message: string) => {
-    toast({
-      title: "Error creating tag",
-      description: message,
-      variant: "destructive",
-    });
-  };
-
   const mutation = useMutation({
     mutationFn: async (data: TagRequest["create"]) => {
       return await TagApi.create(data);
@@ -31,20 +23,15 @@ export const useCreateTag = ({
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
 
-      if (data.isErr) {
-        toastError(data.error.message);
-        return;
-      }
-
       setColors((prev) => ({
         ...prev,
-        [data.value.label]: data.value.color,
+        [data.label]: data.color,
       }));
 
       toast({
         description: (
           <div className="flex items-center gap-2">
-            <TagBadge tag={data.value} variant="auto" />
+            <TagBadge tag={data} variant="auto" />
             created successfully!
           </div>
         ),
@@ -52,7 +39,7 @@ export const useCreateTag = ({
       });
 
       if (onSuccess) {
-        onSuccess(data.value);
+        onSuccess(data);
       }
     },
   });

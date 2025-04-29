@@ -21,11 +21,7 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
     ...queryKeys.sessions.filtered(props.filter),
     retry: false,
     select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value.reduce(
+      return data.reduce(
         (acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime),
         0,
       );

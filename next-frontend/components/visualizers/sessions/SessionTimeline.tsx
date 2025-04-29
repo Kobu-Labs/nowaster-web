@@ -14,12 +14,6 @@ export const SessionTimeline: FC<SessionTimelineProps> = (props) => {
   const sessions = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     placeholderData: keepPreviousData,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
   });
 
   const data = useMemo(() => {

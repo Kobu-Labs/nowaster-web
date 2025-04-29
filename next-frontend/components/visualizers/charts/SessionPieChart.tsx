@@ -46,10 +46,7 @@ export const SessionPieChart = (props: SessionPieChart) => {
     ...queryKeys.sessions.filtered(props.filter),
     retry: false,
     select: (data) => {
-      if (data.isErr) {
-        return [];
-      }
-      const groupedData = groupData(data.value, props.groupingFn);
+      const groupedData = groupData(data, props.groupingFn);
       return props.postProcess ? props.postProcess(groupedData) : groupedData;
     },
     refetchOnWindowFocus: false,

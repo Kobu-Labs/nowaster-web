@@ -16,12 +16,7 @@ export const FriendRequestsManagement = () => {
   const incomingRequests = useQuery({
     queryKey: ["friends", "requests", "incoming"],
     queryFn: async () => {
-      const data = await FriendRequestApi.read({ direction: "incoming" });
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value;
+      return await FriendRequestApi.read({ direction: "incoming" });
     },
     initialData: [],
   });
@@ -29,12 +24,7 @@ export const FriendRequestsManagement = () => {
   const outgoingRequests = useQuery({
     queryKey: ["friends", "requests", "outgoing"],
     queryFn: async () => {
-      const data = await FriendRequestApi.read({ direction: "outgoing" });
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value;
+      return await FriendRequestApi.read({ direction: "outgoing" });
     },
     initialData: [],
   });
