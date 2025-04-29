@@ -1,21 +1,19 @@
-import baseApi, { handleResponse } from "@/api/baseApi";
+import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import { FriendRequest } from "@/api/definitions/requests/friends/friend";
 import {
-  FriendResponse,
   FriendResponseSchema,
 } from "@/api/definitions/responses/friends/friend";
-import { Result } from "@badrap/result";
 
 const BASE_URL = "/friends/friend";
 
-export const read = async (): Promise<Result<FriendResponse["read"]>> => {
+export const read = async ()=> {
   const { data } = await baseApi.get(BASE_URL);
-  return await handleResponse(data, FriendResponseSchema.read);
+  return await parseResponseUnsafe(data, FriendResponseSchema.read);
 };
 
 export const remove = async (
   params: FriendRequest["remove"],
-): Promise<Result<FriendResponse["remove"]>> => {
+)=> {
   const { data } = await baseApi.delete(BASE_URL, { data: { ...params } });
-  return await handleResponse(data, FriendResponseSchema.remove);
+  return await parseResponseUnsafe(data, FriendResponseSchema.remove);
 };

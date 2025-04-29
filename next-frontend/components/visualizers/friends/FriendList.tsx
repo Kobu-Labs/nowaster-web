@@ -41,12 +41,7 @@ export const FriendsList = () => {
 
   const mutation = useMutation({
     mutationFn: async (friendship_id: string) => {
-      const data = await FriendsApi.remove({ friendship_id: friendship_id });
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value;
+      return await FriendsApi.remove({ friendship_id: friendship_id });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["friends", "my"] });

@@ -39,12 +39,6 @@ export default function TagsManagement() {
   const tagQuery = useQuery({
     ...queryKeys.tags.all,
     retry: false,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
   });
 
   const [searchQuery, setSearchQuery] = useState("");

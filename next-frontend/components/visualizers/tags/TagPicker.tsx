@@ -19,12 +19,6 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
   } = useQuery({
     ...queryKeys.tags.all,
     retry: false,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
   });
 
   if (isError) {
