@@ -30,15 +30,10 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
     }: {
       status: "accepted" | "rejected" | "cancelled";
     }) => {
-      const data = await FriendRequestApi.update({
+      return await FriendRequestApi.update({
         request_id: props.request.id,
         status,
       });
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value;
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({

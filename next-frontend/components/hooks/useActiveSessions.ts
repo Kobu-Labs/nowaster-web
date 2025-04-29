@@ -6,13 +6,6 @@ export const useActiveSessions = () => {
     ...queryKeys.sessions.active,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      return data.value;
-    },
   });
 
   return query;

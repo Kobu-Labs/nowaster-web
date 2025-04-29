@@ -28,12 +28,6 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
     ...queryKeys.categories.all,
     retry: false,
     staleTime: 5 * 60 * 1000,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
   });
 
   if (isError) {
@@ -78,12 +72,6 @@ export const SingleCategoryPicker: FC<
   } = useQuery({
     ...queryKeys.categories.all,
     retry: false,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
   });
 
   const [selectedCategory, setSelectedCategory] = useState<

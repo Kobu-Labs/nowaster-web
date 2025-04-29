@@ -10,11 +10,7 @@ export const useCreateStopwatchSession = () => {
 
   const mutation = useMutation({
     mutationFn: async (data: StopwatchSessionRequest["create"]) => {
-      const result = await StopwatchApi.create(data);
-      if (result.isErr) {
-        throw new Error(result.error.message);
-      }
-      return result.value;
+      return await StopwatchApi.create(data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({

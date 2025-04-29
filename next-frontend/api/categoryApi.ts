@@ -1,44 +1,29 @@
-import baseApi, { handleResponse } from "@/api/baseApi";
-import { Result } from "@badrap/result";
-import {
-  CategoryRequest,
-  CategoryResponse,
-  CategoryResponseSchema,
-} from "@/api/definitions";
+import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
+import { CategoryRequest, CategoryResponseSchema } from "@/api/definitions";
 
 const BASE_URL = "/category";
 
-export const getCategories = async (): Promise<
-  Result<CategoryResponse["readMany"]>
-> => {
+export const getCategories = async () => {
   const { data } = await baseApi.get(BASE_URL);
-  return await handleResponse(data, CategoryResponseSchema.readMany);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.readMany);
 };
 
-export const create = async (
-  params: CategoryRequest["create"],
-): Promise<Result<CategoryResponse["create"]>> => {
+export const create = async (params: CategoryRequest["create"]) => {
   const { data } = await baseApi.post(BASE_URL, params);
-  return await handleResponse(data, CategoryResponseSchema.create);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.create);
 };
 
-export const readMany = async (
-  params: CategoryRequest["readMany"],
-): Promise<Result<CategoryResponse["readMany"]>> => {
+export const readMany = async (params: CategoryRequest["readMany"]) => {
   const { data } = await baseApi.get(BASE_URL, { params: { ...params } });
-  return await handleResponse(data, CategoryResponseSchema.readMany);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.readMany);
 };
 
-export const update = async (
-  params: CategoryRequest["update"],
-): Promise<Result<CategoryResponse["update"]>> => {
+export const update = async (params: CategoryRequest["update"]) => {
   const { data } = await baseApi.patch(BASE_URL, { ...params });
-  return await handleResponse(data, CategoryResponseSchema.update);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.update);
 };
 
-export const readById = async (
-  params: CategoryRequest["readById"],
-): Promise<Result<CategoryResponse["readById"]>> => {
+export const readById = async (params: CategoryRequest["readById"]) => {
   const { data } = await baseApi.get(BASE_URL + "/" + params.id);
-  return await handleResponse(data, CategoryResponseSchema.readById);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.readById);
 };

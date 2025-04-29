@@ -25,13 +25,13 @@ export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
 
   }
 
-  if (result.isError || result.data.isErr) {
+  if (result.isError) {
     return <span>Error occured</span>;
   }
 
   return (
     <SessionBaseAreaChartUiProvider
-      data={result.data.value}
+      data={result.data}
       groupingOpts={props.groupingOpts}
     />
   );
