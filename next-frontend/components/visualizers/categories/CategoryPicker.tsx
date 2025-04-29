@@ -38,15 +38,13 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center  w-full grow h-screen m-20">
-        <Frown className="text-red-500 grow h-1/2 w-1/2" />
-      </div>
+      <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
     );
   }
 
   if (isPending) {
     return (
-      <Skeleton className="flex items-center justify-center w-full grow  h-10"></Skeleton>
+      <Skeleton className="flex items-center justify-center w-full grow h-10" />
     );
   }
 
@@ -96,9 +94,7 @@ export const SingleCategoryPicker: FC<
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center  w-full grow h-screen m-20">
-        <Frown className="text-red-500 grow h-1/2 w-1/2" />
-      </div>
+      <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
     );
   }
 
