@@ -17,9 +17,6 @@ type BaseSessionTableProps = {
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
   const { data, isLoading } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
-    select: (data) => {
-      return data.isOk ? data.value : [];
-    },
   });
 
   return (

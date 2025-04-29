@@ -21,19 +21,15 @@ export const SessionAverageDurationProvider = (
   } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-
-      if (data.value.length === 0) {
+      if (data.length === 0) {
         return 0;
       }
 
-      const totalAmount = data.value.reduce(
+      const totalAmount = data.reduce(
         (acc, curr) => acc + differenceInMinutes(curr.endTime, curr.startTime),
         0,
       );
-      return totalAmount / data.value.length;
+      return totalAmount / data.length;
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

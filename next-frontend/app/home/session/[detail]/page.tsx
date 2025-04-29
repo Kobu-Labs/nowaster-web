@@ -19,12 +19,6 @@ export default function Page(props: { params: { detail: string } }) {
   const categoryId = props.params.detail;
   const query = useQuery({
     ...queryKeys.categories.byId(categoryId),
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
   });
 
   const updateCategoryColor = useUpdateCategory({});

@@ -6,7 +6,7 @@ export default function PageLayout({ children }: RootLayoutProps) {
   return children;
 }
 
-import { handleResponse } from "@/api/baseApi";
+import { parseResponseToResult } from "@/api/baseApi";
 import { CategoryResponseSchema } from "@/api/definitions";
 import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     env.NEXT_PUBLIC_API_URL + "/category/" + id,
     { headers: { Authorization: `Bearer ${token}` } },
   );
-  const request = await handleResponse(data, CategoryResponseSchema.readById);
+  const request = await parseResponseToResult(data, CategoryResponseSchema.readById);
 
   if (request.isErr) {
     return {
