@@ -44,7 +44,7 @@ export const useUpdateCategory = ({
           <div className="flex items-center gap-2">
             Category
             <CategoryBadge name={data.name} color={data.color} />
-            created
+            updated
           </div>
         ),
       });
