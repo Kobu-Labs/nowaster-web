@@ -76,7 +76,7 @@ export default function TagsManagement() {
                   placeholder="Search tags..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="text-white placeholder:text-gray-500"
+                  className="text-primary placeholder:text-muted-foreground"
                 />
               </div>
               <Dialog
