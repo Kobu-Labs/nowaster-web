@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { TagDetails } from "@/api/definitions";
-import { useQuery } from "@tanstack/react-query";
 import { Check, Edit, Frown, LoaderCircle, Plus } from "lucide-react";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { ScrollArea } from "@/components/shadcn/scroll-area";
@@ -25,6 +23,7 @@ import {
   PopoverContent,
 } from "@/components/shadcn/popover";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import { useTags } from "@/components/hooks/tag/useTags";
 
 const fuzzyFindStrategy = (
   category: TagDetails,
@@ -36,24 +35,21 @@ const fuzzyFindStrategy = (
 };
 
 export default function TagsManagement() {
-  const tagQuery = useQuery({
-    ...queryKeys.tags.all,
-    retry: false,
-  });
-
+  const tags = useTags();
   const [searchQuery, setSearchQuery] = useState("");
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
   const [editTagDialogOpen, setEditTagDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<TagDetails | null>(null);
 
-  if (tagQuery.isError) {
+  if (tags.isError) {
     return (
       <div className="flex items-center justify-center  w-full grow h-screen m-20">
         <Frown className="text-red-500 grow h-1/2 w-1/2" />
       </div>
     );
   }
-  if (tagQuery.isPending) {
+
+  if (tags.isPending) {
     return (
       <Skeleton className="flex items-center justify-center  w-full grow h-screen m-20">
         <LoaderCircle strokeWidth={1} className="h-1/2 w-1/2 animate-spin" />
@@ -61,7 +57,7 @@ export default function TagsManagement() {
     );
   }
 
-  const filteredTags = tagQuery.data.filter((tag) =>
+  const filteredTags = tags.data.filter((tag) =>
     fuzzyFindStrategy(tag, searchQuery),
   );
 
