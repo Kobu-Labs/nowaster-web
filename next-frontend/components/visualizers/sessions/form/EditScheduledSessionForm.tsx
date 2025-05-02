@@ -94,11 +94,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   async function onSubmit(values: ScheduledSessionWithId) {
-    if (
-      values.endTime &&
-      values.startTime &&
-      isBefore(values.endTime, values.startTime)
-    ) {
+    if (isBefore(values.endTime, values.startTime)) {
       form.setError("startTime", {
         message: "Start time must be before end time",
       });
