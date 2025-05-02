@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SessionCard } from "@/components/visualizers/categories/SessionCard";
+import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
 import { randomColor } from "@/lib/utils";
 
 const createMockTags = (tagLabels: string[]) => {
