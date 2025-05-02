@@ -9,6 +9,7 @@ import {
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
+  Form,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +36,7 @@ import {
   subMinutes,
 } from "date-fns";
 import React from "react";
-import { useForm, Form } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const updateSessionPrecursor = z.object({
