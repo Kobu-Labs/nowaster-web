@@ -1,5 +1,4 @@
 import { CategoryApi } from "@/api";
-import { CategoryRequest, CategoryWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
@@ -7,36 +6,20 @@ import { categoryColors } from "@/state/categories";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetRecoilState } from "recoil";
 
-export const useCreateCategory = ({
-  onSuccess,
-}: {
-  onSuccess?: (val: CategoryWithId) => void;
-}) => {
+export const useCreateCategory = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const setColors = useSetRecoilState(categoryColors);
 
-  const toastError = (message: string) => {
-    toast({
-      title: "Error creating category",
-      description: message,
-      variant: "destructive",
-    });
-  };
-
   const mutation = useMutation({
-    mutationFn: async (params: CategoryRequest["create"]) => {
-      return await CategoryApi.create(params);
-    },
+    mutationFn: CategoryApi.create,
     onSuccess: async (data) => {
       await queryClient.invalidateQueries(queryKeys.categories.all);
       setColors((prev) => ({
         ...prev,
         [data.name]: data.color,
       }));
-      if (onSuccess) {
-        onSuccess(data);
-      }
+
       toast({
         description: (
           <div className="flex items-center gap-2">
@@ -48,10 +31,13 @@ export const useCreateCategory = ({
       });
     },
     onError: (error) => {
-      toastError(error.message);
+      toast({
+        title: "Error creating category",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
   return mutation;
 };
-//title: (<div>Category < CategoryBadge color={ data.value.color } name={ data.value.name } /> </div>),
