@@ -1,6 +1,5 @@
+import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
 
 const meta = {
   title: "ScheduledSessionCreationForm",
@@ -9,6 +8,6 @@ const meta = {
 } satisfies Meta<typeof ScheduledSessionCreationForm>;
 
 export default meta;
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 export const MainForm: Story = {};
