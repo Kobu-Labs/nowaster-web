@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
-import { FC, useState } from "react";
 import { tagColors } from "@/state/tags";
+import { FC, useState } from "react";
 import {
   Cell,
   Label,
@@ -16,7 +16,7 @@ import {
 import { useRecoilValue } from "recoil";
 
 import { formatTime, randomColor } from "@/lib/utils";
-import { AmountByCategory } from "@/components/visualizers/charts/SessionPieChart";
+import { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
 
 type SessionPieChartUiProviderProps = {
   data: AmountByCategory[];
