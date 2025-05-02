@@ -1,11 +1,11 @@
-import { FC } from "react";
+import { useTags } from "@/components/hooks/tag/useTags";
+import { Skeleton } from "@/components/shadcn/skeleton";
 import {
   TagPickerUiProvider,
   TagPickerUiProviderProps,
-} from "@/components/ui-providers/TagPickerUiProvider";
-import { Skeleton } from "@/components/shadcn/skeleton";
+} from "@/components/ui-providers/tags/TagPickerUiProvider";
 import { Frown } from "lucide-react";
-import { useTags } from "@/components/hooks/tag/useTags";
+import { FC } from "react";
 
 type SimpleTagPickerProps = Omit<TagPickerUiProviderProps, "availableTags">;
 

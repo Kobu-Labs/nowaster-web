@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { RecoilRoot } from "recoil";
 
-import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/SessionBaseAreaChartUiProvider";
 import { randomColor } from "@/lib/utils";
+import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/session/charts/SessionBaseAreaChartUiProvider";
 
 const meta = {
   title: "OverviewAreaChartVisualizer",
