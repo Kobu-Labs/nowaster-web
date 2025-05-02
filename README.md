@@ -6,9 +6,9 @@ Simple application for tracking your time
 
 
 
-## Deployment
+## Activity
 
-Learn how to run this application on our [wiki](https://github.com/Kobu-Labs/nowaster-web/wiki/Running-the-app)
+![Alt](https://repobeats.axiom.co/api/embed/7dc8f842034ca4bd3f1b4a98a07866d6aba7432e.svg "Repobeats analytics image")
 
 ## License
 

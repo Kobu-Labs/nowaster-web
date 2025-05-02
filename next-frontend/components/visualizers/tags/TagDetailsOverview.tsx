@@ -1,11 +1,11 @@
 import { TagDetails } from "@/api/definitions";
 import { Card, CardContent } from "@/components/shadcn/card";
-import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
-import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
-import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
-import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/session-table/BaseSessionColumns";
-import { BaseSessionTable } from "@/components/visualizers/sessions/session-table/BaseSessionTable";
+import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
+import { SessionAverageDurationProvider } from "@/components/visualizers/sessions/kpi/SessionAverageDurationCard";
+import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
+import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { FC } from "react";
 

@@ -7,9 +7,9 @@ import {
   DialogTitle,
 } from "@/components/shadcn/dialog";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
-import { SessionCard } from "@/components/visualizers/categories/SessionCard";
-import { EditScheduledSession } from "@/components/visualizers/sessions/EditScheduledSessionForm";
-import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/ScheduledSessionCreationForm";
+import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
+import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
+import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { sessionToNonIntersection } from "@/lib/sessions/intervals";
 import { cn } from "@/lib/utils";
 import {
@@ -85,11 +85,6 @@ export function SessionTimelineUiProvider({
   const percentToDate = (percent: number): Date => {
     const milliseconds = (percent / 100) * totalDuration;
     return addMilliseconds(startDate, milliseconds);
-  };
-
-  // Function to format date for display
-  const formatDateTime = (date: Date): string => {
-    return format(date, "MMM d, h:mm a");
   };
 
   // Function to handle mouse down on timeline
@@ -241,7 +236,7 @@ export function SessionTimelineUiProvider({
     const totalDurationMs = differenceInMilliseconds(endDate, startDate);
     const elapsedMs = (percentage / 100) * totalDurationMs;
     const result = addMilliseconds(startDate, elapsedMs);
-    return formatDateTime(result);
+    return format(result, "MMM d, HH:mm");
   };
 
   const TimelineRow: FC<{ sessions: ScheduledSessionWithId[] }> = ({

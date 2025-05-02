@@ -1,28 +1,22 @@
-import baseApi, { handleResponse } from "@/api/baseApi";
-import { Result } from "@badrap/result";
+import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import {
-  StatisticsResponse,
   StatisticsResponseSchema,
 } from "@/api/definitions";
 import { z } from "zod";
 
-export const getDashboardData = async (): Promise<
-  Result<StatisticsResponse["getDashboardData"]>
-> => {
+export const getDashboardData = async () => {
   const { data } = await baseApi.get("statistics/dashboard");
-  return await handleResponse(data, StatisticsResponseSchema.getDashboardData);
+  return await parseResponseUnsafe(data, StatisticsResponseSchema.getDashboardData);
 };
 
-export const getStreakData = async (): Promise<
-  Result<StatisticsResponse["getStreakData"]>
-> => {
+export const getStreakData = async () => {
   const { data } = await baseApi.get("statistics/streak");
-  return await handleResponse(data, StatisticsResponseSchema.getStreakData);
+  return await parseResponseUnsafe(data, StatisticsResponseSchema.getStreakData);
 };
 
 export const getColors = async () => {
   const { data } = await baseApi.get("statistics/colors");
-  return await handleResponse(
+  return await parseResponseUnsafe(
     data,
     z.object({
       tag_colors: z.array(z.tuple([z.string(), z.string()])),

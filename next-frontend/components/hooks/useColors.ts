@@ -11,24 +11,20 @@ export const useColors = () => {
   const query = useQuery({
     queryFn: async () => {
       const data = await StatisticsApi.getColors();
-      if (data.isErr) {
-        console.log("Error fetching colors", data.error.message);
-        return [];
-      }
 
       const tagColors: Record<string, string> = {};
       const category_colors: Record<string, string> = {};
 
-      data.value.category_colors.forEach(([color, categoryName]) => {
+      data.category_colors.forEach(([color, categoryName]) => {
         category_colors[categoryName] = color;
       });
 
-      data.value.tag_colors.forEach(([color, tagLabel]) => {
+      data.tag_colors.forEach(([color, tagLabel]) => {
         tagColors[tagLabel] = color;
       });
       setTagColors(tagColors);
       setCategoryColors(category_colors);
-      return data.value;
+      return data;
     },
     queryKey: ["colors"],
   });

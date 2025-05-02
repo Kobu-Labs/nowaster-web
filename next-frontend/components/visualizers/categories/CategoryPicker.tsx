@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
 
 import { CategoryWithId } from "@/api/definitions";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Frown } from "lucide-react";
 import {
@@ -10,7 +8,8 @@ import {
   MultipleCategoryPickerUiProvider,
   SingleCategoryPickerUiProviderProps,
   SingleCategoryPickerUiProvider,
-} from "@/components/ui-providers/CategoryPickerUiProvider";
+} from "@/components/ui-providers/categories/CategoryPickerUiProvider";
+import { useCategories } from "@/components/hooks/category/useCategory";
 
 type MultipleCategoryPickerProps = Omit<
   MultipleCategoryPickerUiProviderProps,
@@ -20,29 +19,15 @@ type MultipleCategoryPickerProps = Omit<
 export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   props,
 ) => {
-  const {
-    data: categories,
-    isPending,
-    isError,
-  } = useQuery({
-    ...queryKeys.categories.all,
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
-  });
+  const categories = useCategories();
 
-  if (isError) {
+  if (categories.isError) {
     return (
       <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
     );
   }
 
-  if (isPending) {
+  if (categories.isPending) {
     return (
       <Skeleton className="flex items-center justify-center w-full grow h-10" />
     );
@@ -51,7 +36,7 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   return (
     <MultipleCategoryPickerUiProvider
       modal={props.modal}
-      availableCategories={categories}
+      availableCategories={categories.data}
       selectedCategories={props.selectedCategories}
       onSelectCategory={props.onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
@@ -71,34 +56,20 @@ type SingleCategoryPickerProps = {
 export const SingleCategoryPicker: FC<
   SingleCategoryPickerProps & { value?: CategoryWithId }
 > = (props) => {
-  const {
-    data: categories,
-    isPending,
-    isError,
-  } = useQuery({
-    ...queryKeys.categories.all,
-    retry: false,
-    select: (data) => {
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
-      return data.value;
-    },
-  });
-
+  const categories = useCategories();
   const [selectedCategory, setSelectedCategory] = useState<
     CategoryWithId | undefined
   >();
   const isControlled = props.value !== undefined;
   const value = isControlled ? props.value : selectedCategory;
 
-  if (isError) {
+  if (categories.isError) {
     return (
       <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
     );
   }
 
-  if (isPending) {
+  if (categories.isPending) {
     return (
       <Skeleton className="flex w-full items-center justify-center h-10 grow" />
     );
@@ -114,7 +85,7 @@ export const SingleCategoryPicker: FC<
   return (
     <SingleCategoryPickerUiProvider
       modal={props.modal}
-      availableCategories={categories}
+      availableCategories={categories.data}
       selectedCategory={value}
       onSelectCategory={onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
