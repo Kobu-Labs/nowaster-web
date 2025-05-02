@@ -1,37 +1,37 @@
 "use client";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/shadcn/alert-dialog";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/shadcn/form";
 import {
-    addHours,
-    addMinutes,
-    isBefore,
-    setMinutes,
-    subHours,
-    subMinutes,
+  addHours,
+  addMinutes,
+  isBefore,
+  setMinutes,
+  subHours,
+  subMinutes,
 } from "date-fns";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
-    ScheduledSessionRequest,
-    ScheduledSessionWithId,
-    ScheduledSessionWithIdSchema,
+  ScheduledSessionRequest,
+  ScheduledSessionWithId,
+  ScheduledSessionWithIdSchema,
 } from "@/api/definitions";
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
@@ -40,8 +40,8 @@ import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
 import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import {
-    DateTimePicker,
-    QuickOption,
+  DateTimePicker,
+  QuickOption,
 } from "@/components/visualizers/DateTimePicker";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
