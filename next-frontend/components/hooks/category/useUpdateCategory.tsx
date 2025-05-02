@@ -1,5 +1,5 @@
 import { CategoryApi } from "@/api";
-import { CategoryRequest, CategoryWithId } from "@/api/definitions";
+import { CategoryWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
@@ -16,20 +16,9 @@ export const useUpdateCategory = ({
   const queryClient = useQueryClient();
   const setColors = useSetRecoilState(categoryColors);
 
-  const toastError = (message: string) => {
-    toast({
-      title: "Error updating category",
-      description: message,
-      variant: "destructive",
-    });
-  };
-
   const mutation = useMutation({
-    mutationFn: async (params: CategoryRequest["update"]) => {
-      return await CategoryApi.update(params);
-    },
+    mutationFn: CategoryApi.update,
     onSuccess: async (data) => {
-
       await queryClient.invalidateQueries(queryKeys.categories.all);
       setColors((prev) => ({
         ...prev,
@@ -50,7 +39,11 @@ export const useUpdateCategory = ({
       });
     },
     onError: (error) => {
-      toastError(error.message);
+      toast({
+        title: "Error updating category",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
