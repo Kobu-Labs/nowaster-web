@@ -1,8 +1,8 @@
-import { WeekDatePicker } from "@/components/ui-providers/date-pickers/WeekDatePicker";
 import { MonthDatePicker } from "@/components/ui-providers/date-pickers/MonthDatePicker";
+import { WeekDatePicker } from "@/components/ui-providers/date-pickers/WeekDatePicker";
 import { YearDatePicker } from "@/components/ui-providers/date-pickers/YearDatePicker";
+import { Granularity } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { type ComponentProps, type FC } from "react";
-import { Granularity } from "@/components/visualizers/charts/GranularitySelect";
 
 const granularityToComponent = {
   "days-in-week": WeekDatePicker,

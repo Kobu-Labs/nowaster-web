@@ -1,8 +1,3 @@
-import { FC, HTMLAttributes, useState } from "react";
-import {
-  Granularity,
-  GranularitySelect,
-} from "@/components/visualizers/charts/GranularitySelect";
 import {
   SessionFilterPrecursor,
   filterPrecursorAtom,
@@ -11,14 +6,19 @@ import {
 } from "@/state/chart-filter";
 import { Provider, useAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
+import { FC, HTMLAttributes, useState } from "react";
 
-import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
-import { ChartFilter } from "@/components/visualizers/charts/ChartFilter";
-import { SessionBaseAreaChart } from "@/components/visualizers/charts/SessionBaseAreChart";
 import { GranularityBasedDatePicker } from "@/components/ui-providers/date-pickers/GranularityBasedDatePicker";
-import { DeepRequired } from "react-hook-form";
+import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
+import { DeepRequired } from "react-hook-form";
+import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
+import {
+  Granularity,
+  GranularitySelect,
+} from "@/components/visualizers/sessions/charts/GranularitySelect";
+import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: Granularity;
