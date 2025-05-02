@@ -1,5 +1,5 @@
 import { TagApi } from "@/api";
-import { TagDetails, TagRequest } from "@/api/definitions";
+import { TagRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
@@ -7,11 +7,7 @@ import { tagColors } from "@/state/tags";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetRecoilState } from "recoil";
 
-export const useCreateTag = ({
-  onSuccess,
-}: {
-  onSuccess?: (val: TagDetails) => void;
-}) => {
+export const useCreateTag = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const setColors = useSetRecoilState(tagColors);
@@ -37,10 +33,6 @@ export const useCreateTag = ({
         ),
         variant: "default",
       });
-
-      if (onSuccess) {
-        onSuccess(data);
-      }
     },
   });
 
