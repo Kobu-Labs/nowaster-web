@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/shadcn/dialog";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
-import { SessionCard } from "@/components/visualizers/categories/SessionCard";
+import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
 import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { sessionToNonIntersection } from "@/lib/sessions/intervals";
