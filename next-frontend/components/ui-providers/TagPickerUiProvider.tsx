@@ -70,12 +70,12 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   const isControlled = props.selectedTags !== undefined;
 
   // TODO move this higher
-  const { mutate: createTag } = useCreateTag({
-    onSuccess: (tag) => {
-      handleTagSelect(tag);
-      setNewTagColor(randomColor());
-    },
-  });
+  const { mutate: createTag } = useCreateTag();
+
+  const handleTagCreate = (tag: TagDetails) => {
+    handleTagSelect(tag);
+    setNewTagColor(randomColor());
+  };
 
   const handleTagSelect = (tag: TagDetails) => {
     const newTags = tagsValue.some((t) => t.id === tag.id)
@@ -140,8 +140,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {tagsValue.length === 0
                 ? "Select Tags"
                 : tagsValue.map((tag) => (
-                  <TagBadge tag={tag} variant="auto" key={tag.id} />
-                ))}
+                    <TagBadge tag={tag} variant="auto" key={tag.id} />
+                  ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -155,27 +155,30 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-            <CommandGroup>
-              <CommandItem
-                className="flex"
-                onSelect={() =>
-                  createTag({
-                    color: newTagColor,
-                    label: searchTerm,
-                    allowedCategories: [],
-                  })
-                }
-              >
-                <p>Create</p>
-                <div className="grow"></div>
-                <TagBadge
-                  variant="manual"
-                  value={searchTerm}
-                  colors={newTagColor}
-                />
-              </CommandItem>
-            </CommandGroup>
-          )}
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() =>
+                    createTag(
+                      {
+                        color: newTagColor,
+                        label: searchTerm,
+                        allowedCategories: [],
+                      },
+                      { onSuccess: handleTagCreate },
+                    )
+                  }
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <TagBadge
+                    variant="manual"
+                    value={searchTerm}
+                    colors={newTagColor}
+                  />
+                </CommandItem>
+              </CommandGroup>
+            )}
           <ScrollArea
             type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
