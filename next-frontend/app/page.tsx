@@ -1,4 +1,4 @@
-import { ThemedImage } from "@/app/ThemedImage";
+import { ThemedImage } from "@/components/visualizers/ThemedImage";
 import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
 import { GoToAppButton } from "@/components/pages/GoToAppButton";
 import { SignInButton } from "@/components/pages/SignInButton";
