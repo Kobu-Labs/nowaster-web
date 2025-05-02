@@ -15,8 +15,8 @@ import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSe
 import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 
-export default function Page(props: { params: { detail: string } }) {
-  const categoryId = props.params.detail;
+export default function Page(props: { params: { id: string } }) {
+  const categoryId = props.params.id;
   const query = useQuery({
     ...queryKeys.categories.byId(categoryId),
   });
