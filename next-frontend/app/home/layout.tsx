@@ -18,6 +18,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTags } from "@/components/hooks/tag/useTags";
+import { useCategories } from "@/components/hooks/category/useCategory";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -62,7 +64,9 @@ const AxiosInterceptorWrapper = ({ children }: RootLayoutProps) => {
     setReady(true);
   }, [auth]);
 
-  // load initial colors
+  // load initially needed data
+  useTags();
+  useCategories();
   useColors();
 
   return (
