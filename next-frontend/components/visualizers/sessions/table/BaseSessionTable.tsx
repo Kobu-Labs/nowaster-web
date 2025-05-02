@@ -1,7 +1,7 @@
 "use client";
 import { ScheduledSessionWithId } from "@/api/definitions";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC } from "react";
 
@@ -15,13 +15,14 @@ type BaseSessionTableProps = {
 };
 
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
-  const { data, isLoading } = useQuery({
+  const { data, isPending } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
+    placeholderData: keepPreviousData,
   });
 
   return (
     <DataTable
-      loading={isLoading}
+      loading={isPending}
       columns={props.columns ?? BaseSessionTableColumns}
       data={data ?? []}
     />

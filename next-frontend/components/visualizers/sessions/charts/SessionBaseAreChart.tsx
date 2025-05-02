@@ -1,5 +1,5 @@
 import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -18,6 +18,7 @@ export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    placeholderData: keepPreviousData,
   });
 
   if (result.isPending) {
