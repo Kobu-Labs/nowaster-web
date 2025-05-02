@@ -7,21 +7,23 @@ import "@/styles/globals.css";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { RecoilRoot } from "recoil";
 
-import { SiteHeader } from "@/components/pages/site-header";
-import { Toaster } from "@/components/shadcn/toaster";
-import { ReactQueryProvider } from "@/app/ReactQueryProvider";
-import { useAuth } from "@clerk/nextjs";
 import { setupAxiosInterceptors } from "@/api/baseApi";
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/shadcn/skeleton";
-import { LoaderCircle } from "lucide-react";
 import { useColors } from "@/components/hooks/useColors";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SiteHeader } from "@/components/pages/site-header";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Toaster } from "@/components/shadcn/toaster";
+import { useAuth } from "@clerk/nextjs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { LoaderCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
+
+const queryClient = new QueryClient();
 
 export default function RootLayout({ children }: RootLayoutProps) {
   const auth = useAuth();
@@ -42,11 +44,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <RecoilRoot>
-      <ReactQueryProvider>
+      <QueryClientProvider client={queryClient}>
         <SpeedInsights />
         <Analytics />
         <AxiosInterceptorWrapper>{children}</AxiosInterceptorWrapper>
-      </ReactQueryProvider>
+      </QueryClientProvider>
     </RecoilRoot>
   );
 }
