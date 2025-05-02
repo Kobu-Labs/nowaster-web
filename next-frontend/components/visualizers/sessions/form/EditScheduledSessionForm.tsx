@@ -1,53 +1,53 @@
 "use client";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/shadcn/alert-dialog";
-import { useForm } from "react-hook-form";
 import {
-  addHours,
-  addMinutes,
-  isBefore,
-  setMinutes,
-  subHours,
-  subMinutes,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/shadcn/form";
+import {
+    addHours,
+    addMinutes,
+    isBefore,
+    setMinutes,
+    subHours,
+    subMinutes,
 } from "date-fns";
 import { FC, useState } from "react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/shadcn/form";
+import { useForm } from "react-hook-form";
 
 import {
-  ScheduledSessionWithId,
-  ScheduledSessionWithIdSchema,
+    ScheduledSessionRequest,
+    ScheduledSessionWithId,
+    ScheduledSessionWithIdSchema,
 } from "@/api/definitions";
-import { cn } from "@/lib/utils";
-import { ArrowBigRight } from "lucide-react";
+import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
+import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { Input } from "@/components/shadcn/input";
+import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import {
-  DateTimePicker,
-  QuickOption,
+    DateTimePicker,
+    QuickOption,
 } from "@/components/visualizers/DateTimePicker";
-import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
-import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
-import { ScheduledSessionRequest } from "@/api/definitions";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
-import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
+import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowBigRight } from "lucide-react";
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -100,9 +100,6 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
       });
       return;
     }
-    if (props.onSave) {
-      props.onSave();
-    }
 
     const data: ScheduledSessionRequest["update"] = {
       id: values.id,
@@ -113,7 +110,9 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
       tag_ids: values.tags.map((tag) => tag.id),
     };
 
-    await updateSession.mutateAsync(data);
+    await updateSession.mutateAsync(data, {
+      onSuccess: props.onSave,
+    });
   }
 
   return (
