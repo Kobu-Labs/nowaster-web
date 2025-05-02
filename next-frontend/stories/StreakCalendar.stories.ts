@@ -1,7 +1,6 @@
+import { SessionStreakCalendar } from "@/components/visualizers/sessions/SessionStreakCalendar";
 import type { Meta, StoryObj } from "@storybook/react";
 import { subDays } from "date-fns";
-
-import { SessionStreakCalendar } from "@/components/visualizers/charts/SessionStreakCalendar";
 
 const meta = {
   title: "SessionStreakCalendar",
@@ -10,7 +9,7 @@ const meta = {
 } satisfies Meta<typeof SessionStreakCalendar>;
 
 export default meta;
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 function randomDate(start: Date, end: Date): Date {
   return new Date(

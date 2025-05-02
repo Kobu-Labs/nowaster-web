@@ -1,8 +1,7 @@
+import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
 import type { Meta, StoryObj } from "@storybook/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot } from "recoil";
-
-import { ChartFilter } from "@/components/visualizers/charts/ChartFilter";
 
 const meta = {
   title: "ChartFilter",
@@ -11,7 +10,7 @@ const meta = {
 } satisfies Meta<typeof ChartFilter>;
 
 export default meta;
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 export const FilterSettingsBase: Story = {
   render: () => {
