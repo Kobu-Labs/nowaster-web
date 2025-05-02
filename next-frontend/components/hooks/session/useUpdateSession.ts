@@ -34,15 +34,11 @@ const useUpdateStopwatchSession = () => {
 
   const updateSessionMutation = useMutation({
     mutationFn: async (data: StopwatchSessionRequest["update"]) => {
-      const result = await StopwatchApi.update(data);
-      if (result.isErr) {
-        throw new Error(result.error.message);
-      }
-      return result.value;
+      return await StopwatchApi.update(data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.sessions.active._def,
+        queryKey: queryKeys.sessions.active.queryKey,
       });
       toast({
         description: `Session updated successfully!`,
@@ -66,11 +62,7 @@ const useUpdateScheduledSession = () => {
 
   const updateSessionMutation = useMutation({
     mutationFn: async (data: ScheduledSessionRequest["update"]) => {
-      const result = await ScheduledSessionApi.update(data);
-      if (result.isErr) {
-        throw new Error(result.error.message);
-      }
-      return result.value;
+      return await ScheduledSessionApi.update(data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({

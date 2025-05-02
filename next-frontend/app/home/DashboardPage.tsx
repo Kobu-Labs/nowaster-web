@@ -1,10 +1,10 @@
 "use client";
 
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
-import { CurrentStreakKpiCard } from "@/components/visualizers/CurrentStreakKpiCard";
-import { IntervaledSessionTimeline } from "@/components/visualizers/sessions/IntervaledSessionTimeline";
-import { TotalSessionTimeKpiCard } from "@/components/visualizers/TotalMinutesSpentKpiCard";
-import { TotalSessionsKpiCard } from "@/components/visualizers/TotalSessionsKpiCard";
+import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
+import { CurrentStreakKpiCard } from "@/components/visualizers/sessions/kpi/CurrentStreakKpiCard";
+import { TotalSessionTimeKpiCard } from "@/components/visualizers/sessions/kpi/TotalMinutesSpentKpiCard";
+import { TotalSessionsKpiCard } from "@/components/visualizers/sessions/kpi/TotalSessionsKpiCard";
+import { IntervaledSessionTimeline } from "@/components/visualizers/sessions/timeline/IntervaledSessionTimeline";
 import { subHours } from "date-fns";
 import { useMemo } from "react";
 

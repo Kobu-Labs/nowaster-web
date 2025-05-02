@@ -9,11 +9,8 @@ export const useMyFriends = () => {
     queryKey: ["friends", "my"],
     queryFn: async () => {
       const data = await FriendsApi.read();
-      if (data.isErr) {
-        throw new Error(data.error.message);
-      }
 
-      return data.value.map((friendship) => {
+      return data.map((friendship) => {
         return {
           id: friendship.id,
           friend:

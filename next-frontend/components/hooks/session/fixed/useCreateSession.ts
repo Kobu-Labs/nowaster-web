@@ -10,11 +10,7 @@ export const useCreateScheduledSession = () => {
 
   const mutation = useMutation({
     mutationFn: async (data: ScheduledSessionRequest["create"]) => {
-      const result = await ScheduledSessionApi.create(data);
-      if (result.isErr) {
-        throw new Error(result.error.message);
-      }
-      return result.value;
+      return await ScheduledSessionApi.create(data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
