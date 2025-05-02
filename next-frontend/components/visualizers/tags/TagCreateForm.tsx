@@ -54,12 +54,11 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
     }
   };
 
-  const mutation = useCreateTag({
-    onSuccess: (data) => {
-      setNewTagName("");
-      props.onSave(data);
-    },
-  });
+  const mutation = useCreateTag();
+  const handleTagCreate = (tag: TagWithId) => {
+    setNewTagName("");
+    props.onSave(tag);
+  };
 
   return (
     <Card className="h-fit">
@@ -157,11 +156,16 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
             loading={mutation.isPending}
             disabled={newTagName.length === 0}
             onClick={() =>
-              mutation.mutate({
-                label: newTagName,
-                allowedCategories: selectedCategories,
-                color: selectedColor,
-              })
+              mutation.mutate(
+                {
+                  label: newTagName,
+                  allowedCategories: selectedCategories,
+                  color: selectedColor,
+                },
+                {
+                  onSuccess: handleTagCreate,
+                },
+              )
             }
           >
             <Save className="mr-2 h-4 w-4" /> Save

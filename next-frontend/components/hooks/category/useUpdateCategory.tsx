@@ -1,5 +1,4 @@
 import { CategoryApi } from "@/api";
-import { CategoryWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
@@ -7,11 +6,7 @@ import { categoryColors } from "@/state/categories";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetRecoilState } from "recoil";
 
-export const useUpdateCategory = ({
-  onSuccess,
-}: {
-  onSuccess?: (val: CategoryWithId) => void;
-}) => {
+export const useUpdateCategory = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const setColors = useSetRecoilState(categoryColors);
@@ -25,9 +20,6 @@ export const useUpdateCategory = ({
         [data.name]: data.color,
       }));
 
-      if (onSuccess) {
-        onSuccess(data);
-      }
       toast({
         description: (
           <div className="flex items-center gap-2">
