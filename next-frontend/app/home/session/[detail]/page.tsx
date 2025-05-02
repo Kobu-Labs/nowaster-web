@@ -1,19 +1,19 @@
 "use client";
 
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { Skeleton } from "@/components/shadcn/skeleton";
 import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
-import { FilteredSessionAreaChart } from "@/components/visualizers/charts/FilteredSessionAreaChart";
-import { SessionAverageDurationProvider } from "@/components/visualizers/charts/SessionAverageDurationCard";
-import { SessionCountCard } from "@/components/visualizers/charts/SessionCountCard";
-import { TagsToSessionPieChart } from "@/components/visualizers/charts/TagsToSessionPieChart";
-import { TotalSessionTimeCard } from "@/components/visualizers/charts/TotalSessionTimeCard";
+import { ColorPicker } from "@/components/visualizers/ColorPicker";
+import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
+import { TagsToSessionPieChart } from "@/components/visualizers/sessions/charts/TagsToSessionPieChart";
+import { SessionAverageDurationProvider } from "@/components/visualizers/sessions/kpi/SessionAverageDurationCard";
+import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
+import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
 import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { ColorPicker } from "@/components/visualizers/ColorPicker";
-import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
-import { Skeleton } from "@/components/shadcn/skeleton";
 
 export default function Page(props: { params: { detail: string } }) {
   const categoryId = props.params.detail;
