@@ -109,7 +109,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
               <div className="flex sm:flex-col p-2 items-center">
                 <p className="text-muted-foreground">HH</p>
                 <Separator />
-                {hours.reverse().map((hour) => (
+                {hours.map((hour) => (
                   <Button
                     key={hour}
                     size="icon"
