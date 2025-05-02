@@ -1,10 +1,10 @@
-import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { ScheduledSession } from "@/api/definitions";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { SessionPieChartUiProvider } from "@/components/ui-providers/SessionPieChartUiProvider";
+import { SessionPieChartUiProvider } from "@/components/ui-providers/session/charts/SessionPieChartUiProvider";
 
 type SessionPieChart = {
   filter?: SessionFilterPrecursor;
