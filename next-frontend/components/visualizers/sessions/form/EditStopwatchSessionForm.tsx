@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   CategoryWithIdSchema,
@@ -72,7 +72,6 @@ const dateQuickOptions: QuickOption[] = [
     increment: (date) => subHours(date, 1),
   },
 ];
-
 
 const formatTimeDifference = (seconds: number) => {
   const diffInSeconds = seconds;
