@@ -21,7 +21,7 @@ export default function Page(props: { params: { detail: string } }) {
     ...queryKeys.categories.byId(categoryId),
   });
 
-  const updateCategoryColor = useUpdateCategory({});
+  const updateCategoryColor = useUpdateCategory();
 
   if (query.isPending) {
     return (
