@@ -52,13 +52,7 @@ export const MultipleCategoryPickerUiProvider: FC<
   const [newCategoryColor, setNewCategoryColor] =
     useState<string>(randomColor());
 
-  // TODO move this higher
-  const { mutate: createCategory } = useCreateCategory({
-    onSuccess: (cat) => {
-      props.onSelectCategory(cat);
-      setNewCategoryColor(newCategoryColor);
-    },
-  });
+  const { mutateAsync: createCategory } = useCreateCategory();
 
   let categoriesInDisplayOrder = props.availableCategories;
   if (props.categoryDisplayStrategy) {
@@ -102,12 +96,12 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <CategoryBadge
-                      key={category.id}
-                      name={category.name}
-                      color={category.color}
-                    />
-                  ))}
+                      <CategoryBadge
+                        key={category.id}
+                        name={category.name}
+                        color={category.color}
+                      />
+                    ))}
               </ScrollArea>
             </div>
           </div>
@@ -124,21 +118,29 @@ export const MultipleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <Button
-              variant="ghost"
-              className="m-0"
-              onClick={() =>
-                createCategory({
-                  color: newCategoryColor,
-                  name: searchTerm,
-                })
-              }
-            >
-              <p>Create</p>
-              <div className="grow"></div>
-              <CategoryBadge color={newCategoryColor} name={searchTerm} />
-            </Button>
-          )}
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={async () =>
+                  await createCategory(
+                    {
+                      color: newCategoryColor,
+                      name: searchTerm,
+                    },
+                    {
+                      onSuccess: (cat) => {
+                        props.onSelectCategory(cat);
+                        setNewCategoryColor(newCategoryColor);
+                      },
+                    },
+                  )
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
           <CommandSeparator />
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
@@ -173,10 +175,10 @@ export const MultipleCategoryPickerUiProvider: FC<
           )}
           {categoriesInDisplayOrder.length === 0 &&
             searchTerm.trim().length === 0 && (
-            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
                 Type to create!
-            </div>
-          )}
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
@@ -207,12 +209,7 @@ export const SingleCategoryPickerUiProvider: FC<
   const [newCategoryColor, setNewCategoryColor] =
     useState<string>(randomColor());
 
-  const { mutate: createCategory } = useCreateCategory({
-    onSuccess: (cat) => {
-      props.onSelectCategory(cat);
-      setNewCategoryColor(randomColor());
-    },
-  });
+  const { mutateAsync: createCategory } = useCreateCategory();
 
   let categoriesInDisplayOrder = props.availableCategories;
   if (props.categoryDisplayStrategy && props.selectedCategory) {
@@ -268,21 +265,29 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <Button
-              variant="ghost"
-              className="m-0"
-              onClick={() =>
-                createCategory({
-                  color: newCategoryColor,
-                  name: searchTerm,
-                })
-              }
-            >
-              <p>Create</p>
-              <div className="grow"></div>
-              <CategoryBadge color={newCategoryColor} name={searchTerm} />
-            </Button>
-          )}
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={async () =>
+                  await createCategory(
+                    {
+                      color: newCategoryColor,
+                      name: searchTerm,
+                    },
+                    {
+                      onSuccess: (cat) => {
+                        props.onSelectCategory(cat);
+                        setNewCategoryColor(randomColor());
+                      },
+                    },
+                  )
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
           <CommandSeparator />
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
@@ -315,10 +320,10 @@ export const SingleCategoryPickerUiProvider: FC<
           )}
           {categoriesInDisplayOrder.length === 0 &&
             searchTerm.trim().length === 0 && (
-            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
                 Type to create!
-            </div>
-          )}
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
