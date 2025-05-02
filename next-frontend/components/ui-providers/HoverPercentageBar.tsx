@@ -1,11 +1,11 @@
 import { FC, PropsWithChildren, useState } from "react";
 
 type HoverPercentageBarProps = {
-    formatter: (percentage: number) => string;
+  formatter: (percentage: number) => string;
 };
 
 export const HoverPercentageBar: FC<
-    PropsWithChildren<HoverPercentageBarProps>
+  PropsWithChildren<HoverPercentageBarProps>
 > = (props) => {
   const [hoverX, setHoverX] = useState<number | null>(null);
   const [percentage, setPercentage] = useState<number | null>(null);
@@ -24,7 +24,7 @@ export const HoverPercentageBar: FC<
 
   return (
     <div
-      className="relative w-full h-full border rounded-2xl overflow-hidden"
+      className="relative w-full h-full border rounded-2xl overflow-hidden p-4"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
