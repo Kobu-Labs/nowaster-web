@@ -87,11 +87,6 @@ export function SessionTimelineUiProvider({
     return addMilliseconds(startDate, milliseconds);
   };
 
-  // Function to format date for display
-  const formatDateTime = (date: Date): string => {
-    return format(date, "MMM d, h:mm a");
-  };
-
   // Function to handle mouse down on timeline
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!timelineRef.current) {
@@ -241,7 +236,7 @@ export function SessionTimelineUiProvider({
     const totalDurationMs = differenceInMilliseconds(endDate, startDate);
     const elapsedMs = (percentage / 100) * totalDurationMs;
     const result = addMilliseconds(startDate, elapsedMs);
-    return formatDateTime(result);
+    return format(result, "MMM d, HH:mm");
   };
 
   const TimelineRow: FC<{ sessions: ScheduledSessionWithId[] }> = ({
