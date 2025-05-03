@@ -1,10 +1,9 @@
 use anyhow::Result;
-use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::user::{create_user::CreateUserDto, update_user::UpdateUserDto},
+    dto::user::create_user::CreateUserDto,
     entity::user::User,
 };
 
@@ -14,18 +13,23 @@ pub struct UserRepository {
 }
 
 #[derive(sqlx::FromRow, Debug)]
-pub struct ReadUserRow {
-    id: String,
-    displayname: String,
+pub struct UserRow {
+    pub id: String,
+    pub displayname: String,
+}
+
+pub fn map_user_row(row: UserRow) -> User {
+    User {
+        id: row.id,
+        username: row.displayname,
+    }
 }
 
 pub trait UserRepositoryTrait {
-    async fn update(&self, dto: UpdateUserDto) -> Result<User>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn create(&self, dto: CreateUserDto) -> Result<User>;
-    async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>>;
     async fn get_user_by_username(&self, username: String) -> Result<User>;
-    fn mapper(&self, row: ReadUserRow) -> User;
+    fn mapper(&self, row: UserRow) -> User;
 }
 
 impl UserRepositoryTrait for UserRepository {
@@ -37,7 +41,7 @@ impl UserRepositoryTrait for UserRepository {
 
     async fn get_user_by_username(&self, username: String) -> Result<User> {
         let row = sqlx::query_as!(
-            ReadUserRow,
+            UserRow,
             r#"
                 SELECT id, displayname
                 FROM "user"
@@ -53,7 +57,7 @@ impl UserRepositoryTrait for UserRepository {
 
     async fn create(&self, dto: CreateUserDto) -> Result<User> {
         let row = sqlx::query_as!(
-            ReadUserRow,
+            UserRow,
             r#"
                     INSERT INTO "user" (id, displayname)
                     VALUES ($1, $2)
@@ -68,60 +72,7 @@ impl UserRepositoryTrait for UserRepository {
         Ok(self.mapper(row))
     }
 
-    async fn update(&self, dto: UpdateUserDto) -> Result<User> {
-        let mut should_execute = false;
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
-            r#"
-                UPDATE "user" SET
-            "#,
-        );
-
-        if let Some(displayname) = dto.username {
-            if displayname.is_empty() {
-                return Err(anyhow::anyhow!("Display name cannot be empty"));
-            }
-            query.push(" displayname = ");
-            query.push_bind(displayname);
-            should_execute = true;
-        }
-        query.push(" WHERE id = ");
-        query.push_bind(dto.id);
-        query.push(" RETURNING id, displayname");
-
-        if !should_execute {
-            return Err(anyhow::anyhow!("No fields to update"));
-        }
-
-        let row = query
-            .build_query_as::<ReadUserRow>()
-            .fetch_one(self.db_conn.get_pool())
-            .await?;
-
-        Ok(self.mapper(row))
-    }
-
-    fn mapper(&self, row: ReadUserRow) -> User {
-        User {
-            id: row.id,
-            username: row.displayname,
-        }
-    }
-
-    async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>> {
-        let row = sqlx::query_as!(
-            ReadUserRow,
-            r#"
-                INSERT INTO "user" (id, displayname)
-                VALUES ($1, $2)
-                ON CONFLICT (id) DO NOTHING
-                RETURNING id, displayname
-            "#,
-            dto.id,
-            dto.username
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
-
-        Ok(row.map(|row| self.mapper(row)))
+    fn mapper(&self, row: UserRow) -> User {
+        map_user_row(row)
     }
 }

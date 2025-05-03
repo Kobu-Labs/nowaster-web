@@ -1,5 +1,5 @@
 use crate::{
-    dto::user::{create_user::CreateUserDto, update_user::UpdateUserDto},
+    dto::user::create_user::CreateUserDto,
     entity::user::User,
     repository::user::{UserRepository, UserRepositoryTrait},
     router::user::root::UserError,
@@ -17,14 +17,6 @@ impl UserService {
 
     pub async fn create(&self, dto: CreateUserDto) -> Result<User, UserError> {
         let res = self.repo.create(dto).await;
-        match res {
-            Ok(u) => Ok(u),
-            Err(e) => Err(UserError::UnknownError(e.to_string())),
-        }
-    }
-
-    pub async fn update_user(&self, dto: UpdateUserDto) -> Result<User, UserError> {
-        let res = self.repo.update(dto).await;
         match res {
             Ok(u) => Ok(u),
             Err(e) => Err(UserError::UnknownError(e.to_string())),
