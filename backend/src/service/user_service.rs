@@ -21,13 +21,6 @@ impl UserService {
         }
     }
 
-    pub async fn upsert(&self, dto: CreateUserDto) -> Result<(), UserError> {
-        let res = self.repo.upsert(dto).await;
-        match res {
-            Ok(_) => Ok(()),
-            Err(e) => Err(UserError::UnknownError(e.to_string())),
-        }
-    }
 
     pub async fn update_user(&self, dto: UpdateUserDto) -> Result<ReadUserDto, UserError> {
         let res = self.repo.update(dto).await;
