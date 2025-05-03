@@ -223,7 +223,6 @@ impl StopwatchSessionRepository {
         .execute(tx.as_mut())
         .await?;
 
-        println!("Tags: {:?}", dto.tag_ids);
         if let Some(tags) = dto.tag_ids {
             sqlx::query!(
                 r#"
