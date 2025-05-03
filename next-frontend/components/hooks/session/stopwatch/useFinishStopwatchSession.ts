@@ -1,4 +1,4 @@
-import { ScheduledSessionApi } from "@/api";
+import { ScheduledSessionApi, StopwatchApi } from "@/api";
 import {
   ScheduledSessionSchema,
   StopwatchSessionWithId,
@@ -24,6 +24,7 @@ export const useFinishStopwatchSession = () => {
         console.error(parsed.error);
         throw new Error("Fill out start time and category!");
       }
+      await StopwatchApi.remove({ id: session.id });
       return await ScheduledSessionApi.create(parsed.data);
     },
 
