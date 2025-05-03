@@ -122,12 +122,6 @@ impl UserRepositoryTrait for UserRepository {
         .fetch_optional(self.db_conn.get_pool())
         .await?;
 
-        match row {
-            Some(row) => {
-                let user = self.mapper(row);
-                Ok(Some(user))
-            }
-            None => Ok(None),
-        }
+        Ok(row.map(|row| self.mapper(row)))
     }
 }
