@@ -2,13 +2,12 @@ use crate::{
     dto::{
         category::read_category::ReadCategoryDto,
         session::stopwatch_session::ReadStopwatchSessionDto, tag::read_tag::ReadTagDto,
-        user::read_user::ReadUserDto,
     },
     service::friend_service::ReadUserAvatarDto,
 };
 
 use super::{category::Category, tag::Tag, user::User};
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -44,7 +43,7 @@ pub struct FixedSession {
     pub end_time: DateTime<Local>,
 
     pub description: Option<String>,
-    pub user_id: String,
+    pub user: User,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

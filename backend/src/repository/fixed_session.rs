@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgRow, prelude::FromRow, Postgres, QueryBuilder, Row};
+use sqlx::{prelude::FromRow, Postgres, QueryBuilder};
 use std::{sync::Arc, vec};
 use uuid::Uuid;
 
@@ -16,12 +16,16 @@ use crate::{
     router::clerk::ClerkUser,
 };
 
+use super::user::{map_user_row, UserRow};
+
 #[derive(Clone)]
 pub struct FixedSessionRepository {
     db_conn: Arc<Database>,
 }
 
 pub trait SessionRepositoryTrait {
+    type SessionType;
+    fn new(db_conn: &Arc<Database>) -> Self;
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
@@ -33,9 +37,7 @@ pub trait SessionRepositoryTrait {
         dto: FilterSessionDto,
         actor: ClerkUser,
     ) -> Result<Vec<Self::SessionType>>;
-    type SessionType;
-    fn new(db_conn: &Arc<Database>) -> Self;
-    fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
+    fn convert(&self, val: Vec<SessionRow>) -> Result<Vec<Self::SessionType>>;
     async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>>;
     async fn create(
         &self,
@@ -43,15 +45,14 @@ pub trait SessionRepositoryTrait {
         category_id: Uuid,
         tag_ids: Vec<Uuid>,
         actor: ClerkUser,
-    ) -> Result<FixedSession>;
+    ) -> Result<Self::SessionType>;
 }
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
-pub struct GenericFullRowSession {
+pub struct SessionRow {
     pub id: Uuid,
-    pub user_id: String,
     start_time: DateTime<Utc>,
-    end_time: Option<DateTime<Utc>>,
+    end_time: DateTime<Utc>,
     session_type: String,
     description: Option<String>,
 
@@ -62,23 +63,33 @@ pub struct GenericFullRowSession {
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
     tag_color: Option<String>,
+
+    pub user_id: String,
+    pub user_displayname: String,
 }
 
-fn map_read_to_session(row: &PgRow) -> Result<GenericFullRowSession> {
-    Ok(GenericFullRowSession {
-        user_id: row.try_get("user_id")?,
-        id: row.try_get("id")?,
-        start_time: row.try_get("start_time")?,
-        end_time: row.try_get("end_time")?,
-        session_type: row.try_get("session_type")?,
-        description: row.try_get("description")?,
-        category_id: row.try_get("category_id")?,
-        category: row.try_get("category")?,
-        tag_id: row.try_get("tag_id")?,
-        tag_label: row.try_get("tag_label")?,
-        tag_color: row.try_get("tag_color")?,
-        category_color: row.try_get("category_color")?,
-    })
+impl From<SessionRow> for FixedSession {
+    fn from(row: SessionRow) -> Self {
+        let user = map_user_row(UserRow {
+            id: row.user_id.clone(),
+            displayname: row.user_displayname,
+        });
+
+        FixedSession {
+            id: row.id,
+            user,
+            category: Category {
+                id: row.category_id,
+                name: row.category,
+                created_by: row.user_id.clone(),
+                color: row.category_color,
+            },
+            tags: vec![],
+            start_time: DateTime::from(row.start_time),
+            end_time: DateTime::from(row.end_time),
+            description: row.description,
+        }
+    }
 }
 
 impl SessionRepositoryTrait for FixedSessionRepository {
@@ -90,16 +101,19 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
-    fn convert(&self, sessions: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>> {
-        let mut grouped_tags: IndexMap<Uuid, FixedSession> = IndexMap::new();
+    fn convert(&self, sessions: Vec<SessionRow>) -> Result<Vec<Self::SessionType>> {
+        let mut grouped_sessions: IndexMap<Uuid, FixedSession> = IndexMap::new();
         for session in sessions {
             if session.session_type != "fixed" {
                 return Err(anyhow!("Fixed session must have 'fixed' session type"));
             }
 
-            let entry = grouped_tags.entry(session.id).or_insert(FixedSession {
+            let entry = grouped_sessions.entry(session.id).or_insert(FixedSession {
                 id: session.id,
-                user_id: session.user_id.clone(),
+                user: map_user_row(UserRow {
+                    id: session.user_id.clone(),
+                    displayname: session.user_displayname,
+                }),
                 category: Category {
                     id: session.category_id,
                     name: session.category,
@@ -108,7 +122,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 },
                 tags: vec![],
                 start_time: DateTime::from(session.start_time),
-                end_time: DateTime::from(session.end_time.unwrap()), // INFO: fixed sessions cannot have nullable end_time
+                end_time: DateTime::from(session.end_time),
                 description: session.description,
             });
 
@@ -122,18 +136,17 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 });
             }
         }
-        Ok(grouped_tags.into_values().collect())
+        Ok(grouped_sessions.into_values().collect())
     }
 
     async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
-            GenericFullRowSession,
+            SessionRow,
             r#"SELECT 
                 s.id,
-                s.user_id as "user_id!",
                 s.start_time,
                 s.description,
-                s.end_time,
+                s.end_time as "end_time!",
                 s.type as session_type,
 
                 s.category_id,
@@ -142,7 +155,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
-                t.color as "tag_color?"
+                t.color as "tag_color?",
+
+                u.id as "user_id!",
+                u.displayname as "user_displayname!"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -150,6 +166,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
+            LEFT JOIN "user" u
+                on u.id = s.user_id
             WHERE 
                 s.id = $1
                 AND type = 'fixed' 
@@ -231,7 +249,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 t.id as tag_id,
                 t.label as tag_label,
-                t.color as tag_color
+                t.color as tag_color,
+
+                u.id as "user_id!",
+                u.displayname as "user_displayname!"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -239,6 +260,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
+            LEFT JOIN "user" u
+                on u.id = s.user_id
             WHERE 
                 s.user_id = "#,
         );
@@ -271,7 +294,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         query.push(" ORDER BY s.start_time DESC");
 
         let rows = query
-            .build_query_as::<GenericFullRowSession>()
+            .build_query_as::<SessionRow>()
             .fetch_all(self.db_conn.get_pool())
             .await?;
 
