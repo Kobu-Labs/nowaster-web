@@ -43,7 +43,6 @@ export type DataTableProps<
 > = {
   columns: TColumns;
   data: TData[];
-  loading?: boolean;
   options?: {
     getRowId?: (value: TData) => string;
     loading?: boolean;
