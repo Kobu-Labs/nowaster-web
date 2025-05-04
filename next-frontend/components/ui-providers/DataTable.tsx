@@ -19,7 +19,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -177,9 +176,6 @@ export function DataTable<
             </TableRow>
           )}
         </TableBody>
-        <TableFooter>
-          Selected values: {table.getSelectedRowModel().rows.length}
-        </TableFooter>
       </Table>
     </div>
   );
