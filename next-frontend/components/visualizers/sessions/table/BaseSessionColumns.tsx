@@ -102,7 +102,7 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
   );
 };
 
-export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
+export const BaseSessionTableColumns = [
   {
     accessorKey: "category",
     header: "Category",
@@ -111,6 +111,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
     },
   },
   {
+    id: "tags",
     accessorKey: "tags",
     header: "Tags",
     cell: (data) => {
@@ -126,10 +127,12 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
     },
   },
   {
+    id: "description",
     accessorKey: "description",
     header: "Description",
   },
   {
+    id: "startTime",
     accessorKey: "startTime",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Start Time" />
@@ -138,6 +141,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       format(original.startTime, "dd-MM-yyyy HH:mm"),
   },
   {
+    id: "endTime",
     accessorKey: "endTime",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="End Time" />
@@ -166,4 +170,4 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       </>
     ),
   },
-];
+] as const satisfies ColumnDef<ScheduledSessionWithId>[];
