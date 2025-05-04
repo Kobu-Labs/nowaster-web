@@ -10,8 +10,7 @@ import { TagsToSessionPieChart } from "@/components/visualizers/sessions/charts/
 import { SessionAverageDurationProvider } from "@/components/visualizers/sessions/kpi/SessionAverageDurationCard";
 import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
 import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
-import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
+import { SessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 
@@ -90,7 +89,7 @@ export default function Page(props: { params: { id: string } }) {
           className="col-span-full h-[350px]"
         />
         <div className="col-span-full">
-          <BaseSessionTable filter={filter} columns={BaseSessionTableColumns} />
+          <SessionTable filter={filter} />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
+import { SessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function HistoryPage() {
   return (
     <div className="m-8 grow">
-      <BaseSessionTable />
+      <SessionTable />
     </div>
   );
 }

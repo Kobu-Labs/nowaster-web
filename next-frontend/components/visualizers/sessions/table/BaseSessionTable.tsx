@@ -2,19 +2,23 @@
 import { ScheduledSessionWithId } from "@/api/definitions";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
 import { FC } from "react";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { DataTable } from "@/components/ui-providers/DataTable";
+import {
+  DataTable,
+  ManagedTableProps,
+} from "@/components/ui-providers/DataTable";
 import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 
-type BaseSessionTableProps = {
-  columns?: ColumnDef<ScheduledSessionWithId>[];
+type SessionTableProps = Omit<
+  ManagedTableProps<ScheduledSessionWithId, typeof BaseSessionTableColumns>,
+  "data"
+> & {
   filter?: SessionFilterPrecursor;
 };
 
-export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
+export const SessionTable: FC<SessionTableProps> = (props) => {
   const { data, isPending } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     placeholderData: keepPreviousData,
@@ -22,9 +26,13 @@ export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
 
   return (
     <DataTable
-      loading={isPending}
-      columns={props.columns ?? BaseSessionTableColumns}
+      columns={BaseSessionTableColumns}
       data={data ?? []}
+      options={{
+        loading: isPending,
+        getRowId: (val) => val.id,
+        ...props.options,
+      }}
     />
   );
 };

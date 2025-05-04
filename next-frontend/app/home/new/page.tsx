@@ -3,7 +3,7 @@
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { Separator } from "@/components/shadcn/separator";
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
-import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
+import { SessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { subHours } from "date-fns";
 import { useMemo } from "react";
 
@@ -30,7 +30,7 @@ const NewSessionPage = () => {
           Some of the last sessions you had in the past 48 hours!
         </h2>
         <ScrollArea className="h-[600px]" type="always">
-          <BaseSessionTable filter={filter} />
+          <SessionTable filter={filter} />
           <ScrollBar />
         </ScrollArea>
       </div>
