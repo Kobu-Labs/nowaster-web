@@ -2,7 +2,7 @@ import { withThemeByClassName } from "@storybook/addon-styling"
 import type { Preview } from "@storybook/react"
 
 /* TODO: update import to your tailwind styles file */
-import "../styles/global.css"
+import "../styles/globals.css"
 
 const preview: Preview = {
   parameters: {
