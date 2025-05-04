@@ -44,7 +44,7 @@ export type DataTableProps<
   columns: TColumns;
   data: TData[];
   loading?: boolean;
-  options: {
+  options?: {
     getRowId?: (value: TData) => string;
     loading?: boolean;
     enableMultiRowSelection?: boolean;
@@ -88,7 +88,7 @@ export function DataTable<
   TColumns extends ColumnDef<TData, TValue>[],
 >({ columns, data, options }: DataTableProps<TData, TColumns, TValue>) {
   const [sorting, setSorting] = React.useState<ColumnSort[]>(
-    options.initialSorting ?? [],
+    options?.initialSorting ?? [],
   );
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -97,14 +97,14 @@ export function DataTable<
   const columnVisibilityInitial =
     React.useMemo(
       () =>
-        options.hiddenColumns?.reduce(
+        options?.hiddenColumns?.reduce(
           (acc, id) => {
             acc[id as string] = false;
             return acc;
           },
           {} as Record<string, boolean>,
         ),
-      [options.hiddenColumns],
+      [options?.hiddenColumns],
     ) ?? {};
 
   const [columnVisibility, setColumnVisibility] =
@@ -113,7 +113,7 @@ export function DataTable<
   const table = useReactTable({
     data,
     columns,
-    getRowId: options.getRowId,
+    getRowId: options?.getRowId,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -164,7 +164,7 @@ export function DataTable<
                 ))}
               </TableRow>
             ))
-          ) : options.loading ? (
+          ) : options?.loading ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
                 <Skeleton className="w-full min-h-32" />
