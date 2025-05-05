@@ -1,5 +1,6 @@
 use anyhow::{Ok, Result};
 use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -22,7 +23,7 @@ pub struct TagRepository {
     db_conn: Arc<Database>,
 }
 
-#[derive(sqlx::FromRow)]
+#[derive(sqlx::FromRow, Serialize, Deserialize)]
 pub struct ReadTagRow {
     id: Uuid,
     label: String,
