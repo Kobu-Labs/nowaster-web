@@ -192,7 +192,7 @@ impl TagRepositoryTrait for TagRepository {
         if let Some(label) = filter.label {
             query.push(" and tag.label = ").push_bind(label);
         }
-        query.push(" ORDER BY usages DESC");
+        query.push(" ORDER BY tag.last_used_at DESC NULLS LAST");
 
         let rows = query
             .build_query_as::<ReadTagDetailsRow>()
