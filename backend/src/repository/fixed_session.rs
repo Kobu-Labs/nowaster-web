@@ -192,6 +192,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
         // INFO: pair tags with created session
         for tag_id in tag_ids {
+            // TODO: this should be done with either UNNEST or bulk insert
             sqlx::query!(
                 r#"
                     INSERT INTO tag_to_session (tag_id, session_id)
