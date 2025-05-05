@@ -102,6 +102,8 @@ impl CategoryRepositoryTrait for CategoryRepository {
             query.push(" AND category.id = ").push_bind(id);
         }
 
+        query.push(" ORDER BY category.last_used_at DESC NULLS LAST");
+
         let rows = query
             .build_query_as::<ReadCategoryRow>()
             .fetch_all(self.db_conn.get_pool())
