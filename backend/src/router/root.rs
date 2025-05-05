@@ -11,21 +11,10 @@ use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, Tr
 use crate::{
     config::database::Database,
     repository::{
-        category::{CategoryRepository, CategoryRepositoryTrait},
-        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
-        friends::FriendsRepository,
-        statistics::sessions::StatisticsRepository,
-        stopwatch_session::StopwatchSessionRepository,
-        tag::{TagRepository, TagRepositoryTrait},
-        user::{UserRepository, UserRepositoryTrait},
+        category::{CategoryRepository, CategoryRepositoryTrait}, fixed_session::{FixedSessionRepository, SessionRepositoryTrait}, friends::FriendsRepository, recurring_session::RecurringSessionRepository, statistics::sessions::StatisticsRepository, stopwatch_session::StopwatchSessionRepository, tag::{TagRepository, TagRepositoryTrait}, user::{UserRepository, UserRepositoryTrait}
     },
     service::{
-        category_service::CategoryService,
-        friend_service::FriendService,
-        session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
-        statistics_service::StatisticsService,
-        tag_service::TagService,
-        user_service::UserService,
+        category_service::CategoryService, friend_service::FriendService, session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService}, session_template::SessionTemplateService, statistics_service::StatisticsService, tag_service::TagService, user_service::UserService
     },
 };
 
@@ -47,6 +36,7 @@ pub struct AppState {
     pub user_service: UserService,
     pub statistics_service: StatisticsService,
     pub friend_service: FriendService,
+    pub session_template_service: SessionTemplateService,
 }
 
 pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
@@ -57,6 +47,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let statistics_repo = StatisticsRepository::new(&db);
     let friend_repo = FriendsRepository::new(&db);
     let stopwatch_repo = StopwatchSessionRepository::new(&db);
+    let template_session_repo = RecurringSessionRepository::new(&db);
 
     let category_service = CategoryService::new(category_repo.clone());
     let user_service = UserService::new(user_repo.clone());
@@ -70,6 +61,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let friend_service = FriendService::new(friend_repo);
     let stopwatch_service =
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
+    let session_template_service = SessionTemplateService::new(template_session_repo);
 
     let state = AppState {
         clerk: clerk.clone(),
@@ -80,6 +72,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         user_service,
         statistics_service,
         stopwatch_service,
+        session_template_service,
     };
 
     tracing_subscriber::registry()
