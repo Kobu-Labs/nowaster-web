@@ -70,7 +70,6 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
             granularity={granularity}
             props={{
               onSelected: updateFilter,
-              initialDate: filterPrecursor.data.endTimeTo?.value,
             }}
           />
         </div>
