@@ -87,8 +87,9 @@ const NoActiveSession: FC = ({}) => {
   return (
     <Card
       className={cn(
-        "px-2 p-1 flex items-center justify-center gap-2",
-        createSession.isError && "border-red-400",
+
+        "px-2 p-1 mr-10 flex items-center justify-center gap-2 bg-transparent",
+        createSession.isError && "border-red-400 bg-red-100",
       )}
     >
       <TooltipProvider delayDuration={50}>
