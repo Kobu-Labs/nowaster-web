@@ -1,7 +1,7 @@
 import { ScheduledSessionWithId } from "@/api/definitions";
 import { ColumnDef } from "@tanstack/react-table";
 import { differenceInMinutes, format } from "date-fns";
-import { Edit, Trash2 } from "lucide-react";
+import { DownloadIcon, Edit, Trash2 } from "lucide-react";
 import { FC, useState } from "react";
 
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
@@ -102,7 +102,36 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
   );
 };
 
+const downloadJSON = (data: ScheduledSessionWithId[], filename: string) => {
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
+
 export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
+  {
+    accessorKey: "download",
+    header: (data) => {
+      const rows = data.table.getRowModel().rows.map((row) => row.original);
+      return (
+        <Button
+          onClick={() => downloadJSON(rows, "export.json")}
+          variant="ghost"
+          className="p-0 m-0"
+        >
+          <DownloadIcon className="size-4"/>
+        </Button>
+      );
+    },
+  },
+
   {
     accessorKey: "category",
     header: "Category",
