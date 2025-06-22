@@ -1,4 +1,5 @@
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -18,7 +19,7 @@ pub struct CategoryRepository {
     db_conn: Arc<Database>,
 }
 
-#[derive(sqlx::FromRow)]
+#[derive(sqlx::FromRow, Serialize, Deserialize)]
 pub struct ReadCategoryRow {
     id: Uuid,
     name: String,
