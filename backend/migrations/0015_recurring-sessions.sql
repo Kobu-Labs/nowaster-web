@@ -5,8 +5,8 @@ CREATE TABLE "session_template" (
     "name" text NOT NULL,
     "created_at" timestamptz NOT NULL DEFAULT now(),
 
-    "start_date" date NOT NULL,
-    "end_date" date NOT NULL ,
+    "start_date" timestamptz NOT NULL,
+    "end_date" timestamptz NOT NULL ,
     "interval" recurring_session_interval NOT NULL,
 
     "user_id" varchar NOT NULL,
