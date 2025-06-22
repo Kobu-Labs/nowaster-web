@@ -4,3 +4,4 @@ pub mod session;
 pub mod statistics_service;
 pub mod tag_service;
 pub mod user_service;
+pub mod session_template;
