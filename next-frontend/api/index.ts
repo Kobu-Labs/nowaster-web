@@ -6,3 +6,4 @@ export * as UserApi from "./userApi";
 export * as FriendsApi from "./friends";
 export * as FriendRequestApi from "./friend-request";
 export * as StopwatchApi from "./stopwatchApi";
+export * as SessionTemplateApi from "./templateApi";
