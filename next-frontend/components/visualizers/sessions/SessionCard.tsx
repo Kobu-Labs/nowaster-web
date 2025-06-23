@@ -1,8 +1,7 @@
-import { FC } from "react";
 import { ScheduledSession } from "@/api/definitions";
 import { VariantProps, cva } from "class-variance-authority";
+import { FC } from "react";
 
-import { cn, getFormattedTimeDifference } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -10,9 +9,11 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { cn, getFormattedTimeDifference } from "@/lib/utils";
 
 type SessionCardProps = {
   session: ScheduledSession;
+  durationElement?: (startDate: Date, endDate: Date) => React.ReactNode;
 } & VariantProps<typeof historyCardVariants> &
   React.HTMLAttributes<HTMLDivElement>;
 
@@ -32,6 +33,22 @@ const historyCardVariants = cva(
 );
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
+  let durationChild: React.ReactNode = (
+    <div className="ml-4 text-xl font-medium">
+      {getFormattedTimeDifference(
+        props.session.startTime,
+        props.session.endTime,
+      )}
+    </div>
+  );
+
+  if (props.durationElement) {
+    durationChild = props.durationElement(
+      props.session.startTime,
+      props.session.endTime,
+    );
+  }
+
   return (
     <Card
       {...props}
@@ -58,12 +75,7 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
           </div>
         </div>
         <div className="grow" />
-        <div className="ml-4 text-xl font-medium">
-          {getFormattedTimeDifference(
-            props.session.startTime,
-            props.session.endTime,
-          )}
-        </div>
+        {durationChild}
       </CardContent>
     </Card>
   );
