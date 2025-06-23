@@ -6,7 +6,7 @@ import { z } from "zod";
 export const RecurringSessionIntervalSchema = z.enum([
   "daily",
   "weekly",
-  "b-weekly",
+  "bi-weekly",
   "monthly",
 ]);
 
