@@ -117,8 +117,8 @@ impl RecurringSessionRepository {
             RETURNING id
             "#,
             dto.name,
-            dto.start_time,
-            dto.end_time,
+            dto.start_date,
+            dto.end_date,
             dto.interval as RecurringSessionInterval,
             actor.user_id
         )
@@ -158,16 +158,17 @@ impl RecurringSessionRepository {
                 )
                 INSERT INTO tag_to_recurring_session (tag_id, session_id)
                 SELECT tag_id, new_session.id
-                FROM new_session, unnest($2::uuid[]) AS tag_id
+                FROM new_session, unnest($7::uuid[]) AS tag_id
             "#,
             dto.category_id,
             dto.description,
             dto.start_minute_offset,
             dto.end_minute_offset,
             template_id,
-            actor.user_id
+            actor.user_id,
+            dto.tag_ids.as_slice()
         )
-        .fetch_one(tx.as_mut())
+        .execute(tx.as_mut())
         .await?;
 
         Ok(())
