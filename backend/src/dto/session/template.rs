@@ -8,10 +8,8 @@ use crate::entity::session_template::RecurringSessionInterval;
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct CreateSessionTemplateDto {
     pub name: String,
-    #[serde(rename = "startTime")]
-    pub start_time: DateTime<Local>,
-    #[serde(rename = "endTime")]
-    pub end_time: DateTime<Local>,
+    pub start_date: DateTime<Local>,
+    pub end_date: DateTime<Local>,
     pub interval: RecurringSessionInterval,
     pub sessions: Vec<CreateRecurringSessionDto>,
 }
