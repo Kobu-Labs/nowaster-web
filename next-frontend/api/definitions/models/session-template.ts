@@ -19,7 +19,7 @@ export const RecurringSessionSchema = z.object({
   tags: z.array(TagWithIdSchema),
   start_minute_offset: z.number(),
   end_minute_offset: z.number(),
-  description: z.string().optional(),
+  description: z.string().nullable(),
 });
 
 export const SessionTemplateSchema = z.object({
@@ -27,7 +27,7 @@ export const SessionTemplateSchema = z.object({
   interval: RecurringSessionIntervalSchema,
   start_date: z.coerce.date(),
   end_date: z.coerce.date(),
-  recurring_sessions: z.array(RecurringSessionSchema),
+  sessions: z.array(RecurringSessionSchema),
 });
 
 export const SessionTemplateIdSchema = SessionTemplateSchema.merge(HasID);
