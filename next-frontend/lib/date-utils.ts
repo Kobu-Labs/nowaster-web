@@ -1,3 +1,6 @@
+import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
+import { zeroPad } from "@/lib/utils";
+
 export const numberToDay = (value: number): string => {
   switch (value) {
     case 0:
@@ -28,3 +31,22 @@ export const daysOfWeek = [
   { short: "Sat", full: "Saturday", value: 6 },
   { short: "Sun", full: "Sunday", value: 0 },
 ] as const;
+
+export const formatIntervalPickerLabel = (
+  interval: RecurringSessionInterval,
+  value: {
+    day: number;
+    hours: number;
+    minutes: number;
+  } | undefined,
+) => {
+  if (value === undefined) {
+    return "Pick a value";
+  }
+  switch (interval) {
+    case "daily":
+      return `${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
+    case "weekly":
+      return `${numberToDay(value.day).substring(0, 3)}, ${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
+  }
+};
