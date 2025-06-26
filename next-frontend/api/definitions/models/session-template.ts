@@ -6,8 +6,9 @@ import { z } from "zod";
 export const RecurringSessionIntervalSchema = z.enum([
   "daily",
   "weekly",
-  "bi-weekly",
-  "monthly",
+  // INFO: disabled now for simplicity, can be re-enabled later
+  // "bi-weekly",
+  // "monthly",
 ]);
 
 export type RecurringSessionInterval = z.infer<
