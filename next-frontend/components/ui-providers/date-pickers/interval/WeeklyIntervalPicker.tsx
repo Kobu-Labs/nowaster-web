@@ -10,15 +10,13 @@ import { Separator } from "@/components/shadcn/separator";
 import { DailyIntervalPicker } from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import { daysOfWeek } from "@/lib/date-utils";
 
-type WeeklyIntervalDatePickerProps = {
+export type WeeklyIntervalPickerProps = {
   onSelect: (value: { day: number; hours: number; minutes: number }) => void;
   selected?: { day: number; hours: number; minutes: number };
   orientation?: "horizontal" | "vertical";
 };
 
-export const WeeklyIntervalPicker: FC<WeeklyIntervalDatePickerProps> = (
-  props,
-) => {
+export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
   return (
     <Card className="w-full ">
       <CardHeader>
