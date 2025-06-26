@@ -16,13 +16,11 @@ import { Separator } from "@radix-ui/react-separator";
 import {
   addDays,
   addMinutes,
-  addMonths,
   addWeeks,
   format,
   isBefore,
   isSameDay,
   startOfDay,
-  startOfMonth,
   startOfWeek,
 } from "date-fns";
 import { Calendar, Edit, Trash2 } from "lucide-react";
@@ -37,10 +35,6 @@ export const intervalToStartOf = (
       return startOfDay(asOf);
     case "weekly":
       return startOfWeek(asOf);
-    case "bi-weekly":
-      return startOfWeek(asOf);
-    case "monthly":
-      return startOfMonth(asOf);
   }
 };
 
@@ -53,18 +47,10 @@ const incrementByInterval = (
       return addDays(date, 1);
     case "weekly":
       return addWeeks(date, 1);
-    case "bi-weekly":
-      return addWeeks(date, 2);
-    case "monthly":
-      return addMonths(date, 1);
   }
 };
 
-export function TemplateOverview({
-  template,
-}: {
-  template: SessionTemplate;
-}) {
+export function TemplateOverview({ template }: { template: SessionTemplate }) {
   const relativeDate = useMemo(
     () => intervalToStartOf(template.interval, new Date()),
     [template.interval],
