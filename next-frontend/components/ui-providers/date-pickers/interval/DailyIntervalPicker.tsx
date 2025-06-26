@@ -2,13 +2,9 @@ import { FC } from "react";
 import { Button } from "@/components/shadcn/button";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { Separator } from "@/components/shadcn/separator";
-import { cn, zeroPad } from "@/lib/utils";
+import { cn, toggleOrientation, zeroPad } from "@/lib/utils";
 
-const toggleOrientation = (orientation: "horizontal" | "vertical") => {
-  return orientation === "horizontal" ? "vertical" : "horizontal";
-};
-
-type DailyIntervalPickerProps = {
+export type DailyIntervalPickerProps = {
   onSelect: (value: { day: number; hours: number; minutes: number }) => void;
   selected?: { day: number; hours: number; minutes: number };
   orientation?: "horizontal" | "vertical";
