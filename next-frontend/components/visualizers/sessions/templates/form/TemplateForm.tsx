@@ -14,7 +14,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -26,14 +25,6 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import {
   RecurringSessionForm,
@@ -48,36 +39,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import React from "react";
 import { Separator } from "@/components/shadcn/separator";
+import { TemplateIntervalSelect } from "@/components/visualizers/sessions/templates/TemplateIntervalSelect";
 
-const IntervalToLabel: Record<RecurringSessionInterval, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-} as const;
-
-export const TestIntervalSelect = React.forwardRef<
-  React.ElementRef<typeof Select>,
-  React.ComponentPropsWithoutRef<typeof Select>
->(({ ...props }) => {
-  return (
-    <Select {...props}>
-      <SelectTrigger>
-        <SelectValue
-          placeholder="Select an interval!"
-          className="text-muted-foreground"
-        />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup defaultChecked>
-          {Object.entries(IntervalToLabel).map(([k, v]) => (
-            <SelectItem key={k} value={k}>
-              {v}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  );
-});
 
 type TemplateFormProps = {
   onSuccess?: () => void;
@@ -215,7 +178,7 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
               <FormItem>
                 <FormLabel>Inteval</FormLabel>
                 <FormControl>
-                  <TestIntervalSelect
+                  <TemplateIntervalSelect
                     {...field}
                     key={field.value}
                     onValueChange={field.onChange}
