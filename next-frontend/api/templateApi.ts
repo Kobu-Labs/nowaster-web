@@ -16,3 +16,23 @@ export const create = async (params: SessionTemplateRequest["create"]) => {
   const { data } = await baseApi.post(BASE_URL, params);
   return await parseResponseUnsafe(data, SessionTemplateResponseSchema.create);
 };
+
+export const deleteTemplate = async (
+  params: SessionTemplateRequest["deleteTemplate"],
+) => {
+  const { data } = await baseApi.delete(`${BASE_URL}/${params.id}`);
+  return await parseResponseUnsafe(
+    data,
+    SessionTemplateResponseSchema.deleteTemplate,
+  );
+};
+
+export const deleteRecurringSession = async (
+  params: SessionTemplateRequest["deleteRecurringSession"],
+) => {
+  const { data } = await baseApi.delete(`${BASE_URL}/recurring/${params.id}`);
+  return await parseResponseUnsafe(
+    data,
+    SessionTemplateResponseSchema.deleteRecurringSession,
+  );
+};
