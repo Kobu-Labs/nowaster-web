@@ -6,7 +6,9 @@ use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::session::template::{CreateRecurringSessionDto, CreateSessionTemplateDto},
+    dto::session::template::{
+        CreateRecurringSessionDto, CreateSessionTemplateDto, UpdateRecurringSessionDto,
+    },
     entity::session_template::RecurringSessionInterval,
     router::clerk::ClerkUser,
 };
@@ -171,6 +173,105 @@ impl RecurringSessionRepository {
         .execute(tx.as_mut())
         .await?;
 
+        Ok(())
+    }
+
+    pub async fn delete_recurring_session(&self, session_id: Uuid, actor: ClerkUser) -> Result<()> {
+        sqlx::query!(
+            r#"
+            DELETE FROM recurring_session
+            WHERE id = $1 AND user_id = $2
+            "#,
+            session_id,
+            actor.user_id
+        )
+        .execute(self.db_conn.get_pool())
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_session_template(&self, template_id: Uuid, actor: ClerkUser) -> Result<()> {
+        sqlx::query!(
+            r#"
+            DELETE FROM session_template
+            WHERE id = $1 AND user_id = $2
+            "#,
+            template_id,
+            actor.user_id
+        )
+        .execute(self.db_conn.get_pool())
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update_recurring_session(
+        &self,
+        dto: UpdateRecurringSessionDto,
+        actor: ClerkUser,
+    ) -> Result<()> {
+        let mut tx = self.db_conn.get_pool().begin().await?;
+
+        sqlx::query!(
+            r#"
+            UPDATE recurring_session
+            SET category_id = COALESCE($1, category_id),
+                description = COALESCE($2, description),
+                start_minute_offset = COALESCE($3, start_minute_offset),
+                end_minute_offset = COALESCE($4, end_minute_offset)
+            WHERE id = $5 AND user_id = $6
+            "#,
+            dto.category_id,
+            dto.description,
+            dto.start_minute_offset,
+            dto.end_minute_offset,
+            dto.id,
+            actor.user_id
+        )
+        .execute(tx.as_mut())
+        .await?;
+
+        sqlx::query!(
+            r#"
+            DELETE FROM tag_to_recurring_session
+            WHERE session_id = $1
+            "#,
+            dto.id
+        )
+        .execute(tx.as_mut())
+        .await?;
+
+        if let Some(tag_ids) = dto.tag_ids {
+            // delete all tags first
+            sqlx::query!(
+                r#"
+                DELETE FROM tag_to_recurring_session ttrs
+                USING tag t
+                WHERE ttrs.tag_id = t.id
+                  AND ttrs.session_id = $1
+                  AND t.created_by = $2;
+
+                "#,
+                dto.id,
+                actor.user_id
+            )
+            .execute(tx.as_mut())
+            .await?;
+
+            sqlx::query!(
+                r#"
+                INSERT INTO tag_to_recurring_session (tag_id, session_id)
+                SELECT tag_id, $1 FROM UNNEST($2::uuid[]) AS tag_id
+                "#,
+                dto.id,
+                tag_ids.as_slice()
+            )
+            .execute(tx.as_mut())
+            .await?;
+        }
+
+        tx.commit().await?;
         Ok(())
     }
 }
