@@ -17,6 +17,14 @@ const create = z.object({
   ),
 });
 
+const deleteTemplate = z.object({
+  id: z.string().uuid(),
+});
+
+const deleteRecurringSession = z.object({
+  id: z.string().uuid(),
+});
+
 const readMany = z.null();
 
 export type SessionTemplateRequest = {
@@ -28,4 +36,6 @@ export type SessionTemplateRequest = {
 export const SessionTemplateRequestSchema = {
   create,
   readMany,
+  deleteTemplate,
+  deleteRecurringSession,
 } as const;

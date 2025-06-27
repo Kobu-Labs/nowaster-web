@@ -22,3 +22,32 @@ pub struct CreateRecurringSessionDto {
     pub start_minute_offset: f64,
     pub end_minute_offset: f64,
 }
+
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct UpdateRecurringSessionDto {
+    pub id: Uuid,
+    pub category_id: Option<Uuid>,
+    pub tag_ids: Option<Vec<Uuid>>,
+    pub description: Option<String>,
+    pub start_minute_offset: Option<f64>,
+    pub end_minute_offset: Option<f64>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct DeleteRecurringSessionDto {
+    pub id: Uuid,
+}
+
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct DelteteSessionTemplateDto {
+    pub id: Uuid,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UpdateSessionTemplateDto {
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub start_date: Option<DateTime<Local>>,
+    pub end_date: Option<DateTime<Local>>,
+    pub interval: Option<RecurringSessionInterval>,
+}

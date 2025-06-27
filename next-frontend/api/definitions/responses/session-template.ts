@@ -5,6 +5,10 @@ const readMany = z.array(SessionTemplateIdSchema);
 
 const create = z.null();
 
+const deleteTemplate = z.any();
+
+const deleteRecurringSession = z.any();
+
 export type SessionTemplateResponse = {
   [Property in keyof typeof SessionTemplateResponseSchema]: z.infer<
     (typeof SessionTemplateResponseSchema)[Property]
@@ -14,4 +18,6 @@ export type SessionTemplateResponse = {
 export const SessionTemplateResponseSchema = {
   create,
   readMany,
+  deleteTemplate,
+  deleteRecurringSession,
 } as const;
