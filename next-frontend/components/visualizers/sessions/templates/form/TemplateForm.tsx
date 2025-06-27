@@ -79,7 +79,11 @@ export const TestIntervalSelect = React.forwardRef<
   );
 });
 
-export const TemplateForm: FC = () => {
+type TemplateFormProps = {
+  onSuccess?: () => void;
+};
+
+export const TemplateForm: FC<TemplateFormProps> = (props) => {
   const form = useForm<z.infer<typeof templateSessionPrecursor>>({
     resolver: zodResolver(templateSessionPrecursor),
   });
@@ -89,6 +93,9 @@ export const TemplateForm: FC = () => {
     mutationKey: ["session-template"],
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
+      if (props.onSuccess) {
+        props.onSuccess();
+      }
     },
     mutationFn: async (data: z.infer<typeof templateSessionPrecursor>) => {
       const interval_start = data.start_date;
@@ -164,15 +171,12 @@ export const TemplateForm: FC = () => {
         }),
       };
 
-      await SessionTemplateApi.create(translatedData);
+      return await SessionTemplateApi.create(translatedData);
     },
   });
 
   const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
     await mutation.mutateAsync(data);
-    form.reset();
-    form.reset({ name: "" });
-    fieldArray.remove();
   };
 
   const fieldArray = useFieldArray({ control: form.control, name: "sessions" });
@@ -337,8 +341,12 @@ export const TemplateFormDialog: FC = () => {
   const [open, setIsOpen] = useState(false);
 
   return (
-    <>
-      <Button className="w-fit" onClick={() => setIsOpen(true)}>
+    <div>
+      <Button
+        className="w-fit flex items-center gap-2"
+        onClick={() => setIsOpen(true)}
+      >
+        <Plus />
         Create template
       </Button>
       <Dialog modal={false} onOpenChange={setIsOpen} open={open}>
@@ -350,9 +358,9 @@ export const TemplateFormDialog: FC = () => {
               on your schedule.
             </DialogDescription>
           </DialogHeader>
-          <TemplateForm />
+          <TemplateForm onSuccess={() => setIsOpen(false)} />
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
