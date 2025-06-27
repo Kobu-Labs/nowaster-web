@@ -1,5 +1,6 @@
 import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { zeroPad } from "@/lib/utils";
+import { format } from "date-fns";
 
 export const numberToDay = (value: number): string => {
   switch (value) {
@@ -49,4 +50,8 @@ export const formatIntervalPickerLabel = (
     case "weekly":
       return `${numberToDay(value.day).substring(0, 3)}, ${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
   }
+};
+
+export const format24Hour = (date: Date): string => {
+  return format(date, "HH:mm");
 };
