@@ -59,7 +59,7 @@
         "date-fns": "^2.30.0",
         "fuzzy-search": "^3.2.1",
         "jotai": "^2.8.3",
-        "lucide-react": "^0.447.0",
+        "lucide-react": "^0.525.0",
         "luxon": "^3.3.0",
         "next": "^14.2.4",
         "next-themes": "^0.2.1",
