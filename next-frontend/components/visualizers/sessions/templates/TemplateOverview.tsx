@@ -1,6 +1,6 @@
 import { SessionTemplateApi } from "@/api";
 import {
-  RecurringSessionInterval,
+  RecurringSession,
   SessionTemplate,
 } from "@/api/definitions/models/session-template";
 import { Button } from "@/components/shadcn/button";
@@ -10,158 +10,132 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/card";
-import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
-import { TemplateIntervalBadge } from "@/components/visualizers/sessions/templates/TemplateIntervalBadge";
-import { getFormattedTimeDifference } from "@/lib/utils";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { TemplateIntervalBadge } from "@/components/visualizers/sessions/templates/TemplateIntervalBadge";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { formatTime } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-separator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  addDays,
-  addMinutes,
-  addWeeks,
-  format,
-  isSameDay,
-  max,
-  set,
-  startOfDay,
-  startOfWeek,
-} from "date-fns";
+import { addMinutes, format, max } from "date-fns";
 import {
   Calendar,
+  Clock,
   CopyIcon,
-  Edit,
   EditIcon,
   MoreHorizontal,
+  Tag,
   Trash,
-  Trash2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { FC, useMemo } from "react";
+import {
+  format24Hour,
+  getDaytimeAfterDate,
+  numberToDay,
+} from "@/lib/date-utils";
 
-export const intervalToStartOf = (
-  interval: RecurringSessionInterval,
-  asOf: Date,
-): Date => {
-  switch (interval) {
-    case "daily":
-      return startOfDay(asOf);
-    case "weekly":
-      return startOfWeek(asOf);
-  }
+type SessionCardProps = {
+  session: RecurringSession;
+  template: SessionTemplate;
 };
 
-const incrementByInterval = (
-  interval: RecurringSessionInterval,
-  date: Date,
-): Date => {
-  switch (interval) {
-    case "daily":
-      return addDays(date, 1);
-    case "weekly":
-      return addWeeks(date, 1);
-  }
-};
+export const RecurringSessionCard: FC<SessionCardProps> = (props) => {
+  const start = addMinutes(
+    props.template.start_date,
+    props.session.start_minute_offset,
+  );
+  const end = addMinutes(
+    start,
+    props.session.end_minute_offset - props.session.start_minute_offset,
+  );
 
-const closestAfterGivenDate = (
-  lowerBoundDate: Date,
-  time: { minutes: number; hours: number; day: number },
-): Date => {
-  let result = new Date(lowerBoundDate);
-
-  const currentDay = result.getDay();
-  const targetDay = time.day;
-
-  // If it's the same day, check if the time has already passed
-  if (currentDay === targetDay) {
-    // Set the time for today
-    const todayWithTargetTime = set(new Date(result), {
-      hours: time.hours,
-      minutes: time.minutes,
-      seconds: 0,
-      milliseconds: 0,
-    });
-
-    // If the target time today is after the lower bound, use today
-    if (todayWithTargetTime >= lowerBoundDate) {
-      return todayWithTargetTime;
-    }
-  }
-
-  // Otherwise, we need to go to next week
-  result = addDays(result, 7);
-
-  // Set the target time
-  result.setHours(time.hours, time.minutes, 0, 0);
-
-  return result;
-};
-
-const getClosesToBasedOnInterval = (
-  lowerBoundDate: Date,
-  time: { minutes: number; hours: number; day: number },
-  interval: RecurringSessionInterval,
-): Date => {
-  switch (interval) {
-    case "daily": {
-      // For daily, we can just set the time for today
-      const todayWithTargetTime = set(new Date(lowerBoundDate), {
-        hours: time.hours,
-        minutes: time.minutes,
-        seconds: 0,
-        milliseconds: 0,
-      });
-
-      // If the target time today is after the lower bound, use today
-      if (todayWithTargetTime >= lowerBoundDate) {
-        return todayWithTargetTime;
+  const calculatePeriod = useMemo(() => {
+    switch (props.template.interval) {
+      case "daily": {
+        return `Every day at ${format24Hour(start)}-${format24Hour(end)}`;
       }
-      // Otherwise, we need to go to the next day
-      return addDays(todayWithTargetTime, 1);
+
+      case "weekly": {
+        return `${numberToDay(start.getDay())} at ${format24Hour(start)}-${format24Hour(end)}`;
+      }
     }
-    case "weekly": {
-      return closestAfterGivenDate(lowerBoundDate, time);
-    }
-  }
+  }, [props.template, props.session]);
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-3xl font-bold">
+          {props.session.category.name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex gap-2 items-center justify-center">
+        <div>
+          {props.session.tags.map((tag) => (
+            <TagBadge tag={tag} variant="auto" key={tag.id} />
+          ))}
+        </div>
+        <div className="grow" />
+        <div>
+          <div className="text-sm text-muted-foreground">{calculatePeriod}</div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const calculateClosestSession = (
+  session: Omit<RecurringSession, "id">,
+  template: SessionTemplate,
+) => {
+  const startTime = addMinutes(
+    template.start_date,
+    session.start_minute_offset,
+  );
+
+  let closestStartTime = getDaytimeAfterDate(
+    max([startTime, new Date()]),
+    template.interval,
+    {
+      day: startTime.getDay(),
+      hours: startTime.getHours(),
+      minutes: startTime.getMinutes(),
+    },
+  );
+
+  let closestEndTime = addMinutes(
+    closestStartTime,
+    session.end_minute_offset - session.start_minute_offset,
+  );
+
+  return {
+    ...session,
+    closestStartTime,
+    closestEndTime,
+  };
 };
 
 export function TemplateOverview({ template }: { template: SessionTemplate }) {
   // INFO: Calculate session times based on the template and todays date, only future session dates are shown
-  const sessionTimes = useMemo(() => {
-    return template.sessions.map((session) => {
-      const startTime = addMinutes(
-        template.start_date,
-        session.start_minute_offset,
-      );
-      console.log("start_time", startTime);
+  const sessionTimes = useMemo(
+    () =>
+      template.sessions
+        .map((session) => calculateClosestSession(session, template))
+        // show the closest upcoming sessions first
+        .sort(
+          (a, b) => b.closestStartTime.getTime() - a.closestStartTime.getTime(),
+        ),
+    [template.sessions, template.interval],
+  );
 
-      let closestStartTime = getClosesToBasedOnInterval(
-        max([startTime, new Date()]),
-        {
-          day: startTime.getDay(),
-          hours: startTime.getHours(),
-          minutes: startTime.getMinutes(),
-        },
-        template.interval,
-      );
-      console.log("start_time closes", closestStartTime);
-
-      let closestEndTime = addMinutes(
-        closestStartTime,
-        session.end_minute_offset - session.start_minute_offset,
-      );
-
-      return {
-        ...session,
-        closestStartTime,
-        closestEndTime,
-      };
-    });
-  }, [template.sessions, template.interval]);
+  const totalSessionDuration = useMemo(() => {
+    return template.sessions.reduce((prev, curr) => {
+      return curr.end_minute_offset - curr.start_minute_offset + prev;
+    }, 0);
+  }, [template.sessions]);
 
   const queryClient = useQueryClient();
 
@@ -178,7 +152,7 @@ export function TemplateOverview({ template }: { template: SessionTemplate }) {
   });
 
   return (
-    <Card key={template.id} className="overflow-hidden">
+    <Card className="overflow-hidden">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
@@ -216,49 +190,44 @@ export function TemplateOverview({ template }: { template: SessionTemplate }) {
             </DropdownMenu>
           </div>
         </div>
+        <div className="flex justify-between">
+          <div className="flex items-center justify-center gap-1 text-sm">
+            <Tag className="size-3" />
+            {template.sessions.length} sessions
+          </div>
+          <div className="flex items-center justify-center gap-1 text-sm">
+            <Clock className="size-3" />
+            {formatTime(totalSessionDuration)} total
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-sm">
+          <Calendar className="size-3" />
+          <div className="text-sm text-muted-foreground">
+            {format(template.start_date, "dd. MMM HH:mm")} -{" "}
+            {format(template.end_date, "dd. MMM HH:mm ")}
+          </div>
+        </div>
       </CardHeader>
 
       <CardContent className="pt-0">
         {template.sessions.length > 0 ? (
           <div className="space-y-4">
-            {/* Session Statistics */}
-
-            <Separator />
-
-            {/* Sessions List */}
+            <h4 className="font-medium text-sm text-muted-foreground">
+              Sessions:
+            </h4>
             <div className="space-y-2">
-              <h4 className="font-medium text-sm text-muted-foreground">
-                Sessions Templates
-              </h4>
-              <div className="space-y-2">
-                {sessionTimes.map((session, index) => {
-                  return (
-                    <SessionCard
-                      durationElement={(start, end) => {
-                        return (
-                          <div className="ml-4 text-xl font-medium text-muted-foreground">
-                            {format(start, " cccc, dd. HH:mm - ")}
-                            {format(
-                              end,
-                              isSameDay(start, end)
-                                ? "HH:mm"
-                                : "cccc dd. HH:mm",
-                            )}
-                            {` (${getFormattedTimeDifference(start, end)})`}
-                          </div>
-                        );
-                      }}
-                      session={{
-                        ...session,
-                        startTime: session.closestStartTime,
-                        endTime: session.closestEndTime,
-                        session_type: "fixed",
-                      }}
-                      key={index}
-                    />
-                  );
-                })}
-              </div>
+              {sessionTimes.map((session, index) => {
+                return (
+                  <RecurringSessionCard
+                    session={{
+                      ...session,
+                      id: index.toString(),
+                    }}
+                    key={index}
+                    template={template}
+                  />
+                );
+              })}
             </div>
           </div>
         ) : (
