@@ -1,6 +1,6 @@
 import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { zeroPad } from "@/lib/utils";
-import { format } from "date-fns";
+import { addDays, addWeeks, format, set } from "date-fns";
 
 export const numberToDay = (value: number): string => {
   switch (value) {
@@ -35,11 +35,13 @@ export const daysOfWeek = [
 
 export const formatIntervalPickerLabel = (
   interval: RecurringSessionInterval,
-  value: {
-    day: number;
-    hours: number;
-    minutes: number;
-  } | undefined,
+  value:
+    | {
+        day: number;
+        hours: number;
+        minutes: number;
+      }
+    | undefined,
 ) => {
   if (value === undefined) {
     return "Pick a value";
@@ -54,4 +56,49 @@ export const formatIntervalPickerLabel = (
 
 export const format24Hour = (date: Date): string => {
   return format(date, "HH:mm");
+};
+
+export const incrementByInterval = (
+  interval: RecurringSessionInterval,
+  date: Date,
+): Date => {
+  switch (interval) {
+    case "daily":
+      return addDays(date, 1);
+    case "weekly":
+      return addWeeks(date, 1);
+  }
+};
+
+export const normalizeDayNumber = (day: number): number => {
+  return (day + 6) % 7;
+};
+
+export const getDaytimeAfterDate = (
+  lowerBoundDate: Date,
+  interval: RecurringSessionInterval,
+  time: { minutes: number; hours: number; day: number },
+): Date => {
+  const currentDay = lowerBoundDate.getDay();
+  const targetDay = time.day;
+  const dayDiff =
+    normalizeDayNumber(targetDay) - normalizeDayNumber(currentDay);
+
+  const adjustedDate = set(lowerBoundDate, {
+    hours: time.hours,
+    minutes: time.minutes,
+    seconds: 0,
+    milliseconds: 0,
+  });
+
+  if (adjustedDate >= lowerBoundDate) {
+    return adjustedDate;
+  }
+
+  // TODO: this check should be replaced by a interval specific-check
+  if (dayDiff > 0) {
+    return addDays(adjustedDate, dayDiff);
+  }
+
+  return incrementByInterval(interval, adjustedDate);
 };
