@@ -95,8 +95,8 @@ impl RecurringSessionRepository {
                 ) FILTER (WHERE rs.id IS NOT NULL), '[]') AS "sessions!: Json<Vec<ReadRecurringSessionRow>>"
 
             FROM session_template st
-            JOIN recurring_session rs ON st.id = rs.template_id
-            JOIN category c on rs.category_id = c.id
+            LEFT JOIN recurring_session rs ON st.id = rs.template_id
+            LEFT JOIN category c on rs.category_id = c.id
             WHERE st.user_id = $1
             GROUP BY st.id, st.name, st.start_date, st.end_date, st.interval, st.created_at
            "#,
