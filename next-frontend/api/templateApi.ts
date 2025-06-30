@@ -17,6 +17,11 @@ export const create = async (params: SessionTemplateRequest["create"]) => {
   return await parseResponseUnsafe(data, SessionTemplateResponseSchema.create);
 };
 
+export const update = async (params: SessionTemplateRequest["update"]) => {
+  const { data } = await baseApi.patch(BASE_URL, params);
+  return await parseResponseUnsafe(data, SessionTemplateResponseSchema.update);
+};
+
 export const deleteTemplate = async (
   params: SessionTemplateRequest["deleteTemplate"],
 ) => {
