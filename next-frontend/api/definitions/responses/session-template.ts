@@ -4,6 +4,7 @@ import { z } from "zod";
 const readMany = z.array(SessionTemplateIdSchema);
 
 const create = z.null();
+const update = z.null();
 
 const deleteTemplate = z.any();
 
@@ -17,6 +18,7 @@ export type SessionTemplateResponse = {
 
 export const SessionTemplateResponseSchema = {
   create,
+  update,
   readMany,
   deleteTemplate,
   deleteRecurringSession,
