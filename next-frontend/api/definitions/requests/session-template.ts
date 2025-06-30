@@ -17,6 +17,23 @@ const create = z.object({
   ),
 });
 
+const update = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(1),
+  interval: RecurringSessionIntervalSchema,
+  start_date: z.coerce.date(),
+  end_date: z.coerce.date(),
+  sessions: z.array(
+    z.object({
+      category_id: z.string(),
+      tag_ids: z.array(z.string()),
+      start_minute_offset: z.number(),
+      end_minute_offset: z.number(),
+      description: z.string().optional(),
+    }),
+  ),
+});
+
 const deleteTemplate = z.object({
   id: z.string().uuid(),
 });
@@ -35,6 +52,7 @@ export type SessionTemplateRequest = {
 
 export const SessionTemplateRequestSchema = {
   create,
+  update,
   readMany,
   deleteTemplate,
   deleteRecurringSession,
