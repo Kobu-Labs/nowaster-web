@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::{
     config::database::{Database, DatabaseTrait},
     dto::session::template::{
-        CreateRecurringSessionDto, CreateSessionTemplateDto, UpdateRecurringSessionDto,
+        CreateRecurringSessionDto, CreateSessionTemplateDto, UpdateSessionTemplateDto,
     },
     entity::session_template::RecurringSessionInterval,
     router::clerk::ClerkUser,
@@ -104,6 +104,52 @@ impl RecurringSessionRepository {
         ).fetch_all(self.db_conn.get_pool()).await?;
 
         Ok(rows)
+    }
+
+    pub async fn update_session_template(
+        &self,
+        dto: UpdateSessionTemplateDto,
+        actor: ClerkUser,
+    ) -> Result<()> {
+        let mut tx = self.db_conn.get_pool().begin().await?;
+        sqlx::query!(
+            r#"
+            DELETE FROM recurring_session rs
+            WHERE rs.template_id = $1 AND user_id = $2
+        "#,
+            dto.id,
+            actor.user_id
+        )
+        .execute(tx.as_mut())
+        .await?;
+
+        sqlx::query!(
+            r#"
+            UPDATE session_template
+            SET name = COALESCE($1, name),
+                start_date = COALESCE($2, start_date),
+                end_date = COALESCE($3, end_date),
+                interval = COALESCE($4, interval)
+            WHERE id = $5 AND user_id = $6
+            "#,
+            dto.name,
+            dto.start_date,
+            dto.end_date,
+            dto.interval as RecurringSessionInterval,
+            dto.id,
+            actor.user_id
+        )
+        .execute(tx.as_mut())
+        .await?;
+
+        // TODO :rewrite this to a bulk insert
+        for session in dto.sessions {
+            self.create_recurring_session(session, dto.id, actor.clone(), &mut tx)
+                .await?;
+        }
+
+        tx.commit().await?;
+        Ok(())
     }
 
     pub async fn create_session_template(
@@ -203,75 +249,6 @@ impl RecurringSessionRepository {
         .execute(self.db_conn.get_pool())
         .await?;
 
-        Ok(())
-    }
-
-    pub async fn update_recurring_session(
-        &self,
-        dto: UpdateRecurringSessionDto,
-        actor: ClerkUser,
-    ) -> Result<()> {
-        let mut tx = self.db_conn.get_pool().begin().await?;
-
-        sqlx::query!(
-            r#"
-            UPDATE recurring_session
-            SET category_id = COALESCE($1, category_id),
-                description = COALESCE($2, description),
-                start_minute_offset = COALESCE($3, start_minute_offset),
-                end_minute_offset = COALESCE($4, end_minute_offset)
-            WHERE id = $5 AND user_id = $6
-            "#,
-            dto.category_id,
-            dto.description,
-            dto.start_minute_offset,
-            dto.end_minute_offset,
-            dto.id,
-            actor.user_id
-        )
-        .execute(tx.as_mut())
-        .await?;
-
-        sqlx::query!(
-            r#"
-            DELETE FROM tag_to_recurring_session
-            WHERE session_id = $1
-            "#,
-            dto.id
-        )
-        .execute(tx.as_mut())
-        .await?;
-
-        if let Some(tag_ids) = dto.tag_ids {
-            // delete all tags first
-            sqlx::query!(
-                r#"
-                DELETE FROM tag_to_recurring_session ttrs
-                USING tag t
-                WHERE ttrs.tag_id = t.id
-                  AND ttrs.session_id = $1
-                  AND t.created_by = $2;
-
-                "#,
-                dto.id,
-                actor.user_id
-            )
-            .execute(tx.as_mut())
-            .await?;
-
-            sqlx::query!(
-                r#"
-                INSERT INTO tag_to_recurring_session (tag_id, session_id)
-                SELECT tag_id, $1 FROM UNNEST($2::uuid[]) AS tag_id
-                "#,
-                dto.id,
-                tag_ids.as_slice()
-            )
-            .execute(tx.as_mut())
-            .await?;
-        }
-
-        tx.commit().await?;
         Ok(())
     }
 }
