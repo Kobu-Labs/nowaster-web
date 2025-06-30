@@ -327,3 +327,118 @@ export const TemplateFormDialog: FC = () => {
     </div>
   );
 };
+
+export const EditTemplateFormDialog: FC<{
+  template: SessionTemplate;
+    open:boolean,
+    setIsOpen: (val:boolean) => void
+}> = (props) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationKey: ["session-template"],
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
+    },
+    mutationFn: async (data: z.infer<typeof templateSessionPrecursor>) => {
+      const interval_start = data.start_date;
+
+      const dailyHandler = (time: { hours: number; minutes: number }) => {
+        let newDate = new Date(interval_start);
+        newDate.setHours(time.hours, time.minutes, 0, 0);
+        if (isBefore(newDate, interval_start)) {
+          newDate = addDays(newDate, 1);
+        }
+
+        return differenceInMinutes(newDate, interval_start);
+      };
+
+      const weeklyHandler = (time: {
+        day: number;
+        hours: number;
+        minutes: number;
+      }) => {
+        let newDate = new Date(interval_start);
+        if (interval_start.getDay() < time.day) {
+          newDate = addDays(interval_start, time.day - interval_start.getDay());
+          newDate.setHours(time.hours, time.minutes, 0, 0);
+        } else if (interval_start.getDay() > time.day) {
+          newDate = addDays(newDate, 7);
+          newDate = addDays(newDate, time.day - interval_start.getDay());
+          newDate.setHours(time.hours, time.minutes, 0, 0);
+        } else {
+          newDate.setHours(time.hours, time.minutes, 0, 0);
+          if (isBefore(newDate, interval_start)) {
+            newDate = addDays(newDate, 7);
+          }
+        }
+
+        return differenceInMinutes(newDate, interval_start);
+      };
+
+      const onFieldChange = (time: {
+        day: number;
+        hours: number;
+        minutes: number;
+      }) => {
+        if (data.interval === "daily") {
+          return dailyHandler(time);
+        }
+        return weeklyHandler(time);
+      };
+
+      const translatedData: SessionTemplateRequest["update"] = {
+        id: props.template.id,
+        name: data.name,
+        interval: data.interval,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        sessions: data.sessions.map((session) => {
+          const session_start = onFieldChange(session.start_date_time);
+          let session_end = onFieldChange(session.end_date_time);
+
+          if (session_start >= session_end) {
+            if (data.interval === "daily") {
+              session_end = session_start + 24 * 60; // add 24 hours in minutes
+            } else {
+              session_end += 7 * 24 * 60;
+            }
+          }
+
+          return {
+            category_id: session.category!.id!,
+            tag_ids: session.tags.map((tag) => tag.id),
+            description: session.description ?? undefined,
+            start_minute_offset: session_start,
+            end_minute_offset: session_end,
+          };
+        }),
+      };
+
+      return await SessionTemplateApi.update(translatedData);
+    },
+  });
+
+  const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
+    await mutation.mutateAsync(data);
+    props.setIsOpen(false);
+  };
+
+  return (
+    <Dialog modal={false} onOpenChange={props.setIsOpen} open={props.open}>
+      <DialogContent
+        className="max-w-4xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle>Create New Template</DialogTitle>
+          <DialogDescription>
+            Edit a template with recurring sessions that will repeat based on
+            your schedule.
+          </DialogDescription>
+        </DialogHeader>
+        <TemplateForm defaultValues={props.template} onSubmit={submitForm} />
+      </DialogContent>
+    </Dialog>
+  );
+};
