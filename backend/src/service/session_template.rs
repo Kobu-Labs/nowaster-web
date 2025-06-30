@@ -2,7 +2,7 @@ use anyhow::Result;
 use uuid::Uuid;
 
 use crate::{
-    dto::session::template::{CreateSessionTemplateDto, UpdateRecurringSessionDto},
+    dto::session::template::{CreateSessionTemplateDto, UpdateSessionTemplateDto},
     repository::recurring_session::{ReadSesionTemplateRow, RecurringSessionRepository},
     router::clerk::ClerkUser,
 };
@@ -29,27 +29,19 @@ impl SessionTemplateService {
         self.repo.create_session_template(dto, actor).await
     }
 
-    pub async fn update_recurring_session(
+    pub async fn update_session_template(
         &self,
-        dto: UpdateRecurringSessionDto,
+        dto: UpdateSessionTemplateDto,
         actor: ClerkUser,
     ) -> Result<()> {
-        self.repo.update_recurring_session(dto, actor).await
+        self.repo.update_session_template(dto, actor).await
     }
 
-    pub async fn delete_recurring_session(
-        &self,
-        id: Uuid,
-        actor: ClerkUser,
-    ) -> Result<()> {
+    pub async fn delete_recurring_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
         self.repo.delete_recurring_session(id, actor).await
     }
 
-    pub async fn delete_session_template(
-        &self,
-        id: Uuid,
-        actor: ClerkUser,
-    ) -> Result<()> {
+    pub async fn delete_session_template(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
         self.repo.delete_session_template(id, actor).await
     }
 }
