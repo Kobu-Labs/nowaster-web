@@ -1,19 +1,12 @@
 import { sessionFilter } from "@/api/definitions/filters";
-import {
-  CategoryWithIdSchema,
-} from "@/api/definitions/models";
 import { z } from "zod";
 
 const create = z.object({
-  category: CategoryWithIdSchema,
+  category_id: z.string().uuid(),
   description: z.string().nullable(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
-  tags: z.array(
-    z.object({
-      id: z.string().uuid(),
-    }),
-  ),
+  tag_ids: z.array(z.string().uuid()),
 });
 
 const readById = z.object({

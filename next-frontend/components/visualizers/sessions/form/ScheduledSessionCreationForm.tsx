@@ -1,6 +1,6 @@
 import {
+  CategoryWithIdSchema,
   ScheduledSessionRequest,
-  ScheduledSessionRequestSchema,
 } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -37,6 +37,7 @@ import { SingleCategoryPicker } from "@/components/visualizers/categories/Catego
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { formatTime } from "@/lib/utils";
 import { SessionPrecursor } from "@/validation/session/creation";
+import { z } from "zod";
 
 const creationFormQuickOptions: QuickOption[] = [
   {
@@ -84,17 +85,29 @@ type ScheduledSessionCreationFormProps = {
   onSave?: () => void;
 };
 
+const createSessionPrecursor = z.object({
+  category: CategoryWithIdSchema,
+  description: z.string().nullable(),
+  startTime: z.coerce.date(),
+  endTime: z.coerce.date(),
+  tags: z.array(
+    z.object({
+      id: z.string().uuid(),
+    }),
+  ),
+});
+
 export const ScheduledSessionCreationForm: FC<
   ScheduledSessionCreationFormProps
 > = (props) => {
-  const form = useForm<ScheduledSessionRequest["create"]>({
-    resolver: zodResolver(ScheduledSessionRequestSchema.create),
+  const form = useForm<z.infer<typeof createSessionPrecursor>>({
+    resolver: zodResolver(createSessionPrecursor),
     defaultValues: props.precursor,
   });
 
   const createSession = useCreateScheduledSession();
 
-  async function onSubmit(values: ScheduledSessionRequest["create"]) {
+  async function onSubmit(values: z.infer<typeof createSessionPrecursor>) {
     if (
       isBefore(values.endTime, values.startTime) ||
       isEqual(values.endTime, values.startTime)
@@ -105,7 +118,15 @@ export const ScheduledSessionCreationForm: FC<
       return;
     }
 
-    await createSession.mutateAsync(values, {
+    const data: ScheduledSessionRequest["create"] = {
+      startTime: values.startTime,
+      endTime: values.endTime,
+      description: values.description,
+      category_id: values.category.id,
+      tag_ids: values.tags.map((tag) => tag.id),
+    };
+
+    await createSession.mutateAsync(data, {
       onSuccess: () => {
         if (props.onSave) {
           props.onSave();

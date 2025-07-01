@@ -49,19 +49,9 @@ impl FixedSessionService {
         dto: CreateFixedSessionDto,
         actor: ClerkUser,
     ) -> Result<ReadFixedSessionDto> {
-        let category = self
-            .category_service
-            .upsert_category(dto.category.clone(), actor.clone())
-            .await?;
-
         let res = self
             .fixed_repo
-            .create(
-                dto.clone(),
-                category.id,
-                dto.tags.iter().map(|t| t.id).collect(),
-                actor.clone(),
-            )
+            .create(dto.clone(), dto.category_id, dto.tag_ids, actor.clone())
             .await?;
 
         Ok(ReadFixedSessionDto::from(res))
