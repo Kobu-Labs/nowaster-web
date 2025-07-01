@@ -79,11 +79,6 @@ export const getDaytimeAfterDate = (
   interval: RecurringSessionInterval,
   time: { minutes: number; hours: number; day: number },
 ): Date => {
-  const currentDay = lowerBoundDate.getDay();
-  const targetDay = time.day;
-  const dayDiff =
-    normalizeDayNumber(targetDay) - normalizeDayNumber(currentDay);
-
   const adjustedDate = set(lowerBoundDate, {
     hours: time.hours,
     minutes: time.minutes,
@@ -91,14 +86,40 @@ export const getDaytimeAfterDate = (
     milliseconds: 0,
   });
 
-  if (adjustedDate >= lowerBoundDate) {
-    return adjustedDate;
-  }
+  const dailyHandler = () => {
+    // check if we are within the same interval and day
+    if (adjustedDate >= lowerBoundDate) {
+      return adjustedDate;
+    }
+    return incrementByInterval(interval, adjustedDate);
+  };
 
-  // TODO: this check should be replaced by a interval specific-check
-  if (dayDiff > 0) {
-    return addDays(adjustedDate, dayDiff);
-  }
+  const weeklyHandler = () => {
+    const currentDay = lowerBoundDate.getDay();
+    const targetDay = time.day;
+    const dayDiff =
+      normalizeDayNumber(targetDay) - normalizeDayNumber(currentDay);
 
-  return incrementByInterval(interval, adjustedDate);
+    // check if we are within the same interval and day
+    if (adjustedDate >= lowerBoundDate && dayDiff === 0) {
+      return adjustedDate;
+    }
+
+    // we are within the interval and just need to adjust the day
+    if (dayDiff > 0) {
+      return addDays(adjustedDate, dayDiff);
+    }
+
+    // we are already past given point and need to go to next interval
+    return incrementByInterval(interval, adjustedDate);
+  };
+
+  switch (interval) {
+    case "daily": {
+      return dailyHandler();
+    }
+    case "weekly": {
+      return weeklyHandler();
+    }
+  }
 };
