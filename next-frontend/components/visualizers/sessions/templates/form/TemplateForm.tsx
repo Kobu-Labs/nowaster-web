@@ -32,120 +32,61 @@ import {
 } from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addDays, differenceInMinutes, isBefore } from "date-fns";
+import { addMinutes, differenceInMinutes } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import React from "react";
 import { Separator } from "@/components/shadcn/separator";
 import { TemplateIntervalSelect } from "@/components/visualizers/sessions/templates/TemplateIntervalSelect";
-
+import { SessionTemplate } from "@/api/definitions/models/session-template";
+import { getDaytimeAfterDate } from "@/lib/date-utils";
 
 type TemplateFormProps = {
-  onSuccess?: () => void;
+  onSubmit: (data: z.infer<typeof templateSessionPrecursor>) => void;
+  onError?: () => void;
+  isLoading?: boolean;
+  defaultValues?: SessionTemplate;
+};
+
+const translateTemplateToPrecursor = (
+  template: SessionTemplate,
+): z.infer<typeof templateSessionPrecursor> => {
+  return {
+    ...template,
+    sessions: template.sessions.map((sess) => {
+      const start = addMinutes(template.start_date, sess.start_minute_offset);
+      const end = addMinutes(template.start_date, sess.end_minute_offset);
+      return {
+        ...sess,
+        description: sess.description ?? undefined,
+        end_date_time: {
+          day: end.getDay(),
+          hours: end.getHours(),
+          minutes: end.getMinutes(),
+        },
+        start_date_time: {
+          day: start.getDay(),
+          hours: start.getHours(),
+          minutes: start.getMinutes(),
+        },
+      };
+    }),
+  };
 };
 
 export const TemplateForm: FC<TemplateFormProps> = (props) => {
   const form = useForm<z.infer<typeof templateSessionPrecursor>>({
     resolver: zodResolver(templateSessionPrecursor),
+    defaultValues: props.defaultValues
+      ? translateTemplateToPrecursor(props.defaultValues)
+      : undefined,
   });
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationKey: ["session-template"],
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
-      if (props.onSuccess) {
-        props.onSuccess();
-      }
-    },
-    mutationFn: async (data: z.infer<typeof templateSessionPrecursor>) => {
-      const interval_start = data.start_date;
-
-      const dailyHandler = (time: { hours: number; minutes: number }) => {
-        let newDate = new Date(interval_start);
-        newDate.setHours(time.hours, time.minutes, 0, 0);
-        if (isBefore(newDate, interval_start)) {
-          newDate = addDays(newDate, 1);
-        }
-
-        return differenceInMinutes(newDate, interval_start);
-      };
-
-      const weeklyHandler = (time: {
-        day: number;
-        hours: number;
-        minutes: number;
-      }) => {
-        let newDate = new Date(interval_start);
-        if (interval_start.getDay() < time.day) {
-          newDate = addDays(interval_start, time.day - interval_start.getDay());
-          newDate.setHours(time.hours, time.minutes, 0, 0);
-        } else if (interval_start.getDay() > time.day) {
-          newDate = addDays(newDate, 7);
-          newDate = addDays(newDate, time.day - interval_start.getDay());
-          newDate.setHours(time.hours, time.minutes, 0, 0);
-        } else {
-          newDate.setHours(time.hours, time.minutes, 0, 0);
-          if (isBefore(newDate, interval_start)) {
-            newDate = addDays(newDate, 7);
-          }
-        }
-
-        return differenceInMinutes(newDate, interval_start);
-      };
-
-      const onFieldChange = (time: {
-        day: number;
-        hours: number;
-        minutes: number;
-      }) => {
-        if (data.interval === "daily") {
-          return dailyHandler(time);
-        }
-        return weeklyHandler(time);
-      };
-
-      const translatedData: SessionTemplateRequest["create"] = {
-        name: data.name,
-        interval: data.interval,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        sessions: data.sessions.map((session) => {
-          const session_start = onFieldChange(session.start_date_time);
-          let session_end = onFieldChange(session.end_date_time);
-
-          if (session_start >= session_end) {
-            if (data.interval === "daily") {
-              session_end = session_start + 24 * 60; // add 24 hours in minutes
-            } else {
-              session_end += 7 * 24 * 60;
-            }
-          }
-
-          return {
-            category_id: session.category!.id!,
-            tag_ids: session.tags.map((tag) => tag.id),
-            description: session.description ?? undefined,
-            start_minute_offset: session_start,
-            end_minute_offset: session_end,
-          };
-        }),
-      };
-
-      return await SessionTemplateApi.create(translatedData);
-    },
-  });
-
-  const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
-    await mutation.mutateAsync(data);
-  };
 
   const fieldArray = useFieldArray({ control: form.control, name: "sessions" });
 
   const preventContinue =
-    mutation.isPending ||
     form.watch("interval") === undefined ||
     form.watch("start_date") === undefined ||
     form.watch("end_date") === undefined;
@@ -153,7 +94,7 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(submitForm, console.error)}
+        onSubmit={form.handleSubmit(props.onSubmit, props.onError)}
         className="m-8 flex flex-col items-center justify-center gap-8"
       >
         <div className="grid w-full grid-cols-2 gap-4 content-center">
@@ -237,13 +178,13 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
               className="flex items-center gap-2 col-span-full"
               key={field.id}
             >
-              <div className="rounded-md border p-4">
-                <Trash2
-                  className="cursor-pointer hover:text-red-500"
-                  type="button"
-                  onClick={() => fieldArray.remove(index)}
-                />
-              </div>
+              <Button
+                className="rounded-md border p-4 group"
+                variant="outline"
+                onClick={() => fieldArray.remove(index)}
+              >
+                <Trash2 className="group-hover:text-red-500" />
+              </Button>
               <RecurringSessionForm
                 interval={form.watch("interval")}
                 intervalStart={form.watch("start_date")}
@@ -290,7 +231,7 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
             className="w-fit"
             variant="default"
             size="lg"
-            loading={mutation.isPending}
+            loading={props.isLoading}
           >
             Submit
           </Button>
@@ -300,127 +241,114 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
   );
 };
 
-export const TemplateFormDialog: FC = () => {
-  const [open, setIsOpen] = useState(false);
-
-  return (
-    <div>
-      <Button
-        className="w-fit flex items-center gap-2"
-        onClick={() => setIsOpen(true)}
-      >
-        <Plus />
-        Create template
-      </Button>
-      <Dialog modal={false} onOpenChange={setIsOpen} open={open}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Template</DialogTitle>
-            <DialogDescription>
-              Create a template with recurring sessions that will repeat based
-              on your schedule.
-            </DialogDescription>
-          </DialogHeader>
-          <TemplateForm onSuccess={() => setIsOpen(false)} />
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export const EditTemplateFormDialog: FC<{
-  template: SessionTemplate;
-    open:boolean,
-    setIsOpen: (val:boolean) => void
+export const CreateTemplateFormDialog: FC<{
+  defaultValues?: SessionTemplate;
+  open: boolean;
+  setIsOpen: (val: boolean) => void;
 }> = (props) => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const createTemplateMutation = useMutation({
     mutationKey: ["session-template"],
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
     },
-    mutationFn: async (data: z.infer<typeof templateSessionPrecursor>) => {
-      const interval_start = data.start_date;
-
-      const dailyHandler = (time: { hours: number; minutes: number }) => {
-        let newDate = new Date(interval_start);
-        newDate.setHours(time.hours, time.minutes, 0, 0);
-        if (isBefore(newDate, interval_start)) {
-          newDate = addDays(newDate, 1);
-        }
-
-        return differenceInMinutes(newDate, interval_start);
-      };
-
-      const weeklyHandler = (time: {
-        day: number;
-        hours: number;
-        minutes: number;
-      }) => {
-        let newDate = new Date(interval_start);
-        if (interval_start.getDay() < time.day) {
-          newDate = addDays(interval_start, time.day - interval_start.getDay());
-          newDate.setHours(time.hours, time.minutes, 0, 0);
-        } else if (interval_start.getDay() > time.day) {
-          newDate = addDays(newDate, 7);
-          newDate = addDays(newDate, time.day - interval_start.getDay());
-          newDate.setHours(time.hours, time.minutes, 0, 0);
-        } else {
-          newDate.setHours(time.hours, time.minutes, 0, 0);
-          if (isBefore(newDate, interval_start)) {
-            newDate = addDays(newDate, 7);
-          }
-        }
-
-        return differenceInMinutes(newDate, interval_start);
-      };
-
-      const onFieldChange = (time: {
-        day: number;
-        hours: number;
-        minutes: number;
-      }) => {
-        if (data.interval === "daily") {
-          return dailyHandler(time);
-        }
-        return weeklyHandler(time);
-      };
-
-      const translatedData: SessionTemplateRequest["update"] = {
-        id: props.template.id,
-        name: data.name,
-        interval: data.interval,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        sessions: data.sessions.map((session) => {
-          const session_start = onFieldChange(session.start_date_time);
-          let session_end = onFieldChange(session.end_date_time);
-
-          if (session_start >= session_end) {
-            if (data.interval === "daily") {
-              session_end = session_start + 24 * 60; // add 24 hours in minutes
-            } else {
-              session_end += 7 * 24 * 60;
-            }
-          }
-
-          return {
-            category_id: session.category!.id!,
-            tag_ids: session.tags.map((tag) => tag.id),
-            description: session.description ?? undefined,
-            start_minute_offset: session_start,
-            end_minute_offset: session_end,
-          };
-        }),
-      };
-
-      return await SessionTemplateApi.update(translatedData);
+    mutationFn: async (precursor: z.infer<typeof templateSessionPrecursor>) => {
+      const translatedData = translateTemplatePrecursor(precursor);
+      return await SessionTemplateApi.create(translatedData);
     },
   });
 
   const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
-    await mutation.mutateAsync(data);
+    await createTemplateMutation.mutateAsync(data);
+    props.setIsOpen(false);
+  };
+
+  return (
+    <Dialog modal={false} onOpenChange={props.setIsOpen} open={props.open}>
+      <DialogContent
+        className="max-w-4xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle>Create New Template</DialogTitle>
+          <DialogDescription>
+            Create a template with recurring sessions that will repeat based on
+            your schedule.
+          </DialogDescription>
+        </DialogHeader>
+        <TemplateForm
+          isLoading={createTemplateMutation.isPending}
+          onSubmit={submitForm}
+          defaultValues={props.defaultValues}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const translateTemplatePrecursor = (
+  precursor: z.infer<typeof templateSessionPrecursor>,
+) => {
+  const translatedData: SessionTemplateRequest["create"] = {
+    name: precursor.name,
+    interval: precursor.interval,
+    start_date: precursor.start_date,
+    end_date: precursor.end_date,
+    sessions: precursor.sessions.map((session) => {
+      const session_start = getDaytimeAfterDate(
+        precursor.start_date,
+        precursor.interval,
+        session.start_date_time,
+      );
+      let session_end = getDaytimeAfterDate(
+        session_start,
+        precursor.interval,
+        session.end_date_time,
+      );
+
+      return {
+        category_id: session.category!.id!,
+        tag_ids: session.tags.map((tag) => tag.id),
+        description: session.description ?? undefined,
+        start_minute_offset: differenceInMinutes(
+          session_start,
+          precursor.start_date,
+        ),
+        end_minute_offset: differenceInMinutes(
+          session_end,
+          precursor.start_date,
+        ),
+      };
+    }),
+  };
+
+  return translatedData;
+};
+
+export const EditTemplateFormDialog: FC<{
+  template: SessionTemplate;
+  open: boolean;
+  setIsOpen: (val: boolean) => void;
+}> = (props) => {
+  const queryClient = useQueryClient();
+
+  const updateTemplateMutation = useMutation({
+    mutationKey: ["session-template"],
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
+    },
+    mutationFn: async (precursor: z.infer<typeof templateSessionPrecursor>) => {
+      const data = translateTemplatePrecursor(precursor);
+      return await SessionTemplateApi.update({
+        ...data,
+        id: props.template.id,
+      });
+    },
+  });
+
+  const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
+    await updateTemplateMutation.mutateAsync(data);
     props.setIsOpen(false);
   };
 
@@ -437,7 +365,11 @@ export const EditTemplateFormDialog: FC<{
             your schedule.
           </DialogDescription>
         </DialogHeader>
-        <TemplateForm defaultValues={props.template} onSubmit={submitForm} />
+        <TemplateForm
+          defaultValues={props.template}
+          onSubmit={submitForm}
+          isLoading={updateTemplateMutation.isPending}
+        />
       </DialogContent>
     </Dialog>
   );
