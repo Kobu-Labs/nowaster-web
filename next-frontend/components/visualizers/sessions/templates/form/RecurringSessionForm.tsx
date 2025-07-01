@@ -25,13 +25,11 @@ export const recurringSessionPrecursor = z.object({
   category: CategoryWithIdSchema,
   tags: z.array(TagWithIdSchema),
   description: z.string().optional(),
-  // offset from stat_date of the template in seconds
   start_date_time: z.object({
     hours: z.number().min(0).max(23),
     minutes: z.number().min(0).max(59),
     day: z.number().min(0).max(6),
   }),
-  // offset from stat_date of the template in seconds
   end_date_time: z.object({
     hours: z.number().min(0).max(23),
     minutes: z.number().min(0).max(59),
