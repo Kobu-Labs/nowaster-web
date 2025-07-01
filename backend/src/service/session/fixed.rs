@@ -51,7 +51,7 @@ impl FixedSessionService {
     ) -> Result<ReadFixedSessionDto> {
         let res = self
             .fixed_repo
-            .create(dto.clone(), dto.category_id, dto.tag_ids, actor.clone())
+            .create(dto, actor)
             .await?;
 
         Ok(ReadFixedSessionDto::from(res))
