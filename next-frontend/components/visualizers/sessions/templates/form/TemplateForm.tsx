@@ -32,7 +32,7 @@ import {
 } from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addMinutes, differenceInMinutes } from "date-fns";
+import { addMinutes, differenceInMinutes, isAfter, set } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
 import { FC } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -139,6 +139,17 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
                 <FormLabel className="block">Start Time</FormLabel>
                 <FormControl>
                   <DateTimePicker
+                    disabled={(val) =>
+                      isAfter(
+                        set(new Date(), {
+                          hours: 0,
+                          minutes: 0,
+                          seconds: 0,
+                          milliseconds: 0,
+                        }),
+                        val,
+                      )
+                    }
                     selected={field.value ?? undefined}
                     onSelect={(val) => {
                       field.onChange(val);
