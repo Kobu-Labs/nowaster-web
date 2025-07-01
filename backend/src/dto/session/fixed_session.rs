@@ -4,10 +4,7 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    dto::{
-        category::{create_category::CreateCategoryDto, read_category::ReadCategoryDto},
-        tag::read_tag::ReadTagDto,
-    },
+    dto::{category::read_category::ReadCategoryDto, tag::read_tag::ReadTagDto},
     entity::session::{FixedSession, SessionType},
 };
 
@@ -18,8 +15,8 @@ pub struct AddTagDto {
 
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct CreateFixedSessionDto {
-    pub category: CreateCategoryDto,
-    pub tags: Vec<AddTagDto>,
+    pub category_id: Uuid,
+    pub tag_ids: Vec<Uuid>,
     pub description: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: DateTime<Local>,
