@@ -1,8 +1,9 @@
 import { SessionTemplateApi } from "@/api";
-import { TemplateFormDialog } from "@/components/visualizers/sessions/templates/form/TemplateForm";
+import { Button } from "@/components/shadcn/button";
+import { CreateTemplateFormDialog } from "@/components/visualizers/sessions/templates/form/TemplateForm";
 import { TemplateOverview } from "@/components/visualizers/sessions/templates/TemplateOverview";
 import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 export const TemplateDashboard: FC = () => {
   const q = useQuery({
@@ -19,6 +20,8 @@ export const TemplateDashboard: FC = () => {
   if (q.isError) {
     return <div>Error: {q.error.message}</div>;
   }
+
+  const [open, setOpen] = useState(false);
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -28,7 +31,8 @@ export const TemplateDashboard: FC = () => {
             Manage your recurring session templates
           </p>
         </div>
-        <TemplateFormDialog />
+        <Button onClick={() => setOpen(true)}>Add template</Button>
+        <CreateTemplateFormDialog open={open} setIsOpen={setOpen} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
