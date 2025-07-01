@@ -40,8 +40,6 @@ pub trait SessionRepositoryTrait {
     async fn create(
         &self,
         dto: CreateFixedSessionDto,
-        category_id: Uuid,
-        tag_ids: Vec<Uuid>,
         actor: ClerkUser,
     ) -> Result<FixedSession>;
 }
@@ -170,8 +168,6 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn create(
         &self,
         dto: CreateFixedSessionDto,
-        category_id: Uuid,
-        tag_ids: Vec<Uuid>,
         actor: ClerkUser,
     ) -> Result<FixedSession> {
         let result = sqlx::query!(
@@ -180,7 +176,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 VALUES ($1, $2,$3,$4,$5, $6)
                 RETURNING session.id
             "#,
-            category_id,
+            dto.category_id,
             String::from("fixed"),
             dto.start_time,
             dto.end_time,
