@@ -10,6 +10,8 @@ import {
 } from "@/components/shadcn/card";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { cn, getFormattedTimeDifference } from "@/lib/utils";
+import { Badge } from "@/components/shadcn/badge";
+import { CalendarSync } from "lucide-react";
 
 type SessionCardProps = {
   session: ScheduledSession;
@@ -59,8 +61,14 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">
+        <CardTitle className="text-2xl font-bold flex gap-8 items-center">
           {props.session.category.name}
+          {props.session.template && (
+            <Badge className="text-sm flex items-center gap-2">
+              <CalendarSync className="size-4" />
+              {props.session.template.name}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex grow-0">
@@ -68,7 +76,7 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
           <p className="text-sm text-muted-foreground">
             {props.session.description}
           </p>
-          <div className="mt-1 flex">
+          <div className="mt-1 flex gap-1">
             {props.session.tags.map((tag) => (
               <TagBadge tag={tag} variant="auto" key={tag.id} />
             ))}
