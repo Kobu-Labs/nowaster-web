@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgRow, prelude::FromRow, Postgres, QueryBuilder, Row};
+use sqlx::{prelude::FromRow, Postgres, QueryBuilder};
 use std::{sync::Arc, vec};
 use uuid::Uuid;
 
@@ -10,9 +10,15 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::session::{
         filter_session::{FilterSessionDto, Mode},
-        fixed_session::{CreateFixedSessionDto, UpdateFixedSessionDto},
+        fixed_session::{
+            CreateFixedSessionDto, CreateFixedSessionDtoWithId, UpdateFixedSessionDto,
+        },
+        template::ReadTemplateShallowDto,
     },
-    entity::{category::Category, session::FixedSession, tag::Tag},
+    entity::{
+        category::Category, session::FixedSession, session_template::RecurringSessionInterval,
+        tag::Tag,
+    },
     router::clerk::ClerkUser,
 };
 
@@ -22,6 +28,7 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
+    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: ClerkUser) -> Result<()>;
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
@@ -37,11 +44,7 @@ pub trait SessionRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
     async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>>;
-    async fn create(
-        &self,
-        dto: CreateFixedSessionDto,
-        actor: ClerkUser,
-    ) -> Result<FixedSession>;
+    async fn create(&self, dto: CreateFixedSessionDto, actor: ClerkUser) -> Result<FixedSession>;
 }
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
@@ -60,23 +63,12 @@ pub struct GenericFullRowSession {
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
     tag_color: Option<String>,
-}
 
-fn map_read_to_session(row: &PgRow) -> Result<GenericFullRowSession> {
-    Ok(GenericFullRowSession {
-        user_id: row.try_get("user_id")?,
-        id: row.try_get("id")?,
-        start_time: row.try_get("start_time")?,
-        end_time: row.try_get("end_time")?,
-        session_type: row.try_get("session_type")?,
-        description: row.try_get("description")?,
-        category_id: row.try_get("category_id")?,
-        category: row.try_get("category")?,
-        tag_id: row.try_get("tag_id")?,
-        tag_label: row.try_get("tag_label")?,
-        tag_color: row.try_get("tag_color")?,
-        category_color: row.try_get("category_color")?,
-    })
+    template_id: Option<Uuid>,
+    template_name: Option<String>,
+    template_start_date: Option<DateTime<Utc>>,
+    template_end_date: Option<DateTime<Utc>>,
+    template_interval: Option<RecurringSessionInterval>,
 }
 
 impl SessionRepositoryTrait for FixedSessionRepository {
@@ -108,7 +100,30 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 start_time: DateTime::from(session.start_time),
                 end_time: DateTime::from(session.end_time.unwrap()), // INFO: fixed sessions cannot have nullable end_time
                 description: session.description,
+                template: None,
             });
+
+            if let (
+                Some(template_id),
+                Some(template_name),
+                Some(template_start_date),
+                Some(template_end_date),
+                Some(template_interval),
+            ) = (
+                session.template_id,
+                session.template_name,
+                session.template_start_date,
+                session.template_end_date,
+                session.template_interval,
+            ) {
+                entry.template = Some(ReadTemplateShallowDto {
+                    id: template_id,
+                    name: template_name,
+                    start_date: template_start_date,
+                    end_date: template_end_date,
+                    interval: template_interval,
+                })
+            }
 
             if let (Some(id), Some(label), Some(tag_color)) =
                 (session.tag_id, session.tag_label, session.tag_color)
@@ -140,7 +155,13 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
-                t.color as "tag_color?"
+                t.color as "tag_color?",
+
+                st.id as "template_id?",
+                st.name as "template_name?",
+                st.start_date as "template_start_date?",
+                st.end_date as "template_end_date?",
+                st.interval AS "template_interval?: RecurringSessionInterval"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -148,6 +169,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
+            LEFT JOIN session_template st
+                on st.id = s.template_id
             WHERE 
                 s.id = $1
                 AND type = 'fixed' 
@@ -165,15 +188,55 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
-    async fn create(
-        &self,
-        dto: CreateFixedSessionDto,
-        actor: ClerkUser,
-    ) -> Result<FixedSession> {
+    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: ClerkUser) -> Result<()> {
+        let sessions: Vec<CreateFixedSessionDtoWithId> =
+            dtos.iter().cloned().map(Into::into).collect();
+
+        let mut tx = self.db_conn.get_pool().begin().await?;
+        let mut query_builder: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, id, template_id)
+                "#,
+        );
+
+        query_builder.push_values(sessions.iter().cloned(), |mut b, session| {
+            b.push_bind(session.category_id)
+                .push_bind(String::from("fixed"))
+                .push_bind(session.start_time)
+                .push_bind(session.end_time)
+                .push_bind(session.description.clone())
+                .push_bind(actor.user_id.clone())
+                .push_bind(session.id)
+                .push_bind(session.template_id);
+        });
+
+        query_builder.build().execute(tx.as_mut()).await?;
+
+        let mut tag_query_builder: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+                INSERT INTO tag_to_session (session_id, tag_id)
+            "#,
+        );
+
+        let tag_ids: Vec<(Uuid, Uuid)> = sessions
+            .into_iter()
+            .flat_map(|ts| ts.tag_ids.into_iter().map(move |tag_id| (ts.id, tag_id)))
+            .collect();
+
+        tag_query_builder.push_values(tag_ids, |mut b, tag_tuple| {
+            b.push_bind(tag_tuple.0).push_bind(tag_tuple.1);
+        });
+
+        tag_query_builder.build().execute(tx.as_mut()).await?;
+        tx.commit().await?;
+        Ok(())
+    }
+
+    async fn create(&self, dto: CreateFixedSessionDto, actor: ClerkUser) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
-                INSERT INTO session (category_id, type, start_time, end_time, description, user_id)
-                VALUES ($1, $2,$3,$4,$5, $6)
+                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id)
+                VALUES ($1, $2,$3,$4,$5, $6, $7)
                 RETURNING session.id
             "#,
             dto.category_id,
@@ -181,13 +244,14 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             dto.start_time,
             dto.end_time,
             dto.description,
-            actor.user_id
+            actor.user_id,
+            dto.template_id
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
 
         // INFO: pair tags with created session
-        for tag_id in tag_ids {
+        for tag_id in dto.tag_ids {
             // TODO: this should be done with either UNNEST or bulk insert
             sqlx::query!(
                 r#"
@@ -228,7 +292,13 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
                 t.id as tag_id,
                 t.label as tag_label,
-                t.color as tag_color
+                t.color as tag_color,
+
+                st.id as template_id,
+                st.name as template_name,
+                st.start_date as "template_start_date",
+                st.end_date as "template_end_date",
+                st.interval AS "template_interval"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -236,6 +306,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
+            LEFT JOIN session_template st
+                on st.id = s.template_id
             WHERE 
                 s.user_id = "#,
         );
