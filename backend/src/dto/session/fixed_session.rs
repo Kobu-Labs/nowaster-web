@@ -4,7 +4,10 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    dto::{category::read_category::ReadCategoryDto, tag::read_tag::ReadTagDto},
+    dto::{
+        category::read_category::ReadCategoryDto, session::template::ReadTemplateShallowDto,
+        tag::read_tag::ReadTagDto,
+    },
     entity::session::{FixedSession, SessionType},
 };
 
@@ -13,9 +16,37 @@ pub struct AddTagDto {
     pub id: Uuid,
 }
 
+impl From<CreateFixedSessionDto> for CreateFixedSessionDtoWithId {
+    fn from(dto: CreateFixedSessionDto) -> Self {
+        CreateFixedSessionDtoWithId {
+            id: Uuid::new_v4(),
+            category_id: dto.category_id,
+            tag_ids: dto.tag_ids,
+            description: dto.description,
+            start_time: dto.start_time,
+            end_time: dto.end_time,
+            template_id: dto.template_id,
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct CreateFixedSessionDtoWithId {
+    pub id: Uuid,
+    pub category_id: Uuid,
+    pub tag_ids: Vec<Uuid>,
+    pub description: Option<String>,
+    #[serde(rename = "startTime")]
+    pub start_time: DateTime<Local>,
+    #[serde(rename = "endTime")]
+    pub end_time: DateTime<Local>,
+    pub template_id: Option<Uuid>,
+}
+
 #[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct CreateFixedSessionDto {
     pub category_id: Uuid,
+    pub template_id: Option<Uuid>,
     pub tag_ids: Vec<Uuid>,
     pub description: Option<String>,
     #[serde(rename = "startTime")]
@@ -35,6 +66,7 @@ pub struct ReadFixedSessionDto {
     #[serde(rename = "endTime")]
     pub end_time: DateTime<Local>,
     pub description: Option<String>,
+    pub template: Option<ReadTemplateShallowDto>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate)]
@@ -63,6 +95,7 @@ impl ReadFixedSessionDto {
             start_time: entity.start_time,
             end_time: entity.end_time,
             description: entity.description,
+            template: entity.template,
         }
     }
 }

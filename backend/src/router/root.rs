@@ -11,10 +11,23 @@ use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, Tr
 use crate::{
     config::database::Database,
     repository::{
-        category::{CategoryRepository, CategoryRepositoryTrait}, fixed_session::{FixedSessionRepository, SessionRepositoryTrait}, friends::FriendsRepository, recurring_session::RecurringSessionRepository, statistics::sessions::StatisticsRepository, stopwatch_session::StopwatchSessionRepository, tag::{TagRepository, TagRepositoryTrait}, user::{UserRepository, UserRepositoryTrait}
+        category::{CategoryRepository, CategoryRepositoryTrait},
+        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+        friends::FriendsRepository,
+        recurring_session::RecurringSessionRepository,
+        statistics::sessions::StatisticsRepository,
+        stopwatch_session::StopwatchSessionRepository,
+        tag::{TagRepository, TagRepositoryTrait},
+        user::{UserRepository, UserRepositoryTrait},
     },
     service::{
-        category_service::CategoryService, friend_service::FriendService, session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService}, session_template::SessionTemplateService, statistics_service::StatisticsService, tag_service::TagService, user_service::UserService
+        category_service::CategoryService,
+        friend_service::FriendService,
+        session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
+        session_template::SessionTemplateService,
+        statistics_service::StatisticsService,
+        tag_service::TagService,
+        user_service::UserService,
     },
 };
 
@@ -53,7 +66,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let user_service = UserService::new(user_repo.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let session_service = FixedSessionService::new(
-        session_repo,
+        session_repo.clone(),
         category_service.clone(),
         stopwatch_repo.clone(),
     );
@@ -61,7 +74,8 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let friend_service = FriendService::new(friend_repo);
     let stopwatch_service =
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
-    let session_template_service = SessionTemplateService::new(template_session_repo);
+    let session_template_service =
+        SessionTemplateService::new(template_session_repo, session_repo.clone());
 
     let state = AppState {
         clerk: clerk.clone(),

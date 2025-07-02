@@ -7,7 +7,8 @@ use uuid::Uuid;
 use crate::{
     config::database::{Database, DatabaseTrait},
     dto::session::template::{
-        CreateRecurringSessionDto, CreateSessionTemplateDto, UpdateSessionTemplateDto,
+        CreateRecurringSessionDto, CreateSessionTemplateDto, ReadTemplateShallowDto,
+        UpdateSessionTemplateDto,
     },
     entity::session_template::RecurringSessionInterval,
     router::clerk::ClerkUser,
@@ -154,21 +155,23 @@ impl RecurringSessionRepository {
 
     pub async fn create_session_template(
         &self,
+        template_id: Uuid,
         dto: CreateSessionTemplateDto,
         actor: ClerkUser,
     ) -> Result<()> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let template_id: Uuid = sqlx::query_scalar!(
             r#"
-            INSERT INTO session_template (name, start_date, end_date, interval, user_id)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO session_template (name, start_date, end_date, interval, user_id, id)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
             "#,
             dto.name,
             dto.start_date,
             dto.end_date,
             dto.interval as RecurringSessionInterval,
-            actor.user_id
+            actor.user_id,
+            template_id
         )
         .fetch_one(tx.as_mut())
         .await?;
@@ -250,5 +253,26 @@ impl RecurringSessionRepository {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn find_template_by_id(&self, id: Uuid) -> Result<Option<ReadTemplateShallowDto>> {
+        let val = sqlx::query_as!(
+            ReadTemplateShallowDto,
+            r#"
+            SELECT
+                s.id,
+                s.name,
+                s.start_date,
+                s.end_date,
+                s.interval AS "interval!: RecurringSessionInterval"
+            FROM session_template s
+            WHERE s.id = $1
+            "#,
+            id
+        )
+        .fetch_optional(self.db_conn.get_pool())
+        .await?;
+
+        Ok(val)
     }
 }
