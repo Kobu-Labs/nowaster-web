@@ -23,6 +23,14 @@ export const RecurringSessionSchema = z.object({
   description: z.string().nullable(),
 });
 
+export const SessionTemplateShallowSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(1),
+  interval: RecurringSessionIntervalSchema,
+  start_date: z.coerce.date(),
+  end_date: z.coerce.date(),
+});
+
 export const SessionTemplateSchema = z.object({
   name: z.string().trim().min(1),
   interval: RecurringSessionIntervalSchema,
