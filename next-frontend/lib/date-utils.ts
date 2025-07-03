@@ -70,6 +70,7 @@ export const incrementByInterval = (
   }
 };
 
+// Sunday -> 6, Monday -> 0
 export const normalizeDayNumber = (day: number): number => {
   return (day + 6) % 7;
 };
@@ -95,23 +96,17 @@ export const getDaytimeAfterDate = (
   };
 
   const weeklyHandler = () => {
-    const currentDay = lowerBoundDate.getDay();
-    const targetDay = time.day;
-    const dayDiff =
-      normalizeDayNumber(targetDay) - normalizeDayNumber(currentDay);
+    const lowerBoundDay = normalizeDayNumber(lowerBoundDate.getDay());
+    const targetDay = normalizeDayNumber(time.day);
+    // amount of days it takes to get from `lowerBoundDay` to `targetDay`
+    const dayDifference = (targetDay - lowerBoundDay + 7) % 7;
 
-    // check if we are within the same interval and day
-    if (adjustedDate >= lowerBoundDate && dayDiff === 0) {
-      return adjustedDate;
+    const result = addDays(adjustedDate, dayDifference);
+    if (result >= lowerBoundDate) {
+      return result;
     }
 
-    // we are within the interval and just need to adjust the day
-    if (dayDiff > 0) {
-      return addDays(adjustedDate, dayDiff);
-    }
-
-    // we are already past given point and need to go to next interval
-    return incrementByInterval(interval, adjustedDate);
+    return incrementByInterval(interval, result);
   };
 
   switch (interval) {
