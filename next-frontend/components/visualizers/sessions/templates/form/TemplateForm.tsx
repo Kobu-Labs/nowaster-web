@@ -28,7 +28,7 @@ import { Input } from "@/components/shadcn/input";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import {
   RecurringSessionForm,
-  templateSessionPrecursor,
+  recurringSessionPrecursor,
 } from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -40,15 +40,23 @@ import { z } from "zod";
 import React from "react";
 import { Separator } from "@/components/shadcn/separator";
 import { TemplateIntervalSelect } from "@/components/visualizers/sessions/templates/TemplateIntervalSelect";
-import { SessionTemplate } from "@/api/definitions/models/session-template";
+import {
+  RecurringSessionIntervalSchema,
+  SessionTemplate,
+} from "@/api/definitions/models/session-template";
 import { getDaytimeAfterDate } from "@/lib/date-utils";
 
-type TemplateFormProps = {
-  onSubmit: (data: z.infer<typeof templateSessionPrecursor>) => void;
-  onError?: () => void;
-  isLoading?: boolean;
-  defaultValues?: SessionTemplate;
-};
+export const templateSessionPrecursor = z.object({
+  name: z.string().trim().min(1),
+  interval: RecurringSessionIntervalSchema,
+  start_date: z.coerce.date(),
+  end_date: z.coerce.date(),
+  sessions: z.array(recurringSessionPrecursor),
+  // only relevant when editing a template
+  existing_sessions_action: z.optional(
+    z.enum(["delete-all", "delete-future", "keep-all"]),
+  ),
+});
 
 const translateTemplateToPrecursor = (
   template: SessionTemplate,
@@ -74,6 +82,13 @@ const translateTemplateToPrecursor = (
       };
     }),
   };
+};
+
+type TemplateFormProps = {
+  onSubmit: (data: z.infer<typeof templateSessionPrecursor>) => void;
+  onError?: () => void;
+  isLoading?: boolean;
+  defaultValues?: SessionTemplate;
 };
 
 export const TemplateForm: FC<TemplateFormProps> = (props) => {
@@ -237,13 +252,7 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
 
         <div className="flex items-center justify-center w-full gap-4">
           <div className="grow" />
-          <Button
-            type="submit"
-            className="w-fit"
-            variant="default"
-            size="lg"
-            loading={props.isLoading}
-          >
+          <Button type="submit" className="w-fit" variant="default" size="lg">
             Submit
           </Button>
         </div>
@@ -335,53 +344,4 @@ const translateTemplatePrecursor = (
   };
 
   return translatedData;
-};
-
-export const EditTemplateFormDialog: FC<{
-  template: SessionTemplate;
-  open: boolean;
-  setIsOpen: (val: boolean) => void;
-}> = (props) => {
-  const queryClient = useQueryClient();
-
-  const updateTemplateMutation = useMutation({
-    mutationKey: ["session-template"],
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
-    },
-    mutationFn: async (precursor: z.infer<typeof templateSessionPrecursor>) => {
-      const data = translateTemplatePrecursor(precursor);
-      return await SessionTemplateApi.update({
-        ...data,
-        id: props.template.id,
-      });
-    },
-  });
-
-  const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
-    await updateTemplateMutation.mutateAsync(data);
-    props.setIsOpen(false);
-  };
-
-  return (
-    <Dialog modal={false} onOpenChange={props.setIsOpen} open={props.open}>
-      <DialogContent
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader>
-          <DialogTitle>Create New Template</DialogTitle>
-          <DialogDescription>
-            Edit a template with recurring sessions that will repeat based on
-            your schedule.
-          </DialogDescription>
-        </DialogHeader>
-        <TemplateForm
-          defaultValues={props.template}
-          onSubmit={submitForm}
-          isLoading={updateTemplateMutation.isPending}
-        />
-      </DialogContent>
-    </Dialog>
-  );
 };

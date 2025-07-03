@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { IntervalBasedPicker } from "@/components/ui-providers/date-pickers/interval/IntevalBasedPicker";
 import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { templateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/TemplateForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { FC } from "react";
 import { Control } from "react-hook-form";
@@ -35,14 +36,6 @@ export const recurringSessionPrecursor = z.object({
     minutes: z.number().min(0).max(59),
     day: z.number().min(0).max(6),
   }),
-});
-
-export const templateSessionPrecursor = z.object({
-  name: z.string().trim().min(1),
-  interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
-  sessions: z.array(recurringSessionPrecursor),
 });
 
 export type RecurringSessionFormProps = {
