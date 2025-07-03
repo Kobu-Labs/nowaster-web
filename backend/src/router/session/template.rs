@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     dto::session::template::{CreateSessionTemplateDto, UpdateSessionTemplateDto},
-    repository::recurring_session::ReadSesionTemplateRow,
+    repository::session_template::ReadSesionTemplateRow,
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
