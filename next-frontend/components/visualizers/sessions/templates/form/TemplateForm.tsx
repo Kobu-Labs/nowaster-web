@@ -1,5 +1,9 @@
 "use client";
 
+import { SessionTemplateApi } from "@/api";
+import { SessionTemplate } from "@/api/definitions/models/session-template";
+import { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
+import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -7,15 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
-import { SessionTemplateApi } from "@/api";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
-import { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
-import { Button } from "@/components/shadcn/button";
 import {
   Form,
   FormControl,
@@ -25,42 +20,31 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
+import { Separator } from "@/components/shadcn/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import {
-  RecurringSessionForm,
-  recurringSessionPrecursor,
-} from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
+  TemplateSessionPrecursor,
+  templateSessionPrecursorSchema,
+} from "@/components/visualizers/sessions/templates/form/form-schemas";
+import { RecurringSessionForm } from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
+import { TemplateIntervalSelect } from "@/components/visualizers/sessions/templates/TemplateIntervalSelect";
+import { getDaytimeAfterDate } from "@/lib/date-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addMinutes, differenceInMinutes, isAfter, set } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
 import { FC } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
-import React from "react";
-import { Separator } from "@/components/shadcn/separator";
-import { TemplateIntervalSelect } from "@/components/visualizers/sessions/templates/TemplateIntervalSelect";
-import {
-  RecurringSessionIntervalSchema,
-  SessionTemplate,
-} from "@/api/definitions/models/session-template";
-import { getDaytimeAfterDate } from "@/lib/date-utils";
-
-export const templateSessionPrecursor = z.object({
-  name: z.string().trim().min(1),
-  interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
-  sessions: z.array(recurringSessionPrecursor),
-  // only relevant when editing a template
-  existing_sessions_action: z.optional(
-    z.enum(["delete-all", "delete-future", "keep-all"]),
-  ),
-});
 
 const translateTemplateToPrecursor = (
   template: SessionTemplate,
-): z.infer<typeof templateSessionPrecursor> => {
+): TemplateSessionPrecursor => {
   return {
     ...template,
     sessions: template.sessions.map((sess) => {
@@ -85,15 +69,15 @@ const translateTemplateToPrecursor = (
 };
 
 type TemplateFormProps = {
-  onSubmit: (data: z.infer<typeof templateSessionPrecursor>) => void;
+  onSubmit: (data: TemplateSessionPrecursor) => void;
   onError?: () => void;
   isLoading?: boolean;
   defaultValues?: SessionTemplate;
 };
 
 export const TemplateForm: FC<TemplateFormProps> = (props) => {
-  const form = useForm<z.infer<typeof templateSessionPrecursor>>({
-    resolver: zodResolver(templateSessionPrecursor),
+  const form = useForm<TemplateSessionPrecursor>({
+    resolver: zodResolver(templateSessionPrecursorSchema),
     defaultValues: props.defaultValues
       ? translateTemplateToPrecursor(props.defaultValues)
       : undefined,
@@ -273,13 +257,13 @@ export const CreateTemplateFormDialog: FC<{
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
     },
-    mutationFn: async (precursor: z.infer<typeof templateSessionPrecursor>) => {
+    mutationFn: async (precursor: TemplateSessionPrecursor) => {
       const translatedData = translateTemplatePrecursor(precursor);
       return await SessionTemplateApi.create(translatedData);
     },
   });
 
-  const submitForm = async (data: z.infer<typeof templateSessionPrecursor>) => {
+  const submitForm = async (data: TemplateSessionPrecursor) => {
     await createTemplateMutation.mutateAsync(data);
     props.setIsOpen(false);
   };
@@ -307,9 +291,7 @@ export const CreateTemplateFormDialog: FC<{
   );
 };
 
-const translateTemplatePrecursor = (
-  precursor: z.infer<typeof templateSessionPrecursor>,
-) => {
+const translateTemplatePrecursor = (precursor: TemplateSessionPrecursor) => {
   const translatedData: SessionTemplateRequest["create"] = {
     name: precursor.name,
     interval: precursor.interval,
