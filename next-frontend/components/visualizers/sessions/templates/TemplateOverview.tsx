@@ -16,10 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import {
-  CreateTemplateFormDialog,
-  EditTemplateFormDialog,
-} from "@/components/visualizers/sessions/templates/form/TemplateForm";
+import { CreateTemplateFormDialog } from "@/components/visualizers/sessions/templates/form/TemplateForm";
 import { RecurringSessionCard } from "@/components/visualizers/sessions/templates/RecurringSessionCard";
 import { TemplateIntervalBadge } from "@/components/visualizers/sessions/templates/TemplateIntervalBadge";
 import { getDaytimeAfterDate } from "@/lib/date-utils";
@@ -30,7 +27,6 @@ import {
   Calendar,
   Clock,
   CopyIcon,
-  EditIcon,
   MoreHorizontal,
   Tag,
   Trash,
@@ -105,16 +101,10 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
     },
   });
 
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
 
   return (
     <>
-      <EditTemplateFormDialog
-        template={template}
-        open={isEditOpen}
-        setIsOpen={setIsEditOpen}
-      />
       <CreateTemplateFormDialog
         open={isDuplicateOpen}
         setIsOpen={setIsDuplicateOpen}
@@ -139,13 +129,6 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="flex items-center gap-2"
-                    onSelect={() => setIsEditOpen(true)}
-                  >
-                    <EditIcon className="p-1" />
-                    Edit
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="flex items-center gap-2"
                     onSelect={() => setIsDuplicateOpen(true)}
