@@ -1,10 +1,7 @@
 "use client";
 
 import { CategoryWithIdSchema, TagWithIdSchema } from "@/api/definitions";
-import {
-  RecurringSessionInterval,
-  RecurringSessionIntervalSchema,
-} from "@/api/definitions/models/session-template";
+import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { Card } from "@/components/shadcn/card";
 import {
   FormControl,
@@ -16,7 +13,7 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { IntervalBasedPicker } from "@/components/ui-providers/date-pickers/interval/IntevalBasedPicker";
 import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
-import { templateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/TemplateForm";
+import { TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { FC } from "react";
 import { Control } from "react-hook-form";
@@ -39,7 +36,7 @@ export const recurringSessionPrecursor = z.object({
 });
 
 export type RecurringSessionFormProps = {
-  control: Control<z.infer<typeof templateSessionPrecursor>>;
+  control: Control<TemplateSessionPrecursor>;
   intervalStart: Date;
   interval: RecurringSessionInterval;
   parentFieldIndex: number;
