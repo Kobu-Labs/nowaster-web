@@ -223,11 +223,14 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             .flat_map(|ts| ts.tag_ids.into_iter().map(move |tag_id| (ts.id, tag_id)))
             .collect();
 
-        tag_query_builder.push_values(tag_ids, |mut b, tag_tuple| {
-            b.push_bind(tag_tuple.0).push_bind(tag_tuple.1);
-        });
+        if !tag_ids.is_empty() {
+            tag_query_builder.push_values(tag_ids, |mut b, tag_tuple| {
+                b.push_bind(tag_tuple.0).push_bind(tag_tuple.1);
+            });
 
-        tag_query_builder.build().execute(tx.as_mut()).await?;
+            tag_query_builder.build().execute(tx.as_mut()).await?;
+        }
+
         tx.commit().await?;
         Ok(())
     }
