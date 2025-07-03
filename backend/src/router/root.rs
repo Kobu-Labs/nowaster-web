@@ -14,7 +14,7 @@ use crate::{
         category::{CategoryRepository, CategoryRepositoryTrait},
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
-        recurring_session::RecurringSessionRepository,
+        session_template::RecurringSessionRepository,
         statistics::sessions::StatisticsRepository,
         stopwatch_session::StopwatchSessionRepository,
         tag::{TagRepository, TagRepositoryTrait},
