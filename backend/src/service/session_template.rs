@@ -10,7 +10,7 @@ use crate::{
     entity::session_template::RecurringSessionInterval,
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
-        recurring_session::{ReadSesionTemplateRow, RecurringSessionRepository},
+        session_template::{ReadSesionTemplateRow, RecurringSessionRepository},
     },
     router::clerk::ClerkUser,
 };
@@ -74,7 +74,9 @@ impl SessionTemplateService {
             }
         });
 
-        self.session_repo.create_many(sessions, actor).await?;
+        if !sessions.is_empty() {
+            self.session_repo.create_many(sessions, actor).await?;
+        }
 
         Ok(())
     }
