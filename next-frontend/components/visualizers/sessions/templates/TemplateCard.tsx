@@ -12,12 +12,7 @@ import {
 } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
-import {
-  addMinutes,
-  format,
-  startOfDay,
-  startOfWeek,
-} from "date-fns";
+import { addMinutes, format, startOfDay, startOfWeek } from "date-fns";
 import { FC } from "react";
 
 type TemplateCardProps = {
@@ -68,6 +63,7 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
                 <SessionCard
                   session={{
                     ...session,
+                    template: props.template,
                     startTime,
                     endTime,
                     session_type: "fixed",
