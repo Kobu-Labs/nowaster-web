@@ -58,4 +58,23 @@ pub struct FilterSessionDto {
     pub from_end_time: Option<DateFilter>,
     #[serde(rename = "toEndTime")]
     pub to_end_time: Option<DateFilter>,
+    #[serde(rename = "templateId")]
+    pub template_id: Option<Uuid>,
+}
+
+
+impl FilterSessionDto {
+    pub fn has_filters(&self) -> bool {
+        self.tags.is_some()
+            || self.categories.is_some()
+            || self.from_start_time.is_some()
+            || self.to_start_time.is_some()
+            || self.from_end_time.is_some()
+            || self.to_end_time.is_some()
+            || self.template_id.is_some()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        !self.has_filters()
+    }
 }
