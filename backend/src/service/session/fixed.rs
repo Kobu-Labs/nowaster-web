@@ -71,6 +71,11 @@ impl FixedSessionService {
         Ok(())
     }
 
+    pub async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: ClerkUser) -> Result<u64> {
+        let affected_rows = self.fixed_repo.delete_sessions_by_filter(dto, actor).await?;
+        Ok(affected_rows)
+    }
+
     pub async fn get_active_sessions(&self, actor: ClerkUser) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {

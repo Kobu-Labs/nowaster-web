@@ -35,6 +35,11 @@ pub trait SessionRepositoryTrait {
         actor: ClerkUser,
     ) -> Result<Self::SessionType>;
     async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
+    async fn delete_sessions_by_filter(
+        &self,
+        dto: FilterSessionDto,
+        actor: ClerkUser,
+    ) -> Result<u64>;
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
@@ -443,6 +448,58 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         .await?;
 
         Ok(())
+    }
+
+    async fn delete_sessions_by_filter(
+        &self,
+        dto: FilterSessionDto,
+        actor: ClerkUser,
+    ) -> Result<u64> {
+        if dto.is_empty() {
+            return Err(anyhow!(
+                "No filters were specified - aborting session deletion"
+            ));
+        }
+        println!("Tags: {:?}", dto);
+
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"DELETE FROM session s
+            WHERE s.user_id = "#,
+        );
+        query.push_bind(actor.user_id);
+        query.push(" AND s.type = 'fixed'");
+
+        if let Some(from_endtime) = dto.from_end_time {
+            query
+                .push(" AND s.end_time >= ")
+                .push_bind(from_endtime.value);
+        }
+
+        if let Some(to_endtime) = dto.to_end_time {
+            query
+                .push(" AND s.end_time <= ")
+                .push_bind(to_endtime.value);
+        }
+
+        if let Some(from_starttime) = dto.from_start_time {
+            query
+                .push(" AND s.start_time >= ")
+                .push_bind(from_starttime.value);
+        }
+
+        if let Some(to_starttime) = dto.to_start_time {
+            query
+                .push(" AND s.start_time <= ")
+                .push_bind(to_starttime.value);
+        }
+
+        if let Some(template_id) = dto.template_id {
+            query.push(" AND s.template_id = ").push_bind(template_id);
+        }
+
+        let result = query.build().execute(self.db_conn.get_pool()).await?;
+
+        Ok(result.rows_affected())
     }
 
     async fn update_session(
