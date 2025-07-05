@@ -1,13 +1,14 @@
 use anyhow::Result;
-use chrono::{DateTime, Duration, Local};
+use chrono::{DateTime, Duration, Local, Utc};
 use uuid::Uuid;
 
 use crate::{
     dto::session::{
+        filter_session::{DateFilter, FilterSessionDto},
         fixed_session::CreateFixedSessionDto,
         template::{CreateSessionTemplateDto, UpdateSessionTemplateDto},
     },
-    entity::session_template::RecurringSessionInterval,
+    entity::session_template::{ExistingSessionsAction, RecurringSessionInterval},
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         session_template::{ReadSesionTemplateRow, RecurringSessionRepository},
@@ -93,7 +94,44 @@ impl SessionTemplateService {
         self.repo.delete_recurring_session(id, actor).await
     }
 
-    pub async fn delete_session_template(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
-        self.repo.delete_session_template(id, actor).await
+    pub async fn delete_session_template(
+        &self,
+        id: Uuid,
+        action: ExistingSessionsAction,
+        actor: ClerkUser,
+    ) -> Result<()> {
+        match action {
+            ExistingSessionsAction::KeepAll => {}
+            ExistingSessionsAction::DeleteAll => {
+                println!("Delete all");
+                self.session_repo
+                    .delete_sessions_by_filter(
+                        FilterSessionDto {
+                            template_id: Some(id),
+                            ..Default::default()
+                        },
+                        actor.clone(),
+                    )
+                    .await?;
+            }
+            ExistingSessionsAction::DeleteFuture => {
+                println!("Delete future");
+                self.session_repo
+                    .delete_sessions_by_filter(
+                        FilterSessionDto {
+                            template_id: Some(id),
+                            from_start_time: Some(DateFilter {
+                                value: Utc::now(),
+                            }),
+                            ..Default::default()
+                        },
+                        actor.clone(),
+                    )
+                    .await?;
+            }
+        }
+
+        self.repo.delete_session_template(id, actor).await?;
+        Ok(())
     }
 }
