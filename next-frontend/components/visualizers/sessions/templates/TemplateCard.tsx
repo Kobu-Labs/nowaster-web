@@ -16,7 +16,6 @@ import {
   addMinutes,
   format,
   startOfDay,
-  startOfMonth,
   startOfWeek,
 } from "date-fns";
 import { FC } from "react";
@@ -34,10 +33,6 @@ export const intervalToStartOf = (
       return startOfDay(asOf);
     case "weekly":
       return startOfWeek(asOf);
-    case "bi-weekly":
-      return startOfWeek(asOf);
-    case "monthly":
-      return startOfMonth(asOf);
   }
 };
 
