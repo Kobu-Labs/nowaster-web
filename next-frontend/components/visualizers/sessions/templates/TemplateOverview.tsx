@@ -60,7 +60,7 @@ const incrementByInterval = (
   }
 };
 
-export function TestSessions({
+export function TemplateOverview({
   template,
 }: {
   template: SessionTemplate;
