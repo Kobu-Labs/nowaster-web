@@ -25,7 +25,7 @@ export const update = async (params: SessionTemplateRequest["update"]) => {
 export const deleteTemplate = async (
   params: SessionTemplateRequest["deleteTemplate"],
 ) => {
-  const { data } = await baseApi.delete(`${BASE_URL}/${params.id}`);
+  const { data } = await baseApi.delete(`${BASE_URL}/${params.id}/${params.existingSessionActions}`);
   return await parseResponseUnsafe(
     data,
     SessionTemplateResponseSchema.deleteTemplate,
