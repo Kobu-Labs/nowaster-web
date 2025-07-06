@@ -1,5 +1,16 @@
 import { SessionTemplateApi } from "@/api";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/alert-dialog";
+import {
   RecurringSession,
   SessionTemplate,
 } from "@/api/definitions/models/session-template";
@@ -30,8 +41,10 @@ import {
   MoreHorizontal,
   Tag,
   Trash,
+  Trash2,
 } from "lucide-react";
 import { FC, useMemo, useState } from "react";
+import { TemplateSessionsAction } from "@/components/visualizers/sessions/templates/form/form-schemas";
 
 const calculateClosestSession = (
   session: Omit<RecurringSession, "id">,
@@ -91,9 +104,10 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
 
   const handleDeleteTemplate = useMutation({
     mutationKey: ["session-template", "deleteTemplate"],
-    mutationFn: async (templateId: string) => {
+    mutationFn: async (action: TemplateSessionsAction) => {
       await SessionTemplateApi.deleteTemplate({
-        id: templateId,
+        id: template.id,
+        existingSessionActions: action,
       });
     },
     onSuccess: async () => {
@@ -122,7 +136,7 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <MoreHorizontal className="w-4 h-4" />
@@ -136,12 +150,12 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
                     <CopyIcon className="p-1" />
                     Duplicate
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="text-destructive flex items-center gap-2"
-                    onClick={() => handleDeleteTemplate.mutate(template.id)}
-                  >
-                    <Trash className="p-1" />
-                    Delete
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <DeleteTemplateAlertDialog
+                      template={template}
+                      onConfirm={handleDeleteTemplate.mutate}
+                      onCancel={console.log}
+                    />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -194,5 +208,104 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
         </CardContent>
       </Card>
     </>
+  );
+};
+
+const DeleteTemplateAlertDialog: FC<{
+  template: SessionTemplate;
+  onConfirm: (action: TemplateSessionsAction) => void;
+  onCancel: () => void;
+}> = (props) => {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger className="text-destructive flex items-center gap-2">
+        <Trash className="p-1" />
+        Delete
+      </AlertDialogTrigger>
+      <AlertDialogContent className="max-w-lg">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-destructive" />
+            Delete Template "{props.template.name}"?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-base space-y-4">
+            <p>
+              This template has associated sessions. What would you like to do
+              with them?
+            </p>
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium">Keep sessions</p>
+                    <p className="text-sm text-muted-foreground">
+                      Only remove template, keep all sessions
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => props.onConfirm("keep-all")}
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto sm:min-w-24"
+                >
+                  Keep
+                </Button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-2 h-2 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-destructive">
+                      Delete future sessions
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Remove template and upcoming sessions only
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => props.onConfirm("delete-future")}
+                  variant="destructive"
+                  size="sm"
+                  className="w-full sm:w-auto sm:min-w-24"
+                >
+                  Delete Future
+                </Button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-2 h-2 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-destructive">
+                      Delete all sessions
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Permanently remove template and all sessions
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => props.onConfirm("delete-all")}
+                  variant="destructive"
+                  size="sm"
+                  className="w-full sm:w-auto sm:min-w-24"
+                >
+                  Delete All
+                </Button>
+              </div>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={props.onCancel} className="w-full">
+            Cancel
+          </AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
