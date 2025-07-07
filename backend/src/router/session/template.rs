@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     dto::session::template::{CreateSessionTemplateDto, UpdateSessionTemplateDto},
+    entity::session_template::ExistingSessionsAction,
     repository::session_template::ReadSesionTemplateRow,
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
@@ -19,7 +20,7 @@ pub fn session_template_router() -> Router<AppState> {
                 .post(create_handler)
                 .patch(update_session_template),
         )
-        .route("/{id}", delete(delete_session_template))
+        .route("/{id}/{action}", delete(delete_session_template))
         .nest("/recurring", recurring_session_router())
 }
 
@@ -74,11 +75,11 @@ async fn delete_recurring_session(
 async fn delete_session_template(
     State(state): State<AppState>,
     actor: ClerkUser,
-    Path(id): Path<Uuid>,
+    Path((id, action)): Path<(Uuid, ExistingSessionsAction)>,
 ) -> ApiResponse<()> {
     let res = state
         .session_template_service
-        .delete_session_template(id, actor)
+        .delete_session_template(id, action, actor)
         .await;
     ApiResponse::from_result(res)
 }
