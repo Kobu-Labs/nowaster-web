@@ -4,6 +4,16 @@ use uuid::Uuid;
 
 use super::{category::Category, tag::Tag};
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum ExistingSessionsAction {
+    #[serde(rename = "keep-all")]
+    KeepAll,
+    #[serde(rename = "delete-all")]
+    DeleteAll,
+    #[serde(rename = "delete-future")]
+    DeleteFuture,
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
 #[sqlx(type_name = "recurring_session_interval", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]

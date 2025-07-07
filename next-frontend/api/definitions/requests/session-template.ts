@@ -1,4 +1,5 @@
 import { RecurringSessionIntervalSchema } from "@/api/definitions/models/session-template";
+import { templateSessionsActionSchema } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import { z } from "zod";
 
 const create = z.object({
@@ -36,6 +37,7 @@ const update = z.object({
 
 const deleteTemplate = z.object({
   id: z.string().uuid(),
+  existingSessionActions: templateSessionsActionSchema,
 });
 
 const deleteRecurringSession = z.object({
