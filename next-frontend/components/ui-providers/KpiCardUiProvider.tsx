@@ -42,7 +42,7 @@ export function KpiCardUiProvider<T extends ReactNode>(
   props: KpiCardUiProviderProps<T>,
 ) {
   return (
-    <Card className="group flex grow flex-col hover:cursor-pointer hover:bg-accent hover:text-accent-foreground">
+    <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground  hover:border-pink-primary">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{props.title}</CardTitle>
         <div>{props.children}</div>
