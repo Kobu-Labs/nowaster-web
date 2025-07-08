@@ -10,15 +10,24 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "gradient-button",
+        destructive: "bg-destructive/80",
+        outline: cn(
+          "border  border-2  hover:text-accent-foreground",
+          "relative overflow-hidden transition-all duration-300 ease-in-out",
+          "before:absolute before:inset-0 before:opacity-100 before:transition-opacity before:duration-300 before:ease-in-out before:gradient-container",
+          "after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-300 after:ease-in-out after:gradient-container-subtle",
+          "hover:before:opacity-0 hover:after:opacity-100",
+        ),
+        secondary: cn(
+          "hover:text-accent-foreground",
+          "relative overflow-hidden transition-all duration-300 ease-in-out",
+          "before:absolute before:inset-0 before:opacity-100 before:transition-opacity before:duration-300 before:ease-in-out before:gradient-container",
+          "after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-300 after:ease-in-out after:gradient-container-subtle",
+          "hover:before:opacity-0 hover:after:opacity-100",
+        ),
+        ghost: "hover:gradient-icon-container hover:text-accent-foreground",
+        link: "text-pink-primary gradient-text-hover transition-all hover:transition-all duration-300 relative inline-block after:content-[''] after:absolute after:left-1/2 after:bottom-2 after:h-[2px] after:bg-primary after:w-0 after:transition-all after:duration-300 hover:after:left-0 hover:after:w-full",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -72,4 +81,3 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 export { Button, buttonVariants };
-
