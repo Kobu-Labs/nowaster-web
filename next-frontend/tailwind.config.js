@@ -18,10 +18,11 @@ module.exports = {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
+        border: "hsl(var(--pink-muted))",
+        input: "linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%)",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
+        "background-gradient": "var(--background-gradient)",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -50,6 +51,21 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        pink: {
+          primary: "hsl(var(--pink-primary))",
+          muted: "hsl(var(--pink-muted))",
+          subtle: "hsl(var(--pink-subtle))",
+        },
+        purple: {
+          primary: "hsl(var(--purple-primary))",
+          muted: "hsl(var(--purple-muted))",
+          subtle: "hsl(var(--purple-subtle))",
+        },
+        gradient: {
+          primary: "var(--gradient-primary)",
+          secondary: "var(--gradient-secondary)",
+          muted: "var(--gradient-muted)",
         },
       },
       boxShadow: {
@@ -103,14 +119,59 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    function ({ addUtilities }) {
+    function ({ addUtilities, addComponents }) {
       const newUtilities = {
         ".text-shadow-neon-pink": {
           textShadow:
             "0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff",
         },
       };
+
+      const newComponents = {
+        ".gradient-card": {
+          background: "var(--gradient-secondary)",
+          borderColor: "hsl(var(--pink-muted))",
+        },
+        ".gradient-card-muted": {
+          background: "var(--gradient-muted)",
+          borderColor: "hsl(var(--pink-subtle))",
+        },
+        ".gradient-accent-bar": {
+          background:
+            "linear-gradient(180deg, hsl(var(--pink-primary)) 0%, hsl(var(--purple-primary)) 100%)",
+        },
+        ".gradient-text-hover": {
+          transition: "all 0.3s ease",
+          "&:hover": {
+            background:
+              "linear-gradient(135deg, hsl(var(--pink-primary)) 0%, hsl(var(--purple-primary)) 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          },
+        },
+        ".gradient-container": {
+          background:
+            "linear-gradient(135deg, hsl(var(--pink-muted)) 0%, hsl(var(--purple-muted)) 100%)",
+        },
+        ".gradient-container-subtle": {
+          background:
+            "linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%)",
+        },
+        ".gradient-button": {
+          background:
+            "linear-gradient(135deg, hsl(var(--pink-primary)) 0%, hsl(var(--purple-primary)) 100%)",
+          color: "white",
+          border: "none",
+          transition: "opacity 0.3s ease",
+          "&:hover": {
+            opacity: "0.9",
+          },
+        },
+      };
+
       addUtilities(newUtilities, ["responsive", "hover"]);
+      addComponents(newComponents);
     },
   ],
 };

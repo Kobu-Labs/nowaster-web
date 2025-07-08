@@ -196,14 +196,14 @@ export function SessionTimelineUiProvider({
         <div
           key={`marker-${i}`}
           className={cn(
-            "absolute top-0 bottom-0 border-l border-gray-300 dark:border-gray-700",
+            "absolute top-0 bottom-0 border-l border-pink-muted",
             (i === 0 || i === numMarkers - 1) && "border-0",
           )}
           style={{ left: `${percent}%` }}
         >
           <span
             className={cn(
-              "absolute -top-6 -translate-x-1/4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap overflow-hidden",
+              "absolute -top-6 -translate-x-1/4 text-xs text-white whitespace-nowrap overflow-hidden",
 
               i === 0 && "left-2",
               i === numMarkers - 1 && "-right-5",
@@ -225,8 +225,8 @@ export function SessionTimelineUiProvider({
         bottom: "5%",
         height: "90%",
         position: "absolute" as const,
-        backgroundColor: "rgba(59, 130, 246, 0.3)",
-        border: "2px dashed #3b82f6",
+        backgroundColor: "#330e29",
+        border: "2px dashed #630e20",
         zIndex: 5,
         pointerEvents: "none" as const,
       }
@@ -259,7 +259,7 @@ export function SessionTimelineUiProvider({
               session={session}
               className={cn(
                 "absolute overflow-hidden rounded-md cursor-pointer transition-all",
-                "hover:z-50 hover:border-green-200 hover:border-2",
+                "hover:z-50 hover:border-pink-primary/50 hover:border-2",
                 selectedSession?.id === session.id
                   ? "ring-2 ring-offset-2 ring-black dark:ring-white"
                   : "opacity-80 hover:opacity-100",
@@ -305,7 +305,7 @@ export function SessionTimelineUiProvider({
             {/* Drag selection area */}
             {isDragging && <div style={dragSelectionStyle}></div>}
             {groupedSessions.length === 0 && (
-              <div className="h-36  flex items-center justify-center text-gray-500">
+              <div className="h-36  flex items-center justify-center text-blue-500">
                 No sessions available
               </div>
             )}

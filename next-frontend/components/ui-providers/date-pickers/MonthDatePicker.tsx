@@ -80,11 +80,7 @@ export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
           )}
         >
           <CalendarIcon className="mr-2 size-4" />
-          {date ? (
-            format(date, "MMMM yyyy")
-          ) : (
-            <span>Pick a month</span>
-          )}
+          {date ? format(date, "MMMM yyyy") : <span>Pick a month</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -92,9 +88,7 @@ export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
           <Button variant="outline" size="icon" onClick={handlePreviousMonth}>
             <ChevronLeft className="size-4" />
           </Button>
-          <div className="font-semibold">
-            {format(date, "yyyy")}
-          </div>
+          <div className="font-semibold">{format(date, "yyyy")}</div>
           <Button variant="outline" size="icon" onClick={handleNextMonth}>
             <ChevronRight className="size-4" />
           </Button>

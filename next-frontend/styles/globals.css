@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
+    --background-gradient: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(322 65% 48% / 0.03) 50%, hsl(262 60% 45% / 0.02) 100%);
     --foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -13,40 +14,54 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
 
-    --border: 214.3 31.8% 91.4%;
+    --border-color: 322 65% 48% / 0.1;
     --input: 214.3 31.8% 91.4%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 47.4% 11.2%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 322 65% 48%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 322 65% 48%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 100% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --ring: 215 20.2% 65.1%;
+    --ring: 322 84% 60%;
 
     --radius: 0.5rem;
+
+    /* Purple/Pink gradient system */
+    --gradient-primary: linear-gradient(135deg, hsl(322 65% 48%) 0%, hsl(262 60% 45%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(322 65% 48% / 0.1) 0%, hsl(262 60% 45% / 0.05) 100%);
+    --gradient-muted: linear-gradient(135deg, hsl(322 65% 48% / 0.03) 0%, hsl(262 60% 45% / 0.02) 100%);
+    
+    /* Pink and Purple individual colors */
+    --pink-primary: 322 65% 48%;
+    --pink-muted: 322 65% 48% / 0.1;
+    --pink-subtle: 322 65% 48% / 0.03;
+    --purple-primary: 262 60% 45%;
+    --purple-muted: 262 60% 45% / 0.1;
+    --purple-subtle: 262 60% 45% / 0.03;
   }
 
   .dark {
     --background: 224 71% 4%;
+    --background-gradient: linear-gradient(135deg, hsl(224 71% 4%) 0%, hsl(322 65% 48% / 0.06) 50%, hsl(262 60% 45% / 0.04) 100%);
     --foreground: 213 31% 91%;
 
-    --muted: 223 47% 11%;
+    --muted: 300 47% 11%/ 1;
     --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 216 34% 17%;
+    --accent: 322 65% 48%;
     --accent-foreground: 210 40% 98%;
 
-    --popover: 224 71% 4%;
+    --popover: 300 47% 11%/ 1;
     --popover-foreground: 215 20.2% 65.1%;
 
     --border: 216 34% 17%;
@@ -55,8 +70,8 @@
     --card: 224 71% 4%;
     --card-foreground: 213 31% 91%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
+    --primary: 322 65% 48%;
+    --primary-foreground: 224 71% 4%;
 
     --secondary: 222.2 47.4% 11.2%;
     --secondary-foreground: 210 40% 98%;
@@ -64,9 +79,22 @@
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --ring: 216 34% 17%;
+    --ring: 322 65% 48%;
 
     --radius: 0.5rem;
+
+    /* Dark theme gradient adjustments */
+    --gradient-primary: linear-gradient(135deg, hsl(322 65% 48%) 0%, hsl(262 60% 45%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(322 65% 48% / 0.15) 0%, hsl(262 60% 45% / 0.1) 100%);
+    --gradient-muted: linear-gradient(135deg, hsl(322 65% 48% / 0.05) 0%, hsl(262 60% 45% / 0.03) 100%);
+    
+    /* Dark theme pink and purple colors */
+    --pink-primary: 322 65% 48%;
+    --pink-muted: 322 65% 48% / 0.1;
+    --pink-subtle: 322 65% 48% / 0.05;
+    --purple-primary: 262 60% 45%;
+    --purple-muted: 262 60% 45% / 0.1;
+    --purple-subtle: 262 60% 45% / 0.05;
   }
 }
 
@@ -75,7 +103,67 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    background: var(--background-gradient);
+    @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Gradient backgrounds */
+  .gradient-card {
+    background: var(--gradient-secondary);
+    @apply border-pink-200/30 dark:border-pink-900/20;
+  }
+  
+  .gradient-card-muted {
+    background: var(--gradient-muted);
+    @apply border-pink-100/20 dark:border-pink-900/10;
+  }
+  
+  /* Gradient decorations */
+  .gradient-decoration {
+    background: linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%);
+  }
+  
+  .gradient-decoration-strong {
+    background: linear-gradient(135deg, hsl(var(--pink-muted)) 0%, hsl(var(--purple-muted)) 100%);
+  }
+  
+  /* Gradient accent bars */
+  .gradient-accent-bar {
+    background: linear-gradient(180deg, hsl(var(--pink-primary)) 0%, hsl(var(--purple-primary)) 100%);
+  }
+  
+  /* Gradient text on hover */
+  .gradient-text-hover {
+    @apply transition-all duration-300;
+  }
+  
+  .gradient-text-hover:hover {
+    background: linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--pink-primary)) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Icon containers with gradients */
+  .gradient-container {
+    background: linear-gradient(135deg, hsl(var(--pink-muted)) 0%, hsl(var(--purple-muted)) 100%);
+  }
+  
+  .gradient-container-subtle {
+    background: linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%);
+  }
+  
+  /* Button gradients */
+  .gradient-button {
+    background: linear-gradient(135deg, hsl(var(--pink-primary)) 0%, hsl(var(--purple-primary)) 100%);
+    @apply text-white border-0 hover:opacity-90 transition-opacity;
+  }
+  
+  /* Background gradient */
+  .gradient-background {
+    background: var(--background-gradient);
   }
 }

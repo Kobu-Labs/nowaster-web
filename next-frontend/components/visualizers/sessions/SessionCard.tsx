@@ -19,20 +19,17 @@ type SessionCardProps = {
 } & VariantProps<typeof historyCardVariants> &
   React.HTMLAttributes<HTMLDivElement>;
 
-const historyCardVariants = cva(
-  "hover:bg-accent hover:text-accent-foreground hover:cursor-pointer",
-  {
-    variants: {
-      variant: {
-        default: "border border-input",
-        borderless: "border-hidden",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
+const historyCardVariants = cva("hover:cursor-pointer", {
+  variants: {
+    variant: {
+      default: "border",
+      borderless: "border-hidden",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
   let durationChild: React.ReactNode = (
