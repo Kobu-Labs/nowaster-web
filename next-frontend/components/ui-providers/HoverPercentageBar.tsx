@@ -24,7 +24,7 @@ export const HoverPercentageBar: FC<
 
   return (
     <div
-      className="relative w-full h-full border rounded-2xl overflow-hidden p-4"
+      className="relative w-full h-full border rounded-2xl overflow-hidden p-4 bg-transparent/30"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
