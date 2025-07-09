@@ -29,6 +29,7 @@ export const ThemedImage: FC<
   return (
     <Image
       {...props}
+      alt="image"
       src={theme === "light" ? props.lightUrl : props.darkUrl}
     />
   );
