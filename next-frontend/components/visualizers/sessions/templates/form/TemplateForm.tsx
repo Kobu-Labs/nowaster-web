@@ -303,14 +303,14 @@ const translateTemplatePrecursor = (precursor: TemplateSessionPrecursor) => {
         precursor.interval,
         session.start_date_time,
       );
-      let session_end = getDaytimeAfterDate(
+      const session_end = getDaytimeAfterDate(
         session_start,
         precursor.interval,
         session.end_date_time,
       );
 
       return {
-        category_id: session.category!.id!,
+        category_id: session.category.id,
         tag_ids: session.tags.map((tag) => tag.id),
         description: session.description ?? undefined,
         start_minute_offset: differenceInMinutes(
