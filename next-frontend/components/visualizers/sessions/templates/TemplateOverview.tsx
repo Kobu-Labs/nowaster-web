@@ -1,7 +1,6 @@
 import { SessionTemplateApi } from "@/api";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -39,9 +38,10 @@ import {
   Clock,
   CopyIcon,
   MoreHorizontal,
-  Tag,
   Trash,
   Trash2,
+  PlayCircle,
+  Users,
 } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { TemplateSessionsAction } from "@/components/visualizers/sessions/templates/form/form-schemas";
@@ -55,7 +55,7 @@ const calculateClosestSession = (
     session.start_minute_offset,
   );
 
-  let closestStartTime = getDaytimeAfterDate(
+  const closestStartTime = getDaytimeAfterDate(
     max([startTime, new Date()]),
     template.interval,
     {
@@ -65,7 +65,7 @@ const calculateClosestSession = (
     },
   );
 
-  let closestEndTime = addMinutes(
+  const closestEndTime = addMinutes(
     closestStartTime,
     session.end_minute_offset - session.start_minute_offset,
   );
@@ -124,85 +124,124 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
         setIsOpen={setIsDuplicateOpen}
         defaultValues={{ ...template, name: template.name + " - duplicated" }}
       />
-      <Card className="overflow-hidden">
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <CardTitle className="text-xl">{template.name}</CardTitle>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <Card className="group overflow-hidden transition-all duration-400 shadow-md hover:shadow-xl">
+        <CardHeader className="pb-4 relative">
+          <div className="flex items-start justify-between relative">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-12 gradient-accent-bar rounded-full" />
+              <div>
+                <CardTitle className="text-lg font-semibold gradient-text-hover">
+                  {template.name}
+                </CardTitle>
                 <TemplateIntervalBadge interval={template.interval} />
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="flex items-center gap-2"
-                    onSelect={() => setIsDuplicateOpen(true)}
-                  >
-                    <CopyIcon className="p-1" />
-                    Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <DeleteTemplateAlertDialog
-                      template={template}
-                      onConfirm={handleDeleteTemplate.mutate}
-                      onCancel={console.log}
-                    />
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onSelect={() => setIsDuplicateOpen(true)}
+                >
+                  <CopyIcon className="w-4 h-4" />
+                  Duplicate
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <DeleteTemplateAlertDialog
+                    template={template}
+                    onConfirm={handleDeleteTemplate.mutate}
+                    onCancel={console.log}
+                  />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Stats row */}
+          <div className="ml-5 grid grid-cols-2 gap-4 pt-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-8 h-8 gradient-container-subtle rounded-lg flex items-center justify-center">
+                <Users className="w-4 h-4 text-pink-primary" />
+              </div>
+              <div>
+                <div className="font-medium text-foreground">
+                  {template.sessions.length}
+                </div>
+                <div className="text-xs">Sessions</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-8 h-8 gradient-container-subtle rounded-lg flex items-center justify-center">
+                <Clock className="w-4 h-4 text-purple-primary" />
+              </div>
+              <div>
+                <div className="font-medium text-foreground">
+                  {formatTime(totalSessionDuration)}
+                </div>
+                <div className="text-xs">Duration</div>
+              </div>
             </div>
           </div>
-          <div className="flex justify-between">
-            <div className="flex items-center justify-center gap-1 text-sm">
-              <Tag className="size-3" />
-              {template.sessions.length} sessions
-            </div>
-            <div className="flex items-center justify-center gap-1 text-sm">
-              <Clock className="size-3" />
-              {formatTime(totalSessionDuration)} total
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-sm">
-            <Calendar className="size-3" />
-            <div className="text-sm text-muted-foreground">
-              {format(template.start_date, "dd. MMM HH:mm")} -{" "}
-              {format(template.end_date, "dd. MMM HH:mm ")}
-            </div>
+
+          {/* Date range */}
+          <div className="ml-5 flex items-center gap-2 text-xs text-muted-foreground pt-3 border-t border-pink-muted">
+            <Calendar className="w-3 h-3" />
+            <span>
+              {format(template.start_date, "MMM dd, yyyy")} -{" "}
+              {format(template.end_date, "MMM dd, yyyy")}
+            </span>
           </div>
         </CardHeader>
 
         <CardContent className="pt-0">
           {template.sessions.length > 0 ? (
-            <div className="space-y-4">
-              <h4 className="font-medium text-sm text-muted-foreground">
-                Sessions:
-              </h4>
-              <div className="space-y-2">
-                {sessionTimes.map((session, index) => (
-                  <RecurringSessionCard
-                    session={{
-                      ...session,
-                      id: index.toString(),
-                    }}
-                    key={index}
-                    template={template}
-                  />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <PlayCircle className="w-4 h-4 text-pink-primary" />
+                Upcoming Sessions
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {sessionTimes.slice(0, 3).map((session, index) => (
+                  <div key={index} className="border rounded-lg">
+                    <RecurringSessionCard
+                      session={{
+                        ...session,
+                        id: index.toString(),
+                      }}
+                      template={template}
+                    />
+                  </div>
                 ))}
+                {sessionTimes.length > 3 && (
+                  <div className="text-center py-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-pink-primary hover:text-pink-primary/80 hover:bg-pink-subtle"
+                    >
+                      +{sessionTimes.length - 3} more sessions
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">No sessions created yet</p>
+              <div className="w-12 h-12 gradient-container-subtle rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Calendar className="w-6 h-6 text-pink-primary" />
+              </div>
+              <p className="text-sm font-medium">No sessions configured</p>
+              <p className="text-xs">Edit this template to add sessions</p>
             </div>
           )}
         </CardContent>
@@ -226,7 +265,7 @@ const DeleteTemplateAlertDialog: FC<{
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Trash2 className="w-5 h-5 text-destructive" />
-            Delete Template "{props.template.name}"?
+            Delete Template &ldquo;{props.template.name}&rdquo;?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-base space-y-4">
             <p>
@@ -234,9 +273,9 @@ const DeleteTemplateAlertDialog: FC<{
               with them?
             </p>
             <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gradient-to-r from-green-50/50 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/10 rounded-lg border border-green-200/30 dark:border-green-800/20">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0" />
                   <div className="flex-1">
                     <p className="font-medium">Keep sessions</p>
                     <p className="text-sm text-muted-foreground">
@@ -248,17 +287,17 @@ const DeleteTemplateAlertDialog: FC<{
                   onClick={() => props.onConfirm("keep-all")}
                   variant="outline"
                   size="sm"
-                  className="w-full sm:w-auto sm:min-w-24"
+                  className="w-full sm:w-auto sm:min-w-24 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950/20"
                 >
                   Keep
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gradient-to-r from-orange-50/50 to-yellow-50/30 dark:from-orange-950/20 dark:to-yellow-950/10 rounded-lg border border-orange-200/30 dark:border-orange-800/20">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium text-destructive">
+                    <p className="font-medium text-orange-600 dark:text-orange-400">
                       Delete future sessions
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -268,19 +307,18 @@ const DeleteTemplateAlertDialog: FC<{
                 </div>
                 <Button
                   onClick={() => props.onConfirm("delete-future")}
-                  variant="destructive"
                   size="sm"
-                  className="w-full sm:w-auto sm:min-w-24"
+                  className="w-full sm:w-auto sm:min-w-24 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white border-0"
                 >
                   Delete Future
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gradient-to-r from-red-50/50 to-pink-50/30 dark:from-red-950/20 dark:to-pink-950/10 rounded-lg border border-red-200/30 dark:border-red-800/20">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium text-destructive">
+                    <p className="font-medium text-red-600 dark:text-red-400">
                       Delete all sessions
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -290,9 +328,8 @@ const DeleteTemplateAlertDialog: FC<{
                 </div>
                 <Button
                   onClick={() => props.onConfirm("delete-all")}
-                  variant="destructive"
                   size="sm"
-                  className="w-full sm:w-auto sm:min-w-24"
+                  className="w-full sm:w-auto sm:min-w-24 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0"
                 >
                   Delete All
                 </Button>
