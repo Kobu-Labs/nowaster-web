@@ -4,7 +4,7 @@ import { SessionTemplateResponseSchema } from "@/api/definitions/responses/sessi
 
 const BASE_URL = "/session/template";
 
-export const readMany = async (params?: SessionTemplateRequest["readMany"]) => {
+export const readMany = async (_params?: SessionTemplateRequest["readMany"]) => {
   const { data } = await baseApi.get(BASE_URL);
   return await parseResponseUnsafe(
     data,
