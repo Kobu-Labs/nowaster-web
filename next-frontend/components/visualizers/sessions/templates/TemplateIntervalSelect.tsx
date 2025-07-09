@@ -38,3 +38,5 @@ export const TemplateIntervalSelect = React.forwardRef<
     </Select>
   );
 });
+
+TemplateIntervalSelect.displayName = "TemplateIntervalSelect";
