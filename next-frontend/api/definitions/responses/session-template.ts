@@ -6,9 +6,9 @@ const readMany = z.array(SessionTemplateIdSchema);
 const create = z.null();
 const update = z.null();
 
-const deleteTemplate = z.any();
+const deleteTemplate = z.unknown();
 
-const deleteRecurringSession = z.any();
+const deleteRecurringSession = z.unknown();
 
 export type SessionTemplateResponse = {
   [Property in keyof typeof SessionTemplateResponseSchema]: z.infer<
