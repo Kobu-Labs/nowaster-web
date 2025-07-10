@@ -305,7 +305,7 @@ export function SessionTimelineUiProvider({
             {/* Drag selection area */}
             {isDragging && <div style={dragSelectionStyle}></div>}
             {groupedSessions.length === 0 && (
-              <div className="h-36 flex items-center justify-center text-blue-500">
+              <div className="h-36 flex items-center justify-center">
                 No sessions available
               </div>
             )}
