@@ -104,6 +104,10 @@ export function SessionTimelineUiProvider({
     }
   };
 
+  const handleMouseExit = () => {
+    setIsDragging(false);
+  };
+
   // Function to handle mouse move during drag
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !timelineRef.current) return;
@@ -305,7 +309,7 @@ export function SessionTimelineUiProvider({
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            onMouseLeave={handleMouseExit}
           >
             {/* Timeline background for click detection */}
             <div className="timeline-bg absolute inset-0"></div>
