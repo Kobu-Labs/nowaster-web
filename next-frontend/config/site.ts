@@ -20,5 +20,9 @@ export const siteConfig = {
       title: "Friends",
       href: "/home/friends",
     },
+    {
+      title: "Templates",
+      href: "/home/templates",
+    },
   ],
 } as const;
