@@ -125,8 +125,16 @@ export function SessionTimelineUiProvider({
         const startPercent = Math.min(dragStart, dragEnd);
         const endPercent = Math.max(dragStart, dragEnd);
 
-        const sessionStartDate = percentToDate(startPercent);
-        const sessionEndDate = percentToDate(endPercent);
+        let sessionStartDate;
+        let sessionEndDate;
+
+        if (startPercent < endPercent) {
+          sessionStartDate = percentToDate(endPercent);
+          sessionEndDate = percentToDate(startPercent);
+        } else {
+          sessionStartDate = percentToDate(startPercent);
+          sessionEndDate = percentToDate(endPercent);
+        }
 
         // Create new session
         const newSession: SessionPrecursor = {
