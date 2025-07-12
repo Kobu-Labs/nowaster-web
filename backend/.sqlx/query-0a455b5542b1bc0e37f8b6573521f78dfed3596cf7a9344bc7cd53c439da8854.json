@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH new_session AS (\n                  INSERT INTO recurring_session (\n                    category_id,\n                    description,\n                    start_minute_offset,\n                    end_minute_offset,\n                    template_id,\n                    user_id\n                  )\n                  VALUES ($1, $2, $3, $4, $5, $6)\n                  RETURNING id\n                )\n                INSERT INTO tag_to_recurring_session (tag_id, session_id)\n                SELECT tag_id, new_session.id\n                FROM new_session, unnest($7::uuid[]) AS tag_id\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Float8",
+        "Float8",
+        "Uuid",
+        "Varchar",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0a455b5542b1bc0e37f8b6573521f78dfed3596cf7a9344bc7cd53c439da8854"
+}
