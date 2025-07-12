@@ -1,6 +1,6 @@
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
 import {
-  ScheduledSessionSchema,
+  ScheduledSessionRequestSchema,
   StopwatchSessionWithId,
 } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
@@ -13,17 +13,19 @@ export const useFinishStopwatchSession = () => {
 
   const mutation = useMutation({
     mutationFn: async (session: StopwatchSessionWithId) => {
-      const parsed = await ScheduledSessionSchema.safeParseAsync({
-        ...session,
-        tags: session.tags ?? [],
-        session_type: "fixed",
+      const parsed = await ScheduledSessionRequestSchema.create.safeParseAsync({
+        category_id: session.category?.id,
+        tag_ids: session.tags?.map((tag) => tag.id) ?? [],
         endTime: new Date(),
+        startTime: session.startTime,
+        description: session.description,
       });
 
       if (!parsed.success) {
         console.error(parsed.error);
         throw new Error("Fill out start time and category!");
       }
+
       await StopwatchApi.remove({ id: session.id });
       return await ScheduledSessionApi.create(parsed.data);
     },
