@@ -1,0 +1,39 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO session_template (name, start_date, end_date, interval, user_id, id)\n            VALUES ($1, $2, $3, $4, $5, $6)\n            RETURNING id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        {
+          "Custom": {
+            "name": "recurring_session_interval",
+            "kind": {
+              "Enum": [
+                "monthly",
+                "weekly",
+                "bi-weekly",
+                "daily"
+              ]
+            }
+          }
+        },
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "878848ce9b12e7905f3318cf99e49d2f3f30797c9f3570e7437f3f96d004b341"
+}
