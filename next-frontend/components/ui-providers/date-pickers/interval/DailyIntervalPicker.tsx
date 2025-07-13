@@ -31,7 +31,7 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
           )}
         >
           <div className="relative">
-            <p className="top-0 text-muted-foreground sticky">HH</p>
+            <p className="top-0 text-white sticky">HH</p>
           </div>
           <Separator orientation={toggleOrientation(orientation)} />
           {hours.map((hour) => (
@@ -39,7 +39,7 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
               key={hour}
               size="icon"
               type="button"
-              className="shrink-0 aspect-square"
+              className="shrink-0 aspect-square text-muted-foreground hover:text-white"
               variant={props.selected?.hours === hour ? "default" : "ghost"}
               onClick={() =>
                 props.onSelect({
@@ -63,14 +63,14 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
             orientation === "vertical" && "flex-col items-center h-[300px]",
           )}
         >
-          <p className="text-muted-foreground">MM</p>
+          <p className="text-white">MM</p>
           <Separator orientation={toggleOrientation(orientation)} />
           {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
             <Button
               key={minute}
               size="icon"
               type="button"
-              className="shrink-0 aspect-square"
+              className="shrink-0 aspect-square text-muted-foreground hover:text-white"
               variant={props.selected?.minutes === minute ? "default" : "ghost"}
               onClick={() =>
                 props.onSelect({
