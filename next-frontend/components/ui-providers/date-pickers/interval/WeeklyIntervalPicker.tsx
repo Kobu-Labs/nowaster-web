@@ -29,7 +29,7 @@ export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
               type="button"
               key={day.value}
               size="sm"
-              className="h-12 text-xs font-medium"
+              className="h-12 text-xs font-medium text-muted-foreground hover:text-white"
               variant={props.selected?.day === day.value ? "default" : "ghost"}
               onClick={() =>
                 props.onSelect({
