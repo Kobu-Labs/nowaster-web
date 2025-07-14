@@ -32,6 +32,7 @@ type Story = StoryObj<typeof meta>;
 export const TwoHours: Story = {
   args: {
     session: {
+      template: null,
       session_type: "fixed",
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
       startTime: new Date(2023, 5, 27, 19, 0),
@@ -45,6 +46,7 @@ export const TwoHours: Story = {
 export const NinetyMinutes: Story = {
   args: {
     session: {
+      template: null,
       session_type: "fixed",
       startTime: new Date(2023, 5, 27, 19, 0),
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
@@ -58,6 +60,7 @@ export const NinetyMinutes: Story = {
 export const HalfHour: Story = {
   args: {
     session: {
+      template: null,
       session_type: "fixed",
       startTime: new Date(2023, 5, 27, 20, 0),
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),
@@ -71,6 +74,7 @@ export const HalfHour: Story = {
 export const NineMinutesNineSeconds: Story = {
   args: {
     session: {
+      template: null,
       session_type: "fixed",
       startTime: new Date(2023, 5, 27, 20, 0, 0),
       tags: createMockTags(["school", "pb138", "pb138/project", "focus"]),

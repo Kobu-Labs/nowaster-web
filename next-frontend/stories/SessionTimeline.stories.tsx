@@ -25,6 +25,7 @@ const createMockTags = (tagLabels: string[]) => {
 
 const sessionsPastTwoDays: ScheduledSessionWithId[] = [
   {
+    template: null,
     id: "1",
     session_type: "fixed",
     tags: createMockTags([
@@ -44,6 +45,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     description: "Working on the project",
   },
   {
+    template: null,
     session_type: "fixed",
     id: "2",
     tags: createMockTags([
@@ -63,6 +65,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     description: "Working on the project",
   },
   {
+    template: null,
     id: "33",
     tags: ["school", "pb138", "pb138/project", "focus", "testing"].map(
       (label, i) => {
@@ -81,6 +84,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     session_type: "fixed",
   },
   {
+    template: null,
     id: "3",
     tags: createMockTags([
       "school",
@@ -96,6 +100,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     session_type: "fixed",
   },
   {
+    template: null,
     id: "5",
     session_type: "fixed",
     tags: createMockTags([
@@ -112,6 +117,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     description: "Working on the project",
   },
   {
+    template: null,
     id: "6",
     tags: createMockTags([
       "school",
@@ -127,6 +133,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     session_type: "fixed",
   },
   {
+    template: null,
     id: "7",
     tags: createMockTags([
       "school",
@@ -142,6 +149,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     session_type: "fixed",
   },
   {
+    template: null,
     session_type: "fixed",
     id: "8",
     tags: createMockTags([
@@ -161,6 +169,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     description: "Working on the project",
   },
   {
+    template: null,
     id: "9",
     tags: ["school", "pb138", "pb138/project", "focus", "testing"].map(
       (label, i) => {
@@ -179,6 +188,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     session_type: "fixed",
   },
   {
+    template: null,
     id: "10",
     tags: createMockTags([
       "school",
@@ -194,6 +204,7 @@ const sessionsPastTwoDays: ScheduledSessionWithId[] = [
     session_type: "fixed",
   },
   {
+    template: null,
     id: "11",
     session_type: "fixed",
     tags: createMockTags([
