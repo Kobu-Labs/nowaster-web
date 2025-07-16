@@ -8,8 +8,8 @@ export const useDeleteStopwatchSession = () => {
   return useMutation({
     mutationFn: async ({ id }: { id: string }) =>
       await StopwatchApi.remove({ id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions.active._def,
       });
     },
