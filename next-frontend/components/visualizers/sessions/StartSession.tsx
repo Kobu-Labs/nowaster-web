@@ -1,12 +1,5 @@
 "use client";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
-import { subHours } from "date-fns";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -14,29 +7,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import { FC, useEffect, useState } from "react";
 
-import { useActiveSessions } from "@/components/hooks/useActiveSessions";
-import { differenceInSeconds } from "date-fns";
 import { StopwatchSessionWithId } from "@/api/definitions";
-import { cn, formatTime } from "@/lib/utils";
-import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
-import { CircleCheck, Play } from "lucide-react";
+import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
+import { useFinishStopwatchSession } from "@/components/hooks/session/stopwatch/useFinishStopwatchSession";
+import { useActiveSessions } from "@/components/hooks/useActiveSessions";
 import { Button } from "@/components/shadcn/button";
 import { Card } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
-import { useFinishStopwatchSession } from "@/components/hooks/session/stopwatch/useFinishStopwatchSession";
-import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
-import { StopwatchApi } from "@/api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { DataTable } from "@/components/ui-providers/DataTable";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
-import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
-import {
-  EditSessionFormHandle,
-  EditStopwatchSession,
-} from "@/components/visualizers/sessions/form/EditStopwatchSessionForm";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
+import { EditStopwatchSession } from "@/components/visualizers/sessions/form/EditStopwatchSessionForm";
+import { cn, formatTime } from "@/lib/utils";
+import { differenceInSeconds } from "date-fns";
+import { CircleCheck, Play, Trash } from "lucide-react";
+import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
 
 const formatTimeDifference = (seconds: number) => {
   const diffInSeconds = seconds;
@@ -127,44 +118,8 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
     differenceInSeconds(new Date(), session.startTime),
   );
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
-
   const finishSession = useFinishStopwatchSession();
-  const [globalErr, setGlobalErr] = useState(false);
-  const formRef = useRef<EditSessionFormHandle>(null);
-  const filter = useMemo(
-    () => ({
-      endTimeTo: { value: new Date() },
-      endTimeFrom: { value: subHours(new Date(), 48) },
-    }),
-    [],
-  );
-  const pastSessionQuery = useQuery({
-    ...queryKeys.sessions.filtered({
-      settings: {},
-      data: filter,
-    }),
-  });
-
-  const onInteractOutside = async () => {
-    const isValid = await formRef.current?.validate();
-    if (!isValid) {
-      setGlobalErr(true);
-      return;
-    }
-    const formValues = formRef.current?.prepareData();
-    if (!formValues) {
-      setGlobalErr(true);
-      return;
-    }
-
-    // TODO: api called directly with unsage parse
-    await StopwatchApi.update(formValues);
-    await queryClient.invalidateQueries({
-      queryKey: queryKeys.sessions.active._def,
-    });
-    setOpen(false);
-  };
+  const deleteSessionMutation = useDeleteStopwatchSession();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -178,7 +133,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
   }, [session]);
 
   return (
-    <Card className="px-2 flex items-center justify-center gap-2">
+    <Card className="px-2 flex items-center justify-center">
       <TooltipProvider delayDuration={50}>
         <Dialog modal={false} open={open} onOpenChange={setOpen}>
           <DialogTrigger className="p-1">
@@ -187,11 +142,7 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
                 <Button
                   onClick={() => setOpen(true)}
                   variant="ghost"
-                  className={cn(
-                    "flex items-center px-1 m-0 gap-2 relative",
-                    globalErr &&
-                      "border-2 animate-[border-pulse_0.5s_ease-in-out_infinite]",
-                  )}
+                  className="flex items-center px-1 m-0 gap-2 relative"
                 >
                   {session.category && (
                     <CategoryBadge
@@ -210,33 +161,16 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
               </TooltipContent>
             </Tooltip>
           </DialogTrigger>
-          {open && (
-            <div
-              className={cn(
-                "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-              )}
-            />
-          )}
-          <DialogContent
-            onInteractOutside={onInteractOutside}
-            className="[&>button]:hidden max-w-[60%] w-full"
-          >
+          <DialogContent className="w-1/2">
             <DialogHeader>
               <DialogTitle className="m-1">Edit session data</DialogTitle>
               <Separator className="w-full" />
               <DialogDescription>
-                <EditStopwatchSession ref={formRef} session={session} />
-                <h2 className="text-bold text-xl my-4">
-                  Some of the last sessions you had in the past 48 hours!
-                </h2>
-                <ScrollArea className="h-64" type="always">
-                  <DataTable
-                    loading={pastSessionQuery.isLoading}
-                    columns={BaseSessionTableColumns}
-                    data={pastSessionQuery.data ?? []}
-                  />
-                  <ScrollBar />
-                </ScrollArea>
+                <EditStopwatchSession
+                  session={session}
+                  onDelete={() => setOpen(false)}
+                  onSubmit={() => setOpen(false)}
+                />
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
@@ -246,14 +180,13 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              className="group p-1 m-0 aspect-square"
+              className="group p-0 m-0 aspect-square"
               onClick={() =>
                 finishSession.mutate(session, {
                   onSuccess: () => {
                     document.title = "Nowaster";
-                    setGlobalErr(false);
                   },
-                  onError: () => setGlobalErr(true),
+                  onError: () => setOpen(true),
                 })
               }
               loading={finishSession.isPending}
@@ -265,6 +198,30 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
           </TooltipTrigger>
           <TooltipContent className="text-nowrap">
             Finish the session
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              className="group p-0 m-0 aspect-square"
+              onClick={() =>
+                deleteSessionMutation.mutate(
+                  { id: session.id },
+                  {
+                    onSuccess: () => setOpen(false),
+                  },
+                )
+              }
+              loading={deleteSessionMutation.isPending}
+            >
+              {!deleteSessionMutation.isPending && (
+                <Trash className="group-hover:text-red-500" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="text-nowrap">
+            Delete the session
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
