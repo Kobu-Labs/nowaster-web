@@ -14,14 +14,10 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
+import { Separator } from "@/components/shadcn/separator";
+import { QuickOption } from "@/components/ui-providers/date-pickers/QuickOptions";
 import { cn } from "@/lib/utils";
 import { Matcher } from "react-day-picker";
-import { Separator } from "@/components/shadcn/separator";
-
-export type QuickOption = {
-  label: string;
-  increment: (date: Date) => Date;
-};
 
 type DatePickerDemoProps = {
   selected: Date | undefined;

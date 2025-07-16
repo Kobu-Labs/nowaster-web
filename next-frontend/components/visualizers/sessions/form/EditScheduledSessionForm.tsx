@@ -17,14 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
-import {
-  addHours,
-  addMinutes,
-  isBefore,
-  setMinutes,
-  subHours,
-  subMinutes,
-} from "date-fns";
+import { isBefore } from "date-fns";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -38,43 +31,14 @@ import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
+import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
 import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
-import {
-  DateTimePicker,
-  QuickOption,
-} from "@/components/visualizers/DateTimePicker";
+import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight } from "lucide-react";
-
-const creationFormQuickOptions: QuickOption[] = [
-  {
-    label: "now",
-    increment: () => new Date(),
-  },
-  {
-    label: "clamp",
-    increment: (date) => setMinutes(date, 0),
-  },
-  {
-    label: "+ 15m",
-    increment: (date) => addMinutes(date, 15),
-  },
-  {
-    label: "- 15m",
-    increment: (date) => subMinutes(date, 15),
-  },
-  {
-    label: "+ 1h",
-    increment: (date) => addHours(date, 1),
-  },
-  {
-    label: "- 1h",
-    increment: (date) => subHours(date, 1),
-  },
-];
 
 type EditStopwatchSessionProps = {
   session: ScheduledSessionWithId;
@@ -169,7 +133,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                     <FormLabel className="block">Start Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={creationFormQuickOptions}
+                        quickOptions={dateQuickOptions}
                         selected={field.value || undefined}
                         onSelect={(val) => {
                           if (val) {
@@ -204,7 +168,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={creationFormQuickOptions}
+                        quickOptions={dateQuickOptions}
                         selected={field.value}
                         onSelect={(val) => {
                           if (val) {
