@@ -54,7 +54,7 @@ export const ChartFilter: FC = () => {
         <SheetTrigger asChild className="group relative cursor-pointer">
           <Button
             variant="outline"
-            className="flex items-center justify-center overflow-visible"
+            className="flex items-center justify-center overflow-visible w-fit"
           >
             <Filter className="group-hover:text-pink-300 ">Open</Filter>
             {appliedFiltersCount > 0 && (
