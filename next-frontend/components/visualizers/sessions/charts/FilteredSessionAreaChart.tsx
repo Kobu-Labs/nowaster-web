@@ -1,11 +1,8 @@
 import {
   SessionFilterPrecursor,
-  filterPrecursorAtom,
-  getDefaultFilter,
+  defaultFilter,
   overwriteData,
 } from "@/state/chart-filter";
-import { Provider, useAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
 import { FC, HTMLAttributes, useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
@@ -19,6 +16,8 @@ import {
   GranularitySelect,
 } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
+import { ChartFilterContext } from "@/components/context/chart-filter";
+import { useChartFilter } from "@/components/hooks/use-chart-filter";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: Granularity;
@@ -28,28 +27,24 @@ type FilteredSessionAreaChartProps = {
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   props,
 ) => {
+  const [filter, setFilter] = useState(props.filter ?? defaultFilter);
+
   return (
-    <Provider>
+    <ChartFilterContext.Provider value={{ filter, setFilter }}>
       <FilteredSessionAreaChartInner {...props} />
-    </Provider>
+    </ChartFilterContext.Provider>
   );
 };
 
 const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   props,
 ) => {
-  const [granularity, setGranularity] = useState<Granularity>(
-    props.initialGranularity,
-  );
+  const [granularity, setGranularity] = useState(props.initialGranularity);
 
-  useHydrateAtoms(
-    new Map([[filterPrecursorAtom, props.filter ?? getDefaultFilter()]]),
-  );
-
-  const [filterPrecursor, setChartFilter] = useAtom(filterPrecursorAtom);
+  const { filter, setFilter } = useChartFilter();
 
   const updateFilter = (range: DeepRequired<DateRange>) => {
-    setChartFilter((oldState) =>
+    setFilter((oldState) =>
       overwriteData(oldState, {
         endTimeFrom: { value: range.from },
         endTimeTo: { value: range.to },
@@ -81,7 +76,7 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
             granularity: granularity,
             allKeys: true,
           }}
-          filter={filterPrecursor}
+          filter={filter}
         />
       </CardContent>
     </Card>

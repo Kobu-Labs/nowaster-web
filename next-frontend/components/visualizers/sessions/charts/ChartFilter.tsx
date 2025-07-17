@@ -1,17 +1,15 @@
-import { FC, useMemo } from "react";
+import { CategoryWithId, TagDetails } from "@/api/definitions";
 import {
   changeCategoryFilterMode,
   changeTagFilterMode,
-  filterPrecursorAtom,
+  defaultFilter,
   handleSelectCategory,
-  getDefaultFilter,
   overwriteData,
 } from "@/state/chart-filter";
-import { CategoryWithId, TagDetails } from "@/api/definitions";
-import { useAtom } from "jotai";
 import { CircleHelp, Filter, RotateCcw } from "lucide-react";
+import { FC, useMemo } from "react";
 
-import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
+import { useChartFilter } from "@/components/hooks/use-chart-filter";
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
 import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
@@ -32,19 +30,18 @@ import {
 } from "@/components/shadcn/tooltip";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 
-// TODO: currently the most disgusting component in the codebase
-// refactor it using Forms probably
 export const ChartFilter: FC = () => {
-  const [filter, setChartFilter] = useAtom(filterPrecursorAtom);
+  const { filter, setFilter } = useChartFilter();
 
   const onSelectTag = (tags: TagDetails[]) =>
-    setChartFilter((state) => overwriteData(state, { tags }));
+    setFilter((state) => overwriteData(state, { tags }));
 
   const onSelectCategory = (category: CategoryWithId) =>
-    setChartFilter((state) => handleSelectCategory(state, category));
+    setFilter((state) => handleSelectCategory(state, category));
 
-  const resetFilter = () => setChartFilter(getDefaultFilter());
+  const resetFilter = () => setFilter(defaultFilter);
 
   const appliedFiltersCount = useMemo(
     () => countLeaves(translateFilterPrecursor(filter)),
@@ -85,7 +82,7 @@ export const ChartFilter: FC = () => {
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) => changeTagFilterMode(state, value));
+                setFilter((state) => changeTagFilterMode(state, value));
               }}
               defaultValue={filter.settings.tags?.label?.mode}
               className="flex flex-col space-y-1"
@@ -131,9 +128,7 @@ export const ChartFilter: FC = () => {
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) =>
-                  changeCategoryFilterMode(state, value),
-                );
+                setFilter((state) => changeCategoryFilterMode(state, value));
               }}
               defaultValue={filter.settings.categories?.name?.mode}
               className="flex flex-col space-y-1"
