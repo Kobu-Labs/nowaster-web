@@ -54,10 +54,10 @@ export const ChartFilter: FC = () => {
   return (
     <div className="flex flex-col">
       <Sheet modal={false}>
-        <SheetTrigger asChild className="group relative  cursor-pointer">
+        <SheetTrigger asChild className="group relative cursor-pointer">
           <Button
             variant="outline"
-            className="flex items-center justify-center"
+            className="flex items-center justify-center overflow-visible"
           >
             <Filter className="group-hover:text-pink-300 ">Open</Filter>
             {appliedFiltersCount > 0 && (
