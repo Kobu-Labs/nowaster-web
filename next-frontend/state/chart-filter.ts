@@ -3,10 +3,9 @@ import {
   ScheduledSessionRequest,
   TagDetails,
 } from "@/api/definitions";
-import { atom } from "jotai";
 
 /*
- * Object describing **how** to do filtering, now **what** is the value of the filter
+ * Object describing **how** to do filtering, not **what** is the value of the filter
  */
 export type FilterSettings = NonNullable<OmitValue<SessionFilter>>;
 
@@ -49,12 +48,6 @@ const defaultFilterData: FilterValueFiller = {
   tags: [],
   categories: [],
 };
-
-// This state is not global and is provided per-filtered-chart basis
-export const filterPrecursorAtom = atom<SessionFilterPrecursor>({
-  data: defaultFilterData,
-  settings: defaultFilterSettings,
-});
 
 export const changeTagFilterMode = (
   oldState: SessionFilterPrecursor,
@@ -106,11 +99,10 @@ export const overwriteData = (
   oldState: SessionFilterPrecursor,
   newData: Partial<FilterValueFiller>,
 ): SessionFilterPrecursor => {
-  const { data, ...rest } = oldState;
   return {
-    ...rest,
+    settings: oldState.settings,
     data: {
-      ...data,
+      ...oldState.data,
       ...newData,
     },
   };
@@ -180,17 +172,7 @@ export const handleSelectCategory = (
   };
 };
 
-export const getDefaultFilterSettings = (): FilterSettings => {
-  return defaultFilterSettings;
-};
-
-export const getDefaultFilterData = (): FilterValueFiller => {
-  return defaultFilterData;
-};
-
-export const getDefaultFilter = (): SessionFilterPrecursor => {
-  return {
-    data: defaultFilterData,
-    settings: defaultFilterSettings,
-  };
+export const defaultFilter: SessionFilterPrecursor = {
+  data: defaultFilterData,
+  settings: defaultFilterSettings,
 };
