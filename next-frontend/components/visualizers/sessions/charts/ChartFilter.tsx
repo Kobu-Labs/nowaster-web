@@ -99,7 +99,7 @@ export const ChartFilter: FC = () => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Filtered sessions will contain all of these tags</p>
+                      <p>Each session will contain all of these tags</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -114,7 +114,7 @@ export const ChartFilter: FC = () => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        Filtered sessions will contain a subset of these tags
+                        Each session will contain a at least one of these tags
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -147,7 +147,7 @@ export const ChartFilter: FC = () => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Filtered sessions will have exactly this category</p>
+                      <p>Each session will have this category</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -163,7 +163,7 @@ export const ChartFilter: FC = () => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Filtered sessions will have one of these categories</p>
+                      <p>Each session will have one of these categories</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
