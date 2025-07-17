@@ -111,7 +111,7 @@ export const ChartFilter: FC = () => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        Each session will contain a at least one of these tags
+                        Each session will contain at least one of these tags
                       </p>
                     </TooltipContent>
                   </Tooltip>
