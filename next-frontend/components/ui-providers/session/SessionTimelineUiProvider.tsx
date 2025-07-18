@@ -33,8 +33,6 @@ export function SessionTimelineUiProvider({
   startDate,
   endDate,
 }: SessionTimelineUiProviderProps) {
-  const [selectedSession, setSelectedSession] =
-    useState<ScheduledSessionWithId | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
@@ -50,7 +48,6 @@ export function SessionTimelineUiProvider({
   const groupedSessions = useMemo(() => {
     return sessionToNonIntersection(sessions);
   }, [sessions]);
-
 
   const totalDuration = differenceInMilliseconds(endDate, startDate);
   const calculateWidth = (
@@ -173,7 +170,6 @@ export function SessionTimelineUiProvider({
 
     setIsEditDialogOpen(false);
     setSessionToEdit(null);
-    setSelectedSession(null);
   };
 
   const getMarkerSetp = () => {
@@ -266,9 +262,7 @@ export function SessionTimelineUiProvider({
               className={cn(
                 "absolute overflow-hidden rounded-md cursor-pointer transition-all",
                 "hover:z-50 hover:border-pink-primary/50 hover:border-2",
-                selectedSession?.id === session.id
-                  ? "ring-2 ring-offset-2 ring-black dark:ring-white"
-                  : "opacity-80 hover:opacity-100",
+                "opacity-80 hover:opacity-100",
                 (isDragging || isEditDialogOpen || isCreateDialogOpen) &&
                   "pointer-events-none",
               )}
@@ -321,24 +315,6 @@ export function SessionTimelineUiProvider({
           </div>
         </HoverPercentageBar>
       </div>
-
-      {/* Session details section */}
-      {selectedSession && (
-        <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
-          <div className="space-y-2">
-            <SessionCard session={selectedSession} />
-            <div className="pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleEditSession(selectedSession)}
-              >
-                Edit Session
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {sessionToCreate && (
         <Dialog
