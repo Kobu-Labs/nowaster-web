@@ -24,7 +24,6 @@ interface SessionTimelineUiProviderProps {
   sessions: ScheduledSessionWithId[];
   startDate: Date;
   endDate: Date;
-  onSessionsChange?: (sessions: ScheduledSessionWithId[]) => void;
 }
 
 export function SessionTimelineUiProvider({
