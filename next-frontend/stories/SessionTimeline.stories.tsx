@@ -230,7 +230,6 @@ export const Basic: Story = {
     startDate: subDays(new Date(), 4),
     endDate: new Date(),
     sessions: sessionsPastTwoDays,
-    onSessionsChange: console.log,
   },
   render: (props) => {
     const queryClient = new QueryClient();
