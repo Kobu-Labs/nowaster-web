@@ -221,17 +221,17 @@ export function SessionTimelineUiProvider({
   const dragSelectionStyle =
     isDragging && dragStart !== null
       ? {
-          left: `${dragStart.start}%`,
-          width: `${dragStart.end - dragStart.start}%`,
-          bottom: "5%",
-          height: "90%",
-          position: "absolute" as const,
-          backgroundColor: "#330e29",
-          opacity: 0.6,
-          border: "2px dashed #630e20",
-          zIndex: 5,
-          pointerEvents: "none" as const,
-        }
+        left: `${dragStart.start}%`,
+        width: `${dragStart.end - dragStart.start}%`,
+        bottom: "5%",
+        height: "90%",
+        position: "absolute" as const,
+        backgroundColor: "#330e29",
+        opacity: 0.6,
+        border: "2px dashed #630e20",
+        zIndex: 5,
+        pointerEvents: "none" as const,
+      }
       : null;
 
   const timeFormatter = (percentage: number) => {
