@@ -18,7 +18,7 @@ import {
   differenceInMilliseconds,
   format,
 } from "date-fns";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useMemo, useRef, useState } from "react";
 import { SessionPrecursor } from "@/validation/session/creation";
 
 interface SessionTimelineUiProviderProps {
@@ -32,7 +32,6 @@ export function SessionTimelineUiProvider({
   sessions,
   startDate,
   endDate,
-  onSessionsChange,
 }: SessionTimelineUiProviderProps) {
   const [selectedSession, setSelectedSession] =
     useState<ScheduledSessionWithId | null>(null);
@@ -52,11 +51,6 @@ export function SessionTimelineUiProvider({
     return sessionToNonIntersection(sessions);
   }, [sessions]);
 
-  useEffect(() => {
-    if (onSessionsChange) {
-      onSessionsChange(sessions);
-    }
-  }, [sessions, onSessionsChange]);
 
   const totalDuration = differenceInMilliseconds(endDate, startDate);
   const calculateWidth = (
