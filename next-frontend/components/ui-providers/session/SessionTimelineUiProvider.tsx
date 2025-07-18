@@ -1,5 +1,4 @@
 import { ScheduledSessionWithId } from "@/api/definitions";
-import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -34,8 +33,12 @@ export function SessionTimelineUiProvider({
   endDate,
 }: SessionTimelineUiProviderProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<number | null>(null);
-  const [dragEnd, setDragEnd] = useState<number | null>(null);
+  const [dragStart, setDragStart] = useState<{
+    start: number;
+    end: number;
+    origin: number;
+  } | null>(null);
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [sessionToEdit, setSessionToEdit] =
@@ -90,8 +93,7 @@ export function SessionTimelineUiProvider({
       const percent = ((e.clientX - rect.left) / rect.width) * 100;
 
       setIsDragging(true);
-      setDragStart(percent);
-      setDragEnd(percent);
+      setDragStart({ start: percent, end: percent, origin: percent });
     }
   };
 
@@ -109,29 +111,28 @@ export function SessionTimelineUiProvider({
     // Clamp percent between 0 and 100
     const clampedPercent = Math.max(0, Math.min(100, percent));
 
-    setDragEnd(clampedPercent);
+    if (!dragStart) {
+      setDragStart({
+        start: clampedPercent,
+        end: clampedPercent,
+        origin: clampedPercent,
+      });
+    } else {
+      // Calculate start and end based on origin and current position
+      const start = Math.min(dragStart.origin, clampedPercent);
+      const end = Math.max(dragStart.origin, clampedPercent);
+      setDragStart({ start, end, origin: dragStart.origin });
+    }
   };
 
   // Function to handle mouse up after drag
   const handleMouseUp = () => {
-    if (isDragging && dragStart !== null && dragEnd !== null) {
+    if (isDragging && dragStart !== null) {
       // Only create session if drag distance is significant
-      if (Math.abs(dragEnd - dragStart) > 1) {
-        const startPercent = Math.min(dragStart, dragEnd);
-        const endPercent = Math.max(dragStart, dragEnd);
+      if (dragStart.end - dragStart.start > 1) {
+        const sessionStartDate = percentToDate(dragStart.start);
+        const sessionEndDate = percentToDate(dragStart.end);
 
-        let sessionStartDate;
-        let sessionEndDate;
-
-        if (startPercent < endPercent) {
-          sessionStartDate = percentToDate(endPercent);
-          sessionEndDate = percentToDate(startPercent);
-        } else {
-          sessionStartDate = percentToDate(startPercent);
-          sessionEndDate = percentToDate(endPercent);
-        }
-
-        // Create new session
         const newSession: SessionPrecursor = {
           startTime: sessionStartDate,
           category: undefined,
@@ -147,7 +148,6 @@ export function SessionTimelineUiProvider({
 
     setIsDragging(false);
     setDragStart(null);
-    setDragEnd(null);
   };
 
   // Function to edit an session
