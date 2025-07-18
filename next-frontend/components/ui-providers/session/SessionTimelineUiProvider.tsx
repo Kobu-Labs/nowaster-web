@@ -220,19 +220,20 @@ export function SessionTimelineUiProvider({
 
   // Calculate drag selection area
   const dragSelectionStyle =
-    isDragging && dragStart !== null && dragEnd !== null
+    isDragging && dragStart !== null
       ? {
-        left: `${Math.min(dragStart, dragEnd)}%`,
-        width: `${Math.abs(dragEnd - dragStart)}%`,
-        bottom: "5%",
-        height: "90%",
-        position: "absolute" as const,
-        backgroundColor: "#330e29",
-        border: "2px dashed #630e20",
-        zIndex: 5,
-        pointerEvents: "none" as const,
-      }
-      : {};
+          left: `${dragStart.start}%`,
+          width: `${dragStart.end - dragStart.start}%`,
+          bottom: "5%",
+          height: "90%",
+          position: "absolute" as const,
+          backgroundColor: "#330e29",
+          opacity: 0.6,
+          border: "2px dashed #630e20",
+          zIndex: 5,
+          pointerEvents: "none" as const,
+        }
+      : null;
 
   const timeFormatter = (percentage: number) => {
     const totalDurationMs = differenceInMilliseconds(endDate, startDate);
@@ -303,7 +304,7 @@ export function SessionTimelineUiProvider({
             <div className="timeline-bg absolute inset-0"></div>
 
             {/* Drag selection area */}
-            {isDragging && <div style={dragSelectionStyle}></div>}
+            {dragSelectionStyle && <div style={dragSelectionStyle}></div>}
             {groupedSessions.length === 0 && (
               <div className="h-36 flex items-center justify-center">
                 No sessions available
