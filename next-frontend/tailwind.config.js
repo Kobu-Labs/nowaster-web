@@ -19,7 +19,8 @@ module.exports = {
     extend: {
       colors: {
         border: "hsl(var(--pink-muted))",
-        input: "linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%)",
+        input:
+          "linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%)",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         "background-gradient": "var(--background-gradient)",
@@ -67,6 +68,18 @@ module.exports = {
           secondary: "var(--gradient-secondary)",
           muted: "var(--gradient-muted)",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+        },
       },
       boxShadow: {
         "neon-pink":
@@ -79,16 +92,28 @@ module.exports = {
       },
       keyframes: {
         blink: {
-          "0%, 100%": { opacity: 1 },
-          "50%": { opacity: 0 },
+          "0%, 100%": {
+            opacity: 1,
+          },
+          "50%": {
+            opacity: 0,
+          },
         },
         "accordion-down": {
-          from: { height: 0 },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: 0,
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: 0,
+          },
         },
         pulse: {
           "0%, 100%": {
