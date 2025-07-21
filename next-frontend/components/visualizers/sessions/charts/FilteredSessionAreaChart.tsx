@@ -1,23 +1,19 @@
-import {
-  SessionFilterPrecursor,
-  defaultFilter,
-  overwriteData,
-} from "@/state/chart-filter";
+import { SessionFilterPrecursor, overwriteData } from "@/state/chart-filter";
 import { FC, HTMLAttributes, useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
+import { useChartFilter } from "@/components/hooks/use-chart-filter";
 import { GranularityBasedDatePicker } from "@/components/ui-providers/date-pickers/GranularityBasedDatePicker";
-import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
-import { DeepRequired } from "react-hook-form";
 import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
 import {
   Granularity,
   GranularitySelect,
 } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
-import { ChartFilterContext } from "@/components/context/chart-filter";
-import { useChartFilter } from "@/components/hooks/use-chart-filter";
+import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
+import { DeepRequired } from "react-hook-form";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: Granularity;
@@ -27,12 +23,12 @@ type FilteredSessionAreaChartProps = {
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   props,
 ) => {
-  const [filter, setFilter] = useState(props.filter ?? defaultFilter);
-
   return (
-    <ChartFilterContext.Provider value={{ filter, setFilter }}>
-      <FilteredSessionAreaChartInner {...props} />
-    </ChartFilterContext.Provider>
+    <FilterContextProvider initialFilter={props.filter}>
+      <FilteredSessionAreaChartInner
+        initialGranularity={props.initialGranularity}
+      />
+    </FilterContextProvider>
   );
 };
 
