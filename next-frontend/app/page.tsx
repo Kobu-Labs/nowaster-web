@@ -1,7 +1,5 @@
-import { ThemedImage } from "@/components/visualizers/ThemedImage";
-import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
-import { GoToAppButton } from "@/components/pages/GoToAppButton";
-import { SignInButton } from "@/components/pages/SignInButton";
+import { SiteFooter } from "@/components/pages/site-footer";
+import { SiteHeader } from "@/components/pages/site-header";
 import {
   Avatar,
   AvatarFallback,
@@ -9,6 +7,7 @@ import {
 } from "@/components/shadcn/avatar";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
 import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Nowaster - Time Tracking Made Easy",
@@ -18,7 +17,8 @@ export const metadata: Metadata = {
 
 export default async function LandingPage() {
   return (
-    <UnknownUserNavbar>
+    <>
+      <SiteHeader />
       <div className="flex flex-col min-h-screen">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-background to-muted">
           <div className="container px-4 md:px-6">
@@ -33,25 +33,11 @@ export default async function LandingPage() {
                     productivity with our intuitive time tracking solution.
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <SignInButton
-                    asChild
-                    size="lg"
-                    label="Start now"
-                    variant="default"
-                  />
-                  <GoToAppButton
-                    asChild
-                    size="lg"
-                    label="Go to application"
-                    variant="default"
-                  />
-                </div>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
               </div>
               <div className="flex items-center justify-center">
-                <ThemedImage
-                  lightUrl="/nowaster-landing-1-light.png"
-                  darkUrl="/nowaster-landing-1-dark.jpg"
+                <Image
+                  src="/nowaster-landing-1-dark.jpg"
                   alt="Time tracking dashboard"
                   width={1320}
                   height={990}
@@ -80,9 +66,8 @@ export default async function LandingPage() {
             </div>
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:gird-cols[1fr_600px] lg:gap-12">
               <div className="flex items-center justify-center">
-                <ThemedImage
-                  lightUrl="/nowaster-landing-2-light.png"
-                  darkUrl="/nowaster-landing-2-dark.png"
+                <Image
+                  src="/nowaster-landing-2-dark.png"
                   alt="Time tracking dashboard"
                   width={1320}
                   height={990}
@@ -225,16 +210,6 @@ export default async function LandingPage() {
                     <span>Basic reporting</span>
                   </li>
                 </ul>
-                <SignInButton
-                  variant="outline"
-                  className="mt-8"
-                  label="Get Started"
-                />
-                <GoToAppButton
-                  className="mt-8"
-                  label="Go to application"
-                  variant="outline"
-                />
               </div>
             </div>
           </div>
@@ -333,17 +308,12 @@ export default async function LandingPage() {
                   productivity with our time tracking solution.
                 </p>
               </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <SignInButton
-                  variant="secondary"
-                  label="Start your journey now"
-                />
-                <GoToAppButton label="Go to application" variant="secondary" />
-              </div>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
             </div>
           </div>
         </section>
       </div>
-    </UnknownUserNavbar>
+      <SiteFooter />
+    </>
   );
 }
