@@ -18,25 +18,21 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex grow flex-col p-8">
+    <div className="flex grow flex-col p-4 md:p-8 gap-4 md:gap-8">
       <h2 className="mb-8 text-3xl font-bold tracking-tight">Dashboard</h2>
-      <div className="flex gap-8 ">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8">
         <TotalSessionsKpiCard />
         <TotalSessionTimeKpiCard />
         <CurrentStreakKpiCard />
       </div>
-      <div className="mt-8 h-fit">
-        <IntervaledSessionTimeline
-          startDate={filter.startDate}
-          endDate={filter.endDate}
-        />
-      </div>
-      <div className="mt-8 grid grow gap-8 md:grid-cols-2 lg:grid-cols-7">
-        <FilteredSessionAreaChart
-          initialGranularity="days-in-month"
-          className="col-span-full h-[400px]"
-        />
-      </div>
+      <IntervaledSessionTimeline
+        startDate={filter.startDate}
+        endDate={filter.endDate}
+      />
+      <FilteredSessionAreaChart
+        initialGranularity="days-in-month"
+        className="col-span-full h-[400px]"
+      />
     </div>
   );
 }
