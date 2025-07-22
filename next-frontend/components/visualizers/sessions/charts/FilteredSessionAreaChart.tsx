@@ -50,20 +50,21 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
 
   return (
     <Card className={cn("flex grow flex-col", props.className)}>
-      <CardHeader className="flex flex-row items-center gap-2">
+      <CardHeader className="md:hidden self-end">
+        <ChartFilter />
+      </CardHeader>
+      <CardHeader className="hidden md:flex flex-row items-center gap-2 space-y-0">
         <GranularitySelect
           onSelect={setGranularity}
           defaultValue={granularity}
         />
         <div className="grow"></div>
-        <div className="flex items-center gap-2">
-          <GranularityBasedDatePicker
-            granularity={granularity}
-            props={{
-              onSelected: updateFilter,
-            }}
-          />
-        </div>
+        <GranularityBasedDatePicker
+          granularity={granularity}
+          props={{
+            onSelected: updateFilter,
+          }}
+        />
         <ChartFilter />
       </CardHeader>
       <CardContent className="grow">
