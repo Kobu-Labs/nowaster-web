@@ -26,7 +26,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   return (
     <FilterContextProvider initialFilter={props.filter}>
       <FilteredSessionAreaChartInner
-        initialGranularity={props.initialGranularity}
+        {...props}
       />
     </FilterContextProvider>
   );
@@ -49,7 +49,7 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   };
 
   return (
-    <Card className={cn("flex grow flex-col", props.className)}>
+    <Card className={cn("flex flex-col w-full", props.className)}>
       <CardHeader className="md:hidden self-end">
         <ChartFilter />
       </CardHeader>
