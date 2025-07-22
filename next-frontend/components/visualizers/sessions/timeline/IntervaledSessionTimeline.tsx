@@ -20,8 +20,8 @@ export const IntervaledSessionTimeline: FC<IntervaledSessionTimelineProps> = (
   const [endDate, setEndDate] = useState<Date>(props.endDate ?? new Date());
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="p-0">
+      <CardHeader className="hidden md:flex">
         <div className="flex w-fit items-center justify-between gap-2 pt-2 pl-2">
           <DateTimePicker
             selected={startDate}
@@ -44,7 +44,7 @@ export const IntervaledSessionTimeline: FC<IntervaledSessionTimelineProps> = (
         </div>
       </CardHeader>
       <Separator />
-      <CardContent>
+      <CardContent className="p-0">
         <SessionTimeline
           filter={{
             settings: {},
