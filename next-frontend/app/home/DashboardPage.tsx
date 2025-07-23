@@ -4,6 +4,7 @@ import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/char
 import { CurrentStreakKpiCard } from "@/components/visualizers/sessions/kpi/CurrentStreakKpiCard";
 import { TotalSessionTimeKpiCard } from "@/components/visualizers/sessions/kpi/TotalMinutesSpentKpiCard";
 import { TotalSessionsKpiCard } from "@/components/visualizers/sessions/kpi/TotalSessionsKpiCard";
+import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
 import { IntervaledSessionTimeline } from "@/components/visualizers/sessions/timeline/IntervaledSessionTimeline";
 import { subHours } from "date-fns";
 import { useMemo } from "react";
@@ -29,10 +30,12 @@ export default function DashboardPage() {
         startDate={filter.startDate}
         endDate={filter.endDate}
       />
-      <FilteredSessionAreaChart
-        initialGranularity="days-in-month"
-        className="col-span-full h-[400px]"
-      />
+      <FilterContextProvider>
+        <FilteredSessionAreaChart
+          initialGranularity="days-in-month"
+          className="col-span-full h-[400px]"
+        />
+      </FilterContextProvider>
     </div>
   );
 }
