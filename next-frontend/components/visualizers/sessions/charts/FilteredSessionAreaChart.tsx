@@ -1,4 +1,4 @@
-import { SessionFilterPrecursor, overwriteData } from "@/state/chart-filter";
+import { overwriteData } from "@/state/chart-filter";
 import { FC, HTMLAttributes, useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
@@ -10,29 +10,15 @@ import {
   GranularitySelect,
 } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
-import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 import { DeepRequired } from "react-hook-form";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: Granularity;
-  filter?: SessionFilterPrecursor;
 } & HTMLAttributes<HTMLDivElement>;
 
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
-  props,
-) => {
-  return (
-    <FilterContextProvider initialFilter={props.filter}>
-      <FilteredSessionAreaChartInner
-        {...props}
-      />
-    </FilterContextProvider>
-  );
-};
-
-const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   props,
 ) => {
   const [granularity, setGranularity] = useState(props.initialGranularity);
