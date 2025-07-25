@@ -143,10 +143,11 @@ const StopwatchSessionActive: FC<{
 
       <div
         className={cn(
-          "inline-flex items-center bg-transparent whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center bg-transparent text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           "justify-start gap-2 relative border-2 border-pink-muted border-dashed",
           "hover:text-accent-foreground",
-          "gradient-container min-h-9 rounded-md",
+          "gradient-container min-h-9 rounded-md py-1",
+          !session.category && "h-9",
         )}
       >
         <div className="flex justify-between w-full pr-2">
@@ -158,16 +159,18 @@ const StopwatchSessionActive: FC<{
                 onClick={() => setOpen(true)}
               >
                 <Edit className="size-4" />
-                <div className="flex flex-wrap gap-2 items-center justify-center">
+                <div className="flex flex-wrap items-center justify-center">
                   <Timer
                     durationInSeconds={displayedTime}
                     formatingFunction={formatTimeDifference}
                   />
                   {session.category && (
-                    <CategoryBadge
-                      color={session.category.color}
-                      name={session.category.name}
-                    />
+                    <div className="ml-2">
+                      <CategoryBadge
+                        color={session.category.color}
+                        name={session.category.name}
+                      />
+                    </div>
                   )}
                 </div>
               </Button>
