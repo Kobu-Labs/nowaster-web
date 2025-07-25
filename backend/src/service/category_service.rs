@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::ReadCategoryDto, update_category::UpdateCategoryDto,
+        read_category::{ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
     },
     entity::category::Category,
     repository::category::{CategoryRepository, CategoryRepositoryTrait},
@@ -61,5 +61,12 @@ impl CategoryService {
         }
         let res = self.repo.update(dto).await?;
         Ok(ReadCategoryDto::from(res))
+    }
+
+    pub async fn get_categories_with_session_count(
+        &self,
+        actor: ClerkUser,
+    ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
+        self.repo.get_categories_with_session_count(actor).await
     }
 }
