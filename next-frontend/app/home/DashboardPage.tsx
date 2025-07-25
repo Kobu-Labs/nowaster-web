@@ -5,15 +5,19 @@ import { CurrentStreakKpiCard } from "@/components/visualizers/sessions/kpi/Curr
 import { TotalSessionTimeKpiCard } from "@/components/visualizers/sessions/kpi/TotalMinutesSpentKpiCard";
 import { TotalSessionsKpiCard } from "@/components/visualizers/sessions/kpi/TotalSessionsKpiCard";
 import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
-import { IntervaledSessionTimeline } from "@/components/visualizers/sessions/timeline/IntervaledSessionTimeline";
-import { subHours } from "date-fns";
+import { FilteredSessionTimeline } from "@/components/visualizers/sessions/timeline/FilteredSessionTimeline";
+import { SessionFilterPrecursor } from "@/state/chart-filter";
+import { addHours, subHours } from "date-fns";
 import { useMemo } from "react";
 
 export default function DashboardPage() {
-  const filter = useMemo(
+  const timelineFilter: SessionFilterPrecursor = useMemo(
     () => ({
-      startDate: subHours(new Date(), 24),
-      endDate: new Date(),
+      settings: {},
+      data: {
+        endTimeFrom: { value: subHours(new Date(), 20) },
+        endTimeTo: { value: addHours(new Date(), 1) },
+      },
     }),
     [],
   );
@@ -26,10 +30,9 @@ export default function DashboardPage() {
         <TotalSessionTimeKpiCard />
         <CurrentStreakKpiCard />
       </div>
-      <IntervaledSessionTimeline
-        startDate={filter.startDate}
-        endDate={filter.endDate}
-      />
+      <FilterContextProvider initialFilter={timelineFilter}>
+        <FilteredSessionTimeline />
+      </FilterContextProvider>
       <FilterContextProvider>
         <FilteredSessionAreaChart
           initialGranularity="days-in-month"
