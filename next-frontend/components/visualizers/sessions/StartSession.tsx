@@ -5,7 +5,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/shadcn/dialog";
 import {
   Tooltip,
@@ -17,17 +16,16 @@ import { FC, useEffect, useState } from "react";
 
 import { StopwatchSessionWithId } from "@/api/definitions";
 import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
+import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
 import { useFinishStopwatchSession } from "@/components/hooks/session/stopwatch/useFinishStopwatchSession";
 import { useActiveSessions } from "@/components/hooks/useActiveSessions";
 import { Button } from "@/components/shadcn/button";
-import { Card } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { EditStopwatchSession } from "@/components/visualizers/sessions/form/EditStopwatchSessionForm";
 import { cn, formatTime } from "@/lib/utils";
 import { differenceInSeconds } from "date-fns";
-import { CircleCheck, Play, Trash } from "lucide-react";
-import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
+import { CircleCheck, Edit, Play, Trash } from "lucide-react";
 
 const formatTimeDifference = (seconds: number) => {
   const diffInSeconds = seconds;
@@ -76,44 +74,37 @@ const NoActiveSession: FC = ({}) => {
   const createSession = useCreateStopwatchSession();
 
   return (
-    <Card
-      className={cn(
-        "px-2 p-1 flex items-center justify-center gap-2",
-        createSession.isError && "border-red-400",
-      )}
-    >
-      <TooltipProvider delayDuration={50}>
-        <div className="flex items-center px-1 m-0 gap-3 rounded-md text-sm ">
-          <Timer
-            durationInSeconds={0}
-            formatingFunction={formatTimeDifference}
-          />
-        </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              className="group p-1 m-0 aspect-square"
-              onClick={() => createSession.mutate({ startTime: new Date() })}
-              loading={createSession.isPending}
-            >
+    <TooltipProvider delayDuration={50}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="group/start justify-start gap-2 bg-transparent"
+            onClick={() => createSession.mutate({ startTime: new Date() })}
+            loading={createSession.isPending}
+          >
+            <>
               {!createSession.isPending && (
-                <Play className="group-hover:text-green-500" />
+                <Play className="group-hover/start:text-green-500 size-4" />
               )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="text-nowrap">
-            Start a session
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </Card>
+
+              <Timer
+                durationInSeconds={0}
+                formatingFunction={formatTimeDifference}
+              />
+            </>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="text-nowrap">Start a session</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
-const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
-  session,
-}) => {
+const StopwatchSessionActive: FC<{
+  session: StopwatchSessionWithId;
+}> = ({ session }) => {
   const [displayedTime, setDisplayedTime] = useState<number>(
     differenceInSeconds(new Date(), session.startTime),
   );
@@ -133,98 +124,106 @@ const StopwatchSessionActive: FC<{ session: StopwatchSessionWithId }> = ({
   }, [session]);
 
   return (
-    <Card className="px-2 flex items-center justify-center">
-      <TooltipProvider delayDuration={50}>
-        <Dialog modal={false} open={open} onOpenChange={setOpen}>
-          <DialogTrigger className="p-1">
-            <Tooltip>
-              <TooltipTrigger>
-                <Button
-                  onClick={() => setOpen(true)}
-                  variant="ghost"
-                  className="flex items-center px-1 m-0 gap-2 relative"
-                >
+    <TooltipProvider delayDuration={50}>
+      <Dialog modal={false} open={open} onOpenChange={setOpen}>
+        <DialogContent className="w-1/2">
+          <DialogHeader>
+            <DialogTitle className="m-1">Edit session data</DialogTitle>
+            <Separator className="w-full" />
+            <DialogDescription>
+              <EditStopwatchSession
+                session={session}
+                onDelete={() => setOpen(false)}
+                onSubmit={() => setOpen(false)}
+              />
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <div
+        className={cn(
+          "inline-flex items-center bg-transparent whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "justify-start gap-2 relative border-2 border-pink-muted border-dashed",
+          "hover:text-accent-foreground",
+          "gradient-container min-h-9 rounded-md",
+        )}
+      >
+        <div className="flex justify-between w-full pr-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                className={cn("flex gap-2 items-center")}
+                onClick={() => setOpen(true)}
+              >
+                <Edit className="size-4" />
+                <div className="flex flex-wrap gap-2 items-center justify-center">
+                  <Timer
+                    durationInSeconds={displayedTime}
+                    formatingFunction={formatTimeDifference}
+                  />
                   {session.category && (
                     <CategoryBadge
                       color={session.category.color}
                       name={session.category.name}
                     />
                   )}
-                  <Timer
-                    durationInSeconds={displayedTime}
-                    formatingFunction={formatTimeDifference}
-                  />
+                </div>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-nowrap">
+              Edit Session
+            </TooltipContent>
+          </Tooltip>
+          <div className="flex gap-2 items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 m-0"
+                  onClick={() =>
+                    finishSession.mutate(session, {
+                      onSuccess: () => {
+                        document.title = "Nowaster";
+                      },
+                      onError: () => setOpen(true),
+                    })
+                  }
+                >
+                  <CircleCheck className="hover:text-green-500 size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="text-nowrap">
-                Edit session
+                Finish the session
               </TooltipContent>
             </Tooltip>
-          </DialogTrigger>
-          <DialogContent className="w-1/2">
-            <DialogHeader>
-              <DialogTitle className="m-1">Edit session data</DialogTitle>
-              <Separator className="w-full" />
-              <DialogDescription>
-                <EditStopwatchSession
-                  session={session}
-                  onDelete={() => setOpen(false)}
-                  onSubmit={() => setOpen(false)}
-                />
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              className="group p-0 m-0 aspect-square"
-              onClick={() =>
-                finishSession.mutate(session, {
-                  onSuccess: () => {
-                    document.title = "Nowaster";
-                  },
-                  onError: () => setOpen(true),
-                })
-              }
-              loading={finishSession.isPending}
-            >
-              {!finishSession.isPending && (
-                <CircleCheck className="group-hover:text-green-500" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="text-nowrap">
-            Finish the session
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              className="group p-0 m-0 aspect-square"
-              onClick={() =>
-                deleteSessionMutation.mutate(
-                  { id: session.id },
-                  {
-                    onSuccess: () => setOpen(false),
-                  },
-                )
-              }
-              loading={deleteSessionMutation.isPending}
-            >
-              {!deleteSessionMutation.isPending && (
-                <Trash className="group-hover:text-red-500" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="text-nowrap">
-            Delete the session
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </Card>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="p-0 m-0"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    deleteSessionMutation.mutate(
+                      { id: session.id },
+                      {
+                        onSuccess: () => setOpen(false),
+                      },
+                    )
+                  }
+                >
+                  <Trash className="hover:text-red-500 size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="text-nowrap">
+                Delete the session
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
   );
 };
