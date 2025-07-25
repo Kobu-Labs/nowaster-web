@@ -11,6 +11,15 @@ pub struct ReadCategoryDto {
     pub color: String,
 }
 
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct ReadCategoryWithSessionCountDto {
+    pub id: Uuid,
+    pub name: String,
+    pub color: String,
+    #[serde(rename = "sessionCount")]
+    pub session_count: i64,
+}
+
 impl ReadCategoryDto {
     pub fn from(entity: Category) -> ReadCategoryDto {
         Self {

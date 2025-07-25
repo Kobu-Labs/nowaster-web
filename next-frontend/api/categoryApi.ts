@@ -1,7 +1,16 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import { CategoryRequest, CategoryResponseSchema } from "@/api/definitions";
+import { z } from "zod";
 
 const BASE_URL = "/category";
+
+export const getSessionCountByCategory = async () => {
+  const { data } = await baseApi.get(BASE_URL + "/group-sessions");
+  return await parseResponseUnsafe(
+    data,
+    z.array(CategoryResponseSchema.groupBySession),
+  );
+};
 
 export const getCategories = async () => {
   const { data } = await baseApi.get(BASE_URL);

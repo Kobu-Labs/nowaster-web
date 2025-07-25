@@ -1,9 +1,12 @@
-import {
-  CategoryWithIdSchema,
-} from "@/api/definitions/models/category";
+import { CategoryWithIdSchema } from "@/api/definitions/models/category";
 import { z } from "zod";
 
 export const CategoryResponseSchema = {
+  groupBySession: CategoryWithIdSchema.merge(
+    z.object({
+      sessionCount: z.number(),
+    }),
+  ),
   create: CategoryWithIdSchema,
   readMany: z.array(CategoryWithIdSchema),
   readByName: CategoryWithIdSchema.nullable(),
