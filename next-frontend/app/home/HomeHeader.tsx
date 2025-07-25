@@ -11,6 +11,7 @@ import { UserButton } from "@clerk/nextjs";
 import { Bell } from "lucide-react";
 import { FC } from "react";
 import { Separator } from "@/components/shadcn/separator";
+import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 
 export const HomeHeader: FC = () => {
   return (
@@ -20,7 +21,7 @@ export const HomeHeader: FC = () => {
         <Separator orientation="vertical" className="w-[2px]" />
         <NowasterLogo href="/home/" />
         <div className="grow"></div>
-
+        <SessionTimer />
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
