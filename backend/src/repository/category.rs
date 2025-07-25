@@ -8,7 +8,7 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        update_category::UpdateCategoryDto,
+        read_category::ReadCategoryWithSessionCountDto, update_category::UpdateCategoryDto,
     },
     entity::category::Category,
     router::clerk::ClerkUser,
@@ -36,6 +36,7 @@ pub trait CategoryRepositoryTrait {
         filter: FilterCategoryDto,
         actor: ClerkUser,
     ) -> Result<Vec<Category>>;
+    async fn get_categories_with_session_count(&self, actor: ClerkUser) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
@@ -182,5 +183,28 @@ impl CategoryRepositoryTrait for CategoryRepository {
             .await?;
 
         Ok(self.mapper(row))
+    }
+
+    async fn get_categories_with_session_count(&self, actor: ClerkUser) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
+        let rows = sqlx::query_as!(
+            ReadCategoryWithSessionCountDto,
+            r#"
+                SELECT 
+                    c.id,
+                    c.name,
+                    c.color,
+                    COALESCE(COUNT(s.id)::bigint,0) as "session_count!"
+                FROM category c
+                LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
+                WHERE c.created_by = $1
+                GROUP BY c.id
+                ORDER BY c.last_used_at DESC NULLS LAST
+            "#,
+            actor.user_id
+        )
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        Ok(rows)
     }
 }

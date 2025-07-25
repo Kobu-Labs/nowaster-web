@@ -38,7 +38,7 @@ const statisticsKeys = createQueryKeys("statistics", {
 const categoryKeys = createQueryKeys("categories", {
   all: {
     queryKey: null,
-    queryFn: async () => await CategoryApi.getCategories(),
+    queryFn: async () => await CategoryApi.getSessionCountByCategory(),
   },
   byId: (id: string) => ({
     queryKey: [id],
