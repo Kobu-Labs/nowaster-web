@@ -36,7 +36,10 @@ pub trait CategoryRepositoryTrait {
         filter: FilterCategoryDto,
         actor: ClerkUser,
     ) -> Result<Vec<Category>>;
-    async fn get_categories_with_session_count(&self, actor: ClerkUser) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
+    async fn get_categories_with_session_count(
+        &self,
+        actor: ClerkUser,
+    ) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
@@ -185,7 +188,10 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(self.mapper(row))
     }
 
-    async fn get_categories_with_session_count(&self, actor: ClerkUser) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
+    async fn get_categories_with_session_count(
+        &self,
+        actor: ClerkUser,
+    ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
         let rows = sqlx::query_as!(
             ReadCategoryWithSessionCountDto,
             r#"
@@ -198,7 +204,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
                 WHERE c.created_by = $1
                 GROUP BY c.id
-                ORDER BY c.last_used_at DESC NULLS LAST
+                ORDER BY COALESCE(COUNT(s.id)::bigint,0) DESC
             "#,
             actor.user_id
         )
