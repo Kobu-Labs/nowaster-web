@@ -1,11 +1,21 @@
 "use client";
 
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import { StopwatchApi } from "@/api";
+import {
   CategoryWithIdSchema,
+  ScheduledSessionRequestSchema,
   StopwatchSessionRequest,
   StopwatchSessionWithId,
   TagWithIdSchema,
 } from "@/api/definitions";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Button } from "@/components/shadcn/button";
@@ -24,8 +34,9 @@ import { SingleCategoryPicker } from "@/components/visualizers/categories/Catego
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { differenceInSeconds, isAfter, isBefore } from "date-fns";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -59,10 +70,6 @@ interface FormComponentProps {
 export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
   const form = useForm<z.infer<typeof updateSessionPrecursor>>({
     resolver: zodResolver(updateSessionPrecursor),
-    mode: "onChange",
-    resetOptions: {
-      keepDirty: true,
-    },
     defaultValues: {
       id: props.session.id,
       startTime: props.session.startTime,
@@ -72,8 +79,19 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
     },
   });
 
+  const [endTime, setEndTime] = useState<Date | undefined>(new Date());
+  const convertedSession = ScheduledSessionRequestSchema.create.safeParse({
+    startTime: form.watch("startTime"),
+    endTime: endTime,
+    category_id: form.watch("category.id"),
+    description: form.watch("description"),
+    tag_ids: form.watch("tags")?.map((tag) => tag.id),
+  }).data;
+
+  const createSession = useCreateScheduledSession();
   const deleteSessionMutation = useDeleteStopwatchSession();
   const updateSession = useUpdateSession("stopwatch");
+  const queryClient = useQueryClient();
 
   const onUpdateSession = async (
     values: z.infer<typeof updateSessionPrecursor>,
@@ -178,6 +196,17 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                   );
                 }}
               />
+              <FormItem className="flex flex-col gap-2">
+                <FormLabel className="flex items-center gap-2">
+                  End Time
+                </FormLabel>
+
+                <DateTimePicker
+                  quickOptions={dateQuickOptions}
+                  selected={endTime}
+                  onSelect={setEndTime}
+                />
+              </FormItem>
             </div>
 
             <FormField
@@ -204,29 +233,73 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 </FormItem>
               )}
             />
-            <div className="flex gap-2 justify-end">
-              <Button
-                loading={deleteSessionMutation.isPending}
-                type="button"
-                variant="destructive"
-                onClick={() =>
-                  deleteSessionMutation.mutate(
-                    { id: props.session.id },
-                    { onSuccess: props.onDelete },
-                  )
-                }
-              >
-                Delete
-              </Button>
-              <Button
-                type="submit"
-                variant="outline"
-                loading={updateSession.isPending}
-                disabled={!form.formState.isDirty}
-              >
-                Update
-              </Button>
-            </div>
+            <TooltipProvider delayDuration={200}>
+              <div className="flex gap-2 items-center">
+                <Button
+                  loading={deleteSessionMutation.isPending}
+                  type="button"
+                  variant="destructive"
+                  onClick={() =>
+                    deleteSessionMutation.mutate(
+                      { id: props.session.id },
+                      { onSuccess: props.onDelete },
+                    )
+                  }
+                >
+                  Delete
+                </Button>
+
+                <div className="grow"></div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      loading={updateSession.isPending}
+                      disabled={!form.formState.isDirty}
+                    >
+                      Update
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    The session will keep running, but will be updated with the
+                    selected values
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      loading={createSession.isPending}
+                      disabled={!convertedSession}
+                      onClick={async () => {
+                        if (convertedSession) {
+                          // TODO: this needs to be extracted
+                          await StopwatchApi.remove({ id: props.session.id });
+
+                          await createSession.mutateAsync(convertedSession, {
+                            onSuccess: async () => {
+                              await queryClient.invalidateQueries({
+                                queryKey: queryKeys.sessions.active._def,
+                              });
+
+                              if (props.onSubmit) {
+                                props.onSubmit();
+                              }
+                            },
+                          });
+                        }
+                      }}
+                    >
+                      Finish
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    The session will finish with the selected values
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
           </form>
         </Form>
       </CardContent>
