@@ -322,7 +322,7 @@ export function SessionTimelineUiProvider({
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
         >
-          <DialogContent className="w-full max-w-[60%]">
+          <DialogContent className="w-fit max-w-fit">
             <DialogHeader>
               <DialogTitle>Create Session</DialogTitle>
             </DialogHeader>
