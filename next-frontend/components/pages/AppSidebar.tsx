@@ -116,7 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     Quick Log
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-full max-w-[60%]">
+                <DialogContent className="w-fit max-w-fit">
                   <ScheduledSessionCreationForm />
                 </DialogContent>
               </Dialog>
