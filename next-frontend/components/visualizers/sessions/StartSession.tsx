@@ -2,7 +2,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
@@ -126,17 +125,15 @@ const StopwatchSessionActive: FC<{
   return (
     <TooltipProvider delayDuration={50}>
       <Dialog modal={false} open={open} onOpenChange={setOpen}>
-        <DialogContent className="w-1/2">
+        <DialogContent className="w-fit max-w-fit">
           <DialogHeader>
             <DialogTitle className="m-1">Edit session data</DialogTitle>
             <Separator className="w-full" />
-            <DialogDescription>
-              <EditStopwatchSession
-                session={session}
-                onDelete={() => setOpen(false)}
-                onSubmit={() => setOpen(false)}
-              />
-            </DialogDescription>
+            <EditStopwatchSession
+              session={session}
+              onDelete={() => setOpen(false)}
+              onSubmit={() => setOpen(false)}
+            />
           </DialogHeader>
         </DialogContent>
       </Dialog>
