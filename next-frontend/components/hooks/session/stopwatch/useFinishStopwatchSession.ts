@@ -34,6 +34,10 @@ export const useFinishStopwatchSession = () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions._def,
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.categories._def,
+      });
       toast({
         description: `Session finished successfully!`,
         variant: "default",
