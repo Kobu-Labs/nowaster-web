@@ -86,9 +86,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       {...props}
-      className="top-[var(--header-height)] !h-[calc(100svh-var(--header-height))] bg-sidebar w-72"
+      className="top-[var(--header-height)] !h-[calc(100svh-var(--header-height))] w-72"
     >
-      <SidebarHeader className="flex flex-row items-center px-4 justify-between ">
+      <SidebarHeader className="flex flex-row items-center px-4 justify-between gradient-button">
         <NowasterLogo href="/home" />
         <Button
           variant="ghost"
@@ -99,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Button>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gradient-card">
         <SidebarGroup>
           <SidebarGroupLabel>Quick Actions</SidebarGroupLabel>
           <SidebarGroupContent>
