@@ -21,7 +21,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <Providers>
       <SidebarProvider
-        defaultOpen={true}
+        defaultOpen={false}
         className="flex flex-col [--header-height:3.5rem]"
       >
         <HomeHeader />
