@@ -55,3 +55,8 @@ export const getById = async (
   const { data } = await baseApi.get(BASE_URL + "/" + params.id);
   return await parseResponseUnsafe(data, TagResponseSchema.getById);
 };
+
+export const getStatistics = async () => {
+  const { data } = await baseApi.get(BASE_URL + "/statistics");
+  return await parseResponseUnsafe(data, TagResponseSchema.statistics);
+};

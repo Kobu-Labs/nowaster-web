@@ -25,6 +25,14 @@ pub struct ReadTagDetailsDto {
     pub color: String,
 }
 
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct TagStatsDto {
+    pub total_tags: i64,
+    pub total_usages: i64,
+    pub average_usages_per_tag: f64,
+    pub most_used_tag: Option<ReadTagDto>,
+}
+
 impl ReadTagDetailsDto {
     pub fn from(entity: TagDetails) -> ReadTagDetailsDto {
         Self {
