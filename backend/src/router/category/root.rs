@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::{
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::{ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
+        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
     },
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
@@ -25,6 +25,10 @@ pub fn category_router() -> Router<AppState> {
         .route(
             "/group-sessions",
             get(get_categories_with_session_count_handler),
+        )
+        .route(
+            "/statistics",
+            get(get_category_statistics_handler),
         )
         .route(
             "/{category_id}",
@@ -96,6 +100,17 @@ async fn get_categories_with_session_count_handler(
     let res = state
         .category_service
         .get_categories_with_session_count(actor)
+        .await;
+    ApiResponse::from_result(res)
+}
+
+async fn get_category_statistics_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+) -> ApiResponse<CategoryStatsDto> {
+    let res = state
+        .category_service
+        .get_category_statistics(actor)
         .await;
     ApiResponse::from_result(res)
 }

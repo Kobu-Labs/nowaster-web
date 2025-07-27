@@ -20,6 +20,15 @@ pub struct ReadCategoryWithSessionCountDto {
     pub session_count: i64,
 }
 
+#[derive(Clone, Serialize, Deserialize, Validate)]
+pub struct CategoryStatsDto {
+    pub total_categories: i64,
+    pub total_sessions: i64,
+    pub total_time_minutes: Option<f64>,
+    pub average_sessions_per_category: f64,
+    pub most_used_category: Option<ReadCategoryDto>,
+}
+
 impl ReadCategoryDto {
     pub fn from(entity: Category) -> ReadCategoryDto {
         Self {
