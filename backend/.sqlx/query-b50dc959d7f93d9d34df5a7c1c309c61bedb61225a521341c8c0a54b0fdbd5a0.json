@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT \n                    t.id, \n                    t.label, \n                    t.color\n                FROM tag t\n                LEFT JOIN tag_to_session tts ON t.id = tts.tag_id\n                WHERE t.created_by = $1\n                GROUP BY t.id, t.label, t.color\n                ORDER BY COUNT(tts.tag_id) DESC\n                LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "color",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b50dc959d7f93d9d34df5a7c1c309c61bedb61225a521341c8c0a54b0fdbd5a0"
+}
