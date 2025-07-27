@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
 use crate::dto::tag::create_tag::{CreateTagDto, UpdateTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
-use crate::dto::tag::read_tag::ReadTagDetailsDto;
+use crate::dto::tag::read_tag::{ReadTagDetailsDto, TagStatsDto};
 use crate::router::clerk::ClerkUser;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
@@ -21,6 +21,7 @@ pub fn tag_router() -> Router<AppState> {
             post(add_allowed_category_handler).delete(remove_allowed_category_handler),
         )
         .route("/", post(create_tag_handler).get(filter_tags_handler))
+        .route("/statistics", axum::routing::get(get_tag_statistics_handler))
         .route(
             "/{tag_id}",
             delete(delete_tag_handler)
@@ -139,6 +140,14 @@ async fn delete_tag_handler(
     Path(tag_id): Path<Uuid>,
 ) -> ApiResponse<()> {
     let res = state.tag_service.delete_tag(tag_id, actor).await;
+    ApiResponse::from_result(res)
+}
+
+async fn get_tag_statistics_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+) -> ApiResponse<TagStatsDto> {
+    let res = state.tag_service.get_tag_statistics(actor).await;
     ApiResponse::from_result(res)
 }
 

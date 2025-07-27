@@ -12,6 +12,7 @@ use crate::{
         tag::{
             create_tag::{CreateTagDto, UpdateTagDto},
             filter_tags::TagFilterDto,
+            read_tag::{ReadTagDto, TagStatsDto},
         },
     },
     entity::{category::Category, tag::TagDetails},
@@ -53,6 +54,7 @@ pub trait TagRepositoryTrait {
     async fn delete_tag(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
     async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
+    async fn get_tag_statistics(&self, actor: ClerkUser) -> Result<TagStatsDto>;
 }
 
 impl TagRepositoryTrait for TagRepository {
@@ -332,5 +334,66 @@ impl TagRepositoryTrait for TagRepository {
         }
 
         self.find_by_id(id, actor.clone()).await
+    }
+
+    async fn get_tag_statistics(&self, actor: ClerkUser) -> Result<TagStatsDto> {
+        // Get total tags count
+        let total_tags = sqlx::query_scalar!(
+            "SELECT COUNT(DISTINCT id) FROM tag WHERE created_by = $1",
+            actor.user_id
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        // Get total usages
+        let total_usages = sqlx::query_scalar!(
+            r#"
+                SELECT COUNT(*)
+                FROM tag_to_session tts
+                JOIN tag t ON t.id = tts.tag_id
+                WHERE t.created_by = $1
+            "#,
+            actor.user_id
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        // Get most used tag
+        let most_used = sqlx::query!(
+            r#"
+                SELECT 
+                    t.id, 
+                    t.label, 
+                    t.color
+                FROM tag t
+                LEFT JOIN tag_to_session tts ON t.id = tts.tag_id
+                WHERE t.created_by = $1
+                GROUP BY t.id, t.label, t.color
+                ORDER BY COUNT(tts.tag_id) DESC
+                LIMIT 1
+            "#,
+            actor.user_id
+        )
+        .fetch_optional(self.db_conn.get_pool())
+        .await?;
+
+        let most_used_tag = most_used.map(|row| ReadTagDto {
+            id: row.id,
+            label: row.label,
+            color: row.color,
+        });
+
+        let average_usages_per_tag = if total_tags.unwrap_or(0) > 0 {
+            total_usages.unwrap_or(0) as f64 / total_tags.unwrap_or(0) as f64
+        } else {
+            0.0
+        };
+
+        Ok(TagStatsDto {
+            total_tags: total_tags.unwrap_or(0),
+            total_usages: total_usages.unwrap_or(0),
+            average_usages_per_tag,
+            most_used_tag,
+        })
     }
 }
