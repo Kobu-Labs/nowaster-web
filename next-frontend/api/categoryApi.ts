@@ -36,3 +36,8 @@ export const readById = async (params: CategoryRequest["readById"]) => {
   const { data } = await baseApi.get(BASE_URL + "/" + params.id);
   return await parseResponseUnsafe(data, CategoryResponseSchema.readById);
 };
+
+export const getStatistics = async () => {
+  const { data } = await baseApi.get(BASE_URL + "/statistics");
+  return await parseResponseUnsafe(data, CategoryResponseSchema.statistics);
+};

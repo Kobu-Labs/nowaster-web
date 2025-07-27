@@ -59,7 +59,7 @@ const navItems = [
   },
   {
     title: "Categories",
-    url: "/home/history",
+    url: "/home/category",
     icon: ChartPie,
   },
   {
