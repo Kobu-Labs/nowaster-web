@@ -38,8 +38,11 @@ import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 import Link from "next/link";
+import { useTags } from "@/components/hooks/tag/useTags";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 const SHOW_CATEGORY_AMOUNT = 5;
+const SHOW_TAG_AMOUNT = 7;
 
 const navItems = [
   {
@@ -78,7 +81,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar } = useSidebar();
 
   const categories = useCategories();
-  if (!categories.data) {
+  const tags = useTags();
+  if (!categories.data || !tags.data) {
     // INFO: do not render sidebar when data is not loaded, subject to change
     return null;
   }
@@ -176,10 +180,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Tags</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <div className="space-y-2 px-2">
+              {tags.data.slice(0, SHOW_TAG_AMOUNT).map((category) => (
+                <Link
+                  href={"/home/tag/" + category.id}
+                  key={category.id}
+                  className="flex items-center gap-2 p-2 rounded-md justify-between hover:bg-sidebar-accent/50 cursor-pointer"
+                >
+                  <TagBadge variant="auto" tag={category} />
+                  <Badge variant="outline" className="text-xs">
+                    {category.usages}
+                  </Badge>
+                </Link>
+              ))}
+              {tags.data.length > SHOW_TAG_AMOUNT && (
+                <Link href={"/home/category"}>
+                  <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
+                    <p className="text-accent-foreground">
+                      {tags.data.length - SHOW_TAG_AMOUNT}
+                    </p>
+                    <p>more..</p>
+                  </SidebarMenuButton>
+                </Link>
+              )}
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       {/* placeholder for footer */}
-      <SidebarFooter>
+      <SidebarFooter className="bg-pink-muted">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild></SidebarMenuButton>
