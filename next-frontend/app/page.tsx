@@ -5,9 +5,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
+import { Button } from "@/components/shadcn/button";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Nowaster - Time Tracking Made Easy",
@@ -33,6 +35,12 @@ export default async function LandingPage() {
                     productivity with our intuitive time tracking solution.
                   </p>
                 </div>
+
+                <Link href="/home/">
+                  <Button variant="secondary">
+                    <p>Sign up now</p>
+                  </Button>
+                </Link>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
               </div>
               <div className="flex items-center justify-center">
@@ -216,7 +224,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Testimonials */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted gradient-container">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -296,7 +304,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground">
+        <section className="w-full py-12 md:py-24 lg:py-32 gradient-card text-foreground">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -308,7 +316,13 @@ export default async function LandingPage() {
                   productivity with our time tracking solution.
                 </p>
               </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                <Link href="/home/">
+                  <Button variant="secondary">
+                    <p>Start your journey now</p>
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
