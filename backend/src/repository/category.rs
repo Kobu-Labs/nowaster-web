@@ -8,7 +8,7 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::ReadCategoryWithSessionCountDto, update_category::UpdateCategoryDto,
+        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
     },
     entity::category::Category,
     router::clerk::ClerkUser,
@@ -40,6 +40,7 @@ pub trait CategoryRepositoryTrait {
         &self,
         actor: ClerkUser,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
+    async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
@@ -157,8 +158,8 @@ impl CategoryRepositoryTrait for CategoryRepository {
 
         let mut fields = vec![];
 
-        if let Some(label) = dto.name {
-            fields.push(("label", label));
+        if let Some(name) = dto.name {
+            fields.push(("name", name));
         }
 
         if let Some(color) = dto.color {
@@ -199,12 +200,12 @@ impl CategoryRepositoryTrait for CategoryRepository {
                     c.id,
                     c.name,
                     c.color,
-                    COALESCE(COUNT(s.id)::bigint,0) as "session_count!"
+                    COALESCE(COUNT(s.id),0) as "session_count!"
                 FROM category c
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
                 WHERE c.created_by = $1
                 GROUP BY c.id
-                ORDER BY COALESCE(COUNT(s.id)::bigint,0) DESC
+                ORDER BY COALESCE(COUNT(s.id),0) DESC
             "#,
             actor.user_id
         )
@@ -212,5 +213,60 @@ impl CategoryRepositoryTrait for CategoryRepository {
         .await?;
 
         Ok(rows)
+    }
+
+    async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto> {
+        // First get basic stats
+        let basic_stats = sqlx::query!(
+            r#"
+                SELECT 
+                    COUNT(DISTINCT c.id) as "total_categories!",
+                    COUNT(s.id) as "total_sessions!",
+                    CAST(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time))) / 60 AS FLOAT8) as total_time_minutes
+                FROM category c
+                LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
+                WHERE c.created_by = $1
+            "#,
+            actor.user_id
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        // Get most used category separately
+        let most_used = sqlx::query!(
+            r#"
+                SELECT 
+                    c.id, c.name, c.color
+                FROM category c
+                LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
+                WHERE c.created_by = $1
+                GROUP BY c.id, c.name, c.color
+                ORDER BY COUNT(s.id) DESC
+                LIMIT 1
+            "#,
+            actor.user_id
+        )
+        .fetch_optional(self.db_conn.get_pool())
+        .await?;
+
+        let most_used_category = most_used.map(|row| ReadCategoryDto {
+            id: row.id,
+            name: row.name,
+            color: row.color,
+        });
+
+        let average_sessions_per_category = if basic_stats.total_categories > 0 {
+            basic_stats.total_sessions as f64 / basic_stats.total_categories as f64
+        } else {
+            0.0
+        };
+
+        Ok(CategoryStatsDto {
+            total_categories: basic_stats.total_categories,
+            total_sessions: basic_stats.total_sessions,
+            total_time_minutes: basic_stats.total_time_minutes,
+            average_sessions_per_category,
+            most_used_category,
+        })
     }
 }
