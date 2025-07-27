@@ -13,7 +13,7 @@ const create = z.object({
 
 const update = z.object({
   id: z.string(),
-  label: z.string().optional(),
+  name: z.string().optional(),
   color: z.string().trim().min(1).optional(),
 });
 
