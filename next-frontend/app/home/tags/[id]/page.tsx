@@ -65,7 +65,7 @@ function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Tag Not Found</AlertTitle>
         <AlertDescription className="mt-2">
-          The tag you're looking for doesn't exist or you don't have access to it.
+          The tag you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
         </AlertDescription>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" size="sm" onClick={onRetry}>
