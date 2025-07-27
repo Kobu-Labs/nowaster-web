@@ -26,6 +26,10 @@ const tagKeys = createQueryKeys("tags", {
     queryFn: async () => await TagApi.readMany(),
     queryKey: null,
   },
+  byId: (id: string) => ({
+    queryKey: [id],
+    queryFn: async () => await TagApi.getById({ id: id }),
+  }),
 });
 
 const statisticsKeys = createQueryKeys("statistics", {

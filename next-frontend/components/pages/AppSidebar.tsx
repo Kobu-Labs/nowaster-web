@@ -185,15 +185,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Tags</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-2 px-2">
-              {tags.data.slice(0, SHOW_TAG_AMOUNT).map((category) => (
+              {tags.data.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
                 <Link
-                  href={"/home/tag/" + category.id}
-                  key={category.id}
+                  href={"/home/tags/" + tag.id}
+                  key={tag.id}
                   className="flex items-center gap-2 p-2 rounded-md justify-between hover:bg-sidebar-accent/50 cursor-pointer"
                 >
-                  <TagBadge variant="auto" tag={category} />
+                  <TagBadge variant="auto" tag={tag} />
                   <Badge variant="outline" className="text-xs">
-                    {category.usages}
+                    {tag.usages}
                   </Badge>
                 </Link>
               ))}
