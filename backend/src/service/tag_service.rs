@@ -5,7 +5,7 @@ use crate::{
     dto::tag::{
         create_tag::{CreateTagDto, UpdateTagDto},
         filter_tags::TagFilterDto,
-        read_tag::ReadTagDetailsDto,
+        read_tag::{ReadTagDetailsDto, TagStatsDto},
     },
     entity::{category::Category, tag::TagDetails},
     repository::{
@@ -101,5 +101,9 @@ impl TagService {
     ) -> Result<ReadTagDetailsDto> {
         let res = self.repo.update_tag(id, dto, actor).await?;
         Ok(ReadTagDetailsDto::from(res))
+    }
+
+    pub async fn get_tag_statistics(&self, actor: ClerkUser) -> Result<TagStatsDto> {
+        self.repo.get_tag_statistics(actor).await
     }
 }
