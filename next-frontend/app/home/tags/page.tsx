@@ -1,5 +1,6 @@
 "use client";
 
+import { TagWithId } from "@/api/definitions";
 import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 import { useTags } from "@/components/hooks/tag/useTags";
 import { useTagStats } from "@/components/hooks/tag/useTagStats";
@@ -56,7 +57,7 @@ export default function TagsPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingTag, setEditingTag] = useState<any>(null);
+  const [editingTag, setEditingTag] = useState<TagWithId | null>(null);
   const [newTagLabel, setNewTagLabel] = useState("");
   const [newTagColor, setNewTagColor] = useState(randomColor());
 
@@ -68,7 +69,7 @@ export default function TagsPage() {
   const filteredAndSortedTags = useMemo(() => {
     if (!tagsQuery.data) return [];
 
-    let filtered = tagsQuery.data.filter((tag) =>
+    const filtered = tagsQuery.data.filter((tag) =>
       tag.label.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
@@ -76,15 +77,15 @@ export default function TagsPage() {
       let comparison = 0;
 
       switch (sortBy) {
-        case "name":
-          comparison = a.label.localeCompare(b.label);
-          break;
-        case "usages":
-          comparison = a.usages - b.usages;
-          break;
-        case "recent":
-          comparison = 0;
-          break;
+      case "name":
+        comparison = a.label.localeCompare(b.label);
+        break;
+      case "usages":
+        comparison = a.usages - b.usages;
+        break;
+      case "recent":
+        comparison = 0;
+        break;
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -117,7 +118,6 @@ export default function TagsPage() {
           id: editingTag.id,
           label: newTagLabel.trim(),
           color: newTagColor,
-          allowedCategories: editingTag.allowedCategories,
         },
         {
           onSuccess: () => {
@@ -130,7 +130,7 @@ export default function TagsPage() {
     }
   };
 
-  const openEditDialog = (tag: any) => {
+  const openEditDialog = (tag: TagWithId) => {
     setEditingTag(tag);
     setNewTagLabel(tag.label);
     setNewTagColor(tag.color);
@@ -192,8 +192,8 @@ export default function TagsPage() {
   }
 
   const stats = statsQuery.data;
-  const totalTags = stats?.total_tags || 0;
-  const totalUsages = stats?.total_usages || 0;
+  const totalTags = stats?.total_tags ?? 0;
+  const totalUsages = stats?.total_usages ?? 0;
   const mostUsedTag = stats?.most_used_tag;
 
   return (

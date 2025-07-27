@@ -1,5 +1,6 @@
 "use client";
 
+import { CategoryWithId } from "@/api/definitions";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useCategoryStats } from "@/components/hooks/category/useCategoryStats";
 import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
@@ -58,7 +59,9 @@ export default function CategoriesPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingCategory, setEditingCategory] = useState<CategoryWithId | null>(
+    null,
+  );
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryColor, setNewCategoryColor] = useState(randomColor());
 
@@ -70,7 +73,7 @@ export default function CategoriesPage() {
   const filteredAndSortedCategories = useMemo(() => {
     if (!categoriesQuery.data) return [];
 
-    let filtered = categoriesQuery.data.filter((category) =>
+    const filtered = categoriesQuery.data.filter((category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
@@ -78,20 +81,20 @@ export default function CategoriesPage() {
       let comparison = 0;
 
       switch (sortBy) {
-        case "name":
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case "sessions":
-          comparison = a.sessionCount - b.sessionCount;
-          break;
-        case "time":
-          // Assuming totalTime exists or calculate from sessionCount
-          comparison = a.sessionCount * 60 - b.sessionCount * 60;
-          break;
-        case "recent":
-          // This would require lastUsedAt field
-          comparison = 0; // Placeholder
-          break;
+      case "name":
+        comparison = a.name.localeCompare(b.name);
+        break;
+      case "sessions":
+        comparison = a.sessionCount - b.sessionCount;
+        break;
+      case "time":
+        // Assuming totalTime exists or calculate from sessionCount
+        comparison = a.sessionCount * 60 - b.sessionCount * 60;
+        break;
+      case "recent":
+        // This would require lastUsedAt field
+        comparison = 0; // Placeholder
+        break;
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -135,7 +138,7 @@ export default function CategoriesPage() {
     }
   };
 
-  const openEditDialog = (category: any) => {
+  const openEditDialog = (category: CategoryWithId) => {
     setEditingCategory(category);
     setNewCategoryName(category.name);
     setNewCategoryColor(category.color);
@@ -197,8 +200,8 @@ export default function CategoriesPage() {
   }
 
   const stats = statsQuery.data;
-  const totalCategories = stats?.total_categories || 0;
-  const totalTimeMinutes = stats?.total_time_minutes || 0;
+  const totalCategories = stats?.total_categories ?? 0;
+  const totalTimeMinutes = stats?.total_time_minutes ?? 0;
   const mostUsedCategory = stats?.most_used_category;
   const mostUsedCategoryCount = categoriesQuery.data.find(
     (cat) => cat.id === mostUsedCategory?.id,
@@ -240,7 +243,9 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="color" className="mr-2">Color</Label>
+                <Label htmlFor="color" className="mr-2">
+                  Color
+                </Label>
                 <ColorPicker
                   initialColor={newCategoryColor}
                   onSelect={setNewCategoryColor}

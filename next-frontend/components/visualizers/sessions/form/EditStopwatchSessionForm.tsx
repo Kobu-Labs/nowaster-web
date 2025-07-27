@@ -278,6 +278,7 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                           await StopwatchApi.remove({ id: props.session.id });
 
                           await createSession.mutateAsync(convertedSession, {
+                            /* eslint-disable @typescript-eslint/no-misused-promises */
                             onSuccess: async () => {
                               await queryClient.invalidateQueries({
                                 queryKey: queryKeys.sessions.active._def,
