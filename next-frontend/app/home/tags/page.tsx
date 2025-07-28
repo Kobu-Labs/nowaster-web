@@ -2,9 +2,21 @@
 
 import { TagWithId } from "@/api/definitions";
 import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
+import { useDeleteTag } from "@/components/hooks/tag/useDeleteTag";
 import { useTags } from "@/components/hooks/tag/useTags";
 import { useTagStats } from "@/components/hooks/tag/useTagStats";
 import { useUpdateTag } from "@/components/hooks/tag/useUpdateTag";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/alert-dialog";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -38,14 +50,17 @@ import { randomColor } from "@/lib/utils";
 import {
   Clock,
   Edit,
+  Eye,
   Filter,
   MoreVertical,
   Plus,
   Search,
   SortAsc,
   SortDesc,
+  Trash2,
   TrendingUp,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type SortOption = "name" | "usages" | "recent";
@@ -65,6 +80,7 @@ export default function TagsPage() {
   const statsQuery = useTagStats();
   const createTag = useCreateTag();
   const updateTag = useUpdateTag();
+  const deleteTag = useDeleteTag();
 
   const filteredAndSortedTags = useMemo(() => {
     if (!tagsQuery.data) return [];
@@ -77,15 +93,15 @@ export default function TagsPage() {
       let comparison = 0;
 
       switch (sortBy) {
-      case "name":
-        comparison = a.label.localeCompare(b.label);
-        break;
-      case "usages":
-        comparison = a.usages - b.usages;
-        break;
-      case "recent":
-        comparison = 0;
-        break;
+        case "name":
+          comparison = a.label.localeCompare(b.label);
+          break;
+        case "usages":
+          comparison = a.usages - b.usages;
+          break;
+        case "recent":
+          comparison = 0;
+          break;
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -365,6 +381,15 @@ export default function TagsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/home/tags/${tag.id}`}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Details
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => openEditDialog(tag)}
                       className="flex items-center gap-2 cursor-pointer"
@@ -372,6 +397,43 @@ export default function TagsPage() {
                       <Edit className="h-4 w-4" />
                       Edit Tag
                     </DropdownMenuItem>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete Tag
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Tag</AlertDialogTitle>
+                          <AlertDialogDescription className="space-y-0">
+                            <span>Are you sure you want to delete </span>
+                            <TagBadge variant="auto" tag={tag} />
+                            <span>
+                              ? This action cannot be undone and will remove the
+                              tag from all the
+                            </span>
+                            <span className="text-foreground">
+                              {` ${tag.usages} `}
+                            </span>
+                            <span>sessions that use it.</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteTag.mutate({ id: tag.id })}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
