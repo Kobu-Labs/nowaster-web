@@ -453,6 +453,12 @@ export default function TagsPage() {
                   </Badge>
                 </div>
               )}
+
+              <Link href={`/home/tags/${tag.id}`}>
+                <Button variant="outline" className="w-full h-8" size="sm">
+                  View Details
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ))}
