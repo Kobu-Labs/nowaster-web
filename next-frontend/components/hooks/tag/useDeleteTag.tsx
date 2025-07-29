@@ -1,6 +1,6 @@
 import * as TagApi from "@/api/tagApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "../queryHooks/queryKeys";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 export const useDeleteTag = () => {
   const queryClient = useQueryClient();
