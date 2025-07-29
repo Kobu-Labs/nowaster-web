@@ -198,7 +198,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </Link>
               ))}
               {tags.data.length > SHOW_TAG_AMOUNT && (
-                <Link href={"/home/category"}>
+                <Link href={"/home/tags"}>
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
                       {tags.data.length - SHOW_TAG_AMOUNT}
