@@ -93,15 +93,15 @@ export default function TagsPage() {
       let comparison = 0;
 
       switch (sortBy) {
-        case "name":
-          comparison = a.label.localeCompare(b.label);
-          break;
-        case "usages":
-          comparison = a.usages - b.usages;
-          break;
-        case "recent":
-          comparison = 0;
-          break;
+      case "name":
+        comparison = a.label.localeCompare(b.label);
+        break;
+      case "usages":
+        comparison = a.usages - b.usages;
+        break;
+      case "recent":
+        comparison = 0;
+        break;
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
