@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { HomeHeader } from "@/app/home/HomeHeader";
 import { Providers } from "@/app/home/providers";
 import { AppSidebar } from "@/components/pages/AppSidebar";
@@ -12,10 +11,11 @@ interface RootLayoutProps {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/");
+    redirectToSignIn();
+    return;
   }
 
   return (
