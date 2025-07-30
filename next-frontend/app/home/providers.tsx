@@ -1,13 +1,14 @@
 "use client";
 
 import { setupAxiosInterceptors } from "@/api/baseApi";
+import { AuthProvider } from "@/app/clerk-provider";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useTags } from "@/components/hooks/tag/useTags";
 import { useColors } from "@/components/hooks/useColors";
 import { ThemeProvider } from "@/components/pages/theme-provider";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Toaster } from "@/components/shadcn/toaster";
-import { ClerkProvider, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Analytics } from "@vercel/analytics/react";
@@ -23,7 +24,7 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <RecoilRoot>
         <QueryClientProvider client={queryClient}>
           <SpeedInsights />
@@ -37,7 +38,7 @@ export function Providers({ children }: ProvidersProps) {
           </AxiosInterceptorWrapper>
         </QueryClientProvider>
       </RecoilRoot>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }
 
