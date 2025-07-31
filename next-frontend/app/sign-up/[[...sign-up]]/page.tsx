@@ -285,7 +285,7 @@ export default function SignUpPage() {
                                 Verify your email
                               </CardTitle>
                               <CardDescription className="text-center text-gray-600 dark:text-gray-300">
-                                We've sent a verification code to your email
+                                We&apos;ve sent a verification code to your email
                                 address
                               </CardDescription>
                             </CardHeader>
