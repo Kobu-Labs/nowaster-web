@@ -171,7 +171,7 @@ export default function SignInPage() {
                           <CardFooter className="pt-6">
                             <div className="w-full text-center">
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Don't have an account?{" "}
+                                Don&apos;t have an account?{" "}
                                 <Clerk.Link
                                   navigate="sign-up"
                                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
