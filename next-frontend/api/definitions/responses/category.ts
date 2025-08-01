@@ -12,6 +12,7 @@ export const CategoryResponseSchema = {
   readByName: CategoryWithIdSchema.nullable(),
   update: CategoryWithIdSchema,
   readById: CategoryWithIdSchema,
+  delete: z.null(),
   statistics: z.object({
     total_categories: z.number(),
     total_sessions: z.number(),

@@ -5,6 +5,18 @@ import { useCategories } from "@/components/hooks/category/useCategory";
 import { useCategoryStats } from "@/components/hooks/category/useCategoryStats";
 import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
 import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
+import { useDeleteCategory } from "@/components/hooks/category/useDeleteCategory";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/alert-dialog";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -45,6 +57,7 @@ import {
   Search,
   SortAsc,
   SortDesc,
+  Trash2,
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
@@ -69,6 +82,7 @@ export default function CategoriesPage() {
   const statsQuery = useCategoryStats();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
 
   const filteredAndSortedCategories = useMemo(() => {
     if (!categoriesQuery.data) return [];
@@ -413,6 +427,39 @@ export default function CategoriesPage() {
                       <Edit className="h-4 w-4" />
                       Edit Category
                     </DropdownMenuItem>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete Category
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                          <AlertDialogDescription className="space-y-0">
+                            <span>Are you sure you want to delete </span>
+                            <CategoryBadge color={category.color} name={category.name} />
+                            <span>
+                              ? This action cannot be undone and will remove the
+                              category from all associated sessions.
+                            </span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteCategory.mutate({ id: category.id })}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

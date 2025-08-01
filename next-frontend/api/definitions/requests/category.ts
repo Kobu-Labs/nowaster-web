@@ -33,6 +33,10 @@ const readById = z.object({
   id: z.string().uuid(),
 });
 
+const deleteCategory = z.object({
+  id: z.string().uuid(),
+});
+
 export const CategoryRequestSchema = {
   create,
   update,
@@ -40,4 +44,5 @@ export const CategoryRequestSchema = {
   readByName,
   remove,
   readById,
+  deleteCategory,
 };
