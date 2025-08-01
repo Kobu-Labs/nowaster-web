@@ -41,3 +41,8 @@ export const getStatistics = async () => {
   const { data } = await baseApi.get(BASE_URL + "/statistics");
   return await parseResponseUnsafe(data, CategoryResponseSchema.statistics);
 };
+
+export const deleteCategory = async (params: CategoryRequest["deleteCategory"]) => {
+  const { data } = await baseApi.delete(BASE_URL + "/" + params.id);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.delete);
+};
