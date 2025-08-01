@@ -4,8 +4,8 @@ import { CategoryWithId } from "@/api/definitions";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useCategoryStats } from "@/components/hooks/category/useCategoryStats";
 import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
-import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
 import { useDeleteCategory } from "@/components/hooks/category/useDeleteCategory";
+import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +44,12 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Label } from "@/components/shadcn/label";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { formatTime, randomColor } from "@/lib/utils";
@@ -428,21 +434,47 @@ export default function CategoriesPage() {
                       Edit Category
                     </DropdownMenuItem>
                     <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete Category
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
+                      {category.sessionCount > 0 ? (
+                        <TooltipProvider delayDuration={0}>
+                          <Tooltip delayDuration={0}>
+                            <TooltipTrigger>
+                              <AlertDialogTrigger disabled>
+                                <DropdownMenuItem
+                                  disabled
+                                  className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Delete Category
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              This category cannot be deleted, as it has
+                              sessions associated with it
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Category
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                      )}
+
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Category</AlertDialogTitle>
                           <AlertDialogDescription className="space-y-0">
                             <span>Are you sure you want to delete </span>
-                            <CategoryBadge color={category.color} name={category.name} />
+                            <CategoryBadge
+                              color={category.color}
+                              name={category.name}
+                            />
                             <span>
                               ? This action cannot be undone and will remove the
                               category from all associated sessions.
@@ -452,7 +484,9 @@ export default function CategoriesPage() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => deleteCategory.mutate({ id: category.id })}
+                            onClick={() =>
+                              deleteCategory.mutate({ id: category.id })
+                            }
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             Delete
