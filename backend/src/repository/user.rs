@@ -19,17 +19,8 @@ pub struct ReadUserRow {
     displayname: String,
 }
 
-pub trait UserRepositoryTrait {
-    async fn update(&self, dto: UpdateUserDto) -> Result<User>;
-    fn new(db_conn: &Arc<Database>) -> Self;
-    async fn create(&self, dto: CreateUserDto) -> Result<User>;
-    async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>>;
-    async fn get_user_by_username(&self, username: String) -> Result<User>;
-    fn mapper(&self, row: ReadUserRow) -> User;
-}
-
-impl UserRepositoryTrait for UserRepository {
-    fn new(db_conn: &Arc<Database>) -> Self {
+impl UserRepository {
+    pub fn new(db_conn: &Arc<Database>) -> Self {
         Self {
             db_conn: Arc::clone(db_conn),
         }
