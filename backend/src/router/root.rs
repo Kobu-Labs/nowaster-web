@@ -18,10 +18,11 @@ use crate::{
         statistics::sessions::StatisticsRepository,
         stopwatch_session::StopwatchSessionRepository,
         tag::{TagRepository, TagRepositoryTrait},
-        user::{UserRepository, UserRepositoryTrait},
+        user::UserRepository,
     },
     service::{
         category_service::CategoryService,
+        feed_service::FeedService,
         friend_service::FriendService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
@@ -32,8 +33,9 @@ use crate::{
 };
 
 use super::{
-    category::root::category_router, friend::root::friend_router, session::root::session_router,
-    statistics::root::statistics_router, tag::root::tag_router, user::root::user_router,
+    category::root::category_router, feed::root::feed_router, friend::root::friend_router,
+    session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
+    user::root::user_router,
 };
 
 use tracing::Level;
@@ -50,6 +52,7 @@ pub struct AppState {
     pub statistics_service: StatisticsService,
     pub friend_service: FriendService,
     pub session_template_service: SessionTemplateService,
+    pub feed_service: FeedService,
 }
 
 pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
@@ -65,10 +68,12 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let category_service = CategoryService::new(category_repo.clone());
     let user_service = UserService::new(user_repo.clone(), clerk.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
+    let feed_service = FeedService::new(&db, user_service.clone());
     let session_service = FixedSessionService::new(
         session_repo.clone(),
         category_service.clone(),
         stopwatch_repo.clone(),
+        feed_service.clone(),
     );
     let statistics_service = StatisticsService::new(statistics_repo);
     let friend_service = FriendService::new(friend_repo);
@@ -87,6 +92,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         statistics_service,
         stopwatch_service,
         session_template_service,
+        feed_service,
     };
 
     tracing_subscriber::registry()
@@ -102,6 +108,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .nest("/category", category_router().with_state(state.clone()))
         .nest("/statistics", statistics_router().with_state(state.clone()))
         .nest("/friends", friend_router().with_state(state.clone()))
+        .nest("/feed", feed_router().with_state(state.clone()))
         .layer(ClerkLayer::new(
             MemoryCacheJwksProvider::new(clerk),
             None,
