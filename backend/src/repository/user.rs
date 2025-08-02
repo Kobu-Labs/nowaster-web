@@ -19,6 +19,18 @@ pub struct ReadUserRow {
     displayname: String,
 }
 
+#[derive(Debug, Default)]
+pub struct FilterUsersDto {
+    pub id: Option<IdFilter>,
+    pub name: Option<String>,
+}
+
+#[derive(Debug)]
+pub enum IdFilter {
+    Many(Vec<String>),
+    Single(String),
+}
+
 impl UserRepository {
     pub fn new(db_conn: &Arc<Database>) -> Self {
         Self {
@@ -26,23 +38,7 @@ impl UserRepository {
         }
     }
 
-    async fn get_user_by_username(&self, username: String) -> Result<User> {
-        let row = sqlx::query_as!(
-            ReadUserRow,
-            r#"
-                SELECT id, displayname
-                FROM "user"
-                WHERE displayname = $1
-            "#,
-            username
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
-
-        Ok(self.mapper(row))
-    }
-
-    async fn create(&self, dto: CreateUserDto) -> Result<User> {
+    pub async fn create(&self, dto: CreateUserDto) -> Result<User> {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
@@ -59,7 +55,7 @@ impl UserRepository {
         Ok(self.mapper(row))
     }
 
-    async fn update(&self, dto: UpdateUserDto) -> Result<User> {
+    pub async fn update(&self, dto: UpdateUserDto) -> Result<User> {
         let mut should_execute = false;
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -98,7 +94,7 @@ impl UserRepository {
         }
     }
 
-    async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>> {
+    pub async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>> {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
@@ -120,5 +116,42 @@ impl UserRepository {
             }
             None => Ok(None),
         }
+    }
+
+    pub async fn filter_users(&self, filter: FilterUsersDto) -> Result<Vec<User>> {
+        if filter.id.is_none() && filter.name.is_none() {
+            return Ok(vec![]);
+        }
+
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+                SELECT id, displayname
+                FROM "user"
+                WHERE 1=1
+            "#,
+        );
+
+        if let Some(id) = filter.id {
+            match id {
+                IdFilter::Many(ids) => {
+                    query.push(" AND id = ANY(").push_bind(ids).push(")");
+                }
+                IdFilter::Single(single) => {
+                    query.push(" AND id = ").push_bind(single);
+                }
+            }
+        }
+
+        if let Some(name) = filter.name {
+            query.push("WHERE displayname = ").push_bind(name);
+        }
+
+        let rows = query
+            .build_query_as::<ReadUserRow>()
+            .fetch_all(self.db_conn.get_pool())
+            .await?;
+
+        let users = rows.into_iter().map(|row| self.mapper(row)).collect();
+        Ok(users)
     }
 }
