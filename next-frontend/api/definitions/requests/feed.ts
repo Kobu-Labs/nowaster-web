@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const FeedQueryRequestSchema = z.object({
-  cursor: z.string().datetime().optional(),
+  cursor: z.coerce.date().optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
 
