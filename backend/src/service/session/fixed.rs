@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::DateTime;
+use chrono::{DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,12 +9,13 @@ use crate::{
         fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
         stopwatch_session::ReadStopwatchSessionDto,
     },
+    entity::feed::{FeedEvent, FeedEventType, SessionEventData},
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,
     },
     router::clerk::ClerkUser,
-    service::category_service::CategoryService,
+    service::{category_service::CategoryService, feed_service::FeedService},
 };
 
 #[derive(Clone)]
@@ -22,6 +23,7 @@ pub struct FixedSessionService {
     fixed_repo: FixedSessionRepository,
     category_service: CategoryService,
     stopwatch_repo: StopwatchSessionRepository,
+    feed_service: FeedService,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -36,11 +38,13 @@ impl FixedSessionService {
         repo: FixedSessionRepository,
         cat_serv: CategoryService,
         stopwatch_repo: StopwatchSessionRepository,
+        feed_service: FeedService,
     ) -> Self {
         Self {
             fixed_repo: repo,
             category_service: cat_serv,
             stopwatch_repo,
+            feed_service,
         }
     }
 
@@ -49,9 +53,24 @@ impl FixedSessionService {
         dto: CreateFixedSessionDto,
         actor: ClerkUser,
     ) -> Result<ReadFixedSessionDto> {
-        let res = self
-            .fixed_repo
-            .create(dto, actor)
+        let res = self.fixed_repo.create(dto, actor.clone()).await?;
+        self.feed_service
+            .publish_event(
+                FeedEvent {
+                    id: Uuid::new_v4(),
+                    user_id: actor.user_id.clone(),
+                    data: FeedEventType::SessionCompleted(SessionEventData {
+                        session_id: res.id,
+                        category: res.category.clone(),
+                        tags: res.tags.clone(),
+                        description: res.description.clone(),
+                        start_time: res.start_time,
+                        end_time: res.end_time,
+                    }),
+                    created_at: Local::now(),
+                },
+                actor.user_id,
+            )
             .await?;
 
         Ok(ReadFixedSessionDto::from(res))
