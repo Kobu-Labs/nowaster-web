@@ -16,7 +16,7 @@ import { useAddReaction, useRemoveReaction } from "@/components/hooks/feed/useFe
 interface ReactionBarProps {
   event: ReadFeedEvent;
   reactions: ReadFeedReaction[];
-  userReaction: string | null;
+  userReaction?: string | null;
 }
 
 const COMMON_EMOJIS = [
