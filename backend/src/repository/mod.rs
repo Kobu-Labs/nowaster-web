@@ -1,4 +1,5 @@
 pub mod category;
+pub mod feed;
 pub mod fixed_session;
 pub mod friends;
 pub mod statistics;
