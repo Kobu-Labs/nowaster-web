@@ -22,7 +22,6 @@ export const ReadFeedEventSchema = z.object({
   event_data: z.any(), // JSON data varies by event type
   created_at: z.coerce.date(),
   reactions: z.array(ReadFeedReactionSchema),
-  user_reaction: z.string().nullable(),
 });
 
 export type FeedEventType = z.infer<typeof FeedEventTypeSchema>;

@@ -137,7 +137,6 @@ export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
         <ReactionBar 
           event={event}
           reactions={event.reactions}
-          userReaction={event.user_reaction}
         />
       </CardContent>
     </Card>
