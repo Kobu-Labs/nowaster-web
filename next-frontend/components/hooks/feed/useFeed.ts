@@ -1,4 +1,5 @@
 import {
+  InfiniteData,
   useInfiniteQuery,
   useMutation,
   useQueryClient,
@@ -9,6 +10,7 @@ import {
   CreateFeedReactionRequest,
   RemoveFeedReactionRequest,
 } from "@/api/definitions/requests/feed";
+import { FeedResponse } from "@/api/definitions/responses/feed";
 
 export const FEED_QUERY_KEY = "feed";
 
@@ -36,29 +38,32 @@ export const useAddReaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: CreateFeedReactionRequest) =>
-      FeedApi.addReaction(params),
+    mutationFn: async (params: CreateFeedReactionRequest) =>
+      await FeedApi.addReaction(params),
     onSuccess: (_, variables) => {
       // Optimistically update the query data
-      queryClient.setQueryData([FEED_QUERY_KEY], (oldData: any) => {
-        if (!oldData?.pages) return oldData;
+      queryClient.setQueryData(
+        [FEED_QUERY_KEY],
+        (oldData: InfiniteData<FeedResponse["getFeed"]>) => {
+          if (!oldData?.pages) return oldData;
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page: ReadFeedEvent[]) =>
-            page.map((event) =>
-              event.id === variables.feed_event_id
-                ? {
-                    ...event,
-                    user_reaction: variables.emoji,
-                    // Note: We don't add to reactions array here as we don't have user info
-                    // The backend should handle this and a refetch would show the complete data
-                  }
-                : event,
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.map((event) =>
+                event.id === variables.feed_event_id
+                  ? {
+                      ...event,
+                      user_reaction: variables.emoji,
+                      // Note: We don't add to reactions array here as we don't have user info
+                      // The backend should handle this and a refetch would show the complete data
+                    }
+                  : event,
+              ),
             ),
-          ),
-        };
-      });
+          };
+        },
+      );
     },
   });
 };
