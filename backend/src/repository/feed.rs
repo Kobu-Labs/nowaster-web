@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use sqlx::{Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::{
@@ -73,9 +74,8 @@ impl FeedRepository {
         user_id: String,
         query: FeedQueryDto,
     ) -> Result<Vec<FeedEvent>> {
-        let limit = query.limit.unwrap_or(20);
-
-        let base_query = r#"
+        let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
             SELECT DISTINCT
                 fe.id,
                 fe.user_id,
@@ -84,51 +84,41 @@ impl FeedRepository {
                 fe.created_at
             FROM feed_event fe
             JOIN friend f ON (
-                (f.friend_1_id = $1 AND f.friend_2_id = fe.user_id) OR
-                (f.friend_2_id = $1 AND f.friend_1_id = fe.user_id)
-            )
-            WHERE f.deleted IS NOT TRUE"#;
+                (f.friend_1_id = "#,
+        );
 
-        let results = if let Some(cursor) = query.cursor {
-            let query_with_cursor = format!(
-                "{} AND fe.created_at < $2 ORDER BY fe.created_at DESC LIMIT $3",
-                base_query
-            );
-            sqlx::query_as::<
-                _,
-                (
-                    uuid::Uuid,
-                    String,
-                    FeedEventTypeSql,
-                    serde_json::Value,
-                    chrono::DateTime<chrono::Utc>,
-                ),
-            >(&query_with_cursor)
-            .bind(user_id)
-            .bind(cursor)
-            .bind(limit)
-            .fetch_all(self.db.get_pool())
-            .await?
-        } else {
-            let query_without_cursor =
-                format!("{} ORDER BY fe.created_at DESC LIMIT $2", base_query);
-            sqlx::query_as::<
-                _,
-                (
-                    uuid::Uuid,
-                    String,
-                    FeedEventTypeSql,
-                    serde_json::Value,
-                    chrono::DateTime<chrono::Utc>,
-                ),
-            >(&query_without_cursor)
-            .bind(user_id)
-            .bind(limit)
-            .fetch_all(self.db.get_pool())
-            .await?
-        };
+        base_query.push_bind(user_id.clone());
+        base_query.push(" AND f.friend_2_id = fe.user_id) OR (f.friend_2_id = ");
+        base_query.push_bind(user_id.clone());
+        base_query.push(" AND f.friend_1_id = fe.user_id))");
+        // 👇 Add OR condition for user’s own events
+        base_query.push(" OR fe.user_id = ");
+        base_query.push_bind(user_id);
 
-        let events = results
+        base_query.push(" WHERE f.deleted IS NOT TRUE ");
+
+        if let Some(cursor) = query.cursor {
+            base_query.push(" AND fe.created_at < ").push_bind(cursor);
+        }
+
+        if let Some(limit) = query.limit {
+            base_query
+                .push(" ORDER BY fe.created_at DESC LIMIT ")
+                .push_bind(limit);
+        }
+
+        let rows = base_query
+            .build_query_as::<(
+                uuid::Uuid,
+                String,
+                FeedEventTypeSql,
+                serde_json::Value,
+                chrono::DateTime<chrono::Utc>,
+            )>()
+            .fetch_all(self.db.get_pool())
+            .await?;
+
+        let events = rows
             .into_iter()
             .map(|(id, user_id, event_type_str, event_data, created_at)| {
                 // Reconstruct the type-safe enum from database data
