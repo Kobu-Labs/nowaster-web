@@ -1,5 +1,6 @@
 pub mod category;
 pub mod clerk;
+pub mod feed;
 pub mod friend;
 pub mod request;
 pub mod response;

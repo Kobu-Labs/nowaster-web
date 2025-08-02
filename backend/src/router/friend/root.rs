@@ -87,7 +87,14 @@ async fn create_friend_request_handler(
         .await;
 
     let recipient = match recipient {
-        Ok(user) => user,
+        Ok(user) => match user {
+            Some(user) => user,
+            None => {
+                return ApiResponse::Error {
+                    message: String::from("User not found"),
+                }
+            }
+        },
         Err(e) => {
             return ApiResponse::Error {
                 message: e.to_string(),

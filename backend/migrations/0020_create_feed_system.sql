@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS "feed_event" (
     
     -- id of the user that created the event
     user_id VARCHAR NOT NULL,
+
     event_type feed_event_type NOT NULL,
-    
     -- JSON data for different event types
     event_data JSONB NOT NULL,
     

@@ -1,4 +1,5 @@
 pub mod category_service;
+pub mod feed_service;
 pub mod friend_service;
 pub mod session;
 pub mod statistics_service;
