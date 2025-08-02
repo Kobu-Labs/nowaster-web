@@ -6,6 +6,7 @@ import {
   History,
   Home,
   Plus,
+  Rss,
   Tag,
   Users,
   X,
@@ -49,6 +50,11 @@ const navItems = [
     title: "Dashboard",
     url: "/home",
     icon: Home,
+  },
+  {
+    title: "Feed",
+    url: "/home/feed",
+    icon: Rss,
   },
   {
     title: "Templates",
