@@ -2,8 +2,8 @@
 
 import { FC, useEffect, useRef, useCallback } from "react";
 import { useFeed } from "@/components/hooks/feed/useFeed";
-import { SessionFeedCard } from "./SessionFeedCard";
 import { Loader2 } from "lucide-react";
+import { SessionCompletedFeedCard } from "@/components/visualizers/feed/events/SessionCompletedEventCard";
 
 export const FeedPage: FC = () => {
   const {
@@ -64,11 +64,11 @@ export const FeedPage: FC = () => {
           if (index === allEvents.length - 3) {
             return (
               <div key={event.id} ref={lastEventElementRef}>
-                <SessionFeedCard event={event} />
+                <SessionCompletedFeedCard event={event} />
               </div>
             );
           }
-          return <SessionFeedCard key={event.id} event={event} />;
+          return <SessionCompletedFeedCard key={event.id} event={event} />;
         })}
         
         {isFetchingNextPage && (
