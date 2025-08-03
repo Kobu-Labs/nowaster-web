@@ -152,7 +152,14 @@ export const emptyStringToUndefined = (
   return workingValue;
 };
 
-
 export const toggleOrientation = (orientation: "horizontal" | "vertical") => {
   return orientation === "horizontal" ? "vertical" : "horizontal";
+};
+
+export const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((name) => name[0])
+    .join("")
+    .toUpperCase();
 };
