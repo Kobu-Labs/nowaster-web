@@ -61,7 +61,7 @@ export const FeedPage: FC = () => {
       <div className="text-2xl font-bold">Feed</div>
       <div className="space-y-4">
         {allEvents.map((event, index) => {
-          if (index === allEvents.length - 1) {
+          if (index === allEvents.length - 3) {
             return (
               <div key={event.id} ref={lastEventElementRef}>
                 <SessionFeedCard event={event} />
