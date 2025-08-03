@@ -1,108 +1,114 @@
 import {
-  InfiniteData,
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
+    useMutation,
+    useQuery,
+    useQueryClient
 } from "@tanstack/react-query";
 import * as FeedApi from "@/api/feedApi";
-import { ReadFeedEvent } from "@/api/definitions/models/feed";
 import {
-  CreateFeedReactionRequest,
-  RemoveFeedReactionRequest,
+    RemoveFeedReactionRequest
 } from "@/api/definitions/requests/feed";
 import { FeedResponse } from "@/api/definitions/responses/feed";
+import { useAuth } from "@clerk/nextjs";
+import { Infer } from "next/dist/compiled/superstruct";
 
 export const FEED_QUERY_KEY = "feed";
 
 export const useFeed = () => {
-  return useInfiniteQuery({
+  return useQuery({
     queryKey: [FEED_QUERY_KEY],
-    queryFn: async ({ pageParam }) =>
+    queryFn: async () =>
       await FeedApi.getFeed({
-        cursor: pageParam,
         limit: 20,
       }),
-    initialPageParam: undefined as Date | undefined,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.length === 0) return undefined;
-
-      // Get the oldest item's created_at as the next cursor
-      const oldestItem = lastPage[lastPage.length - 1];
-      return oldestItem?.created_at;
-    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
 export const useAddReaction = () => {
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
 
   return useMutation({
-    mutationFn: async (params: CreateFeedReactionRequest) =>
-      await FeedApi.addReaction(params),
-    onSuccess: (_, variables) => {
-      // Optimistically update the query data
+    mutationFn: async (params: Infer) => {
+      return await FeedApi.addReaction(params);
+    },
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({ queryKey: [FEED_QUERY_KEY] });
+      const previousFeed = queryClient.getQueryData([FEED_QUERY_KEY]);
+
+      // Optimistically update to the new value
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
-        (oldData: InfiniteData<FeedResponse["getFeed"]>) => {
-          if (!oldData?.pages) return oldData;
-
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) =>
-              page.map((event) =>
-                event.id === variables.feed_event_id
-                  ? {
-                      ...event,
-                      user_reaction: variables.emoji,
-                      // Note: We don't add to reactions array here as we don't have user info
-                      // The backend should handle this and a refetch would show the complete data
-                    }
-                  : event,
-              ),
-            ),
-          };
+        (old: FeedResponse["getFeed"]) => {
+          return old.map((event) => {
+            if (event.id === newTodo.feed_event_id) {
+              return {
+                ...event,
+                reactions: [
+                  {
+                    emoji: newTodo.emoji,
+                    created_at: new Date(),
+                    user: {
+                      id: userId,
+                    },
+                  },
+                  ...event.reactions,
+                ],
+              };
+            }
+            return event;
+          });
         },
       );
+
+      return { previousFeed };
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
+    },
+    onError: (_err, _addedReaction, context) => {
+      queryClient.setQueryData([FEED_QUERY_KEY], context?.previousFeed);
     },
   });
 };
 
 export const useRemoveReaction = () => {
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
 
   return useMutation({
     mutationFn: (params: RemoveFeedReactionRequest) =>
       FeedApi.removeReaction(params),
-    onSuccess: (_, variables) => {
-      // Optimistically update the query data
-      queryClient.setQueryData([FEED_QUERY_KEY], (oldData: any) => {
-        if (!oldData?.pages) return oldData;
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({ queryKey: [FEED_QUERY_KEY] });
+      const previousData = queryClient.getQueryData([FEED_QUERY_KEY]);
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page: ReadFeedEvent[]) =>
-            page.map((event) =>
-              event.id === variables.feed_event_id
-                ? {
-                    ...event,
-                    user_reaction:
-                      event.user_reaction === variables.emoji
-                        ? null
-                        : event.user_reaction,
-                    reactions: event.reactions.filter(
-                      (reaction) =>
-                        !(
-                          reaction.emoji === variables.emoji &&
-                          reaction.user.id === event.user.id
-                        ),
-                    ),
-                  }
-                : event,
-            ),
-          ),
-        };
-      });
+      queryClient.setQueryData(
+        [FEED_QUERY_KEY],
+        (old: FeedResponse["getFeed"]) => {
+          return old.map((event) => {
+            if (event.id === newTodo.feed_event_id) {
+              return {
+                ...event,
+                reactions: event.reactions.filter(
+                  (reaction) =>
+                    reaction.emoji !== newTodo.emoji ||
+                    reaction.user.id !== userId,
+                ),
+              };
+            }
+            return event;
+          });
+        },
+      );
+
+      return { previousData };
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
+    },
+    onError: (_err, _removedReaction, context) => {
+      queryClient.setQueryData([FEED_QUERY_KEY], context?.previousData);
     },
   });
 };
