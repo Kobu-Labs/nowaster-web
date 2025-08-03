@@ -31,6 +31,7 @@ import { FriendsApi } from "@/api";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Image from "next/image";
 import { useMyFriends } from "@/components/hooks/friends/useMyFriends";
+import { getInitials } from "@/lib/utils";
 
 export const FriendsList = () => {
   const queryClient = useQueryClient();
@@ -97,10 +98,7 @@ export const FriendsList = () => {
                           alt={friendship.friend.username}
                         />
                         <AvatarFallback>
-                          {friendship.friend.username
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          {getInitials(friendship.friend.username)}
                         </AvatarFallback>
                       </Avatar>
                     </div>
