@@ -1,9 +1,10 @@
 "use client";
 
-import { FC, useEffect, useRef, useCallback } from "react";
+import { FC, useRef, useCallback } from "react";
 import { useFeed } from "@/components/hooks/feed/useFeed";
 import { Loader2 } from "lucide-react";
 import { SessionCompletedFeedCard } from "@/components/visualizers/feed/events/SessionCompletedEventCard";
+import { ReadFeedEvent } from "@/api/definitions/models/feed";
 
 export const FeedPage: FC = () => {
   const {
@@ -16,16 +17,19 @@ export const FeedPage: FC = () => {
   } = useFeed();
 
   const observer = useRef<IntersectionObserver>();
-  const lastEventElementRef = useCallback((node: HTMLDivElement) => {
-    if (isFetchingNextPage) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        fetchNextPage();
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+  const lastEventElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (isFetchingNextPage) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isFetchingNextPage, hasNextPage, fetchNextPage],
+  );
 
   if (isLoading) {
     return (
@@ -56,6 +60,20 @@ export const FeedPage: FC = () => {
     );
   }
 
+  const renderEventCard = (event: ReadFeedEvent) => {
+    switch (event.event_type) {
+      case "session_completed":
+        return (
+          <SessionCompletedFeedCard
+            event={event}
+            event_data={event.event_data}
+          />
+        );
+      case "session_updated":
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-4 p-6">
       <div className="text-2xl font-bold">Feed</div>
@@ -64,19 +82,19 @@ export const FeedPage: FC = () => {
           if (index === allEvents.length - 3) {
             return (
               <div key={event.id} ref={lastEventElementRef}>
-                <SessionCompletedFeedCard event={event} />
+                {renderEventCard(event)}
               </div>
             );
           }
-          return <SessionCompletedFeedCard key={event.id} event={event} />;
+          return renderEventCard(event);
         })}
-        
+
         {isFetchingNextPage && (
           <div className="flex justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         )}
-        
+
         {!hasNextPage && allEvents.length > 0 && (
           <div className="text-center py-4 text-muted-foreground text-sm">
             You've reached the end of the feed
