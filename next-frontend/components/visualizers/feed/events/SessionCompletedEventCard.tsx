@@ -12,10 +12,10 @@ import {
 } from "@/components/shadcn/avatar";
 import { ReadFeedEvent } from "@/api/definitions/models/feed";
 import { cn, getFormattedTimeDifference } from "@/lib/utils";
-import { ReactionBar } from "./ReactionBar";
 import { CategoryWithId, TagWithId } from "@/api/definitions";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
+import { ReactionBar } from "@/components/visualizers/feed/ReactionBar";
 
 interface SessionFeedCardProps {
   event: ReadFeedEvent;
@@ -31,7 +31,7 @@ interface SessionEventData {
   end_time: Date;
 }
 
-export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
+export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
   const sessionData = event.event_data as SessionEventData;
 
   const getEventIcon = () => {
