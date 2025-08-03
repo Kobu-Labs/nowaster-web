@@ -11,6 +11,7 @@ import { RelativeDate } from "@/components/ui-providers/RelativeDate";
 import { Button } from "@/components/shadcn/button";
 import { Check, X } from "lucide-react";
 import { Card, CardContent } from "@/components/shadcn/card";
+import { getInitials } from "@/lib/utils";
 
 type FriendRequestProps = {
   request: FriendRequestType;
@@ -46,12 +47,7 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
       <CardContent className="p-4 flex items-center gap-2">
         <Avatar>
           <AvatarImage src={"/placeholder.svg"} alt={subject.username} />
-          <AvatarFallback>
-            {subject.username
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </AvatarFallback>
+          <AvatarFallback>{getInitials(subject.username)}</AvatarFallback>
         </Avatar>
         <div>
           <p className="font-medium">{subject.username}</p>
