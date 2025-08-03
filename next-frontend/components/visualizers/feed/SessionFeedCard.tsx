@@ -5,11 +5,17 @@ import { formatDistanceToNow } from "date-fns";
 import { Clock, Play, CheckCircle } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/shadcn/avatar";
-import { Badge } from "@/components/shadcn/badge";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/shadcn/avatar";
 import { ReadFeedEvent } from "@/api/definitions/models/feed";
 import { cn, getFormattedTimeDifference } from "@/lib/utils";
 import { ReactionBar } from "./ReactionBar";
+import { CategoryWithId, TagWithId } from "@/api/definitions";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 
 interface SessionFeedCardProps {
   event: ReadFeedEvent;
@@ -18,18 +24,16 @@ interface SessionFeedCardProps {
 interface SessionEventData {
   session_id: string;
   session_type: string;
-  category_name?: string;
-  category_color?: string;
-  tags: string[];
+  category: CategoryWithId;
+  tags: TagWithId[];
   description?: string;
-  start_time: string;
-  end_time?: string;
-  duration_seconds?: number;
+  start_time: Date;
+  end_time: Date;
 }
 
 export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
   const sessionData = event.event_data as SessionEventData;
-  
+
   const getEventIcon = () => {
     switch (event.event_type) {
       case "session_started":
@@ -53,10 +57,14 @@ export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
   };
 
   const getDurationText = () => {
-    if (event.event_type === "session_completed" && sessionData.start_time && sessionData.end_time) {
+    if (
+      event.event_type === "session_completed" &&
+      sessionData.start_time &&
+      sessionData.end_time
+    ) {
       return getFormattedTimeDifference(
-        new Date(sessionData.start_time),
-        new Date(sessionData.end_time)
+        sessionData.start_time,
+        sessionData.end_time,
       );
     }
     return null;
@@ -64,9 +72,9 @@ export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
 
   const getInitials = (username: string) => {
     return username
-      .split(' ')
-      .map(name => name[0])
-      .join('')
+      .split(" ")
+      .map((name) => name[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -77,34 +85,34 @@ export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
             {event.user.avatar_url ? (
-              <AvatarImage src={event.user.avatar_url} alt={event.user.username} />
+              <AvatarImage
+                src={event.user.avatar_url}
+                alt={event.user.username}
+              />
             ) : null}
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               {getInitials(event.user.username)}
             </AvatarFallback>
           </Avatar>
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-medium text-sm">{event.user.username}</span>
               {getEventIcon()}
-              <span className="text-sm text-muted-foreground">{getEventText()}</span>
-              {sessionData.category_name && (
-                <Badge 
-                  variant="secondary" 
-                  className="text-xs"
-                  style={sessionData.category_color ? {
-                    backgroundColor: `${sessionData.category_color}20`,
-                    color: sessionData.category_color,
-                    borderColor: `${sessionData.category_color}40`,
-                  } : undefined}
-                >
-                  {sessionData.category_name}
-                </Badge>
+              <span className="text-sm text-muted-foreground">
+                {getEventText()}
+              </span>
+              {sessionData.category && (
+                <CategoryBadge
+                  color={sessionData.category.color}
+                  name={sessionData.category.name}
+                />
               )}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {formatDistanceToNow(new Date(event.created_at), { addSuffix: true })}
+              {formatDistanceToNow(new Date(event.created_at), {
+                addSuffix: true,
+              })}
             </div>
           </div>
         </div>
@@ -120,9 +128,7 @@ export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
         <div className="flex items-center justify-between">
           <div className="flex gap-2 flex-wrap">
             {sessionData.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
+              <TagBadge variant="auto" tag={tag} key={index} />
             ))}
           </div>
 
@@ -134,10 +140,7 @@ export const SessionFeedCard: FC<SessionFeedCardProps> = ({ event }) => {
           )}
         </div>
 
-        <ReactionBar 
-          event={event}
-          reactions={event.reactions}
-        />
+        <ReactionBar event={event} reactions={event.reactions} />
       </CardContent>
     </Card>
   );
