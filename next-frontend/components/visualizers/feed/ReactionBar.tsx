@@ -36,11 +36,7 @@ const COMMON_EMOJIS = [
   "🚀",
 ];
 
-export const ReactionBar: FC<ReactionBarProps> = ({
-  event,
-  reactions,
-  userReaction,
-}) => {
+export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const addReaction = useAddReaction();
   const { userId } = useAuth();
@@ -50,34 +46,34 @@ export const ReactionBar: FC<ReactionBarProps> = ({
     return;
   }
 
-  // Group reactions by emoji and count them
-  const reactionCounts = reactions.reduce(
-    (acc, reaction) => {
-      acc[reaction.emoji] = {
-        count: (acc[reaction.emoji]?.count ?? 0) + 1,
-        currentUserReacted:
-          acc[reaction.emoji]?.currentUserReacted ||
-          reaction.user.id === userId,
-      };
-      return acc;
-    },
-    {} as Record<string, { count: number; currentUserReacted: boolean }>,
-  );
+  const sortedGroupedReactions = Object.entries(
+    reactions.reduce(
+      (acc, reaction) => {
+        acc[reaction.emoji] = {
+          count: (acc[reaction.emoji]?.count ?? 0) + 1,
+          currentUserReacted:
+            acc[reaction.emoji]?.currentUserReacted ||
+            reaction.user.id === userId,
+        };
+        return acc;
+      },
+      {} as Record<string, { count: number; currentUserReacted: boolean }>,
+    ),
+  ).sort(([, a], [, b]) => b.count - a.count);
 
-  const totalReactions = Object.values(reactionCounts).reduce(
-    (sum, reaction) => sum + reaction.count,
+  const totalReactions = sortedGroupedReactions.reduce(
+    (sum, [, reaction]) => sum + reaction.count,
     0,
   );
 
   const handleEmojiClick = (emoji: string) => {
-    if (userReaction === emoji) {
-      // Remove reaction if user already reacted with this emoji
+    const emojiData = sortedGroupedReactions.find(([e]) => e === emoji)?.[1];
+    if (emojiData?.currentUserReacted) {
       removeReaction.mutate({
         feed_event_id: event.id,
         emoji: emoji,
       });
     } else {
-      // Add new reaction
       addReaction.mutate({
         feed_event_id: event.id,
         emoji: emoji,
@@ -88,9 +84,8 @@ export const ReactionBar: FC<ReactionBarProps> = ({
 
   return (
     <div className="flex items-center gap-2 pt-2 border-t">
-      {/* Existing reactions */}
       <div className="flex gap-1 flex-wrap">
-        {Object.entries(reactionCounts).map(
+        {sortedGroupedReactions.map(
           ([emoji, { count, currentUserReacted }]) => (
             <Button
               key={emoji}
@@ -111,7 +106,6 @@ export const ReactionBar: FC<ReactionBarProps> = ({
         )}
       </div>
 
-      {/* Add reaction button */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
