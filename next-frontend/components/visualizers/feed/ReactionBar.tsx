@@ -59,7 +59,12 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
       },
       {} as Record<string, { count: number; currentUserReacted: boolean }>,
     ),
-  ).sort(([, a], [, b]) => b.count - a.count);
+  ).sort(([emojiA, a], [emojiB, b]) => {
+    if (a.count === b.count) {
+      return emojiA.localeCompare(emojiB);
+    }
+    return b.count - a.count;
+  });
 
   const totalReactions = sortedGroupedReactions.reduce(
     (sum, [, reaction]) => sum + reaction.count,
