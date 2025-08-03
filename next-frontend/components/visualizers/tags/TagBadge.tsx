@@ -22,7 +22,7 @@ const TagBadgeInner = (props: { color: string; label: string }) => {
     <Badge
       style={{ "--tag-color": props.color } as React.CSSProperties}
       className={cn(
-        "h-min w-min bg-[var(--tag-color)] text-white hover:scale-110 hover:bg-[var(--tag-color)] hover:transition ",
+        "h-min w-min bg-[var(--tag-color)] text-white hover:scale-110 hover:bg-[var(--tag-color)] hover:transition whitespace-nowrap",
       )}
     >
       {props.label}
