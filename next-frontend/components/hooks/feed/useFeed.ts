@@ -1,6 +1,6 @@
 import {
     useMutation,
-    useQuery,
+    useInfiniteQuery,
     useQueryClient
 } from "@tanstack/react-query";
 import * as FeedApi from "@/api/feedApi";
@@ -14,12 +14,18 @@ import { Infer } from "next/dist/compiled/superstruct";
 export const FEED_QUERY_KEY = "feed";
 
 export const useFeed = () => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: [FEED_QUERY_KEY],
-    queryFn: async () =>
+    queryFn: async ({ pageParam }) =>
       await FeedApi.getFeed({
+        cursor: pageParam,
         limit: 20,
       }),
+    initialPageParam: undefined as Date | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length === 0) return undefined;
+      return lastPage[lastPage.length - 1].created_at;
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
@@ -39,25 +45,32 @@ export const useAddReaction = () => {
       // Optimistically update to the new value
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
-        (old: FeedResponse["getFeed"]) => {
-          return old.map((event) => {
-            if (event.id === newTodo.feed_event_id) {
-              return {
-                ...event,
-                reactions: [
-                  {
-                    emoji: newTodo.emoji,
-                    created_at: new Date(),
-                    user: {
-                      id: userId,
-                    },
-                  },
-                  ...event.reactions,
-                ],
-              };
-            }
-            return event;
-          });
+        (old: any) => {
+          if (!old?.pages) return old;
+          
+          return {
+            ...old,
+            pages: old.pages.map((page: FeedResponse["getFeed"]) => {
+              return page.map((event) => {
+                if (event.id === newTodo.feed_event_id) {
+                  return {
+                    ...event,
+                    reactions: [
+                      {
+                        emoji: newTodo.emoji,
+                        created_at: new Date(),
+                        user: {
+                          id: userId,
+                        },
+                      },
+                      ...event.reactions,
+                    ],
+                  };
+                }
+                return event;
+              });
+            }),
+          };
         },
       );
 
@@ -85,20 +98,27 @@ export const useRemoveReaction = () => {
 
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
-        (old: FeedResponse["getFeed"]) => {
-          return old.map((event) => {
-            if (event.id === newTodo.feed_event_id) {
-              return {
-                ...event,
-                reactions: event.reactions.filter(
-                  (reaction) =>
-                    reaction.emoji !== newTodo.emoji ||
-                    reaction.user.id !== userId,
-                ),
-              };
-            }
-            return event;
-          });
+        (old: any) => {
+          if (!old?.pages) return old;
+          
+          return {
+            ...old,
+            pages: old.pages.map((page: FeedResponse["getFeed"]) => {
+              return page.map((event) => {
+                if (event.id === newTodo.feed_event_id) {
+                  return {
+                    ...event,
+                    reactions: event.reactions.filter(
+                      (reaction) =>
+                        reaction.emoji !== newTodo.emoji ||
+                        reaction.user.id !== userId,
+                    ),
+                  };
+                }
+                return event;
+              });
+            }),
+          };
         },
       );
 
