@@ -34,12 +34,10 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
-            {event.user.avatar_url && (
-              <AvatarImage
-                src={event.user.avatar_url}
-                alt={event.user.username}
-              />
-            )}
+            <AvatarImage
+              src={event.user.avatar_url ?? undefined}
+              alt={event.user.username}
+            />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               {getInitials(event.user.username)}
             </AvatarFallback>
