@@ -47,8 +47,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
                     u2.id AS recipient_id
+                    u2.avatar_url as recipient_avatar_url,
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
@@ -95,8 +97,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
                     u2.id AS recipient_id
+                    u2.avatar_url as recipient_avatar_url,
                 FROM updated u
                 JOIN "user" u1 ON u1.id = u.requestor_id
                 JOIN "user" u2 ON u2.id = u.recipient_id
@@ -142,7 +146,9 @@ impl FriendsRepository {
                     i.friend_2_id AS friend2_id,
                     i.created_at,
                     u1.displayname AS friend1_username,
-                    u2.displayname AS friend2_username
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.displayname AS friend2_username,
+                    u2.avatar_url as friend2_avatar_url
                 FROM inserted i
                 LEFT JOIN "user" u1 ON u1.id = i.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = i.friend_2_id
@@ -167,7 +173,9 @@ impl FriendsRepository {
                     f.friend_2_id as "friend2_id", 
                     f.created_at,
                     u1.displayname AS friend1_username,
-                    u2.displayname AS friend2_username
+                    u2.displayname AS friend2_username,
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.avatar_url as friend2_avatar_url
                 FROM friend f
                 LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
@@ -205,7 +213,9 @@ impl FriendsRepository {
                     d.friend_2_id AS friend2_id,
                     d.created_at,
                     u1.displayname AS friend1_username,
-                    u2.displayname AS friend2_username
+                    u2.displayname AS friend2_username,
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.avatar_url as friend2_avatar_url
                 FROM deleted d
                 LEFT JOIN "user" u1 ON u1.id = d.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = d.friend_2_id
@@ -284,8 +294,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM inserted i
                 JOIN "user" u1 ON u1.id = i.requestor_id
                 JOIN "user" u2 ON u2.id = i.recipient_id
@@ -319,8 +331,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id

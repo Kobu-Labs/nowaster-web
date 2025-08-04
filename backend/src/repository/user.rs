@@ -17,6 +17,7 @@ pub struct UserRepository {
 pub struct ReadUserRow {
     id: String,
     displayname: String,
+    avatar_url: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -42,12 +43,13 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                    INSERT INTO "user" (id, displayname)
-                    VALUES ($1, $2)
-                    RETURNING id, displayname
+                    INSERT INTO "user" (id, displayname, avatar_url)
+                    VALUES ($1, $2, $3)
+                    RETURNING id, displayname, avatar_url
             "#,
             dto.id,
-            dto.username
+            dto.username,
+            dto.avatar_url
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -71,9 +73,16 @@ impl UserRepository {
             query.push_bind(displayname);
             should_execute = true;
         }
+
+        if let Some(avatar_url) = dto.avatar_url {
+            query.push(" avatarUrl = ");
+            query.push_bind(avatar_url);
+            should_execute = true;
+        }
+
         query.push(" WHERE id = ");
         query.push_bind(dto.id);
-        query.push(" RETURNING id, displayname");
+        query.push(" RETURNING id, displayname, avatar_url");
 
         if !should_execute {
             return Err(anyhow::anyhow!("No fields to update"));
@@ -91,6 +100,7 @@ impl UserRepository {
         User {
             id: row.id,
             username: row.displayname,
+            avatar_url: row.avatar_url,
         }
     }
 
@@ -101,7 +111,7 @@ impl UserRepository {
                 INSERT INTO "user" (id, displayname)
                 VALUES ($1, $2)
                 ON CONFLICT (id) DO NOTHING
-                RETURNING id, displayname
+                RETURNING id, displayname, avatar_url
             "#,
             dto.id,
             dto.username
@@ -125,7 +135,7 @@ impl UserRepository {
 
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
-                SELECT id, displayname
+                SELECT id, displayname, avatar_url
                 FROM "user"
                 WHERE 1=1
             "#,

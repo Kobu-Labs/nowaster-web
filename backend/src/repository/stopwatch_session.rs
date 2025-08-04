@@ -64,6 +64,7 @@ impl StopwatchSessionRepository {
                 user: User {
                     id: session.user_id.clone(),
                     username: session.user_name.clone(),
+                    avatar_url: None,
                 },
                 category: None,
                 tags: None,
