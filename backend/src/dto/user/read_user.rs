@@ -6,6 +6,7 @@ use crate::entity::user::User;
 pub struct ReadUserDto {
     pub id: String,
     pub username: String,
+    pub avatar_url: Option<String>,
 }
 
 impl ReadUserDto {
@@ -13,6 +14,7 @@ impl ReadUserDto {
         Self {
             id: entity.id,
             username: entity.username,
+            avatar_url: entity.avatar_url,
         }
     }
 }

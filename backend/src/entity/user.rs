@@ -6,6 +6,7 @@ use crate::dto::user::read_user::ReadUserDto;
 pub struct User {
     pub id: String,
     pub username: String,
+    pub avatar_url: Option<String>,
 }
 
 impl From<User> for ReadUserDto {
@@ -13,6 +14,7 @@ impl From<User> for ReadUserDto {
         Self {
             id: user.id,
             username: user.username,
+            avatar_url: user.avatar_url,
         }
     }
 }

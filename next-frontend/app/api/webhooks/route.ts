@@ -21,6 +21,7 @@ export async function POST(req: Request) {
       await UserApi.create({
         id: evt.data.id,
         username: evt.data.username,
+        avatarUrl: evt.data.image_url,
       });
 
       return new Response("User created", { status: 200 });
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
       await UserApi.update({
         id: evt.data.id,
         username: evt.data.username,
+        avatarUrl: evt.data.image_url,
       });
 
       return new Response("User updated", { status: 200 });
