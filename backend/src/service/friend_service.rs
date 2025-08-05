@@ -59,7 +59,7 @@ impl From<User> for ReadUserAvatarDto {
         Self {
             id: user.id,
             username: user.username,
-            avatar_url: None,
+            avatar_url: user.avatar_url,
         }
     }
 }
