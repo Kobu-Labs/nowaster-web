@@ -57,7 +57,7 @@ impl UserService {
             .await
             .map_err(|e| UserError::UnknownError(e.to_string()))?;
 
-        self.add_avatars(user).await.map(|va| va.first().cloned())
+        Ok(user.first().cloned().map(Into::into))
     }
 
     pub async fn get_user_by_id(
@@ -73,7 +73,7 @@ impl UserService {
             .await
             .map_err(|e| UserError::UnknownError(e.to_string()))?;
 
-        self.add_avatars(user).await.map(|va| va.first().cloned())
+        Ok(user.first().cloned().map(Into::into))
     }
 
     pub async fn get_users_by_ids(
@@ -93,57 +93,6 @@ impl UserService {
             .await
             .map_err(|e| UserError::UnknownError(e.to_string()))?;
 
-        self.add_avatars(users).await
-    }
-
-    async fn add_avatars(&self, users: Vec<User>) -> Result<Vec<ReadUserAvatarDto>, UserError> {
-        if users.is_empty() {
-            return Ok(vec![]);
-        }
-
-        let ids: Vec<String> = users.iter().map(|user| user.id.clone()).collect();
-
-        // Fetch user data from Clerk to get avatar URLs
-        let clerk_users = clerk_rs::apis::users_api::User::get_user_list(
-            &self.clerk,
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(ids),
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
-        .await
-        .map_err(|e| {
-            UserError::UnknownError(format!("Failed to fetch user data from Clerk: {}", e))
-        })?;
-
-        let avatar_map: HashMap<String, Option<String>> = clerk_users
-            .into_iter()
-            .map(|clerk_user| {
-                let user_id = clerk_user.id.unwrap_or_default();
-                let avatar_url = clerk_user.image_url;
-                (user_id, avatar_url)
-            })
-            .collect();
-
-        let result = users
-            .into_iter()
-            .map(|user| {
-                let avatar_url = avatar_map.get(&user.id).and_then(|url| url.clone());
-                ReadUserAvatarDto {
-                    id: user.id,
-                    username: user.username,
-                    avatar_url,
-                }
-            })
-            .collect();
-
-        Ok(result)
+        Ok(users.iter().cloned().map(Into::into).collect())
     }
 }
