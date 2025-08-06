@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::entity::user::User;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadUserDto {
     pub id: String,
     pub username: String,
