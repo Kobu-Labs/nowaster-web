@@ -1,13 +1,9 @@
-use std::collections::HashMap;
-
 use clerk_rs::clerk::Clerk;
 
 use crate::{
     dto::user::{create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto},
-    entity::user::User,
     repository::user::{FilterUsersDto, IdFilter, UserRepository},
     router::user::root::UserError,
-    service::friend_service::ReadUserAvatarDto,
 };
 
 #[derive(Clone)]
@@ -47,7 +43,7 @@ impl UserService {
     pub async fn get_user_by_name(
         &self,
         username: String,
-    ) -> Result<Option<ReadUserAvatarDto>, UserError> {
+    ) -> Result<Option<ReadUserDto>, UserError> {
         let user = self
             .repo
             .filter_users(FilterUsersDto {
@@ -60,10 +56,7 @@ impl UserService {
         Ok(user.first().cloned().map(Into::into))
     }
 
-    pub async fn get_user_by_id(
-        &self,
-        user_id: String,
-    ) -> Result<Option<ReadUserAvatarDto>, UserError> {
+    pub async fn get_user_by_id(&self, user_id: String) -> Result<Option<ReadUserDto>, UserError> {
         let user = self
             .repo
             .filter_users(FilterUsersDto {
@@ -79,7 +72,7 @@ impl UserService {
     pub async fn get_users_by_ids(
         &self,
         user_ids: Vec<String>,
-    ) -> Result<Vec<ReadUserAvatarDto>, UserError> {
+    ) -> Result<Vec<ReadUserDto>, UserError> {
         if user_ids.is_empty() {
             return Ok(vec![]);
         }

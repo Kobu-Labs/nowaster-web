@@ -4,14 +4,17 @@ use uuid::Uuid;
 
 use crate::{
     config::database::Database,
-    dto::feed::{
-        CreateFeedEventDto, CreateFeedReactionDto, FeedQueryDto, ReadFeedEventDto,
-        ReadFeedReactionDto,
+    dto::{
+        feed::{
+            CreateFeedEventDto, CreateFeedReactionDto, FeedQueryDto, ReadFeedEventDto,
+            ReadFeedReactionDto,
+        },
+        user::read_user::ReadUserDto,
     },
     entity::feed::FeedEvent,
     repository::feed::FeedRepository,
     router::clerk::ClerkUser,
-    service::{friend_service::ReadUserAvatarDto, user_service::UserService},
+    service::user_service::UserService,
 };
 
 #[derive(Clone)]
@@ -59,7 +62,7 @@ impl FeedService {
 
         // Get user information with avatars
         let users = self.get_users_with_avatars(user_ids).await?;
-        let user_map: HashMap<String, ReadUserAvatarDto> =
+        let user_map: HashMap<String, ReadUserDto> =
             users.into_iter().map(|u| (u.id.clone(), u)).collect();
 
         // Get reactions for all events
@@ -69,15 +72,14 @@ impl FeedService {
         // Group reactions by event
         let mut reactions_by_event: HashMap<Uuid, Vec<ReadFeedReactionDto>> = HashMap::new();
         for reaction in reactions {
-            let user =
-                user_map
-                    .get(&reaction.user_id)
-                    .cloned()
-                    .unwrap_or_else(|| ReadUserAvatarDto {
-                        id: reaction.user_id.clone(),
-                        username: "Unknown User".to_string(),
-                        avatar_url: None,
-                    });
+            let user = user_map
+                .get(&reaction.user_id)
+                .cloned()
+                .unwrap_or_else(|| ReadUserDto {
+                    id: reaction.user_id.clone(),
+                    username: "Unknown User".to_string(),
+                    avatar_url: None,
+                });
 
             let reaction_dto = ReadFeedReactionDto {
                 id: reaction.id,
@@ -93,32 +95,32 @@ impl FeedService {
         }
 
         // Build final feed events
-        let feed_events =
-            events
-                .into_iter()
-                .map(|event| {
-                    let user = user_map.get(&event.user_id).cloned().unwrap_or_else(|| {
-                        ReadUserAvatarDto {
-                            id: event.user_id.clone(),
-                            username: "Unknown User".to_string(),
-                            avatar_url: None,
-                        }
+        let feed_events = events
+            .into_iter()
+            .map(|event| {
+                let user = user_map
+                    .get(&event.user_id)
+                    .cloned()
+                    .unwrap_or_else(|| ReadUserDto {
+                        id: event.user_id.clone(),
+                        username: "Unknown User".to_string(),
+                        avatar_url: None,
                     });
 
-                    let event_reactions = reactions_by_event
-                        .get(&event.id)
-                        .cloned()
-                        .unwrap_or_default();
+                let event_reactions = reactions_by_event
+                    .get(&event.id)
+                    .cloned()
+                    .unwrap_or_default();
 
-                    ReadFeedEventDto {
-                        id: event.id,
-                        user,
-                        data: event.data.clone(),
-                        created_at: event.created_at,
-                        reactions: event_reactions,
-                    }
-                })
-                .collect();
+                ReadFeedEventDto {
+                    id: event.id,
+                    user,
+                    data: event.data.clone(),
+                    created_at: event.created_at,
+                    reactions: event_reactions,
+                }
+            })
+            .collect();
 
         Ok(feed_events)
     }
@@ -154,10 +156,7 @@ impl FeedService {
             .await
     }
 
-    async fn get_users_with_avatars(
-        &self,
-        user_ids: Vec<String>,
-    ) -> Result<Vec<ReadUserAvatarDto>> {
+    async fn get_users_with_avatars(&self, user_ids: Vec<String>) -> Result<Vec<ReadUserDto>> {
         // Use UserService to get users with avatars
         self.user_service
             .get_users_by_ids(user_ids)
@@ -165,7 +164,7 @@ impl FeedService {
             .map_err(|e| anyhow::anyhow!("Failed to get users with avatars: {}", e))
     }
 
-    async fn get_user_with_avatar(&self, user_id: String) -> Result<ReadUserAvatarDto> {
+    async fn get_user_with_avatar(&self, user_id: String) -> Result<ReadUserDto> {
         let users = self.get_users_with_avatars(vec![user_id]).await?;
         users
             .into_iter()

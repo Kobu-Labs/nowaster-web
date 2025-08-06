@@ -1,10 +1,7 @@
-use crate::{
-    dto::{
-        category::read_category::ReadCategoryDto,
-        session::{stopwatch_session::ReadStopwatchSessionDto, template::ReadTemplateShallowDto},
-        tag::read_tag::ReadTagDto,
-    },
-    service::friend_service::ReadUserAvatarDto,
+use crate::dto::{
+    category::read_category::ReadCategoryDto,
+    session::{stopwatch_session::ReadStopwatchSessionDto, template::ReadTemplateShallowDto},
+    tag::read_tag::ReadTagDto, user::read_user::ReadUserDto,
 };
 
 use super::{category::Category, tag::Tag, user::User};
@@ -74,7 +71,7 @@ impl From<StopwatchSession> for ReadStopwatchSessionDto {
             }),
             description: session.description,
             start_time: session.start_time,
-            user: ReadUserAvatarDto::from(session.user),
+            user: ReadUserDto::from(session.user),
         }
     }
 }
