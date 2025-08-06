@@ -4,14 +4,14 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
+    dto::user::read_user::ReadUserDto,
     entity::feed::{FeedEvent, FeedEventType, FeedReaction},
-    service::friend_service::ReadUserAvatarDto,
 };
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFeedEventDto {
     pub id: Uuid,
-    pub user: ReadUserAvatarDto,
+    pub user: ReadUserDto,
     #[serde(flatten)]
     pub data: FeedEventType,
     pub created_at: DateTime<Local>,
@@ -21,7 +21,7 @@ pub struct ReadFeedEventDto {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFeedReactionDto {
     pub id: Uuid,
-    pub user: ReadUserAvatarDto,
+    pub user: ReadUserDto,
     pub emoji: String,
     pub created_at: DateTime<Local>,
 }
@@ -49,7 +49,7 @@ impl From<FeedEvent> for ReadFeedEventDto {
     fn from(event: FeedEvent) -> Self {
         Self {
             id: event.id,
-            user: ReadUserAvatarDto {
+            user: ReadUserDto {
                 id: event.user_id.clone(),
                 username: String::new(), // Will be filled by the service
                 avatar_url: None,        // Will be filled by the service
@@ -65,7 +65,7 @@ impl From<FeedReaction> for ReadFeedReactionDto {
     fn from(reaction: FeedReaction) -> Self {
         Self {
             id: reaction.id,
-            user: ReadUserAvatarDto {
+            user: ReadUserDto {
                 id: reaction.user_id.clone(),
                 username: String::new(), // Will be filled by the service
                 avatar_url: None,        // Will be filled by the service
