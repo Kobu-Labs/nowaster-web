@@ -1,29 +1,32 @@
 use anyhow::Result;
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
-    dto::session::{
-        filter_session::{DateFilter, FilterSessionDto},
-        fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
-        stopwatch_session::ReadStopwatchSessionDto,
+    dto::{
+        feed::CreateFeedEventDto,
+        session::{
+            filter_session::{DateFilter, FilterSessionDto},
+            fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
+            stopwatch_session::ReadStopwatchSessionDto,
+        },
     },
-    entity::feed::{FeedEvent, FeedEventType, SessionEventData},
+    entity::feed::{FeedEvent, FeedEventSource, FeedEventType, SessionEventData},
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,
     },
     router::clerk::ClerkUser,
-    service::{category_service::CategoryService, feed_service::FeedService},
+    service::{feed_service::FeedService, user_service::UserService},
 };
 
 #[derive(Clone)]
 pub struct FixedSessionService {
     fixed_repo: FixedSessionRepository,
-    category_service: CategoryService,
     stopwatch_repo: StopwatchSessionRepository,
     feed_service: FeedService,
+    user_service: UserService,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -36,15 +39,15 @@ pub enum ActiveSession {
 impl FixedSessionService {
     pub fn new(
         repo: FixedSessionRepository,
-        cat_serv: CategoryService,
         stopwatch_repo: StopwatchSessionRepository,
         feed_service: FeedService,
+        user_service: UserService,
     ) -> Self {
         Self {
             fixed_repo: repo,
-            category_service: cat_serv,
             stopwatch_repo,
             feed_service,
+            user_service,
         }
     }
 
@@ -54,23 +57,25 @@ impl FixedSessionService {
         actor: ClerkUser,
     ) -> Result<ReadFixedSessionDto> {
         let res = self.fixed_repo.create(dto, actor.clone()).await?;
+        let user = self
+            .user_service
+            .get_user_by_id(res.user_id.clone())
+            .await?
+            .unwrap();
+
         self.feed_service
-            .publish_event(
-                FeedEvent {
-                    id: Uuid::new_v4(),
-                    user_id: actor.user_id.clone(),
-                    data: FeedEventType::SessionCompleted(SessionEventData {
-                        session_id: res.id,
-                        category: res.category.clone(),
-                        tags: res.tags.clone(),
-                        description: res.description.clone(),
-                        start_time: res.start_time,
-                        end_time: res.end_time,
-                    }),
-                    created_at: Local::now(),
-                },
-                actor.user_id,
-            )
+            .publish_event(CreateFeedEventDto {
+                id: None,
+                data: FeedEventType::SessionCompleted(SessionEventData {
+                    session_id: res.id,
+                    category: res.category.clone(),
+                    tags: res.tags.clone(),
+                    description: res.description.clone(),
+                    start_time: res.start_time,
+                    end_time: res.end_time,
+                }),
+                source: FeedEventSource::User(user),
+            })
             .await?;
 
         Ok(ReadFixedSessionDto::from(res))
@@ -90,8 +95,15 @@ impl FixedSessionService {
         Ok(())
     }
 
-    pub async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: ClerkUser) -> Result<u64> {
-        let affected_rows = self.fixed_repo.delete_sessions_by_filter(dto, actor).await?;
+    pub async fn delete_sessions_by_filter(
+        &self,
+        dto: FilterSessionDto,
+        actor: ClerkUser,
+    ) -> Result<u64> {
+        let affected_rows = self
+            .fixed_repo
+            .delete_sessions_by_filter(dto, actor)
+            .await?;
         Ok(affected_rows)
     }
 
