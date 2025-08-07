@@ -49,6 +49,33 @@ pub struct FeedQueryDto {
     pub limit: Option<i64>,
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum AddFeedSource {
+    User(String),
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum RemoveFeedSource {
+    User(String),
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ReadFeedSubscriptionDto {
+    pub id: uuid::Uuid,
+    #[serde(flatten)]
+    pub source: FeedEventSource,
+    pub is_muted: bool,
+    pub is_paused: bool,
+    pub created_at: DateTime<Local>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, validator::Validate)]
+pub struct UpdateFeedSubscriptionDto {
+    pub subscription_id: uuid::Uuid,
+    pub is_muted: Option<bool>,
+    pub is_paused: Option<bool>,
+}
+
 impl From<FeedEvent> for ReadFeedEventDto {
     fn from(event: FeedEvent) -> Self {
         Self {

@@ -6,39 +6,50 @@ use crate::{
     config::database::Database,
     dto::{
         feed::{
-            CreateFeedEventDto, CreateFeedReactionDto, FeedQueryDto, ReadFeedEventDto,
-            ReadFeedReactionDto,
+            AddFeedSource, CreateFeedEventDto, CreateFeedReactionDto, FeedQueryDto,
+            ReadFeedEventDto, ReadFeedReactionDto, ReadFeedSubscriptionDto, RemoveFeedSource,
+            UpdateFeedSubscriptionDto,
         },
         user::read_user::ReadUserDto,
     },
-    entity::feed::{FeedEvent, FeedEventSource},
-    repository::feed::{FeedRepository, FeedSubsriptionRow},
+    entity::feed::FeedEventSource,
+    repository::{
+        feed::{FeedRepository, FeedSourceSqlType, FeedSubscriptionRow},
+        user::{FilterUsersDto, IdFilter, UserRepository},
+    },
     router::clerk::ClerkUser,
-    service::user_service::UserService,
+    service::user_service::{self, UserService},
 };
 
 #[derive(Clone)]
 pub struct FeedService {
     feed_repository: FeedRepository,
+    user_service: UserService,
 }
 
 impl FeedService {
-    pub fn new(db: &Arc<Database>) -> Self {
+    pub fn new(db: &Arc<Database>, user_service: UserService) -> Self {
         Self {
             feed_repository: FeedRepository::new(&db),
+            user_service,
         }
-    }
-
-    pub async fn get_subscriptions(
-        &self,
-        event_source: FeedEventSource,
-    ) -> Result<Vec<FeedSubsriptionRow>> {
-        self.feed_repository.get_subscriptions(event_source).await
     }
 
     pub async fn publish_event(&self, event: CreateFeedEventDto) -> Result<()> {
         self.feed_repository.create_feed_event(event).await?;
         Ok(())
+    }
+
+    pub async fn add_feed_source(&self, source: AddFeedSource, actor: ClerkUser) -> Result<()> {
+        self.feed_repository.subscribe(source, actor).await
+    }
+
+    pub async fn remove_feed_source(
+        &self,
+        source: RemoveFeedSource,
+        actor: ClerkUser,
+    ) -> Result<()> {
+        self.feed_repository.unsubscribe(source, actor).await
     }
 
     pub async fn get_friends_feed(
@@ -114,5 +125,75 @@ impl FeedService {
         self.feed_repository
             .remove_reaction(feed_event_id, emoji, actor)
             .await
+    }
+
+    pub async fn get_user_subscriptions(
+        &self,
+        actor: ClerkUser,
+    ) -> Result<Vec<ReadFeedSubscriptionDto>> {
+        let subs_ids = self
+            .feed_repository
+            .get_user_subscriptions(actor.user_id)
+            .await?;
+
+        let mut sources_by_type: std::collections::HashMap<FeedSourceSqlType, Vec<String>> =
+            std::collections::HashMap::new();
+        for subscription in &subs_ids {
+            sources_by_type
+                .entry(subscription.source_type.clone())
+                .or_insert_with(Vec::new)
+                .push(subscription.source_id.clone());
+        }
+
+        // Fetch all users at once
+        let mut user_lookup = HashMap::new();
+        if let Some(user_ids) = sources_by_type.get(&FeedSourceSqlType::User) {
+            let users = self.user_service.get_users_by_ids(user_ids.clone()).await?;
+
+            for user in users {
+                user_lookup.insert(user.id.clone(), user);
+            }
+        }
+
+        let subscriptions = subs_ids
+            .into_iter()
+            .map(|row| ReadFeedSubscriptionDto {
+                id: row.id,
+                source: match row.source_type {
+                    FeedSourceSqlType::User => {
+                        let user = user_lookup.get(&row.source_id);
+                        FeedEventSource::User(ReadUserDto {
+                            id: row.source_id.clone(),
+                            username: user.map(|u| u.username.clone()).unwrap_or_default(),
+                            avatar_url: user.and_then(|u| u.avatar_url.clone()),
+                        })
+                    }
+                },
+                is_muted: row.is_muted,
+                is_paused: row.is_paused,
+                created_at: row.created_at,
+            })
+            .collect();
+
+        Ok(subscriptions)
+    }
+
+    pub async fn update_subscription(
+        &self,
+        dto: UpdateFeedSubscriptionDto,
+        actor: ClerkUser,
+    ) -> Result<()> {
+        self.feed_repository
+            .update_subscription(
+                dto.subscription_id,
+                actor.user_id,
+                dto.is_muted,
+                dto.is_paused,
+            )
+            .await
+    }
+
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: ClerkUser) -> Result<()> {
+        self.feed_repository.unsubscribe(source, actor).await
     }
 }
