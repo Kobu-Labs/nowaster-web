@@ -8,7 +8,11 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
-    dto::feed::{CreateFeedReactionDto, FeedQueryDto, ReadFeedEventDto},
+    dto::feed::{
+        CreateFeedReactionDto, FeedQueryDto, ReadFeedEventDto, ReadFeedSubscriptionDto,
+        RemoveFeedSource, UpdateFeedSubscriptionDto,
+    },
+    repository::feed::FeedSourceSqlType,
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
@@ -25,11 +29,20 @@ pub struct RemoveReactionRequest {
     pub emoji: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, validator::Validate)]
+pub struct UnsubscribeRequest {
+    pub source_id: String,
+    pub source_type: FeedSourceSqlType,
+}
+
 pub fn feed_router() -> Router<AppState> {
     Router::new()
         .route("/", get(get_friends_feed_handler))
         .route("/reaction", post(add_reaction_handler))
         .route("/reaction/remove", post(remove_reaction_handler))
+        .route("/subscriptions", get(get_subscriptions_handler))
+        .route("/subscriptions", post(update_subscription_handler))
+        .route("/subscriptions/unsubscribe", post(unsubscribe_handler))
 }
 
 async fn get_friends_feed_handler(
@@ -70,6 +83,46 @@ async fn remove_reaction_handler(
         .remove_reaction(payload.feed_event_id, payload.emoji, actor)
         .await;
 
+    match result {
+        Ok(_) => ApiResponse::Success { data: () },
+        Err(e) => ApiResponse::Error {
+            message: e.to_string(),
+        },
+    }
+}
+
+async fn get_subscriptions_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+) -> ApiResponse<Vec<ReadFeedSubscriptionDto>> {
+    let result = state.feed_service.get_user_subscriptions(actor).await;
+    ApiResponse::from_result(result)
+}
+
+async fn update_subscription_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<UpdateFeedSubscriptionDto>,
+) -> ApiResponse<()> {
+    let result = state.feed_service.update_subscription(payload, actor).await;
+    match result {
+        Ok(_) => ApiResponse::Success { data: () },
+        Err(e) => ApiResponse::Error {
+            message: e.to_string(),
+        },
+    }
+}
+
+async fn unsubscribe_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<UnsubscribeRequest>,
+) -> ApiResponse<()> {
+    let source = match payload.source_type {
+        FeedSourceSqlType::User => RemoveFeedSource::User(payload.source_id),
+    };
+
+    let result = state.feed_service.remove_feed_source(source, actor).await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
         Err(e) => ApiResponse::Error {
