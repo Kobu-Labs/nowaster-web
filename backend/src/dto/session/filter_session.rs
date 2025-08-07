@@ -62,7 +62,6 @@ pub struct FilterSessionDto {
     pub template_id: Option<Uuid>,
 }
 
-
 impl FilterSessionDto {
     pub fn has_filters(&self) -> bool {
         self.tags.is_some()

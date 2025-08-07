@@ -120,9 +120,7 @@ impl SessionTemplateService {
                     .delete_sessions_by_filter(
                         FilterSessionDto {
                             template_id: Some(id),
-                            from_start_time: Some(DateFilter {
-                                value: Utc::now(),
-                            }),
+                            from_start_time: Some(DateFilter { value: Utc::now() }),
                             ..Default::default()
                         },
                         actor.clone(),
