@@ -1,5 +1,10 @@
-import { FeedPage } from "@/components/visualizers/feed/FeedPage";
+import { Feed } from "@/components/visualizers/feed/Feed";
 
-export default function Feed() {
-  return <FeedPage />;
+export default function FeedPage() {
+  return (
+    <div className="space-y-4 p-6">
+      <div className="text-2xl font-bold">Feed</div>
+      <Feed />
+    </div>
+  );
 }
