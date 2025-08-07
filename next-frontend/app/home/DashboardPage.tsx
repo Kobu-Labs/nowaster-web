@@ -1,5 +1,6 @@
 "use client";
 
+import { Feed } from "@/components/visualizers/feed/Feed";
 import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
 import { CurrentStreakKpiCard } from "@/components/visualizers/sessions/kpi/CurrentStreakKpiCard";
 import { TotalSessionTimeKpiCard } from "@/components/visualizers/sessions/kpi/TotalMinutesSpentKpiCard";
@@ -39,6 +40,7 @@ export default function DashboardPage() {
           className="col-span-full h-[400px]"
         />
       </FilterContextProvider>
+      <Feed />
     </div>
   );
 }
