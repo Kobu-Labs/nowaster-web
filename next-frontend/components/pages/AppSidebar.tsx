@@ -7,6 +7,7 @@ import {
   Home,
   Plus,
   Rss,
+  Settings,
   Tag,
   Users,
   X,
@@ -80,6 +81,11 @@ const navItems = [
     title: "History",
     url: "/home/history",
     icon: History,
+  },
+  {
+    title: "Settings",
+    url: "/home/settings",
+    icon: Settings,
   },
 ] as const;
 
