@@ -7,8 +7,10 @@ use uuid::Uuid;
 use crate::{
     config::database::{Database, DatabaseTrait},
     dto::category::{
-        create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
+        create_category::CreateCategoryDto,
+        filter_category::FilterCategoryDto,
+        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto},
+        update_category::UpdateCategoryDto,
     },
     entity::category::Category,
     router::clerk::ClerkUser,

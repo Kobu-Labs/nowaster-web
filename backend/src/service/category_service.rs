@@ -3,8 +3,10 @@ use uuid::Uuid;
 
 use crate::{
     dto::category::{
-        create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
+        create_category::CreateCategoryDto,
+        filter_category::FilterCategoryDto,
+        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto},
+        update_category::UpdateCategoryDto,
     },
     entity::category::Category,
     repository::category::{CategoryRepository, CategoryRepositoryTrait},
@@ -70,10 +72,7 @@ impl CategoryService {
         self.repo.get_categories_with_session_count(actor).await
     }
 
-    pub async fn get_category_statistics(
-        &self,
-        actor: ClerkUser,
-    ) -> Result<CategoryStatsDto> {
+    pub async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto> {
         self.repo.get_category_statistics(actor).await
     }
 }

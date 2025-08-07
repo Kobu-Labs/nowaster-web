@@ -21,7 +21,10 @@ pub fn tag_router() -> Router<AppState> {
             post(add_allowed_category_handler).delete(remove_allowed_category_handler),
         )
         .route("/", post(create_tag_handler).get(filter_tags_handler))
-        .route("/statistics", axum::routing::get(get_tag_statistics_handler))
+        .route(
+            "/statistics",
+            axum::routing::get(get_tag_statistics_handler),
+        )
         .route(
             "/{tag_id}",
             delete(delete_tag_handler)
