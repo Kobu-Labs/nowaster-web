@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { SessionCompletedFeedCard } from "@/components/visualizers/feed/events/SessionCompletedEventCard";
 import { ReadFeedEvent } from "@/api/definitions/models/feed";
 
-export const FeedPage: FC = () => {
+export const Feed: FC = () => {
   const {
     data,
     fetchNextPage,
@@ -75,32 +75,29 @@ export const FeedPage: FC = () => {
   };
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="text-2xl font-bold">Feed</div>
-      <div className="space-y-4">
-        {allEvents.map((event, index) => {
-          if (index === allEvents.length - 3) {
-            return (
-              <div key={event.id} ref={lastEventElementRef}>
-                {renderEventCard(event)}
-              </div>
-            );
-          }
-          return renderEventCard(event);
-        })}
+    <div className="space-y-4">
+      {allEvents.map((event, index) => {
+        if (index === allEvents.length - 3) {
+          return (
+            <div key={event.id} ref={lastEventElementRef}>
+              {renderEventCard(event)}
+            </div>
+          );
+        }
+        return renderEventCard(event);
+      })}
 
-        {isFetchingNextPage && (
-          <div className="flex justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        )}
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      )}
 
-        {!hasNextPage && allEvents.length > 0 && (
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            You've reached the end of the feed
-          </div>
-        )}
-      </div>
+      {!hasNextPage && allEvents.length > 0 && (
+        <div className="text-center py-4 text-muted-foreground text-sm">
+          You've reached the end of the feed
+        </div>
+      )}
     </div>
   );
 };
