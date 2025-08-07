@@ -11,7 +11,10 @@ use uuid::Uuid;
 use crate::{
     config::database::{Database, DatabaseTrait},
     dto::{
-        feed::{CreateFeedEventDto, CreateFeedReactionDto, FeedQueryDto},
+        feed::{
+            AddFeedSource, CreateFeedEventDto, CreateFeedReactionDto, FeedQueryDto,
+            RemoveFeedSource,
+        },
         user::read_user::ReadUserDto,
     },
     entity::feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
@@ -31,21 +34,23 @@ enum FeedEventSqlType {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, FromRow)]
-pub struct FeedSubsriptionRow {
+pub struct FeedSubscriptionRow {
     pub id: Uuid,
     pub created_at: DateTime<Local>,
 
     pub subscriber_id: String,
     pub source_id: String,
+    pub source_type: FeedSourceSqlType,
 
     pub is_muted: bool,
     pub is_paused: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Hash, sqlx::Type, Deserialize, Serialize, Eq)]
 #[sqlx(type_name = "feed_source_type")]
-enum FeedSourceSqlType {
+pub enum FeedSourceSqlType {
     #[sqlx(rename = "user")]
+    #[serde(rename = "user")]
     User,
 }
 
@@ -146,36 +151,45 @@ impl FeedRepository {
         }
     }
 
-    pub async fn get_subscriptions(
-        &self,
-        source: FeedEventSource,
-    ) -> Result<Vec<FeedSubsriptionRow>> {
-        let (source_id, source_type) = FeedEventMapper::serialize_source(source);
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: ClerkUser) -> Result<()> {
+        let (source_id, source_type) = match source {
+            RemoveFeedSource::User(id) => (id, FeedSourceSqlType::User),
+        };
 
-        let results = sqlx::query_as!(
-            FeedSubsriptionRow,
+        sqlx::query!(
             r#"
-                SELECT
-                    fs.id,
-                    fs.created_at,
-
-                    fs.is_muted,
-                    fs.is_paused,
-
-                    fs.subscriber_id,
-
-                    fs.source_id
-                FROM feed_subscription fs
-                WHERE fs.source_type = $1
-                    AND fs.source_id = $2
+                DELETE FROM feed_subscription
+                WHERE subscriber_id = $1 AND source_id = $2 AND source_type = $3
             "#,
+            actor.user_id,
+            source_id,
+            source_type as FeedSourceSqlType
+        )
+        .execute(self.db.get_pool())
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn subscribe(&self, source: AddFeedSource, actor: ClerkUser) -> Result<()> {
+        let (source_id, source_type) = match source {
+            AddFeedSource::User(id) => (id, FeedSourceSqlType::User),
+        };
+
+        sqlx::query!(
+            r#"
+                INSERT INTO feed_subscription (subscriber_id, source_type, source_id)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (subscriber_id, source_type, source_id) DO NOTHING
+            "#,
+            actor.user_id,
             source_type as FeedSourceSqlType,
             source_id
         )
-        .fetch_all(self.db.get_pool())
+        .execute(self.db.get_pool())
         .await?;
 
-        Ok(results)
+        Ok(())
     }
 
     pub async fn create_feed_event(&self, dto: CreateFeedEventDto) -> Result<()> {
@@ -332,6 +346,76 @@ impl FeedRepository {
         .execute(self.db.get_pool())
         .await?;
 
+        Ok(())
+    }
+
+    pub async fn get_user_subscriptions(
+        &self,
+        user_id: String,
+    ) -> Result<Vec<FeedSubscriptionRow>> {
+        let results = sqlx::query_as!(
+            FeedSubscriptionRow,
+            r#"
+                SELECT
+                    fs.id,
+                    fs.created_at,
+                    fs.source_id,
+                    fs.source_type as "source_type!: FeedSourceSqlType",
+                    fs.is_muted,
+                    fs.is_paused,
+                    fs.subscriber_id
+                FROM feed_subscription fs
+                WHERE fs.subscriber_id = $1
+                ORDER BY fs.created_at DESC
+            "#,
+            user_id
+        )
+        .fetch_all(self.db.get_pool())
+        .await?;
+
+        Ok(results)
+    }
+
+    pub async fn update_subscription(
+        &self,
+        subscription_id: Uuid,
+        user_id: String,
+        is_muted: Option<bool>,
+        is_paused: Option<bool>,
+    ) -> Result<()> {
+        // Build dynamic query based on provided fields
+        let mut query_parts = Vec::new();
+        let mut param_index = 3; // Start from $3 since $1 and $2 are subscription_id and user_id
+
+        if is_muted.is_some() {
+            query_parts.push(format!("is_muted = ${}", param_index));
+            param_index += 1;
+        }
+
+        if is_paused.is_some() {
+            query_parts.push(format!("is_paused = ${}", param_index));
+        }
+
+        if query_parts.is_empty() {
+            return Ok(()); // Nothing to update
+        }
+
+        let query_str = format!(
+            "UPDATE feed_subscription SET {} WHERE id = $1 AND subscriber_id = $2",
+            query_parts.join(", ")
+        );
+
+        let mut query = sqlx::query(&query_str);
+        query = query.bind(subscription_id).bind(user_id);
+
+        if let Some(muted) = is_muted {
+            query = query.bind(muted);
+        }
+        if let Some(paused) = is_paused {
+            query = query.bind(paused);
+        }
+
+        query.execute(self.db.get_pool()).await?;
         Ok(())
     }
 }
