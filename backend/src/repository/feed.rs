@@ -1,6 +1,6 @@
 use chrono::{DateTime, Local};
 use serde_json::Value;
-use sqlx::{postgres::PgRow, prelude::FromRow, ColumnIndex, Row};
+use sqlx::{postgres::PgRow, prelude::FromRow, Row};
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
