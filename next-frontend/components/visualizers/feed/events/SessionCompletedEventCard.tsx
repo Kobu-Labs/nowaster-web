@@ -6,6 +6,7 @@ import { FC } from "react";
 
 import {
   ReadFeedEvent,
+  ReadUserAvatar,
   SessionCompletedEventSchema,
 } from "@/api/definitions/models/feed";
 import {
@@ -23,11 +24,13 @@ import { z } from "zod";
 type SessionFeedCardProps = {
   event: ReadFeedEvent;
   event_data: z.infer<typeof SessionCompletedEventSchema>;
+  user: ReadUserAvatar;
 };
 
 export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
   event,
   event_data,
+  user,
 }) => {
   return (
     <Card className="w-full">
@@ -35,17 +38,17 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={event.user.avatar_url ?? undefined}
-              alt={event.user.username}
+              src={user.avatar_url ?? undefined}
+              alt={user.username}
             />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
-              {getInitials(event.user.username)}
+              {getInitials(user.username)}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-sm">{event.user.username}</span>
+              <span className="font-medium text-sm">{user.username}</span>
               <CheckCircle className="h-4 w-4 text-blue-500" />
               <span className="text-sm text-muted-foreground">
                 Completed a session
