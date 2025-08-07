@@ -188,15 +188,16 @@ impl FeedRepository {
         Ok(results)
     }
 
-    pub async fn create_feed_event(&self, dto: FeedEvent) -> Result<()> {
+    pub async fn create_feed_event(&self, dto: CreateFeedEventDto) -> Result<()> {
         let (event_type, event_data) = FeedEventMapper::serialize_event(dto.data)?;
         let (source_id, source_type) = FeedEventMapper::serialize_source(dto.source);
 
         sqlx::query!(
             r#"
-                INSERT INTO feed_event (event_type, event_data, source_type, source_id)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO feed_event (id, event_type, event_data, source_type, source_id)
+                VALUES ($1, $2, $3, $4, $5)
             "#,
+            dto.id.unwrap_or(Uuid::new_v4()),
             event_type as FeedEventSqlType,
             event_data,
             source_type as FeedSourceSqlType,
