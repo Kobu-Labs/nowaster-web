@@ -19,7 +19,6 @@ export const ReadFeedReactionSchema = z.object({
 
 export const SessionCompletedEventSchema = z.object({
   session_id: z.string(),
-  user: ReadUserAvatarSchema,
   category: CategoryWithIdSchema,
   tags: z.array(TagWithIdSchema),
   description: z.string().nullish(),
@@ -57,8 +56,33 @@ export const ReadFeedEventSchema = z
   })
   .and(EventTypeMappingSchema.and(SourceTypeMappingSchema));
 
+export const ReadFeedSubscriptionSchema = z
+  .object({
+    id: z.string().uuid(),
+    is_muted: z.boolean(),
+    is_paused: z.boolean(),
+    created_at: z.coerce.date(),
+  })
+  .and(SourceTypeMappingSchema);
+
+export const UpdateFeedSubscriptionSchema = z.object({
+  subscription_id: z.string().uuid(),
+  is_muted: z.boolean().optional(),
+  is_paused: z.boolean().optional(),
+});
+
 export type EventTypeMapping = z.infer<typeof EventTypeMappingSchema>;
 export type FeedEventType = z.infer<typeof EventTypeSchema>;
 export type ReadUserAvatar = z.infer<typeof ReadUserAvatarSchema>;
 export type ReadFeedReaction = z.infer<typeof ReadFeedReactionSchema>;
 export type ReadFeedEvent = z.infer<typeof ReadFeedEventSchema>;
+export type ReadFeedSubscription = z.infer<typeof ReadFeedSubscriptionSchema>;
+export type UpdateFeedSubscription = z.infer<
+  typeof UpdateFeedSubscriptionSchema
+>;
+
+export const FeedSourceTypeSchema = z.union([
+  z.literal("user"),
+  z.literal("placeholder"),
+]);
+export type FeedSourceType = z.infer<typeof FeedSourceTypeSchema>;

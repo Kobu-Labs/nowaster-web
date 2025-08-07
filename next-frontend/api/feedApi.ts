@@ -1,9 +1,11 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import { FeedResponseSchema } from "@/api/definitions/responses/feed";
-import { 
-  FeedQueryRequest, 
-  CreateFeedReactionRequest, 
-  RemoveFeedReactionRequest 
+import {
+  FeedQueryRequest,
+  CreateFeedReactionRequest,
+  RemoveFeedReactionRequest,
+  UpdateFeedSubscriptionRequest,
+  UnsubscribeRequest
 } from "@/api/definitions/requests/feed";
 
 const BASE_URL = "/feed";
@@ -23,4 +25,19 @@ export const addReaction = async (params: CreateFeedReactionRequest) => {
 export const removeReaction = async (params: RemoveFeedReactionRequest) => {
   const { data } = await baseApi.post(`${BASE_URL}/reaction/remove`, params);
   return await parseResponseUnsafe(data, FeedResponseSchema.removeReaction);
+};
+
+export const getSubscriptions = async () => {
+  const { data } = await baseApi.get(`${BASE_URL}/subscriptions`);
+  return await parseResponseUnsafe(data, FeedResponseSchema.getSubscriptions);
+};
+
+export const updateSubscription = async (params: UpdateFeedSubscriptionRequest) => {
+  const { data } = await baseApi.post(`${BASE_URL}/subscriptions`, params);
+  return await parseResponseUnsafe(data, FeedResponseSchema.updateSubscription);
+};
+
+export const unsubscribe = async (params: UnsubscribeRequest) => {
+  const { data } = await baseApi.post(`${BASE_URL}/subscriptions/unsubscribe`, params);
+  return await parseResponseUnsafe(data, FeedResponseSchema.unsubscribe);
 };
