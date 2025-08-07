@@ -19,12 +19,24 @@ export const ReadFeedReactionSchema = z.object({
 
 export const SessionCompletedEventSchema = z.object({
   session_id: z.string(),
+  user: ReadUserAvatarSchema,
   category: CategoryWithIdSchema,
   tags: z.array(TagWithIdSchema),
   description: z.string().nullish(),
   start_time: z.coerce.date(),
   end_time: z.coerce.date(),
 });
+
+export const SourceTypeMappingSchema = z.discriminatedUnion("source_type", [
+  z.object({
+    source_type: z.literal("user"),
+    source_data: ReadUserAvatarSchema,
+  }),
+  z.object({
+    source_data: z.number(),
+    source_type: z.literal("placeholder"),
+  }),
+]);
 
 export const EventTypeMappingSchema = z.discriminatedUnion("event_type", [
   z.object({
@@ -40,11 +52,10 @@ export const EventTypeMappingSchema = z.discriminatedUnion("event_type", [
 export const ReadFeedEventSchema = z
   .object({
     id: z.string().uuid(),
-    user: ReadUserAvatarSchema,
     created_at: z.coerce.date(),
     reactions: z.array(ReadFeedReactionSchema),
   })
-  .and(EventTypeMappingSchema);
+  .and(EventTypeMappingSchema.and(SourceTypeMappingSchema));
 
 export type EventTypeMapping = z.infer<typeof EventTypeMappingSchema>;
 export type FeedEventType = z.infer<typeof EventTypeSchema>;
