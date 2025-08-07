@@ -5,13 +5,14 @@ use validator::Validate;
 
 use crate::{
     dto::user::read_user::ReadUserDto,
-    entity::feed::{FeedEvent, FeedEventType, FeedReaction},
+    entity::feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
 };
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFeedEventDto {
     pub id: Uuid,
-    pub user: ReadUserDto,
+    #[serde(flatten)]
+    pub source: FeedEventSource,
     #[serde(flatten)]
     pub data: FeedEventType,
     pub created_at: DateTime<Local>,
@@ -28,8 +29,11 @@ pub struct ReadFeedReactionDto {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CreateFeedEventDto {
-    pub user_id: String,
-    pub event: FeedEvent,
+    pub id: Option<Uuid>,
+    #[serde(flatten)]
+    pub source: FeedEventSource,
+    #[serde(flatten)]
+    pub data: FeedEventType,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Validate)]
@@ -49,11 +53,7 @@ impl From<FeedEvent> for ReadFeedEventDto {
     fn from(event: FeedEvent) -> Self {
         Self {
             id: event.id,
-            user: ReadUserDto {
-                id: event.user_id.clone(),
-                username: String::new(), // Will be filled by the service
-                avatar_url: None,        // Will be filled by the service
-            },
+            source: event.source,
             data: event.data,
             created_at: event.created_at,
             reactions: vec![],
@@ -66,9 +66,9 @@ impl From<FeedReaction> for ReadFeedReactionDto {
         Self {
             id: reaction.id,
             user: ReadUserDto {
-                id: reaction.user_id.clone(),
+                id: reaction.user.id.clone(),
                 username: String::new(), // Will be filled by the service
-                avatar_url: None,        // Will be filled by the service
+                avatar_url: reaction.user.avatar_url, // Will be filled by the service
             },
             emoji: reaction.emoji,
             created_at: reaction.created_at,
