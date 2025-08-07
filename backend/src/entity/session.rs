@@ -1,7 +1,8 @@
 use crate::dto::{
     category::read_category::ReadCategoryDto,
     session::{stopwatch_session::ReadStopwatchSessionDto, template::ReadTemplateShallowDto},
-    tag::read_tag::ReadTagDto, user::read_user::ReadUserDto,
+    tag::read_tag::ReadTagDto,
+    user::read_user::ReadUserDto,
 };
 
 use super::{category::Category, tag::Tag, user::User};

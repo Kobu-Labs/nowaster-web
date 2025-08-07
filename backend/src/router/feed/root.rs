@@ -69,7 +69,7 @@ async fn remove_reaction_handler(
         .feed_service
         .remove_reaction(payload.feed_event_id, payload.emoji, actor)
         .await;
-    
+
     match result {
         Ok(_) => ApiResponse::Success { data: () },
         Err(e) => ApiResponse::Error {
