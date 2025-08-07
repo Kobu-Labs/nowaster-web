@@ -45,12 +45,8 @@ pub struct FeedSubsriptionRow {
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
 #[sqlx(type_name = "feed_source_type")]
 enum FeedSourceSqlType {
-    #[sqlx(rename = "group")]
-    Group,
     #[sqlx(rename = "user")]
     User,
-    #[sqlx(rename = "system")]
-    System,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -106,12 +102,6 @@ impl FeedEventMapper {
                         "Source type of 'user' is missing 'user_id' or 'user_name'"
                     ));
                 }
-            }
-            FeedSourceSqlType::Group => {
-                return Err(anyhow::anyhow!("Group source type not yet implemented"));
-            }
-            FeedSourceSqlType::System => {
-                return Err(anyhow::anyhow!("System source type not yet implemented"));
             }
         };
 
