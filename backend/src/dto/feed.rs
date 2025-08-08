@@ -5,7 +5,7 @@ use validator::Validate;
 
 use crate::{
     dto::user::read_user::ReadUserDto,
-    entity::feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
+    entity::{feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction}, visibility::VisibilityFlags},
 };
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -96,6 +96,7 @@ impl From<FeedReaction> for ReadFeedReactionDto {
                 id: reaction.user.id.clone(),
                 username: String::new(), // Will be filled by the service
                 avatar_url: reaction.user.avatar_url, // Will be filled by the service
+                visibility_flags: VisibilityFlags::default(),
             },
             emoji: reaction.emoji,
             created_at: reaction.created_at,

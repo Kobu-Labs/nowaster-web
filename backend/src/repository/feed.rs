@@ -17,7 +17,10 @@ use crate::{
         },
         user::read_user::ReadUserDto,
     },
-    entity::feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
+    entity::{
+        feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
+        visibility::VisibilityFlags,
+    },
     router::clerk::ClerkUser,
 };
 
@@ -101,6 +104,7 @@ impl FeedEventMapper {
                         id: user_id,
                         username: user_name,
                         avatar_url: row.user_avatar_url,
+                        visibility_flags: VisibilityFlags::default(),
                     })
                 } else {
                     return Err(anyhow!(
@@ -298,6 +302,7 @@ impl FeedRepository {
                     id: row.user_id,
                     username: row.displayname,
                     avatar_url: row.avatar_url,
+                    visibility_flags: VisibilityFlags::default(), // Default for feed display
                 },
                 emoji: row.emoji,
                 created_at: row.created_at.into(),

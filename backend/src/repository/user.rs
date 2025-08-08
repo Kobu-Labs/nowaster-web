@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::user::{create_user::CreateUserDto, update_user::UpdateUserDto},
-    entity::user::User,
+    dto::user::{create_user::CreateUserDto, update_user::UpdateUserDto, update_visibility::UpdateVisibilityDto},
+    entity::{user::User, visibility::VisibilityFlags},
 };
 
 #[derive(Clone)]
@@ -18,6 +18,7 @@ pub struct ReadUserRow {
     id: String,
     displayname: String,
     avatar_url: Option<String>,
+    visibility_flags: VisibilityFlags,
 }
 
 #[derive(Debug, Default)]
@@ -43,13 +44,14 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                    INSERT INTO "user" (id, displayname, avatar_url)
-                    VALUES ($1, $2, $3)
-                    RETURNING id, displayname, avatar_url
+                    INSERT INTO "user" (id, displayname, avatar_url, visibility_flags)
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING id, displayname, avatar_url, visibility_flags
             "#,
             dto.id,
             dto.username,
-            dto.avatar_url
+            dto.avatar_url,
+            VisibilityFlags::default().as_raw()
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -82,7 +84,7 @@ impl UserRepository {
 
         query.push(" WHERE id = ");
         query.push_bind(dto.id);
-        query.push(" RETURNING id, displayname, avatar_url");
+        query.push(" RETURNING id, displayname, avatar_url, visibility_flags");
 
         if !should_execute {
             return Err(anyhow::anyhow!("No fields to update"));
@@ -101,6 +103,7 @@ impl UserRepository {
             id: row.id,
             username: row.displayname,
             avatar_url: row.avatar_url,
+            visibility_flags: row.visibility_flags,
         }
     }
 
@@ -108,13 +111,14 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                INSERT INTO "user" (id, displayname)
-                VALUES ($1, $2)
+                INSERT INTO "user" (id, displayname, visibility_flags)
+                VALUES ($1, $2, $3)
                 ON CONFLICT (id) DO NOTHING
-                RETURNING id, displayname, avatar_url
+                RETURNING id, displayname, avatar_url, visibility_flags
             "#,
             dto.id,
-            dto.username
+            dto.username,
+            VisibilityFlags::default().as_raw()
         )
         .fetch_optional(self.db_conn.get_pool())
         .await?;
@@ -135,7 +139,7 @@ impl UserRepository {
 
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
-                SELECT id, displayname, avatar_url
+                SELECT id, displayname, avatar_url, visibility_flags
                 FROM "user"
                 WHERE 1=1
             "#,
@@ -163,5 +167,42 @@ impl UserRepository {
 
         let users = rows.into_iter().map(|row| self.mapper(row)).collect();
         Ok(users)
+    }
+
+    pub async fn update_visibility(&self, user_id: String, dto: UpdateVisibilityDto) -> Result<User> {
+        let row = sqlx::query_as!(
+            ReadUserRow,
+            r#"
+                UPDATE "user"
+                SET visibility_flags = $1
+                WHERE id = $2
+                RETURNING id, displayname, avatar_url, visibility_flags
+            "#,
+            dto.visibility_flags.as_raw(),
+            user_id
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        Ok(self.mapper(row))
+    }
+
+    pub async fn get_by_id(&self, user_id: String) -> Result<Option<User>> {
+        let row = sqlx::query_as!(
+            ReadUserRow,
+            r#"
+                SELECT id, displayname, avatar_url, visibility_flags
+                FROM "user"
+                WHERE id = $1
+            "#,
+            user_id
+        )
+        .fetch_optional(self.db_conn.get_pool())
+        .await?;
+
+        match row {
+            Some(row) => Ok(Some(self.mapper(row))),
+            None => Ok(None),
+        }
     }
 }
