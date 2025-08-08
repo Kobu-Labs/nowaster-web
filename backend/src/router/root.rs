@@ -21,6 +21,7 @@ use crate::{
         tag::{TagRepository, TagRepositoryTrait},
         user::UserRepository,
     },
+    router::user::root::protected_user_router,
     service::{
         category_service::CategoryService,
         feed::{
@@ -39,7 +40,7 @@ use crate::{
 use super::{
     category::root::category_router, feed::root::feed_router, friend::root::friend_router,
     session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
-    user::root::user_router,
+    user::root::public_user_router,
 };
 
 use tracing::Level;
@@ -133,9 +134,11 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .with(EnvFilter::new("info"))
         .init();
 
-    let user_route = Router::new().nest("/user", user_router().with_state(state.clone()));
+    let publicuser_route =
+        Router::new().nest("/user", public_user_router().with_state(state.clone()));
 
     let protected_routes = Router::new()
+        .nest("/user", protected_user_router().with_state(state.clone()))
         .nest("/session", session_router().with_state(state.clone()))
         .nest("/tag", tag_router().with_state(state.clone()))
         .nest("/category", category_router().with_state(state.clone()))
@@ -148,7 +151,9 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
             false,
         ));
 
-    let api_router = Router::new().merge(user_route).merge(protected_routes);
+    let api_router = Router::new()
+        .merge(publicuser_route)
+        .merge(protected_routes);
 
     Router::new()
         .nest("/api", api_router)
