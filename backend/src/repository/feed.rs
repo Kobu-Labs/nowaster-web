@@ -245,6 +245,7 @@ impl FeedRepository {
         );
         base_query.push_bind(user_id.clone());
         base_query.push(" WHERE fs.is_muted IS NOT TRUE AND fs.is_paused IS NOT TRUE");
+        base_query.push(" AND fs.is_allowed_by_visibility IS TRUE ");
 
         if let Some(cursor) = query.cursor {
             base_query.push(" AND fe.created_at < ").push_bind(cursor);
