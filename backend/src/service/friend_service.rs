@@ -6,7 +6,10 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    dto::{feed::AddFeedSource, user::read_user::ReadUserDto},
+    dto::{
+        feed::{AddFeedSource, RemoveFeedSource},
+        user::read_user::ReadUserDto,
+    },
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
@@ -349,8 +352,18 @@ impl FriendServiceTrait for FriendService {
 
     async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
         let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
+
+        let other_user_id = if friendship.friend1.id == actor.user_id.clone() {
+            friendship.clone().friend2.id
+        } else {
+            friendship.clone().friend1.id
+        };
+
+        self.subscription_service
+            .unsubscribe(RemoveFeedSource::User(other_user_id), actor.clone())
+            .await;
         self.visibility_service
-            .recalculate_friendship_visibility(friendship)
+            .recalculate_friendship_visibility(friendship.clone())
             .await;
 
         Ok(())
