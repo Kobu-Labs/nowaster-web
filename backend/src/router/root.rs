@@ -12,6 +12,7 @@ use crate::{
     config::database::Database,
     repository::{
         category::{CategoryRepository, CategoryRepositoryTrait},
+        feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
         session_template::RecurringSessionRepository,
@@ -22,7 +23,10 @@ use crate::{
     },
     service::{
         category_service::CategoryService,
-        feed_service::FeedService,
+        feed::{
+            events::FeedEventService, reactions::FeedReactionService,
+            subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService,
+        },
         friend_service::{FriendService, FriendServiceTrait},
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
@@ -42,6 +46,14 @@ use tracing::Level;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 #[derive(Clone)]
+pub struct Feed {
+    pub visibility_service: FeedVisibilityService,
+    pub reaction_service: FeedReactionService,
+    pub event_service: FeedEventService,
+    pub subscription_service: FeedSubscriptionService,
+}
+
+#[derive(Clone)]
 pub struct AppState {
     pub clerk: Clerk,
     pub session_service: FixedSessionService,
@@ -52,7 +64,7 @@ pub struct AppState {
     pub statistics_service: StatisticsService,
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
     pub session_template_service: SessionTemplateService,
-    pub feed_service: FeedService,
+    pub feed: Feed,
 }
 
 pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
@@ -64,19 +76,31 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let friend_repo = FriendsRepository::new(&db);
     let stopwatch_repo = StopwatchSessionRepository::new(&db);
     let template_session_repo = RecurringSessionRepository::new(&db);
+    let feed_repo = FeedRepository::new(&db);
 
     let category_service = CategoryService::new(category_repo.clone());
-    let user_service = UserService::new(user_repo.clone(), clerk.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
-    let feed_service = FeedService::new(&db, user_service.clone());
+    let statistics_service = StatisticsService::new(statistics_repo);
+
+    // feed related services
+    let visibility_service = FeedVisibilityService::new(feed_repo.clone());
+    let reaction_service = FeedReactionService::new(feed_repo.clone());
+    let event_service = FeedEventService::new(feed_repo.clone());
+    let user_service = UserService::new(user_repo.clone(), visibility_service.clone());
+    let subscription_service =
+        FeedSubscriptionService::new(feed_repo.clone(), user_service.clone());
+
     let session_service = FixedSessionService::new(
         session_repo.clone(),
         stopwatch_repo.clone(),
-        feed_service.clone(),
+        event_service.clone(),
         user_service.clone(),
     );
-    let statistics_service = StatisticsService::new(statistics_repo);
-    let friend_service = FriendService::new(friend_repo, feed_service.clone());
+    let friend_service = FriendService::new(
+        friend_repo,
+        visibility_service.clone(),
+        subscription_service.clone(),
+    );
     let stopwatch_service =
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
     let session_template_service =
@@ -92,7 +116,12 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         statistics_service,
         stopwatch_service,
         session_template_service,
-        feed_service,
+        feed: Feed {
+            subscription_service,
+            visibility_service,
+            event_service,
+            reaction_service,
+        },
     };
 
     tracing_subscriber::registry()

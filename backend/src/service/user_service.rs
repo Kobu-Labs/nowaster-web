@@ -1,21 +1,31 @@
 use clerk_rs::clerk::Clerk;
 
+use std::sync::Arc;
+
 use crate::{
-    dto::user::{create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto, update_visibility::UpdateVisibilityDto},
+    dto::user::{
+        create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto,
+        update_visibility::UpdateVisibilityDto,
+    },
     repository::user::{FilterUsersDto, IdFilter, UserRepository},
     router::user::root::UserError,
+    service::feed::visibility::FeedVisibilityService,
 };
 
 #[derive(Clone)]
 pub struct UserService {
     repo: UserRepository,
-    clerk: Clerk,
+    visibility_service: FeedVisibilityService,
 }
 
 impl UserService {
-    pub fn new(repo: UserRepository, clerk: Clerk) -> Self {
-        Self { repo, clerk }
+    pub fn new(repo: UserRepository, visibility_service: FeedVisibilityService) -> Self {
+        Self {
+            repo,
+            visibility_service,
+        }
     }
+
     pub async fn create(&self, dto: CreateUserDto) -> Result<ReadUserDto, UserError> {
         let res = self.repo.create(dto).await;
         match res {
@@ -89,18 +99,18 @@ impl UserService {
         Ok(users.iter().cloned().map(Into::into).collect())
     }
 
-    pub async fn update_visibility(&self, user_id: String, dto: UpdateVisibilityDto) -> Result<ReadUserDto, UserError> {
-        let res = self.repo.update_visibility(user_id, dto).await;
+    pub async fn update_visibility(
+        &self,
+        user_id: String,
+        dto: UpdateVisibilityDto,
+    ) -> Result<ReadUserDto, UserError> {
+        let res = self.repo.update_visibility(user_id.clone(), dto).await;
+
+        self.visibility_service
+            .recalculate_visibility(user_id)
+            .await;
         match res {
             Ok(u) => Ok(ReadUserDto::from(u)),
-            Err(e) => Err(UserError::UnknownError(e.to_string())),
-        }
-    }
-
-    pub async fn get_user_by_id_direct(&self, user_id: String) -> Result<Option<ReadUserDto>, UserError> {
-        let res = self.repo.get_by_id(user_id).await;
-        match res {
-            Ok(user) => Ok(user.map(Into::into)),
             Err(e) => Err(UserError::UnknownError(e.to_string())),
         }
     }

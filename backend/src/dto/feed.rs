@@ -5,7 +5,10 @@ use validator::Validate;
 
 use crate::{
     dto::user::read_user::ReadUserDto,
-    entity::{feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction}, visibility::VisibilityFlags},
+    entity::{
+        feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
+        visibility::VisibilityFlags,
+    },
 };
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
