@@ -4,7 +4,10 @@ use std::sync::Arc;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::user::{create_user::CreateUserDto, update_user::UpdateUserDto, update_visibility::UpdateVisibilityDto},
+    dto::user::{
+        create_user::CreateUserDto, update_user::UpdateUserDto,
+        update_visibility::UpdateVisibilityDto,
+    },
     entity::{user::User, visibility::VisibilityFlags},
 };
 
@@ -169,7 +172,11 @@ impl UserRepository {
         Ok(users)
     }
 
-    pub async fn update_visibility(&self, user_id: String, dto: UpdateVisibilityDto) -> Result<User> {
+    pub async fn update_visibility(
+        &self,
+        user_id: String,
+        dto: UpdateVisibilityDto,
+    ) -> Result<User> {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"

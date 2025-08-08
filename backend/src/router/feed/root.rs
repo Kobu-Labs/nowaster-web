@@ -55,7 +55,7 @@ async fn get_friends_feed_handler(
         limit: query.limit,
     };
 
-    let result = state.feed_service.get_friends_feed(dto, actor).await;
+    let result = state.feed.event_service.get_feed(dto, actor).await;
     ApiResponse::from_result(result)
 }
 
@@ -64,7 +64,11 @@ async fn add_reaction_handler(
     actor: ClerkUser,
     ValidatedRequest(payload): ValidatedRequest<CreateFeedReactionDto>,
 ) -> ApiResponse<()> {
-    let result = state.feed_service.add_reaction(payload, actor).await;
+    let result = state
+        .feed
+        .reaction_service
+        .add_reaction(payload, actor)
+        .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
         Err(e) => ApiResponse::Error {
@@ -79,7 +83,8 @@ async fn remove_reaction_handler(
     ValidatedRequest(payload): ValidatedRequest<RemoveReactionRequest>,
 ) -> ApiResponse<()> {
     let result = state
-        .feed_service
+        .feed
+        .reaction_service
         .remove_reaction(payload.feed_event_id, payload.emoji, actor)
         .await;
 
@@ -95,7 +100,11 @@ async fn get_subscriptions_handler(
     State(state): State<AppState>,
     actor: ClerkUser,
 ) -> ApiResponse<Vec<ReadFeedSubscriptionDto>> {
-    let result = state.feed_service.get_user_subscriptions(actor).await;
+    let result = state
+        .feed
+        .subscription_service
+        .get_user_subscriptions(actor)
+        .await;
     ApiResponse::from_result(result)
 }
 
@@ -104,7 +113,11 @@ async fn update_subscription_handler(
     actor: ClerkUser,
     ValidatedRequest(payload): ValidatedRequest<UpdateFeedSubscriptionDto>,
 ) -> ApiResponse<()> {
-    let result = state.feed_service.update_subscription(payload, actor).await;
+    let result = state
+        .feed
+        .subscription_service
+        .update_subscription(payload, actor)
+        .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
         Err(e) => ApiResponse::Error {
@@ -122,7 +135,11 @@ async fn unsubscribe_handler(
         FeedSourceSqlType::User => RemoveFeedSource::User(payload.source_id),
     };
 
-    let result = state.feed_service.unsubscribe(source, actor).await;
+    let result = state
+        .feed
+        .subscription_service
+        .unsubscribe(source, actor)
+        .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
         Err(e) => ApiResponse::Error {

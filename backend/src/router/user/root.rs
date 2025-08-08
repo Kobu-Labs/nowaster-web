@@ -38,7 +38,10 @@ async fn update_visibility_handler(
     ValidatedRequest(payload): ValidatedRequest<UpdateVisibilitySettingsDto>,
 ) -> ApiResponse<ReadUserDto> {
     let visibility_dto: UpdateVisibilityDto = payload.into();
-    let res = state.user_service.update_visibility(actor.user_id, visibility_dto).await;
+    let res = state
+        .user_service
+        .update_visibility(actor.user_id, visibility_dto)
+        .await;
     ApiResponse::from_result(res)
 }
 
