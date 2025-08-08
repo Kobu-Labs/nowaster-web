@@ -101,20 +101,20 @@ export default function CategoriesPage() {
       let comparison = 0;
 
       switch (sortBy) {
-      case "name":
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case "sessions":
-        comparison = a.sessionCount - b.sessionCount;
-        break;
-      case "time":
-        // Assuming totalTime exists or calculate from sessionCount
-        comparison = a.sessionCount * 60 - b.sessionCount * 60;
-        break;
-      case "recent":
-        // This would require lastUsedAt field
-        comparison = 0; // Placeholder
-        break;
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "sessions":
+          comparison = a.sessionCount - b.sessionCount;
+          break;
+        case "time":
+          // Assuming totalTime exists or calculate from sessionCount
+          comparison = a.sessionCount * 60 - b.sessionCount * 60;
+          break;
+        case "recent":
+          // This would require lastUsedAt field
+          comparison = 0; // Placeholder
+          break;
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
