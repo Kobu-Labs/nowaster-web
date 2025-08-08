@@ -23,7 +23,7 @@ use crate::{
     service::{
         category_service::CategoryService,
         feed_service::FeedService,
-        friend_service::FriendService,
+        friend_service::{FriendService, FriendServiceTrait},
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
         statistics_service::StatisticsService,
@@ -50,7 +50,7 @@ pub struct AppState {
     pub category_service: CategoryService,
     pub user_service: UserService,
     pub statistics_service: StatisticsService,
-    pub friend_service: FriendService,
+    pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
     pub session_template_service: SessionTemplateService,
     pub feed_service: FeedService,
 }
@@ -84,7 +84,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
 
     let state = AppState {
         clerk: clerk.clone(),
-        friend_service,
+        friend_service: Arc::new(friend_service),
         session_service,
         tag_service,
         category_service,

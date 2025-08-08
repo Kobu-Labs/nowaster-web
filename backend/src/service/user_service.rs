@@ -1,7 +1,7 @@
 use clerk_rs::clerk::Clerk;
 
 use crate::{
-    dto::user::{create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto},
+    dto::user::{create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto, update_visibility::UpdateVisibilityDto},
     repository::user::{FilterUsersDto, IdFilter, UserRepository},
     router::user::root::UserError,
 };
@@ -87,5 +87,21 @@ impl UserService {
             .map_err(|e| UserError::UnknownError(e.to_string()))?;
 
         Ok(users.iter().cloned().map(Into::into).collect())
+    }
+
+    pub async fn update_visibility(&self, user_id: String, dto: UpdateVisibilityDto) -> Result<ReadUserDto, UserError> {
+        let res = self.repo.update_visibility(user_id, dto).await;
+        match res {
+            Ok(u) => Ok(ReadUserDto::from(u)),
+            Err(e) => Err(UserError::UnknownError(e.to_string())),
+        }
+    }
+
+    pub async fn get_user_by_id_direct(&self, user_id: String) -> Result<Option<ReadUserDto>, UserError> {
+        let res = self.repo.get_by_id(user_id).await;
+        match res {
+            Ok(user) => Ok(user.map(Into::into)),
+            Err(e) => Err(UserError::UnknownError(e.to_string())),
+        }
     }
 }

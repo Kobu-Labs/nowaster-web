@@ -7,8 +7,10 @@ use validator::Validate;
 
 use crate::{
     dto::user::read_user::ReadUserDto,
+    entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
+    service::feed_service::{self, FeedService},
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -44,12 +46,14 @@ impl FromRow<'_, PgRow> for ReadFriendRequestDto {
             id: row.try_get("requestor_id")?,
             username: row.try_get("requestor_username")?,
             avatar_url: row.try_get("requestor_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friend request display
         };
 
         let recipient = ReadUserDto {
             id: row.try_get("recipient_id")?,
             username: row.try_get("recipient_username")?,
             avatar_url: row.try_get("recipient_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friend request display
         };
 
         let created_at: DateTime<Local> = row.try_get("created_at")?;
@@ -73,12 +77,14 @@ impl FromRow<'_, PgRow> for ReadFriendshipDto {
             id: row.try_get("friend1_id")?,
             username: row.try_get("friend1_username")?,
             avatar_url: row.try_get("friend1_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friendship display
         };
 
         let friend2 = ReadUserDto {
             id: row.try_get("friend2_id")?,
             username: row.try_get("friend2_username")?,
             avatar_url: row.try_get("friend2_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friendship display
         };
 
         let created_at: DateTime<Local> = row.try_get("created_at")?;
@@ -158,17 +164,52 @@ pub struct ReadFriendRequestDto {
     pub introduction_message: Option<String>,
 }
 
+#[async_trait::async_trait]
+pub trait FriendServiceTrait {
+    async fn create_friend_request(
+        &self,
+        dto: CreateFriendRequestDto,
+        actor: ClerkUser,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn accept_friend_request(
+        &self,
+        dto: AcceptFriendRequestDto,
+        actor: ClerkUser,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn reject_friend_request(
+        &self,
+        dto: RejectFriendRequestDto,
+        actor: ClerkUser,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn cancel_friend_request(
+        &self,
+        dto: CancelFriendRequestDto,
+        actor: ClerkUser,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>>;
+
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()>;
+
+    async fn list_friend_requests(
+        &self,
+        actor: ClerkUser,
+        data: ReadFriendRequestsDto,
+    ) -> Result<Vec<ReadFriendRequestDto>>;
+}
+
 #[derive(Clone)]
 pub struct FriendService {
     repo: FriendsRepository,
+    feed_service: FeedService,
 }
 
-impl FriendService {
-    pub fn new(repo: FriendsRepository) -> Self {
-        Self { repo }
-    }
-
-    pub async fn create_friend_request(
+#[async_trait::async_trait]
+impl FriendServiceTrait for FriendService {
+    async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
         actor: ClerkUser,
@@ -183,7 +224,7 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn accept_friend_request(
+    async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
         actor: ClerkUser,
@@ -214,7 +255,7 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn reject_friend_request(
+    async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
         actor: ClerkUser,
@@ -245,7 +286,7 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn cancel_friend_request(
+    async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
         actor: ClerkUser,
@@ -276,22 +317,28 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
+    async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
         let result = self.repo.list_friends(actor.clone()).await?;
         Ok(result)
     }
 
-    pub async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
         self.repo.remove_friendship(dto, actor).await?;
         Ok(())
     }
 
-    pub async fn list_friend_requests(
+    async fn list_friend_requests(
         &self,
         actor: ClerkUser,
         data: ReadFriendRequestsDto,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = self.repo.list_friend_requests(data, actor).await?;
         Ok(result)
+    }
+}
+
+impl FriendService {
+    pub fn new(repo: FriendsRepository, feed_service: FeedService) -> Self {
+        FriendService { repo, feed_service }
     }
 }

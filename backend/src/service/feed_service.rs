@@ -12,7 +12,7 @@ use crate::{
         },
         user::read_user::ReadUserDto,
     },
-    entity::feed::FeedEventSource,
+    entity::{feed::FeedEventSource, visibility::VisibilityFlags},
     repository::{
         feed::{FeedRepository, FeedSourceSqlType, FeedSubscriptionRow},
         user::{FilterUsersDto, IdFilter, UserRepository},
@@ -166,6 +166,7 @@ impl FeedService {
                             id: row.source_id.clone(),
                             username: user.map(|u| u.username.clone()).unwrap_or_default(),
                             avatar_url: user.and_then(|u| u.avatar_url.clone()),
+                            visibility_flags: user.map(|u| u.visibility_flags).unwrap_or_default(),
                         })
                     }
                 },
