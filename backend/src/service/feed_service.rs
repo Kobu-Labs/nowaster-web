@@ -40,11 +40,11 @@ impl FeedService {
         Ok(())
     }
 
-    pub async fn add_feed_source(&self, source: AddFeedSource, actor: ClerkUser) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, actor: ClerkUser) -> Result<()> {
         self.feed_repository.subscribe(source, actor).await
     }
 
-    pub async fn remove_feed_source(
+    pub async fn unsubscribe(
         &self,
         source: RemoveFeedSource,
         actor: ClerkUser,
@@ -191,9 +191,5 @@ impl FeedService {
                 dto.is_paused,
             )
             .await
-    }
-
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: ClerkUser) -> Result<()> {
-        self.feed_repository.unsubscribe(source, actor).await
     }
 }
