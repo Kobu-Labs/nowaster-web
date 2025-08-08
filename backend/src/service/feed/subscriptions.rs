@@ -10,7 +10,7 @@ use crate::{
         user::read_user::ReadUserDto,
     },
     entity::feed::FeedEventSource,
-    repository::feed::{FeedRepository, FeedSourceSqlType},
+    repository::{feed::{FeedRepository, FeedSourceSqlType}, user::{FilterUsersDto, IdFilter, UserRepository}},
     router::clerk::ClerkUser,
     service::user_service::UserService,
 };
@@ -18,7 +18,7 @@ use crate::{
 #[derive(Clone)]
 pub struct FeedSubscriptionService {
     feed_repository: FeedRepository,
-    user_service: UserService,
+    user_service: UserRepository,
 }
 
 impl FeedSubscriptionService {
@@ -45,7 +45,7 @@ impl FeedSubscriptionService {
         self.feed_repository.unsubscribe(source, actor).await
     }
 
-    pub fn new(repo: FeedRepository, user_service: UserService) -> Self {
+    pub fn new(repo: FeedRepository, user_service: UserRepository) -> Self {
         Self {
             user_service,
             feed_repository: repo,
@@ -73,7 +73,12 @@ impl FeedSubscriptionService {
         // Fetch all users at once
         let mut user_lookup = HashMap::new();
         if let Some(user_ids) = sources_by_type.get(&FeedSourceSqlType::User) {
-            let users = self.user_service.get_users_by_ids(user_ids.clone()).await?;
+            let users = self.user_service
+            .filter_users(FilterUsersDto {
+                id: Some(IdFilter::Many(user_ids.clone())),
+                ..Default::default()
+            })
+            .await?;
 
             for user in users {
                 user_lookup.insert(user.id.clone(), user);

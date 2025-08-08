@@ -6,7 +6,7 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    dto::user::read_user::ReadUserDto,
+    dto::{feed::AddFeedSource, user::read_user::ReadUserDto},
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
@@ -253,6 +253,22 @@ impl FriendServiceTrait for FriendService {
         }
 
         let result = self.repo.update_friend_request(dto).await?;
+        self.subscription_service
+            .subscribe(
+                AddFeedSource::User(request.requestor.id.clone()),
+                ClerkUser {
+                    user_id: request.recipient.id.clone(),
+                },
+            )
+            .await;
+        self.subscription_service
+            .subscribe(
+                AddFeedSource::User(request.recipient.id.clone()),
+                ClerkUser {
+                    user_id: request.requestor.id.clone(),
+                },
+            )
+            .await;
 
         let friendship_result = self.repo.get_friendship_by_id(result.id).await;
         if let Ok(Some(friendship)) = friendship_result {

@@ -86,9 +86,13 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
     let reaction_service = FeedReactionService::new(feed_repo.clone());
     let event_service = FeedEventService::new(feed_repo.clone());
-    let user_service = UserService::new(user_repo.clone(), visibility_service.clone());
-    let subscription_service =
-        FeedSubscriptionService::new(feed_repo.clone(), user_service.clone());
+    let subscription_service = FeedSubscriptionService::new(feed_repo.clone(), user_repo.clone());
+
+    let user_service = UserService::new(
+        user_repo.clone(),
+        visibility_service.clone(),
+        subscription_service.clone(),
+    );
 
     let session_service = FixedSessionService::new(
         session_repo.clone(),

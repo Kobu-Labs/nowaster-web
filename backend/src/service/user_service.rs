@@ -3,33 +3,52 @@ use clerk_rs::clerk::Clerk;
 use std::sync::Arc;
 
 use crate::{
-    dto::user::{
-        create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto,
-        update_visibility::UpdateVisibilityDto,
+    dto::{
+        feed::AddFeedSource,
+        user::{
+            create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto,
+            update_visibility::UpdateVisibilityDto,
+        },
     },
     repository::user::{FilterUsersDto, IdFilter, UserRepository},
-    router::user::root::UserError,
-    service::feed::visibility::FeedVisibilityService,
+    router::{clerk::ClerkUser, user::root::UserError},
+    service::feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
 };
 
 #[derive(Clone)]
 pub struct UserService {
     repo: UserRepository,
     visibility_service: FeedVisibilityService,
+    subscription_service: FeedSubscriptionService,
 }
 
 impl UserService {
-    pub fn new(repo: UserRepository, visibility_service: FeedVisibilityService) -> Self {
+    pub fn new(
+        repo: UserRepository,
+        visibility_service: FeedVisibilityService,
+        subscription_service: FeedSubscriptionService,
+    ) -> Self {
         Self {
             repo,
             visibility_service,
+            subscription_service,
         }
     }
 
     pub async fn create(&self, dto: CreateUserDto) -> Result<ReadUserDto, UserError> {
         let res = self.repo.create(dto).await;
         match res {
-            Ok(u) => Ok(ReadUserDto::from(u)),
+            Ok(u) => {
+                self.subscription_service
+                    .subscribe(
+                        AddFeedSource::User(u.id.clone()),
+                        ClerkUser {
+                            user_id: u.id.clone(),
+                        },
+                    )
+                    .await;
+                Ok(ReadUserDto::from(u))
+            }
             Err(e) => Err(UserError::UnknownError(e.to_string())),
         }
     }
