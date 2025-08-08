@@ -5,13 +5,21 @@ use crate::router::clerk::ClerkUser;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::{dto::user::create_user::CreateUserDto, router::root::AppState};
+use axum::routing::patch;
 use axum::{extract::State, routing::post, Router};
 use thiserror::Error;
 
-pub fn user_router() -> Router<AppState> {
+pub fn public_user_router() -> Router<AppState> {
+    Router::new().route("/", post(crate_user_handler))
+}
+
+pub fn protected_user_router() -> Router<AppState> {
     Router::new()
-        .route("/", post(crate_user_handler).patch(update_user_handler))
-        .route("/visibility", post(update_visibility_handler))
+        .route(
+            "/",
+            patch(update_user_handler).get(get_current_user_handler),
+        )
+        .route("/visibility", patch(update_visibility_handler))
 }
 
 async fn crate_user_handler(
@@ -29,6 +37,18 @@ async fn update_user_handler(
     // TODO: this is insecure, this handler should only be used to 'notify' of a change
     // and the user should be pulled from clerk database and updated in our db
     let res = state.user_service.update_user(payload).await;
+    ApiResponse::from_result(res)
+}
+
+async fn get_current_user_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+) -> ApiResponse<ReadUserDto> {
+    let res = match state.user_service.get_user_by_id(actor.user_id).await {
+        Ok(Some(user)) => Ok(user),
+        Ok(None) => Err(UserError::UserNotFound),
+        Err(e) => Err(e),
+    };
     ApiResponse::from_result(res)
 }
 
