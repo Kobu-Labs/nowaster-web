@@ -423,4 +423,50 @@ impl FeedRepository {
         query.execute(self.db.get_pool()).await?;
         Ok(())
     }
+
+    /// Recalculates visibility permissions for a specific user
+    /// Call this when a user changes their visibility settings or creates new relationships
+    pub async fn recalculate_visibility(&self, user_id: String) -> Result<u64> {
+        let affected_rows = sqlx::query!(
+            r#"
+                UPDATE feed_subscription fs
+                SET is_allowed_by_visibility =
+                    (
+                        -- Allow if source user's visibility is public
+                        ((u.visibility_flags & 3) = 3)
+
+                        OR
+
+                        -- Allow if source user's visibility includes friends AND they are friends
+                        (
+                            (u.visibility_flags & 1) = 1
+                            AND EXISTS (
+                                SELECT 1
+                                FROM friend f
+                                WHERE (
+                                          (f.friend_1_id = fs.subscriber_id AND f.friend_2_id = fs.source_id)
+                                       OR (f.friend_2_id = fs.subscriber_id AND f.friend_1_id = fs.source_id)
+                                      )
+                                  AND f.deleted = false
+                            )
+                        )
+
+                        OR
+
+                        -- Allow if subscriber is viewing their own content
+                        (fs.subscriber_id = fs.source_id)
+                    )
+                FROM "user" u
+                WHERE fs.source_type = 'user'
+                  AND fs.source_id = $1
+                  AND u.id = fs.source_id;
+
+            "#,
+            user_id
+        )
+        .execute(self.db.get_pool())
+        .await?;
+
+        Ok(affected_rows.rows_affected())
+    }
 }
