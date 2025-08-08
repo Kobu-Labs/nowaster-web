@@ -10,9 +10,7 @@ use crate::{
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
-    service::{
-        feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
-    },
+    service::feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -256,13 +254,12 @@ impl FriendServiceTrait for FriendService {
 
         let result = self.repo.update_friend_request(dto).await?;
 
-        self.visibility_service
-            .recalculate_visibility(result.requestor.id.clone())
-            .await;
-
-        self.visibility_service
-            .recalculate_visibility(result.recipient.id.clone())
-            .await;
+        let friendship_result = self.repo.get_friendship_by_id(result.id).await;
+        if let Ok(Some(friendship)) = friendship_result {
+            self.visibility_service
+                .recalculate_friendship_visibility(friendship)
+                .await;
+        }
 
         Ok(result)
     }
@@ -337,17 +334,7 @@ impl FriendServiceTrait for FriendService {
     async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
         let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
         self.visibility_service
-            .recalculate_visibility(actor.user_id.clone())
-            .await;
-
-        let other_user_id = if friendship.friend1.id == actor.user_id.clone() {
-            friendship.friend2.id
-        } else {
-            friendship.friend1.id
-        };
-
-        self.visibility_service
-            .recalculate_visibility(other_user_id)
+            .recalculate_friendship_visibility(friendship)
             .await;
 
         Ok(())
