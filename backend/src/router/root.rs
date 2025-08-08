@@ -76,7 +76,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         user_service.clone(),
     );
     let statistics_service = StatisticsService::new(statistics_repo);
-    let friend_service = FriendService::new(friend_repo);
+    let friend_service = FriendService::new(friend_repo, feed_service.clone());
     let stopwatch_service =
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
     let session_template_service =

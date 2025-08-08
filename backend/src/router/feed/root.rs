@@ -122,7 +122,7 @@ async fn unsubscribe_handler(
         FeedSourceSqlType::User => RemoveFeedSource::User(payload.source_id),
     };
 
-    let result = state.feed_service.remove_feed_source(source, actor).await;
+    let result = state.feed_service.unsubscribe(source, actor).await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
         Err(e) => ApiResponse::Error {
