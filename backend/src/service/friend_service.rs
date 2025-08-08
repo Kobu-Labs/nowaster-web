@@ -10,7 +10,9 @@ use crate::{
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
-    service::feed_service::{self, FeedService},
+    service::{
+        feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
+    },
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -204,7 +206,8 @@ pub trait FriendServiceTrait {
 #[derive(Clone)]
 pub struct FriendService {
     repo: FriendsRepository,
-    feed_service: FeedService,
+    visibility_service: FeedVisibilityService,
+    subscription_service: FeedSubscriptionService,
 }
 
 #[async_trait::async_trait]
@@ -252,6 +255,15 @@ impl FriendServiceTrait for FriendService {
         }
 
         let result = self.repo.update_friend_request(dto).await?;
+
+        self.visibility_service
+            .recalculate_visibility(result.requestor.id.clone())
+            .await;
+
+        self.visibility_service
+            .recalculate_visibility(result.recipient.id.clone())
+            .await;
+
         Ok(result)
     }
 
@@ -323,7 +335,21 @@ impl FriendServiceTrait for FriendService {
     }
 
     async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
-        self.repo.remove_friendship(dto, actor).await?;
+        let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
+        self.visibility_service
+            .recalculate_visibility(actor.user_id.clone())
+            .await;
+
+        let other_user_id = if friendship.friend1.id == actor.user_id.clone() {
+            friendship.friend2.id
+        } else {
+            friendship.friend1.id
+        };
+
+        self.visibility_service
+            .recalculate_visibility(other_user_id)
+            .await;
+
         Ok(())
     }
 
@@ -338,7 +364,15 @@ impl FriendServiceTrait for FriendService {
 }
 
 impl FriendService {
-    pub fn new(repo: FriendsRepository, feed_service: FeedService) -> Self {
-        FriendService { repo, feed_service }
+    pub fn new(
+        repo: FriendsRepository,
+        visibility_service: FeedVisibilityService,
+        subscription_service: FeedSubscriptionService,
+    ) -> Self {
+        FriendService {
+            repo,
+            visibility_service,
+            subscription_service,
+        }
     }
 }
