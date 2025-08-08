@@ -14,6 +14,7 @@ use crate::{
         session::{SessionType, StopwatchSession},
         tag::Tag,
         user::User,
+        visibility::VisibilityFlags,
     },
     router::clerk::ClerkUser,
 };
@@ -65,6 +66,7 @@ impl StopwatchSessionRepository {
                     id: session.user_id.clone(),
                     username: session.user_name.clone(),
                     avatar_url: None,
+                    visibility_flags: VisibilityFlags::default(), // Default for session display
                 },
                 category: None,
                 tags: None,
