@@ -18,14 +18,14 @@ use crate::{
         stopwatch_session::StopwatchSessionRepository,
     },
     router::clerk::ClerkUser,
-    service::{feed_service::FeedService, user_service::UserService},
+    service::{feed::events::FeedEventService, user_service::UserService},
 };
 
 #[derive(Clone)]
 pub struct FixedSessionService {
     fixed_repo: FixedSessionRepository,
     stopwatch_repo: StopwatchSessionRepository,
-    feed_service: FeedService,
+    event_service: FeedEventService,
     user_service: UserService,
 }
 
@@ -40,13 +40,13 @@ impl FixedSessionService {
     pub fn new(
         repo: FixedSessionRepository,
         stopwatch_repo: StopwatchSessionRepository,
-        feed_service: FeedService,
+        event_service: FeedEventService,
         user_service: UserService,
     ) -> Self {
         Self {
             fixed_repo: repo,
             stopwatch_repo,
-            feed_service,
+            event_service,
             user_service,
         }
     }
@@ -63,7 +63,7 @@ impl FixedSessionService {
             .await?
             .unwrap();
 
-        self.feed_service
+        self.event_service
             .publish_event(CreateFeedEventDto {
                 id: None,
                 data: FeedEventType::SessionCompleted(SessionEventData {
