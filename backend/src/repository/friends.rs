@@ -355,4 +355,35 @@ impl FriendsRepository {
 
         Ok(result)
     }
+
+    pub async fn get_friendship_by_id(
+        &self,
+        friendship_id: Uuid,
+    ) -> Result<Option<ReadFriendshipDto>> {
+        let result = sqlx::query(
+            r#"
+                SELECT 
+                    f.id,
+                    f.friend_1_id AS friend1_id,
+                    f.friend_2_id AS friend2_id,
+                    f.created_at,
+                    u1.displayname AS friend1_username,
+                    u2.displayname AS friend2_username,
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.avatar_url as friend2_avatar_url
+                FROM friend f
+                LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
+                WHERE f.id = $1
+            "#,
+        )
+        .bind(friendship_id)
+        .fetch_optional(self.db.get_pool())
+        .await?;
+
+        match result {
+            Some(row) => Ok(Some(ReadFriendshipDto::from_row(&row)?)),
+            None => Ok(None),
+        }
+    }
 }
