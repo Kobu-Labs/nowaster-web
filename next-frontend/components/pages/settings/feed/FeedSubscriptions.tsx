@@ -36,7 +36,7 @@ import {
 import { Switch } from "@/components/shadcn/switch";
 import { useToast } from "@/components/shadcn/use-toast";
 import { getInitials } from "@/lib/utils";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2, Users } from "lucide-react";
 import { FC } from "react";
@@ -108,16 +108,16 @@ export function FeedSubscriptions() {
         <div className="space-y-4">
           {subscriptions.map((subscription) => {
             switch (subscription.source_type) {
-              case "user":
-                return (
-                  <UserSubscriptionCard
-                    user={subscription.source_data}
-                    subscription={subscription}
-                    key={subscription.id}
-                  />
-                );
-              case "placeholder":
-                return null;
+            case "user":
+              return (
+                <UserSubscriptionCard
+                  user={subscription.source_data}
+                  subscription={subscription}
+                  key={subscription.id}
+                />
+              );
+            case "placeholder":
+              return null;
             }
           })}
         </div>
@@ -141,8 +141,8 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
   const { toast } = useToast();
   const updateSubscriptionMutation = useMutation({
     mutationFn: updateSubscription,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["feed-subscriptions"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["feed-subscriptions"] });
       toast({ title: "Subscription updated successfully" });
     },
     onError: (error) => {
@@ -153,8 +153,8 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
 
   const unsubscribeMutation = useMutation({
     mutationFn: unsubscribe,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["feed-subscriptions"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["feed-subscriptions"] });
       toast({ title: "Successfully unsubscribed" });
     },
     onError: (error) => {
