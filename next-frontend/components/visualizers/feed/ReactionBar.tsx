@@ -52,7 +52,7 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
         acc[reaction.emoji] = {
           count: (acc[reaction.emoji]?.count ?? 0) + 1,
           currentUserReacted:
-            acc[reaction.emoji]?.currentUserReacted ||
+            acc[reaction.emoji]?.currentUserReacted ??
             reaction.user.id === userId,
         };
         return acc;
