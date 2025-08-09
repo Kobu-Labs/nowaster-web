@@ -1,6 +1,6 @@
 "use client";
 
-import { Rss, Settings, User } from "lucide-react";
+import { Rss, Settings, Shield, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -24,6 +24,12 @@ const settingsNavItems = [
     icon: Rss,
     description: "Manage your feed subscriptions",
   },
+  {
+    title: "Privacy",
+    url: "/home/settings/visibility",
+    icon: Shield,
+    description: "Control who can see your activity",
+  },
 ] as const;
 
 export function SettingsSidebar() {
@@ -43,7 +49,7 @@ export function SettingsSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="my-2">
           <SidebarGroupLabel>Social</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
