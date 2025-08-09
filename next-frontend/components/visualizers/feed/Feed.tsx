@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useRef, useCallback } from "react";
+import { FC, useRef, useCallback, useEffect } from "react";
 import { useFeed } from "@/components/hooks/feed/useFeed";
 import { Loader2 } from "lucide-react";
 import { SessionCompletedFeedCard } from "@/components/visualizers/feed/events/SessionCompletedEventCard";
@@ -16,20 +16,24 @@ export const Feed: FC = () => {
     error,
   } = useFeed();
 
-  const observer = useRef<IntersectionObserver>();
+  const observer = useRef<IntersectionObserver | null>(null);
   const lastEventElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isFetchingNextPage) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0]?.isIntersecting && hasNextPage) {
-          fetchNextPage();
+          void fetchNextPage();
         }
       });
       if (node) observer.current.observe(node);
     },
     [isFetchingNextPage, hasNextPage, fetchNextPage],
   );
+
+  useEffect(() => {
+    return () => observer.current?.disconnect();
+  }, []);
 
   if (isLoading) {
     return (
@@ -47,7 +51,7 @@ export const Feed: FC = () => {
     );
   }
 
-  const allEvents = data?.pages.flat() || [];
+  const allEvents = data?.pages.flat() ?? [];
 
   if (allEvents.length === 0) {
     return (
@@ -101,7 +105,7 @@ export const Feed: FC = () => {
 
       {!hasNextPage && allEvents.length > 0 && (
         <div className="text-center py-4 text-muted-foreground text-sm">
-          You've reached the end of the feed
+          You&apos;ve reached the end of the feed
         </div>
       )}
     </div>

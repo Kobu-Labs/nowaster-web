@@ -1,6 +1,6 @@
 "use client";
 
-import { Rss, Settings, Shield, User } from "lucide-react";
+import { Rss, Settings, Shield } from "lucide-react";
 
 import {
   Sidebar,
