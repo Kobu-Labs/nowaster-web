@@ -66,21 +66,21 @@ export const Feed: FC = () => {
 
   const renderEventCard = (event: ReadFeedEvent) => {
     switch (event.event_type) {
-      case "session_completed":
-        switch (event.source_type) {
-          case "user":
-            return (
-              <SessionCompletedFeedCard
-                event={event}
-                event_data={event.event_data}
-                user={event.source_data}
-              />
-            );
-          case "placeholder":
-            return null;
-        }
-      case "session_updated":
+    case "session_completed":
+      switch (event.source_type) {
+      case "user":
+        return (
+          <SessionCompletedFeedCard
+            event={event}
+            event_data={event.event_data}
+            user={event.source_data}
+          />
+        );
+      case "placeholder":
         return null;
+      }
+    case "session_updated":
+      return null;
     }
   };
 
