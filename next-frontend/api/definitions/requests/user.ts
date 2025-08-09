@@ -19,7 +19,7 @@ const updateVisibility = z.object({
 });
 
 const getProfile = z.object({
-  id: z.string().optional(), // Optional - if not provided, gets current user
+  id: z.string().optional(),
 });
 
 export type UserRequest = {
