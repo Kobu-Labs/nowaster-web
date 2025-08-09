@@ -10,7 +10,10 @@ use crate::{
         user::read_user::ReadUserDto,
     },
     entity::feed::FeedEventSource,
-    repository::{feed::{FeedRepository, FeedSourceSqlType}, user::{FilterUsersDto, IdFilter, UserRepository}},
+    repository::{
+        feed::{FeedRepository, FeedSourceSqlType},
+        user::{FilterUsersDto, IdFilter, UserRepository},
+    },
     router::clerk::ClerkUser,
     service::user_service::UserService,
 };
@@ -73,12 +76,13 @@ impl FeedSubscriptionService {
         // Fetch all users at once
         let mut user_lookup = HashMap::new();
         if let Some(user_ids) = sources_by_type.get(&FeedSourceSqlType::User) {
-            let users = self.user_service
-            .filter_users(FilterUsersDto {
-                id: Some(IdFilter::Many(user_ids.clone())),
-                ..Default::default()
-            })
-            .await?;
+            let users = self
+                .user_service
+                .filter_users(FilterUsersDto {
+                    id: Some(IdFilter::Many(user_ids.clone())),
+                    ..Default::default()
+                })
+                .await?;
 
             for user in users {
                 user_lookup.insert(user.id.clone(), user);
