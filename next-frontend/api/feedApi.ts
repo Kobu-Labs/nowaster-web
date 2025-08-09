@@ -5,14 +5,14 @@ import {
   CreateFeedReactionRequest,
   RemoveFeedReactionRequest,
   UpdateFeedSubscriptionRequest,
-  UnsubscribeRequest
+  UnsubscribeRequest,
 } from "@/api/definitions/requests/feed";
 
 const BASE_URL = "/feed";
 
 export const getFeed = async (params?: FeedQueryRequest) => {
   const { data } = await baseApi.get(BASE_URL, { 
-    params: params 
+    params: params, 
   });
   return await parseResponseUnsafe(data, FeedResponseSchema.getFeed);
 };

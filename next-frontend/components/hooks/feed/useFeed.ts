@@ -1,15 +1,16 @@
 import {
-    useMutation,
-    useInfiniteQuery,
-    useQueryClient
+  useMutation,
+  useInfiniteQuery,
+  useQueryClient,
+  InfiniteData,
 } from "@tanstack/react-query";
 import * as FeedApi from "@/api/feedApi";
 import {
-    RemoveFeedReactionRequest
+  CreateFeedReactionRequest,
+  RemoveFeedReactionRequest,
 } from "@/api/definitions/requests/feed";
 import { FeedResponse } from "@/api/definitions/responses/feed";
 import { useAuth } from "@clerk/nextjs";
-import { Infer } from "next/dist/compiled/superstruct";
 
 export const FEED_QUERY_KEY = "feed";
 
@@ -23,8 +24,8 @@ export const useFeed = () => {
       }),
     initialPageParam: undefined as Date | undefined,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length === 0) return undefined;
-      return lastPage[lastPage.length - 1].created_at;
+      if (lastPage.length < 20) return undefined;
+      return lastPage[lastPage.length - 1]!.created_at;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -35,7 +36,7 @@ export const useAddReaction = () => {
   const { userId } = useAuth();
 
   return useMutation({
-    mutationFn: async (params: Infer) => {
+    mutationFn: async (params: CreateFeedReactionRequest) => {
       return await FeedApi.addReaction(params);
     },
     onMutate: async (newTodo) => {
@@ -45,9 +46,9 @@ export const useAddReaction = () => {
       // Optimistically update to the new value
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
-        (old: any) => {
+        (old: InfiniteData<FeedResponse["getFeed"]>) => {
           if (!old?.pages) return old;
-          
+
           return {
             ...old,
             pages: old.pages.map((page: FeedResponse["getFeed"]) => {
@@ -98,9 +99,9 @@ export const useRemoveReaction = () => {
 
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
-        (old: any) => {
+        (old: InfiniteData<FeedResponse["getFeed"]>) => {
           if (!old?.pages) return old;
-          
+
           return {
             ...old,
             pages: old.pages.map((page: FeedResponse["getFeed"]) => {

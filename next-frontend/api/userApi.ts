@@ -36,7 +36,7 @@ export const getProfile = async (
   params?: UserRequest["getProfile"],
 ) => {
   const { data } = await baseApi.get(BASE_URL + "/profile", {
-    params: params ? { id: params.id } : undefined
+    params: params ? { id: params.id } : undefined,
   });
   return await parseResponseUnsafe(data, UserResponseSchema.getProfile);
 };

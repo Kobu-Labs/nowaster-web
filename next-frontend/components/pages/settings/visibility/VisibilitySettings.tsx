@@ -5,10 +5,10 @@ import { useUpdateVisibility } from "@/components/hooks/user/useUpdateVisibility
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
 } from "@/components/shadcn/card";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { Label } from "@/components/shadcn/label";
@@ -35,14 +35,14 @@ export const VisibilitySettings: FC<{ user: User }> = ({ user }) => {
 
     let newFlags: VisibilityFlags;
     switch (preset) {
-      case "private":
-        newFlags = VisibilityUtils.none();
-        break;
-      case "public":
-        newFlags = VisibilityUtils.public();
-        break;
-      default:
-        newFlags = currentFlags;
+    case "private":
+      newFlags = VisibilityUtils.none();
+      break;
+    case "public":
+      newFlags = VisibilityUtils.public();
+      break;
+    default:
+      newFlags = currentFlags;
     }
 
     if (preset !== "custom") {
