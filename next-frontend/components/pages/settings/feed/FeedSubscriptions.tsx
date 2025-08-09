@@ -1,40 +1,42 @@
 "use client";
 
 import {
-    ReadFeedSubscription,
-    ReadUserAvatar,
+  ReadFeedSubscription,
+  ReadUserAvatar,
 } from "@/api/definitions/models/feed";
 import {
-    getSubscriptions,
-    unsubscribe,
-    updateSubscription,
+  getSubscriptions,
+  unsubscribe,
+  updateSubscription,
 } from "@/api/feedApi";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/shadcn/alert-dialog";
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
 } from "@/components/shadcn/avatar";
+import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
 } from "@/components/shadcn/card";
 import { Switch } from "@/components/shadcn/switch";
 import { useToast } from "@/components/shadcn/use-toast";
 import { getInitials } from "@/lib/utils";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2, Users } from "lucide-react";
 import { FC } from "react";
@@ -134,6 +136,8 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
   subscription,
 }) => {
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
+
   const { toast } = useToast();
   const updateSubscriptionMutation = useMutation({
     mutationFn: updateSubscription,
@@ -186,6 +190,7 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h3 className="font-medium">{user.username}</h3>
+            {userId === user.id && <Badge variant="secondary">You</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">
             Subscribed {new Date(subscription.created_at).toLocaleDateString()}
