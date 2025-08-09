@@ -12,6 +12,16 @@ const update = z.object({
   avatarUrl: z.string().optional(),
 });
 
+const updateVisibility = z.object({
+  visible_to_friends: z.boolean(),
+  visible_to_groups: z.boolean(),
+  visible_to_public: z.boolean(),
+});
+
+const getProfile = z.object({
+  id: z.string().optional(), // Optional - if not provided, gets current user
+});
+
 export type UserRequest = {
   [Property in keyof typeof UserRequestSchema]: z.infer<
     (typeof UserRequestSchema)[Property]
@@ -21,4 +31,6 @@ export type UserRequest = {
 export const UserRequestSchema = {
   create,
   update,
+  updateVisibility,
+  getProfile,
 } as const;
