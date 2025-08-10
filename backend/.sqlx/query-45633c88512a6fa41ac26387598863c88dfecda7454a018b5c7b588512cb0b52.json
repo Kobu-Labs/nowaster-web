@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    fr.id,\n                    fr.feed_event_id,\n                    fr.emoji,\n                    fr.created_at,\n                    u.id as user_id,\n                    u.displayname,\n                    u.avatar_url\n                FROM feed_reaction fr\n                JOIN \"user\" u on u.id = fr.user_id\n                WHERE feed_event_id = ANY($1)\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "feed_event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "emoji",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "45633c88512a6fa41ac26387598863c88dfecda7454a018b5c7b588512cb0b52"
+}
