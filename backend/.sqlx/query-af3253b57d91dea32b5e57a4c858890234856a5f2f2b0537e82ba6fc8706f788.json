@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO feed_subscription (subscriber_id, source_type, source_id)\n                VALUES ($1, $2, $3)\n                ON CONFLICT (subscriber_id, source_type, source_id) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        {
+          "Custom": {
+            "name": "feed_source_type",
+            "kind": {
+              "Enum": [
+                "group",
+                "user",
+                "system"
+              ]
+            }
+          }
+        },
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "af3253b57d91dea32b5e57a4c858890234856a5f2f2b0537e82ba6fc8706f788"
+}
