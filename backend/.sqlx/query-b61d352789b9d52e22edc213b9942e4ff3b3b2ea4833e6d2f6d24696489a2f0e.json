@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM feed_subscription\n                WHERE subscriber_id = $1 AND source_id = $2 AND source_type = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "feed_source_type",
+            "kind": {
+              "Enum": [
+                "group",
+                "user",
+                "system"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b61d352789b9d52e22edc213b9942e4ff3b3b2ea4833e6d2f6d24696489a2f0e"
+}

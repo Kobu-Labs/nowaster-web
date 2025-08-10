@@ -1,0 +1,39 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO feed_event (id, event_type, event_data, source_type, source_id)\n                VALUES ($1, $2, $3, $4, $5)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "feed_event_type",
+            "kind": {
+              "Enum": [
+                "session_completed",
+                "session_started"
+              ]
+            }
+          }
+        },
+        "Jsonb",
+        {
+          "Custom": {
+            "name": "feed_source_type",
+            "kind": {
+              "Enum": [
+                "group",
+                "user",
+                "system"
+              ]
+            }
+          }
+        },
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "845ed02bdbbc344c462997044f2cf774cdd188ff6656c8cc01e58417a8de6df5"
+}
