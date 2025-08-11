@@ -12,9 +12,9 @@ import {
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Frown } from "lucide-react";
 
-type KpiCardUiProviderProps<T extends ReactNode> = {
+export type KpiCardUiProviderProps<T extends ReactNode> = {
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   children?: React.ReactNode;
   loading?: boolean;
   value?: T;
@@ -59,8 +59,8 @@ export function KpiCardUiProvider<T extends ReactNode>(
         )}
       </CardContent>
       {props.description && (
-        <CardFooter>
-          <p className="text-xs text-muted-foreground">{props.description}</p>
+        <CardFooter className="text-xs text-muted-foreground">
+          {props.description}
         </CardFooter>
       )}
     </Card>
