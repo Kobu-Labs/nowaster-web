@@ -104,11 +104,11 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       tag_ids: values.tags?.map((tag) => tag.id),
     };
 
-    await updateSession.mutateAsync(updateData);
-
     if (props.onSubmit) {
       props.onSubmit();
     }
+
+    await updateSession.mutateAsync(updateData);
   };
 
   return (
