@@ -19,8 +19,16 @@ export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
       <CardContent>
         <SessionPieChart
           filter={props.filter}
-          groupingFn={(sessions) =>
-            sessions.tags.length ? sessions.tags.map((tag) => tag.label) : "-"
+          getKey={(session) =>
+            session.tags.length
+              ? session.tags.map((tag) => ({
+                  key: tag.label,
+                  metadata: { color: tag.color, name: tag.label },
+                }))
+              : {
+                  key: "-",
+                  metadata: { color: "#f129c1", name: "-" },
+                }
           }
         />
       </CardContent>
