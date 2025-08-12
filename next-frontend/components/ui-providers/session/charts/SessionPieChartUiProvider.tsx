@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
-import { tagColors } from "@/state/tags";
 import { FC, useState } from "react";
 import {
   Cell,
@@ -13,13 +12,14 @@ import {
   ResponsiveContainer,
   Sector,
 } from "recharts";
-import { useRecoilValue } from "recoil";
 
-import { formatTime, randomColor } from "@/lib/utils";
 import { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
+import { formatTime, randomColor } from "@/lib/utils";
 
 type SessionPieChartUiProviderProps = {
   data: AmountByCategory[];
+  activeIndex?: number | null;
+  onActiveIndexChange?: (index: number | undefined) => void;
 };
 
 const renderActiveShape = (props: any) => {
@@ -67,13 +67,29 @@ const renderActiveShape = (props: any) => {
 export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   props,
 ) => {
-  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+  const [internalActiveIndex, setInternalActiveIndex] = useState<
+    number | undefined
+  >(undefined);
+
+  // Use external activeIndex if provided, otherwise use internal state
+  const activeIndex =
+    props.activeIndex !== undefined
+      ? (props.activeIndex ?? undefined)
+      : internalActiveIndex;
+
   const [fallbackColor] = useState(randomColor());
-  const colors = useRecoilValue(tagColors);
+
+  const handleActiveIndexChange = (index: number | undefined) => {
+    if (props.onActiveIndexChange) {
+      props.onActiveIndexChange(index);
+    } else {
+      setInternalActiveIndex(index);
+    }
+  };
 
   return (
     <ResponsiveContainer width={"100%"} height={180}>
-      <PieChart onMouseLeave={() => setActiveIndex(undefined)}>
+      <PieChart onMouseLeave={() => handleActiveIndexChange(undefined)}>
         <Pie
           data={props.data}
           dataKey="value"
@@ -84,16 +100,16 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           outerRadius={80}
           paddingAngle={5}
           activeShape={renderActiveShape}
-          onMouseEnter={(_, i) => setActiveIndex(i)}
+          onMouseEnter={(_, i) => handleActiveIndexChange(i)}
           activeIndex={activeIndex}
         >
-          {props.data.map(({ key }, index) => {
+          {props.data.map(({ metadata }, index) => {
             return (
               <Cell
                 fillOpacity={0.4}
-                stroke={colors[key] ?? fallbackColor}
+                stroke={metadata.color ?? fallbackColor}
                 key={`cell-${index}`}
-                fill={colors[key] ?? fallbackColor}
+                fill={metadata.color ?? fallbackColor}
               />
             );
           })}
