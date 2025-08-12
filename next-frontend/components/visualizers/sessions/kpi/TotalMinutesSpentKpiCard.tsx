@@ -23,7 +23,7 @@ export const TotalSessionTimeKpiCard: FC<TotalSessionTimeKpiCardProps> = () => {
       description={
         stats.data === undefined
           ? ""
-          : `That's almost ${Math.ceil(stats.data / 60).toFixed(2)} hours!`
+          : `That's almost ${Math.ceil(stats.data / 60) + 1} hours!`
       }
     >
       <Hourglass />
