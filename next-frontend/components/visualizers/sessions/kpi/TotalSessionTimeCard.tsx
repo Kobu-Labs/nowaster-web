@@ -5,12 +5,20 @@ import { differenceInMinutes } from "date-fns";
 
 import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
+import {
+  KpiCardUiProvider,
+  KpiCardUiProviderProps,
+} from "@/components/ui-providers/KpiCardUiProvider";
 import { Clock1 } from "lucide-react";
 
 type TotalSessionTimeCardProps = {
   filter?: SessionFilterPrecursor;
-};
+} & Partial<
+  Pick<
+    KpiCardUiProviderProps<number>,
+    "title" | "description" | "variant" | "mapper"
+  >
+>;
 
 export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
   const {
@@ -30,12 +38,13 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
 
   return (
     <KpiCardUiProvider
+      description={props.description}
       error={isError}
       loading={isLoading}
-      variant={"big_value"}
-      mapper={formatTime}
+      variant={props.variant ?? "big_value"}
+      mapper={props.mapper ?? formatTime}
       value={result}
-      title={"Total time"}
+      title={props.title ?? "Total time"}
     >
       <Clock1 />
     </KpiCardUiProvider>
