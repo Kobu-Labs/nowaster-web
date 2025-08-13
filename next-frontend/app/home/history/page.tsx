@@ -1,4 +1,5 @@
 import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
+import { endOfDay } from "date-fns";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,7 +10,14 @@ export const metadata: Metadata = {
 export default function HistoryPage() {
   return (
     <div className="m-8 grow">
-      <BaseSessionTable />
+      <BaseSessionTable
+        filter={{
+          settings: {},
+          data: {
+            endTimeTo: { value: endOfDay(new Date()) },
+          },
+        }}
+      />
     </div>
   );
 }
