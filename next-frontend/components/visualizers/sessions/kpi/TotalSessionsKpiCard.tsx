@@ -19,7 +19,7 @@ export const TotalSessionsKpiCard: FC<TotalSessionsKpiCardProps> = () => {
       loading={stats.isLoading}
       error={stats.isError}
       title={"Total Sessions"}
-      description={"Many to go.."}
+      description={"Many more to go.."}
     >
       <AlignVerticalDistributeEnd />
     </KpiCardUiProvider>
