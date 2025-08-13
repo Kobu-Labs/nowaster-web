@@ -87,6 +87,20 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
     }
   };
 
+  if (props.data.length === 0) {
+    return (
+      <ResponsiveContainer
+        width={"100%"}
+        height={180}
+        className="flex items-center justify-center"
+      >
+        <div className="flex items-center justify-center text-muted-foreground">
+          No sessions
+        </div>
+      </ResponsiveContainer>
+    );
+  }
+
   return (
     <ResponsiveContainer width={"100%"} height={180}>
       <PieChart onMouseLeave={() => handleActiveIndexChange(undefined)}>
