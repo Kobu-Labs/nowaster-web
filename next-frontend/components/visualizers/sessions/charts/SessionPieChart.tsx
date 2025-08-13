@@ -100,7 +100,9 @@ const SessionPieChartInner = <TMetadata = any,>(
         activeIndex={context.index}
         onActiveIndexChange={setIndex}
       />
-      {props.renderLegend && props.renderLegend({ data: result ?? [] })}
+      {props.renderLegend &&
+        !!result?.length &&
+        props.renderLegend({ data: result ?? [] })}
     </div>
   );
 };
