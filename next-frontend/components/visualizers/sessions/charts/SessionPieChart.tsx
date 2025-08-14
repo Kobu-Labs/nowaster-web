@@ -72,16 +72,15 @@ const SessionPieChartInner = <TMetadata = any,>(
       differenceInMinutes(session.endTime, session.startTime));
 
   const context = useContext(ActiveIndexContext);
-  if (!context) {
-    return null;
-  }
+
   const setIndex = (val: number | undefined) => {
     if (val !== undefined) {
-      context.setIndex(val);
+      context?.setIndex(val);
     } else {
-      context.setIndex(null);
+      context?.setIndex(null);
     }
   };
+
   const { data: result } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     retry: false,
@@ -92,6 +91,10 @@ const SessionPieChartInner = <TMetadata = any,>(
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+
+  if (!context) {
+    return null;
+  }
 
   return (
     <div className="flex items-center">
