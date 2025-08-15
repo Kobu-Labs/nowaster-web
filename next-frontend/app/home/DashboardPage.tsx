@@ -173,28 +173,27 @@ export default function DashboardPage() {
                   category: CategoryWithId;
                 }>[];
               }) => {
+                /* eslint-disable react-hooks/rules-of-hooks */
+                const context = useContext(ActiveIndexContext);
+
                 return (
                   <div className="flex flex-col items-center flex-grow w-full gap-1">
-                    {props.data.map((val, i) => {
-                      const context = useContext(ActiveIndexContext);
-
-                      return (
-                        <div
-                          key={val.key}
-                          onMouseEnter={() => context?.setIndex(i)}
-                          onMouseLeave={() => context?.setIndex(null)}
-                          className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
-                        >
-                          {val.metadata && (
-                            <CategoryBadge
-                              color={val.metadata.category.color}
-                              name={val.metadata.category.name}
-                            />
-                          )}
-                          <p>{formatTime(val.value)}</p>
-                        </div>
-                      );
-                    })}
+                    {props.data.map((val, i) => (
+                      <div
+                        key={val.key}
+                        onMouseEnter={() => context?.setIndex(i)}
+                        onMouseLeave={() => context?.setIndex(null)}
+                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
+                      >
+                        {val.metadata && (
+                          <CategoryBadge
+                            color={val.metadata.category.color}
+                            name={val.metadata.category.name}
+                          />
+                        )}
+                        <p>{formatTime(val.value)}</p>
+                      </div>
+                    ))}
                   </div>
                 );
               }}
@@ -227,29 +226,28 @@ export default function DashboardPage() {
                   name: string;
                 }>[];
               }) => {
+                /* eslint-disable react-hooks/rules-of-hooks */
+                const context = useContext(ActiveIndexContext);
+
                 return (
                   <div className="flex flex-col items-center flex-grow w-full gap-1">
-                    {props.data.map((val, i) => {
-                      const context = useContext(ActiveIndexContext);
-
-                      return (
-                        <div
-                          key={val.key}
-                          onMouseEnter={() => context?.setIndex(i)}
-                          onMouseLeave={() => context?.setIndex(null)}
-                          className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
-                        >
-                          {val.metadata && (
-                            <TagBadge
-                              variant="manual"
-                              value={val.metadata.name}
-                              colors={val.metadata.color}
-                            />
-                          )}
-                          <p>{formatTime(val.value)}</p>
-                        </div>
-                      );
-                    })}
+                    {props.data.map((val, i) => (
+                      <div
+                        key={val.key}
+                        onMouseEnter={() => context?.setIndex(i)}
+                        onMouseLeave={() => context?.setIndex(null)}
+                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
+                      >
+                        {val.metadata && (
+                          <TagBadge
+                            variant="manual"
+                            value={val.metadata.name}
+                            colors={val.metadata.color}
+                          />
+                        )}
+                        <p>{formatTime(val.value)}</p>
+                      </div>
+                    ))}
                   </div>
                 );
               }}
