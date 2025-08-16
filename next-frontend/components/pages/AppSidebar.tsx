@@ -42,6 +42,8 @@ import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/
 import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { cn } from "@/lib/utils";
+import { closeSidebarOnLinkClickAtom } from "@/state/preferences";
+import { useAtom } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -94,6 +96,7 @@ const navItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar } = useSidebar();
+  const [closeSidebarOnLinkClick] = useAtom(closeSidebarOnLinkClickAtom);
 
   const categories = useCategories();
   const tags = useTags();
@@ -102,7 +105,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleLinkClick = (href: string) => {
     setCurrentLink(href);
-    toggleSidebar();
+    if (closeSidebarOnLinkClick) {
+      toggleSidebar();
+    }
   };
   if (!categories.data || !tags.data) {
     // INFO: do not render sidebar when data is not loaded, subject to change
