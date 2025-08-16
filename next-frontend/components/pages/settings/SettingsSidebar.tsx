@@ -1,6 +1,6 @@
 "use client";
 
-import { Rss, Settings, Shield } from "lucide-react";
+import { Rss, Settings, Shield, Sliders } from "lucide-react";
 
 import {
   Sidebar,
@@ -32,6 +32,15 @@ const settingsNavItems = [
   },
 ] as const;
 
+const preferencesNavItems = [
+  {
+    title: "Preferences",
+    url: "/home/settings/preferences",
+    icon: Sliders,
+    description: "Customize your app experience",
+  },
+] as const;
+
 export function SettingsSidebar() {
   const pathname = usePathname();
 
@@ -54,6 +63,26 @@ export function SettingsSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link href={item.url} className="flex items-start gap-1">
+                      <div className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="my-2">
+          <SidebarGroupLabel>Preferences</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {preferencesNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url} className="flex items-start gap-1">
