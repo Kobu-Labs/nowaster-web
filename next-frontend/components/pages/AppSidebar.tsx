@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { useCategories } from "@/components/hooks/category/useCategory";
+import { useTags } from "@/components/hooks/tag/useTags";
 import { NowasterLogo } from "@/components/pages/NowasterLogo";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
@@ -39,9 +40,11 @@ import {
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
-import Link from "next/link";
-import { useTags } from "@/components/hooks/tag/useTags";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const SHOW_CATEGORY_AMOUNT = 5;
 const SHOW_TAG_AMOUNT = 7;
@@ -94,6 +97,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const categories = useCategories();
   const tags = useTags();
+  const pathname = usePathname();
+  const [currentLink, setCurrentLink] = useState(pathname);
+
+  const handleLinkClick = (href: string) => {
+    setCurrentLink(href);
+    toggleSidebar();
+  };
   if (!categories.data || !tags.data) {
     // INFO: do not render sidebar when data is not loaded, subject to change
     return null;
@@ -145,9 +155,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem
+                  key={item.title}
+                  onClick={() => handleLinkClick(item.url)}
+                >
                   <SidebarMenuButton asChild>
-                    <Link href={item.url} className="flex items-center gap-2">
+                    <Link
+                      href={item.url}
+                      className={cn(
+                        "flex items-center gap-2",
+                        currentLink === item.url && "bg-accent",
+                        currentLink !== item.url &&
+                          "hover:bg-sidebar-accent/50",
+                      )}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -166,9 +187,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 .slice(0, SHOW_CATEGORY_AMOUNT)
                 .map((category) => (
                   <Link
+                    onClick={() =>
+                      handleLinkClick("/home/category/" + category.id)
+                    }
                     href={"/home/category/" + category.id}
                     key={category.id}
-                    className="flex items-center gap-2 p-2 rounded-md justify-between hover:bg-sidebar-accent/50 cursor-pointer"
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
+                      currentLink === "/home/category/" + category.id &&
+                        "bg-accent",
+                      currentLink !== "/home/category/" + category.id &&
+                        "hover:bg-sidebar-accent/50",
+                    )}
                   >
                     <CategoryBadge
                       color={category.color}
@@ -199,9 +229,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="space-y-2 px-2">
               {tags.data.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
                 <Link
+                  onClick={() => handleLinkClick("/home/tags/" + tag.id)}
                   href={"/home/tags/" + tag.id}
                   key={tag.id}
-                  className="flex items-center gap-2 p-2 rounded-md justify-between hover:bg-sidebar-accent/50 cursor-pointer"
+                  className={cn(
+                    "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
+                    currentLink === "/home/tags/" + tag.id && "bg-accent",
+                    currentLink !== "/home/tags/" + tag.id &&
+                      "hover:bg-sidebar-accent/50",
+                  )}
                 >
                   <TagBadge variant="auto" tag={tag} />
                   <Badge variant="outline" className="text-xs">
