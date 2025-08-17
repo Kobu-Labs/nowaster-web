@@ -21,11 +21,6 @@ export const getUnseenNotifications = async (params?: { limit?: number }) => {
   return await parseResponseUnsafe(data, NotificationResponseSchema.getUnseenNotifications);
 };
 
-export const getNotificationCounts = async () => {
-  const { data } = await baseApi.get(`${BASE_URL}/count`);
-  return await parseResponseUnsafe(data, NotificationResponseSchema.getNotificationCounts);
-};
-
 export const markNotificationsSeen = async (params: MarkNotificationsSeenRequest) => {
   const { data } = await baseApi.post(`${BASE_URL}/mark_seen`, params);
   return await parseResponseUnsafe(data, NotificationResponseSchema.markNotificationsSeen);
