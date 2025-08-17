@@ -1,15 +1,17 @@
 "use client";
 
 import {
-  FriendRequestData,
+  FriendRequestAcceptedData,
+  FriendRequestData as NewFriendRequestData,
   Notification,
   NotificationType,
-  SessionReactionData,
-  SystemReleaseData,
+  SessionReactionData as SessionReactionAddedData,
+  SystemReleaseData as NewReleaseData,
 } from "@/api/definitions/models/notification";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, Megaphone, Rocket, UserPlus } from "lucide-react";
+import { FC } from "react";
 
 interface NotificationItemProps {
   notification: Notification;
@@ -53,7 +55,7 @@ function getNotificationTitle(notification: Notification): string {
 function getNotificationMessage(notification: Notification): string {
   switch (notification.notification_type) {
     case "friend:new_request": {
-      const data = notification.data as FriendRequestData;
+      const data = notification.data as NewFriendRequestData;
       return `${data.requester_username} wants to be your friend${data.message ? `: "${data.message}"` : ""}`;
     }
 
@@ -63,12 +65,12 @@ function getNotificationMessage(notification: Notification): string {
     }
 
     case "session:reaction_added": {
-      const data = notification.data as SessionReactionData;
+      const data = notification.data as SessionReactionAddedData;
       return `${data.reactor_username} reacted ${data.emoji} to your session${data.session_description ? `: "${data.session_description}"` : ""}`;
     }
 
     case "system:new_release": {
-      const data = notification.data as SystemReleaseData;
+      const data = notification.data as NewReleaseData;
       return `${data.title} (v${data.version}) - ${data.description}`;
     }
   }
@@ -85,17 +87,65 @@ function getSourceName(notification: Notification): string {
   }
 }
 
-export function NotificationItem({
-  notification,
-  onClick,
-  onDelete,
-}: NotificationItemProps) {
-  const title = getNotificationTitle(notification);
-  const message = getNotificationMessage(notification);
-  const icon = getNotificationIcon(notification.notification_type);
-  const timeAgo = formatDistanceToNow(new Date(notification.created_at), {
+const NewReleaseNotificationItem: FC<
+  NotificationItemProps & { data: NewReleaseData }
+> = (props) => {
+  return null;
+};
+
+const SessionReactionAddedNotificationItem: FC<
+  NotificationItemProps & { data: SessionReactionAddedData }
+> = (props) => {
+  return null;
+};
+
+const NewFriendRequestNotificationItem: FC<
+  NotificationItemProps & { data: NewFriendRequestData }
+> = (props) => {
+  return null;
+};
+
+const FriendRequestAcceptedNotificationItem: FC<
+  NotificationItemProps & { data: FriendRequestAcceptedData }
+> = (props) => {
+  return null;
+};
+
+export const NotificationItem: FC<NotificationItemProps> = (props) => {
+  const title = getNotificationTitle(props.notification);
+  const message = getNotificationMessage(props.notification);
+  const icon = getNotificationIcon(props.notification.notification_type);
+  const timeAgo = formatDistanceToNow(new Date(props.notification.created_at), {
     addSuffix: true,
   });
+
+  switch (props.notification.notification_type) {
+    case "friend:new_request":
+      return (
+        <NewFriendRequestNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    case "friend:request_accepted":
+      return (
+        <FriendRequestAcceptedNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    case "session:reaction_added":
+      return (
+        <SessionReactionAddedNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    case "system:new_release":
+      return (
+        <NewReleaseNotificationItem data={props.notification.data} {...props} />
+      );
+  }
 
   return (
     <div
@@ -127,4 +177,4 @@ export function NotificationItem({
       </div>
     </div>
   );
-}
+};
