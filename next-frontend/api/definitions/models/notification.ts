@@ -89,12 +89,12 @@ export type NotificationSource = z.infer<typeof NotificationSourceSchema>;
 export type NotificationData = z.infer<typeof NotificationDataSchema>;
 export type Notification = z.infer<typeof NotificationSchema>;
 
-export type FriendRequestData = z.infer<typeof FriendRequestDataSchema>;
+export type NewFriendRequestData = z.infer<typeof FriendRequestDataSchema>;
 export type FriendRequestAcceptedData = z.infer<
   typeof FriendRequestAcceptedDataSchema
 >;
-export type SessionReactionData = z.infer<typeof SessionReactionDataSchema>;
-export type SystemReleaseData = z.infer<typeof SystemReleaseDataSchema>;
+export type SessionReactionAddedData = z.infer<typeof SessionReactionDataSchema>;
+export type NewReleaseData = z.infer<typeof SystemReleaseDataSchema>;
 export type SystemNotificationData = z.infer<
   typeof SystemNotificationDataSchema
 >;
