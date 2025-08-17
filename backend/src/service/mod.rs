@@ -1,6 +1,7 @@
 pub mod category_service;
 pub mod feed;
 pub mod friend_service;
+pub mod notification_service;
 pub mod session;
 pub mod session_template;
 pub mod statistics_service;
