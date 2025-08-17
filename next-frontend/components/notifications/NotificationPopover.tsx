@@ -1,69 +1,37 @@
 "use client";
 
-import React, { FC, useCallback, useState } from "react";
-import { useAtom } from "jotai";
-import { Bell, X } from "lucide-react";
+import {
+  useMarkNotificationsSeen,
+  useUnseenNotifications,
+} from "@/components/hooks/notifications/useNotifications";
+import { NotificationItem } from "@/components/notifications/NotificationItem";
+import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-import { notificationPopoverOpenAtom } from "@/state/notifications";
-import {
-  useNotificationCounts,
-  useUnseenNotifications,
-  useMarkNotificationsSeen,
-  useDeleteNotification,
-} from "@/components/hooks/notifications/useNotifications";
-import { Notification } from "@/api/definitions/models/notification";
-import { NotificationItem } from "./NotificationItem";
-import { Badge } from "@/components/shadcn/badge";
 import { cn } from "@/lib/utils";
+import { notificationPopoverOpenAtom } from "@/state/notifications";
+import { useAtom } from "jotai";
+import { Bell, X } from "lucide-react";
+import { FC } from "react";
 
 export const NotificationPopover: FC = () => {
   const [isOpen, setIsOpen] = useAtom(notificationPopoverOpenAtom);
 
-  // React Query hooks
-  const { data: counts, isLoading: countsLoading } = useNotificationCounts();
-  const {
-    data: notifications = [],
-    isLoading: notificationsLoading,
-    refetch: refetchNotifications,
-  } = useUnseenNotifications({ limit: 20 });
+  const { data: notifications = [], isLoading } = useUnseenNotifications({
+    limit: 20,
+  });
 
   const markSeenMutation = useMarkNotificationsSeen();
-  const deleteMutation = useDeleteNotification();
+  const unseenCount = notifications.length;
 
-  const unseenCount = counts?.unseen_count || 0;
-  const isLoading = notificationsLoading || countsLoading;
-
-  const handleNotificationClick = useCallback(
-    (notification: Notification) => {
-      if (notification.seen) return;
-
-      markSeenMutation.mutate({
-        notification_ids: [notification.id],
-      });
-    },
-    [markSeenMutation],
-  );
-
-  const handleDeleteNotification = useCallback(
-    (notificationId: string) => {
-      deleteMutation.mutate(notificationId);
-    },
-    [deleteMutation],
-  );
-
-  const handleMarkAllSeen = useCallback(() => {
-    const unseenNotifications = notifications.filter((n) => !n.seen);
-    if (unseenNotifications.length === 0) return;
-
+  const handleMarkAllSeen = () =>
     markSeenMutation.mutate({
-      notification_ids: unseenNotifications.map((n) => n.id),
+      notification_ids: notifications.map((n) => n.id),
     });
-  }, [notifications, markSeenMutation]);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
@@ -74,7 +42,12 @@ export const NotificationPopover: FC = () => {
           className="relative"
           aria-label={`Notifications${unseenCount > 0 ? ` (${unseenCount} unread)` : ""}`}
         >
-          <Bell className="h-5 w-5 hover:scale-110" />
+          <Bell
+            className={cn(
+              "h-5 w-5 hover:scale-125",
+              unseenCount > 0 && "animate-bounce text-accent/90",
+            )}
+          />
           {unseenCount > 0 && (
             <Badge
               className={cn(
@@ -92,15 +65,14 @@ export const NotificationPopover: FC = () => {
         align="end"
         sideOffset={8}
       >
-        <div className="flex items-center justify-between p-4 border-b ">
+        <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold text-lg text-accent">Notifications</h3>
           <div className="flex items-center gap-2">
             {unseenCount > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
                 onClick={handleMarkAllSeen}
-                className="text-xs"
+                className="text-xs m-0 p-0 h-min"
               >
                 Mark all read
               </Button>
@@ -135,8 +107,6 @@ export const NotificationPopover: FC = () => {
                 <NotificationItem
                   key={notification.id}
                   notification={notification}
-                  onClick={() => handleNotificationClick(notification)}
-                  onDelete={() => handleDeleteNotification(notification.id)}
                 />
               ))}
             </div>
