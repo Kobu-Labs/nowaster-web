@@ -2,6 +2,7 @@ pub mod category;
 pub mod clerk;
 pub mod feed;
 pub mod friend;
+pub mod notification;
 pub mod request;
 pub mod response;
 pub mod root;
