@@ -29,6 +29,7 @@ use crate::{
             subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService,
         },
         friend_service::{FriendService, FriendServiceTrait},
+        notification_service::NotificationService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
         statistics_service::StatisticsService,
@@ -39,8 +40,8 @@ use crate::{
 
 use super::{
     category::root::category_router, feed::root::feed_router, friend::root::friend_router,
-    session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
-    user::root::public_user_router,
+    notification::root::notification_router, session::root::session_router,
+    statistics::root::statistics_router, tag::root::tag_router, user::root::public_user_router,
 };
 
 use tracing::Level;
@@ -65,6 +66,7 @@ pub struct AppState {
     pub statistics_service: StatisticsService,
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
     pub session_template_service: SessionTemplateService,
+    pub notification_service: NotificationService,
     pub feed: Feed,
 }
 
@@ -110,6 +112,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
     let session_template_service =
         SessionTemplateService::new(template_session_repo, session_repo.clone());
+    let notification_service = NotificationService::new(&db);
 
     let state = AppState {
         clerk: clerk.clone(),
@@ -121,6 +124,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         statistics_service,
         stopwatch_service,
         session_template_service,
+        notification_service,
         feed: Feed {
             subscription_service,
             visibility_service,
@@ -145,6 +149,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .nest("/statistics", statistics_router().with_state(state.clone()))
         .nest("/friends", friend_router().with_state(state.clone()))
         .nest("/feed", feed_router().with_state(state.clone()))
+        .nest("/notifications", notification_router().with_state(state.clone()))
         .layer(ClerkLayer::new(
             MemoryCacheJwksProvider::new(clerk),
             None,
