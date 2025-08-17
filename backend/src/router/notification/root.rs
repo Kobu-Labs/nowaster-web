@@ -101,6 +101,6 @@ pub fn notification_router() -> Router<AppState> {
         .route("/unseen", get(get_unseen_notifications))
         .route("/count", get(get_notification_counts))
         .route("/mark_seen", post(mark_notifications_seen))
-        .route("/:id", axum::routing::delete(delete_notification))
+        .route("/{:id}", axum::routing::delete(delete_notification))
 }
 
