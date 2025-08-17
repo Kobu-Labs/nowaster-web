@@ -1,5 +1,6 @@
 pub mod category;
 pub mod feed;
+pub mod notification;
 pub mod session;
 pub mod session_template;
 pub mod tag;
