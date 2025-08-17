@@ -1,23 +1,26 @@
 "use client";
 
 import {
-  FriendRequestAcceptedData,
-  FriendRequestData as NewFriendRequestData,
+  NewFriendRequestData,
+  NewReleaseData,
   Notification,
   NotificationType,
-  SessionReactionData as SessionReactionAddedData,
-  SystemReleaseData as NewReleaseData,
+  SessionReactionAddedData,
 } from "@/api/definitions/models/notification";
+import { FriendRequestAcceptedNotificationItem } from "@/components/notifications/items/FriendRequestAcceptedNotification";
+import { NewFriendRequestNotificationItem } from "@/components/notifications/items/NewFriendRequestNotification";
+import { NewReleaseNotificationItem } from "@/components/notifications/items/NewReleaseNotification";
+import { SessionReactionAddedNotificationItem } from "@/components/notifications/items/SessionReactionAddedNotification";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, Megaphone, Rocket, UserPlus } from "lucide-react";
 import { FC } from "react";
 
-interface NotificationItemProps {
+export type NotificationItemProps = {
   notification: Notification;
   onClick?: () => void;
   onDelete?: () => void;
-}
+};
 
 function getNotificationIcon(type: NotificationType) {
   switch (type) {
@@ -75,41 +78,6 @@ function getNotificationMessage(notification: Notification): string {
     }
   }
 }
-
-function getSourceName(notification: Notification): string {
-  switch (notification.source_type) {
-    case "user":
-      return notification.source_data.username;
-    case "system":
-      return notification.source_data.system_name;
-    default:
-      return "Unknown";
-  }
-}
-
-const NewReleaseNotificationItem: FC<
-  NotificationItemProps & { data: NewReleaseData }
-> = (props) => {
-  return null;
-};
-
-const SessionReactionAddedNotificationItem: FC<
-  NotificationItemProps & { data: SessionReactionAddedData }
-> = (props) => {
-  return null;
-};
-
-const NewFriendRequestNotificationItem: FC<
-  NotificationItemProps & { data: NewFriendRequestData }
-> = (props) => {
-  return null;
-};
-
-const FriendRequestAcceptedNotificationItem: FC<
-  NotificationItemProps & { data: FriendRequestAcceptedData }
-> = (props) => {
-  return null;
-};
 
 export const NotificationItem: FC<NotificationItemProps> = (props) => {
   const title = getNotificationTitle(props.notification);
