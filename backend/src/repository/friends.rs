@@ -49,8 +49,8 @@ impl FriendsRepository {
                     u1.id AS requestor_id,
                     u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
-                    u2.avatar_url as recipient_avatar_url,
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
@@ -99,8 +99,8 @@ impl FriendsRepository {
                     u1.id AS requestor_id,
                     u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
-                    u2.avatar_url as recipient_avatar_url,
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM updated u
                 JOIN "user" u1 ON u1.id = u.requestor_id
                 JOIN "user" u2 ON u2.id = u.recipient_id
