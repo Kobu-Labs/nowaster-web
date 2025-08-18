@@ -49,6 +49,7 @@ pub trait SessionRepositoryTrait {
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
     async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>>;
+    async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>>;
     async fn create(&self, dto: CreateFixedSessionDto, actor: ClerkUser) -> Result<FixedSession>;
 }
 
@@ -554,6 +555,55 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         match session {
             Some(val) => Ok(val),
             None => Err(anyhow!("Error updating the session")),
+        }
+    }
+
+    async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>> {
+        let sessions = sqlx::query_as!(
+            GenericFullRowSession,
+            r#"SELECT 
+                s.id,
+                s.user_id as "user_id!",
+                s.start_time,
+                s.description,
+                s.end_time,
+                s.type as session_type,
+
+                s.category_id,
+                c.name as category,
+                c.color as category_color,
+
+                t.id as "tag_id?",
+                t.label as "tag_label?",
+                t.color as "tag_color?",
+
+                st.id as "template_id?",
+                st.name as "template_name?",
+                st.start_date as "template_start_date?",
+                st.end_date as "template_end_date?",
+                st.interval AS "template_interval?: RecurringSessionInterval"
+            FROM session s
+            JOIN category c
+                on c.id = s.category_id
+            LEFT JOIN tag_to_session tts
+                on tts.session_id = s.id
+            LEFT JOIN tag t
+                on tts.tag_id = t.id
+            LEFT JOIN session_template st
+                on st.id = s.template_id
+            WHERE 
+                s.id = $1
+                AND type = 'fixed' 
+                "#,
+            id,
+        )
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        let result = self.convert(sessions)?;
+        match result.first() {
+            Some(val) => Ok(Some(val.clone())),
+            None => Ok(None),
         }
     }
 }
