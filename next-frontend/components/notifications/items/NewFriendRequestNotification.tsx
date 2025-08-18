@@ -33,7 +33,7 @@ export const NewFriendRequestNotificationItem: FC<
         </div>
 
         <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
-          {props.data.requester_username} wants to be your friend
+          {props.data.requestor.username} wants to be your friend
           {props.data.message ? `: "${props.data.message}"` : ""}
         </p>
 

@@ -97,16 +97,18 @@ impl NotificationService {
         requester_username: String,
         message: Option<String>,
     ) -> Result<Uuid> {
+        let requester_dto = crate::dto::user::read_user::ReadUserDto {
+            id: requester_user_id.clone(),
+            username: requester_username.clone(),
+            avatar_url: None, // Will be populated by repository layer
+            visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
+        };
+
         let dto = CreateNotificationDto {
             user_id: recipient_user_id,
-            source: NotificationSource::User(crate::dto::user::read_user::ReadUserDto {
-                id: requester_user_id.clone(),
-                username: requester_username.clone(),
-                avatar_url: None, // Will be populated by repository layer
-                visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
-            }),
+            source: NotificationSource::User(requester_dto.clone()),
             notification_type: NotificationType::FriendNewRequest(FriendRequestData {
-                requester_username,
+                requestor: requester_dto,
                 message,
             }),
         };
@@ -120,16 +122,18 @@ impl NotificationService {
         accepter_user_id: String,
         accepter_username: String,
     ) -> Result<Uuid> {
+        let accepter_dto = crate::dto::user::read_user::ReadUserDto {
+            id: accepter_user_id.clone(),
+            username: accepter_username.clone(),
+            avatar_url: None,
+            visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
+        };
+
         let dto = CreateNotificationDto {
             user_id: requester_user_id,
-            source: NotificationSource::User(crate::dto::user::read_user::ReadUserDto {
-                id: accepter_user_id.clone(),
-                username: accepter_username.clone(),
-                avatar_url: None,
-                visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
-            }),
+            source: NotificationSource::User(accepter_dto.clone()),
             notification_type: NotificationType::FriendRequestAccepted(FriendRequestAcceptedData {
-                accepter_username,
+                accepter: accepter_dto,
             }),
         };
 
@@ -139,30 +143,27 @@ impl NotificationService {
     pub async fn notify_session_reaction(
         &self,
         session_owner_user_id: String,
-        reactor_user_id: String,
-        reactor_username: String,
+        reactor_user_dto: crate::dto::user::read_user::ReadUserDto,
+        reaction_dto: crate::dto::feed::ReadFeedReactionDto,
         session_id: Uuid,
-        session_description: Option<String>,
-        emoji: String,
+        session_category: crate::entity::category::Category,
+        session_start_time: chrono::DateTime<chrono::Local>,
+        session_end_time: chrono::DateTime<chrono::Local>,
     ) -> Result<Uuid> {
         // Dont notify users about their own reactions
-        if session_owner_user_id == reactor_user_id {
+        if session_owner_user_id == reactor_user_dto.id {
             return Ok(Uuid::new_v4()); // Return dummy ID
         }
 
         let dto = CreateNotificationDto {
             user_id: session_owner_user_id,
-            source: NotificationSource::User(crate::dto::user::read_user::ReadUserDto {
-                id: reactor_user_id.clone(),
-                username: reactor_username.clone(),
-                avatar_url: None,
-                visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
-            }),
+            source: NotificationSource::User(reactor_user_dto),
             notification_type: NotificationType::SessionReactionAdded(SessionReactionData {
-                reactor_username,
+                reaction: reaction_dto,
                 session_id,
-                session_description,
-                emoji,
+                session_category,
+                session_start_time,
+                session_end_time,
             }),
         };
 
@@ -172,10 +173,9 @@ impl NotificationService {
     pub async fn notify_system_announcement(
         &self,
         user_ids: Vec<String>,
+        release_id: Uuid,
         title: String,
-        description: String,
-        features: Vec<String>,
-        version: String,
+        short_description: Option<String>,
     ) -> Result<Vec<Uuid>> {
         let mut notification_ids = Vec::new();
 
@@ -188,10 +188,9 @@ impl NotificationService {
                 }),
                 notification_type: NotificationType::SystemNewRelease(
                     crate::entity::notification::SystemReleaseData {
-                        version: version.clone(),
+                        release_id,
                         title: title.clone(),
-                        description: description.clone(),
-                        features: features.clone(),
+                        short_description: short_description.clone(),
                     },
                 ),
             };

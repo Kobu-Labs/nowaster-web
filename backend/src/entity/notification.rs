@@ -2,7 +2,10 @@ use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::dto::user::read_user::ReadUserDto;
+use crate::{
+    dto::{feed::ReadFeedReactionDto, user::read_user::ReadUserDto},
+    entity::category::Category,
+};
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
 #[sqlx(type_name = "notification_type")]
@@ -36,32 +39,32 @@ pub enum NotificationSourceTypeSql {
     System,
 }
 
-// Typed notification data structures
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FriendRequestData {
-    pub requester_username: String,
+    pub requestor: ReadUserDto,
     pub message: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FriendRequestAcceptedData {
-    pub accepter_username: String,
+    pub accepter: ReadUserDto,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SessionReactionData {
-    pub reactor_username: String,
+    #[serde(flatten)]
+    pub reaction: ReadFeedReactionDto,
     pub session_id: Uuid,
-    pub session_description: Option<String>,
-    pub emoji: String,
+    pub session_category: Category,
+    pub session_start_time: DateTime<Local>,
+    pub session_end_time: DateTime<Local>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SystemReleaseData {
-    pub version: String,
+    pub release_id: Uuid,
     pub title: String,
-    pub description: String,
-    pub features: Vec<String>,
+    pub short_description: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -104,4 +107,3 @@ pub struct Notification {
     pub seen: bool,
     pub created_at: DateTime<Local>,
 }
-
