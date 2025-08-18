@@ -4,7 +4,7 @@ import {
   useMarkNotificationsSeen,
   useUnseenNotifications,
 } from "@/components/hooks/notifications/useNotifications";
-import { NotificationItem } from "@/components/notifications/NotificationItem";
+import { NotificationsHandler } from "@/components/notifications/NotificationItem";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -103,12 +103,7 @@ export const NotificationPopover: FC = () => {
             </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                />
-              ))}
+              <NotificationsHandler notifications={notifications} />
             </div>
           )}
         </div>
