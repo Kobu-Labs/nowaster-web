@@ -1,8 +1,8 @@
 import { FriendRequestAcceptedData } from "@/api/definitions/models/notification";
 import { NotificationItemProps } from "@/components/notifications/NotificationItem";
+import { UserAvatar } from "@/components/visualizers/user/UserAvatar";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { UserCheck } from "lucide-react";
 import { FC } from "react";
 
 export const FriendRequestAcceptedNotificationItem: FC<
@@ -16,25 +16,22 @@ export const FriendRequestAcceptedNotificationItem: FC<
       )}
       onClick={props.onClick}
     >
-      <div className="flex-shrink-0 mt-1">
-        <UserCheck className="h-5 w-5 text-green-500" />
-      </div>
+      <UserAvatar
+        username={props.data.accepter.username}
+        avatar_url={props.data.accepter.avatar_url}
+      />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <p className="font-semibold text-sm truncate text-white">
             Friend request accepted
           </p>
-          <div className="flex items-center gap-2 ml-2">
-            {!props.notification.seen && (
-              <div className="w-2 h-2 rounded-full flex-shrink-0" />
-            )}
-          </div>
         </div>
 
-        <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
-          {props.data.accepter.username} accepted your friend request
-        </p>
+        <div className="text-sm">
+          <span className="text-accent/70">{props.data.accepter.username}</span>{" "}
+          <span>accepted your friend request</span>
+        </div>
 
         <p className="text-xs mt-2">
           {formatDistanceToNow(props.notification.created_at, {
