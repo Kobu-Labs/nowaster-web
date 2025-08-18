@@ -85,9 +85,12 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);
 
+    let notification_service = NotificationService::new(&db);
+
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
-    let reaction_service = FeedReactionService::new(feed_repo.clone());
+    let reaction_service =
+        FeedReactionService::new(feed_repo.clone(), notification_service.clone());
     let event_service = FeedEventService::new(feed_repo.clone());
     let subscription_service = FeedSubscriptionService::new(feed_repo.clone(), user_repo.clone());
 
@@ -107,12 +110,12 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         friend_repo,
         visibility_service.clone(),
         subscription_service.clone(),
+        notification_service.clone(),
     );
     let stopwatch_service =
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
     let session_template_service =
         SessionTemplateService::new(template_session_repo, session_repo.clone());
-    let notification_service = NotificationService::new(&db);
 
     let state = AppState {
         clerk: clerk.clone(),
@@ -149,7 +152,10 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .nest("/statistics", statistics_router().with_state(state.clone()))
         .nest("/friends", friend_router().with_state(state.clone()))
         .nest("/feed", feed_router().with_state(state.clone()))
-        .nest("/notifications", notification_router().with_state(state.clone()))
+        .nest(
+            "/notifications",
+            notification_router().with_state(state.clone()),
+        )
         .layer(ClerkLayer::new(
             MemoryCacheJwksProvider::new(clerk),
             None,
