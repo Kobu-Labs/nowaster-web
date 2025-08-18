@@ -353,13 +353,15 @@ impl FeedRepository {
         &self,
         dto: CreateFeedReactionDto,
         actor: ClerkUser,
-    ) -> Result<()> {
+    ) -> Result<FeedReaction> {
+        let id = Uuid::new_v4();
         sqlx::query!(
             r#"
-                INSERT INTO feed_reaction (feed_event_id, user_id, emoji)
-                VALUES ($1, $2, $3)
+                INSERT INTO feed_reaction (id, feed_event_id, user_id, emoji)
+                VALUES ($1, $2, $3, $4)
                 ON CONFLICT (feed_event_id, user_id, emoji) DO NOTHING
             "#,
+            id,
             dto.feed_event_id,
             actor.user_id,
             dto.emoji
@@ -367,7 +369,12 @@ impl FeedRepository {
         .execute(self.db.get_pool())
         .await?;
 
-        Ok(())
+        let data = self
+            .get_reaction_by_id(id)
+            .await?
+            .ok_or(anyhow!("Not found"))?;
+
+        Ok(data)
     }
 
     pub async fn remove_reaction(
