@@ -313,6 +313,42 @@ impl FeedRepository {
         Ok(reactions)
     }
 
+    pub async fn get_reaction_by_id(&self, reaction_id: Uuid) -> Result<Option<FeedReaction>> {
+        let results = sqlx::query!(
+            r#"
+                SELECT
+                    fr.id,
+                    fr.feed_event_id,
+                    fr.emoji,
+                    fr.created_at,
+                    u.id as user_id,
+                    u.displayname,
+                    u.avatar_url
+                FROM feed_reaction fr
+                JOIN "user" u on u.id = fr.user_id
+                WHERE fr.id = $1
+            "#,
+            reaction_id
+        )
+        .fetch_optional(self.db.get_pool())
+        .await?;
+
+        let reaction = results.map(|row| FeedReaction {
+            id: row.id,
+            feed_event_id: row.feed_event_id,
+            user: ReadUserDto {
+                id: row.user_id,
+                username: row.displayname,
+                avatar_url: row.avatar_url,
+                visibility_flags: VisibilityFlags::default(), // Default for feed display
+            },
+            emoji: row.emoji,
+            created_at: row.created_at.into(),
+        });
+
+        Ok(reaction)
+    }
+
     pub async fn create_reaction(
         &self,
         dto: CreateFeedReactionDto,
