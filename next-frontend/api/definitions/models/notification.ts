@@ -1,5 +1,8 @@
 import { CategoryWithIdSchema } from "@/api/definitions/models/category";
-import { ReadFeedReactionSchema } from "@/api/definitions/models/feed";
+import {
+  ReadFeedReactionSchema,
+  ReadUserAvatarSchema,
+} from "@/api/definitions/models/feed";
 import { z } from "zod";
 import { UserSchema } from "./user";
 
@@ -13,12 +16,13 @@ export const NotificationTypeSchema = z.enum([
 ]);
 
 export const FriendRequestDataSchema = z.object({
-  requestor: UserSchema,
-  message: z.string().optional(),
+  requestor: ReadUserAvatarSchema,
+  message: z.string().nullish(),
+  request_id: z.string(),
 });
 
 export const FriendRequestAcceptedDataSchema = z.object({
-  accepter: UserSchema,
+  accepter: ReadUserAvatarSchema,
 });
 
 export const SessionReactionDataSchema = z
