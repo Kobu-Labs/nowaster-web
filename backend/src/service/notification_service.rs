@@ -4,9 +4,12 @@ use uuid::Uuid;
 
 use crate::{
     config::database::Database,
-    dto::notification::{
-        CreateNotificationDto, MarkNotificationsSeenDto, NotificationCountDto,
-        NotificationQueryDto, ReadNotificationDto,
+    dto::{
+        notification::{
+            CreateNotificationDto, MarkNotificationsSeenDto, NotificationCountDto,
+            NotificationQueryDto, ReadNotificationDto,
+        },
+        user::read_user::ReadUserDto,
     },
     entity::notification::{
         FriendRequestAcceptedData, FriendRequestData, NotificationSource, NotificationType,
@@ -14,6 +17,7 @@ use crate::{
     },
     repository::notification::NotificationRepository,
     router::clerk::ClerkUser,
+    service::friend_service::ReadFriendRequestDto,
 };
 
 #[derive(Clone)]
@@ -90,26 +94,14 @@ impl NotificationService {
             .await
     }
 
-    pub async fn notify_friend_request(
-        &self,
-        recipient_user_id: String,
-        requester_user_id: String,
-        requester_username: String,
-        message: Option<String>,
-    ) -> Result<Uuid> {
-        let requester_dto = crate::dto::user::read_user::ReadUserDto {
-            id: requester_user_id.clone(),
-            username: requester_username.clone(),
-            avatar_url: None, // Will be populated by repository layer
-            visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
-        };
-
+    pub async fn notify_friend_request(&self, request: ReadFriendRequestDto) -> Result<Uuid> {
         let dto = CreateNotificationDto {
-            user_id: recipient_user_id,
-            source: NotificationSource::User(requester_dto.clone()),
+            user_id: request.recipient.id.clone(),
+            source: NotificationSource::User(request.requestor.clone()),
             notification_type: NotificationType::FriendNewRequest(FriendRequestData {
-                requestor: requester_dto,
-                message,
+                request_id: request.id,
+                requestor: request.requestor.clone(),
+                message: request.introduction_message,
             }),
         };
 
@@ -118,22 +110,13 @@ impl NotificationService {
 
     pub async fn notify_friend_request_accepted(
         &self,
-        requester_user_id: String,
-        accepter_user_id: String,
-        accepter_username: String,
+        request: ReadFriendRequestDto,
     ) -> Result<Uuid> {
-        let accepter_dto = crate::dto::user::read_user::ReadUserDto {
-            id: accepter_user_id.clone(),
-            username: accepter_username.clone(),
-            avatar_url: None,
-            visibility_flags: crate::entity::visibility::VisibilityFlags::default(),
-        };
-
         let dto = CreateNotificationDto {
-            user_id: requester_user_id,
-            source: NotificationSource::User(accepter_dto.clone()),
+            user_id: request.requestor.id,
+            source: NotificationSource::User(request.recipient.clone()),
             notification_type: NotificationType::FriendRequestAccepted(FriendRequestAcceptedData {
-                accepter: accepter_dto,
+                accepter: request.recipient.clone(),
             }),
         };
 
@@ -209,4 +192,3 @@ impl NotificationService {
             .await
     }
 }
-
