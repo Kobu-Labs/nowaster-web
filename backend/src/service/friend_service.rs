@@ -13,7 +13,7 @@ use crate::{
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
-    service::feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
+    service::{feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService}, notification_service::NotificationService},
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -209,6 +209,7 @@ pub struct FriendService {
     repo: FriendsRepository,
     visibility_service: FeedVisibilityService,
     subscription_service: FeedSubscriptionService,
+    notification_service: NotificationService
 }
 
 #[async_trait::async_trait]
@@ -384,11 +385,13 @@ impl FriendService {
         repo: FriendsRepository,
         visibility_service: FeedVisibilityService,
         subscription_service: FeedSubscriptionService,
+        notification_service: NotificationService
     ) -> Self {
         FriendService {
             repo,
             visibility_service,
             subscription_service,
+            notification_service
         }
     }
 }
