@@ -33,7 +33,7 @@ export const FriendRequestAcceptedNotificationItem: FC<
         </div>
 
         <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
-          {props.data.accepter_username} accepted your friend request
+          {props.data.accepter.username} accepted your friend request
         </p>
 
         <p className="text-xs mt-2">

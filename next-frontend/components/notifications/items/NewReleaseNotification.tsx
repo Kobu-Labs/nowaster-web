@@ -23,17 +23,12 @@ export const NewReleaseNotificationItem: FC<
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <p className="font-semibold text-sm truncate text-white">
-            New release: {props.data.version}
+            {props.data.title}
           </p>
-          <div className="flex items-center gap-2 ml-2">
-            {!props.notification.seen && (
-              <div className="w-2 h-2 rounded-full flex-shrink-0" />
-            )}
-          </div>
         </div>
 
         <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
-          {props.data.description}
+          {props.data.short_description || "New release available"}
         </p>
 
         <p className="text-xs mt-2">
