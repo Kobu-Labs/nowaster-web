@@ -13,7 +13,10 @@ use crate::{
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
     router::clerk::ClerkUser,
-    service::{feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService}, notification_service::NotificationService},
+    service::{
+        feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
+        notification_service::NotificationService,
+    },
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -209,7 +212,7 @@ pub struct FriendService {
     repo: FriendsRepository,
     visibility_service: FeedVisibilityService,
     subscription_service: FeedSubscriptionService,
-    notification_service: NotificationService
+    notification_service: NotificationService,
 }
 
 #[async_trait::async_trait]
@@ -226,6 +229,9 @@ impl FriendServiceTrait for FriendService {
         }
 
         let result = self.repo.create_friend_request(dto, actor).await?;
+        self.notification_service
+            .notify_friend_request(result.clone())
+            .await;
         Ok(result)
     }
 
@@ -274,6 +280,10 @@ impl FriendServiceTrait for FriendService {
             )
             .await;
 
+        let _ = self
+            .notification_service
+            .notify_friend_request_accepted(request.clone())
+            .await;
         let friendship_result = self.repo.get_friendship_by_id(result.id).await;
         if let Ok(Some(friendship)) = friendship_result {
             self.visibility_service
@@ -385,13 +395,13 @@ impl FriendService {
         repo: FriendsRepository,
         visibility_service: FeedVisibilityService,
         subscription_service: FeedSubscriptionService,
-        notification_service: NotificationService
+        notification_service: NotificationService,
     ) -> Self {
         FriendService {
             repo,
             visibility_service,
             subscription_service,
-            notification_service
+            notification_service,
         }
     }
 }
