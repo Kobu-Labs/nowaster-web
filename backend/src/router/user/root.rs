@@ -69,7 +69,7 @@ async fn update_visibility_handler(
 pub enum UserError {
     #[error("User not found")]
     UserNotFound,
-    #[error("Something went wrong")]
+    #[error("Something went wrong: {0}")]
     UnknownError(String),
     #[error("Unauthorized")]
     Unauthorized,
