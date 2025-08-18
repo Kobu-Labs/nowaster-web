@@ -3,11 +3,13 @@ use uuid::Uuid;
 
 use crate::{
     dto::feed::CreateFeedReactionDto, repository::feed::FeedRepository, router::clerk::ClerkUser,
+    service::notification_service::NotificationService,
 };
 
 #[derive(Clone)]
 pub struct FeedReactionService {
     feed_repository: FeedRepository,
+    notification_service: NotificationService,
 }
 
 impl FeedReactionService {
@@ -25,9 +27,10 @@ impl FeedReactionService {
             .remove_reaction(feed_event_id, emoji, actor)
             .await
     }
-    pub fn new(repo: FeedRepository) -> Self {
+    pub fn new(repo: FeedRepository, notification_service: NotificationService) -> Self {
         Self {
             feed_repository: repo,
+            notification_service,
         }
     }
 }
