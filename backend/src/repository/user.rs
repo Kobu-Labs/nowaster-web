@@ -160,7 +160,7 @@ impl UserRepository {
         }
 
         if let Some(name) = filter.name {
-            query.push("WHERE displayname = ").push_bind(name);
+            query.push("AND displayname = ").push_bind(name);
         }
 
         let rows = query
