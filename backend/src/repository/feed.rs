@@ -470,4 +470,41 @@ impl FeedRepository {
 
         Ok(affected_rows.rows_affected())
     }
+
+    pub async fn get_feed_event_by_id(&self, feed_event_id: Uuid) -> Result<Option<FeedEvent>> {
+        let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+            SELECT 
+                fe.id,
+                fe.created_at,
+
+                fe.source_id,
+                fe.source_type,
+
+                fe.event_type,
+                fe.event_data,
+
+                u.id as user_id,
+                u.displayname as user_name,
+                u.avatar_url as user_avatar_url
+            FROM feed_event fe
+            LEFT JOIN "user" u 
+                ON u.id = fe.source_id 
+                AND fe.source_type = 'user'
+            WHERE fe.id = "#,
+        );
+        base_query.push_bind(feed_event_id);
+
+        let row = base_query
+            .build_query_as::<FeedRowRead>()
+            .fetch_optional(self.db.get_pool())
+            .await?;
+
+        let result = match row {
+            Some(event) => Some(FeedEventMapper::map_to_feed_event(event)?),
+            None => None,
+        };
+
+        Ok(result)
+    }
 }
