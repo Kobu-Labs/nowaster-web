@@ -33,12 +33,9 @@ export const SessionReactionAddedNotificationItem: FC<
         </div>
 
         <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
-          `${props.data.reactor_username} reacted ${props.data.emoji} to your
-          session{" "}
-          {props.data.session_description
-            ? `: "${props.data.session_description}"`
-            : ""}
-          `
+          {props.data.user.username} reacted {props.data.emoji} to your{" "}
+          {props.data.session_category.name.toLowerCase()} session from{" "}
+          {props.data.session_start_time.toLocaleString()}
         </p>
 
         <p className="text-xs mt-2">

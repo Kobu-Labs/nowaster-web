@@ -1,3 +1,5 @@
+import { CategoryWithIdSchema } from "@/api/definitions/models/category";
+import { ReadFeedReactionSchema } from "@/api/definitions/models/feed";
 import { z } from "zod";
 import { UserSchema } from "./user";
 
@@ -11,26 +13,28 @@ export const NotificationTypeSchema = z.enum([
 ]);
 
 export const FriendRequestDataSchema = z.object({
-  requester_username: z.string(),
+  requestor: UserSchema,
   message: z.string().optional(),
 });
 
 export const FriendRequestAcceptedDataSchema = z.object({
-  accepter_username: z.string(),
+  accepter: UserSchema,
 });
 
-export const SessionReactionDataSchema = z.object({
-  reactor_username: z.string(),
-  session_id: z.string(),
-  session_description: z.string().optional(),
-  emoji: z.string(),
-});
+export const SessionReactionDataSchema = z
+  .object({
+    session_id: z.string(),
+    session_start_time: z.coerce.date(),
+    session_end_time: z.coerce.date(),
+
+    session_category: CategoryWithIdSchema,
+  })
+  .and(ReadFeedReactionSchema);
 
 export const SystemReleaseDataSchema = z.object({
-  version: z.string(),
+  release_id: z.string(),
   title: z.string(),
-  description: z.string(),
-  features: z.array(z.string()),
+  short_description: z.string().optional(),
 });
 
 export const SystemNotificationDataSchema = z.object({
@@ -93,7 +97,9 @@ export type NewFriendRequestData = z.infer<typeof FriendRequestDataSchema>;
 export type FriendRequestAcceptedData = z.infer<
   typeof FriendRequestAcceptedDataSchema
 >;
-export type SessionReactionAddedData = z.infer<typeof SessionReactionDataSchema>;
+export type SessionReactionAddedData = z.infer<
+  typeof SessionReactionDataSchema
+>;
 export type NewReleaseData = z.infer<typeof SystemReleaseDataSchema>;
 export type SystemNotificationData = z.infer<
   typeof SystemNotificationDataSchema
