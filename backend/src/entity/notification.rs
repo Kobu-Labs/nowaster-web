@@ -43,6 +43,7 @@ pub enum NotificationSourceTypeSql {
 pub struct FriendRequestData {
     pub requestor: ReadUserDto,
     pub message: Option<String>,
+    pub request_id: Uuid,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
