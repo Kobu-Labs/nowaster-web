@@ -84,7 +84,7 @@ export const NotificationSchema = z
     id: z.string(),
     user_id: z.string(),
     seen: z.boolean(),
-    created_at: z.string(),
+    created_at: z.coerce.date(),
   })
   .and(NotificationSourceSchema)
   .and(NotificationDataSchema);
