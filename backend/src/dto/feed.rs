@@ -97,8 +97,8 @@ impl From<FeedReaction> for ReadFeedReactionDto {
             id: reaction.id,
             user: ReadUserDto {
                 id: reaction.user.id.clone(),
-                username: String::new(), // Will be filled by the service
-                avatar_url: reaction.user.avatar_url, // Will be filled by the service
+                username: reaction.user.username,
+                avatar_url: reaction.user.avatar_url,
                 visibility_flags: VisibilityFlags::default(),
             },
             emoji: reaction.emoji,
