@@ -38,7 +38,7 @@ export const NewFriendRequestNotificationItem: FC<
         </p>
 
         <p className="text-xs mt-2">
-          {formatDistanceToNow(new Date(props.notification.created_at), {
+          {formatDistanceToNow(props.notification.created_at, {
             addSuffix: true,
           })}
         </p>
