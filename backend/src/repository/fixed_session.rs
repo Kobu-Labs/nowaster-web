@@ -19,7 +19,7 @@ use crate::{
         category::Category, session::FixedSession, session_template::RecurringSessionInterval,
         tag::Tag,
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -28,29 +28,29 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
-    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: ClerkUser) -> Result<()>;
+    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()>;
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Self::SessionType>;
-    async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
+    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()>;
     async fn delete_sessions_by_filter(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<u64>;
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<Self::SessionType>>;
     type SessionType;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>>;
+    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>>;
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>>;
-    async fn create(&self, dto: CreateFixedSessionDto, actor: ClerkUser) -> Result<FixedSession>;
+    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession>;
 }
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
@@ -144,7 +144,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Option<Self::SessionType>> {
+    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
             r#"SELECT 
@@ -194,7 +194,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
-    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: ClerkUser) -> Result<()> {
+    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()> {
         let sessions: Vec<CreateFixedSessionDtoWithId> =
             dtos.iter().cloned().map(Into::into).collect();
 
@@ -241,7 +241,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(())
     }
 
-    async fn create(&self, dto: CreateFixedSessionDto, actor: ClerkUser) -> Result<FixedSession> {
+    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
                 INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id)
@@ -284,7 +284,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<Self::SessionType>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT 
@@ -436,7 +436,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(sessions)
     }
 
-    async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM session
@@ -454,7 +454,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn delete_sessions_by_filter(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<u64> {
         if dto.is_empty() {
             return Err(anyhow!(
@@ -506,7 +506,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Self::SessionType> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         sqlx::query(

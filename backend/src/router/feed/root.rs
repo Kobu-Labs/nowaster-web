@@ -13,7 +13,7 @@ use crate::{
         RemoveFeedSource, UpdateFeedSubscriptionDto,
     },
     repository::feed::FeedSourceSqlType,
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -48,7 +48,7 @@ pub fn feed_router() -> Router<AppState> {
 async fn get_friends_feed_handler(
     State(state): State<AppState>,
     Query(query): Query<FeedQuery>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadFeedEventDto>> {
     let dto = FeedQueryDto {
         cursor: query.cursor,
@@ -61,7 +61,7 @@ async fn get_friends_feed_handler(
 
 async fn add_reaction_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateFeedReactionDto>,
 ) -> ApiResponse<()> {
     let result = state
@@ -79,7 +79,7 @@ async fn add_reaction_handler(
 
 async fn remove_reaction_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<RemoveReactionRequest>,
 ) -> ApiResponse<()> {
     let result = state
@@ -98,7 +98,7 @@ async fn remove_reaction_handler(
 
 async fn get_subscriptions_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadFeedSubscriptionDto>> {
     let result = state
         .feed
@@ -110,7 +110,7 @@ async fn get_subscriptions_handler(
 
 async fn update_subscription_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateFeedSubscriptionDto>,
 ) -> ApiResponse<()> {
     let result = state
@@ -128,7 +128,7 @@ async fn update_subscription_handler(
 
 async fn unsubscribe_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UnsubscribeRequest>,
 ) -> ApiResponse<()> {
     let source = match payload.source_type {

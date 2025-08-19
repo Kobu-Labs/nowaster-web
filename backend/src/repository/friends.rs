@@ -8,7 +8,7 @@ use validator::Validate;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::friend_service::{
         CreateFriendRequestDto, FriendRequestStatus, ReadFriendRequestDto, ReadFriendRequestsDto,
         ReadFriendshipDto, RemoveFriendDto,
@@ -35,7 +35,7 @@ impl FriendsRepository {
     pub async fn get_friend_request(
         &self,
         id: Uuid,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let result = sqlx::query(
             r#"
@@ -164,7 +164,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
-    pub async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
+    pub async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = sqlx::query(
             r#"
                 SELECT 
@@ -197,7 +197,7 @@ impl FriendsRepository {
     pub async fn remove_friendship(
         &self,
         dto: RemoveFriendDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendshipDto> {
         let row = sqlx::query(
             r#"
@@ -234,7 +234,7 @@ impl FriendsRepository {
     pub async fn create_friend_request(
         &self,
         data: CreateFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let mut tx = self.db.get_pool().begin().await?;
         let exising_request = sqlx::query!(
@@ -319,7 +319,7 @@ impl FriendsRepository {
     pub async fn list_friend_requests(
         &self,
         data: ReadFriendRequestsDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = sqlx::query(
             r#"

@@ -12,7 +12,7 @@ use crate::{
     },
     entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::{
         feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
         notification_service::NotificationService,
@@ -175,34 +175,34 @@ pub trait FriendServiceTrait {
     async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto>;
 
     async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto>;
 
     async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto>;
 
     async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto>;
 
-    async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>>;
+    async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>>;
 
-    async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()>;
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()>;
 
     async fn list_friend_requests(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
         data: ReadFriendRequestsDto,
     ) -> Result<Vec<ReadFriendRequestDto>>;
 }
@@ -220,7 +220,7 @@ impl FriendServiceTrait for FriendService {
     async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         if dto.recipient_id == actor.user_id {
             return Err(anyhow::anyhow!(
@@ -238,7 +238,7 @@ impl FriendServiceTrait for FriendService {
     async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -266,7 +266,7 @@ impl FriendServiceTrait for FriendService {
         self.subscription_service
             .subscribe(
                 AddFeedSource::User(request.requestor.id.clone()),
-                ClerkUser {
+                Actor {
                     user_id: request.recipient.id.clone(),
                 },
             )
@@ -274,7 +274,7 @@ impl FriendServiceTrait for FriendService {
         self.subscription_service
             .subscribe(
                 AddFeedSource::User(request.recipient.id.clone()),
-                ClerkUser {
+                Actor {
                     user_id: request.requestor.id.clone(),
                 },
             )
@@ -297,7 +297,7 @@ impl FriendServiceTrait for FriendService {
     async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -328,7 +328,7 @@ impl FriendServiceTrait for FriendService {
     async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -356,12 +356,12 @@ impl FriendServiceTrait for FriendService {
         Ok(result)
     }
 
-    async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
+    async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = self.repo.list_friends(actor.clone()).await?;
         Ok(result)
     }
 
-    async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()> {
         let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
 
         let other_user_id = if friendship.friend1.id == actor.user_id.clone() {
@@ -382,7 +382,7 @@ impl FriendServiceTrait for FriendService {
 
     async fn list_friend_requests(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
         data: ReadFriendRequestsDto,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = self.repo.list_friend_requests(data, actor).await?;

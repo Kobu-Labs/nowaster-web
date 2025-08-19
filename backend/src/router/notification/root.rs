@@ -11,7 +11,7 @@ use crate::{
     dto::notification::{
         MarkNotificationsSeenDto, NotificationCountDto, NotificationQueryDto, ReadNotificationDto,
     },
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,7 +33,7 @@ impl From<NotificationQuery> for NotificationQueryDto {
 
 async fn get_notifications(
     State(state): State<AppState>,
-    user: ClerkUser,
+    user: Actor,
     Query(query): Query<NotificationQuery>,
 ) -> ApiResponse<Vec<ReadNotificationDto>> {
     let notifications = state
@@ -46,7 +46,7 @@ async fn get_notifications(
 
 async fn get_unseen_notifications(
     State(state): State<AppState>,
-    user: ClerkUser,
+    user: Actor,
     Query(query): Query<NotificationQuery>,
 ) -> ApiResponse<Vec<ReadNotificationDto>> {
     let notifications = state
@@ -59,7 +59,7 @@ async fn get_unseen_notifications(
 
 async fn get_notification_counts(
     State(state): State<AppState>,
-    user: ClerkUser,
+    user: Actor,
 ) -> ApiResponse<NotificationCountDto> {
     let counts = state
         .notification_service
@@ -71,7 +71,7 @@ async fn get_notification_counts(
 
 async fn mark_notifications_seen(
     State(state): State<AppState>,
-    user: ClerkUser,
+    user: Actor,
     ValidatedRequest(dto): ValidatedRequest<MarkNotificationsSeenDto>,
 ) -> ApiResponse<()> {
     let updated_count = state
@@ -84,7 +84,7 @@ async fn mark_notifications_seen(
 
 async fn delete_notification(
     State(state): State<AppState>,
-    user: ClerkUser,
+    user: Actor,
     Path(notification_id): Path<Uuid>,
 ) -> ApiResponse<()> {
     let deleted = state

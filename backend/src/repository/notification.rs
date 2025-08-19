@@ -21,7 +21,7 @@ use crate::{
         },
         visibility::VisibilityFlags,
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -252,7 +252,7 @@ impl NotificationRepository {
     pub async fn mark_notifications_seen(
         &self,
         notification_ids: &[Uuid],
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<u64> {
         if notification_ids.is_empty() {
             return Ok(0);
@@ -306,7 +306,7 @@ impl NotificationRepository {
     pub async fn delete_notification(
         &self,
         notification_id: Uuid,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<bool> {
         let result = sqlx::query!(
             r#"
