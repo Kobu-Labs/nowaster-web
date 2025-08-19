@@ -17,7 +17,7 @@ use crate::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::{feed::events::FeedEventService, user_service::UserService},
 };
 
@@ -54,7 +54,7 @@ impl FixedSessionService {
     pub async fn create_fixed_session(
         &self,
         dto: CreateFixedSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFixedSessionDto> {
         let res = self.fixed_repo.create(dto, actor.clone()).await?;
         let user = self
@@ -84,13 +84,13 @@ impl FixedSessionService {
     pub async fn filter_fixed_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadFixedSessionDto>> {
         let res = self.fixed_repo.filter_sessions(dto, actor).await?;
         Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
     }
 
-    pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         self.fixed_repo.delete_session(id, actor).await?;
         Ok(())
     }
@@ -98,7 +98,7 @@ impl FixedSessionService {
     pub async fn delete_sessions_by_filter(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<u64> {
         let affected_rows = self
             .fixed_repo
@@ -107,7 +107,7 @@ impl FixedSessionService {
         Ok(affected_rows)
     }
 
-    pub async fn get_active_sessions(&self, actor: ClerkUser) -> Result<Vec<ActiveSession>> {
+    pub async fn get_active_sessions(&self, actor: Actor) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {
             from_end_time: Some(DateFilter {
@@ -144,7 +144,7 @@ impl FixedSessionService {
     pub async fn update_fixed_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFixedSessionDto> {
         let res = self.fixed_repo.update_session(dto, actor).await?;
 

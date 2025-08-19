@@ -14,7 +14,7 @@ use crate::{
         feed::{FeedRepository, FeedSourceSqlType},
         user::{FilterUsersDto, IdFilter, UserRepository},
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::user_service::UserService,
 };
 
@@ -28,7 +28,7 @@ impl FeedSubscriptionService {
     pub async fn update_subscription(
         &self,
         dto: UpdateFeedSubscriptionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<()> {
         self.feed_repository
             .update_subscription(
@@ -40,11 +40,11 @@ impl FeedSubscriptionService {
             .await
     }
 
-    pub async fn subscribe(&self, source: AddFeedSource, actor: ClerkUser) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, actor: Actor) -> Result<()> {
         self.feed_repository.subscribe(source, actor).await
     }
 
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: ClerkUser) -> Result<()> {
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: Actor) -> Result<()> {
         self.feed_repository.unsubscribe(source, actor).await
     }
 
@@ -57,7 +57,7 @@ impl FeedSubscriptionService {
 
     pub async fn get_user_subscriptions(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadFeedSubscriptionDto>> {
         let subs_ids = self
             .feed_repository

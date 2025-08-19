@@ -10,7 +10,7 @@ use crate::{
     },
     entity::category::Category,
     repository::category::{CategoryRepository, CategoryRepositoryTrait},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -26,7 +26,7 @@ impl CategoryService {
     pub async fn upsert_category(
         &self,
         dto: CreateCategoryDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadCategoryDto> {
         let res = self.repo.upsert(dto, actor).await?;
         Ok(ReadCategoryDto::from(res))
@@ -40,20 +40,20 @@ impl CategoryService {
     pub async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadCategoryDto>> {
         let res = self.repo.filter_categories(filter, actor).await?;
         Ok(res.into_iter().map(ReadCategoryDto::from).collect())
     }
 
-    pub async fn get_by_id(&self, category_id: Uuid, actor: ClerkUser) -> Result<Category> {
+    pub async fn get_by_id(&self, category_id: Uuid, actor: Actor) -> Result<Category> {
         self.repo.find_by_id(category_id, actor).await
     }
 
     pub async fn update_category(
         &self,
         dto: UpdateCategoryDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadCategoryDto> {
         let category = self.repo.find_by_id(dto.id, actor.clone()).await?;
         if category.created_by != actor.user_id {
@@ -67,12 +67,12 @@ impl CategoryService {
 
     pub async fn get_categories_with_session_count(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
         self.repo.get_categories_with_session_count(actor).await
     }
 
-    pub async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto> {
+    pub async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
         self.repo.get_category_statistics(actor).await
     }
 }

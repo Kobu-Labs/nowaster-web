@@ -16,7 +16,7 @@ use crate::{
         SessionReactionData, SystemNotificationData,
     },
     repository::notification::NotificationRepository,
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::friend_service::ReadFriendRequestDto,
 };
 
@@ -62,7 +62,7 @@ impl NotificationService {
     pub async fn mark_notifications_seen(
         &self,
         dto: MarkNotificationsSeenDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<u64> {
         self.repository
             .mark_notifications_seen(&dto.notification_ids, actor)
@@ -87,7 +87,7 @@ impl NotificationService {
     pub async fn delete_notification(
         &self,
         notification_id: Uuid,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<bool> {
         self.repository
             .delete_notification(notification_id, actor)

@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{
     dto::feed::{CreateFeedEventDto, FeedQueryDto, ReadFeedEventDto, ReadFeedReactionDto},
     repository::feed::FeedRepository,
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -22,7 +22,7 @@ impl FeedEventService {
     pub async fn get_feed(
         &self,
         query: FeedQueryDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadFeedEventDto>> {
         let events = self
             .feed_repository
