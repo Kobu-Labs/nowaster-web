@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE notification\n                SET seen = true\n                WHERE id = ANY($1) AND user_id = $2 AND seen = false\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4938d640a52e3a138abfc8a24234bd2632a2bfdee0b833eb1d7251afaa4e0aad"
+}
