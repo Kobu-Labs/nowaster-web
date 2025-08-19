@@ -2,7 +2,13 @@ use anyhow::Result;
 use uuid::Uuid;
 
 use crate::{
-    dto::feed::CreateFeedReactionDto, repository::feed::FeedRepository, router::clerk::ClerkUser,
+    dto::feed::{CreateFeedReactionDto, ReadFeedReactionDto},
+    entity::feed::FeedEventType,
+    repository::{
+        feed::FeedRepository,
+        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+    },
+    router::clerk::ClerkUser,
     service::notification_service::NotificationService,
 };
 
@@ -10,11 +16,51 @@ use crate::{
 pub struct FeedReactionService {
     feed_repository: FeedRepository,
     notification_service: NotificationService,
+    session_repo: FixedSessionRepository,
 }
 
 impl FeedReactionService {
     pub async fn add_reaction(&self, dto: CreateFeedReactionDto, actor: ClerkUser) -> Result<()> {
-        self.feed_repository.create_reaction(dto, actor).await
+        let reaction = self
+            .feed_repository
+            .create_reaction(dto.clone(), actor)
+            .await?;
+
+        let Some(ev) = self
+            .feed_repository
+            .get_feed_event_by_id(dto.feed_event_id)
+            .await?
+        else {
+            return Ok(());
+        };
+
+        let FeedEventType::SessionCompleted(event_data) = ev.data else {
+            return Ok(());
+        };
+
+        let Some(session) = self
+            .session_repo
+            .find_by_id_admin(event_data.session_id)
+            .await?
+        else {
+            return Ok(());
+        };
+
+        let reaction_dto: ReadFeedReactionDto = reaction.clone().into();
+
+        self.notification_service
+            .notify_session_reaction(
+                session.user_id,
+                reaction.user,
+                reaction_dto,
+                session.id,
+                session.category,
+                session.start_time,
+                session.end_time,
+            )
+            .await;
+
+        Ok(())
     }
 
     pub async fn remove_reaction(
@@ -27,10 +73,15 @@ impl FeedReactionService {
             .remove_reaction(feed_event_id, emoji, actor)
             .await
     }
-    pub fn new(repo: FeedRepository, notification_service: NotificationService) -> Self {
+    pub fn new(
+        repo: FeedRepository,
+        notification_service: NotificationService,
+        session_repo: FixedSessionRepository,
+    ) -> Self {
         Self {
             feed_repository: repo,
             notification_service,
+            session_repo,
         }
     }
 }
