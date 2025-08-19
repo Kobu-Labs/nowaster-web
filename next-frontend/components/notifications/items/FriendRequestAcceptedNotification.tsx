@@ -14,7 +14,6 @@ export const FriendRequestAcceptedNotificationItem: FC<
         "flex items-start gap-3 p-4 cursor-pointer transition-colors group relative bg-pink-subtle",
         !props.notification.seen && "border-l-4 border-l-pink-400",
       )}
-      onClick={props.onClick}
     >
       <UserAvatar
         username={props.data.accepter.username}
