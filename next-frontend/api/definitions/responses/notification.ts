@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NotificationSchema } from "../models/notification";
+import { NotificationSchema } from "@/api/definitions/models/notification";
 
 export const NotificationResponseSchema = {
   getNotifications: z.array(NotificationSchema),

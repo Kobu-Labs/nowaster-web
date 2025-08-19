@@ -98,7 +98,7 @@ export const NotificationPopover: FC = () => {
               <Bell className="h-12 w-12 mb-2" />
               <p className="font-medium">No notifications yet</p>
               <p className="text-sm mt-1">
-                We'll let you know when something happens!
+                We&apos;ll let you know when something happens!
               </p>
             </div>
           ) : (

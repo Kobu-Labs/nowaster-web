@@ -4,7 +4,7 @@ import {
   ReadUserAvatarSchema,
 } from "@/api/definitions/models/feed";
 import { z } from "zod";
-import { UserSchema } from "./user";
+import { UserSchema } from "@/api/definitions/models/user";
 
 export const NotificationSourceTypeSchema = z.enum(["user", "system"]);
 
