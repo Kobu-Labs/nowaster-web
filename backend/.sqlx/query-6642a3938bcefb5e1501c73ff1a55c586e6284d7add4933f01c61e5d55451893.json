@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO notification (id, user_id, notification_type, source_id, source_type, content)\n                VALUES ($1, $2, $3, $4, $5, $6)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "notification_type",
+            "kind": {
+              "Enum": [
+                "friend:new_request",
+                "friend:request_accepted",
+                "session:reaction_added",
+                "system:new_release"
+              ]
+            }
+          }
+        },
+        "Varchar",
+        {
+          "Custom": {
+            "name": "notification_source_type",
+            "kind": {
+              "Enum": [
+                "user",
+                "group",
+                "system"
+              ]
+            }
+          }
+        },
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6642a3938bcefb5e1501c73ff1a55c586e6284d7add4933f01c61e5d55451893"
+}
