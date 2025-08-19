@@ -14,7 +14,6 @@ export const NewReleaseNotificationItem: FC<
         "flex items-start gap-3 p-4 cursor-pointer transition-colors group relative bg-pink-subtle",
         !props.notification.seen && "border-l-4 border-l-pink-400",
       )}
-      onClick={props.onClick}
     >
       <div className="flex-shrink-0 mt-1">
         <Rocket className="h-5 w-5 text-purple-500" />
@@ -28,7 +27,7 @@ export const NewReleaseNotificationItem: FC<
         </div>
 
         <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
-          {props.data.short_description || "New release available"}
+          {props.data.short_description ?? "New release available"}
         </p>
 
         <p className="text-xs mt-2">
