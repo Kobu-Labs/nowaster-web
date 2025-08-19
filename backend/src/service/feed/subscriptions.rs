@@ -15,7 +15,6 @@ use crate::{
         user::{FilterUsersDto, IdFilter, UserRepository},
     },
     router::clerk::Actor,
-    service::user_service::UserService,
 };
 
 #[derive(Clone)]
@@ -40,12 +39,14 @@ impl FeedSubscriptionService {
             .await
     }
 
-    pub async fn subscribe(&self, source: AddFeedSource, actor: Actor) -> Result<()> {
-        self.feed_repository.subscribe(source, actor).await
+    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
+        self.feed_repository.subscribe(source, subscriber_id).await
     }
 
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: Actor) -> Result<()> {
-        self.feed_repository.unsubscribe(source, actor).await
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
+        self.feed_repository
+            .unsubscribe(source, subscriber_id)
+            .await
     }
 
     pub fn new(repo: FeedRepository, user_service: UserRepository) -> Self {

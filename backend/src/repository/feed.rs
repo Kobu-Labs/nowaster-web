@@ -155,7 +155,7 @@ impl FeedRepository {
         }
     }
 
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: Actor) -> Result<()> {
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
         let (source_id, source_type) = match source {
             RemoveFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -165,7 +165,7 @@ impl FeedRepository {
                 DELETE FROM feed_subscription
                 WHERE subscriber_id = $1 AND source_id = $2 AND source_type = $3
             "#,
-            actor.user_id,
+            subscriber_id,
             source_id,
             source_type as FeedSourceSqlType
         )
@@ -175,7 +175,7 @@ impl FeedRepository {
         Ok(())
     }
 
-    pub async fn subscribe(&self, source: AddFeedSource, actor: Actor) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
         let (source_id, source_type) = match source {
             AddFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -186,7 +186,7 @@ impl FeedRepository {
                 VALUES ($1, $2, $3)
                 ON CONFLICT (subscriber_id, source_type, source_id) DO NOTHING
             "#,
-            actor.user_id,
+            subscriber_id,
             source_type as FeedSourceSqlType,
             source_id
         )
