@@ -15,7 +15,7 @@ export default function FriendsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const currentTab = searchParams.get("tab") || "friends";
+  const currentTab = searchParams.get("tab") ?? "friends";
 
   const handleTabChange = useCallback((value: string) => {
     const params = new URLSearchParams(searchParams);
