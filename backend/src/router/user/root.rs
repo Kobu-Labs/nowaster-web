@@ -1,7 +1,7 @@
 use crate::dto::user::read_user::ReadUserDto;
 use crate::dto::user::update_user::UpdateUserDto;
 use crate::dto::user::update_visibility::{UpdateVisibilityDto, UpdateVisibilitySettingsDto};
-use crate::router::clerk::ClerkUser;
+use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::{dto::user::create_user::CreateUserDto, router::root::AppState};
@@ -42,7 +42,7 @@ async fn update_user_handler(
 
 async fn get_current_user_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<ReadUserDto> {
     let res = match state.user_service.get_user_by_id(actor.user_id).await {
         Ok(Some(user)) => Ok(user),
@@ -54,7 +54,7 @@ async fn get_current_user_handler(
 
 async fn update_visibility_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateVisibilitySettingsDto>,
 ) -> ApiResponse<ReadUserDto> {
     let visibility_dto: UpdateVisibilityDto = payload.into();

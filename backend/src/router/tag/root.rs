@@ -9,7 +9,7 @@ use crate::dto::tag::add_category::AddAllowedCategoryDto;
 use crate::dto::tag::create_tag::{CreateTagDto, UpdateTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
 use crate::dto::tag::read_tag::{ReadTagDetailsDto, TagStatsDto};
-use crate::router::clerk::ClerkUser;
+use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
@@ -36,7 +36,7 @@ pub fn tag_router() -> Router<AppState> {
 async fn update_tag_handler(
     State(state): State<AppState>,
     Path(tag_id): Path<Uuid>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateTagDto>,
 ) -> ApiResponse<ReadTagDetailsDto> {
     let res = state.tag_service.update_tag(tag_id, payload, actor).await;
@@ -45,7 +45,7 @@ async fn update_tag_handler(
 
 async fn add_allowed_category_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<AddAllowedCategoryDto>,
 ) -> ApiResponse<()> {
     let tag = state
@@ -78,7 +78,7 @@ async fn add_allowed_category_handler(
 
 async fn get_tag_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     Path(tag_id): Path<Uuid>,
 ) -> ApiResponse<ReadTagDetailsDto> {
     let res = state.tag_service.get_by_id(tag_id, actor).await;
@@ -88,7 +88,7 @@ async fn get_tag_handler(
 
 async fn remove_allowed_category_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<AddAllowedCategoryDto>,
 ) -> ApiResponse<()> {
     let tag = state
@@ -121,7 +121,7 @@ async fn remove_allowed_category_handler(
 
 async fn create_tag_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateTagDto>,
 ) -> ApiResponse<ReadTagDetailsDto> {
     let res = state.tag_service.create_tag(payload, actor).await;
@@ -130,7 +130,7 @@ async fn create_tag_handler(
 
 async fn filter_tags_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     Query(payload): Query<TagFilterDto>,
 ) -> ApiResponse<Vec<ReadTagDetailsDto>> {
     let res = state.tag_service.filter_tags(payload, actor).await;
@@ -139,7 +139,7 @@ async fn filter_tags_handler(
 
 async fn delete_tag_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     Path(tag_id): Path<Uuid>,
 ) -> ApiResponse<()> {
     let res = state.tag_service.delete_tag(tag_id, actor).await;
@@ -148,7 +148,7 @@ async fn delete_tag_handler(
 
 async fn get_tag_statistics_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<TagStatsDto> {
     let res = state.tag_service.get_tag_statistics(actor).await;
     ApiResponse::from_result(res)

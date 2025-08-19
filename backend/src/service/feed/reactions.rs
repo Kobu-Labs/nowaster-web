@@ -8,7 +8,7 @@ use crate::{
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::notification_service::NotificationService,
 };
 
@@ -20,7 +20,7 @@ pub struct FeedReactionService {
 }
 
 impl FeedReactionService {
-    pub async fn add_reaction(&self, dto: CreateFeedReactionDto, actor: ClerkUser) -> Result<()> {
+    pub async fn add_reaction(&self, dto: CreateFeedReactionDto, actor: Actor) -> Result<()> {
         let reaction = self
             .feed_repository
             .create_reaction(dto.clone(), actor)
@@ -67,7 +67,7 @@ impl FeedReactionService {
         &self,
         feed_event_id: Uuid,
         emoji: String,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<()> {
         self.feed_repository
             .remove_reaction(feed_event_id, emoji, actor)

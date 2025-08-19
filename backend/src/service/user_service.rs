@@ -11,7 +11,7 @@ use crate::{
         },
     },
     repository::user::{FilterUsersDto, IdFilter, UserRepository},
-    router::{clerk::ClerkUser, user::root::UserError},
+    router::{clerk::Actor, user::root::UserError},
     service::feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
 };
 
@@ -42,7 +42,7 @@ impl UserService {
                 self.subscription_service
                     .subscribe(
                         AddFeedSource::User(u.id.clone()),
-                        ClerkUser {
+                        Actor {
                             user_id: u.id.clone(),
                         },
                     )

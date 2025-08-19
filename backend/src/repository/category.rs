@@ -13,7 +13,7 @@ use crate::{
         update_category::UpdateCategoryDto,
     },
     entity::category::Category,
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -31,20 +31,20 @@ pub struct ReadCategoryRow {
 
 pub trait CategoryRepositoryTrait {
     async fn update(&self, dto: UpdateCategoryDto) -> Result<Category>;
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Category>;
+    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Category>;
     async fn delete_category(&self, id: Uuid) -> Result<()>;
     async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<Category>>;
     async fn get_categories_with_session_count(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
-    async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto>;
+    async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto>;
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category>;
+    async fn upsert(&self, dto: CreateCategoryDto, actor: Actor) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
 }
 
@@ -55,7 +55,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
-    async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category> {
+    async fn upsert(&self, dto: CreateCategoryDto, actor: Actor) -> Result<Category> {
         let row = sqlx::query_as!(
             ReadCategoryRow,
             r#"
@@ -91,7 +91,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
     async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<Category>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
@@ -134,7 +134,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(())
     }
 
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<Category> {
+    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Category> {
         let result = self
             .filter_categories(
                 FilterCategoryDto {
@@ -193,7 +193,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
 
     async fn get_categories_with_session_count(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
         let rows = sqlx::query_as!(
             ReadCategoryWithSessionCountDto,
@@ -217,7 +217,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(rows)
     }
 
-    async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto> {
+    async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
         // First get basic stats
         let basic_stats = sqlx::query!(
             r#"

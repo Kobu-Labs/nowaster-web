@@ -16,7 +16,7 @@ use crate::{
         },
     },
     entity::{category::Category, tag::TagDetails},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -45,16 +45,16 @@ struct ReadTagDetailsRow {
 }
 
 pub trait TagRepositoryTrait {
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<TagDetails>;
-    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: ClerkUser)
+    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails>;
+    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: Actor)
         -> Result<TagDetails>;
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn create(&self, dto: CreateTagDto, actor: ClerkUser) -> Result<TagDetails>;
-    async fn filter_tags(&self, filter: TagFilterDto, actor: ClerkUser) -> Result<Vec<TagDetails>>;
-    async fn delete_tag(&self, id: Uuid, actor: ClerkUser) -> Result<()>;
+    async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails>;
+    async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>>;
+    async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()>;
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
     async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
-    async fn get_tag_statistics(&self, actor: ClerkUser) -> Result<TagStatsDto>;
+    async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto>;
 }
 
 impl TagRepositoryTrait for TagRepository {
@@ -64,7 +64,7 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
-    async fn create(&self, dto: CreateTagDto, actor: ClerkUser) -> Result<TagDetails> {
+    async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
@@ -131,7 +131,7 @@ impl TagRepositoryTrait for TagRepository {
         })
     }
 
-    async fn delete_tag(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM tag
@@ -146,7 +146,7 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    async fn find_by_id(&self, id: Uuid, actor: ClerkUser) -> Result<TagDetails> {
+    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
         let result = self
             .filter_tags(
                 TagFilterDto {
@@ -163,7 +163,7 @@ impl TagRepositoryTrait for TagRepository {
         Err(anyhow::anyhow!("Tag not found"))
     }
 
-    async fn filter_tags(&self, filter: TagFilterDto, actor: ClerkUser) -> Result<Vec<TagDetails>> {
+    async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 SELECT 
@@ -266,7 +266,7 @@ impl TagRepositoryTrait for TagRepository {
         &self,
         id: Uuid,
         dto: UpdateTagDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<TagDetails> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -336,7 +336,7 @@ impl TagRepositoryTrait for TagRepository {
         self.find_by_id(id, actor.clone()).await
     }
 
-    async fn get_tag_statistics(&self, actor: ClerkUser) -> Result<TagStatsDto> {
+    async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
         // Get total tags count
         let total_tags = sqlx::query_scalar!(
             "SELECT COUNT(DISTINCT id) FROM tag WHERE created_by = $1",

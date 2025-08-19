@@ -16,7 +16,7 @@ use crate::{
         user::User,
         visibility::VisibilityFlags,
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -106,7 +106,7 @@ impl StopwatchSessionRepository {
         dto: CreateStopwatchSessionDto,
         category_id: Option<Uuid>,
         tag_ids: Option<Vec<Uuid>>,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<StopwatchSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let result = sqlx::query!(
@@ -149,7 +149,7 @@ impl StopwatchSessionRepository {
     }
 
     // INFO: only one stopwatch session can be active at a time
-    pub async fn read_stopwatch(&self, actor: ClerkUser) -> Result<Option<StopwatchSession>> {
+    pub async fn read_stopwatch(&self, actor: Actor) -> Result<Option<StopwatchSession>> {
         let sessions = sqlx::query_as!(
             StopwatchFullRow,
             r#"SELECT 
@@ -189,7 +189,7 @@ impl StopwatchSessionRepository {
         Ok(result.first().cloned())
     }
 
-    pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM stopwatch_session s
@@ -207,7 +207,7 @@ impl StopwatchSessionRepository {
     pub async fn update_session(
         &self,
         dto: UpdateStopwatchSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<StopwatchSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         sqlx::query(

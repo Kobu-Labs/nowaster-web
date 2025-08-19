@@ -11,7 +11,7 @@ use crate::{
         UpdateSessionTemplateDto,
     },
     entity::session_template::RecurringSessionInterval,
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 use std::sync::Arc;
 
@@ -52,7 +52,7 @@ impl RecurringSessionRepository {
 
     pub async fn get_recurring_sessions(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadSesionTemplateRow>> {
         let rows = sqlx::query_as!(
             ReadSesionTemplateRow,
@@ -110,7 +110,7 @@ impl RecurringSessionRepository {
     pub async fn update_session_template(
         &self,
         dto: UpdateSessionTemplateDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<()> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         sqlx::query!(
@@ -157,7 +157,7 @@ impl RecurringSessionRepository {
         &self,
         template_id: Uuid,
         dto: CreateSessionTemplateDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<()> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let template_id: Uuid = sqlx::query_scalar!(
@@ -190,7 +190,7 @@ impl RecurringSessionRepository {
         &self,
         dto: CreateRecurringSessionDto,
         template_id: Uuid,
-        actor: ClerkUser,
+        actor: Actor,
         tx: &mut sqlx::Transaction<'_, Postgres>,
     ) -> Result<()> {
         sqlx::query!(
@@ -225,7 +225,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
-    pub async fn delete_recurring_session(&self, session_id: Uuid, actor: ClerkUser) -> Result<()> {
+    pub async fn delete_recurring_session(&self, session_id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
             DELETE FROM recurring_session
@@ -240,7 +240,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
-    pub async fn delete_session_template(&self, template_id: Uuid, actor: ClerkUser) -> Result<()> {
+    pub async fn delete_session_template(&self, template_id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
             DELETE FROM session_template

@@ -13,7 +13,7 @@ use crate::{
         read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto},
         update_category::UpdateCategoryDto,
     },
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 pub fn category_router() -> Router<AppState> {
@@ -37,7 +37,7 @@ pub fn category_router() -> Router<AppState> {
 
 async fn create_category_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
     let res = state.category_service.upsert_category(payload, actor).await;
@@ -55,7 +55,7 @@ async fn delete_category_handler(
 async fn filter_categories_handler(
     State(state): State<AppState>,
     Query(payload): Query<FilterCategoryDto>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadCategoryDto>> {
     let res = state
         .category_service
@@ -67,7 +67,7 @@ async fn filter_categories_handler(
 async fn get_category_by_id_handler(
     State(state): State<AppState>,
     Path(category_id): Path<Uuid>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Option<ReadCategoryDto>> {
     let res = state
         .category_service
@@ -85,7 +85,7 @@ async fn get_category_by_id_handler(
 
 async fn update_category_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
     let res = state.category_service.update_category(payload, actor).await;
@@ -94,7 +94,7 @@ async fn update_category_handler(
 
 async fn get_categories_with_session_count_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadCategoryWithSessionCountDto>> {
     let res = state
         .category_service
@@ -105,7 +105,7 @@ async fn get_categories_with_session_count_handler(
 
 async fn get_category_statistics_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<CategoryStatsDto> {
     let res = state.category_service.get_category_statistics(actor).await;
     ApiResponse::from_result(res)
