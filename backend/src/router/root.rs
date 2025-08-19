@@ -89,8 +89,6 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
-    let reaction_service =
-        FeedReactionService::new(feed_repo.clone(), notification_service.clone());
     let event_service = FeedEventService::new(feed_repo.clone());
     let subscription_service = FeedSubscriptionService::new(feed_repo.clone(), user_repo.clone());
 
@@ -105,6 +103,11 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         stopwatch_repo.clone(),
         event_service.clone(),
         user_service.clone(),
+    );
+    let reaction_service = FeedReactionService::new(
+        feed_repo.clone(),
+        notification_service.clone(),
+        session_repo.clone(),
     );
     let friend_service = FriendService::new(
         friend_repo,
