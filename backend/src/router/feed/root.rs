@@ -138,7 +138,7 @@ async fn unsubscribe_handler(
     let result = state
         .feed
         .subscription_service
-        .unsubscribe(source, actor)
+        .unsubscribe(source, actor.user_id)
         .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
