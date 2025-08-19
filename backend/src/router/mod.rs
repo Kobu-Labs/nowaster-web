@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod category;
 pub mod clerk;
 pub mod feed;
