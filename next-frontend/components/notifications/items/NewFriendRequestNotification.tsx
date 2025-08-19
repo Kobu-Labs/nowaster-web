@@ -68,7 +68,6 @@ export const NewFriendRequestNotificationItem: FC<
         !props.notification.seen && "border-l-4 border-l-pink-400",
       )}
       onClick={() => {
-        props.onClick?.();
         setNotificationsOpen(false);
       }}
     >
