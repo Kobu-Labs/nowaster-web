@@ -6,7 +6,7 @@ use axum::{
 
 use crate::{
     repository::friends::UpdateFriendRequestDto,
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
     service::friend_service::{
         AcceptFriendRequestDto, CancelFriendRequestDto, CreateFriendRequestDto,
         FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto, ReadFriendRequestsDto,
@@ -30,7 +30,7 @@ pub fn friend_router() -> Router<AppState> {
 
 async fn update_friend_request_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateFriendRequestDto>,
 ) -> ApiResponse<ReadFriendRequestDto> {
     let result = match payload.status {
@@ -77,7 +77,7 @@ async fn update_friend_request_handler(
 
 async fn create_friend_request_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<ProcessFriendRequestDto>,
 ) -> ApiResponse<ReadFriendRequestDto> {
     let recipient = state
@@ -117,7 +117,7 @@ async fn create_friend_request_handler(
 async fn list_friend_requests_handler(
     State(state): State<AppState>,
     Query(direction): Query<ReadFriendRequestsDto>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadFriendRequestDto>> {
     let result = state
         .friend_service
@@ -141,7 +141,7 @@ fn get_other_friend_id(user_id: String, friendship: ReadFriendshipDto) -> String
 
 async fn list_friends_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadFriendshipDto>> {
     let result = state.friend_service.list_friends(actor.clone()).await;
 
@@ -150,7 +150,7 @@ async fn list_friends_handler(
 
 async fn remove_friend_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<RemoveFriendDto>,
 ) -> ApiResponse<()> {
     let result = state.friend_service.remove_friend(payload, actor).await;

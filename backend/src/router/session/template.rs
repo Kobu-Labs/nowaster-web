@@ -9,7 +9,7 @@ use crate::{
     dto::session::template::{CreateSessionTemplateDto, UpdateSessionTemplateDto},
     entity::session_template::ExistingSessionsAction,
     repository::session_template::ReadSesionTemplateRow,
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 pub fn session_template_router() -> Router<AppState> {
@@ -30,7 +30,7 @@ pub fn recurring_session_router() -> Router<AppState> {
 
 async fn get_templates(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadSesionTemplateRow>> {
     let res = state.session_template_service.get_templates(actor).await;
     ApiResponse::from_result(res)
@@ -38,7 +38,7 @@ async fn get_templates(
 
 async fn create_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateSessionTemplateDto>,
 ) -> ApiResponse<()> {
     let res = state
@@ -50,7 +50,7 @@ async fn create_handler(
 
 async fn update_session_template(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateSessionTemplateDto>,
 ) -> ApiResponse<()> {
     let res = state
@@ -62,7 +62,7 @@ async fn update_session_template(
 
 async fn delete_recurring_session(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     Path(id): Path<Uuid>,
 ) -> ApiResponse<()> {
     let res = state
@@ -74,7 +74,7 @@ async fn delete_recurring_session(
 
 async fn delete_session_template(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     Path((id, action)): Path<(Uuid, ExistingSessionsAction)>,
 ) -> ApiResponse<()> {
     let res = state

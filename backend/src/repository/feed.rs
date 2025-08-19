@@ -21,7 +21,7 @@ use crate::{
         feed::{FeedEvent, FeedEventSource, FeedEventType, FeedReaction},
         visibility::VisibilityFlags,
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -155,7 +155,7 @@ impl FeedRepository {
         }
     }
 
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: ClerkUser) -> Result<()> {
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, actor: Actor) -> Result<()> {
         let (source_id, source_type) = match source {
             RemoveFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -175,7 +175,7 @@ impl FeedRepository {
         Ok(())
     }
 
-    pub async fn subscribe(&self, source: AddFeedSource, actor: ClerkUser) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, actor: Actor) -> Result<()> {
         let (source_id, source_type) = match source {
             AddFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -352,7 +352,7 @@ impl FeedRepository {
     pub async fn create_reaction(
         &self,
         dto: CreateFeedReactionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<FeedReaction> {
         let id = Uuid::new_v4();
         sqlx::query!(
@@ -381,7 +381,7 @@ impl FeedRepository {
         &self,
         feed_event_id: Uuid,
         emoji: String,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<()> {
         sqlx::query!(
             r#"
