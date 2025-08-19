@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 
@@ -9,6 +9,7 @@ use crate::{
         update_visibility::UpdateVisibilityDto,
     },
     entity::{user::User, visibility::VisibilityFlags},
+    router::clerk::{Actor, UserRole},
 };
 
 #[derive(Clone)]
@@ -135,6 +136,27 @@ impl UserRepository {
         }
     }
 
+    pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<Actor>> {
+        let query = sqlx::query!(
+            r#"
+                SELECT 
+                    u.id,
+                    u.role AS "role: UserRole"
+                FROM "user" u
+                WHERE
+                    u.id = $1
+            "#,
+            actor_id
+        )
+        .fetch_optional(self.db_conn.get_pool())
+        .await?
+        .ok_or(anyhow!("Not found"))?;
+
+        Ok(Some(Actor {
+            user_id: query.id,
+            role: query.role,
+        }))
+    }
     pub async fn filter_users(&self, filter: FilterUsersDto) -> Result<Vec<User>> {
         if filter.id.is_none() && filter.name.is_none() {
             return Ok(vec![]);
