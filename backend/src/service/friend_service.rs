@@ -266,17 +266,13 @@ impl FriendServiceTrait for FriendService {
         self.subscription_service
             .subscribe(
                 AddFeedSource::User(request.requestor.id.clone()),
-                Actor {
-                    user_id: request.recipient.id.clone(),
-                },
+                request.recipient.id.clone(),
             )
             .await;
         self.subscription_service
             .subscribe(
                 AddFeedSource::User(request.recipient.id.clone()),
-                Actor {
-                    user_id: request.requestor.id.clone(),
-                },
+                request.requestor.id.clone(),
             )
             .await;
 
@@ -371,7 +367,7 @@ impl FriendServiceTrait for FriendService {
         };
 
         self.subscription_service
-            .unsubscribe(RemoveFeedSource::User(other_user_id), actor.clone())
+            .unsubscribe(RemoveFeedSource::User(other_user_id), actor.user_id.clone())
             .await;
         self.visibility_service
             .recalculate_friendship_visibility(friendship.clone())

@@ -1,6 +1,4 @@
-use clerk_rs::clerk::Clerk;
-
-use std::sync::Arc;
+use anyhow::Result;
 
 use crate::{
     dto::{
@@ -40,12 +38,7 @@ impl UserService {
         match res {
             Ok(u) => {
                 self.subscription_service
-                    .subscribe(
-                        AddFeedSource::User(u.id.clone()),
-                        Actor {
-                            user_id: u.id.clone(),
-                        },
-                    )
+                    .subscribe(AddFeedSource::User(u.id.clone()), u.id.clone())
                     .await;
                 Ok(ReadUserDto::from(u))
             }
@@ -83,6 +76,11 @@ impl UserService {
             .map_err(|e| UserError::UnknownError(e.to_string()))?;
 
         Ok(user.first().cloned().map(Into::into))
+    }
+
+    pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<Actor>> {
+        // INFO: right now only user can be an actor
+        self.repo.get_actor_by_id(actor_id).await
     }
 
     pub async fn get_user_by_id(&self, user_id: String) -> Result<Option<ReadUserDto>, UserError> {
