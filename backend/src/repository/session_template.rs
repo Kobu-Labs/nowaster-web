@@ -52,10 +52,7 @@ impl RecurringSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_recurring_sessions(
-        &self,
-        actor: Actor,
-    ) -> Result<Vec<ReadSesionTemplateRow>> {
+    pub async fn get_recurring_sessions(&self, actor: Actor) -> Result<Vec<ReadSesionTemplateRow>> {
         let rows = sqlx::query_as!(
             ReadSesionTemplateRow,
             r#"

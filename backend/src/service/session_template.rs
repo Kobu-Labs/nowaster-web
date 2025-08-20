@@ -46,11 +46,7 @@ impl SessionTemplateService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn create_template(
-        &self,
-        dto: CreateSessionTemplateDto,
-        actor: Actor,
-    ) -> Result<()> {
+    pub async fn create_template(&self, dto: CreateSessionTemplateDto, actor: Actor) -> Result<()> {
         let template_id = Uuid::new_v4();
         self.repo
             .create_session_template(template_id, dto.clone(), actor.clone())
