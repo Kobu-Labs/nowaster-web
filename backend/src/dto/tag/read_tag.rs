@@ -4,7 +4,7 @@ use validator::Validate;
 
 use crate::{
     dto::category::read_category::ReadCategoryDto,
-    entity::tag::{Tag, TagDetails},
+    entity::tag::TagDetails,
 };
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]

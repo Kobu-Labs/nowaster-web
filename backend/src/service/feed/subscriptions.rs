@@ -75,7 +75,7 @@ impl FeedSubscriptionService {
         for subscription in &subs_ids {
             sources_by_type
                 .entry(subscription.source_type.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(subscription.source_id.clone());
         }
 
