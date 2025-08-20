@@ -25,7 +25,7 @@ pub struct TagRepository {
     db_conn: Arc<Database>,
 }
 
-#[derive(sqlx::FromRow, Serialize, Deserialize)]
+#[derive(sqlx::FromRow, Serialize, Deserialize, Debug)]
 pub struct ReadTagRow {
     id: Uuid,
     label: String,
@@ -33,7 +33,7 @@ pub struct ReadTagRow {
     color: String,
 }
 
-#[derive(sqlx::FromRow)]
+#[derive(sqlx::FromRow, Debug)]
 struct ReadTagDetailsRow {
     created_by: String,
     tag_id: Uuid,
@@ -65,7 +65,7 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id, tag_label = %dto.label))]
+    #[instrument(skip(self))]
     async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,

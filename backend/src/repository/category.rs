@@ -22,7 +22,7 @@ pub struct CategoryRepository {
     db_conn: Arc<Database>,
 }
 
-#[derive(sqlx::FromRow, Serialize, Deserialize)]
+#[derive(sqlx::FromRow, Serialize, Deserialize, Debug)]
 pub struct ReadCategoryRow {
     id: Uuid,
     name: String,

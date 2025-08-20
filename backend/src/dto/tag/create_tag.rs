@@ -3,7 +3,7 @@ use validator::Validate;
 
 use crate::dto::category::read_category::ReadCategoryDto;
 
-#[derive(Clone, Deserialize, Serialize, Validate)]
+#[derive(Clone, Deserialize, Serialize, Validate, Debug)]
 pub struct CreateTagDto {
     pub label: String,
     #[serde(rename = "allowedCategories")]
@@ -11,7 +11,7 @@ pub struct CreateTagDto {
     pub color: String,
 }
 
-#[derive(Clone, Deserialize, Serialize, Validate)]
+#[derive(Clone, Deserialize, Serialize, Validate, Debug)]
 pub struct UpdateTagDto {
     pub label: Option<String>,
     #[serde(rename = "allowedCategories")]

@@ -14,7 +14,7 @@ use crate::{
 
 use super::fixed_session::AddTagDto;
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateStopwatchSessionDto {
     pub category: Option<CreateCategoryDto>,
     pub tags: Option<Vec<AddTagDto>>,
@@ -23,7 +23,7 @@ pub struct CreateStopwatchSessionDto {
     pub start_time: DateTime<Local>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadStopwatchSessionDto {
     pub id: Uuid,
     pub category: Option<ReadCategoryDto>,
@@ -35,7 +35,7 @@ pub struct ReadStopwatchSessionDto {
     pub user: ReadUserDto,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct UpdateStopwatchSessionDto {
     pub id: Uuid,
     pub category_id: Option<Uuid>,
