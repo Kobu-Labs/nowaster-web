@@ -62,7 +62,7 @@ impl NotificationService {
         self.get_notifications(user_id, query).await
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor.user_id, notification_count = dto.notification_ids.len()))]
+    #[instrument(err, skip(self), fields(actor_id = %actor, notification_count = dto.notification_ids.len()))]
     pub async fn mark_notifications_seen(
         &self,
         dto: MarkNotificationsSeenDto,
@@ -90,7 +90,7 @@ impl NotificationService {
         self.repository.create_notification(dto).await
     }
 
-    #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor))]
     pub async fn delete_notification(
         &self,
         notification_id: Uuid,

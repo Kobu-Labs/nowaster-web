@@ -102,7 +102,7 @@ impl StopwatchSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = ?category_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor, category_id = ?category_id))]
     pub async fn create(
         &self,
         dto: CreateStopwatchSessionDto,
@@ -151,7 +151,7 @@ impl StopwatchSessionRepository {
     }
 
     // INFO: only one stopwatch session can be active at a time
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn read_stopwatch(&self, actor: Actor) -> Result<Option<StopwatchSession>> {
         let sessions = sqlx::query_as!(
             StopwatchFullRow,
@@ -192,7 +192,7 @@ impl StopwatchSessionRepository {
         Ok(result.first().cloned())
     }
 
-    #[instrument(err, skip(self), fields(session_id = %id, user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
     pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
@@ -208,7 +208,7 @@ impl StopwatchSessionRepository {
         Ok(())
     }
 
-    #[instrument(err, skip(self), fields(session_id = %dto.id, user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(session_id = %dto.id, actor_id = %actor))]
     pub async fn update_session(
         &self,
         dto: UpdateStopwatchSessionDto,
