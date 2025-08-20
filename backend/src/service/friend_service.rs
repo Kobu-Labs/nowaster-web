@@ -2,6 +2,7 @@ use anyhow::Result;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, prelude::FromRow, Row};
+use tracing::instrument;
 use uuid::Uuid;
 use validator::Validate;
 
@@ -217,6 +218,7 @@ pub struct FriendService {
 
 #[async_trait::async_trait]
 impl FriendServiceTrait for FriendService {
+    #[instrument(err, skip(self), fields(recipient_id = %dto.recipient_id, requestor_id = %actor.user_id))]
     async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
@@ -235,6 +237,7 @@ impl FriendServiceTrait for FriendService {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, actor_id = %actor.user_id))]
     async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
@@ -290,6 +293,7 @@ impl FriendServiceTrait for FriendService {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, actor_id = %actor.user_id))]
     async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
@@ -321,6 +325,7 @@ impl FriendServiceTrait for FriendService {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, actor_id = %actor.user_id))]
     async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
@@ -352,11 +357,13 @@ impl FriendServiceTrait for FriendService {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = self.repo.list_friends(actor.clone()).await?;
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, actor_id = %actor.user_id))]
     async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()> {
         let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
 
@@ -376,6 +383,7 @@ impl FriendServiceTrait for FriendService {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id, direction = %data.direction))]
     async fn list_friend_requests(
         &self,
         actor: Actor,

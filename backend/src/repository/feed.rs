@@ -2,6 +2,7 @@ use chrono::{DateTime, Local};
 use serde_json::Value;
 use sqlx::{postgres::PgRow, prelude::FromRow, Row};
 use std::sync::Arc;
+use tracing::instrument;
 
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -75,6 +76,7 @@ struct FeedRowRead {
 }
 
 impl FromRow<'_, PgRow> for FeedRowRead {
+    #[instrument(err)]
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         Ok(Self {
             id: row.try_get("id")?,
@@ -155,6 +157,7 @@ impl FeedRepository {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
         let (source_id, source_type) = match source {
             RemoveFeedSource::User(id) => (id, FeedSourceSqlType::User),
@@ -175,6 +178,7 @@ impl FeedRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self))]
     pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
         let (source_id, source_type) = match source {
             AddFeedSource::User(id) => (id, FeedSourceSqlType::User),
@@ -196,6 +200,7 @@ impl FeedRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self))]
     pub async fn create_feed_event(&self, dto: CreateFeedEventDto) -> Result<()> {
         let (event_type, event_data) = FeedEventMapper::serialize_event(dto.data)?;
         let (source_id, source_type) = FeedEventMapper::serialize_source(dto.source);
@@ -217,6 +222,7 @@ impl FeedRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self))]
     pub async fn get_feed(&self, user_id: String, query: FeedQueryDto) -> Result<Vec<FeedEvent>> {
         let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -270,6 +276,7 @@ impl FeedRepository {
         Ok(events)
     }
 
+    #[instrument(err, skip(self), fields(event_count = feed_event_ids.len()))]
     pub async fn get_event_reactions(&self, feed_event_ids: &[Uuid]) -> Result<Vec<FeedReaction>> {
         if feed_event_ids.is_empty() {
             return Ok(vec![]);
@@ -313,6 +320,7 @@ impl FeedRepository {
         Ok(reactions)
     }
 
+    #[instrument(err, skip(self), fields(reaction_id = %reaction_id))]
     pub async fn get_reaction_by_id(&self, reaction_id: Uuid) -> Result<Option<FeedReaction>> {
         let results = sqlx::query!(
             r#"
@@ -349,6 +357,7 @@ impl FeedRepository {
         Ok(reaction)
     }
 
+    #[instrument(err, skip(self))]
     pub async fn create_reaction(
         &self,
         dto: CreateFeedReactionDto,
@@ -377,6 +386,7 @@ impl FeedRepository {
         Ok(data)
     }
 
+    #[instrument(err, skip(self), fields(feed_event_id = %feed_event_id, user_id = %actor.user_id, emoji = %emoji))]
     pub async fn remove_reaction(
         &self,
         feed_event_id: Uuid,
@@ -398,6 +408,7 @@ impl FeedRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_user_subscriptions(
         &self,
         user_id: String,
@@ -425,6 +436,7 @@ impl FeedRepository {
         Ok(results)
     }
 
+    #[instrument(err, skip(self), fields(subscription_id = %subscription_id, user_id = %user_id))]
     pub async fn update_subscription(
         &self,
         subscription_id: Uuid,
@@ -470,6 +482,7 @@ impl FeedRepository {
 
     /// Recalculates visibility permissions for a specific user
     /// Call this when a user changes their visibility settings or creates new relationships
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn recalculate_visibility(&self, user_id: String) -> Result<u64> {
         let affected_rows = sqlx::query!(
             r#"
@@ -514,6 +527,7 @@ impl FeedRepository {
         Ok(affected_rows.rows_affected())
     }
 
+    #[instrument(err, skip(self), fields(feed_event_id = %feed_event_id))]
     pub async fn get_feed_event_by_id(&self, feed_event_id: Uuid) -> Result<Option<FeedEvent>> {
         let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"

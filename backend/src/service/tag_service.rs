@@ -1,4 +1,5 @@
 use anyhow::{Ok, Result};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -29,6 +30,7 @@ impl TagService {
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn create_tag(
         &self,
         dto: CreateTagDto,
@@ -38,6 +40,7 @@ impl TagService {
         Ok(ReadTagDetailsDto::from(res))
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %tag.id, category_id = %category.id, actor_id = %actor.user_id))]
     pub async fn add_allowed_category(
         &self,
         tag: &TagDetails,
@@ -55,6 +58,7 @@ impl TagService {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %tag.id, category_id = %category.id, actor_id = %actor.user_id))]
     pub async fn remove_allowed_category(
         &self,
         tag: &TagDetails,
@@ -75,6 +79,7 @@ impl TagService {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn filter_tags(
         &self,
         filter: TagFilterDto,
@@ -84,15 +89,18 @@ impl TagService {
         Ok(res.into_iter().map(ReadTagDetailsDto::from).collect())
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor.user_id))]
     pub async fn get_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
         self.repo.find_by_id(id, actor).await
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor.user_id))]
     pub async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
         self.repo.delete_tag(id, actor).await?;
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor.user_id))]
     pub async fn update_tag(
         &self,
         id: Uuid,
@@ -103,6 +111,7 @@ impl TagService {
         Ok(ReadTagDetailsDto::from(res))
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
         self.repo.get_tag_statistics(actor).await
     }

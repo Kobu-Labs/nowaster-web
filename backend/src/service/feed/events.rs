@@ -1,5 +1,6 @@
 use anyhow::Result;
 use std::collections::HashMap;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -14,11 +15,13 @@ pub struct FeedEventService {
 }
 
 impl FeedEventService {
+    #[instrument(err, skip(self))]
     pub async fn publish_event(&self, event: CreateFeedEventDto) -> Result<()> {
         self.feed_repository.create_feed_event(event).await?;
         Ok(())
     }
 
+    #[instrument(err, skip(self))]
     pub async fn get_feed(
         &self,
         query: FeedQueryDto,

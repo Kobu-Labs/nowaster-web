@@ -8,7 +8,6 @@ use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 mod config;
 mod dto;
 mod entity;
-mod logging;
 mod repository;
 mod router;
 mod service;

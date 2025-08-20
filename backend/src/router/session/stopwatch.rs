@@ -3,6 +3,7 @@ use axum::{
     routing::{delete, get},
     Router,
 };
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -23,6 +24,7 @@ pub fn stopwatch_session_router() -> Router<AppState> {
         .route("/{session_id}", delete(delete_handler))
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn get_stopwatch_session_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -31,6 +33,7 @@ async fn get_stopwatch_session_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn create_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -43,6 +46,7 @@ async fn create_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, session_id = %session_id))]
 async fn delete_handler(
     State(state): State<AppState>,
     Path(session_id): Path<Uuid>,
@@ -55,6 +59,7 @@ async fn delete_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn update_handler(
     State(state): State<AppState>,
     actor: Actor,
