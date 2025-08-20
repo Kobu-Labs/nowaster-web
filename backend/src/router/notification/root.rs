@@ -5,6 +5,7 @@ use axum::{
 };
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -31,6 +32,7 @@ impl From<NotificationQuery> for NotificationQueryDto {
     }
 }
 
+#[instrument(err, skip(state), fields(user_id = %user.user_id))]
 async fn get_notifications(
     State(state): State<AppState>,
     user: Actor,
@@ -44,6 +46,7 @@ async fn get_notifications(
     ApiResponse::from_result(notifications)
 }
 
+#[instrument(err, skip(state), fields(user_id = %user.user_id))]
 async fn get_unseen_notifications(
     State(state): State<AppState>,
     user: Actor,
@@ -57,6 +60,7 @@ async fn get_unseen_notifications(
     ApiResponse::from_result(notifications)
 }
 
+#[instrument(err, skip(state), fields(user_id = %user.user_id))]
 async fn get_notification_counts(
     State(state): State<AppState>,
     user: Actor,
@@ -69,6 +73,7 @@ async fn get_notification_counts(
     ApiResponse::from_result(counts)
 }
 
+#[instrument(err, skip(state), fields(user_id = %user.user_id))]
 async fn mark_notifications_seen(
     State(state): State<AppState>,
     user: Actor,
@@ -82,6 +87,7 @@ async fn mark_notifications_seen(
     ApiResponse::Success { data: () }
 }
 
+#[instrument(err, skip(state), fields(user_id = %user.user_id, notification_id = %notification_id))]
 async fn delete_notification(
     State(state): State<AppState>,
     user: Actor,

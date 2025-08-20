@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, Postgres, QueryBuilder};
 use std::{sync::Arc, vec};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -144,6 +145,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
+    #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
@@ -194,6 +196,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, session_count = dtos.len()))]
     async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()> {
         let sessions: Vec<CreateFixedSessionDtoWithId> =
             dtos.iter().cloned().map(Into::into).collect();
@@ -241,6 +244,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = %dto.category_id))]
     async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
@@ -281,6 +285,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
@@ -436,6 +441,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(sessions)
     }
 
+    #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
     async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
@@ -451,6 +457,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn delete_sessions_by_filter(
         &self,
         dto: FilterSessionDto,
@@ -503,6 +510,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         Ok(result.rows_affected())
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, user_id = %actor.user_id))]
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
@@ -558,6 +566,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(id = %id))]
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,

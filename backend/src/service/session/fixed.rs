@@ -1,6 +1,7 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -51,6 +52,7 @@ impl FixedSessionService {
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn create_fixed_session(
         &self,
         dto: CreateFixedSessionDto,
@@ -81,6 +83,7 @@ impl FixedSessionService {
         Ok(ReadFixedSessionDto::from(res))
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn filter_fixed_sessions(
         &self,
         dto: FilterSessionDto,
@@ -90,11 +93,13 @@ impl FixedSessionService {
         Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
     }
 
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor.user_id))]
     pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         self.fixed_repo.delete_session(id, actor).await?;
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn delete_sessions_by_filter(
         &self,
         dto: FilterSessionDto,
@@ -107,6 +112,7 @@ impl FixedSessionService {
         Ok(affected_rows)
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn get_active_sessions(&self, actor: Actor) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {
@@ -141,6 +147,7 @@ impl FixedSessionService {
         Ok(all_sessions)
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, actor_id = %actor.user_id))]
     pub async fn update_fixed_session(
         &self,
         dto: UpdateFixedSessionDto,

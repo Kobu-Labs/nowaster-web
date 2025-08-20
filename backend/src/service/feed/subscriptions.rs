@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
+use tracing::instrument;
 
 use crate::{
     dto::{
@@ -24,6 +25,7 @@ pub struct FeedSubscriptionService {
 }
 
 impl FeedSubscriptionService {
+    #[instrument(err, skip(self), fields(subscription_id = %dto.subscription_id, actor_id = %actor.user_id))]
     pub async fn update_subscription(
         &self,
         dto: UpdateFeedSubscriptionDto,
@@ -39,10 +41,12 @@ impl FeedSubscriptionService {
             .await
     }
 
+    #[instrument(err, skip(self), fields(subscriber_id = %subscriber_id))]
     pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
         self.feed_repository.subscribe(source, subscriber_id).await
     }
 
+    #[instrument(err, skip(self), fields(subscriber_id = %subscriber_id))]
     pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
         self.feed_repository
             .unsubscribe(source, subscriber_id)
@@ -56,6 +60,7 @@ impl FeedSubscriptionService {
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn get_user_subscriptions(
         &self,
         actor: Actor,

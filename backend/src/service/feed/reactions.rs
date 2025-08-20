@@ -1,4 +1,5 @@
 use anyhow::Result;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -20,6 +21,7 @@ pub struct FeedReactionService {
 }
 
 impl FeedReactionService {
+    #[instrument(err, skip(self))]
     pub async fn add_reaction(&self, dto: CreateFeedReactionDto, actor: Actor) -> Result<()> {
         let reaction = self
             .feed_repository
@@ -63,6 +65,7 @@ impl FeedReactionService {
         Ok(())
     }
 
+    #[instrument(err, skip(self))]
     pub async fn remove_reaction(
         &self,
         feed_event_id: Uuid,

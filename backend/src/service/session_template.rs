@@ -1,5 +1,6 @@
 use anyhow::Result;
 use chrono::{DateTime, Duration, Local, Utc};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -39,10 +40,12 @@ impl SessionTemplateService {
         Self { repo, session_repo }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn get_templates(&self, actor: Actor) -> Result<Vec<ReadSesionTemplateRow>> {
         self.repo.get_recurring_sessions(actor).await
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn create_template(
         &self,
         dto: CreateSessionTemplateDto,
@@ -82,6 +85,7 @@ impl SessionTemplateService {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(template_id = %dto.id, actor_id = %actor.user_id))]
     pub async fn update_session_template(
         &self,
         dto: UpdateSessionTemplateDto,
@@ -90,10 +94,12 @@ impl SessionTemplateService {
         self.repo.update_session_template(dto, actor).await
     }
 
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor.user_id))]
     pub async fn delete_recurring_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         self.repo.delete_recurring_session(id, actor).await
     }
 
+    #[instrument(err, skip(self), fields(template_id = %id, actor_id = %actor.user_id))]
     pub async fn delete_session_template(
         &self,
         id: Uuid,
