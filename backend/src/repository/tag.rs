@@ -47,8 +47,7 @@ struct ReadTagDetailsRow {
 
 pub trait TagRepositoryTrait {
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails>;
-    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: Actor)
-        -> Result<TagDetails>;
+    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: Actor) -> Result<TagDetails>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails>;
     async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>>;
@@ -270,12 +269,7 @@ impl TagRepositoryTrait for TagRepository {
     }
 
     #[instrument(skip(self), fields(tag_id = %id, actor_id = %actor))]
-    async fn update_tag(
-        &self,
-        id: Uuid,
-        dto: UpdateTagDto,
-        actor: Actor,
-    ) -> Result<TagDetails> {
+    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: Actor) -> Result<TagDetails> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 UPDATE "tag" SET
