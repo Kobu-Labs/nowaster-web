@@ -52,7 +52,7 @@ impl FeedEventService {
 
             reactions_by_event
                 .entry(reaction.feed_event_id)
-                .or_insert(Vec::new())
+                .or_default()
                 .push(reaction_dto);
         }
 

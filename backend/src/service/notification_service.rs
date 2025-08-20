@@ -5,13 +5,10 @@ use uuid::Uuid;
 
 use crate::{
     config::database::Database,
-    dto::{
-        notification::{
+    dto::notification::{
             CreateNotificationDto, MarkNotificationsSeenDto, NotificationCountDto,
             NotificationQueryDto, ReadNotificationDto,
         },
-        user::read_user::ReadUserDto,
-    },
     entity::notification::{
         FriendRequestAcceptedData, FriendRequestData, NotificationSource, NotificationType,
         SessionReactionData, SystemNotificationData,

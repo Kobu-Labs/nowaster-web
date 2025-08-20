@@ -5,7 +5,7 @@ use axum::{
 };
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
-use tracing::{instrument, Level};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
