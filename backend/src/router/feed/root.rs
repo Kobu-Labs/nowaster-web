@@ -5,6 +5,7 @@ use axum::{
 };
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use tracing::{instrument, Level};
 use uuid::Uuid;
 
 use crate::{
@@ -37,7 +38,7 @@ pub struct UnsubscribeRequest {
 
 pub fn feed_router() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_friends_feed_handler))
+        .route("/", get(get_feed_handler))
         .route("/reaction", post(add_reaction_handler))
         .route("/reaction/remove", post(remove_reaction_handler))
         .route("/subscriptions", get(get_subscriptions_handler))
@@ -45,7 +46,8 @@ pub fn feed_router() -> Router<AppState> {
         .route("/subscriptions/unsubscribe", post(unsubscribe_handler))
 }
 
-async fn get_friends_feed_handler(
+#[instrument(skip(state), level = "info")]
+async fn get_feed_handler(
     State(state): State<AppState>,
     Query(query): Query<FeedQuery>,
     actor: Actor,
