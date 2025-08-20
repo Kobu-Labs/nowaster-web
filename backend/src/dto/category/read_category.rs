@@ -4,14 +4,14 @@ use validator::Validate;
 
 use crate::entity::category::Category;
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadCategoryDto {
     pub id: Uuid,
     pub name: String,
     pub color: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadCategoryWithSessionCountDto {
     pub id: Uuid,
     pub name: String,
@@ -20,7 +20,7 @@ pub struct ReadCategoryWithSessionCountDto {
     pub session_count: i64,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CategoryStatsDto {
     pub total_categories: i64,
     pub total_sessions: i64,

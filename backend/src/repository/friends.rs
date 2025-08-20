@@ -21,7 +21,7 @@ pub struct FriendsRepository {
     db: Arc<Database>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct UpdateFriendRequestDto {
     pub request_id: Uuid,
     pub status: FriendRequestStatus,

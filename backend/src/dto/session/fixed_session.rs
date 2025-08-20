@@ -30,7 +30,7 @@ impl From<CreateFixedSessionDto> for CreateFixedSessionDtoWithId {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateFixedSessionDtoWithId {
     pub id: Uuid,
     pub category_id: Uuid,
@@ -43,7 +43,7 @@ pub struct CreateFixedSessionDtoWithId {
     pub template_id: Option<Uuid>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateFixedSessionDto {
     pub category_id: Uuid,
     pub template_id: Option<Uuid>,
@@ -55,7 +55,7 @@ pub struct CreateFixedSessionDto {
     pub end_time: DateTime<Local>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadFixedSessionDto {
     pub id: Uuid,
     pub category: ReadCategoryDto,
@@ -69,7 +69,7 @@ pub struct ReadFixedSessionDto {
     pub template: Option<ReadTemplateShallowDto>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct UpdateFixedSessionDto {
     pub id: Uuid,
     pub category_id: Option<Uuid>,

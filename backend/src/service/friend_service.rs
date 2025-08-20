@@ -20,26 +20,26 @@ use crate::{
     },
 };
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFriendshipAsActorDto {
     pub id: Uuid,
     pub friend: ReadUserDto,
     pub created_at: DateTime<Local>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ProcessFriendRequestDto {
     pub recipient_name: String,
     pub introduction_message: Option<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateFriendRequestDto {
     pub recipient_id: String,
     pub introduction_message: Option<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFriendshipDto {
     pub id: Uuid,
     pub friend1: ReadUserDto,
@@ -105,27 +105,27 @@ impl FromRow<'_, PgRow> for ReadFriendshipDto {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct AcceptFriendRequestDto {
     pub request_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct RejectFriendRequestDto {
     pub request_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CancelFriendRequestDto {
     pub request_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct RemoveFriendDto {
     pub friendship_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum FriendRequestDirection {
     Incoming,
@@ -156,12 +156,12 @@ pub enum FriendRequestStatus {
     Cancelled,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadFriendRequestsDto {
     pub direction: FriendRequestDirection,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFriendRequestDto {
     pub id: Uuid,
     pub status: FriendRequestStatus,

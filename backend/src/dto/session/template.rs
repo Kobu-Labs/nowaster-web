@@ -6,7 +6,7 @@ use validator::Validate;
 
 use crate::entity::session_template::RecurringSessionInterval;
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateSessionTemplateDto {
     pub name: String,
     pub start_date: DateTime<Local>,
@@ -15,7 +15,7 @@ pub struct CreateSessionTemplateDto {
     pub sessions: Vec<CreateRecurringSessionDto>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateRecurringSessionDto {
     pub category_id: Uuid,
     pub tag_ids: Vec<Uuid>,
@@ -24,7 +24,7 @@ pub struct CreateRecurringSessionDto {
     pub end_minute_offset: f64,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct UpdateSessionTemplateDto {
     pub id: Uuid,
     pub name: String,
@@ -34,12 +34,12 @@ pub struct UpdateSessionTemplateDto {
     pub sessions: Vec<CreateRecurringSessionDto>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct DeleteRecurringSessionDto {
     pub id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct DelteteSessionTemplateDto {
     pub id: Uuid,
 }
