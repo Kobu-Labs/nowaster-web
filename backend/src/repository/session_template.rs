@@ -23,7 +23,7 @@ pub struct RecurringSessionRepository {
     db_conn: Arc<Database>,
 }
 
-#[derive(Serialize, Deserialize, FromRow)]
+#[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct ReadRecurringSessionRow {
     pub id: Uuid,
     pub description: Option<String>,
@@ -33,7 +33,7 @@ pub struct ReadRecurringSessionRow {
     pub end_minute_offset: f64,
 }
 
-#[derive(Serialize, Deserialize, FromRow)]
+#[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct ReadSesionTemplateRow {
     pub id: Uuid,
     pub name: String,
