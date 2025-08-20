@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
-use axum::{routing::IntoMakeService, Router};
+use axum::{http::Request, routing::IntoMakeService, Router};
 use clerk_rs::{
     clerk::Clerk,
     validators::{axum::ClerkLayer, jwks::MemoryCacheJwksProvider},
 };
 use tower::ServiceBuilder;
-use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use uuid::Uuid;
 
 use crate::{
     config::database::Database,
@@ -44,8 +45,7 @@ use super::{
     statistics::root::statistics_router, tag::root::tag_router, user::root::public_user_router,
 };
 
-use tracing::Level;
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use tracing::{info_span, Level};
 
 #[derive(Clone)]
 pub struct Feed {
@@ -170,10 +170,20 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .layer(
             ServiceBuilder::new().layer(
                 TraceLayer::new_for_http()
-                    .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+                    .make_span_with(make_span_for_request)
                     .on_request(DefaultOnRequest::new().level(Level::INFO))
                     .on_response(DefaultOnResponse::new().level(Level::INFO)),
             ),
         )
         .into_make_service()
+}
+
+fn make_span_for_request<B>(req: &Request<B>) -> tracing::Span {
+    let request_id = Uuid::new_v4();
+    info_span!(
+        "http_request",
+        method = %req.method(),
+        uri = %req.uri(),
+        request_id = %request_id
+    )
 }
