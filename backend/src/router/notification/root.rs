@@ -109,4 +109,3 @@ pub fn notification_router() -> Router<AppState> {
         .route("/mark_seen", post(mark_notifications_seen))
         .route("/{:id}", axum::routing::delete(delete_notification))
 }
-

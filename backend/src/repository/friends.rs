@@ -34,11 +34,7 @@ impl FriendsRepository {
         }
     }
     #[instrument(err, skip(self), fields(request_id = %id, actor_id = %actor))]
-    pub async fn get_friend_request(
-        &self,
-        id: Uuid,
-        actor: Actor,
-    ) -> Result<ReadFriendRequestDto> {
+    pub async fn get_friend_request(&self, id: Uuid, actor: Actor) -> Result<ReadFriendRequestDto> {
         let result = sqlx::query(
             r#"
                 SELECT 
