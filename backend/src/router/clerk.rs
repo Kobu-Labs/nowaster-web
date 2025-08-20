@@ -1,4 +1,6 @@
-use anyhow::{anyhow, Result};
+use std::fmt::Display;
+
+use anyhow::Result;
 use axum::{
     extract::FromRequestParts,
     http::{request::Parts, StatusCode},
@@ -12,6 +14,12 @@ use super::root::AppState;
 pub struct Actor {
     pub user_id: String,
     pub role: UserRole,
+}
+
+impl Display for Actor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "user_id: {}, role: {:?}", self.user_id, self.role)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Type)]

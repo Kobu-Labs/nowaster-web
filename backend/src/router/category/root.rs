@@ -36,7 +36,7 @@ pub fn category_router() -> Router<AppState> {
         )
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn create_category_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -55,7 +55,7 @@ async fn delete_category_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn filter_categories_handler(
     State(state): State<AppState>,
     Query(payload): Query<FilterCategoryDto>,
@@ -68,7 +68,7 @@ async fn filter_categories_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id, category_id = %category_id))]
+#[instrument( skip(state), fields(user_id = %actor, category_id = %category_id))]
 async fn get_category_by_id_handler(
     State(state): State<AppState>,
     Path(category_id): Path<Uuid>,
@@ -88,7 +88,7 @@ async fn get_category_by_id_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn update_category_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -98,7 +98,7 @@ async fn update_category_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn get_categories_with_session_count_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -110,7 +110,7 @@ async fn get_categories_with_session_count_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn get_category_statistics_handler(
     State(state): State<AppState>,
     actor: Actor,
