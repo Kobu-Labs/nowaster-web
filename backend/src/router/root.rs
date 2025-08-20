@@ -139,11 +139,6 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         },
     };
 
-    tracing_subscriber::registry()
-        .with(fmt::layer())
-        .with(EnvFilter::new("info"))
-        .init();
-
     let publicuser_route =
         Router::new().nest("/user", public_user_router().with_state(state.clone()));
 
