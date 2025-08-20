@@ -3,6 +3,7 @@ use axum::extract::{Path, Query};
 use axum::routing::delete;
 use axum::{extract::State, routing::post, Router};
 use thiserror::Error;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
@@ -33,6 +34,7 @@ pub fn tag_router() -> Router<AppState> {
         )
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, tag_id = %tag_id))]
 async fn update_tag_handler(
     State(state): State<AppState>,
     Path(tag_id): Path<Uuid>,
@@ -43,6 +45,7 @@ async fn update_tag_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, tag_id = %payload.tag_id, category_id = %payload.category_id))]
 async fn add_allowed_category_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -76,6 +79,7 @@ async fn add_allowed_category_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, tag_id = %tag_id))]
 async fn get_tag_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -86,6 +90,7 @@ async fn get_tag_handler(
     ApiResponse::from_result(dto)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, tag_id = %payload.tag_id, category_id = %payload.category_id))]
 async fn remove_allowed_category_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -119,6 +124,7 @@ async fn remove_allowed_category_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn create_tag_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -128,6 +134,7 @@ async fn create_tag_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn filter_tags_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -137,6 +144,7 @@ async fn filter_tags_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, tag_id = %tag_id))]
 async fn delete_tag_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -146,6 +154,7 @@ async fn delete_tag_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn get_tag_statistics_handler(
     State(state): State<AppState>,
     actor: Actor,

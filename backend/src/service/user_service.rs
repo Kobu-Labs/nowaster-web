@@ -1,4 +1,5 @@
 use anyhow::Result;
+use tracing::instrument;
 
 use crate::{
     dto::{
@@ -33,6 +34,7 @@ impl UserService {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn create(&self, dto: CreateUserDto) -> Result<ReadUserDto, UserError> {
         let res = self.repo.create(dto).await;
         match res {
@@ -46,6 +48,7 @@ impl UserService {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn upsert(&self, dto: CreateUserDto) -> Result<(), UserError> {
         let res = self.repo.upsert(dto).await;
         match res {
@@ -54,6 +57,7 @@ impl UserService {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn update_user(&self, dto: UpdateUserDto) -> Result<ReadUserDto, UserError> {
         let res = self.repo.update(dto).await;
         match res {
@@ -62,6 +66,7 @@ impl UserService {
         }
     }
 
+    #[instrument(err, skip(self), fields(username = %username))]
     pub async fn get_user_by_name(
         &self,
         username: String,
@@ -78,11 +83,13 @@ impl UserService {
         Ok(user.first().cloned().map(Into::into))
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor_id))]
     pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<Actor>> {
         // INFO: right now only user can be an actor
         self.repo.get_actor_by_id(actor_id).await
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_user_by_id(&self, user_id: String) -> Result<Option<ReadUserDto>, UserError> {
         let user = self
             .repo
@@ -96,6 +103,7 @@ impl UserService {
         Ok(user.first().cloned().map(Into::into))
     }
 
+    #[instrument(err, skip(self), fields(user_ids_count = user_ids.len()))]
     pub async fn get_users_by_ids(
         &self,
         user_ids: Vec<String>,
@@ -116,6 +124,7 @@ impl UserService {
         Ok(users.iter().cloned().map(Into::into).collect())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn update_visibility(
         &self,
         user_id: String,

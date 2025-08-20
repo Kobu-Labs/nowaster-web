@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use std::sync::Arc;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -101,6 +102,7 @@ impl StopwatchSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = ?category_id))]
     pub async fn create(
         &self,
         dto: CreateStopwatchSessionDto,
@@ -149,6 +151,7 @@ impl StopwatchSessionRepository {
     }
 
     // INFO: only one stopwatch session can be active at a time
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     pub async fn read_stopwatch(&self, actor: Actor) -> Result<Option<StopwatchSession>> {
         let sessions = sqlx::query_as!(
             StopwatchFullRow,
@@ -189,6 +192,7 @@ impl StopwatchSessionRepository {
         Ok(result.first().cloned())
     }
 
+    #[instrument(err, skip(self), fields(session_id = %id, user_id = %actor.user_id))]
     pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
@@ -204,6 +208,7 @@ impl StopwatchSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, user_id = %actor.user_id))]
     pub async fn update_session(
         &self,
         dto: UpdateStopwatchSessionDto,

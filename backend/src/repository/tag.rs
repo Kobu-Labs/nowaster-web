@@ -3,6 +3,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -64,6 +65,7 @@ impl TagRepositoryTrait for TagRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, tag_label = %dto.label))]
     async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
@@ -131,6 +133,7 @@ impl TagRepositoryTrait for TagRepository {
         })
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %id, user_id = %actor.user_id))]
     async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
@@ -146,6 +149,7 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %id, user_id = %actor.user_id))]
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
         let result = self
             .filter_tags(
@@ -163,6 +167,7 @@ impl TagRepositoryTrait for TagRepository {
         Err(anyhow::anyhow!("Tag not found"))
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -232,6 +237,7 @@ impl TagRepositoryTrait for TagRepository {
         Ok(tags)
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %tag_id, category_id = %category_id))]
     async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
         sqlx::query!(
             r#"
@@ -247,6 +253,7 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %tag_id, category_id = %category_id))]
     async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
         sqlx::query!(
             r#"
@@ -262,6 +269,7 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(tag_id = %id, user_id = %actor.user_id))]
     async fn update_tag(
         &self,
         id: Uuid,
@@ -336,6 +344,7 @@ impl TagRepositoryTrait for TagRepository {
         self.find_by_id(id, actor.clone()).await
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
         // Get total tags count
         let total_tags = sqlx::query_scalar!(

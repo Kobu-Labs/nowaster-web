@@ -7,6 +7,7 @@ use crate::{
     service::category_service::CategoryService,
 };
 use anyhow::Result;
+use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -26,6 +27,7 @@ impl StopwatchSessionService {
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn create_stopwatch_session(
         &self,
         dto: CreateStopwatchSessionDto,
@@ -55,10 +57,12 @@ impl StopwatchSessionService {
         Ok(ReadStopwatchSessionDto::from(res))
     }
 
+    #[instrument(err, skip(self), fields(session_id = %session_id, actor_id = %actor.user_id))]
     pub async fn delete_stopwatch_session(&self, session_id: Uuid, actor: Actor) -> Result<()> {
         self.stopwatch_repo.delete_session(session_id, actor).await
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
     pub async fn read_stopwatch_session(
         &self,
         actor: Actor,
@@ -68,6 +72,7 @@ impl StopwatchSessionService {
         Ok(res.map(ReadStopwatchSessionDto::from))
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, actor_id = %actor.user_id))]
     pub async fn update_stopwatch_session(
         &self,
         dto: UpdateStopwatchSessionDto,

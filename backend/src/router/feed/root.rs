@@ -46,7 +46,7 @@ pub fn feed_router() -> Router<AppState> {
         .route("/subscriptions/unsubscribe", post(unsubscribe_handler))
 }
 
-#[instrument(skip(state), level = "info")]
+#[instrument( skip(state), fields(user_id = %actor.user_id))]
 async fn get_feed_handler(
     State(state): State<AppState>,
     Query(query): Query<FeedQuery>,
@@ -61,6 +61,7 @@ async fn get_feed_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument(skip(state), fields(user_id = %actor.user_id, feed_event_id = %payload.feed_event_id))]
 async fn add_reaction_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -79,6 +80,7 @@ async fn add_reaction_handler(
     }
 }
 
+#[instrument(skip(state), fields(user_id = %actor.user_id, feed_event_id = %payload.feed_event_id))]
 async fn remove_reaction_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -98,6 +100,7 @@ async fn remove_reaction_handler(
     }
 }
 
+#[instrument( skip(state), fields(user_id = %actor.user_id))]
 async fn get_subscriptions_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -110,6 +113,7 @@ async fn get_subscriptions_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument( skip(state), fields(user_id = %actor.user_id))]
 async fn update_subscription_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -128,6 +132,7 @@ async fn update_subscription_handler(
     }
 }
 
+#[instrument( skip(state), fields(user_id = %actor.user_id, source_id = %payload.source_id))]
 async fn unsubscribe_handler(
     State(state): State<AppState>,
     actor: Actor,

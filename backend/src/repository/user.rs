@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
+use tracing::instrument;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
@@ -44,6 +45,7 @@ impl UserRepository {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn create(&self, dto: CreateUserDto) -> Result<User> {
         let row = sqlx::query_as!(
             ReadUserRow,
@@ -63,6 +65,7 @@ impl UserRepository {
         Ok(self.mapper(row))
     }
 
+    #[instrument(err, skip(self))]
     pub async fn update(&self, dto: UpdateUserDto) -> Result<User> {
         let mut should_execute = false;
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
@@ -111,6 +114,7 @@ impl UserRepository {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn upsert(&self, dto: CreateUserDto) -> Result<Option<User>> {
         let row = sqlx::query_as!(
             ReadUserRow,
@@ -136,6 +140,7 @@ impl UserRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor_id))]
     pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<Actor>> {
         let query = sqlx::query!(
             r#"
@@ -157,6 +162,7 @@ impl UserRepository {
             role: query.role,
         }))
     }
+    #[instrument(err, skip(self))]
     pub async fn filter_users(&self, filter: FilterUsersDto) -> Result<Vec<User>> {
         if filter.id.is_none() && filter.name.is_none() {
             return Ok(vec![]);
@@ -194,6 +200,7 @@ impl UserRepository {
         Ok(users)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn update_visibility(
         &self,
         user_id: String,
@@ -216,6 +223,7 @@ impl UserRepository {
         Ok(self.mapper(row))
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_by_id(&self, user_id: String) -> Result<Option<User>> {
         let row = sqlx::query_as!(
             ReadUserRow,

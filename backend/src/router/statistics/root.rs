@@ -1,6 +1,7 @@
 use axum::routing::get;
 use axum::{extract::State, Router};
 use tokio::try_join;
+use tracing::instrument;
 
 use crate::dto::statistics::dashboard::DashboardData;
 use crate::repository::statistics::sessions::ReadColorsDto;
@@ -14,6 +15,7 @@ pub fn statistics_router() -> Router<AppState> {
         .route("/colors", get(get_colors))
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn get_colors(State(state): State<AppState>, actor: Actor) -> ApiResponse<ReadColorsDto> {
     let result = state.statistics_service.get_colors(actor.clone()).await;
     match result {
@@ -24,6 +26,7 @@ async fn get_colors(State(state): State<AppState>, actor: Actor) -> ApiResponse<
     }
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn get_dashboard_data(
     State(state): State<AppState>,
     actor: Actor,

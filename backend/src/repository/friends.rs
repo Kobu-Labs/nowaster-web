@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use tracing::instrument;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -32,6 +33,7 @@ impl FriendsRepository {
             db: Arc::clone(db_conn),
         }
     }
+    #[instrument(err, skip(self), fields(request_id = %id, user_id = %actor.user_id))]
     pub async fn get_friend_request(
         &self,
         id: Uuid,
@@ -67,6 +69,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, status = ?dto.status))]
     pub async fn update_friend_request(
         &self,
         dto: UpdateFriendRequestDto,
@@ -127,6 +130,7 @@ impl FriendsRepository {
         Ok(request)
     }
 
+    #[instrument(err, skip(self, tx), fields(requestor_id = %requestor_id, recipient_id = %recipient_id))]
     async fn create_friend_relationship(
         &self,
         requestor_id: String,
@@ -164,6 +168,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     pub async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = sqlx::query(
             r#"
@@ -194,6 +199,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, user_id = %actor.user_id))]
     pub async fn remove_friendship(
         &self,
         dto: RemoveFriendDto,
@@ -231,6 +237,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(recipient_id = %data.recipient_id, requestor_id = %actor.user_id))]
     pub async fn create_friend_request(
         &self,
         data: CreateFriendRequestDto,
@@ -316,6 +323,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, direction = ?data.direction))]
     pub async fn list_friend_requests(
         &self,
         data: ReadFriendRequestsDto,
@@ -356,6 +364,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(friendship_id = %friendship_id))]
     pub async fn get_friendship_by_id(
         &self,
         friendship_id: Uuid,
