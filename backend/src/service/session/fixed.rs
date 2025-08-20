@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::{DateTime, Local};
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 use uuid::Uuid;
@@ -13,7 +13,7 @@ use crate::{
             stopwatch_session::ReadStopwatchSessionDto,
         },
     },
-    entity::feed::{FeedEvent, FeedEventSource, FeedEventType, SessionEventData},
+    entity::feed::{FeedEventSource, FeedEventType, SessionEventData},
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,

@@ -91,15 +91,15 @@ impl VisibilityFlags {
     }
 }
 
-impl Into<VisibilityFlags> for i32 {
-    fn into(self) -> VisibilityFlags {
-        VisibilityFlags::from_raw(self)
+impl From<i32> for VisibilityFlags {
+    fn from(val: i32) -> Self {
+        VisibilityFlags::from_raw(val)
     }
 }
 
-impl Into<i32> for VisibilityFlags {
-    fn into(self) -> i32 {
-        self.as_raw()
+impl From<VisibilityFlags> for i32 {
+    fn from(val: VisibilityFlags) -> Self {
+        val.as_raw()
     }
 }
 

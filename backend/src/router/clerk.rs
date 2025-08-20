@@ -24,16 +24,13 @@ impl Display for Actor {
 
 #[derive(Debug, Clone, PartialEq, Type)]
 #[sqlx(type_name = "user_role", rename_all = "lowercase")]
+#[derive(Default)]
 pub enum UserRole {
+    #[default]
     User,
     Admin,
 }
 
-impl Default for UserRole {
-    fn default() -> Self {
-        UserRole::User
-    }
-}
 
 impl Actor {
     pub fn is_admin(&self) -> bool {
