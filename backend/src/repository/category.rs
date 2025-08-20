@@ -56,7 +56,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_name = %dto.name))]
+    #[instrument(err, skip(self), fields(actor_id = %actor, category_name = %dto.name))]
     async fn upsert(&self, dto: CreateCategoryDto, actor: Actor) -> Result<Category> {
         let row = sqlx::query_as!(
             ReadCategoryRow,
@@ -90,7 +90,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
@@ -138,7 +138,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(())
     }
 
-    #[instrument(err, skip(self), fields(category_id = %id, user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(category_id = %id, actor_id = %actor))]
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Category> {
         let result = self
             .filter_categories(
@@ -197,7 +197,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(self.mapper(row))
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn get_categories_with_session_count(
         &self,
         actor: Actor,
@@ -224,7 +224,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(rows)
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
         // First get basic stats
         let basic_stats = sqlx::query!(

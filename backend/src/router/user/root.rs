@@ -43,7 +43,7 @@ async fn update_user_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn get_current_user_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -56,7 +56,7 @@ async fn get_current_user_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn update_visibility_handler(
     State(state): State<AppState>,
     actor: Actor,

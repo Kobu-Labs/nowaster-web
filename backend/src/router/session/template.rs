@@ -29,7 +29,7 @@ pub fn recurring_session_router() -> Router<AppState> {
     Router::new().route("/", delete(delete_recurring_session))
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn get_templates(
     State(state): State<AppState>,
     actor: Actor,
@@ -38,7 +38,7 @@ async fn get_templates(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn create_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -51,7 +51,7 @@ async fn create_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id))]
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn update_session_template(
     State(state): State<AppState>,
     actor: Actor,
@@ -64,7 +64,7 @@ async fn update_session_template(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id, id = %id))]
+#[instrument( skip(state), fields(user_id = %actor, id = %id))]
 async fn delete_recurring_session(
     State(state): State<AppState>,
     actor: Actor,
@@ -77,7 +77,7 @@ async fn delete_recurring_session(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state), fields(user_id = %actor.user_id, id = %id))]
+#[instrument( skip(state), fields(user_id = %actor, id = %id))]
 async fn delete_session_template(
     State(state): State<AppState>,
     actor: Actor,

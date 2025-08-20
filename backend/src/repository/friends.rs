@@ -33,7 +33,7 @@ impl FriendsRepository {
             db: Arc::clone(db_conn),
         }
     }
-    #[instrument(err, skip(self), fields(request_id = %id, user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(request_id = %id, actor_id = %actor))]
     pub async fn get_friend_request(
         &self,
         id: Uuid,
@@ -168,7 +168,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = sqlx::query(
             r#"
@@ -199,7 +199,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
-    #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, actor_id = %actor))]
     pub async fn remove_friendship(
         &self,
         dto: RemoveFriendDto,
@@ -237,7 +237,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
-    #[instrument(err, skip(self), fields(recipient_id = %data.recipient_id, requestor_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(recipient_id = %data.recipient_id, actor_id = %actor))]
     pub async fn create_friend_request(
         &self,
         data: CreateFriendRequestDto,
@@ -323,7 +323,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id, direction = ?data.direction))]
+    #[instrument(err, skip(self), fields(actor_id = %actor, direction = ?data.direction))]
     pub async fn list_friend_requests(
         &self,
         data: ReadFriendRequestsDto,
