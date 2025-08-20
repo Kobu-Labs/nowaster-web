@@ -23,7 +23,7 @@ pub fn protected_user_router() -> Router<AppState> {
         .route("/visibility", patch(update_visibility_handler))
 }
 
-#[instrument( skip(state))]
+#[instrument(skip(state))]
 async fn crate_user_handler(
     State(state): State<AppState>,
     ValidatedRequest(payload): ValidatedRequest<CreateUserDto>,
@@ -32,7 +32,7 @@ async fn crate_user_handler(
     ApiResponse::from_result(res)
 }
 
-#[instrument( skip(state))]
+#[instrument(skip(state))]
 async fn update_user_handler(
     State(state): State<AppState>,
     ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,

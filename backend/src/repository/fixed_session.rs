@@ -36,11 +36,7 @@ pub trait SessionRepositoryTrait {
         actor: Actor,
     ) -> Result<Self::SessionType>;
     async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn delete_sessions_by_filter(
-        &self,
-        dto: FilterSessionDto,
-        actor: Actor,
-    ) -> Result<u64>;
+    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64>;
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
@@ -458,11 +454,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    async fn delete_sessions_by_filter(
-        &self,
-        dto: FilterSessionDto,
-        actor: Actor,
-    ) -> Result<u64> {
+    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64> {
         if dto.is_empty() {
             return Err(anyhow!(
                 "No filters were specified - aborting session deletion"
