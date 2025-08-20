@@ -7,14 +7,14 @@ use crate::{
     entity::tag::{Tag, TagDetails},
 };
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadTagDto {
     pub id: Uuid,
     pub label: String,
     pub color: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadTagDetailsDto {
     pub id: Uuid,
     pub label: String,
@@ -25,7 +25,7 @@ pub struct ReadTagDetailsDto {
     pub color: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct TagStatsDto {
     pub total_tags: i64,
     pub total_usages: i64,
