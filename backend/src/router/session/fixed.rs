@@ -2,6 +2,7 @@ use axum::extract::Path;
 use axum::routing::{delete, get};
 use axum::{extract::State, routing::post, Router};
 use thiserror::Error;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::dto::session::filter_session::FilterSessionDto;
@@ -22,6 +23,7 @@ pub fn fixed_session_router() -> Router<AppState> {
         .route("/filter", post(filter_handler))
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn create_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -34,6 +36,7 @@ async fn create_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn active_session_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -42,6 +45,7 @@ async fn active_session_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, session_id = %session_id))]
 async fn delete_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -54,6 +58,7 @@ async fn delete_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn filter_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -66,6 +71,7 @@ async fn filter_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn update_handler(
     State(state): State<AppState>,
     actor: Actor,

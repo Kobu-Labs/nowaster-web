@@ -1,5 +1,6 @@
 use anyhow::Result;
 use std::sync::Arc;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -32,6 +33,7 @@ impl NotificationService {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_notifications(
         &self,
         user_id: String,
@@ -45,6 +47,7 @@ impl NotificationService {
             .collect())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_unseen_notifications(
         &self,
         user_id: String,
@@ -59,6 +62,7 @@ impl NotificationService {
         self.get_notifications(user_id, query).await
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor.user_id, notification_count = dto.notification_ids.len()))]
     pub async fn mark_notifications_seen(
         &self,
         dto: MarkNotificationsSeenDto,
@@ -70,6 +74,7 @@ impl NotificationService {
     }
 
     /// Get notification counts for a user
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_notification_counts(&self, user_id: String) -> Result<NotificationCountDto> {
         let unseen_count = self.repository.get_unseen_count(user_id.clone()).await?;
         let total_count = self.repository.get_total_count(user_id).await?;
@@ -80,10 +85,12 @@ impl NotificationService {
         })
     }
 
+    #[instrument(err, skip(self), fields(user_id = %dto.user_id))]
     pub async fn create_notification(&self, dto: CreateNotificationDto) -> Result<Uuid> {
         self.repository.create_notification(dto).await
     }
 
+    #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor.user_id))]
     pub async fn delete_notification(
         &self,
         notification_id: Uuid,
@@ -94,6 +101,7 @@ impl NotificationService {
             .await
     }
 
+    #[instrument(err, skip(self), fields(recipient_id = %request.recipient.id, requestor_id = %request.requestor.id))]
     pub async fn notify_friend_request(&self, request: ReadFriendRequestDto) -> Result<Uuid> {
         let dto = CreateNotificationDto {
             user_id: request.recipient.id.clone(),
@@ -108,6 +116,7 @@ impl NotificationService {
         self.create_notification(dto).await
     }
 
+    #[instrument(err, skip(self), fields(requestor_id = %request.requestor.id, accepter_id = %request.recipient.id))]
     pub async fn notify_friend_request_accepted(
         &self,
         request: ReadFriendRequestDto,
@@ -123,6 +132,7 @@ impl NotificationService {
         self.create_notification(dto).await
     }
 
+    #[instrument(err, skip(self), fields(session_owner_id = %session_owner_user_id, reactor_id = %reactor_user_dto.id, session_id = %session_id))]
     pub async fn notify_session_reaction(
         &self,
         session_owner_user_id: String,
@@ -153,6 +163,7 @@ impl NotificationService {
         self.create_notification(dto).await
     }
 
+    #[instrument(err, skip(self), fields(user_count = user_ids.len(), release_id = %release_id))]
     pub async fn notify_system_announcement(
         &self,
         user_ids: Vec<String>,
@@ -185,6 +196,7 @@ impl NotificationService {
         Ok(notification_ids)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id, days_old = days_old))]
     pub async fn cleanup_old_notifications(&self, user_id: String, days_old: i64) -> Result<u64> {
         let cutoff_date = chrono::Local::now() - chrono::Duration::days(days_old);
         self.repository

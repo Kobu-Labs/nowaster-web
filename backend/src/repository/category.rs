@@ -2,6 +2,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -55,6 +56,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_name = %dto.name))]
     async fn upsert(&self, dto: CreateCategoryDto, actor: Actor) -> Result<Category> {
         let row = sqlx::query_as!(
             ReadCategoryRow,
@@ -88,6 +90,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
@@ -120,6 +123,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())
     }
 
+    #[instrument(err, skip(self), fields(category_id = %id))]
     async fn delete_category(&self, id: Uuid) -> Result<()> {
         sqlx::query!(
             r#"
@@ -134,6 +138,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(category_id = %id, user_id = %actor.user_id))]
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Category> {
         let result = self
             .filter_categories(
@@ -151,6 +156,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Err(anyhow::anyhow!("Category not found"))
     }
 
+    #[instrument(err, skip(self), fields(category_id = %dto.id))]
     async fn update(&self, dto: UpdateCategoryDto) -> Result<Category> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -191,6 +197,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(self.mapper(row))
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn get_categories_with_session_count(
         &self,
         actor: Actor,
@@ -217,6 +224,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         Ok(rows)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
         // First get basic stats
         let basic_stats = sqlx::query!(

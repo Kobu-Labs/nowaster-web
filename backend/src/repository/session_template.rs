@@ -2,6 +2,7 @@ use anyhow::Result;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, types::Json, Postgres};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -50,6 +51,7 @@ impl RecurringSessionRepository {
         }
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
     pub async fn get_recurring_sessions(
         &self,
         actor: Actor,
@@ -107,6 +109,7 @@ impl RecurringSessionRepository {
         Ok(rows)
     }
 
+    #[instrument(err, skip(self), fields(template_id = %dto.id, user_id = %actor.user_id))]
     pub async fn update_session_template(
         &self,
         dto: UpdateSessionTemplateDto,
@@ -153,6 +156,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(template_id = %template_id, user_id = %actor.user_id))]
     pub async fn create_session_template(
         &self,
         template_id: Uuid,
@@ -186,6 +190,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self, tx), fields(template_id = %template_id, user_id = %actor.user_id, category_id = %dto.category_id))]
     async fn create_recurring_session(
         &self,
         dto: CreateRecurringSessionDto,
@@ -225,6 +230,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(session_id = %session_id, user_id = %actor.user_id))]
     pub async fn delete_recurring_session(&self, session_id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
@@ -240,6 +246,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(template_id = %template_id, user_id = %actor.user_id))]
     pub async fn delete_session_template(&self, template_id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
@@ -255,6 +262,7 @@ impl RecurringSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(template_id = %id))]
     pub async fn find_template_by_id(&self, id: Uuid) -> Result<Option<ReadTemplateShallowDto>> {
         let val = sqlx::query_as!(
             ReadTemplateShallowDto,

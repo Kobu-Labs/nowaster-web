@@ -3,6 +3,7 @@ use axum::{
     routing::{delete, patch},
     Router,
 };
+use tracing::instrument;
 
 use crate::{
     repository::friends::UpdateFriendRequestDto,
@@ -28,6 +29,7 @@ pub fn friend_router() -> Router<AppState> {
         )
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, request_id = %payload.request_id))]
 async fn update_friend_request_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -75,6 +77,7 @@ async fn update_friend_request_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id, recipient_name = %payload.recipient_name))]
 async fn create_friend_request_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -114,6 +117,7 @@ async fn create_friend_request_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn list_friend_requests_handler(
     State(state): State<AppState>,
     Query(direction): Query<ReadFriendRequestsDto>,
@@ -139,6 +143,7 @@ fn get_other_friend_id(user_id: String, friendship: ReadFriendshipDto) -> String
     }
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn list_friends_handler(
     State(state): State<AppState>,
     actor: Actor,
@@ -148,6 +153,7 @@ async fn list_friends_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument(err, skip(state), fields(user_id = %actor.user_id))]
 async fn remove_friend_handler(
     State(state): State<AppState>,
     actor: Actor,

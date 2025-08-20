@@ -2,6 +2,7 @@ use chrono::{DateTime, Local};
 use serde_json::Value;
 use sqlx::{postgres::PgRow, prelude::FromRow, Row};
 use std::sync::Arc;
+use tracing::instrument;
 
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -169,6 +170,7 @@ impl NotificationRepository {
         }
     }
 
+    #[instrument(err, skip(self))]
     pub async fn create_notification(&self, dto: CreateNotificationDto) -> Result<Uuid> {
         let (notification_type, content) =
             NotificationMapper::serialize_notification_type(dto.notification_type)?;
@@ -194,6 +196,7 @@ impl NotificationRepository {
         Ok(notification_id)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_notifications(
         &self,
         user_id: String,
@@ -249,6 +252,7 @@ impl NotificationRepository {
         Ok(notifications)
     }
 
+    #[instrument(err, skip(self), fields(user_id = %actor.user_id, notification_count = notification_ids.len()))]
     pub async fn mark_notifications_seen(
         &self,
         notification_ids: &[Uuid],
@@ -273,6 +277,7 @@ impl NotificationRepository {
         Ok(result.rows_affected())
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_unseen_count(&self, user_id: String) -> Result<i64> {
         let result = sqlx::query!(
             r#"
@@ -288,6 +293,7 @@ impl NotificationRepository {
         Ok(result.count.unwrap_or(0))
     }
 
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_total_count(&self, user_id: String) -> Result<i64> {
         let result = sqlx::query!(
             r#"
@@ -303,6 +309,7 @@ impl NotificationRepository {
         Ok(result.count.unwrap_or(0))
     }
 
+    #[instrument(err, skip(self), fields(notification_id = %notification_id, user_id = %actor.user_id))]
     pub async fn delete_notification(
         &self,
         notification_id: Uuid,
@@ -323,6 +330,7 @@ impl NotificationRepository {
     }
 
     /// Delete all notifications older than the specified date for a user
+    #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn cleanup_old_notifications(
         &self,
         user_id: String,
