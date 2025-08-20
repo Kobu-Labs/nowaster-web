@@ -24,7 +24,7 @@ impl CategoryService {
         Self { repo }
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
+    #[instrument(skip(self), fields(actor = %actor))]
     pub async fn upsert_category(
         &self,
         dto: CreateCategoryDto,
@@ -34,13 +34,13 @@ impl CategoryService {
         Ok(ReadCategoryDto::from(res))
     }
 
-    #[instrument(err, skip(self), fields(category_id = %id))]
+    #[instrument(skip(self), fields(category_id = %id))]
     pub async fn delete_category(&self, id: Uuid) -> Result<()> {
         self.repo.delete_category(id).await?;
         Ok(())
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
+    #[instrument(skip(self), fields(actor = %actor))]
     pub async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
@@ -50,12 +50,12 @@ impl CategoryService {
         Ok(res.into_iter().map(ReadCategoryDto::from).collect())
     }
 
-    #[instrument(err, skip(self), fields(category_id = %category_id, actor_id = %actor.user_id))]
+    #[instrument(skip(self), fields(category_id = %category_id, actor = %actor))]
     pub async fn get_by_id(&self, category_id: Uuid, actor: Actor) -> Result<Category> {
         self.repo.find_by_id(category_id, actor).await
     }
 
-    #[instrument(err, skip(self), fields(category_id = %dto.id, actor_id = %actor.user_id))]
+    #[instrument(skip(self), fields(category_id = %dto.id, actor = %actor))]
     pub async fn update_category(
         &self,
         dto: UpdateCategoryDto,
@@ -71,7 +71,7 @@ impl CategoryService {
         Ok(ReadCategoryDto::from(res))
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
+    #[instrument(skip(self), fields(actor = %actor))]
     pub async fn get_categories_with_session_count(
         &self,
         actor: Actor,
@@ -79,7 +79,7 @@ impl CategoryService {
         self.repo.get_categories_with_session_count(actor).await
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
+    #[instrument(skip(self), fields(actor = %actor))]
     pub async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
         self.repo.get_category_statistics(actor).await
     }

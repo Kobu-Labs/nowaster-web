@@ -25,7 +25,7 @@ pub struct FeedSubscriptionService {
 }
 
 impl FeedSubscriptionService {
-    #[instrument(err, skip(self), fields(subscription_id = %dto.subscription_id, actor_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(subscription_id = %dto.subscription_id, actor_id = %actor))]
     pub async fn update_subscription(
         &self,
         dto: UpdateFeedSubscriptionDto,
@@ -60,7 +60,7 @@ impl FeedSubscriptionService {
         }
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn get_user_subscriptions(
         &self,
         actor: Actor,

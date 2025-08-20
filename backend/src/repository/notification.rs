@@ -252,7 +252,7 @@ impl NotificationRepository {
         Ok(notifications)
     }
 
-    #[instrument(err, skip(self), fields(user_id = %actor.user_id, notification_count = notification_ids.len()))]
+    #[instrument(err, skip(self), fields(actor_id = %actor, notification_count = notification_ids.len()))]
     pub async fn mark_notifications_seen(
         &self,
         notification_ids: &[Uuid],
@@ -309,7 +309,7 @@ impl NotificationRepository {
         Ok(result.count.unwrap_or(0))
     }
 
-    #[instrument(err, skip(self), fields(notification_id = %notification_id, user_id = %actor.user_id))]
+    #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor))]
     pub async fn delete_notification(
         &self,
         notification_id: Uuid,
