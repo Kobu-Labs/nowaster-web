@@ -3,16 +3,29 @@ use std::{env, sync::Arc};
 use clerk_rs::{clerk::Clerk, ClerkConfiguration};
 use config::database::{Database, DatabaseTrait};
 use router::root::get_router;
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 mod config;
 mod dto;
 mod entity;
+mod logging;
 mod repository;
 mod router;
 mod service;
 
 #[tokio::main]
 async fn main() {
+    let log_level = if cfg!(debug_assertions) {
+        "debug"
+    } else {
+        "info"
+    };
+
+    tracing_subscriber::registry()
+        .with(fmt::layer().pretty())
+        .with(EnvFilter::new(log_level))
+        .init();
+
     #[cfg(debug_assertions)]
     {
         dotenv::dotenv().ok();
