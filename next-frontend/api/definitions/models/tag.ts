@@ -11,6 +11,7 @@ export const TagWithIdSchema = TagSchema.merge(HasID);
 export const TagDetailsSchema = TagWithIdSchema.extend({
   allowedCategories: z.array(CategoryWithIdSchema),
   usages: z.number(),
+  last_used_at: z.coerce.date(),
 });
 
 export type Tag = z.infer<typeof TagSchema>;
