@@ -57,7 +57,7 @@ export const showSelectedTagsFirst = (
     if (selectedTags.some((t) => t.id === tag2.id)) {
       return 1;
     }
-    return 0;
+    return tag2.last_used_at.getTime() - tag1.last_used_at.getTime();
   });
 };
 
