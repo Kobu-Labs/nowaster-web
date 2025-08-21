@@ -1,4 +1,5 @@
 use anyhow::{Ok, Result};
+use chrono::{DateTime, Local, Utc};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
@@ -31,18 +32,22 @@ pub struct ReadTagRow {
     label: String,
     created_by: String,
     color: String,
+    last_used_at: DateTime<Utc>,
 }
 
 #[derive(sqlx::FromRow, Debug)]
 struct ReadTagDetailsRow {
     created_by: String,
+
     tag_id: Uuid,
     tag_label: String,
     tag_color: String,
+    usages: i64,
+    last_used_at: DateTime<Utc>,
+
     category_id: Option<Uuid>,
     category_name: Option<String>,
     category_color: Option<String>,
-    usages: i64,
 }
 
 pub trait TagRepositoryTrait {
@@ -72,11 +77,15 @@ impl TagRepositoryTrait for TagRepository {
                 WITH inserted AS (
                     INSERT INTO tag (label, created_by, color)
                     VALUES ($1, $2, $3)
-                    RETURNING tag.id, tag.label, tag.created_by, tag.color
+                    RETURNING tag.id, tag.label, tag.created_by, tag.color, tag.last_used_at
                 )
-                SELECT i.id as "id!", i.label as "label!", i.created_by as "created_by!", i.color as "color!" FROM inserted i
-                UNION ALL
-                SELECT c.id, c.label, c.created_by, c.color FROM tag c WHERE c.label = $1 and c.created_by = $2
+                SELECT
+                    i.id as "id!",
+                    i.label as "label!",
+                    i.created_by as "created_by!",
+                    i.color as "color!",
+                    i.last_used_at as "last_used_at!"
+                FROM inserted i
             "#,
             dto.label,
             actor.user_id,
@@ -119,6 +128,7 @@ impl TagRepositoryTrait for TagRepository {
             label: row.label,
             color: row.color,
             created_by: row.created_by,
+            last_used_at: row.last_used_at,
             allowed_categories: categories
                 .into_iter()
                 .map(|cat| Category {
@@ -178,7 +188,8 @@ impl TagRepositoryTrait for TagRepository {
                     category.id AS category_id,
                     category.name AS category_name,
                     category.color AS category_color,
-                    COALESCE(usage_vals.usages, 0) AS usages
+                    COALESCE(usage_vals.usages, 0) AS usages,
+                    tag.last_used_at
                 FROM tag
                 LEFT OUTER JOIN tag_category ON tag_category.tag_id = tag.id
                 LEFT OUTER JOIN category ON category.id = tag_category.category_id
@@ -211,6 +222,7 @@ impl TagRepositoryTrait for TagRepository {
         for row in rows {
             let tag = tags_map.entry(row.tag_id).or_insert_with(|| TagDetails {
                 id: row.tag_id,
+                last_used_at: row.last_used_at,
                 label: row.tag_label.clone(),
                 color: row.tag_color.clone(),
                 allowed_categories: Vec::new(),

@@ -1,11 +1,9 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::{
-    dto::category::read_category::ReadCategoryDto,
-    entity::tag::TagDetails,
-};
+use crate::{dto::category::read_category::ReadCategoryDto, entity::tag::TagDetails};
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadTagDto {
@@ -20,6 +18,7 @@ pub struct ReadTagDetailsDto {
     pub label: String,
     #[serde(rename = "allowedCategories")]
     pub allowed_categories: Vec<ReadCategoryDto>,
+    pub last_used_at: DateTime<Utc>,
     pub usages: i64,
     pub created_by: String,
     pub color: String,
@@ -46,6 +45,7 @@ impl ReadTagDetailsDto {
                 .collect(),
             usages: entity.usages,
             color: entity.color,
+            last_used_at: entity.last_used_at,
         }
     }
 }
