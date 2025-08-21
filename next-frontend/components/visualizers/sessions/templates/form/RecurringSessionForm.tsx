@@ -140,6 +140,7 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
                       ...t,
                       usages: 0,
                       allowedCategories: [],
+                      last_used_at: new Date(),
                     })) ?? []
                   }
                   onNewTagsSelected={(tags) => field.onChange(tags)}
