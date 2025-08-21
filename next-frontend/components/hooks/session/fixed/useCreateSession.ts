@@ -21,6 +21,10 @@ export const useCreateScheduledSession = () => {
         queryKey: queryKeys.categories._def,
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.tags._def,
+      });
+
       toast({
         description: `Session created successfully!`,
         variant: "default",
