@@ -198,6 +198,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                           ...t,
                           usages: 0,
                           allowedCategories: [],
+                          last_used_at: new Date(),
                         })) ?? []
                       }
                       forCategory={form.watch("category") ?? undefined}
