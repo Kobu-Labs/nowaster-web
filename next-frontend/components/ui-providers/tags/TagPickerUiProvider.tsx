@@ -185,7 +185,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           >
             {categoriesInOrder.map(([category, tags]) => (
               <CommandGroup heading={category} key={category}>
-                {tagsOrderStrategy(tags, tags).map((tag) => (
+                {tagsOrderStrategy(tagsValue, tags).map((tag) => (
                   <CommandItem
                     value={tag.label}
                     key={tag.id}
