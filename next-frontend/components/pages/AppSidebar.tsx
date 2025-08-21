@@ -46,7 +46,7 @@ import { closeSidebarOnLinkClickAtom } from "@/state/preferences";
 import { useAtom } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const SHOW_CATEGORY_AMOUNT = 5;
 const SHOW_TAG_AMOUNT = 7;
@@ -103,13 +103,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const [currentLink, setCurrentLink] = useState(pathname);
 
+  const sortedTags = useMemo(
+    () => tags.data?.toSorted((a, b) => b.usages - a.usages),
+    [tags.data],
+  );
+
   const handleLinkClick = (href: string) => {
     setCurrentLink(href);
     if (closeSidebarOnLinkClick) {
       toggleSidebar();
     }
   };
-  if (!categories.data || !tags.data) {
+  if (!categories.data || !sortedTags) {
     // INFO: do not render sidebar when data is not loaded, subject to change
     return null;
   }
@@ -232,7 +237,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Tags</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-2 px-2">
-              {tags.data.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
+              {sortedTags.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
                 <Link
                   onClick={() => handleLinkClick("/home/tags/" + tag.id)}
                   href={"/home/tags/" + tag.id}
@@ -250,11 +255,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Badge>
                 </Link>
               ))}
-              {tags.data.length > SHOW_TAG_AMOUNT && (
+              {sortedTags.length > SHOW_TAG_AMOUNT && (
                 <Link href={"/home/tags"}>
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
-                      {tags.data.length - SHOW_TAG_AMOUNT}
+                      {sortedTags.length - SHOW_TAG_AMOUNT}
                     </p>
                     <p>more..</p>
                   </SidebarMenuButton>
@@ -265,7 +270,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* placeholder for footer */}
       <SidebarFooter className="bg-pink-muted">
         <SidebarMenu>
           <SidebarMenuItem>
