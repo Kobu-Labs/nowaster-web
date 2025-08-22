@@ -36,8 +36,8 @@ pub struct FeedEvent {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SessionEventData {
     pub session_id: Uuid,
-    pub category: Category,
-    pub tags: Vec<Tag>,
+    pub category: FeedSessionCategory,
+    pub tags: Vec<FeedSessionTag>,
     pub description: Option<String>,
     pub start_time: DateTime<Local>,
     pub end_time: DateTime<Local>,
@@ -50,4 +50,39 @@ pub struct FeedReaction {
     pub user: ReadUserDto,
     pub emoji: String,
     pub created_at: DateTime<Local>,
+}
+
+// INFO: mock objects to prevent growing dependencies
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedSessionCategory {
+    pub id: Uuid,
+    pub name: String,
+    pub color: String,
+}
+
+// INFO: mock objects to prevent growing dependencies
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedSessionTag {
+    pub id: Uuid,
+    pub label: String,
+    pub color: String,
+}
+
+impl From<Tag> for FeedSessionTag {
+    fn from(tag: Tag) -> Self {
+        Self {
+            id: tag.id,
+            label: tag.label,
+            color: tag.color,
+        }
+    }
+}
+impl From<Category> for FeedSessionCategory {
+    fn from(category: Category) -> Self {
+        Self {
+            id: category.id,
+            name: category.name,
+            color: category.color,
+        }
+    }
 }

@@ -70,8 +70,8 @@ impl FixedSessionService {
                 id: None,
                 data: FeedEventType::SessionCompleted(SessionEventData {
                     session_id: res.id,
-                    category: res.category.clone(),
-                    tags: res.tags.clone(),
+                    category: res.category.clone().into(),
+                    tags: res.tags.iter().cloned().map(Into::into).collect(),
                     description: res.description.clone(),
                     start_time: res.start_time,
                     end_time: res.end_time,
