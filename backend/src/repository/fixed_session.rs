@@ -62,10 +62,12 @@ pub struct GenericFullRowSession {
     category_id: Uuid,
     category: String,
     category_color: String,
+    category_last_used_at: DateTime<Utc>,
 
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
     tag_color: Option<String>,
+    tag_last_used_at: Option<DateTime<Utc>>,
 
     template_id: Option<Uuid>,
     template_name: Option<String>,
@@ -95,6 +97,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 user_id: session.user_id.clone(),
                 category: Category {
                     id: session.category_id,
+                    last_used_at: session.category_last_used_at.into(),
                     name: session.category,
                     created_by: session.user_id,
                     color: session.category_color,
@@ -156,10 +159,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.category_id,
                 c.name as category,
                 c.color as category_color,
+                c.last_used_at as category_last_used_at,
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
                 t.color as "tag_color?",
+                t.last_used_at as "tag_last_used_at?",
 
                 st.id as "template_id?",
                 st.name as "template_name?",
@@ -299,10 +304,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.category_id,
                 c.name as category,
                 c.color as category_color,
+                c.last_used_at as "category_last_used_at",
 
                 t.id as tag_id,
                 t.label as tag_label,
                 t.color as tag_color,
+                t.last_used_at as "tag_last_used_at",
 
                 st.id as template_id,
                 st.name as template_name,
@@ -573,10 +580,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.category_id,
                 c.name as category,
                 c.color as category_color,
+                c.last_used_at as category_last_used_at,
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
                 t.color as "tag_color?",
+                t.last_used_at as "tag_last_used_at?",
 
                 st.id as "template_id?",
                 st.name as "template_name?",

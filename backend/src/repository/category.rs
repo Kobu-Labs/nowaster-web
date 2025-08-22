@@ -1,4 +1,5 @@
 use anyhow::Result;
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
@@ -28,6 +29,7 @@ pub struct ReadCategoryRow {
     name: String,
     created_by: String,
     color: String,
+    last_used_at: DateTime<Local>,
 }
 
 pub trait CategoryRepositoryTrait {
@@ -65,11 +67,20 @@ impl CategoryRepositoryTrait for CategoryRepository {
                     INSERT INTO category (name, created_by, color)
                     VALUES ($1, $2, $3)
                     ON CONFLICT (name, created_by) DO NOTHING
-                    RETURNING category.id, category.name, category.created_by, category.color
+                    RETURNING 
+                        category.id,
+                        category.name,
+                        category.created_by,
+                        category.color,
+                        category.last_used_at
                 )
-                SELECT i.id as "id!", i.name as "name!", i.created_by as "created_by!", i.color as "color!" FROM inserted i
-                UNION ALL
-                SELECT c.id, c.name, c.created_by, c.color FROM category c WHERE c.name = $1 and c.created_by = $2
+                SELECT 
+                    i.id as "id!",
+                    i.name as "name!",
+                    i.created_by as "created_by!",
+                    i.color as "color!",
+                    i.last_used_at as "last_used_at!" 
+                FROM inserted i
             "#,
             dto.name,
             actor.user_id,
@@ -87,6 +98,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
             name: row.name,
             created_by: row.created_by,
             color: row.color,
+            last_used_at: row.last_used_at,
         }
     }
 
@@ -98,7 +110,12 @@ impl CategoryRepositoryTrait for CategoryRepository {
     ) -> Result<Vec<Category>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
-                SELECT category.id, category.name, category.created_by, category.color
+                SELECT 
+                    category.id,
+                    category.name,
+                    category.created_by,
+                    category.color,
+                    category.last_used_at
                 FROM category
                 WHERE category.created_by = 
             ",
@@ -183,7 +200,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
 
         query.push(" WHERE id = ");
         query.push_bind(dto.id);
-        query.push(" RETURNING category.id, category.name, category.created_by, category.color");
+        query.push(" RETURNING category.id, category.name, category.created_by, category.color, category.last_used_at");
 
         if fields.is_empty() {
             return Err(anyhow::anyhow!("No fields to update"));
@@ -209,7 +226,8 @@ impl CategoryRepositoryTrait for CategoryRepository {
                     c.id,
                     c.name,
                     c.color,
-                    COALESCE(COUNT(s.id),0) as "session_count!"
+                    COALESCE(COUNT(s.id),0) as "session_count!",
+                    c.last_used_at
                 FROM category c
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
                 WHERE c.created_by = $1
@@ -246,7 +264,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
         let most_used = sqlx::query!(
             r#"
                 SELECT 
-                    c.id, c.name, c.color
+                    c.id, c.name, c.color, c.last_used_at
                 FROM category c
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
                 WHERE c.created_by = $1
@@ -263,6 +281,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
             id: row.id,
             name: row.name,
             color: row.color,
+            last_used_at: row.last_used_at.into(),
         });
 
         let average_sessions_per_category = if basic_stats.total_categories > 0 {

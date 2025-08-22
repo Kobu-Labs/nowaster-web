@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
@@ -9,6 +10,7 @@ pub struct ReadCategoryDto {
     pub id: Uuid,
     pub name: String,
     pub color: String,
+    pub last_used_at: DateTime<Local>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -18,6 +20,7 @@ pub struct ReadCategoryWithSessionCountDto {
     pub color: String,
     #[serde(rename = "sessionCount")]
     pub session_count: i64,
+    pub last_used_at: DateTime<Local>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -35,6 +38,7 @@ impl ReadCategoryDto {
             id: entity.id,
             name: entity.name,
             color: entity.color,
+            last_used_at: entity.last_used_at,
         }
     }
 }
