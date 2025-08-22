@@ -19,7 +19,7 @@ use crate::{
         session_template::RecurringSessionRepository,
         statistics::sessions::StatisticsRepository,
         stopwatch_session::StopwatchSessionRepository,
-        tag::{TagRepository, TagRepositoryTrait},
+        tag::TagRepository,
         user::UserRepository,
     },
     router::user::root::protected_user_router,
