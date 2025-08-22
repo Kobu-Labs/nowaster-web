@@ -44,6 +44,26 @@ const fuzzyFindStrategy = (
   return result.length !== 0;
 };
 
+export const showSelectedCategoryFirst = (
+  selectedCateogries: CategoryWithId[],
+  availableCategories: CategoryWithId[],
+) => {
+  return availableCategories.sort((cat1, cat2) => {
+    if (selectedCateogries.some((cat) => cat.id === cat1.id)) {
+      if (selectedCateogries.some((cat) => cat.id === cat2.id)) {
+        return 0;
+      }
+      return -1;
+    }
+
+    if (selectedCateogries.some((cat) => cat.id === cat2.id)) {
+      return 1;
+    }
+
+    return cat2.last_used_at.getTime() - cat1.last_used_at.getTime();
+  });
+};
+
 export const MultipleCategoryPickerUiProvider: FC<
   MultipleCategoryPickerUiProviderProps
 > = (props) => {
@@ -65,6 +85,11 @@ export const MultipleCategoryPickerUiProvider: FC<
   const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
   categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
     matchStrategy(category, searchTerm),
+  );
+
+  categoriesInDisplayOrder = showSelectedCategoryFirst(
+    props.selectedCategories,
+    props.availableCategories,
   );
 
   return (
@@ -96,12 +121,12 @@ export const MultipleCategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <CategoryBadge
-                      key={category.id}
-                      name={category.name}
-                      color={category.color}
-                    />
-                  ))}
+                      <CategoryBadge
+                        key={category.id}
+                        name={category.name}
+                        color={category.color}
+                      />
+                    ))}
               </ScrollArea>
             </div>
           </div>
@@ -118,29 +143,29 @@ export const MultipleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <Button
-              variant="ghost"
-              className="m-0"
-              onClick={async () =>
-                await createCategory(
-                  {
-                    color: newCategoryColor,
-                    name: searchTerm,
-                  },
-                  {
-                    onSuccess: (cat) => {
-                      props.onSelectCategory(cat);
-                      setNewCategoryColor(newCategoryColor);
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={async () =>
+                  await createCategory(
+                    {
+                      color: newCategoryColor,
+                      name: searchTerm,
                     },
-                  },
-                )
-              }
-            >
-              <p>Create</p>
-              <div className="grow"></div>
-              <CategoryBadge color={newCategoryColor} name={searchTerm} />
-            </Button>
-          )}
+                    {
+                      onSuccess: (cat) => {
+                        props.onSelectCategory(cat);
+                        setNewCategoryColor(newCategoryColor);
+                      },
+                    },
+                  )
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
           <CommandSeparator />
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
@@ -175,10 +200,10 @@ export const MultipleCategoryPickerUiProvider: FC<
           )}
           {categoriesInDisplayOrder.length === 0 &&
             searchTerm.trim().length === 0 && (
-            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
                 Type to create!
-            </div>
-          )}
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
@@ -265,29 +290,29 @@ export const SingleCategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <Button
-              variant="ghost"
-              className="m-0"
-              onClick={async () =>
-                await createCategory(
-                  {
-                    color: newCategoryColor,
-                    name: searchTerm,
-                  },
-                  {
-                    onSuccess: (cat) => {
-                      props.onSelectCategory(cat);
-                      setNewCategoryColor(randomColor());
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={async () =>
+                  await createCategory(
+                    {
+                      color: newCategoryColor,
+                      name: searchTerm,
                     },
-                  },
-                )
-              }
-            >
-              <p>Create</p>
-              <div className="grow"></div>
-              <CategoryBadge color={newCategoryColor} name={searchTerm} />
-            </Button>
-          )}
+                    {
+                      onSuccess: (cat) => {
+                        props.onSelectCategory(cat);
+                        setNewCategoryColor(randomColor());
+                      },
+                    },
+                  )
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
           <CommandSeparator />
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
@@ -320,10 +345,10 @@ export const SingleCategoryPickerUiProvider: FC<
           )}
           {categoriesInDisplayOrder.length === 0 &&
             searchTerm.trim().length === 0 && (
-            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
                 Type to create!
-            </div>
-          )}
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
