@@ -220,7 +220,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 ))}
               {categories.data.length > SHOW_CATEGORY_AMOUNT && (
-                <Link href={"/home/category"}>
+                <Link
+                  href={"/home/category"}
+                  onClick={() => handleLinkClick("/home/category/")}
+                >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
                       {categories.data.length - SHOW_CATEGORY_AMOUNT}
