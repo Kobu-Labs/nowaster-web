@@ -1,5 +1,5 @@
-use anyhow::{Ok, Result};
-use chrono::{DateTime, Local, Utc};
+use anyhow::Result;
+use chrono::{DateTime, Utc};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, QueryBuilder};
@@ -48,29 +48,18 @@ struct ReadTagDetailsRow {
     category_id: Option<Uuid>,
     category_name: Option<String>,
     category_color: Option<String>,
+    category_last_used_at: Option<DateTime<Utc>>,
 }
 
-pub trait TagRepositoryTrait {
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails>;
-    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: Actor) -> Result<TagDetails>;
-    fn new(db_conn: &Arc<Database>) -> Self;
-    async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails>;
-    async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>>;
-    async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
-    async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()>;
-    async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto>;
-}
-
-impl TagRepositoryTrait for TagRepository {
-    fn new(db_conn: &Arc<Database>) -> Self {
+impl TagRepository {
+    pub fn new(db_conn: &Arc<Database>) -> Self {
         Self {
             db_conn: Arc::clone(db_conn),
         }
     }
 
-    #[instrument(skip(self))]
-    async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
+    #[instrument(err, skip(self))]
+    pub async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
@@ -113,7 +102,7 @@ impl TagRepositoryTrait for TagRepository {
         let categories = sqlx::query_as!(
             ReadCategoryDto,
             r#"
-            SELECT cat.id, cat.name, cat.color
+            SELECT cat.id, cat.name, cat.color, cat.last_used_at
             FROM category cat
             JOIN tag_category tc ON tc.category_id = cat.id
             WHERE tc.tag_id = $1
@@ -136,14 +125,15 @@ impl TagRepositoryTrait for TagRepository {
                     name: cat.name,
                     color: cat.color,
                     created_by: actor.user_id.clone(),
+                    last_used_at: cat.last_used_at,
                 })
                 .collect(),
             usages: 0,
         })
     }
 
-    #[instrument(skip(self), fields(tag_id = %id, actor_id = %actor))]
-    async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
+    #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
+    pub async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM tag
@@ -158,8 +148,8 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    #[instrument(skip(self), fields(tag_id = %id, actor_id = %actor))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
+    #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
+    pub async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
         let result = self
             .filter_tags(
                 TagFilterDto {
@@ -176,8 +166,8 @@ impl TagRepositoryTrait for TagRepository {
         Err(anyhow::anyhow!("Tag not found"))
     }
 
-    #[instrument(skip(self), fields(actor_id = %actor))]
-    async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>> {
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 SELECT 
@@ -185,9 +175,12 @@ impl TagRepositoryTrait for TagRepository {
                     tag.label AS tag_label,
                     tag.created_by AS "created_by",
                     tag.color as tag_color,
+
                     category.id AS category_id,
                     category.name AS category_name,
                     category.color AS category_color,
+                    category.last_used_at AS category_last_used_at,
+
                     COALESCE(usage_vals.usages, 0) AS usages,
                     tag.last_used_at
                 FROM tag
@@ -230,15 +223,17 @@ impl TagRepositoryTrait for TagRepository {
                 usages: row.usages,
             });
 
-            if let (Some(cat_id), Some(cat_name), Some(cat_color)) = (
+            if let (Some(cat_id), Some(cat_name), Some(cat_color), Some(last_used_at)) = (
                 row.category_id,
                 row.category_name.clone(),
                 row.category_color.clone(),
+                row.category_last_used_at,
             ) {
                 tag.allowed_categories.push(Category {
                     id: cat_id,
                     name: cat_name,
                     color: cat_color,
+                    last_used_at: last_used_at.into(),
                     created_by: row.created_by.clone(),
                 });
             }
@@ -248,8 +243,8 @@ impl TagRepositoryTrait for TagRepository {
         Ok(tags)
     }
 
-    #[instrument(skip(self), fields(tag_id = %tag_id, category_id = %category_id))]
-    async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
+    #[instrument(err, skip(self), fields(tag_id = %tag_id, category_id = %category_id))]
+    pub async fn add_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
         sqlx::query!(
             r#"
                 INSERT INTO tag_category (tag_id, category_id)
@@ -264,8 +259,8 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    #[instrument(skip(self), fields(tag_id = %tag_id, category_id = %category_id))]
-    async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
+    #[instrument(err, skip(self), fields(tag_id = %tag_id, category_id = %category_id))]
+    pub async fn remove_allowed_category(&self, tag_id: Uuid, category_id: Uuid) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM tag_category
@@ -280,8 +275,13 @@ impl TagRepositoryTrait for TagRepository {
         Ok(())
     }
 
-    #[instrument(skip(self), fields(tag_id = %id, actor_id = %actor))]
-    async fn update_tag(&self, id: Uuid, dto: UpdateTagDto, actor: Actor) -> Result<TagDetails> {
+    #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
+    pub async fn update_tag(
+        &self,
+        id: Uuid,
+        dto: UpdateTagDto,
+        actor: Actor,
+    ) -> Result<TagDetails> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 UPDATE "tag" SET
@@ -350,8 +350,8 @@ impl TagRepositoryTrait for TagRepository {
         self.find_by_id(id, actor.clone()).await
     }
 
-    #[instrument(skip(self), fields(actor_id = %actor))]
-    async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
         // Get total tags count
         let total_tags = sqlx::query_scalar!(
             "SELECT COUNT(DISTINCT id) FROM tag WHERE created_by = $1",
