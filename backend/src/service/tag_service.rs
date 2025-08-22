@@ -1,4 +1,4 @@
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use tracing::instrument;
 use uuid::Uuid;
 
@@ -27,13 +27,13 @@ impl TagService {
         }
     }
 
-    #[instrument(skip(self), fields(actor = %actor))]
+    #[instrument(err, skip(self), fields(actor = %actor))]
     pub async fn create_tag(&self, dto: CreateTagDto, actor: Actor) -> Result<ReadTagDetailsDto> {
         let res = self.repo.create(dto, actor).await?;
         Ok(ReadTagDetailsDto::from(res))
     }
 
-    #[instrument(skip(self), fields(tag_id = %tag.id, category_id = %category.id, actor = %actor))]
+    #[instrument(err, skip(self), fields(tag_id = %tag.id, category_id = %category.id, actor = %actor))]
     pub async fn add_allowed_category(
         &self,
         tag: &TagDetails,
@@ -51,7 +51,7 @@ impl TagService {
         Ok(())
     }
 
-    #[instrument(skip(self), fields(tag_id = %tag.id, category_id = %category.id, actor = %actor))]
+    #[instrument(err, skip(self), fields(tag_id = %tag.id, category_id = %category.id, actor = %actor))]
     pub async fn remove_allowed_category(
         &self,
         tag: &TagDetails,
@@ -72,7 +72,7 @@ impl TagService {
         Ok(())
     }
 
-    #[instrument(skip(self), fields(actor = %actor))]
+    #[instrument(err, skip(self), fields(actor = %actor))]
     pub async fn filter_tags(
         &self,
         filter: TagFilterDto,
@@ -82,18 +82,18 @@ impl TagService {
         Ok(res.into_iter().map(ReadTagDetailsDto::from).collect())
     }
 
-    #[instrument(skip(self), fields(tag_id = %id, actor = %actor))]
+    #[instrument(err, skip(self), fields(tag_id = %id, actor = %actor))]
     pub async fn get_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
         self.repo.find_by_id(id, actor).await
     }
 
-    #[instrument(skip(self), fields(tag_id = %id, actor = %actor))]
+    #[instrument(err, skip(self), fields(tag_id = %id, actor = %actor))]
     pub async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
         self.repo.delete_tag(id, actor).await?;
         Ok(())
     }
 
-    #[instrument(skip(self), fields(tag_id = %id, actor = %actor))]
+    #[instrument(err, skip(self), fields(tag_id = %id, actor = %actor))]
     pub async fn update_tag(
         &self,
         id: Uuid,
@@ -104,7 +104,7 @@ impl TagService {
         Ok(ReadTagDetailsDto::from(res))
     }
 
-    #[instrument(skip(self), fields(actor = %actor))]
+    #[instrument(err, skip(self), fields(actor = %actor))]
     pub async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
         self.repo.get_tag_statistics(actor).await
     }
