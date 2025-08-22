@@ -108,13 +108,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     [tags.data],
   );
 
+  const sortedCategories = useMemo(
+    () => categories.data?.toSorted((a, b) => b.sessionCount - a.sessionCount),
+    [categories.data],
+  );
+
   const handleLinkClick = (href: string) => {
     setCurrentLink(href);
     if (closeSidebarOnLinkClick) {
       toggleSidebar();
     }
   };
-  if (!categories.data || !sortedTags) {
+
+  if (!sortedCategories || !sortedTags) {
     // INFO: do not render sidebar when data is not loaded, subject to change
     return null;
   }
@@ -193,7 +199,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Categories</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-2 px-2">
-              {categories.data
+              {sortedCategories
                 .slice(0, SHOW_CATEGORY_AMOUNT)
                 .map((category) => (
                   <Link
@@ -219,14 +225,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </Badge>
                   </Link>
                 ))}
-              {categories.data.length > SHOW_CATEGORY_AMOUNT && (
+              {sortedCategories.length > SHOW_CATEGORY_AMOUNT && (
                 <Link
                   href={"/home/category"}
                   onClick={() => handleLinkClick("/home/category/")}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
-                      {categories.data.length - SHOW_CATEGORY_AMOUNT}
+                      {sortedCategories.length - SHOW_CATEGORY_AMOUNT}
                     </p>
                     <p>more..</p>
                   </SidebarMenuButton>
