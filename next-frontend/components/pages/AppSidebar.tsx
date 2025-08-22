@@ -259,7 +259,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </Link>
               ))}
               {sortedTags.length > SHOW_TAG_AMOUNT && (
-                <Link href={"/home/tags"}>
+                <Link
+                  href={"/home/tags"}
+                  onClick={() => handleLinkClick("/home/tags/")}
+                >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
                       {sortedTags.length - SHOW_TAG_AMOUNT}
