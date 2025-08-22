@@ -83,13 +83,12 @@ export const SingleCategoryPicker: FC<
   };
 
   return (
-    <SingleCategoryPickerUiProvider
+    <MultipleCategoryPickerUiProvider
       modal={props.modal}
       availableCategories={categories.data}
-      selectedCategory={value}
+      selectedCategories={value ? [value] : []}
       onSelectCategory={onSelectCategory}
       categoryMatchStrategy={props.categoryMatchStrategy}
-      categoryDisplayStrategy={props.categoryDisplayStrategy}
     />
   );
 };
