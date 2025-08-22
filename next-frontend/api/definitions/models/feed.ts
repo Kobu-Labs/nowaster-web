@@ -19,7 +19,7 @@ export const ReadFeedReactionSchema = z.object({
 
 export const SessionCompletedEventSchema = z.object({
   session_id: z.string(),
-  category: CategoryWithIdSchema,
+  category: CategoryWithIdSchema.omit({ last_used_at: true }),
   tags: z.array(TagWithIdSchema),
   description: z.string().nullish(),
   start_time: z.coerce.date(),

@@ -39,6 +39,7 @@ pub struct StopwatchFullRow {
     category_id: Option<Uuid>,
     category_name: Option<String>,
     category_color: Option<String>,
+    category_last_used_at: Option<DateTime<Utc>>,
 
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
@@ -86,15 +87,17 @@ impl StopwatchSessionRepository {
                 });
             }
 
-            if let (Some(id), Some(name), Some(color)) = (
+            if let (Some(id), Some(name), Some(color), Some(last_used_at)) = (
                 session.category_id,
                 session.category_name,
                 session.category_color,
+                session.category_last_used_at,
             ) {
                 entry.category = Some(Category {
                     id,
                     name,
                     color,
+                    last_used_at: last_used_at.into(),
                     created_by: session.user_id.clone(),
                 });
             }
@@ -168,6 +171,7 @@ impl StopwatchSessionRepository {
                 s.category_id as "category_id?",
                 c.name as "category_name?",
                 c.color as "category_color?",
+                c.last_used_at as "category_last_used_at?",
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
