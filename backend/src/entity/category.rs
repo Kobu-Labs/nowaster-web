@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,6 +10,7 @@ pub struct Category {
     pub name: String,
     pub created_by: String,
     pub color: String,
+    pub last_used_at: DateTime<Local>,
 }
 
 impl From<Category> for ReadCategoryDto {
@@ -17,6 +19,7 @@ impl From<Category> for ReadCategoryDto {
             id: category.id,
             name: category.name,
             color: category.color,
+            last_used_at: category.last_used_at,
         }
     }
 }
