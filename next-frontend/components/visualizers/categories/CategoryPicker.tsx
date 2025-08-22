@@ -7,7 +7,6 @@ import {
   MultipleCategoryPickerUiProviderProps,
   MultipleCategoryPickerUiProvider,
   SingleCategoryPickerUiProviderProps,
-  SingleCategoryPickerUiProvider,
 } from "@/components/ui-providers/categories/CategoryPickerUiProvider";
 import { useCategories } from "@/components/hooks/category/useCategory";
 
