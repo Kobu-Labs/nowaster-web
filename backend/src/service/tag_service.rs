@@ -9,10 +9,7 @@ use crate::{
         read_tag::{ReadTagDetailsDto, TagStatsDto},
     },
     entity::{category::Category, tag::TagDetails},
-    repository::{
-        category::CategoryRepository,
-        tag::{TagRepository, TagRepositoryTrait},
-    },
+    repository::{category::CategoryRepository, tag::TagRepository},
     router::clerk::Actor,
 };
 
