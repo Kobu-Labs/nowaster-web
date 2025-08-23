@@ -72,6 +72,9 @@ export default function PreferencesPage() {
 
       return () => clearTimeout(timer);
     }
+    // INFO: placeholder to keep type system happy
+    /* eslint-disable @typescript-eslint/no-empty-function */
+    return () => {};
   }, [searchParams]);
 
   return (
