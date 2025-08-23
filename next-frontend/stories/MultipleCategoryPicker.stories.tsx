@@ -17,11 +17,13 @@ export const Basic: Story = {
     onSelectCategory: console.log,
     selectedCategories: [
       {
+        last_used_at: new Date(),
         name: "pb138",
         id: "pb138",
         color: "#0f0f0f",
       },
       {
+        last_used_at: new Date(),
         name: "testing",
         id: "testing",
         color: "#ff0fbf",
