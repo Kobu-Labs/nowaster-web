@@ -3,10 +3,12 @@ import { atomWithStorage } from "jotai/utils";
 
 export interface UserPreferences {
   closeSidebarOnLinkClick: boolean;
+  sidebarBehavior: "floating" | "permanent";
 }
 
 const defaultPreferences: UserPreferences = {
   closeSidebarOnLinkClick: true,
+  sidebarBehavior: "floating",
 };
 
 export const userPreferencesAtom = atomWithStorage<UserPreferences>(
@@ -21,6 +23,17 @@ export const closeSidebarOnLinkClickAtom = atom(
     set(userPreferencesAtom, {
       ...currentPrefs,
       closeSidebarOnLinkClick: newValue,
+    });
+  },
+);
+
+export const sidebarBehaviorAtom = atom(
+  (get) => get(userPreferencesAtom).sidebarBehavior,
+  (get, set, newValue: "floating" | "permanent") => {
+    const currentPrefs = get(userPreferencesAtom);
+    set(userPreferencesAtom, {
+      ...currentPrefs,
+      sidebarBehavior: newValue,
     });
   },
 );
