@@ -309,7 +309,7 @@ impl TagRepository {
         query
             .push(" AND created_by = ")
             .push_bind(actor.user_id.clone());
-        query.push(" RETURNING tag.id, tag.label, tag.created_by, tag.color ");
+        query.push(" RETURNING tag.id, tag.label, tag.created_by, tag.color, tag.last_used_at");
 
         if fields.is_empty() && dto.allowed_categories.is_none() {
             return Err(anyhow::anyhow!("No fields to update"));
