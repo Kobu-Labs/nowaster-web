@@ -21,12 +21,58 @@ import {
   sidebarBehaviorAtom,
 } from "@/state/preferences";
 import { useAtom } from "jotai";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function PreferencesPage() {
   const [closeSidebarOnLinkClick, setCloseSidebarOnLinkClick] = useAtom(
     closeSidebarOnLinkClickAtom,
   );
   const [sidebarBehavior, setSidebarBehavior] = useAtom(sidebarBehaviorAtom);
+  const searchParams = useSearchParams();
+  const [highlightedSetting, setHighlightedSetting] = useState<string | null>(
+    null,
+  );
+  const sidebarBehaviorRef = useRef<HTMLDivElement>(null);
+  const closeSidebarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const setting = searchParams.get("setting");
+    if (setting) {
+      setHighlightedSetting(setting);
+
+      const scrollToElement = () => {
+        let targetRef;
+        switch (setting) {
+          case "sidebar-behavior":
+            targetRef = sidebarBehaviorRef;
+            break;
+          case "close-sidebar":
+            targetRef = closeSidebarRef;
+            break;
+          default:
+            targetRef = null;
+            break;
+        }
+
+        if (targetRef?.current) {
+          targetRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      };
+
+      setTimeout(scrollToElement, 100);
+
+      const timer = setTimeout(() => {
+        setHighlightedSetting(null);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   return (
     <div className="space-y-6">
@@ -45,7 +91,14 @@ export default function PreferencesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div
+            ref={sidebarBehaviorRef}
+            className={cn(
+              "flex items-center justify-between p-3 rounded-lg transition-all duration-1000",
+              highlightedSetting === "sidebar-behavior" &&
+                "bg-accent/20 shadow-lg ring-2 ring-accent",
+            )}
+          >
             <div className="space-y-0.5">
               <Label htmlFor="sidebar-behavior">Sidebar behavior</Label>
               <p className="text-sm text-muted-foreground">
@@ -62,7 +115,14 @@ export default function PreferencesPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center justify-between">
+          <div
+            ref={closeSidebarRef}
+            className={cn(
+              "flex items-center justify-between p-3 rounded-lg transition-all duration-300",
+              highlightedSetting === "close-sidebar" &&
+                "bg-accent/20 shadow-lg ring-2 ring-accent",
+            )}
+          >
             <div className="space-y-0.5">
               <Label htmlFor="close-sidebar">Close sidebar on link click</Label>
               <p className="text-sm text-muted-foreground">
