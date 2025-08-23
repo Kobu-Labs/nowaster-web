@@ -16,7 +16,12 @@ const createMockTags = (tagLabels: string[]) => {
 
 const createMockCategory = (names: string[]) => {
   return names.map((name, i) => {
-    return { name, id: i.toString(), color: randomColor() };
+    return {
+      last_used_at: new Date(),
+      name,
+      id: i.toString(),
+      color: randomColor(),
+    };
   });
 };
 
