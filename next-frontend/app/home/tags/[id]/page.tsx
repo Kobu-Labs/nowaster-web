@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 
 function TagDetailSkeleton() {
   return (
-    <div>
+    <div className="grow">
       <div className="my-8 pl-8">
         <div className="flex items-center gap-4">
           <Skeleton className="h-8 w-32" />
@@ -58,21 +58,26 @@ function TagDetailSkeleton() {
 
 function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
   const router = useRouter();
-  
+
   return (
     <div className="flex justify-center items-center min-h-96">
       <Alert variant="destructive" className="max-w-md">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Tag Not Found</AlertTitle>
         <AlertDescription className="mt-2">
-          The tag you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
+          The tag you&apos;re looking for doesn&apos;t exist or you don&apos;t
+          have access to it.
         </AlertDescription>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" size="sm" onClick={onRetry}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push('/home/tags')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/home/tags")}
+          >
             Back to Tags
           </Button>
         </div>
@@ -108,7 +113,7 @@ export default function Page(props: { params: { id: string } }) {
   };
 
   return (
-    <div>
+    <div className="grow">
       <div className="my-8 pl-8 ">
         <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
           Details page for
