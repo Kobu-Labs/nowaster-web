@@ -42,8 +42,11 @@ import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/
 import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { cn } from "@/lib/utils";
-import { closeSidebarOnLinkClickAtom } from "@/state/preferences";
-import { useAtom } from "jotai";
+import {
+  closeSidebarOnLinkClickAtom,
+  sidebarBehaviorAtom,
+} from "@/state/preferences";
+import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -97,6 +100,7 @@ const navItems = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar } = useSidebar();
   const [closeSidebarOnLinkClick] = useAtom(closeSidebarOnLinkClickAtom);
+  const pref = useAtomValue(sidebarBehaviorAtom);
 
   const categories = useCategories();
   const tags = useTags();
@@ -128,17 +132,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       {...props}
-      className="top-[var(--header-height)] !h-[calc(100svh-var(--header-height))] w-72"
+      className={cn(
+        "top-[var(--header-height)] w-72 !h-[calc(100svh-var(--header-height))] ",
+        pref === "floating" && "p-0",
+        pref === "permanent" && "h-full",
+      )}
     >
       <SidebarHeader className="flex flex-row items-center px-4 justify-between gradient-button">
         <NowasterLogo href="/home" />
-        <Button
-          variant="ghost"
-          className="hover:bg-accent p-0 m-0 aspect-square"
-          onClick={toggleSidebar}
-        >
-          <X />
-        </Button>
+        {pref !== "permanent" && (
+          <Button
+            variant="ghost"
+            className="hover:bg-accent p-0 m-0 aspect-square"
+            onClick={toggleSidebar}
+          >
+            <X />
+          </Button>
+        )}
       </SidebarHeader>
 
       <SidebarContent className="gradient-card">
