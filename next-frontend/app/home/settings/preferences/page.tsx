@@ -45,15 +45,15 @@ export default function PreferencesPage() {
       const scrollToElement = () => {
         let targetRef;
         switch (setting) {
-          case "sidebar-behavior":
-            targetRef = sidebarBehaviorRef;
-            break;
-          case "close-sidebar":
-            targetRef = closeSidebarRef;
-            break;
-          default:
-            targetRef = null;
-            break;
+        case "sidebar-behavior":
+          targetRef = sidebarBehaviorRef;
+          break;
+        case "close-sidebar":
+          targetRef = closeSidebarRef;
+          break;
+        default:
+          targetRef = null;
+          break;
         }
 
         if (targetRef?.current) {
