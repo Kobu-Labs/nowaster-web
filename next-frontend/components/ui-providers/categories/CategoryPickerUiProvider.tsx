@@ -75,19 +75,15 @@ export const MultipleCategoryPickerUiProvider: FC<
   const { mutateAsync: createCategory } = useCreateCategory();
 
   let categoriesInDisplayOrder = props.availableCategories;
-  if (props.categoryDisplayStrategy) {
-    categoriesInDisplayOrder = props.categoryDisplayStrategy(
-      props.selectedCategories,
-      props.availableCategories,
-    );
-  }
 
   const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
   categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
     matchStrategy(category, searchTerm),
   );
 
-  categoriesInDisplayOrder = showSelectedCategoryFirst(
+  const displayStrategy =
+    props.categoryDisplayStrategy ?? showSelectedCategoryFirst;
+  categoriesInDisplayOrder = displayStrategy(
     props.selectedCategories,
     categoriesInDisplayOrder,
   );
