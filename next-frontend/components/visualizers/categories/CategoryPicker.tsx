@@ -6,7 +6,6 @@ import { Frown } from "lucide-react";
 import {
   MultipleCategoryPickerUiProviderProps,
   CategoryPickerUiProvider,
-  SingleCategoryPickerUiProviderProps,
 } from "@/components/ui-providers/categories/CategoryPickerUiProvider";
 import { useCategories } from "@/components/hooks/category/useCategory";
 
@@ -47,7 +46,7 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
 type SingleCategoryPickerProps = {
   onSelectedCategoriesChanged: (newCategory: CategoryWithId) => void;
 } & Omit<
-  SingleCategoryPickerUiProviderProps,
+  MultipleCategoryPickerUiProviderProps,
   "availableCategories" | "selectedCategory" | "onSelectCategory"
 >;
 
