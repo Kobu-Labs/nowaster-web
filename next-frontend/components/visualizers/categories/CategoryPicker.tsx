@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { Frown } from "lucide-react";
 import {
   MultipleCategoryPickerUiProviderProps,
-  MultipleCategoryPickerUiProvider,
+  CategoryPickerUiProvider,
   SingleCategoryPickerUiProviderProps,
 } from "@/components/ui-providers/categories/CategoryPickerUiProvider";
 import { useCategories } from "@/components/hooks/category/useCategory";
@@ -33,7 +33,7 @@ export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
   }
 
   return (
-    <MultipleCategoryPickerUiProvider
+    <CategoryPickerUiProvider
       modal={props.modal}
       availableCategories={categories.data}
       selectedCategories={props.selectedCategories}
@@ -82,7 +82,7 @@ export const SingleCategoryPicker: FC<
   };
 
   return (
-    <MultipleCategoryPickerUiProvider
+    <CategoryPickerUiProvider
       modal={props.modal}
       availableCategories={categories.data}
       selectedCategories={value ? [value] : []}
