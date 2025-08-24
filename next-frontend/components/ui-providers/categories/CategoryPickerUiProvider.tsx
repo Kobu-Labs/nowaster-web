@@ -89,7 +89,7 @@ export const MultipleCategoryPickerUiProvider: FC<
 
   categoriesInDisplayOrder = showSelectedCategoryFirst(
     props.selectedCategories,
-    props.availableCategories,
+    categoriesInDisplayOrder,
   );
 
   return (
@@ -155,7 +155,7 @@ export const MultipleCategoryPickerUiProvider: FC<
                   {
                     onSuccess: (cat) => {
                       props.onSelectCategory(cat);
-                      setNewCategoryColor(newCategoryColor);
+                      setNewCategoryColor(randomColor());
                     },
                   },
                 )
