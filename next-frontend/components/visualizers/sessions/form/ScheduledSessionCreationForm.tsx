@@ -22,11 +22,11 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { formatTime } from "@/lib/utils";
 import { SessionPrecursor } from "@/validation/session/creation";
 import { z } from "zod";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
 export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
   if (!props.from || !props.to) {
@@ -109,12 +109,14 @@ export const ScheduledSessionCreationForm: FC<
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Category</FormLabel>
                   <FormControl>
-                    <SingleCategoryPicker
-                      onSelectedCategoriesChanged={(category) => {
-                        if (category === undefined) {
+                    <CategoryPicker
+                      mode="single"
+                      selectedCategory={field.value ?? null}
+                      onSelectCategory={(cat) => {
+                        if (cat.id === field.value?.id) {
                           form.resetField("category");
                         } else {
-                          field.onChange(category);
+                          field.onChange(cat);
                         }
                       }}
                     />

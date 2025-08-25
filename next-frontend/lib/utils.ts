@@ -152,6 +152,13 @@ export const emptyStringToUndefined = (
   return workingValue;
 };
 
+export const arrayFromUndefined = <T>(value?: T | null) => {
+  if (!value) {
+    return [];
+  }
+  return [value];
+};
+
 export const toggleOrientation = (orientation: "horizontal" | "vertical") => {
   return orientation === "horizontal" ? "vertical" : "horizontal";
 };
