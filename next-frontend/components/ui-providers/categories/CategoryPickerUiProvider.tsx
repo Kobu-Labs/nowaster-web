@@ -1,24 +1,24 @@
-import { FC, useState } from "react";
-import { CategoryWithId } from "api/definitions";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn, randomColor } from "@/lib/utils";
+import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
 import { Button } from "@/components/shadcn/button";
 import {
-  Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandSeparator,
+    Command,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandSeparator,
 } from "@/components/shadcn/command";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
-import FuzzySearch from "fuzzy-search";
-import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
+import { fuzzyFindSearch } from "@/lib/searching";
+import { cn, randomColor } from "@/lib/utils";
+import { CategoryWithId } from "api/definitions";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { FC, useState } from "react";
 
 export type MultipleCategoryPickerUiProviderProps = {
   availableCategories: CategoryWithId[];
@@ -33,15 +33,6 @@ export type MultipleCategoryPickerUiProviderProps = {
     searchTerm: string,
   ) => number;
   modal?: boolean;
-};
-
-const fuzzyFindStrategy = (
-  category: CategoryWithId,
-  searchTerm: string,
-): boolean => {
-  const searcher = new FuzzySearch([category.name], []);
-  const result = searcher.search(searchTerm);
-  return result.length !== 0;
 };
 
 export const showSelectedCategoryFirst = (
@@ -64,6 +55,10 @@ export const showSelectedCategoryFirst = (
   });
 };
 
+const fuzzyFindCategory = (category: CategoryWithId, searchTerm: string) => {
+  return fuzzyFindSearch(category.name, searchTerm).length !== 0;
+};
+
 export const CategoryPickerUiProvider: FC<
   MultipleCategoryPickerUiProviderProps
 > = (props) => {
@@ -76,7 +71,7 @@ export const CategoryPickerUiProvider: FC<
 
   let categoriesInDisplayOrder = props.availableCategories;
 
-  const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindStrategy;
+  const matchStrategy = props.categoryMatchStrategy ?? fuzzyFindCategory;
   categoriesInDisplayOrder = categoriesInDisplayOrder.filter((category) =>
     matchStrategy(category, searchTerm),
   );
@@ -117,12 +112,12 @@ export const CategoryPickerUiProvider: FC<
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <CategoryBadge
-                      key={category.id}
-                      name={category.name}
-                      color={category.color}
-                    />
-                  ))}
+                      <CategoryBadge
+                        key={category.id}
+                        name={category.name}
+                        color={category.color}
+                      />
+                    ))}
               </ScrollArea>
             </div>
           </div>
@@ -139,29 +134,29 @@ export const CategoryPickerUiProvider: FC<
             props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <Button
-              variant="ghost"
-              className="m-0"
-              onClick={async () =>
-                await createCategory(
-                  {
-                    color: newCategoryColor,
-                    name: searchTerm,
-                  },
-                  {
-                    onSuccess: (cat) => {
-                      props.onSelectCategory(cat);
-                      setNewCategoryColor(randomColor());
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={async () =>
+                  await createCategory(
+                    {
+                      color: newCategoryColor,
+                      name: searchTerm,
                     },
-                  },
-                )
-              }
-            >
-              <p>Create</p>
-              <div className="grow"></div>
-              <CategoryBadge color={newCategoryColor} name={searchTerm} />
-            </Button>
-          )}
+                    {
+                      onSuccess: (cat) => {
+                        props.onSelectCategory(cat);
+                        setNewCategoryColor(randomColor());
+                      },
+                    },
+                  )
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
           <CommandSeparator />
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
@@ -196,13 +191,12 @@ export const CategoryPickerUiProvider: FC<
           )}
           {categoriesInDisplayOrder.length === 0 &&
             searchTerm.trim().length === 0 && (
-            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
                 Type to create!
-            </div>
-          )}
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
   );
 };
-
