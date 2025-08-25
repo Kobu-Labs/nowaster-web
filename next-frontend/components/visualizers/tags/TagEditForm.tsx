@@ -32,7 +32,7 @@ import { TagApi } from "@/api";
 import { useToast } from "@/components/shadcn/use-toast";
 import { Input } from "@/components/shadcn/input";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
-import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { CircleHelp, Save, Trash2 } from "lucide-react";
 import { useRecoilValue } from "recoil";
@@ -175,7 +175,8 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                 </TooltipProvider>
               </div>
               <div className="flex-grow-0 max-w-64">
-                <MultipleCategoryPicker
+                <CategoryPicker
+                  mode="multiple"
                   onSelectCategory={handleSelectCategory}
                   selectedCategories={selectedCategories}
                 />
