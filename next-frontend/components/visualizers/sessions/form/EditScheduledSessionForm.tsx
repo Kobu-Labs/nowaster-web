@@ -32,13 +32,13 @@ import { Button } from "@/components/shadcn/button";
 import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
 import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight } from "lucide-react";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
 type EditStopwatchSessionProps = {
   session: ScheduledSessionWithId;
@@ -94,11 +94,10 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Category</FormLabel>
                   <FormControl>
-                    <SingleCategoryPicker
-                      value={field.value ?? undefined}
-                      onSelectedCategoriesChanged={(category) =>
-                        field.onChange(category)
-                      }
+                    <CategoryPicker
+                      mode="single"
+                      selectedCategory={field.value ?? null}
+                      onSelectCategory={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

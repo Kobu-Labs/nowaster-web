@@ -12,7 +12,7 @@ import {
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
 import { IntervalBasedPicker } from "@/components/ui-providers/date-pickers/interval/IntevalBasedPicker";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { FC } from "react";
@@ -53,11 +53,10 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
             <FormItem className="flex flex-col gap-2">
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <SingleCategoryPicker
-                  value={field.value ?? undefined}
-                  onSelectedCategoriesChanged={(category) =>
-                    field.onChange(category)
-                  }
+                <CategoryPicker
+                  mode="single"
+                  selectedCategory={field.value ?? null}
+                  onSelectCategory={field.onChange}
                 />
               </FormControl>
               <FormMessage />

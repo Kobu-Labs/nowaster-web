@@ -30,7 +30,7 @@ import {
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
 import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -126,11 +126,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Category</FormLabel>
                   <FormControl>
-                    <SingleCategoryPicker
-                      value={field.value ?? undefined}
-                      onSelectedCategoriesChanged={(category) =>
-                        field.onChange(category)
-                      }
+                    <CategoryPicker
+                      mode="single"
+                      selectedCategory={field.value ?? null}
+                      onSelectCategory={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

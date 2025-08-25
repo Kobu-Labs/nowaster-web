@@ -13,7 +13,7 @@ import {
 } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
-import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { CircleHelp, Save } from "lucide-react";
 import {
@@ -142,7 +142,8 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                 </TooltipProvider>
               </div>
               <div className="flex-grow-0 max-w-64">
-                <MultipleCategoryPicker
+                <CategoryPicker
+                  mode="multiple"
                   onSelectCategory={handleSelectCategory}
                   selectedCategories={selectedCategories}
                 />

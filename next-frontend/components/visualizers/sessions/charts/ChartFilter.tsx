@@ -28,7 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 
@@ -122,9 +122,10 @@ export const ChartFilter: FC = () => {
           <Separator />
           <div className="flex flex-col gap-1">
             <SheetDescription>Filter by categories</SheetDescription>
-            <MultipleCategoryPicker
+            <CategoryPicker
               selectedCategories={filter.data.categories ?? []}
               onSelectCategory={onSelectCategory}
+              mode="multiple"
             />
             <RadioGroup
               onValueChange={(value: "some" | "all") => {
