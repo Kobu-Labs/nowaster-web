@@ -1,8 +1,8 @@
-import { FC, useState } from "react";
 import { Category, TagDetails } from "@/api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { FC, useState } from "react";
 
-import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
+import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 import { Button } from "@/components/shadcn/button";
 import {
   Command,
@@ -17,8 +17,8 @@ import {
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
-import FuzzySearch from "fuzzy-search";
-import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
+import { fuzzyFindSearch } from "@/lib/searching";
+import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
 
 export type TagPickerUiProviderProps = {
   availableTags: TagDetails[];
@@ -34,10 +34,8 @@ export type TagPickerUiProviderProps = {
   disabled?: boolean;
 };
 
-const fuzzyFindStrategy = (tags: TagDetails, searchTerm: string): boolean => {
-  const searcher = new FuzzySearch([tags.label], []);
-  const result = searcher.search(searchTerm);
-  return result.length !== 0;
+const fuzzyFindTag = (tag: TagDetails, searchTerm: string) => {
+  return fuzzyFindSearch(tag.label, searchTerm).length !== 0;
 };
 
 const orderCategories = (
@@ -89,7 +87,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     }
   };
 
-  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy;
+  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindTag;
 
   let tagsToDisplay = props.availableTags;
   tagsToDisplay = tagsToDisplay.filter((tag) => matchStrategy(tag, searchTerm));
@@ -140,8 +138,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {tagsValue.length === 0
                 ? "Select Tags"
                 : tagsValue.map((tag) => (
-                  <TagBadge tag={tag} variant="auto" key={tag.id} />
-                ))}
+                    <TagBadge tag={tag} variant="auto" key={tag.id} />
+                  ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -155,30 +153,30 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
           />
           {searchTerm &&
             props.availableTags.every((t) => t.label !== searchTerm) && (
-            <CommandGroup>
-              <CommandItem
-                className="flex"
-                onSelect={() =>
-                  createTag(
-                    {
-                      color: newTagColor,
-                      label: searchTerm,
-                      allowedCategories: [],
-                    },
-                    { onSuccess: handleTagCreate },
-                  )
-                }
-              >
-                <p>Create</p>
-                <div className="grow"></div>
-                <TagBadge
-                  variant="manual"
-                  value={searchTerm}
-                  colors={newTagColor}
-                />
-              </CommandItem>
-            </CommandGroup>
-          )}
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() =>
+                    createTag(
+                      {
+                        color: newTagColor,
+                        label: searchTerm,
+                        allowedCategories: [],
+                      },
+                      { onSuccess: handleTagCreate },
+                    )
+                  }
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <TagBadge
+                    variant="manual"
+                    value={searchTerm}
+                    colors={newTagColor}
+                  />
+                </CommandItem>
+              </CommandGroup>
+            )}
           <ScrollArea
             type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
