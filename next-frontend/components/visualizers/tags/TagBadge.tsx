@@ -31,14 +31,7 @@ const TagBadgeInner = (props: { color: string; label: string }) => {
 };
 
 const TagBadgeAuto = (props: { tag: TagWithId }) => {
-  const [colors, setColors] = useRecoilState(tagColors);
-
-  const color = colors[props.tag.label] ?? props.tag.color;
-  if (colors[props.tag.label] === undefined) {
-    setColors({ ...colors, [props.tag.label]: color });
-  }
-
-  return <TagBadgeInner color={color} label={props.tag.label} />;
+  return <TagBadgeInner color={"#00ff00"} label={props.tag.label} />;
 };
 
 const TagBadgeManual = (props: { value: string; color?: string }) => {
