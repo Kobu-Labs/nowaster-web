@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 
 import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { Button } from "@/components/shadcn/button";
-import { Card, CardContent } from "@/components/shadcn/card";
+import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import {
   Form,
   FormControl,
@@ -44,7 +44,9 @@ export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
 
 type ScheduledSessionCreationFormProps = {
   precursor?: SessionPrecursor;
-  onSave?: () => void;
+  onCreate?: () => void;
+  onClose?: () => void;
+  onCreateAndClose?: () => void;
 };
 
 const createSessionPrecursor = z.object({
@@ -90,8 +92,8 @@ export const ScheduledSessionCreationForm: FC<
 
     await createSession.mutateAsync(data, {
       onSuccess: () => {
-        if (props.onSave) {
-          props.onSave();
+        if (props.onCreate) {
+          props.onCreate();
         }
       },
     });
@@ -225,9 +227,32 @@ export const ScheduledSessionCreationForm: FC<
               )}
             />
 
-            <Button type="submit" loading={createSession.isPending}>
-              Submit
-            </Button>
+            <CardFooter className="justify-between p-0">
+              {props.onClose && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={props.onClose}
+                >
+                  Close
+                </Button>
+              )}
+              <div className="grow"></div>
+              <div className="flex items-center gap-2">
+                <Button type="submit" loading={createSession.isPending}>
+                  Submit
+                </Button>
+                {props.onCreateAndClose && (
+                  <Button
+                    type="submit"
+                    loading={createSession.isPending}
+                    onClick={props.onCreateAndClose}
+                  >
+                    Submit and Close
+                  </Button>
+                )}
+              </div>
+            </CardFooter>
           </form>
         </Form>
       </CardContent>
