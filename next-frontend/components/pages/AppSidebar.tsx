@@ -100,6 +100,7 @@ const navItems = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar } = useSidebar();
   const [closeSidebarOnLinkClick] = useAtom(closeSidebarOnLinkClickAtom);
+  const [showQuickLog, setShowQuickLog] = useState(false);
   const pref = useAtomValue(sidebarBehaviorAtom);
 
   const categories = useCategories();
@@ -157,7 +158,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <div className="grid grid-cols-1 gap-2 px-2">
               <SessionTimer />
-              <Dialog modal={false}>
+              <Dialog
+                modal={false}
+                open={showQuickLog}
+                onOpenChange={setShowQuickLog}
+              >
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -169,7 +174,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="w-fit max-w-fit">
-                  <ScheduledSessionCreationForm />
+                  <ScheduledSessionCreationForm
+                    onCreateAndClose={() => setShowQuickLog(false)}
+                    onClose={() => setShowQuickLog(false)}
+                  />
                 </DialogContent>
               </Dialog>
             </div>
