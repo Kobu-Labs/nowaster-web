@@ -33,7 +33,7 @@ export const SessionBaseAreaChartUiProvider: FC<
     props.groupingOpts,
   );
   const [fallbackColor] = useState(randomColor());
-  const colors = useRecoilValue(categoryColors);
+  const colors = {}
 
   if (props.data.length === 0) {
     return (
