@@ -31,7 +31,7 @@ const getById = z.object({
   id: z.string(),
 });
 
-const update = TagDetailsSchema.deepPartial().merge(HasID);
+const update = TagDetailsSchema.partial().merge(HasID);
 
 export type TagRequest = {
   [Property in keyof typeof TagRequestSchema]: z.infer<
