@@ -17,6 +17,7 @@ import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
 function TagDetailSkeleton() {
   return (
@@ -86,8 +87,9 @@ function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-export default function Page(props: { params: { id: string } }) {
-  const tagQuery = useQuery(queryKeys.tags.byId(props.params.id));
+export default function Page(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
+  const tagQuery = useQuery(queryKeys.tags.byId(params.id));
 
   if (tagQuery.isLoading) {
     return <TagDetailSkeleton />;

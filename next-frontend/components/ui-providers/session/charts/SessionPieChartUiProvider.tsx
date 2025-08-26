@@ -102,8 +102,8 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   }
 
   return (
-    <ResponsiveContainer width={"100%"} height={180}>
-      <PieChart onMouseLeave={() => handleActiveIndexChange(undefined)}>
+    <ResponsiveContainer width={"100%"} height={180} >
+      <PieChart onMouseLeave={() => handleActiveIndexChange(undefined)} >
         <Pie
           data={props.data}
           dataKey="value"
@@ -115,7 +115,8 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           paddingAngle={5}
           activeShape={renderActiveShape}
           onMouseEnter={(_, i) => handleActiveIndexChange(i)}
-          activeIndex={activeIndex}
+          rootTabIndex={activeIndex}
+
         >
           {props.data.map(({ metadata }, index) => {
             return (

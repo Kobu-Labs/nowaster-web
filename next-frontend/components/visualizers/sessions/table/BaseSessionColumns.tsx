@@ -40,7 +40,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
 
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-      <AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
         <Button
           className="group cursor-pointer p-0 m-0 aspect-square"
           variant="ghost"
@@ -79,7 +79,7 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
 
   return (
     <Dialog modal={false} open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button
           className="group cursor-pointer p-0 m-0 aspect-square"
           variant="ghost"
