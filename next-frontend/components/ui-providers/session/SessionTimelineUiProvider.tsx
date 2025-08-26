@@ -329,7 +329,7 @@ export function SessionTimelineUiProvider({
             </DialogHeader>
             <ScheduledSessionCreationForm
               precursor={sessionToCreate}
-              onSave={() => setIsCreateDialogOpen(false)}
+              onCreate={() => setIsCreateDialogOpen(false)}
             />
           </DialogContent>
         </Dialog>
