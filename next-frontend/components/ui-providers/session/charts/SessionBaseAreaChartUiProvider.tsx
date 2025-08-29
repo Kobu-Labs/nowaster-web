@@ -18,6 +18,7 @@ import { useRecoilValue } from "recoil";
 import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
 import { formatTime, randomColor } from "@/lib/utils";
 import { Card } from "@/components/shadcn/card";
+import { Separator } from "@/components/shadcn/separator";
 
 type SessionBaseAreaChartUiProviderProps = {
   data: ScheduledSession[];
@@ -83,9 +84,12 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
   if (filteredValues.length === 0) {
     return <></>;
   }
+  const totalTime = filteredValues.reduce((acc, [_, time]) => {
+    return acc + time;
+  }, 0);
 
   return (
-    <Card className="rounded-sm p-2">
+    <Card className="rounded-sm p-2 gradient-card-solid">
       {filteredValues.map(([category, totalTime], i) => {
         return (
           <div className="flex items-center justify-between gap-2" key={i}>
@@ -110,6 +114,11 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
           </div>
         );
       })}
+      <Separator className="h-0.5"/>
+      <div className="flex items-center justify-between gap-2">
+        <p className={"text-[var(--legend-color)]"}>Total Time</p>
+        <p className={"text-[var(--legend-color)]"}>{formatTime(totalTime)}</p>
+      </div>
     </Card>
   );
 };

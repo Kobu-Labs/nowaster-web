@@ -161,6 +161,10 @@ module.exports = {
           background: "var(--gradient-muted)",
           borderColor: "hsl(var(--pink-subtle))",
         },
+        ".gradient-card-solid": {
+          background: "var(--gradient-secondary-solid)",
+          borderColor: "hsl(var(--pink-subtle))",
+        },
         ".gradient-accent-bar": {
           background:
             "linear-gradient(180deg, hsl(var(--pink-primary)) 0%, hsl(var(--purple-primary)) 100%)",
