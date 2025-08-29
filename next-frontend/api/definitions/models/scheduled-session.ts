@@ -5,8 +5,8 @@ import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
 export const ScheduledSessionSchema = z.object({
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
+  startTime: z.coerce.date<Date>(),
+  endTime: z.coerce.date<Date>(),
   category: CategoryWithIdSchema,
   description: z.string().nullable(),
   tags: z.array(TagWithIdSchema),

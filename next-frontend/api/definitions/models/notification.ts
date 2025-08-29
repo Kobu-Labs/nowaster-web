@@ -28,8 +28,8 @@ export const FriendRequestAcceptedDataSchema = z.object({
 export const SessionReactionDataSchema = z
   .object({
     session_id: z.string(),
-    session_start_time: z.coerce.date(),
-    session_end_time: z.coerce.date(),
+    session_start_time: z.coerce.date<Date>(),
+    session_end_time: z.coerce.date<Date>(),
 
     session_category: CategoryWithIdSchema,
   })
@@ -84,7 +84,7 @@ export const NotificationSchema = z
     id: z.string(),
     user_id: z.string(),
     seen: z.boolean(),
-    created_at: z.coerce.date(),
+    created_at: z.coerce.date<Date>(),
   })
   .and(NotificationSourceSchema)
   .and(NotificationDataSchema);

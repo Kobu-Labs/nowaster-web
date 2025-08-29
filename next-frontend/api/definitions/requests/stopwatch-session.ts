@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 const create = z.object({
-  startTime: z.coerce.date(),
+  startTime: z.coerce.date<Date>(),
 });
 
 const update = z.object({
   id: z.string().uuid(),
-  startTime: z.coerce.date().nullish(),
+  startTime: z.coerce.date<Date>().nullish(),
   category_id: z.string().uuid().nullish(),
   description: z.string().nullish(),
   tag_ids: z.array(z.string().uuid()).nullish(),

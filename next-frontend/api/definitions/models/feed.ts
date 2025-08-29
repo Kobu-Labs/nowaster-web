@@ -14,7 +14,7 @@ export const ReadFeedReactionSchema = z.object({
   id: z.string().uuid(),
   user: ReadUserAvatarSchema,
   emoji: z.string(),
-  created_at: z.coerce.date(),
+  created_at: z.coerce.date<Date>(),
 });
 
 export const SessionCompletedEventSchema = z.object({
@@ -22,8 +22,8 @@ export const SessionCompletedEventSchema = z.object({
   category: CategoryWithIdSchema.omit({ last_used_at: true }),
   tags: z.array(TagWithIdSchema),
   description: z.string().nullish(),
-  start_time: z.coerce.date(),
-  end_time: z.coerce.date(),
+  start_time: z.coerce.date<Date>(),
+  end_time: z.coerce.date<Date>(),
 });
 
 export const SourceTypeMappingSchema = z.discriminatedUnion("source_type", [
@@ -51,7 +51,7 @@ export const EventTypeMappingSchema = z.discriminatedUnion("event_type", [
 export const ReadFeedEventSchema = z
   .object({
     id: z.string().uuid(),
-    created_at: z.coerce.date(),
+    created_at: z.coerce.date<Date>(),
     reactions: z.array(ReadFeedReactionSchema),
   })
   .and(EventTypeMappingSchema.and(SourceTypeMappingSchema));
@@ -61,7 +61,7 @@ export const ReadFeedSubscriptionSchema = z
     id: z.string().uuid(),
     is_muted: z.boolean(),
     is_paused: z.boolean(),
-    created_at: z.coerce.date(),
+    created_at: z.coerce.date<Date>(),
   })
   .and(SourceTypeMappingSchema);
 

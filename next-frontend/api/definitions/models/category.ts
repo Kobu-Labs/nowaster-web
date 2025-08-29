@@ -4,7 +4,7 @@ import { z } from "zod";
 export const CategorySchema = z.object({
   name: z.string().trim().min(1),
   color: z.string().trim().min(1),
-  last_used_at: z.coerce.date(),
+  last_used_at: z.coerce.date<Date>(),
 });
 
 export const CategoryWithIdSchema = CategorySchema.merge(HasID);
