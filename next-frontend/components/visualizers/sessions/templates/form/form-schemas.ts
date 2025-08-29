@@ -11,8 +11,8 @@ export const templateSessionsActionSchema = z.enum([
 export const templateSessionPrecursorSchema = z.object({
   name: z.string().trim().min(1),
   interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
+  start_date: z.coerce.date<Date>(),
+  end_date: z.coerce.date<Date>(),
   sessions: z.array(recurringSessionPrecursor),
 });
 

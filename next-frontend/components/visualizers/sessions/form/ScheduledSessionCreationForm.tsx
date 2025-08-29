@@ -52,8 +52,8 @@ type ScheduledSessionCreationFormProps = {
 const createSessionPrecursor = z.object({
   category: CategoryWithIdSchema,
   description: z.string().nullable(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
+  startTime: z.coerce.date<Date>(),
+  endTime: z.coerce.date<Date>(),
   tags: z.array(
     z.object({
       id: z.string().uuid(),

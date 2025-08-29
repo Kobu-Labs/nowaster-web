@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const getStreakData = z.array(z.coerce.date());
+const getStreakData = z.array(z.coerce.date<Date>());
 
 const getDashboardData = z.object({
   streak: z.number(),
