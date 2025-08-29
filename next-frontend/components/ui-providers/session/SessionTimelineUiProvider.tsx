@@ -265,6 +265,7 @@ export function SessionTimelineUiProvider({
                 "opacity-80 hover:opacity-100",
                 (isDragging || isEditDialogOpen || isCreateDialogOpen) &&
                   "pointer-events-none",
+                hoveredSession === session.id && "gradient-card-solid",
               )}
               style={{
                 minWidth:
