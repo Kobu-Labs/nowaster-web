@@ -5,8 +5,8 @@ import { z } from "zod";
 const create = z.object({
   name: z.string().trim().min(1),
   interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
+  start_date: z.coerce.date<Date>(),
+  end_date: z.coerce.date<Date>(),
   sessions: z.array(
     z.object({
       category_id: z.string(),
@@ -22,8 +22,8 @@ const update = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
   interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
+  start_date: z.coerce.date<Date>(),
+  end_date: z.coerce.date<Date>(),
   sessions: z.array(
     z.object({
       category_id: z.string(),

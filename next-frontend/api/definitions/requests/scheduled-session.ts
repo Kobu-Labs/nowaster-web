@@ -4,8 +4,8 @@ import { z } from "zod";
 const create = z.object({
   category_id: z.string().uuid(),
   description: z.string().nullable(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
+  startTime: z.coerce.date<Date>(),
+  endTime: z.coerce.date<Date>(),
   tag_ids: z.array(z.string().uuid()),
 });
 
@@ -23,8 +23,8 @@ const update = z.object({
   id: z.string().uuid(),
   category_id: z.string().uuid().optional(),
   description: z.string().nullish(),
-  startTime: z.coerce.date().optional(),
-  endTime: z.coerce.date().optional(),
+  startTime: z.coerce.date<Date>().optional(),
+  endTime: z.coerce.date<Date>().optional(),
   tag_ids: z.array(z.string().uuid()).optional(),
 });
 

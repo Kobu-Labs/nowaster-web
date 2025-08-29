@@ -27,15 +27,15 @@ export const SessionTemplateShallowSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
   interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
+  start_date: z.coerce.date<Date>(),
+  end_date: z.coerce.date<Date>(),
 });
 
 export const SessionTemplateSchema = z.object({
   name: z.string().trim().min(1),
   interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date(),
-  end_date: z.coerce.date(),
+  start_date: z.coerce.date<Date>(),
+  end_date: z.coerce.date<Date>(),
   sessions: z.array(RecurringSessionSchema),
 });
 
