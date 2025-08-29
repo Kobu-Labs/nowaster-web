@@ -2,7 +2,7 @@ import { FeedSourceTypeSchema } from "@/api/definitions/models/feed";
 import { z } from "zod";
 
 export const FeedQueryRequestSchema = z.object({
-  cursor: z.coerce.date().optional(),
+  cursor: z.coerce.date<Date>().optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
 

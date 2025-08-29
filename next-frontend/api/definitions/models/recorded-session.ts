@@ -4,7 +4,7 @@ import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
 export const StopwatchSessionSchema = z.object({
-  startTime: z.coerce.date(),
+  startTime: z.coerce.date<Date>(),
   category: CategoryWithIdSchema.nullable(),
   description: z.string().nullish(),
   tags: z.array(TagWithIdSchema).nullable(),

@@ -5,7 +5,7 @@ export const FriendshipSchema = z.object({
   id: z.string().uuid(),
   friend1: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
   friend2: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
-  created_at: z.coerce.date(),
+  created_at: z.coerce.date<Date>(),
 });
 
 export const FriendRequestStatusSchema = z.enum([
@@ -22,7 +22,7 @@ export const FriendRequestSchema = z.object({
   status: FriendRequestStatusSchema,
   requestor: UserSchema,
   recipient: UserSchema,
-  created_at: z.coerce.date(),
+  created_at: z.coerce.date<Date>(),
   introduction_message: z.string().nullable(),
 });
 

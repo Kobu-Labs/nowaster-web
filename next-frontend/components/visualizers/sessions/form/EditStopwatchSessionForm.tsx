@@ -42,7 +42,7 @@ import { z } from "zod";
 
 const updateSessionPrecursor = z.object({
   id: z.string().uuid(),
-  startTime: z.coerce.date().nullish(),
+  startTime: z.coerce.date<Date>().nullish(),
   category: CategoryWithIdSchema.nullish(),
   description: z.string().nullish(),
   tags: z.array(TagWithIdSchema).nullish(),
@@ -68,7 +68,7 @@ interface FormComponentProps {
 }
 
 export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
-  const form = useForm<z.infer<typeof updateSessionPrecursor>>({
+  const form = useForm({
     resolver: zodResolver(updateSessionPrecursor),
     defaultValues: {
       id: props.session.id,
