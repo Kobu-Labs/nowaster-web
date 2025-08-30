@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import {
   Cell,
   Label,
@@ -11,6 +11,7 @@ import {
   PieChart,
   ResponsiveContainer,
   Sector,
+  Tooltip,
 } from "recharts";
 
 import { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
@@ -79,6 +80,16 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
 
   const [fallbackColor] = useState(randomColor());
 
+  // INFO: compability layer because of rechart v3.x changes
+  // see: https://github.com/recharts/recharts/issues/5999,
+  // https://github.com/recharts/recharts/issues/5999
+  const tooltip = useMemo(() => {
+    return (
+      <Tooltip defaultIndex={activeIndex} active={true} content={() => ""} />
+    );
+  }, [activeIndex]);
+
+
   const handleActiveIndexChange = (index: number | undefined) => {
     if (props.onActiveIndexChange) {
       props.onActiveIndexChange(index);
@@ -102,8 +113,9 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   }
 
   return (
-    <ResponsiveContainer width={"100%"} height={180} >
-      <PieChart onMouseLeave={() => handleActiveIndexChange(undefined)} >
+    <ResponsiveContainer width={"100%"} height={180}>
+      <PieChart onMouseLeave={() => handleActiveIndexChange(undefined)}>
+        {tooltip}
         <Pie
           data={props.data}
           dataKey="value"
@@ -113,10 +125,8 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           innerRadius={60}
           outerRadius={80}
           paddingAngle={5}
-          activeShape={renderActiveShape}
+          activeShape={activeIndex !== undefined && renderActiveShape}
           onMouseEnter={(_, i) => handleActiveIndexChange(i)}
-          rootTabIndex={activeIndex}
-
         >
           {props.data.map(({ metadata }, index) => {
             return (
