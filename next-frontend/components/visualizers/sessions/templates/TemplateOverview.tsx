@@ -273,9 +273,9 @@ const DeleteTemplateAlertDialog: FC<{
               with them?
             </p>
             <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gradient-to-r from-green-50/50 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/10 rounded-lg border border-green-200/30 dark:border-green-800/20">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-green-50/50 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/10 rounded-lg border border-green-200/30 dark:border-green-800/20">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 shrink-0" />
                   <div className="flex-1">
                     <p className="font-medium">Keep sessions</p>
                     <p className="text-sm text-muted-foreground">
@@ -293,9 +293,9 @@ const DeleteTemplateAlertDialog: FC<{
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gradient-to-r from-orange-50/50 to-yellow-50/30 dark:from-orange-950/20 dark:to-yellow-950/10 rounded-lg border border-orange-200/30 dark:border-orange-800/20">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-orange-50/50 to-yellow-50/30 dark:from-orange-950/20 dark:to-yellow-950/10 rounded-lg border border-orange-200/30 dark:border-orange-800/20">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 shrink-0" />
                   <div className="flex-1">
                     <p className="font-medium text-orange-600 dark:text-orange-400">
                       Delete future sessions
@@ -308,15 +308,15 @@ const DeleteTemplateAlertDialog: FC<{
                 <Button
                   onClick={() => props.onConfirm("delete-future")}
                   size="sm"
-                  className="w-full sm:w-auto sm:min-w-24 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white border-0"
+                  className="w-full sm:w-auto sm:min-w-24 bg-linear-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white border-0"
                 >
                   Delete Future
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gradient-to-r from-red-50/50 to-pink-50/30 dark:from-red-950/20 dark:to-pink-950/10 rounded-lg border border-red-200/30 dark:border-red-800/20">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-red-50/50 to-pink-50/30 dark:from-red-950/20 dark:to-pink-950/10 rounded-lg border border-red-200/30 dark:border-red-800/20">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 shrink-0" />
                   <div className="flex-1">
                     <p className="font-medium text-red-600 dark:text-red-400">
                       Delete all sessions
@@ -329,7 +329,7 @@ const DeleteTemplateAlertDialog: FC<{
                 <Button
                   onClick={() => props.onConfirm("delete-all")}
                   size="sm"
-                  className="w-full sm:w-auto sm:min-w-24 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0"
+                  className="w-full sm:w-auto sm:min-w-24 bg-linear-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0"
                 >
                   Delete All
                 </Button>
