@@ -4,12 +4,12 @@ import { useToast } from "@/components/shadcn/use-toast";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { categoryColors } from "@/state/categories";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSetRecoilState } from "recoil";
+import { useSetAtom } from "jotai";
 
 export const useCreateCategory = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const setColors = useSetRecoilState(categoryColors);
+  const setColors = useSetAtom(categoryColors);
 
   const mutation = useMutation({
     mutationFn: CategoryApi.create,

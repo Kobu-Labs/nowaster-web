@@ -14,7 +14,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { FC, PropsWithChildren, useEffect, useState } from "react";
-import { RecoilRoot } from "recoil";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -24,8 +23,7 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <AuthProvider>
-      <RecoilRoot>
+      <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <SpeedInsights />
           <Analytics />
@@ -37,8 +35,7 @@ export function Providers({ children }: ProvidersProps) {
             <Toaster />
           </AxiosInterceptorWrapper>
         </QueryClientProvider>
-      </RecoilRoot>
-    </AuthProvider>
+      </AuthProvider>
   );
 }
 
