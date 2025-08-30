@@ -5,12 +5,12 @@ import { useToast } from "@/components/shadcn/use-toast";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { tagColors } from "@/state/tags";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSetRecoilState } from "recoil";
+import { useSetAtom } from "jotai";
 
 export const useUpdateTag = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const setColors = useSetRecoilState(tagColors);
+  const setColors = useSetAtom(tagColors);
 
   const toastError = (message: string) => {
     toast({

@@ -1,6 +1,3 @@
-import { atom } from "recoil";
+import { atom } from "jotai";
 
-export const tagColors = atom<{ [label: string]: string }>({
-  key: "session-tags",
-  default: {},
-});
+export const tagColors = atom<{ [label: string]: string }>({});
