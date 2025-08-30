@@ -8,7 +8,7 @@ export const CategoryBadge: FC<{ color: string; name: string }> = (props) => {
       variant="outline"
       style={{ "--category-color": props.color } as React.CSSProperties}
       className={cn(
-        "border-2 h-min border-[var(--category-color)] text-[var(--category-color)] hover:scale-110 hover:transition ",
+        "border-2 h-min border-(--category-color) text-(--category-color) hover:scale-110 hover:transition ",
       )}
     >
       {props.name}

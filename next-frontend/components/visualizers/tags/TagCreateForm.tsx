@@ -141,7 +141,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="flex-grow-0 max-w-64">
+              <div className="grow-0 max-w-64">
                 <CategoryPicker
                   mode="multiple"
                   onSelectCategory={handleSelectCategory}
@@ -152,7 +152,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
           </div>
         </div>
         <CardFooter className="flex gap-2">
-          <div className="flex-grow"></div>
+          <div className="grow"></div>
           <Button
             loading={mutation.isPending}
             disabled={newTagName.length === 0}

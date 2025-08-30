@@ -15,7 +15,7 @@ export const NewReleaseNotificationItem: FC<
         !props.notification.seen && "border-l-4 border-l-pink-400",
       )}
     >
-      <div className="flex-shrink-0 mt-1">
+      <div className="shrink-0 mt-1">
         <Rocket className="h-5 w-5 text-purple-500" />
       </div>
 
