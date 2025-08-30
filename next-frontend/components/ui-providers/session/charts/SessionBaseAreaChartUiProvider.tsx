@@ -13,12 +13,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useRecoilValue } from "recoil";
 
 import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
 import { formatTime, randomColor } from "@/lib/utils";
 import { Card } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
+import { useAtomValue } from "jotai";
 
 type SessionBaseAreaChartUiProviderProps = {
   data: ScheduledSession[];
@@ -33,7 +33,7 @@ export const SessionBaseAreaChartUiProvider: FC<
     props.groupingOpts,
   );
   const [fallbackColor] = useState(randomColor());
-  const colors = {}
+  const colors = useAtomValue(categoryColors)
 
   if (props.data.length === 0) {
     return (

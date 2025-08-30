@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { StatisticsApi } from "@/api";
 import { categoryColors } from "@/state/categories";
 import { tagColors } from "@/state/tags";
-import { useSetRecoilState } from "recoil";
+import { useSetAtom } from "jotai";
 
 export const useColors = () => {
-  const setTagColors = useSetRecoilState(tagColors);
-  const setCategoryColors = useSetRecoilState(categoryColors);
+  const setTagColors = useSetAtom(tagColors);
+  const setCategoryColors = useSetAtom(categoryColors);
 
   const query = useQuery({
     queryFn: async () => {

@@ -35,10 +35,10 @@ import { ColorPicker } from "@/components/visualizers/ColorPicker";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { CircleHelp, Save, Trash2 } from "lucide-react";
-import { useRecoilValue } from "recoil";
 import { tagColors } from "@/state/tags";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useUpdateTag } from "@/components/hooks/tag/useUpdateTag";
+import { useAtomValue } from "jotai";
 
 type TagEditFormProps = {
   tag: TagDetails;
@@ -48,7 +48,7 @@ type TagEditFormProps = {
 
 export const TagEditForm: FC<TagEditFormProps> = (props) => {
   const [newTagName, setNewTagName] = useState(props.tag.label);
-  const colors = useRecoilValue(tagColors);
+  const colors = useAtomValue(tagColors);
   const tagColor = colors[props.tag.label];
   const queryClient = useQueryClient();
   const [newColor, setNewColor] = useState<string>(tagColor ?? "#00f00f");
