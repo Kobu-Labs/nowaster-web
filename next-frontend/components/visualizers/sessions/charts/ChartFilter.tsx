@@ -68,7 +68,7 @@ export const ChartFilter: FC = () => {
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent className="flex flex-col">
+        <SheetContent className="flex flex-col p-4">
           <SheetHeader>
             <SheetTitle>Apply filter</SheetTitle>
           </SheetHeader>
