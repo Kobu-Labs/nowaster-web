@@ -174,7 +174,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="flex-grow-0 max-w-64">
+              <div className="grow-0 max-w-64">
                 <CategoryPicker
                   mode="multiple"
                   onSelectCategory={handleSelectCategory}
@@ -185,7 +185,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
           </div>
         </div>
         <CardFooter className="flex gap-2">
-          <div className="flex-grow"></div>
+          <div className="grow"></div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button

@@ -9,7 +9,7 @@ import { NotificationPopover } from "@/components/notifications/NotificationPopo
 export const HomeHeader: FC = () => {
   return (
     <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
-      <div className="flex h-[var(--header-height)] w-full items-center gap-2 px-4">
+      <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
         <SidebarTrigger />
         <Separator orientation="vertical" className="w-[2px]" />
         <NowasterLogo href="/home/" />

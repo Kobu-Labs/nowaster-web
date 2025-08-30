@@ -95,7 +95,7 @@ export const SessionReactionAddedNotificationItem: FC<
         "border-l-4 border-l-blue-400",
       )}
     >
-      <div className="flex-shrink-0 mt-1">
+      <div className="shrink-0 mt-1">
         <Heart className="h-5 w-5 text-pink-500" />
       </div>
 

@@ -56,7 +56,7 @@ export default function SignUpPage() {
 
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
                       <Clock className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
@@ -73,7 +73,7 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
                       <CheckCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
@@ -90,7 +90,7 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
                       <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
@@ -260,7 +260,7 @@ export default function SignUpPage() {
                             <SignUp.Action submit asChild>
                               <Button
                                 disabled={isGlobalLoading}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                                className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                               >
                                 <Clerk.Loading>
                                   {(isLoading) => {
@@ -298,7 +298,7 @@ export default function SignUpPage() {
                                   <div className="flex justify-center">
                                     <Clerk.Input
                                       type="otp"
-                                      className="flex justify-center has-[:disabled]:opacity-50"
+                                      className="flex justify-center has-disabled:opacity-50"
                                       autoSubmit
                                       render={({ value, status }) => {
                                         return (
@@ -332,7 +332,7 @@ export default function SignUpPage() {
                               <SignUp.Action submit asChild>
                                 <Button
                                   disabled={isGlobalLoading}
-                                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-200"
+                                  className="w-full bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-200"
                                 >
                                   <Clerk.Loading>
                                     {(isLoading) => {
