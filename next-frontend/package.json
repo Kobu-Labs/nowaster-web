@@ -13,9 +13,7 @@
         "prod": "next build && next start",
         "typecheck": "tsc --noEmit",
         "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
-        "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
-        "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
     },
     "resolutions": {
         "@radix-ui/react-focus-scope": "1.0.4"
