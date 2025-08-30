@@ -177,7 +177,7 @@ export default function DashboardPage() {
                 const context = useContext(ActiveIndexContext);
 
                 return (
-                  <div className="flex flex-col items-center flex-grow w-full gap-1">
+                  <div className="flex flex-col items-center grow w-full gap-1">
                     {props.data.map((val, i) => (
                       <div
                         key={val.key}
@@ -230,7 +230,7 @@ export default function DashboardPage() {
                 const context = useContext(ActiveIndexContext);
 
                 return (
-                  <div className="flex flex-col items-center flex-grow w-full gap-1">
+                  <div className="flex flex-col items-center grow w-full gap-1">
                     {props.data.map((val, i) => (
                       <div
                         key={val.key}

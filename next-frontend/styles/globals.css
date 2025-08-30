@@ -1,3 +1,4 @@
+@config "../tailwind.config.cjs";
 @import "tailwindcss";
 
 @layer base {
@@ -75,15 +76,12 @@
 
 @layer base {
     * {
-        border-color: hsl(var(--border));
+        @apply border-border;
     }
 
     body {
         background: var(--background-gradient);
         color: hsl(var(--foreground));
-        font-feature-settings:
-            "rlig" 1,
-            "calt" 1;
     }
 }
 
@@ -92,17 +90,17 @@
     /* Gradient backgrounds */
     .gradient-card {
         background: var(--gradient-secondary-solid);
-        @apply border-pink-900/20;
+        @apply border-pink-200/30 dark:border-pink-900/20;
     }
 
     .gradient-card-muted {
         background: var(--gradient-muted);
-        @apply border-pink-900/10;
+        @apply border-pink-100/20 dark:border-pink-900/10;
     }
 
     .gradient-card-solid {
         background: var(--gradient-secondary-solid);
-        @apply border-pink-900/10;
+        @apply border-pink-100/20 dark:border-pink-900/10;
     }
 
     /* Gradient decorations */

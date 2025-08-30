@@ -134,7 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar
       {...props}
       className={cn(
-        "top-[var(--header-height)] w-72 !h-[calc(100svh-var(--header-height))] ",
+        "top-(--header-height) w-72 h-[calc(100svh-var(--header-height))]! ",
         pref === "floating" && "p-0",
         pref === "permanent" && "h-full",
       )}
