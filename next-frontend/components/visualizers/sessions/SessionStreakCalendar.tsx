@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 import { addDays, isSameDay, subDays } from "date-fns";
-import { DayContent, DayContentProps } from "react-day-picker";
+import { DayButton, DayButtonProps } from "react-day-picker";
 
 import { Calendar } from "@/components/shadcn/calendar";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -21,20 +21,20 @@ export const dayCellVariants = cva(
 );
 
 type SessionStreakCalendarProps = {
-  sessionsDates: Date[]
-}
+  sessionsDates: Date[];
+};
 
 export const SessionStreakCalendar = ({
   sessionsDates: sessions,
 }: SessionStreakCalendarProps) => {
-  function StreakCalculator(props: DayContentProps) {
+  function StreakCalculator(props: DayButtonProps) {
     // TODO: not very performance friendly
-    const isActiveDay = sessions.some((x) => isSameDay(x, props.date));
+    const isActiveDay = sessions.some((x) => isSameDay(x, props.day.date));
     const isNextDayActive = sessions.some((x) =>
-      isSameDay(addDays(props.date, 1), x),
+      isSameDay(addDays(props.day.date, 1), x),
     );
     const isPreviousDayActive = sessions.some((x) =>
-      isSameDay(subDays(props.date, 1), x),
+      isSameDay(subDays(props.day.date, 1), x),
     );
 
     return (
@@ -46,7 +46,7 @@ export const SessionStreakCalendar = ({
         {isNextDayActive && isActiveDay && (
           <div className=" absolute right-0 top-1/2 h-1 w-[3px] bg-pink-500"></div>
         )}
-        <DayContent {...props} />
+        <DayButton {...props} />
         {isPreviousDayActive && isActiveDay && (
           <div className=" absolute left-0 top-1/2 h-1 w-[3px] bg-pink-500"></div>
         )}
@@ -58,7 +58,7 @@ export const SessionStreakCalendar = ({
     <Card className="inline-flex">
       <CardContent>
         <Calendar
-          components={{ DayContent: StreakCalculator }}
+          components={{ DayButton: StreakCalculator }}
           classNames={{
             day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 focus-visible:ring-ring ring-offset-background inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           }}
