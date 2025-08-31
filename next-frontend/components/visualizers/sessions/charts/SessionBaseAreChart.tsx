@@ -1,24 +1,24 @@
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/session/charts/SessionBaseAreaChartUiProvider";
-import { GroupingOptions } from "@/lib/session-grouping";
+import type { GroupingOptions } from "@/lib/session-grouping";
 
-type SessionBaseChartProps = {
-  groupingOpts: GroupingOptions;
+interface SessionBaseChartProps {
   filter?: SessionFilterPrecursor;
-};
+  groupingOpts: GroupingOptions;
+}
 
 export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
   const result = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
+    placeholderData: keepPreviousData,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     retry: false,
     staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    placeholderData: keepPreviousData,
   });
 
   if (result.isPending) {

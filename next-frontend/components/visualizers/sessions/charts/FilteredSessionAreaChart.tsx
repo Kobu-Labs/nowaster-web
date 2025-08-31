@@ -1,18 +1,20 @@
 import { overwriteData } from "@/state/chart-filter";
-import { FC, HTMLAttributes, useState } from "react";
+import type { FC, HTMLAttributes} from "react";
+import { useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
 import { useChartFilter } from "@/components/hooks/use-chart-filter";
 import { GranularityBasedDatePicker } from "@/components/ui-providers/date-pickers/GranularityBasedDatePicker";
 import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
+import type {
+  Granularity} from "@/components/visualizers/sessions/charts/GranularitySelect";
 import {
-  Granularity,
   GranularitySelect,
 } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
 import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
-import { DeepRequired } from "react-hook-form";
+import type { DateRange } from "react-day-picker";
+import type { DeepRequired } from "react-hook-form";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: Granularity;
@@ -41,8 +43,8 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
       </CardHeader>
       <CardHeader className="hidden md:flex flex-row items-center gap-2 space-y-0">
         <GranularitySelect
-          onSelect={setGranularity}
           defaultValue={granularity}
+          onSelect={setGranularity}
         />
         <div className="grow"></div>
         <GranularityBasedDatePicker
@@ -55,11 +57,11 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
       </CardHeader>
       <CardContent className="grow">
         <SessionBaseAreaChart
-          groupingOpts={{
-            granularity: granularity,
-            allKeys: true,
-          }}
           filter={filter}
+          groupingOpts={{
+            allKeys: true,
+            granularity,
+          }}
         />
       </CardContent>
     </Card>

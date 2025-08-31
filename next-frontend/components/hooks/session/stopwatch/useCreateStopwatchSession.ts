@@ -1,5 +1,5 @@
 import { StopwatchApi } from "@/api";
-import { StopwatchSessionRequest } from "@/api/definitions";
+import type { StopwatchSessionRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,6 +12,13 @@ export const useCreateStopwatchSession = () => {
     mutationFn: async (data: StopwatchSessionRequest["create"]) => {
       return await StopwatchApi.create(data);
     },
+    onError: (error) => {
+      toast({
+        description: error.message,
+        title: "Error creating session",
+        variant: "destructive",
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions.active._def,
@@ -19,13 +26,6 @@ export const useCreateStopwatchSession = () => {
       toast({
         description: `Session created successfully!`,
         variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error creating session",
-        description: error.message,
-        variant: "destructive",
       });
     },
   });

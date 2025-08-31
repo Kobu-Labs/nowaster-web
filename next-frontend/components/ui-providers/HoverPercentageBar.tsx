@@ -1,16 +1,17 @@
-import { FC, PropsWithChildren, useState } from "react";
+import type { FC, PropsWithChildren} from "react";
+import { useState } from "react";
 
-type HoverPercentageBarProps = {
+interface HoverPercentageBarProps {
   formatter: (percentage: number) => string;
-};
+}
 
 export const HoverPercentageBar: FC<
   PropsWithChildren<HoverPercentageBarProps>
 > = (props) => {
-  const [hoverX, setHoverX] = useState<number | null>(null);
-  const [percentage, setPercentage] = useState<number | null>(null);
+  const [hoverX, setHoverX] = useState<null | number>(null);
+  const [percentage, setPercentage] = useState<null | number>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     setHoverX(x);
@@ -25,8 +26,8 @@ export const HoverPercentageBar: FC<
   return (
     <div
       className="relative w-full h-full border rounded-2xl overflow-hidden py-4 bg-transparent/30"
-      onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
     >
       {hoverX !== null && (
         <>

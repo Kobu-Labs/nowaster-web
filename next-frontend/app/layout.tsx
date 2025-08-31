@@ -13,18 +13,18 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <Head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link href="/favicon.ico" rel="icon" sizes="any" />
         <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
           href="/favicon-32x32.png"
+          rel="icon"
+          sizes="32x32"
+          type="image/png"
         />
         <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
           href="/favicon-16x16.png"
+          rel="icon"
+          sizes="16x16"
+          type="image/png"
         />
       </Head>
 

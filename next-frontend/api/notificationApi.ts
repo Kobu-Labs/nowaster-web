@@ -1,22 +1,22 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import { NotificationResponseSchema } from "@/api/definitions/responses/notification";
-import {
-  NotificationQueryRequest,
+import type {
   MarkNotificationsSeenRequest,
+  NotificationQueryRequest,
 } from "@/api/definitions/requests/notification";
 
 const BASE_URL = "/notifications";
 
 export const getNotifications = async (params?: NotificationQueryRequest) => {
   const { data } = await baseApi.get(BASE_URL, {
-    params: params,
+    params,
   });
   return await parseResponseUnsafe(data, NotificationResponseSchema.getNotifications);
 };
 
 export const getUnseenNotifications = async (params?: { limit?: number }) => {
   const { data } = await baseApi.get(`${BASE_URL}/unseen`, {
-    params: params,
+    params,
   });
   return await parseResponseUnsafe(data, NotificationResponseSchema.getUnseenNotifications);
 };

@@ -1,4 +1,4 @@
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 import { Hourglass } from "lucide-react";
@@ -7,19 +7,21 @@ import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
-type SessionAverageDurationProviderProps = {
+interface SessionAverageDurationProviderProps {
   filter?: SessionFilterPrecursor;
-};
+}
 
 export const SessionAverageDurationProvider = (
   props: SessionAverageDurationProviderProps,
 ) => {
   const {
     data: sessions,
-    isLoading,
     isError,
+    isLoading,
   } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     select: (data) => {
       if (data.length === 0) {
         return 0;
@@ -31,18 +33,16 @@ export const SessionAverageDurationProvider = (
       );
       return totalAmount / data.length;
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
   });
 
   return (
     <KpiCardUiProvider
-      loading={isLoading}
       error={isError}
+      loading={isLoading}
       mapper={formatTime}
-      variant={"big_value"}
-      value={sessions}
       title={"Average session duration"}
+      value={sessions}
+      variant={"big_value"}
     >
       <Hourglass />
     </KpiCardUiProvider>

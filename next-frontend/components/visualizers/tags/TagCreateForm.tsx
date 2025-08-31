@@ -1,5 +1,6 @@
-import { FC, useEffect, useState } from "react";
-import { CategoryWithId, TagWithId } from "@/api/definitions";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
+import type { CategoryWithId, TagWithId } from "@/api/definitions";
 
 import { randomColor } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
@@ -24,10 +25,11 @@ import {
 } from "@/components/shadcn/tooltip";
 import Link from "next/link";
 import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
+import { Label } from "@/components/shadcn/label";
 
-type CreateTagDialogProps = {
+interface CreateTagDialogProps {
   onSave: (tag: TagWithId) => void;
-};
+}
 
 export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
   const [newTagName, setNewTagName] = useState("");
@@ -71,44 +73,54 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
         </CardHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label
-              htmlFor="tagName"
+            <Label
               className="text-sm font-medium text-gray-300"
+              htmlFor="tagName"
             >
               Tag Name
-            </label>
+            </Label>
             <div className="flex items-center gap-4">
               <Input
-                id="tagName"
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="Enter tag name"
                 className="w-48"
+                id="tagName"
+                onChange={(e) => {
+                  setNewTagName(e.target.value);
+                }}
+                placeholder="Enter tag name"
+                value={newTagName}
               />
               {newTagName.length > 0 && (
                 <TagBadge
-                  variant="manual"
-                  value={newTagName}
                   colors={selectedColor}
+                  value={newTagName}
+                  variant="manual"
                 />
               )}
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
+            <Label
+              className="text-sm font-medium text-gray-300"
+              htmlFor="colorPicker"
+            >
               Tag Color
-            </label>
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            </Label>
+            <div
+              className="flex flex-wrap items-center justify-center gap-2"
+              id="colorPicker"
+            >
               {randomColors.map((color, i) => (
                 <Button
-                  key={i}
-                  style={{ backgroundColor: color }}
                   className={`w-8 h-8 rounded-full ${
                     selectedColor === color
                       ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900"
                       : ""
                   }`}
-                  onClick={() => setSelectedColor(color)}
+                  key={i}
+                  onClick={() => {
+                    setSelectedColor(color);
+                  }}
+                  style={{ backgroundColor: color }}
                 />
               ))}
               <ColorPicker onSelect={setSelectedColor} value={selectedColor} />
@@ -128,12 +140,12 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                     <TooltipContent className="text-nowrap">
                       Read more about category specific tags on our{" "}
                       <Link
-                        rel="noopener noreferrer"
-                        target="_blank"
                         className="text-nowrap underline hover:text-blue-500"
                         href={
                           "https://github.com/Kobu-Labs/nowaster-web/wiki/Category-specific-tags"
                         }
+                        rel="noopener noreferrer"
+                        target="_blank"
                       >
                         wiki
                       </Link>
@@ -154,20 +166,20 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
         <CardFooter className="flex gap-2">
           <div className="grow"></div>
           <Button
-            loading={mutation.isPending}
             disabled={newTagName.length === 0}
-            onClick={() =>
+            loading={mutation.isPending}
+            onClick={() => {
               mutation.mutate(
                 {
-                  label: newTagName,
                   allowedCategories: selectedCategories,
                   color: selectedColor,
+                  label: newTagName,
                 },
                 {
                   onSuccess: handleTagCreate,
                 },
-              )
-            }
+              );
+            }}
           >
             <Save className="mr-2 h-4 w-4" /> Save
           </Button>

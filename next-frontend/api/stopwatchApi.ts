@@ -1,5 +1,5 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
-import { StopwatchSessionRequest } from "@/api/definitions/requests/stopwatch-session";
+import type { StopwatchSessionRequest } from "@/api/definitions/requests/stopwatch-session";
 import {
   StopwatchSessionResponseSchema,
 } from "@/api/definitions/responses/recorded-session";
@@ -16,7 +16,7 @@ export const create = async (
 export const remove = async (
   params: StopwatchSessionRequest["remove"],
 )=> {
-  const { data } = await baseApi.delete(BASE_URL + "/" + params.id);
+  const { data } = await baseApi.delete(`${BASE_URL  }/${  params.id}`);
   return await parseResponseUnsafe(data, StopwatchSessionResponseSchema.remove);
 };
 

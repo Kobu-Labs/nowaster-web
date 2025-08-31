@@ -1,8 +1,8 @@
 import { ChartFilterContext } from "@/components/context/chart-filter";
-import { useContext } from "react";
+import { use } from "react";
 
 export const useChartFilter = () => {
-  const context = useContext(ChartFilterContext);
+  const context = use(ChartFilterContext);
   if (!context) {
     throw new Error("useChartFilter must be used within a ChartFilterProvider");
   }

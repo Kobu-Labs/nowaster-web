@@ -1,11 +1,13 @@
+/* eslint-disable perfectionist/sort-objects */
+
+import { InfiniteData } from "@tanstack/react-query";
 import {
-  useMutation,
   useInfiniteQuery,
+  useMutation,
   useQueryClient,
-  InfiniteData,
 } from "@tanstack/react-query";
 import * as FeedApi from "@/api/feedApi";
-import {
+import type {
   CreateFeedReactionRequest,
   RemoveFeedReactionRequest,
 } from "@/api/definitions/requests/feed";
@@ -16,18 +18,20 @@ export const FEED_QUERY_KEY = "feed";
 
 export const useFeed = () => {
   return useInfiniteQuery({
-    queryKey: [FEED_QUERY_KEY],
-    queryFn: async ({ pageParam }) =>
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < 20) {
+        return undefined;
+      }
+      return lastPage.at(-1)!.created_at;
+    },
+    initialPageParam: undefined,
+    queryFn: async ({ pageParam }: { pageParam: Date | undefined }) =>
       await FeedApi.getFeed({
         cursor: pageParam,
         limit: 20,
       }),
-    initialPageParam: undefined as Date | undefined,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.length < 20) return undefined;
-      return lastPage[lastPage.length - 1]!.created_at;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    queryKey: [FEED_QUERY_KEY],
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -47,7 +51,9 @@ export const useAddReaction = () => {
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
         (old: InfiniteData<FeedResponse["getFeed"]>) => {
-          if (!old?.pages) return old;
+          if (!old?.pages) {
+            return old;
+          }
 
           return {
             ...old,
@@ -58,8 +64,8 @@ export const useAddReaction = () => {
                     ...event,
                     reactions: [
                       {
-                        emoji: newTodo.emoji,
                         created_at: new Date(),
+                        emoji: newTodo.emoji,
                         user: {
                           id: userId,
                         },
@@ -77,11 +83,11 @@ export const useAddReaction = () => {
 
       return { previousFeed };
     },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
-    },
     onError: (_err, _addedReaction, context) => {
       queryClient.setQueryData([FEED_QUERY_KEY], context?.previousFeed);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
     },
   });
 };
@@ -100,7 +106,9 @@ export const useRemoveReaction = () => {
       queryClient.setQueryData(
         [FEED_QUERY_KEY],
         (old: InfiniteData<FeedResponse["getFeed"]>) => {
-          if (!old?.pages) return old;
+          if (!old?.pages) {
+            return old;
+          }
 
           return {
             ...old,
@@ -125,11 +133,12 @@ export const useRemoveReaction = () => {
 
       return { previousData };
     },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
-    },
+
     onError: (_err, _removedReaction, context) => {
       queryClient.setQueryData([FEED_QUERY_KEY], context?.previousData);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
     },
   });
 };

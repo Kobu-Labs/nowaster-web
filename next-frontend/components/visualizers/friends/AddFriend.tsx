@@ -6,7 +6,8 @@ import { UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AddFriendFormValues, addFriendSchema } from "@/validation/add-friend";
+import type { AddFriendFormValues} from "@/validation/add-friend";
+import { addFriendSchema } from "@/validation/add-friend";
 import { useAddFriend } from "@/components/hooks/friends/useAddFriend";
 import {
   Form,
@@ -30,8 +31,8 @@ export const AddFriend = () => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col sm:flex-row gap-2 w-full my-2"
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
           control={form.control}
@@ -41,7 +42,6 @@ export const AddFriend = () => {
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="Enter username"
                   className={cn(
                     "h-9",
                     sendRequest.isError &&
@@ -49,6 +49,7 @@ export const AddFriend = () => {
                     sendRequest.isSuccess &&
                       "border-green-300 focus-visible:ring-gray-300",
                   )}
+                  placeholder="Enter username"
                 />
               </FormControl>
               <FormMessage />
@@ -63,7 +64,6 @@ export const AddFriend = () => {
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="Add a message (optional)"
                   className={cn(
                     "h-9",
                     sendRequest.isError &&
@@ -71,6 +71,7 @@ export const AddFriend = () => {
                     sendRequest.isSuccess &&
                       "border-green-300 focus-visible:ring-gray-300",
                   )}
+                  placeholder="Add a message (optional)"
                 />
               </FormControl>
               <FormMessage />
@@ -78,10 +79,10 @@ export const AddFriend = () => {
           )}
         />
         <Button
-          type="submit"
-          size="sm"
           className="h-9"
           loading={sendRequest.isPending}
+          size="sm"
+          type="submit"
         >
           <UserPlus className="mr-2 h-4 w-4" />
           Add Friend

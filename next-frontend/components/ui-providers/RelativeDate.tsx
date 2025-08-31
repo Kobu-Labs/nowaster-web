@@ -1,15 +1,15 @@
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
   TooltipProvider,
+  TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { format, formatDistanceToNow } from "date-fns";
-import { FC } from "react";
+import type { FC } from "react";
 
-type RelativeDateProps = {
+interface RelativeDateProps {
   date: Date;
-};
+}
 export const RelativeDate: FC<RelativeDateProps> = (props) => {
   return (
     <TooltipProvider delayDuration={100}>

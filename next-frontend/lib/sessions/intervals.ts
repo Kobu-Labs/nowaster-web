@@ -1,4 +1,4 @@
-import { ScheduledSessionWithId } from "@/api/definitions";
+import type { ScheduledSessionWithId } from "@/api/definitions";
 import { areIntervalsOverlapping } from "date-fns";
 
 export const hasIntersection = (
@@ -7,12 +7,12 @@ export const hasIntersection = (
 ): boolean => {
   return areIntervalsOverlapping(
     {
-      start: session1.startTime,
       end: session1.endTime,
+      start: session1.startTime,
     },
     {
-      start: session2.startTime,
       end: session2.endTime,
+      start: session2.startTime,
     },
     { inclusive: true },
   );

@@ -9,10 +9,10 @@ const addAllowedCategory = TagDetailsSchema;
 const removeAllowedCategory = TagDetailsSchema;
 const deleteTag = z.null();
 const statistics = z.object({
-  total_tags: z.number(),
-  total_usages: z.number(),
   average_usages_per_tag: z.number(),
   most_used_tag: TagWithIdSchema.nullable(),
+  total_tags: z.number(),
+  total_usages: z.number(),
 });
 
 export type TagResponse = {
@@ -22,12 +22,12 @@ export type TagResponse = {
 };
 
 export const TagResponseSchema = {
-  getById,
-  create,
-  readMany,
-  deleteTag,
-  update,
   addAllowedCategory,
+  create,
+  deleteTag,
+  getById,
+  readMany,
   removeAllowedCategory,
   statistics,
+  update,
 } as const;

@@ -1,29 +1,20 @@
-import { ScheduledSession } from "@/api/definitions";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { ScheduledSession } from "@/api/definitions";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { SessionPieChartUiProvider } from "@/components/ui-providers/session/charts/SessionPieChartUiProvider";
 import { differenceInMinutes } from "date-fns";
-import { createContext, FC, useContext, useState } from "react";
-
-type SessionPieChartProps<TMetadata = any> = {
-  filter?: SessionFilterPrecursor;
-  getKey: (session: ScheduledSession) => KeyExtractionResult<TMetadata>;
-  groupingMethod?: (session: ScheduledSession) => number;
-  postProcess?: (
-    data: AmountByCategory<TMetadata>[],
-  ) => AmountByCategory<TMetadata>[];
-  renderLegend?: FC<{ data: AmountByCategory[] }>;
-};
-
-type GroupedDataItem<TMetadata = any> = {
-  key: string;
-  value: number;
-  metadata?: TMetadata;
-};
+import type { FC } from "react";
+import { createContext, use, useState } from "react";
 
 export type AmountByCategory<TMetadata = any> = GroupedDataItem<TMetadata>;
+
+interface GroupedDataItem<TMetadata = any> {
+  key: string;
+  metadata?: TMetadata;
+  value: number;
+}
 
 type KeyExtractionResult<TMetadata = any> =
   | {
@@ -35,30 +26,37 @@ type KeyExtractionResult<TMetadata = any> =
       metadata?: TMetadata;
     }[];
 
+interface SessionPieChartProps<TMetadata = any> {
+  filter?: SessionFilterPrecursor;
+  getKey: (session: ScheduledSession) => KeyExtractionResult<TMetadata>;
+  groupingMethod?: (session: ScheduledSession) => number;
+  postProcess?: (
+    data: AmountByCategory<TMetadata>[],
+  ) => AmountByCategory<TMetadata>[];
+  renderLegend?: FC<{ data: AmountByCategory[] }>;
+}
+
 export const groupData = <TMetadata = any,>(
   sessions: ScheduledSession[],
   getKey: (session: ScheduledSession) => KeyExtractionResult<TMetadata>,
   groupingMethod: (session: ScheduledSession) => number,
 ): AmountByCategory<TMetadata>[] => {
-  const result: { [key: string]: { value: number; metadata?: TMetadata } } = {};
+  const result: Record<string, { metadata?: TMetadata; value: number }> = {};
 
   sessions.forEach((session) => {
     const keyResult = getKey(session);
     const keyResults = Array.isArray(keyResult) ? keyResult : [keyResult];
 
     keyResults.forEach(({ key, metadata }) => {
-      if (result[key] === undefined) {
-        result[key] = { value: 0, metadata };
-      }
-
+      result[key] ??= { metadata, value: 0 };
       result[key].value += groupingMethod(session);
     });
   });
 
-  return Object.entries(result).map(([key, { value, metadata }]) => ({
+  return Object.entries(result).map(([key, { metadata, value }]) => ({
     key,
-    value,
     metadata,
+    value,
   }));
 };
 
@@ -71,25 +69,25 @@ const SessionPieChartInner = <TMetadata = any,>(
     ((session: ScheduledSession) =>
       differenceInMinutes(session.endTime, session.startTime));
 
-  const context = useContext(ActiveIndexContext);
+  const context = use(ActiveIndexContext);
 
   const setIndex = (val: number | undefined) => {
-    if (val !== undefined) {
-      context?.setIndex(val);
-    } else {
+    if (val === undefined) {
       context?.setIndex(null);
+    } else {
+      context?.setIndex(val);
     }
   };
 
   const { data: result } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     retry: false,
     select: (data) => {
       const groupedData = groupData(data, props.getKey, groupingMethod);
       return props.postProcess ? props.postProcess(groupedData) : groupedData;
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
   });
 
   if (!context) {
@@ -99,8 +97,8 @@ const SessionPieChartInner = <TMetadata = any,>(
   return (
     <div className="flex items-center">
       <SessionPieChartUiProvider
-        data={result ?? []}
         activeIndex={context.index}
+        data={result ?? []}
         onActiveIndexChange={setIndex}
       />
       {props.renderLegend && !!result?.length && (
@@ -110,21 +108,21 @@ const SessionPieChartInner = <TMetadata = any,>(
   );
 };
 
-type ActiveIndexContextType = {
-  index: number | null;
-  setIndex: (value: number | null) => void;
-};
+interface ActiveIndexContextType {
+  index: null | number;
+  setIndex: (value: null | number) => void;
+}
 
 export const ActiveIndexContext = createContext<
   ActiveIndexContextType | undefined
 >(undefined);
 
 export const SessionPieChart: FC<SessionPieChartProps> = (props) => {
-  const [filter, setFilter] = useState<number | null>(null);
+  const [filter, setFilter] = useState<null | number>(null);
 
   return (
-    <ActiveIndexContext.Provider value={{ index: filter, setIndex: setFilter }}>
+    <ActiveIndexContext value={{ index: filter, setIndex: setFilter }}>
       <SessionPieChartInner {...props} />
-    </ActiveIndexContext.Provider>
+    </ActiveIndexContext>
   );
 };

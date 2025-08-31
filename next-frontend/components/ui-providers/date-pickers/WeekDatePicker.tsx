@@ -15,10 +15,10 @@ import * as React from "react";
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
 
-type MonthDatePickerProps = {
-  onSelected?: (date: DeepRequired<DateRange>) => void;
+interface MonthDatePickerProps {
   initialDate?: Date;
-};
+  onSelected?: (date: DeepRequired<DateRange>) => void;
+}
 
 export const WeekDatePicker: FC<MonthDatePickerProps> = (props) => {
   const [date, setDate] = React.useState<Date>(props.initialDate ?? new Date());
@@ -50,32 +50,32 @@ export const WeekDatePicker: FC<MonthDatePickerProps> = (props) => {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant={"outline"}
             className={cn(
               "w-fit justify-start text-left font-normal",
               !date && "text-muted-foreground",
             )}
+            variant={"outline"}
           >
             <CalendarIcon className="mr-2 size-4" />
-            {format(range.from, "PPP") +
-              " - " +
-              format(range.to, "PPP")}
+            {`${format(range.from, "PPP") 
+              } - ${ 
+              format(range.to, "PPP")}`}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent align="start" className="w-auto p-0">
           <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleSelect}
             defaultMonth={date}
-            numberOfMonths={1}
-            weekStartsOn={1}
-            showOutsideDays={true}
             fixedWeeks
             ISOWeek
+            mode="single"
             modifiers={{
               selected: (day) => day >= range.from && day <= range.to,
             }}
+            numberOfMonths={1}
+            onSelect={handleSelect}
+            selected={date}
+            showOutsideDays={true}
+            weekStartsOn={1}
           />
         </PopoverContent>
       </Popover>

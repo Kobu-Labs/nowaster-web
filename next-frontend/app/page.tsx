@@ -7,14 +7,14 @@ import {
 } from "@/components/shadcn/avatar";
 import { Button } from "@/components/shadcn/button";
 import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Nowaster - Time Tracking Made Easy",
   description:
     "Effortlessly track time, manage projects, and analyze productivity with our intuitive time tracking solution.",
+  title: "Nowaster - Time Tracking Made Easy",
 };
 
 export default async function LandingPage() {
@@ -45,11 +45,11 @@ export default async function LandingPage() {
               </div>
               <div className="flex items-center justify-center">
                 <Image
-                  src="/nowaster-landing-1-dark.jpg"
                   alt="Time tracking dashboard"
-                  width={1320}
                   height={990}
                   priority
+                  src="/nowaster-landing-1-dark.jpg"
+                  width={1320}
                 />
               </div>
             </div>
@@ -57,8 +57,8 @@ export default async function LandingPage() {
         </section>
 
         <section
-          id="features"
           className="w-full py-12 md:py-24 lg:py-32 bg-background relative"
+          id="features"
         >
           <div className="container px-10 md:px-6 relative">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -75,11 +75,11 @@ export default async function LandingPage() {
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:gird-cols[1fr_600px] lg:gap-12">
               <div className="flex items-center justify-center">
                 <Image
-                  src="/nowaster-landing-2-dark.png"
                   alt="Time tracking dashboard"
-                  width={1320}
                   height={990}
                   priority
+                  src="/nowaster-landing-2-dark.png"
+                  width={1320}
                 />
               </div>
               <div className="flex flex-col justify-center space-y-4 m-10">
@@ -175,8 +175,8 @@ export default async function LandingPage() {
         </section>
 
         <section
-          id="pricing"
           className="w-full py-12 md:py-24 lg:py-32 bg-background "
+          id="pricing"
         >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -258,10 +258,10 @@ export default async function LandingPage() {
                 <div className="flex items-center gap-4">
                   <Avatar>
                     <AvatarImage
+                      alt={"izmi"}
                       src={
                         "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18yd0JBaEdLbThpTzdURkxQdUdZam5FcnBnR3IifQ"
                       }
-                      alt={"izmi"}
                     />
                     <AvatarFallback>{"I"}</AvatarFallback>
                   </Avatar>
@@ -282,10 +282,10 @@ export default async function LandingPage() {
                 <div className="flex items-center gap-4">
                   <Avatar>
                     <AvatarImage
+                      alt={"kobu"}
                       src={
                         "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ3Qm4zMGl0UkJRNTJGRHBBcExwV0c1VGFJSyJ9"
                       }
-                      alt={"kobu"}
                     />
                     <AvatarFallback>{"K"}</AvatarFallback>
                   </Avatar>

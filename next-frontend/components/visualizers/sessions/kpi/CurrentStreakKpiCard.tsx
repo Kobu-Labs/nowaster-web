@@ -1,5 +1,5 @@
 import { Calendar } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useQuery } from "@tanstack/react-query";
@@ -15,11 +15,11 @@ export const CurrentStreakKpiCard: FC<CurrentStreakKpiCardProps> = () => {
 
   return (
     <KpiCardUiProvider
-      value={stats.data}
-      loading={stats.isLoading}
-      error={stats.isError}
-      title="Current Streak"
       description="Keep it going!"
+      error={stats.isError}
+      loading={stats.isLoading}
+      title="Current Streak"
+      value={stats.data}
     >
       <Calendar />
     </KpiCardUiProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import type {
   ReadFeedSubscription,
   ReadUserAvatar,
 } from "@/api/definitions/models/feed";
@@ -39,16 +39,21 @@ import { getInitials } from "@/lib/utils";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2, Users } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
+
+interface UserSubscriptionCardProps {
+  subscription: ReadFeedSubscription;
+  user: ReadUserAvatar;
+}
 
 export function FeedSubscriptions() {
   const {
     data: subscriptions,
-    isLoading,
     error,
+    isLoading,
   } = useQuery({
-    queryKey: ["feed-subscriptions"],
     queryFn: getSubscriptions,
+    queryKey: ["feed-subscriptions"],
   });
 
   if (isLoading) {
@@ -108,16 +113,18 @@ export function FeedSubscriptions() {
         <div className="space-y-4">
           {subscriptions.map((subscription) => {
             switch (subscription.source_type) {
-            case "user":
+            case "placeholder": {
+              return null;
+            }
+            case "user": {
               return (
                 <UserSubscriptionCard
-                  user={subscription.source_data}
-                  subscription={subscription}
                   key={subscription.id}
+                  subscription={subscription}
+                  user={subscription.source_data}
                 />
               );
-            case "placeholder":
-              return null;
+            }
             }
           })}
         </div>
@@ -126,14 +133,9 @@ export function FeedSubscriptions() {
   );
 }
 
-type UserSubscriptionCardProps = {
-  user: ReadUserAvatar;
-  subscription: ReadFeedSubscription;
-};
-
 const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
-  user,
   subscription,
+  user,
 }) => {
   const queryClient = useQueryClient();
   const { userId } = useAuth();
@@ -141,32 +143,30 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
   const { toast } = useToast();
   const updateSubscriptionMutation = useMutation({
     mutationFn: updateSubscription,
+    onError: () => {
+      toast({ title: "Failed to update subscription", variant: "destructive" });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["feed-subscriptions"] });
       toast({ title: "Subscription updated successfully" });
-    },
-    onError: (error) => {
-      toast({ title: "Failed to update subscription", variant: "destructive" });
-      console.error("Update subscription error:", error);
     },
   });
 
   const unsubscribeMutation = useMutation({
     mutationFn: unsubscribe,
+    onError: () => {
+      toast({ title: "Failed to unsubscribe", variant: "destructive" });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["feed-subscriptions"] });
       toast({ title: "Successfully unsubscribed" });
-    },
-    onError: (error) => {
-      toast({ title: "Failed to unsubscribe", variant: "destructive" });
-      console.error("Unsubscribe error:", error);
     },
   });
 
   const handleTogglePaused = (paused: boolean) => {
     updateSubscriptionMutation.mutate({
-      subscription_id: subscription.id,
       is_paused: paused,
+      subscription_id: subscription.id,
     });
   };
 
@@ -181,7 +181,7 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="flex items-center space-x-4">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={user.avatar_url ?? undefined} alt={user.username} />
+          <AvatarImage alt={user.username} src={user.avatar_url ?? undefined} />
           <AvatarFallback className="bg-primary/10 text-primary font-medium">
             {getInitials(user.username)}
           </AvatarFallback>
@@ -201,26 +201,26 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <label
-            htmlFor={`pause-${subscription.id}`}
             className="text-sm font-medium"
+            htmlFor={`pause-${subscription.id}`}
           >
             Paused
           </label>
           <Switch
-            id={`pause-${subscription.id}`}
             checked={subscription.is_paused}
-            onCheckedChange={(checked) => handleTogglePaused(checked)}
             disabled={updateSubscriptionMutation.isPending}
+            id={`pause-${subscription.id}`}
+            onCheckedChange={(checked) => { handleTogglePaused(checked); }}
           />
         </div>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              variant="outline"
-              size="sm"
               className="text-red-600 hover:text-red-700 hover:bg-destructive"
               disabled={unsubscribeMutation.isPending}
+              size="sm"
+              variant="outline"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -239,9 +239,9 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleUnsubscribe}
                 className="bg-red-600 hover:bg-red-700"
                 disabled={unsubscribeMutation.isPending}
+                onClick={handleUnsubscribe}
               >
                 {unsubscribeMutation.isPending
                   ? "Unsubscribing..."

@@ -10,5 +10,5 @@ export const MarkNotificationsSeenRequestSchema = z.object({
   notification_ids: z.array(z.string()).min(1).max(100),
 });
 
-export type NotificationQueryRequest = z.infer<typeof NotificationQueryRequestSchema>;
 export type MarkNotificationsSeenRequest = z.infer<typeof MarkNotificationsSeenRequestSchema>;
+export type NotificationQueryRequest = z.infer<typeof NotificationQueryRequestSchema>;

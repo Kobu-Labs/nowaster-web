@@ -1,5 +1,5 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
-import { FriendRequestRequest } from "@/api/definitions/requests/friends/friend-request";
+import type { FriendRequestRequest } from "@/api/definitions/requests/friends/friend-request";
 import {
   FriendRequestResponseSchema,
 } from "@/api/definitions/responses/friends/friend-request";

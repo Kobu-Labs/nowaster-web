@@ -1,7 +1,8 @@
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
+import type {
+  StopwatchSessionWithId} from "@/api/definitions";
 import {
-  ScheduledSessionRequestSchema,
-  StopwatchSessionWithId,
+  ScheduledSessionRequestSchema
 } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
@@ -15,14 +16,13 @@ export const useFinishStopwatchSession = () => {
     mutationFn: async (session: StopwatchSessionWithId) => {
       const parsed = await ScheduledSessionRequestSchema.create.safeParseAsync({
         category_id: session.category?.id,
-        tag_ids: session.tags?.map((tag) => tag.id) ?? [],
+        description: session.description,
         endTime: new Date(),
         startTime: session.startTime,
-        description: session.description,
+        tag_ids: session.tags?.map((tag) => tag.id) ?? [],
       });
 
       if (!parsed.success) {
-        console.error(parsed.error);
         throw new Error("Fill out start time and category!");
       }
 
@@ -30,6 +30,13 @@ export const useFinishStopwatchSession = () => {
       return await ScheduledSessionApi.create(parsed.data);
     },
 
+    onError: (error) => {
+      toast({
+        description: error.message,
+        title: "Error finishing session",
+        variant: "destructive",
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions._def,
@@ -41,13 +48,6 @@ export const useFinishStopwatchSession = () => {
       toast({
         description: `Session finished successfully!`,
         variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error finishing session",
-        description: error.message,
-        variant: "destructive",
       });
     },
   });

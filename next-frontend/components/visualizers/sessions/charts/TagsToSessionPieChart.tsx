@@ -1,12 +1,12 @@
-import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { FC } from "react";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { FC } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
 import { SessionPieChart } from "@/components/visualizers/sessions/charts/SessionPieChart";
 
-type TagsToSessionPieChartProps = {
+interface TagsToSessionPieChartProps {
   filter?: SessionFilterPrecursor;
-};
+}
 
 export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
   props,

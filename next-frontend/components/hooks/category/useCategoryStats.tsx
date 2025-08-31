@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useCategoryStats = () => {
   return useQuery({
-    queryKey: [queryKeys.categories._def, "statistics"],
     queryFn: CategoryApi.getStatistics,
+    queryKey: [queryKeys.categories._def, "statistics"],
   });
 };

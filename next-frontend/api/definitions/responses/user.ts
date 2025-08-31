@@ -1,5 +1,5 @@
 import { UserSchema } from "@/api/definitions/models/user";
-import { z } from "zod";
+import type { z } from "zod";
 
 const create = UserSchema;
 const update = UserSchema;
@@ -14,7 +14,7 @@ export type UserResponse = {
 
 export const UserResponseSchema = {
   create,
+  getProfile,
   update,
   updateVisibility,
-  getProfile,
 } as const;

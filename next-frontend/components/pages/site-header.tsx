@@ -1,6 +1,6 @@
 import { Navigation } from "@/components/pages/main-nav";
 import { Button } from "@/components/shadcn/button";
-import { NavItem } from "@/types/nav";
+import type { NavItem } from "@/types/nav";
 import { ArrowBigRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,15 +13,15 @@ export function SiteHeader() {
       <div className="container flex h-16 items-center justify-between w-full">
         <div className="flex items-center gap-2 w-full">
           <Link
-            href="/"
             className="flex items-center space-x-2 hover:scale-110 hover:transition"
+            href="/"
           >
             <Image
-              src="/logo.png"
               alt="Logo"
               className="h-8 w-8"
-              width={80}
               height={80}
+              src="/logo.png"
+              width={80}
             />
             <span className="inline-block font-bold">Nowaster</span>
           </Link>

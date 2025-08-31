@@ -1,8 +1,9 @@
-import { ScheduledSessionWithId } from "@/api/definitions";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ScheduledSessionWithId } from "@/api/definitions";
+import type { ColumnDef } from "@tanstack/react-table";
 import { differenceInMinutes, format } from "date-fns";
 import { DownloadIcon, Edit, Trash2 } from "lucide-react";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 import {
@@ -30,16 +31,16 @@ import { EditScheduledSession } from "@/components/visualizers/sessions/form/Edi
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
 
-type DeleteSessionIconProps = {
+interface DeleteSessionIconProps {
   sessionId: string;
-};
+}
 
 const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const deleteSession = useDeleteScheduledSession();
 
   return (
-    <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+    <AlertDialog onOpenChange={setIsDeleteAlertOpen} open={isDeleteAlertOpen}>
       <AlertDialogTrigger asChild>
         <Button
           className="group cursor-pointer p-0 m-0 aspect-square"
@@ -59,12 +60,12 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={async () =>
               await deleteSession.mutateAsync(props.sessionId, {
-                onSuccess: () => setIsDeleteAlertOpen(false),
+                onSuccess: () => { setIsDeleteAlertOpen(false); },
               })
             }
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Delete
           </AlertDialogAction>
@@ -78,7 +79,7 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <Dialog modal={false} open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog modal={false} onOpenChange={setIsDialogOpen} open={isDialogOpen}>
       <DialogTrigger asChild>
         <Button
           className="group cursor-pointer p-0 m-0 aspect-square"
@@ -92,10 +93,10 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
           <DialogTitle>Edit Session</DialogTitle>
         </DialogHeader>
         <EditScheduledSession
+          onCancel={() => { setIsDialogOpen(false); }}
+          onDelete={() => { setIsDialogOpen(false); }}
+          onSave={() => { setIsDialogOpen(false); }}
           session={props.session}
-          onCancel={() => setIsDialogOpen(false)}
-          onSave={() => setIsDialogOpen(false)}
-          onDelete={() => setIsDialogOpen(false)}
         />
       </DialogContent>
     </Dialog>
@@ -122,9 +123,9 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       const rows = data.table.getRowModel().rows.map((row) => row.original);
       return (
         <Button
-          onClick={() => downloadJSON(rows, "export.json")}
-          variant="ghost"
           className="p-0 m-0"
+          onClick={() => { downloadJSON(rows, "export.json"); }}
+          variant="ghost"
         >
           <DownloadIcon className="size-4"/>
         </Button>
@@ -134,25 +135,25 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
 
   {
     accessorKey: "category",
-    header: "Category",
     cell: (data) => {
       return <CategoryLabel category={data.row.original.category} />;
     },
+    header: "Category",
   },
   {
     accessorKey: "tags",
-    header: "Tags",
     cell: (data) => {
-      const tags = data.row.original.tags;
+      const {tags} = data.row.original;
 
       return (
         <div className="flex">
           {tags.map((tag) => (
-            <TagBadge tag={tag} variant="auto" key={tag.id} />
+            <TagBadge key={tag.id} tag={tag} variant="auto" />
           ))}
         </div>
       );
     },
+    header: "Tags",
   },
   {
     accessorKey: "description",
@@ -160,39 +161,39 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   },
   {
     accessorKey: "startTime",
+    cell: ({ row: { original } }) =>
+      format(original.startTime, "dd-MM-yyyy HH:mm"),
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Start Time" />
     ),
-    cell: ({ row: { original } }) =>
-      format(original.startTime, "dd-MM-yyyy HH:mm"),
   },
   {
     accessorKey: "endTime",
+    cell: ({ row: { original } }) =>
+      format(original.endTime, "dd-MM-yyyy HH:mm"),
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="End Time" />
     ),
-    cell: ({ row: { original } }) =>
-      format(original.endTime, "dd-MM-yyyy HH:mm"),
   },
   {
-    id: "duration-column",
     accessorFn: (session) =>
       differenceInMinutes(session.endTime, session.startTime),
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Duration" />
-    ),
     cell: (test) => {
       const time = test.cell.getValue<number>();
       return <div>{formatTime(time)}</div>;
     },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Duration" />
+    ),
+    id: "duration-column",
   },
   {
-    id: "actions",
     cell: (data) => (
       <>
         <EditSessionButton session={data.row.original} />
         <DeleteSessionIcon sessionId={data.row.original.id} />
       </>
     ),
+    id: "actions",
   },
 ];
