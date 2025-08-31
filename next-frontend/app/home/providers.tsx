@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import type { FC, PropsWithChildren} from "react";
+import type { FC, PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
 
 interface ProvidersProps {
@@ -24,19 +24,19 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: ProvidersProps) {
   return (
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <SpeedInsights />
-          <Analytics />
-          <AxiosInterceptorWrapper>
-            <ThemeProvider attribute="class" defaultTheme="dark">
-              {children}
-            </ThemeProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
-            <Toaster />
-          </AxiosInterceptorWrapper>
-        </QueryClientProvider>
-      </AuthProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <SpeedInsights />
+        <Analytics />
+        <AxiosInterceptorWrapper>
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            {children}
+          </ThemeProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <Toaster />
+        </AxiosInterceptorWrapper>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 

@@ -7,7 +7,7 @@ import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge
 import { Feed } from "@/components/visualizers/feed/Feed";
 import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
 import type {
-  AmountByCategory} from "@/components/visualizers/sessions/charts/SessionPieChart";
+  AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
 import {
   ActiveIndexContext,
   SessionPieChart,
@@ -174,7 +174,6 @@ export default function DashboardPage() {
                   category: CategoryWithId;
                 }>[];
               }) => {
-                 
                 const context = use(ActiveIndexContext);
 
                 return (
@@ -213,21 +212,19 @@ export default function DashboardPage() {
               getKey={(session) =>
                 session.tags.length
                   ? session.tags.map((tag) => ({
-                    key: tag.label,
-                    metadata: { color: tag.color, name: tag.label },
-                  }))
+                      key: tag.label,
+                      metadata: { color: tag.color, name: tag.label },
+                    }))
                   : {
-                    key: "-",
-                    metadata: { color: "#f129c1", name: "-" },
-                  }
-              }
+                      key: "-",
+                      metadata: { color: "#f129c1", name: "-" },
+                    }}
               renderLegend={(props: {
                 data: AmountByCategory<{
                   color: string;
                   name: string;
                 }>[];
               }) => {
-                 
                 const context = use(ActiveIndexContext);
 
                 return (

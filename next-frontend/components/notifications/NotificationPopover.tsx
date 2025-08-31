@@ -29,9 +29,9 @@ export const NotificationPopover: FC = () => {
   const unseenCount = notifications.length;
 
   const handleMarkAllSeen = () =>
-    { markSeenMutation.mutate({
-      notification_ids: notifications.map((n) => n.id),
-    }); };
+  { markSeenMutation.mutate({
+    notification_ids: notifications.map((n) => n.id),
+  }); };
 
   return (
     <Popover modal={false} onOpenChange={setIsOpen} open={isOpen}>
@@ -89,23 +89,27 @@ export const NotificationPopover: FC = () => {
         </div>
 
         <div className="max-h-96 overflow-y-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2" />
-            </div>
-          ) : (notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Bell className="h-12 w-12 mb-2" />
-              <p className="font-medium">No notifications yet</p>
-              <p className="text-sm mt-1">
-                We&apos;ll let you know when something happens!
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              <NotificationsHandler notifications={notifications} />
-            </div>
-          ))}
+          {isLoading
+            ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2" />
+                </div>
+              )
+            : (notifications.length === 0
+                ? (
+                    <div className="flex flex-col items-center justify-center p-8 text-center">
+                      <Bell className="h-12 w-12 mb-2" />
+                      <p className="font-medium">No notifications yet</p>
+                      <p className="text-sm mt-1">
+                        We&apos;ll let you know when something happens!
+                      </p>
+                    </div>
+                  )
+                : (
+                    <div className="divide-y">
+                      <NotificationsHandler notifications={notifications} />
+                    </div>
+                  ))}
         </div>
       </PopoverContent>
     </Popover>

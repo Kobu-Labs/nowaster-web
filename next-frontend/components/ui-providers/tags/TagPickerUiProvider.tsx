@@ -1,6 +1,6 @@
 import type { Category, TagDetails } from "@/api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 
 import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
@@ -96,8 +96,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   // group tags based on their allowed categories
   const categories = new Map<string, TagDetails[]>([["-", []]]);
   tagsToDisplay.forEach((tag) => {
-    const categoryNames =
-      tag.allowedCategories.length > 0
+    const categoryNames
+      = tag.allowedCategories.length > 0
         ? tag.allowedCategories.map((c) => c.name)
         : ["-"];
 
@@ -139,8 +139,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {tagsValue.length === 0
                 ? "Select Tags"
                 : tagsValue.map((tag) => (
-                  <TagBadge key={tag.id} tag={tag} variant="auto" />
-                ))}
+                    <TagBadge key={tag.id} tag={tag} variant="auto" />
+                  ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -152,21 +152,20 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
             onValueChange={setSearchTerm}
             placeholder="Search tags"
           />
-          {searchTerm &&
-            props.availableTags.every((t) => t.label !== searchTerm) && (
+          {searchTerm
+            && props.availableTags.every((t) => t.label !== searchTerm) && (
             <CommandGroup>
               <CommandItem
                 className="flex"
                 onSelect={() =>
-                  { createTag(
-                    {
-                      allowedCategories: [],
-                      color: newTagColor,
-                      label: searchTerm,
-                    },
-                    { onSuccess: handleTagCreate },
-                  ); }
-                }
+                { createTag(
+                  {
+                    allowedCategories: [],
+                    color: newTagColor,
+                    label: searchTerm,
+                  },
+                  { onSuccess: handleTagCreate },
+                ); }}
               >
                 <p>Create</p>
                 <div className="grow"></div>

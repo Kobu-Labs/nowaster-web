@@ -1,6 +1,6 @@
 "use client";
 
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 import { Plus, Smile } from "lucide-react";
 
@@ -48,13 +48,13 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
   }
 
   const sortedGroupedReactions = Object.entries(
-    reactions.reduce<Record<string, { count: number; currentUserReacted: boolean }>>(
+    reactions.reduce<Record<string, { count: number; currentUserReacted: boolean; }>>(
       (acc, reaction) => {
         acc[reaction.emoji] = {
           count: (acc[reaction.emoji]?.count ?? 0) + 1,
           currentUserReacted:
-            acc[reaction.emoji]?.currentUserReacted ??
-            reaction.user.id === userId,
+            acc[reaction.emoji]?.currentUserReacted
+            ?? reaction.user.id === userId,
         };
         return acc;
       },
@@ -119,11 +119,13 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
             size="sm"
             variant="ghost"
           >
-            {totalReactions > 0 ? (
-              <Plus className="h-4 w-4" />
-            ) : (
-              <Smile className="h-4 w-4" />
-            )}
+            {totalReactions > 0
+              ? (
+                  <Plus className="h-4 w-4" />
+                )
+              : (
+                  <Smile className="h-4 w-4" />
+                )}
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-auto p-2">

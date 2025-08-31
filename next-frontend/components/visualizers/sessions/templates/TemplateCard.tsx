@@ -24,12 +24,12 @@ export const intervalToStartOf = (
   asOf: Date,
 ): Date => {
   switch (interval) {
-  case "daily": {
-    return startOfDay(asOf);
-  }
-  case "weekly": {
-    return startOfWeek(asOf);
-  }
+    case "daily": {
+      return startOfDay(asOf);
+    }
+    case "weekly": {
+      return startOfWeek(asOf);
+    }
   }
 };
 
@@ -40,7 +40,7 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-pink-500/5 to-purple-500/3 rounded-bl-full" />
-        
+
         <div className="flex items-center gap-3 relative">
           <div className="w-1.5 h-8 bg-linear-to-b from-pink-500 to-purple-500 rounded-full" />
           <CardTitle className="text-2xl font-bold bg-linear-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
@@ -68,15 +68,17 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
             <span className="font-medium">{format(props.template.end_date, "MMM dd, yyyy")}</span>
           </div>
         </div>
-        
+
         <Separator className="w-full bg-linear-to-r from-pink-200/50 via-purple-200/50 to-pink-200/50 dark:from-pink-800/30 dark:via-purple-800/30 dark:to-pink-800/30" />
-        
+
         <div className="space-y-3">
           <h4 className="font-semibold text-sm bg-linear-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
             <div className="w-4 h-4 bg-linear-to-br from-pink-500/20 to-purple-500/20 rounded flex items-center justify-center">
               <div className="w-2 h-2 bg-linear-to-br from-pink-500 to-purple-500 rounded-full" />
             </div>
-            Sessions ({props.template.sessions.length})
+            Sessions (
+            {props.template.sessions.length}
+            )
           </h4>
           <div className="space-y-2">
             {props.template.sessions.map((session) => {
@@ -93,7 +95,9 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground min-w-0">
                     <div className="w-1.5 h-1.5 bg-pink-400 rounded-full shrink-0" />
                     <span className="truncate">
-                      {format(startTime, "MMM dd, HH:mm")} - {format(endTime, "HH:mm")}
+                      {format(startTime, "MMM dd, HH:mm")}
+                      -
+                      {format(endTime, "HH:mm")}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">

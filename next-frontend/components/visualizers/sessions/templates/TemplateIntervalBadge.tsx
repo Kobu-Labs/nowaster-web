@@ -6,18 +6,18 @@ import type { FC } from "react";
 
 const getIntervalBadgeColor = (interval: string) => {
   switch (interval) {
-  case "daily": {
-    return "text-purple-300";
-  }
-  case "monthly": {
-    return "text-purple-800";
-  }
-  case "weekly": {
-    return "text-pink-600";
-  }
-  default: {
-    return "text-gray-800";
-  }
+    case "daily": {
+      return "text-purple-300";
+    }
+    case "monthly": {
+      return "text-purple-800";
+    }
+    case "weekly": {
+      return "text-pink-600";
+    }
+    default: {
+      return "text-gray-800";
+    }
   }
 };
 

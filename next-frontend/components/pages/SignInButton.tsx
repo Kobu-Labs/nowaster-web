@@ -3,7 +3,7 @@ import { Button } from "@/components/shadcn/button";
 import { SignedOut, SignInButton as SignInButtonClerk } from "@clerk/nextjs";
 import type { FC } from "react";
 
-export const SignInButton: FC<{ label?: string } & ButtonProps> = (props) => {
+export const SignInButton: FC<{ label?: string; } & ButtonProps> = (props) => {
   return (
     <SignedOut>
       <SignInButtonClerk>

@@ -1,3 +1,4 @@
+import stylistic from "@stylistic/eslint-plugin";
 import eslintConfigTrumpet from "@trumpet/eslint-config-next";
 
 export default [
@@ -22,8 +23,26 @@ export default [
     ],
   },
   ...eslintConfigTrumpet,
+  stylistic.configs.recommended,
   {
     rules: {
+      "@stylistic/semi": ["error", "always"],
+      "@stylistic/arrow-parens": ["error", "always"],
+      "@stylistic/quotes": ["error", "double"],
+            "@stylistic/brace-style":"off",
+      "@stylistic/member-delimiter-style": [
+        "error",
+        {
+          multiline: {
+            delimiter: "semi",
+            requireLast: true,
+          },
+          singleline: {
+            delimiter: "semi",
+            requireLast: true,
+          },
+        },
+      ],
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
       "unicorn/prefer-ternary": "off",
@@ -38,7 +57,7 @@ export default [
       "jsx-a11y/label-has-associated-control": "off",
       "@typescript-eslint/no-confusing-void-expression": "off",
       "react-perf/jsx-no-new-array-as-prop": "off",
-      "no-fallthrough": "off", //agree, but does not recognize literal unions
+      "no-fallthrough": "off", // agree, but does not recognize literal unions
       "jsx-a11y/no-autofocus": "off",
       "jsx-a11y/no-static-element-interactions": "off",
       "react-hooks/exhaustive-deps": "off",

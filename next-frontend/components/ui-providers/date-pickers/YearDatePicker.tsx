@@ -58,7 +58,6 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
         { length: 12 },
         (_, i) => newYear.getFullYear() - (11 - i),
       ));
-
     }
     handleSelect(newYear);
   };
@@ -71,7 +70,6 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
         { length: 12 },
         (_, i) => newYear.getFullYear() + i,
       ));
-
     }
     handleSelect(newYear);
   };
@@ -88,14 +86,16 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
             "w-[240px] justify-start text-left font-normal",
             !date && "text-muted-foreground",
           )}
-          variant={"outline"}
+          variant="outline"
         >
           <CalendarIcon className="mr-2 size-4" />
-          {date ? (
-            format(date, "yyyy")
-          ) : (
-            <span>Pick a year</span>
-          )}
+          {date
+            ? (
+                format(date, "yyyy")
+              )
+            : (
+                <span>Pick a year</span>
+              )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-0">

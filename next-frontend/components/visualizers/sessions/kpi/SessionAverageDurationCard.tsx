@@ -40,9 +40,9 @@ export const SessionAverageDurationProvider = (
       error={isError}
       loading={isLoading}
       mapper={formatTime}
-      title={"Average session duration"}
+      title="Average session duration"
       value={sessions}
-      variant={"big_value"}
+      variant="big_value"
     >
       <Hourglass />
     </KpiCardUiProvider>

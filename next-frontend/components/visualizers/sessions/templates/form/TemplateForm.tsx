@@ -29,7 +29,7 @@ import {
 } from "@/components/shadcn/tooltip";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import type {
-  TemplateSessionPrecursor} from "@/components/visualizers/sessions/templates/form/form-schemas";
+  TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import {
   templateSessionPrecursorSchema,
 } from "@/components/visualizers/sessions/templates/form/form-schemas";
@@ -86,10 +86,10 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
 
   const fieldArray = useFieldArray({ control: form.control, name: "sessions" });
 
-  const preventContinue =
-    form.watch("interval") === undefined ||
-    form.watch("start_date") === undefined ||
-    form.watch("end_date") === undefined;
+  const preventContinue
+    = form.watch("interval") === undefined
+      || form.watch("start_date") === undefined
+      || form.watch("end_date") === undefined;
 
   return (
     <Form {...form}>
@@ -148,8 +148,7 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
                           seconds: 0,
                         }),
                         val,
-                      )
-                    }
+                      )}
                     onSelect={(val) => {
                       field.onChange(val);
                     }}
@@ -211,13 +210,12 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
                   className="group flex items-center gap-2 "
                   disabled={preventContinue}
                   onClick={() =>
-                    { fieldArray.append({
-                      // @ts-expect-error - .append expects a full object, but we are providing a partial one because category and tags are not set yet
-                      category: undefined,
-                      description: undefined,
-                      tags: [],
-                    }); }
-                  }
+                  { fieldArray.append({
+                    // @ts-expect-error - .append expects a full object, but we are providing a partial one because category and tags are not set yet
+                    category: undefined,
+                    description: undefined,
+                    tags: [],
+                  }); }}
                   type="button"
                   variant="outline"
                 >

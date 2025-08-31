@@ -10,5 +10,4 @@ const ResponseFail = z.object({
   status: z.enum(["fail"]),
 });
 
-
 export const ResponseSchema = ResponseFail.or(ResponseSuccess);

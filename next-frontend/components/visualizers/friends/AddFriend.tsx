@@ -6,7 +6,7 @@ import { UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AddFriendFormValues} from "@/validation/add-friend";
+import type { AddFriendFormValues } from "@/validation/add-friend";
 import { addFriendSchema } from "@/validation/add-friend";
 import { useAddFriend } from "@/components/hooks/friends/useAddFriend";
 import {
@@ -44,10 +44,10 @@ export const AddFriend = () => {
                   {...field}
                   className={cn(
                     "h-9",
-                    sendRequest.isError &&
-                      "border-destructive focus-visible:ring-destructive",
-                    sendRequest.isSuccess &&
-                      "border-green-300 focus-visible:ring-gray-300",
+                    sendRequest.isError
+                    && "border-destructive focus-visible:ring-destructive",
+                    sendRequest.isSuccess
+                    && "border-green-300 focus-visible:ring-gray-300",
                   )}
                   placeholder="Enter username"
                 />
@@ -66,10 +66,10 @@ export const AddFriend = () => {
                   {...field}
                   className={cn(
                     "h-9",
-                    sendRequest.isError &&
-                      "border-destructive focus-visible:ring-destructive",
-                    sendRequest.isSuccess &&
-                      "border-green-300 focus-visible:ring-gray-300",
+                    sendRequest.isError
+                    && "border-destructive focus-visible:ring-destructive",
+                    sendRequest.isSuccess
+                    && "border-green-300 focus-visible:ring-gray-300",
                   )}
                   placeholder="Add a message (optional)"
                 />

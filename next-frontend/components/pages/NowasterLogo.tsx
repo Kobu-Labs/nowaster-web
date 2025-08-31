@@ -6,7 +6,7 @@ import Image from "next/image";
 import type { FC } from "react";
 import { useSidebar } from "@/components/shadcn/sidebar";
 
-export const NowasterLogo: FC<{ href?: string }> = (props) => {
+export const NowasterLogo: FC<{ href?: string; }> = (props) => {
   const { setOpen } = useSidebar();
 
   return (

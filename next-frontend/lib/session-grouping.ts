@@ -23,7 +23,7 @@ export type CategoryPerGranularity = {
  * @type sessionKey function for computing the key from given session
  * @type granularity
  */
-export type GroupingOptions = { granularity: Granularity } & Partial<{
+export type GroupingOptions = { granularity: Granularity; } & Partial<{
   allKeys: boolean;
   sessionKey: (
     session: ScheduledSession,
@@ -139,8 +139,8 @@ export const groupSessions = (
     allKeys[opts.granularity](data).forEach((tick) => (accumulator[tick] = {}));
   }
 
-  const sessionKeyGetter =
-    opts.sessionKey ?? ((session) => session.category.name);
+  const sessionKeyGetter
+    = opts.sessionKey ?? ((session) => session.category.name);
   const granulizers = granularizers[opts.granularity];
   const uniques = new Set<number | string>();
 

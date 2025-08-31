@@ -8,9 +8,9 @@ import {
 import type { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { Card } from "@/components/shadcn/card";
 import type {
-  DailyIntervalPickerProps} from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
+  DailyIntervalPickerProps } from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import {
-  DailyIntervalPicker
+  DailyIntervalPicker,
 } from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import {
   WeeklyIntervalPicker,
@@ -23,9 +23,9 @@ import { formatIntervalPickerLabel } from "@/lib/date-utils";
 
 interface IntervalBasedPickerProps {
   interval: RecurringSessionInterval;
-  onSelect: (value: { day: number; hours: number; minutes: number }) => void;
+  onSelect: (value: { day: number; hours: number; minutes: number; }) => void;
   orientation?: "horizontal" | "vertical";
-  selected?: { day: number; hours: number; minutes: number };
+  selected?: { day: number; hours: number; minutes: number; };
 }
 
 const intervalToPicker = {
@@ -34,7 +34,7 @@ const intervalToPicker = {
       <DailyIntervalPicker {...props} />
     </Card>
   ),
-  weekly: WeeklyIntervalPicker 
+  weekly: WeeklyIntervalPicker,
 } satisfies Record<RecurringSessionInterval, FC<any>>;
 
 export const IntervalBasedPicker: FC<IntervalBasedPickerProps> = (props) => {
@@ -45,7 +45,7 @@ export const IntervalBasedPicker: FC<IntervalBasedPickerProps> = (props) => {
         <Button
           className={cn("w-[240px] justify-start text-left font-normal")}
           type="button"
-          variant={"outline"}
+          variant="outline"
         >
           <CalendarIcon className="mr-2 size-4" />
           <span>

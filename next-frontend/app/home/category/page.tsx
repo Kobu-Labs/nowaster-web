@@ -91,7 +91,9 @@ export default function CategoriesPage() {
   const deleteCategory = useDeleteCategory();
 
   const filteredAndSortedCategories = useMemo(() => {
-    if (!categoriesQuery.data) {return [];}
+    if (!categoriesQuery.data) {
+      return [];
+    }
 
     const filtered = categoriesQuery.data.filter((category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -101,24 +103,24 @@ export default function CategoriesPage() {
       let comparison = 0;
 
       switch (sortBy) {
-      case "name": {
-        comparison = a.name.localeCompare(b.name);
-        break;
-      }
-      case "recent": {
-        // This would require lastUsedAt field
-        comparison = 0; // Placeholder
-        break;
-      }
-      case "sessions": {
-        comparison = a.sessionCount - b.sessionCount;
-        break;
-      }
-      case "time": {
-        // Assuming totalTime exists or calculate from sessionCount
-        comparison = a.sessionCount * 60 - b.sessionCount * 60;
-        break;
-      }
+        case "name": {
+          comparison = a.name.localeCompare(b.name);
+          break;
+        }
+        case "recent": {
+          // This would require lastUsedAt field
+          comparison = 0; // Placeholder
+          break;
+        }
+        case "sessions": {
+          comparison = a.sessionCount - b.sessionCount;
+          break;
+        }
+        case "time": {
+          // Assuming totalTime exists or calculate from sessionCount
+          comparison = a.sessionCount * 60 - b.sessionCount * 60;
+          break;
+        }
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -253,7 +255,11 @@ export default function CategoriesPage() {
               New Category
             </Button>
           </DialogTrigger>
-          <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
+          <DialogContent
+            onInteractOutside={(e) => {
+              e.preventDefault();
+            }}
+          >
             <DialogHeader>
               <DialogTitle>Create New Category</DialogTitle>
               <DialogDescription>
@@ -265,7 +271,9 @@ export default function CategoriesPage() {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  onChange={(e) => { setNewCategoryName(e.target.value); }}
+                  onChange={(e) => {
+                    setNewCategoryName(e.target.value);
+                  }}
                   placeholder="Category name..."
                   value={newCategoryName}
                 />
@@ -282,7 +290,9 @@ export default function CategoriesPage() {
             </div>
             <DialogFooter>
               <Button
-                onClick={() => { setShowCreateDialog(false); }}
+                onClick={() => {
+                  setShowCreateDialog(false);
+                }}
                 variant="outline"
               >
                 Cancel
@@ -339,25 +349,27 @@ export default function CategoriesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mostUsedCategory ? (
-                <div>
-                  <CategoryBadge
-                    color={mostUsedCategory.color}
-                    name={mostUsedCategory.name}
-                  />
-                  <div className="text-xs flex gap-2">
-                    <p className="text-muted-foreground">
-                      Category with the most sessions, being
-                    </p>
+              {mostUsedCategory
+                ? (
+                    <div>
+                      <CategoryBadge
+                        color={mostUsedCategory.color}
+                        name={mostUsedCategory.name}
+                      />
+                      <div className="text-xs flex gap-2">
+                        <p className="text-muted-foreground">
+                          Category with the most sessions, being
+                        </p>
 
-                    <p className="text-foreground">
-                      {mostUsedCategoryCount?.sessionCount}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                "None"
-              )}
+                        <p className="text-foreground">
+                          {mostUsedCategoryCount?.sessionCount}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                : (
+                    "None"
+                  )}
             </div>
           </CardContent>
         </Card>
@@ -369,7 +381,9 @@ export default function CategoriesPage() {
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-10"
-            onChange={(e) => { setSearchQuery(e.target.value); }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
             placeholder="Search categories..."
             value={searchQuery}
           />
@@ -378,32 +392,40 @@ export default function CategoriesPage() {
         <div className="flex gap-2">
           <Button
             className="flex items-center gap-1"
-            onClick={() => { toggleSort("name"); }}
+            onClick={() => {
+              toggleSort("name");
+            }}
             size="sm"
             variant={sortBy === "name" ? "default" : "outline"}
           >
             Name
-            {sortBy === "name" &&
-              (sortDirection === "asc" ? (
-                <SortAsc className="h-3 w-3" />
-              ) : (
-                <SortDesc className="h-3 w-3" />
-              ))}
+            {sortBy === "name"
+              && (sortDirection === "asc"
+                ? (
+                    <SortAsc className="h-3 w-3" />
+                  )
+                : (
+                    <SortDesc className="h-3 w-3" />
+                  ))}
           </Button>
 
           <Button
             className="flex items-center gap-1"
-            onClick={() => { toggleSort("sessions"); }}
+            onClick={() => {
+              toggleSort("sessions");
+            }}
             size="sm"
             variant={sortBy === "sessions" ? "default" : "outline"}
           >
             Sessions
-            {sortBy === "sessions" &&
-              (sortDirection === "asc" ? (
-                <SortAsc className="h-3 w-3" />
-              ) : (
-                <SortDesc className="h-3 w-3" />
-              ))}
+            {sortBy === "sessions"
+              && (sortDirection === "asc"
+                ? (
+                    <SortAsc className="h-3 w-3" />
+                  )
+                : (
+                    <SortDesc className="h-3 w-3" />
+                  ))}
           </Button>
         </div>
       </div>
@@ -436,43 +458,49 @@ export default function CategoriesPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="flex items-center gap-2 cursor-pointer"
-                      onClick={() => { openEditDialog(category); }}
+                      onClick={() => {
+                        openEditDialog(category);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                       Edit Category
                     </DropdownMenuItem>
                     <AlertDialog>
-                      {category.sessionCount > 0 ? (
-                        <TooltipProvider delayDuration={0}>
-                          <Tooltip delayDuration={0}>
-                            <TooltipTrigger>
-                              <AlertDialogTrigger disabled>
-                                <DropdownMenuItem
-                                  className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                                  disabled
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete Category
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              This category cannot be deleted, as it has
-                              sessions associated with it
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem
-                            className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                            onSelect={(e) => { e.preventDefault(); }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Category
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                      )}
+                      {category.sessionCount > 0
+                        ? (
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip delayDuration={0}>
+                                <TooltipTrigger>
+                                  <AlertDialogTrigger disabled>
+                                    <DropdownMenuItem
+                                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                                      disabled
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      Delete Category
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  This category cannot be deleted, as it has
+                                  sessions associated with it
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )
+                        : (
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete Category
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          )}
 
                       <AlertDialogContent>
                         <AlertDialogHeader>
@@ -493,9 +521,9 @@ export default function CategoriesPage() {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() =>
-                              { deleteCategory.mutate({ id: category.id }); }
-                            }
+                            onClick={() => {
+                              deleteCategory.mutate({ id: category.id });
+                            }}
                           >
                             Delete
                           </AlertDialogAction>
@@ -539,7 +567,9 @@ export default function CategoriesPage() {
               {!searchQuery && (
                 <Button
                   className="mt-4"
-                  onClick={() => { setShowCreateDialog(true); }}
+                  onClick={() => {
+                    setShowCreateDialog(true);
+                  }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Category
@@ -556,7 +586,11 @@ export default function CategoriesPage() {
         onOpenChange={(open) => !open && setEditingCategory(null)}
         open={!!editingCategory}
       >
-        <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
+        <DialogContent
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
             <DialogDescription>
@@ -568,7 +602,9 @@ export default function CategoriesPage() {
               <Label htmlFor="edit-name">Name</Label>
               <Input
                 id="edit-name"
-                onChange={(e) => { setNewCategoryName(e.target.value); }}
+                onChange={(e) => {
+                  setNewCategoryName(e.target.value);
+                }}
                 placeholder="Category name..."
                 value={newCategoryName}
               />
@@ -582,7 +618,12 @@ export default function CategoriesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => { setEditingCategory(null); }} variant="outline">
+            <Button
+              onClick={() => {
+                setEditingCategory(null);
+              }}
+              variant="outline"
+            >
               Cancel
             </Button>
             <Button

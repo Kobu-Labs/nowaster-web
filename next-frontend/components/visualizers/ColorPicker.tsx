@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { HexColorPicker } from "react-colorful";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useCallback, useRef, useState } from "react";
 import { isHexColor, randomColor } from "@/lib/utils";
 import {
@@ -28,7 +28,7 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
   const color = isControlled ? props.value : internalColor;
   const [inputColor, setInputColor] = useState(color);
 
-  // INFO: the following mechanism allows users to drag the color picker, 
+  // INFO: the following mechanism allows users to drag the color picker,
   // without spamming backend with requests
   const isDragging = useRef(false);
   const [tempColor, setTempColor] = useState(color);
@@ -85,8 +85,8 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
       <PopoverTrigger asChild>
         <Button
           style={{
-            backgroundColor: `${tempColor  }80`,
-            border: `3px solid ${  tempColor}`,
+            backgroundColor: `${tempColor}80`,
+            border: `3px solid ${tempColor}`,
           }}
           variant="outline"
         >

@@ -5,9 +5,9 @@ import { Separator } from "@/components/shadcn/separator";
 import { cn, toggleOrientation, zeroPad } from "@/lib/utils";
 
 export interface DailyIntervalPickerProps {
-  onSelect: (value: { day: number; hours: number; minutes: number }) => void;
+  onSelect: (value: { day: number; hours: number; minutes: number; }) => void;
   orientation?: "horizontal" | "vertical";
-  selected?: { day: number; hours: number; minutes: number };
+  selected?: { day: number; hours: number; minutes: number; };
 }
 
 export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
@@ -39,12 +39,11 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
               className="shrink-0 aspect-square text-muted-foreground hover:text-white"
               key={hour}
               onClick={() =>
-                { props.onSelect({
-                  day: props.selected?.day ?? 0,
-                  hours: hour,
-                  minutes: props.selected?.minutes ?? 0,
-                }); }
-              }
+              { props.onSelect({
+                day: props.selected?.day ?? 0,
+                hours: hour,
+                minutes: props.selected?.minutes ?? 0,
+              }); }}
               size="icon"
               type="button"
               variant={props.selected?.hours === hour ? "default" : "ghost"}
@@ -70,12 +69,11 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
               className="shrink-0 aspect-square text-muted-foreground hover:text-white"
               key={minute}
               onClick={() =>
-                { props.onSelect({
-                  day: props.selected?.day ?? 0,
-                  hours: props.selected?.hours ?? 0,
-                  minutes: minute,
-                }); }
-              }
+              { props.onSelect({
+                day: props.selected?.day ?? 0,
+                hours: props.selected?.hours ?? 0,
+                minutes: minute,
+              }); }}
               size="icon"
               type="button"
               variant={props.selected?.minutes === minute ? "default" : "ghost"}

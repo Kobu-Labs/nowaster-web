@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { VariantProps} from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
@@ -49,15 +49,21 @@ export function KpiCardUiProvider<T extends ReactNode>(
         <div>{props.children}</div>
       </CardHeader>
       <CardContent className={cn(cardVariants({ variant: props.variant }))}>
-        {props.error ? (
-          <Frown className="text-red-500 grow" />
-        ) : props.loading ? (
-          <Skeleton className="w-full h-full min-h-20" />
-        ) : props.mapper && props.value !== undefined ? (
-          (props.mapper(props.value) as React.ReactNode)
-        ) : (
-          props.value
-        )}
+        {props.error
+          ? (
+              <Frown className="text-red-500 grow" />
+            )
+          : props.loading
+            ? (
+                <Skeleton className="w-full h-full min-h-20" />
+              )
+            : props.mapper && props.value !== undefined
+              ? (
+                  (props.mapper(props.value) as React.ReactNode)
+                )
+              : (
+                  props.value
+                )}
       </CardContent>
       {props.description && (
         <CardFooter className="text-xs text-muted-foreground">

@@ -6,18 +6,18 @@ import { Badge } from "@/components/shadcn/badge";
 import type { TagWithId } from "@/api/definitions";
 import { useAtom } from "jotai";
 
-type TagBadgeProps =
+type TagBadgeProps
+  = | {
+    colors?: string;
+    value: string;
+    variant: "manual";
+  }
   | {
-      colors?: string;
-      value: string;
-      variant: "manual";
-    }
-  | {
-      tag: TagWithId;
-      variant: "auto";
-    };
+    tag: TagWithId;
+    variant: "auto";
+  };
 
-const TagBadgeInner = (props: { color: string; label: string }) => {
+const TagBadgeInner = (props: { color: string; label: string; }) => {
   return (
     <Badge
       className={cn(
@@ -30,7 +30,7 @@ const TagBadgeInner = (props: { color: string; label: string }) => {
   );
 };
 
-const TagBadgeAuto = (props: { tag: TagWithId }) => {
+const TagBadgeAuto = (props: { tag: TagWithId; }) => {
   const [colors, setColors] = useAtom(tagColors);
 
   const color = colors[props.tag.label] ?? props.tag.color;

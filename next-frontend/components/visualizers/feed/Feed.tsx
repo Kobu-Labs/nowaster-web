@@ -53,12 +53,13 @@ export const Feed: FC = () => {
   if (error) {
     return (
       <div className="text-center py-8 text-destructive">
-        Error loading feed: {error.message}
+        Error loading feed:
+        {error.message}
       </div>
     );
   }
 
-  const allEvents = data?.pages.flat()
+  const allEvents = data?.pages.flat() ?? [];
 
   if (allEvents.length === 0) {
     return (
