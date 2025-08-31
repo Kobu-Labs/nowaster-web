@@ -1,36 +1,44 @@
-import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
+import type { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { zeroPad } from "@/lib/utils";
 import { addDays, addWeeks, format, set } from "date-fns";
 
 export const numberToDay = (value: number): string => {
   switch (value) {
-  case 0:
+  case 0: {
     return "Sunday";
-  case 1:
+  }
+  case 1: {
     return "Monday";
-  case 2:
+  }
+  case 2: {
     return "Tuesday";
-  case 3:
+  }
+  case 3: {
     return "Wednesday";
-  case 4:
+  }
+  case 4: {
     return "Thursday";
-  case 5:
+  }
+  case 5: {
     return "Friday";
-  case 6:
+  }
+  case 6: {
     return "Saturday";
-  default:
+  }
+  default: {
     throw new Error("Invalid value for day of the week");
+  }
   }
 };
 
 export const daysOfWeek = [
-  { short: "Mon", full: "Monday", value: 1 },
-  { short: "Tue", full: "Tuesday", value: 2 },
-  { short: "Wed", full: "Wednesday", value: 3 },
-  { short: "Thu", full: "Thursday", value: 4 },
-  { short: "Fri", full: "Friday", value: 5 },
-  { short: "Sat", full: "Saturday", value: 6 },
-  { short: "Sun", full: "Sunday", value: 0 },
+  { full: "Monday", short: "Mon", value: 1 },
+  { full: "Tuesday", short: "Tue", value: 2 },
+  { full: "Wednesday", short: "Wed", value: 3 },
+  { full: "Thursday", short: "Thu", value: 4 },
+  { full: "Friday", short: "Fri", value: 5 },
+  { full: "Saturday", short: "Sat", value: 6 },
+  { full: "Sunday", short: "Sun", value: 0 },
 ] as const;
 
 export const formatIntervalPickerLabel = (
@@ -47,10 +55,12 @@ export const formatIntervalPickerLabel = (
     return "Pick a value";
   }
   switch (interval) {
-  case "daily":
+  case "daily": {
     return `${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
-  case "weekly":
-    return `${numberToDay(value.day).substring(0, 3)}, ${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
+  }
+  case "weekly": {
+    return `${numberToDay(value.day).slice(0, 3)}, ${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
+  }
   }
 };
 
@@ -63,10 +73,12 @@ export const incrementByInterval = (
   date: Date,
 ): Date => {
   switch (interval) {
-  case "daily":
+  case "daily": {
     return addDays(date, 1);
-  case "weekly":
+  }
+  case "weekly": {
     return addWeeks(date, 1);
+  }
   }
 };
 
@@ -78,13 +90,13 @@ export const normalizeDayNumber = (day: number): number => {
 export const getDaytimeAfterDate = (
   lowerBoundDate: Date,
   interval: RecurringSessionInterval,
-  time: { minutes: number; hours: number; day: number },
+  time: { day: number; hours: number; minutes: number; },
 ): Date => {
   const adjustedDate = set(lowerBoundDate, {
     hours: time.hours,
+    milliseconds: 0,
     minutes: time.minutes,
     seconds: 0,
-    milliseconds: 0,
   });
 
   const dailyHandler = () => {

@@ -1,11 +1,9 @@
-import {
-  CategoryWithIdSchema,
-  ScheduledSessionRequest,
-} from "@/api/definitions";
+import type { ScheduledSessionRequest } from "@/api/definitions";
+import { CategoryWithIdSchema } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInMinutes, isBefore, isEqual } from "date-fns";
 import { ArrowBigRight } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 import { useForm } from "react-hook-form";
 
 import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
@@ -24,7 +22,7 @@ import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOp
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { formatTime } from "@/lib/utils";
-import { SessionPrecursor } from "@/validation/session/creation";
+import type { SessionPrecursor } from "@/validation/session/creation";
 import { z } from "zod";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
@@ -52,11 +50,11 @@ type ScheduledSessionCreationFormProps = {
 const createSessionPrecursor = z.object({
   category: CategoryWithIdSchema,
   description: z.string().nullable(),
-  startTime: z.coerce.date<Date>(),
   endTime: z.coerce.date<Date>(),
+  startTime: z.coerce.date<Date>(),
   tags: z.array(
     z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
     }),
   ),
 });
@@ -65,8 +63,8 @@ export const ScheduledSessionCreationForm: FC<
   ScheduledSessionCreationFormProps
 > = (props) => {
   const form = useForm<z.infer<typeof createSessionPrecursor>>({
-    resolver: zodResolver(createSessionPrecursor),
     defaultValues: props.precursor,
+    resolver: zodResolver(createSessionPrecursor),
   });
 
   const createSession = useCreateScheduledSession();
@@ -83,10 +81,10 @@ export const ScheduledSessionCreationForm: FC<
     }
 
     const data: ScheduledSessionRequest["create"] = {
-      startTime: values.startTime,
-      endTime: values.endTime,
-      description: values.description,
       category_id: values.category.id,
+      description: values.description,
+      endTime: values.endTime,
+      startTime: values.startTime,
       tag_ids: values.tags.map((tag) => tag.id),
     };
 
@@ -103,7 +101,7 @@ export const ScheduledSessionCreationForm: FC<
     <Card>
       <CardContent className="mt-3 ">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="category"
@@ -113,7 +111,6 @@ export const ScheduledSessionCreationForm: FC<
                   <FormControl>
                     <CategoryPicker
                       mode="single"
-                      selectedCategory={field.value ?? null}
                       onSelectCategory={(cat) => {
                         if (cat.id === field.value?.id) {
                           form.resetField("category");
@@ -121,6 +118,7 @@ export const ScheduledSessionCreationForm: FC<
                           field.onChange(cat);
                         }
                       }}
+                      selectedCategory={field.value ?? null}
                     />
                   </FormControl>
                   <FormMessage />
@@ -130,16 +128,16 @@ export const ScheduledSessionCreationForm: FC<
 
             <FormField
               control={form.control}
-              name="description"
               defaultValue={null}
+              name="description"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Input
+                      onChange={field.onChange}
                       placeholder="Insert your description"
                       value={field.value ?? ""}
-                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -149,15 +147,13 @@ export const ScheduledSessionCreationForm: FC<
 
             <div className="flex items-center gap-4">
               <FormField
-                name="startTime"
                 control={form.control}
+                name="startTime"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">Start Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={dateQuickOptions}
-                        selected={field.value || undefined}
                         onSelect={(val) => {
                           if (val) {
                             field.onChange(val);
@@ -168,6 +164,8 @@ export const ScheduledSessionCreationForm: FC<
                             form.resetField("startTime");
                           }
                         }}
+                        quickOptions={dateQuickOptions}
+                        selected={field.value || undefined}
                       />
                     </FormControl>
                     <FormMessage />
@@ -184,15 +182,13 @@ export const ScheduledSessionCreationForm: FC<
               </div>
 
               <FormField
-                name="endTime"
                 control={form.control}
+                name="endTime"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={dateQuickOptions}
-                        selected={field.value}
                         onSelect={(val) => {
                           if (val) {
                             field.onChange(val);
@@ -200,6 +196,8 @@ export const ScheduledSessionCreationForm: FC<
                             form.resetField("endTime");
                           }
                         }}
+                        quickOptions={dateQuickOptions}
+                        selected={field.value}
                       />
                     </FormControl>
                     <FormMessage />
@@ -209,17 +207,19 @@ export const ScheduledSessionCreationForm: FC<
             </div>
 
             <FormField
+              control={form.control}
               defaultValue={[]}
               name="tags"
-              control={form.control}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
-                      forCategory={form.watch("category")}
                       disabled={form.getValues("category") === undefined}
-                      onNewTagsSelected={(tags) => field.onChange(tags)}
+                      forCategory={form.watch("category")}
+                      onNewTagsSelected={(tags) => {
+                        field.onChange(tags);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

@@ -1,10 +1,10 @@
-import { FC } from "react";
+import type { FC } from "react";
 import Link from "next/link";
-import { CategoryWithId } from "@/api/definitions";
+import type { CategoryWithId } from "@/api/definitions";
 
-type CategoryLabelProps = {
+interface CategoryLabelProps {
   category: CategoryWithId;
-};
+}
 
 export const CategoryLabel: FC<CategoryLabelProps> = (props) => {
   return (

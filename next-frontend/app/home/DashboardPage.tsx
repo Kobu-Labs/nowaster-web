@@ -1,14 +1,15 @@
 "use client";
 
-import { CategoryWithId } from "@/api/definitions";
+import type { CategoryWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { Feed } from "@/components/visualizers/feed/Feed";
 import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
+import type {
+  AmountByCategory} from "@/components/visualizers/sessions/charts/SessionPieChart";
 import {
   ActiveIndexContext,
-  AmountByCategory,
   SessionPieChart,
 } from "@/components/visualizers/sessions/charts/SessionPieChart";
 import { CurrentStreakKpiCard } from "@/components/visualizers/sessions/kpi/CurrentStreakKpiCard";
@@ -19,7 +20,7 @@ import { FilterContextProvider } from "@/components/visualizers/sessions/Session
 import { FilteredSessionTimeline } from "@/components/visualizers/sessions/timeline/FilteredSessionTimeline";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import {
   addHours,
@@ -30,38 +31,38 @@ import {
   subHours,
 } from "date-fns";
 import { TrendingDown, TrendingUp, TrendingUpDown } from "lucide-react";
-import { useContext, useMemo } from "react";
+import { use, useMemo } from "react";
 
 export default function DashboardPage() {
   const timelineFilter: SessionFilterPrecursor = useMemo(
     () => ({
-      settings: {},
       data: {
         endTimeFrom: { value: subHours(new Date(), 20) },
         endTimeTo: { value: addHours(new Date(), 1) },
       },
+      settings: {},
     }),
     [],
   );
 
   const todayFilter: SessionFilterPrecursor = useMemo(
     () => ({
-      settings: {},
       data: {
         endTimeFrom: { value: startOfDay(new Date()) },
         endTimeTo: { value: endOfDay(new Date()) },
       },
+      settings: {},
     }),
     [],
   );
 
   const yesterdayFilter: SessionFilterPrecursor = useMemo(
     () => ({
-      settings: {},
       data: {
         endTimeFrom: { value: startOfDay(subDays(new Date(), 1)) },
         endTimeTo: { value: endOfDay(subDays(new Date(), 1)) },
       },
+      settings: {},
     }),
     [],
   );
@@ -133,18 +134,18 @@ export default function DashboardPage() {
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <TotalSessionTimeCard
-          filter={todayFilter}
-          variant="default"
           description={percentageChange ?? "Loading..."}
+          filter={todayFilter}
           title="Time tracked today"
+          variant="default"
         />
         <TotalSessionsKpiCard />
         <TotalSessionTimeKpiCard />
         <CurrentStreakKpiCard />
         <FilterContextProvider>
           <FilteredSessionAreaChart
-            initialGranularity="days-in-month"
             className="col-span-full h-[400px]"
+            initialGranularity="days-in-month"
           />
         </FilterContextProvider>
         <FilterContextProvider initialFilter={timelineFilter}>
@@ -173,17 +174,17 @@ export default function DashboardPage() {
                   category: CategoryWithId;
                 }>[];
               }) => {
-                /* eslint-disable react-hooks/rules-of-hooks */
-                const context = useContext(ActiveIndexContext);
+                 
+                const context = use(ActiveIndexContext);
 
                 return (
                   <div className="flex flex-col items-center grow w-full gap-1">
                     {props.data.map((val, i) => (
                       <div
+                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
                         key={val.key}
                         onMouseEnter={() => context?.setIndex(i)}
                         onMouseLeave={() => context?.setIndex(null)}
-                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
                       >
                         {val.metadata && (
                           <CategoryBadge
@@ -226,23 +227,23 @@ export default function DashboardPage() {
                   name: string;
                 }>[];
               }) => {
-                /* eslint-disable react-hooks/rules-of-hooks */
-                const context = useContext(ActiveIndexContext);
+                 
+                const context = use(ActiveIndexContext);
 
                 return (
                   <div className="flex flex-col items-center grow w-full gap-1">
                     {props.data.map((val, i) => (
                       <div
+                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
                         key={val.key}
                         onMouseEnter={() => context?.setIndex(i)}
                         onMouseLeave={() => context?.setIndex(null)}
-                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
                       >
                         {val.metadata && (
                           <TagBadge
-                            variant="manual"
-                            value={val.metadata.name}
                             colors={val.metadata.color}
+                            value={val.metadata.name}
+                            variant="manual"
                           />
                         )}
                         <p>{formatTime(val.value)}</p>

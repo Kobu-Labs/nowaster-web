@@ -8,7 +8,7 @@ import {
 } from "@/components/shadcn/tabs";
 import { FriendsList } from "@/components/visualizers/friends/FriendList";
 import { FriendRequestsManagement } from "@/components/visualizers/friends/FriendRequestManagement";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 export default function FriendsPage() {
@@ -33,15 +33,15 @@ export default function FriendsPage() {
           </p>
         </div>
 
-        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs className="w-full" onValueChange={handleTabChange} value={currentTab}>
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="friends">My Friends</TabsTrigger>
             <TabsTrigger value="requests">Friend Requests</TabsTrigger>
           </TabsList>
-          <TabsContent value="friends" className="space-y-4">
+          <TabsContent className="space-y-4" value="friends">
             <FriendsList />
           </TabsContent>
-          <TabsContent value="requests" className="space-y-4">
+          <TabsContent className="space-y-4" value="requests">
             <FriendRequestsManagement />
           </TabsContent>
         </Tabs>

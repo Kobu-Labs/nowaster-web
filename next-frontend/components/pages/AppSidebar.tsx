@@ -56,44 +56,44 @@ const SHOW_TAG_AMOUNT = 7;
 
 const navItems = [
   {
+    icon: Home,
     title: "Dashboard",
     url: "/home",
-    icon: Home,
   },
   {
+    icon: Rss,
     title: "Feed",
     url: "/home/feed",
-    icon: Rss,
   },
   {
+    icon: FileTemplate,
     title: "Templates",
     url: "/home/templates",
-    icon: FileTemplate,
   },
   {
+    icon: Tag,
     title: "Tags",
     url: "/home/tags",
-    icon: Tag,
   },
   {
+    icon: ChartPie,
     title: "Categories",
     url: "/home/category",
-    icon: ChartPie,
   },
   {
+    icon: Users,
     title: "Friends",
     url: "/home/friends",
-    icon: Users,
   },
   {
+    icon: History,
     title: "History",
     url: "/home/history",
-    icon: History,
   },
   {
+    icon: Settings,
     title: "Settings",
     url: "/home/settings",
-    icon: Settings,
   },
 ] as const;
 
@@ -143,9 +143,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NowasterLogo href="/home" />
         {pref !== "permanent" && (
           <Button
-            variant="ghost"
             className="hover:bg-accent p-0 m-0 aspect-square"
             onClick={toggleSidebar}
+            variant="ghost"
           >
             <X />
           </Button>
@@ -165,9 +165,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <DialogTrigger asChild>
                   <Button
-                    variant="outline"
-                    size="sm"
                     className="justify-start gap-2 bg-transparent"
+                    size="sm"
+                    variant="outline"
                   >
                     <Plus className="h-4 w-4" />
                     Quick Log
@@ -191,17 +191,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {navItems.map((item) => (
                 <SidebarMenuItem
                   key={item.title}
-                  onClick={() => handleLinkClick(item.url)}
+                  onClick={() => { handleLinkClick(item.url); }}
                 >
                   <SidebarMenuButton asChild>
                     <Link
-                      href={item.url}
                       className={cn(
                         "flex items-center gap-2",
                         currentLink === item.url && "bg-accent",
                         currentLink !== item.url &&
                           "hover:bg-sidebar-accent/50",
                       )}
+                      href={item.url}
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -221,24 +221,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 .slice(0, SHOW_CATEGORY_AMOUNT)
                 .map((category) => (
                   <Link
-                    onClick={() =>
-                      handleLinkClick("/home/category/" + category.id)
-                    }
-                    href={"/home/category/" + category.id}
-                    key={category.id}
                     className={cn(
                       "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
-                      currentLink === "/home/category/" + category.id &&
+                      currentLink === `/home/category/${  category.id}` &&
                         "bg-accent",
-                      currentLink !== "/home/category/" + category.id &&
+                      currentLink !== `/home/category/${  category.id}` &&
                         "hover:bg-sidebar-accent/50",
                     )}
+                    href={`/home/category/${  category.id}`}
+                    key={category.id}
+                    onClick={() =>
+                      { handleLinkClick(`/home/category/${  category.id}`); }
+                    }
                   >
                     <CategoryBadge
                       color={category.color}
                       name={category.name}
                     />
-                    <Badge variant="outline" className="text-xs">
+                    <Badge className="text-xs" variant="outline">
                       {category.sessionCount}
                     </Badge>
                   </Link>
@@ -246,7 +246,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {sortedCategories.length > SHOW_CATEGORY_AMOUNT && (
                 <Link
                   href={"/home/category"}
-                  onClick={() => handleLinkClick("/home/category/")}
+                  onClick={() => { handleLinkClick("/home/category/"); }}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
@@ -266,18 +266,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="space-y-2 px-2">
               {sortedTags.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
                 <Link
-                  onClick={() => handleLinkClick("/home/tags/" + tag.id)}
-                  href={"/home/tags/" + tag.id}
-                  key={tag.id}
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
-                    currentLink === "/home/tags/" + tag.id && "bg-accent",
-                    currentLink !== "/home/tags/" + tag.id &&
+                    currentLink === `/home/tags/${  tag.id}` && "bg-accent",
+                    currentLink !== `/home/tags/${  tag.id}` &&
                       "hover:bg-sidebar-accent/50",
                   )}
+                  href={`/home/tags/${  tag.id}`}
+                  key={tag.id}
+                  onClick={() => { handleLinkClick(`/home/tags/${  tag.id}`); }}
                 >
-                  <TagBadge variant="auto" tag={tag} />
-                  <Badge variant="outline" className="text-xs">
+                  <TagBadge tag={tag} variant="auto" />
+                  <Badge className="text-xs" variant="outline">
                     {tag.usages}
                   </Badge>
                 </Link>
@@ -285,7 +285,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {sortedTags.length > SHOW_TAG_AMOUNT && (
                 <Link
                   href={"/home/tags"}
-                  onClick={() => handleLinkClick("/home/tags/")}
+                  onClick={() => { handleLinkClick("/home/tags/"); }}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">

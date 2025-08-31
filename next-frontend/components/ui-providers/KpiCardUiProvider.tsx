@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
-import { VariantProps, cva } from "class-variance-authority";
+import type { ReactNode } from "react";
+import type { VariantProps} from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import {
@@ -13,26 +14,26 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { Frown } from "lucide-react";
 
 export type KpiCardUiProviderProps<T extends ReactNode> = {
-  title: string;
-  description?: React.ReactNode;
   children?: React.ReactNode;
-  loading?: boolean;
-  value?: T;
+  description?: React.ReactNode;
   error?: boolean;
-  mapper?: (value: T) => string | number;
+  loading?: boolean;
+  mapper?: (value: T) => number | string;
+  title: string;
+  value?: T;
 } & VariantProps<typeof cardVariants>;
 
 const cardVariants = cva(
   "font-bold group-hover:scale-y-125 group-hover:text-pink-300 group-hover:transition",
   {
-    variants: {
-      variant: {
-        default: "text-2xl ",
-        big_value: "flex text-7xl grow items-center justify-center",
-      },
-    },
     defaultVariants: {
       variant: "default",
+    },
+    variants: {
+      variant: {
+        big_value: "flex text-7xl grow items-center justify-center",
+        default: "text-2xl ",
+      },
     },
   },
 );
@@ -52,7 +53,7 @@ export function KpiCardUiProvider<T extends ReactNode>(
           <Frown className="text-red-500 grow" />
         ) : props.loading ? (
           <Skeleton className="w-full h-full min-h-20" />
-        ) : props.mapper && props.value != undefined ? (
+        ) : props.mapper && props.value !== undefined ? (
           (props.mapper(props.value) as React.ReactNode)
         ) : (
           props.value

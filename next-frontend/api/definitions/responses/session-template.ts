@@ -18,8 +18,8 @@ export type SessionTemplateResponse = {
 
 export const SessionTemplateResponseSchema = {
   create,
-  update,
-  readMany,
-  deleteTemplate,
   deleteRecurringSession,
+  deleteTemplate,
+  readMany,
+  update,
 } as const;

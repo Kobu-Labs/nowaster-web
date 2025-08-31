@@ -2,12 +2,12 @@ import { ReadFeedEventSchema, ReadFeedSubscriptionSchema } from "@/api/definitio
 import { z } from "zod";
 
 export const FeedResponseSchema = {
-  getFeed: z.array(ReadFeedEventSchema),
   addReaction: z.null(),
-  removeReaction: z.null(),
+  getFeed: z.array(ReadFeedEventSchema),
   getSubscriptions: z.array(ReadFeedSubscriptionSchema),
-  updateSubscription: z.null(),
+  removeReaction: z.null(),
   unsubscribe: z.null(),
+  updateSubscription: z.null(),
 };
 
 export type FeedResponse = {

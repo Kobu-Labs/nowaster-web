@@ -1,14 +1,14 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { Button } from "@/components/shadcn/button";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { Separator } from "@/components/shadcn/separator";
 import { cn, toggleOrientation, zeroPad } from "@/lib/utils";
 
-export type DailyIntervalPickerProps = {
+export interface DailyIntervalPickerProps {
   onSelect: (value: { day: number; hours: number; minutes: number }) => void;
-  selected?: { day: number; hours: number; minutes: number };
   orientation?: "horizontal" | "vertical";
-};
+  selected?: { day: number; hours: number; minutes: number };
+}
 
 export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -36,18 +36,18 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
           <Separator orientation={toggleOrientation(orientation)} />
           {hours.map((hour) => (
             <Button
-              key={hour}
-              size="icon"
-              type="button"
               className="shrink-0 aspect-square text-muted-foreground hover:text-white"
-              variant={props.selected?.hours === hour ? "default" : "ghost"}
+              key={hour}
               onClick={() =>
-                props.onSelect({
+                { props.onSelect({
+                  day: props.selected?.day ?? 0,
                   hours: hour,
                   minutes: props.selected?.minutes ?? 0,
-                  day: props.selected?.day ?? 0,
-                })
+                }); }
               }
+              size="icon"
+              type="button"
+              variant={props.selected?.hours === hour ? "default" : "ghost"}
             >
               {zeroPad(hour)}
             </Button>
@@ -67,18 +67,18 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
           <Separator orientation={toggleOrientation(orientation)} />
           {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
             <Button
+              className="shrink-0 aspect-square text-muted-foreground hover:text-white"
               key={minute}
+              onClick={() =>
+                { props.onSelect({
+                  day: props.selected?.day ?? 0,
+                  hours: props.selected?.hours ?? 0,
+                  minutes: minute,
+                }); }
+              }
               size="icon"
               type="button"
-              className="shrink-0 aspect-square text-muted-foreground hover:text-white"
               variant={props.selected?.minutes === minute ? "default" : "ghost"}
-              onClick={() =>
-                props.onSelect({
-                  minutes: minute,
-                  hours: props.selected?.hours ?? 0,
-                  day: props.selected?.day ?? 0,
-                })
-              }
             >
               {minute.toString().padStart(2, "0")}
             </Button>

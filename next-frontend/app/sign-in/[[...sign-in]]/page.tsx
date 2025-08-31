@@ -21,8 +21,8 @@ type IconProps = React.HTMLAttributes<SVGElement>;
 const GoogleIcon = (props: IconProps) => (
   <svg role="img" viewBox="0 0 24 24" {...props}>
     <path
-      fill="currentColor"
       d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+      fill="currentColor"
     />
   </svg>
 );
@@ -38,11 +38,11 @@ export default function SignInPage() {
               <div className="text-center">
                 <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full shadow-lg">
                   <Image
-                    src="/logo.png"
                     alt="Nowaster Logo"
                     className="h-12 w-12"
-                    width={48}
                     height={48}
+                    src="/logo.png"
+                    width={48}
                   />
                 </div>
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -80,11 +80,11 @@ export default function SignInPage() {
                         <div className="mb-8 lg:hidden text-center">
                           <div className="mx-auto mb-4 gap-2 flex h-16 w-16 items-center justify-center rounded-full">
                             <Image
-                              src="/logo.png"
                               alt="Nowaster Logo"
                               className="h-10 w-10"
-                              width={40}
                               height={40}
+                              src="/logo.png"
+                              width={40}
                             />
                             <span className="font-bold text-2xl">Nowaster</span>
                           </div>
@@ -101,12 +101,12 @@ export default function SignInPage() {
                           </CardHeader>
                           <CardContent className="space-y-4">
                             <div className="grid gap-3">
-                              <Clerk.Connection name="github" asChild>
+                              <Clerk.Connection asChild name="github">
                                 <Button
-                                  variant="outline"
-                                  type="button"
-                                  disabled={isGlobalLoading}
                                   className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                                  disabled={isGlobalLoading}
+                                  type="button"
+                                  variant="outline"
                                 >
                                   <Clerk.Loading scope="provider:github">
                                     {(isLoading) =>
@@ -123,12 +123,12 @@ export default function SignInPage() {
                                 </Button>
                               </Clerk.Connection>
 
-                              <Clerk.Connection name="discord" asChild>
+                              <Clerk.Connection asChild name="discord">
                                 <Button
-                                  variant="outline"
-                                  type="button"
-                                  disabled={isGlobalLoading}
                                   className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                                  disabled={isGlobalLoading}
+                                  type="button"
+                                  variant="outline"
                                 >
                                   <Clerk.Loading scope="provider:discord">
                                     {(isLoading) =>
@@ -145,12 +145,12 @@ export default function SignInPage() {
                                 </Button>
                               </Clerk.Connection>
 
-                              <Clerk.Connection name="google" asChild>
+                              <Clerk.Connection asChild name="google">
                                 <Button
-                                  variant="outline"
-                                  type="button"
-                                  disabled={isGlobalLoading}
                                   className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                                  disabled={isGlobalLoading}
+                                  type="button"
+                                  variant="outline"
                                 >
                                   <Clerk.Loading scope="provider:google">
                                     {(isLoading) =>
@@ -173,8 +173,8 @@ export default function SignInPage() {
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Don&apos;t have an account?{" "}
                                 <Clerk.Link
-                                  navigate="sign-up"
                                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                                  navigate="sign-up"
                                 >
                                   Sign up for free
                                 </Clerk.Link>

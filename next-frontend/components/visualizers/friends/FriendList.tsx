@@ -25,7 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/shadcn/alert-dialog";
-import { Search, MoreHorizontal, UserMinus } from "lucide-react";
+import { MoreHorizontal, Search, UserMinus } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FriendsApi } from "@/api";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -36,13 +36,13 @@ import { getInitials } from "@/lib/utils";
 export const FriendsList = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [friendToRemove, setFriendToRemove] = useState<string | null>(null);
+  const [friendToRemove, setFriendToRemove] = useState<null | string>(null);
 
   const query = useMyFriends();
 
   const mutation = useMutation({
     mutationFn: async (friendship_id: string) => {
-      return await FriendsApi.remove({ friendship_id: friendship_id });
+      return await FriendsApi.remove({ friendship_id });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["friends", "my"] });
@@ -62,26 +62,22 @@ export const FriendsList = () => {
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          type="search"
-          placeholder="Search friends..."
           className="pl-8"
+          onChange={(e) => { setSearchQuery(e.target.value); }}
+          placeholder="Search friends..."
+          type="search"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {!query.isSuccess ? (
-        <div className="flex items-center justify-center py-10">
-          <Skeleton className="w-full h-32" />
-        </div>
-      ) : filteredFriends.length === 0 ? (
+      {query.isSuccess ? (filteredFriends.length === 0 ? (
         <div className="text-center gap-10 flex flex-col items-center justify-center">
           <p className="text-muted-foreground">No friends found :(</p>
           <Image
-            src={"/forever-alone.png"}
             alt={""}
-            width={200}
             height={200}
+            src={"/forever-alone.png"}
+            width={200}
           ></Image>
         </div>
       ) : (
@@ -94,8 +90,8 @@ export const FriendsList = () => {
                     <div className="relative">
                       <Avatar>
                         <AvatarImage
-                          src={friendship.friend.avatar_url ?? undefined}
                           alt={friendship.friend.username}
+                          src={friendship.friend.avatar_url ?? undefined}
                         />
                         <AvatarFallback>
                           {getInitials(friendship.friend.username)}
@@ -118,7 +114,7 @@ export const FriendsList = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
-                          onClick={() => setFriendToRemove(friendship.id)}
+                          onClick={() => { setFriendToRemove(friendship.id); }}
                         >
                           <UserMinus className="mr-2 h-4 w-4" />
                           Remove Friend
@@ -131,11 +127,15 @@ export const FriendsList = () => {
             </Card>
           ))}
         </div>
+      )) : (
+        <div className="flex items-center justify-center py-10">
+          <Skeleton className="w-full h-32" />
+        </div>
       )}
 
       <AlertDialog
-        open={!!friendToRemove}
         onOpenChange={(open) => !open && setFriendToRemove(null)}
+        open={!!friendToRemove}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -148,8 +148,8 @@ export const FriendsList = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => mutation.mutate(friendToRemove!)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { mutation.mutate(friendToRemove!); }}
             >
               Remove
             </AlertDialogAction>

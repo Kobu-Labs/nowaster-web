@@ -5,28 +5,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "components/shadcn/popover";
-import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
+import type { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { Card } from "@/components/shadcn/card";
+import type {
+  DailyIntervalPickerProps} from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import {
-  DailyIntervalPicker,
-  DailyIntervalPickerProps,
+  DailyIntervalPicker
 } from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import {
   WeeklyIntervalPicker,
-  WeeklyIntervalPickerProps,
 } from "@/components/ui-providers/date-pickers/interval/WeeklyIntervalPicker";
-import { FC } from "react";
+import type { FC } from "react";
 import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { formatIntervalPickerLabel } from "@/lib/date-utils";
 
-type IntervalBasedPickerProps = {
+interface IntervalBasedPickerProps {
   interval: RecurringSessionInterval;
   onSelect: (value: { day: number; hours: number; minutes: number }) => void;
-  selected?: { day: number; hours: number; minutes: number };
   orientation?: "horizontal" | "vertical";
-};
+  selected?: { day: number; hours: number; minutes: number };
+}
 
 const intervalToPicker = {
   daily: (props: DailyIntervalPickerProps) => (
@@ -34,10 +34,8 @@ const intervalToPicker = {
       <DailyIntervalPicker {...props} />
     </Card>
   ),
-  weekly: (props: WeeklyIntervalPickerProps) => (
-    <WeeklyIntervalPicker {...props} />
-  ),
-} satisfies { [Key in RecurringSessionInterval]: FC<any> };
+  weekly: WeeklyIntervalPicker 
+} satisfies Record<RecurringSessionInterval, FC<any>>;
 
 export const IntervalBasedPicker: FC<IntervalBasedPickerProps> = (props) => {
   const Component = intervalToPicker[props.interval];
@@ -45,9 +43,9 @@ export const IntervalBasedPicker: FC<IntervalBasedPickerProps> = (props) => {
     <Popover modal={false}>
       <PopoverTrigger className="p-1">
         <Button
+          className={cn("w-[240px] justify-start text-left font-normal")}
           type="button"
           variant={"outline"}
-          className={cn("w-[240px] justify-start text-left font-normal")}
         >
           <CalendarIcon className="mr-2 size-4" />
           <span>

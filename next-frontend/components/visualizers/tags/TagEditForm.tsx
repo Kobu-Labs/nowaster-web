@@ -1,4 +1,4 @@
-import { CategoryWithId, TagDetails } from "@/api/definitions";
+import type { CategoryWithId, TagDetails } from "@/api/definitions";
 import {
   Tooltip,
   TooltipContent,
@@ -19,7 +19,8 @@ import {
 } from "@/components/shadcn/alert-dialog";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FC, useState } from "react";
+import type { FC } from "react";
+import { useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import {
   Card,
@@ -39,12 +40,13 @@ import { tagColors } from "@/state/tags";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useUpdateTag } from "@/components/hooks/tag/useUpdateTag";
 import { useAtomValue } from "jotai";
+import { Label } from "@/components/shadcn/label";
 
-type TagEditFormProps = {
-  tag: TagDetails;
-  onEdit: (tag: TagDetails) => void;
+interface TagEditFormProps {
   onDelete: () => void;
-};
+  onEdit: (tag: TagDetails) => void;
+  tag: TagDetails;
+}
 
 export const TagEditForm: FC<TagEditFormProps> = (props) => {
   const [newTagName, setNewTagName] = useState(props.tag.label);
@@ -72,31 +74,31 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
     mutationFn: async () => {
       return await TagApi.deleteTag({ id: props.tag.id });
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
-      toast({
-        title: "Tag deleted",
-        description: (
-          <div className="flex items-center gap-2">
-            <TagBadge
-              variant="manual"
-              value={props.tag.label}
-              colors={props.tag.color}
-            />
-            deleted successfully!
-          </div>
-        ),
-        variant: "default",
-      });
-    },
     onError: (error) => {
       toast({
-        title: "Error deleting tag",
         description: error.message,
+        title: "Error deleting tag",
         variant: "destructive",
       });
     },
     onSettled: props.onDelete,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
+      toast({
+        description: (
+          <div className="flex items-center gap-2">
+            <TagBadge
+              colors={props.tag.color}
+              value={props.tag.label}
+              variant="manual"
+            />
+            deleted successfully!
+          </div>
+        ),
+        title: "Tag deleted",
+        variant: "default",
+      });
+    },
   });
 
   const saveMutation = useUpdateTag();
@@ -108,41 +110,43 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
           <CardTitle className="font-mono flex items-center gap-2">
             Edit
             <TagBadge
-              value={props.tag.label}
               colors={newColor}
+              value={props.tag.label}
               variant="manual"
             />
           </CardTitle>
         </CardHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label
-              htmlFor="tagName"
+            <Label
               className="text-sm font-medium text-gray-300"
+              htmlFor="tagName"
             >
               Tag Name
-            </label>
+            </Label>
             <div className="flex items-center gap-4">
               <Input
-                id="tagName"
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="Enter tag name"
                 className="w-48"
+                id="tagName"
+                onChange={(e) => {
+                  setNewTagName(e.target.value);
+                }}
+                placeholder="Enter tag name"
+                value={newTagName}
               />
               {newTagName.length > 0 && (
                 <TagBadge
-                  value={newTagName}
                   colors={newColor}
+                  value={newTagName}
                   variant="manual"
                 />
               )}
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
+            <Label className="text-sm font-medium text-gray-300">
               Tag Color
-            </label>
+            </Label>
             <div className="flex flex-wrap gap-2">
               <ColorPicker onSelect={setNewColor} value={newColor} />
             </div>
@@ -150,9 +154,12 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
           <div className="space-y-2">
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-300">
+                <Label
+                  className="text-sm font-medium text-gray-300"
+                  htmlFor="categoryPicker"
+                >
                   Allowed Categories
-                </label>
+                </Label>
                 <TooltipProvider delayDuration={250}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -161,12 +168,12 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                     <TooltipContent className="text-nowrap">
                       Read more about category specific tags on our{" "}
                       <Link
-                        rel="noopener noreferrer"
-                        target="_blank"
                         className="text-nowrap underline hover:text-blue-500"
                         href={
                           "https://github.com/Kobu-Labs/nowaster-web/wiki/Category-specific-tags"
                         }
+                        rel="noopener noreferrer"
+                        target="_blank"
                       >
                         wiki
                       </Link>
@@ -174,7 +181,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="grow-0 max-w-64">
+              <div className="grow-0 max-w-64" id="categoryPicker">
                 <CategoryPicker
                   mode="multiple"
                   onSelectCategory={handleSelectCategory}
@@ -189,8 +196,8 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
-                variant="destructive"
                 loading={deleteTagMutation.isPending}
+                variant="destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
@@ -205,28 +212,32 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => deleteTagMutation.mutate()}>
+                <AlertDialogAction
+                  onClick={() => {
+                    deleteTagMutation.mutate();
+                  }}
+                >
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
           <Button
-            loading={saveMutation.isPending}
             disabled={newTagName.length === 0}
-            onClick={() =>
+            loading={saveMutation.isPending}
+            onClick={() => {
               saveMutation.mutate(
                 {
-                  id: props.tag.id,
-                  label: newTagName,
                   allowedCategories: selectedCategories,
                   color: newColor,
+                  id: props.tag.id,
+                  label: newTagName,
                 },
                 {
                   onSuccess: props.onEdit,
                 },
-              )
-            }
+              );
+            }}
           >
             <Save className="mr-2 h-4 w-4" /> Save
           </Button>

@@ -7,11 +7,12 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { StopwatchApi } from "@/api";
+import type {
+  StopwatchSessionRequest,
+  StopwatchSessionWithId} from "@/api/definitions";
 import {
   CategoryWithIdSchema,
   ScheduledSessionRequestSchema,
-  StopwatchSessionRequest,
-  StopwatchSessionWithId,
   TagWithIdSchema,
 } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
@@ -36,15 +37,16 @@ import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { differenceInSeconds, isAfter, isBefore } from "date-fns";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const updateSessionPrecursor = z.object({
-  id: z.string().uuid(),
-  startTime: z.coerce.date<Date>().nullish(),
   category: CategoryWithIdSchema.nullish(),
   description: z.string().nullish(),
+  id: z.uuid(),
+  startTime: z.coerce.date<Date>().nullish(),
   tags: z.array(TagWithIdSchema).nullish(),
 });
 
@@ -62,29 +64,29 @@ const formatTimeDifference = (seconds: number) => {
 };
 
 interface FormComponentProps {
+  onDelete?: () => void;
   onSubmit?: () => void;
   session: StopwatchSessionWithId;
-  onDelete?: () => void;
 }
 
 export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
   const form = useForm({
-    resolver: zodResolver(updateSessionPrecursor),
     defaultValues: {
-      id: props.session.id,
-      startTime: props.session.startTime,
       category: props.session.category,
       description: props.session.description,
+      id: props.session.id,
+      startTime: props.session.startTime,
       tags: props.session.tags ?? [],
     },
+    resolver: zodResolver(updateSessionPrecursor),
   });
 
   const [endTime, setEndTime] = useState<Date | undefined>(new Date());
   const convertedSession = ScheduledSessionRequestSchema.create.safeParse({
-    startTime: form.watch("startTime"),
-    endTime: endTime,
     category_id: form.watch("category.id"),
     description: form.watch("description"),
+    endTime,
+    startTime: form.watch("startTime"),
     tag_ids: form.watch("tags")?.map((tag) => tag.id),
   }).data;
 
@@ -97,10 +99,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
     values: z.infer<typeof updateSessionPrecursor>,
   ) => {
     const updateData: StopwatchSessionRequest["update"] = {
-      id: values.id,
-      startTime: values.startTime,
       category_id: values.category?.id,
       description: values.description,
+      id: values.id,
+      startTime: values.startTime,
       tag_ids: values.tags?.map((tag) => tag.id),
     };
 
@@ -116,8 +118,8 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       <CardContent className="mt-3">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onUpdateSession)}
             className="space-y-8"
+            onSubmit={form.handleSubmit(onUpdateSession)}
           >
             <FormField
               control={form.control}
@@ -128,8 +130,8 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                   <FormControl>
                     <CategoryPicker
                       mode="single"
-                      selectedCategory={field.value ?? null}
                       onSelectCategory={field.onChange}
+                      selectedCategory={field.value ?? null}
                     />
                   </FormControl>
                   <FormMessage />
@@ -145,9 +147,9 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Input
+                      onChange={field.onChange}
                       placeholder="Insert your description"
                       value={field.value ?? ""}
-                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -157,8 +159,8 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
 
             <div className="flex items-center gap-4">
               <FormField
-                name="startTime"
                 control={form.control}
+                name="startTime"
                 render={({ field }) => {
                   const value = form.watch("startTime");
 
@@ -172,22 +174,20 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                       </FormLabel>
                       <FormControl>
                         <DateTimePicker
-                          quickOptions={dateQuickOptions}
-                          selected={value ?? undefined}
                           onSelect={(val) => {
-                            if (val) {
-                              if (val && isBefore(new Date(), val)) {
+                            if (val && val && isBefore(new Date(), val)) {
                                 form.setError("startTime", {
                                   message:
                                     "Cannot set start time in the future",
                                 });
                                 return;
                               }
-                            }
 
                             field.onChange(val);
                             form.clearErrors("startTime");
                           }}
+                          quickOptions={dateQuickOptions}
+                          selected={value ?? undefined}
                         />
                       </FormControl>
                       <FormMessage />
@@ -201,32 +201,32 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 </FormLabel>
 
                 <DateTimePicker
+                  onSelect={setEndTime}
                   quickOptions={dateQuickOptions}
                   selected={endTime}
-                  onSelect={setEndTime}
                 />
               </FormItem>
             </div>
 
             <FormField
-              name="tags"
               control={form.control}
+              name="tags"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
+                      disabled={form.getValues("category") === undefined}
+                      forCategory={form.watch("category") ?? undefined}
+                      onNewTagsSelected={(tags) => { field.onChange(tags); }}
                       selectedTags={
                         field.value?.map((t) => ({
                           ...t,
-                          usages: 0,
                           allowedCategories: [],
                           last_used_at: new Date(),
+                          usages: 0,
                         })) ?? []
                       }
-                      forCategory={form.watch("category") ?? undefined}
-                      disabled={form.getValues("category") === undefined}
-                      onNewTagsSelected={(tags) => field.onChange(tags)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -237,14 +237,14 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
               <div className="flex gap-2 items-center">
                 <Button
                   loading={deleteSessionMutation.isPending}
-                  type="button"
-                  variant="destructive"
                   onClick={() =>
-                    deleteSessionMutation.mutate(
+                    { deleteSessionMutation.mutate(
                       { id: props.session.id },
                       { onSuccess: props.onDelete },
-                    )
+                    ); }
                   }
+                  type="button"
+                  variant="destructive"
                 >
                   Delete
                 </Button>
@@ -253,10 +253,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
+                      disabled={!form.formState.isDirty}
+                      loading={updateSession.isPending}
                       type="submit"
                       variant="outline"
-                      loading={updateSession.isPending}
-                      disabled={!form.formState.isDirty}
                     >
                       Update
                     </Button>
@@ -269,16 +269,15 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      type="button"
-                      loading={createSession.isPending}
                       disabled={!convertedSession}
+                      loading={createSession.isPending}
                       onClick={async () => {
                         if (convertedSession) {
                           // TODO: this needs to be extracted
                           await StopwatchApi.remove({ id: props.session.id });
 
                           await createSession.mutateAsync(convertedSession, {
-                            /* eslint-disable @typescript-eslint/no-misused-promises */
+                             
                             onSuccess: async () => {
                               await queryClient.invalidateQueries({
                                 queryKey: queryKeys.sessions.active._def,
@@ -291,6 +290,7 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                           });
                         }
                       }}
+                      type="button"
                     >
                       Finish
                     </Button>

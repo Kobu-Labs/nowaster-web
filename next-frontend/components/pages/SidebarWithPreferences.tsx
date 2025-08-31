@@ -17,14 +17,14 @@ export const SidebarWithPreferences: React.FC<SidebarWithPreferencesProps> = ({
 
   return (
     <SidebarProvider
-      defaultOpen={false}
       className="flex flex-col [--header-height:3.5rem] p-0"
+      defaultOpen={false}
     >
       <HomeHeader />
       <div className="flex w-full">
         <AppSidebar
-          variant={sidebarBehavior === "floating" ? "floating" : "sidebar"}
           collapsible={sidebarBehavior === "permanent" ? "none" : "offcanvas"}
+          variant={sidebarBehavior === "floating" ? "floating" : "sidebar"}
         />
         {children}
       </div>

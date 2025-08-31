@@ -5,31 +5,31 @@ import { z } from "zod";
 export const EventTypeSchema = z.enum(["session_completed", "session_started"]);
 
 export const ReadUserAvatarSchema = z.object({
+  avatar_url: z.string().nullable(),
   id: z.string(),
   username: z.string(),
-  avatar_url: z.string().nullable(),
 });
 
 export const ReadFeedReactionSchema = z.object({
-  id: z.string().uuid(),
-  user: ReadUserAvatarSchema,
-  emoji: z.string(),
   created_at: z.coerce.date<Date>(),
+  emoji: z.string(),
+  id: z.uuid(),
+  user: ReadUserAvatarSchema,
 });
 
 export const SessionCompletedEventSchema = z.object({
-  session_id: z.string(),
   category: CategoryWithIdSchema.omit({ last_used_at: true }),
-  tags: z.array(TagWithIdSchema),
   description: z.string().nullish(),
-  start_time: z.coerce.date<Date>(),
   end_time: z.coerce.date<Date>(),
+  session_id: z.string(),
+  start_time: z.coerce.date<Date>(),
+  tags: z.array(TagWithIdSchema),
 });
 
 export const SourceTypeMappingSchema = z.discriminatedUnion("source_type", [
   z.object({
-    source_type: z.literal("user"),
     source_data: ReadUserAvatarSchema,
+    source_type: z.literal("user"),
   }),
   z.object({
     source_data: z.number(),
@@ -39,8 +39,8 @@ export const SourceTypeMappingSchema = z.discriminatedUnion("source_type", [
 
 export const EventTypeMappingSchema = z.discriminatedUnion("event_type", [
   z.object({
-    event_type: z.literal("session_completed"),
     event_data: SessionCompletedEventSchema,
+    event_type: z.literal("session_completed"),
   }),
   z.object({
     event_data: z.number(),
@@ -50,33 +50,33 @@ export const EventTypeMappingSchema = z.discriminatedUnion("event_type", [
 
 export const ReadFeedEventSchema = z
   .object({
-    id: z.string().uuid(),
     created_at: z.coerce.date<Date>(),
+    id: z.uuid(),
     reactions: z.array(ReadFeedReactionSchema),
   })
   .and(EventTypeMappingSchema.and(SourceTypeMappingSchema));
 
 export const ReadFeedSubscriptionSchema = z
   .object({
-    id: z.string().uuid(),
+    created_at: z.coerce.date<Date>(),
+    id: z.uuid(),
     is_muted: z.boolean(),
     is_paused: z.boolean(),
-    created_at: z.coerce.date<Date>(),
   })
   .and(SourceTypeMappingSchema);
 
 export const UpdateFeedSubscriptionSchema = z.object({
-  subscription_id: z.string().uuid(),
   is_muted: z.boolean().optional(),
   is_paused: z.boolean().optional(),
+  subscription_id: z.uuid(),
 });
 
 export type EventTypeMapping = z.infer<typeof EventTypeMappingSchema>;
 export type FeedEventType = z.infer<typeof EventTypeSchema>;
-export type ReadUserAvatar = z.infer<typeof ReadUserAvatarSchema>;
-export type ReadFeedReaction = z.infer<typeof ReadFeedReactionSchema>;
 export type ReadFeedEvent = z.infer<typeof ReadFeedEventSchema>;
+export type ReadFeedReaction = z.infer<typeof ReadFeedReactionSchema>;
 export type ReadFeedSubscription = z.infer<typeof ReadFeedSubscriptionSchema>;
+export type ReadUserAvatar = z.infer<typeof ReadUserAvatarSchema>;
 export type UpdateFeedSubscription = z.infer<
   typeof UpdateFeedSubscriptionSchema
 >;

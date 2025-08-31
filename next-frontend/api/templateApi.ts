@@ -1,5 +1,5 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
-import { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
+import type { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
 import { SessionTemplateResponseSchema } from "@/api/definitions/responses/session-template";
 
 const BASE_URL = "/session/template";

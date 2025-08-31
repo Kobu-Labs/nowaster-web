@@ -19,8 +19,8 @@ export const getColors = async () => {
   return await parseResponseUnsafe(
     data,
     z.object({
-      tag_colors: z.array(z.tuple([z.string(), z.string()])),
       category_colors: z.array(z.tuple([z.string(), z.string()])),
+      tag_colors: z.array(z.tuple([z.string(), z.string()])),
     }),
   );
 };

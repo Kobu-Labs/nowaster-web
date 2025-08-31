@@ -14,10 +14,10 @@ export const SiteFooter = () => {
         </div>
         <Button className="flex items-center gap-4" variant="link">
           <Link
+            className="flex items-center gap-1 text-sm font-medium"
+            href="https://github.com/Kobu-Labs/nowaster-web"
             rel="noopener noreferrer"
             target="_blank"
-            href="https://github.com/Kobu-Labs/nowaster-web"
-            className="flex items-center gap-1 text-sm font-medium"
           >
             <Github className="h-4 w-4" />
             <span>GitHub</span>

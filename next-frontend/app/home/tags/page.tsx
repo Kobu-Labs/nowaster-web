@@ -1,6 +1,6 @@
 "use client";
 
-import { TagWithId } from "@/api/definitions";
+import type { TagWithId } from "@/api/definitions";
 import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 import { useDeleteTag } from "@/components/hooks/tag/useDeleteTag";
 import { useTags } from "@/components/hooks/tag/useTags";
@@ -63,8 +63,8 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-type SortOption = "name" | "usages" | "recent";
 type SortDirection = "asc" | "desc";
+type SortOption = "name" | "recent" | "usages";
 
 export default function TagsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +72,7 @@ export default function TagsPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingTag, setEditingTag] = useState<TagWithId | null>(null);
+  const [editingTag, setEditingTag] = useState<null | TagWithId>(null);
   const [newTagLabel, setNewTagLabel] = useState("");
   const [newTagColor, setNewTagColor] = useState(randomColor());
 
@@ -83,7 +83,7 @@ export default function TagsPage() {
   const deleteTag = useDeleteTag();
 
   const filteredAndSortedTags = useMemo(() => {
-    if (!tagsQuery.data) return [];
+    if (!tagsQuery.data) {return [];}
 
     const filtered = tagsQuery.data.filter((tag) =>
       tag.label.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -93,15 +93,18 @@ export default function TagsPage() {
       let comparison = 0;
 
       switch (sortBy) {
-      case "name":
+      case "name": {
         comparison = a.label.localeCompare(b.label);
         break;
-      case "usages":
-        comparison = a.usages - b.usages;
-        break;
-      case "recent":
+      }
+      case "recent": {
         comparison = 0;
         break;
+      }
+      case "usages": {
+        comparison = a.usages - b.usages;
+        break;
+      }
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -112,9 +115,9 @@ export default function TagsPage() {
     if (newTagLabel.trim()) {
       createTag.mutate(
         {
-          label: newTagLabel.trim(),
-          color: newTagColor,
           allowedCategories: [],
+          color: newTagColor,
+          label: newTagLabel.trim(),
         },
         {
           onSuccess: () => {
@@ -131,9 +134,9 @@ export default function TagsPage() {
     if (editingTag && newTagLabel.trim()) {
       updateTag.mutate(
         {
+          color: newTagColor,
           id: editingTag.id,
           label: newTagLabel.trim(),
-          color: newTagColor,
         },
         {
           onSuccess: () => {
@@ -182,7 +185,7 @@ export default function TagsPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton className="h-32" key={i} />
           ))}
         </div>
       </div>
@@ -223,9 +226,9 @@ export default function TagsPage() {
         </div>
 
         <Dialog
-          open={showCreateDialog}
-          onOpenChange={setShowCreateDialog}
           modal={false}
+          onOpenChange={setShowCreateDialog}
+          open={showCreateDialog}
         >
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -233,7 +236,7 @@ export default function TagsPage() {
               New Tag
             </Button>
           </DialogTrigger>
-          <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+          <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
             <DialogHeader>
               <DialogTitle>Create New Tag</DialogTitle>
               <DialogDescription>
@@ -245,13 +248,13 @@ export default function TagsPage() {
                 <Label htmlFor="label">Label</Label>
                 <Input
                   id="label"
-                  value={newTagLabel}
-                  onChange={(e) => setNewTagLabel(e.target.value)}
+                  onChange={(e) => { setNewTagLabel(e.target.value); }}
                   placeholder="Tag label..."
+                  value={newTagLabel}
                 />
               </div>
               <div>
-                <Label htmlFor="color" className="mr-2">
+                <Label className="mr-2" htmlFor="color">
                   Color
                 </Label>
                 <ColorPicker
@@ -262,14 +265,14 @@ export default function TagsPage() {
             </div>
             <DialogFooter>
               <Button
+                onClick={() => { setShowCreateDialog(false); }}
                 variant="outline"
-                onClick={() => setShowCreateDialog(false)}
               >
                 Cancel
               </Button>
               <Button
-                onClick={handleCreateTag}
                 disabled={!newTagLabel.trim() || createTag.isPending}
+                onClick={handleCreateTag}
               >
                 {createTag.isPending ? "Creating..." : "Create"}
               </Button>
@@ -329,19 +332,19 @@ export default function TagsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
+            className="pl-10"
+            onChange={(e) => { setSearchQuery(e.target.value); }}
             placeholder="Search tags..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
           />
         </div>
 
         <div className="flex gap-2">
           <Button
-            variant={sortBy === "name" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("name")}
             className="flex items-center gap-1"
+            onClick={() => { toggleSort("name"); }}
+            size="sm"
+            variant={sortBy === "name" ? "default" : "outline"}
           >
             Name
             {sortBy === "name" &&
@@ -353,10 +356,10 @@ export default function TagsPage() {
           </Button>
 
           <Button
-            variant={sortBy === "usages" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("usages")}
             className="flex items-center gap-1"
+            onClick={() => { toggleSort("usages"); }}
+            size="sm"
+            variant={sortBy === "usages" ? "default" : "outline"}
           >
             Usages
             {sortBy === "usages" &&
@@ -372,31 +375,31 @@ export default function TagsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {filteredAndSortedTags.map((tag) => (
           <Card
-            key={tag.id}
             className="group hover:shadow-md transition-shadow"
+            key={tag.id}
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <TagBadge tag={tag} variant="auto" />
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Button className="h-6 w-6 p-0" size="sm" variant="ghost">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/home/tags/${tag.id}`}
                         className="flex items-center gap-2 cursor-pointer"
+                        href={`/home/tags/${tag.id}`}
                       >
                         <Eye className="h-4 w-4" />
                         View Details
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => openEditDialog(tag)}
                       className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => { openEditDialog(tag); }}
                     >
                       <Edit className="h-4 w-4" />
                       Edit Tag
@@ -404,8 +407,8 @@ export default function TagsPage() {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
                           className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                          onSelect={(e) => { e.preventDefault(); }}
                         >
                           <Trash2 className="h-4 w-4" />
                           Delete Tag
@@ -416,7 +419,7 @@ export default function TagsPage() {
                           <AlertDialogTitle>Delete Tag</AlertDialogTitle>
                           <AlertDialogDescription className="space-y-0">
                             <span>Are you sure you want to delete </span>
-                            <TagBadge variant="auto" tag={tag} />
+                            <TagBadge tag={tag} variant="auto" />
                             <span>
                               ? This action cannot be undone and will remove the
                               tag from all the
@@ -430,8 +433,8 @@ export default function TagsPage() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => deleteTag.mutate({ id: tag.id })}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => { deleteTag.mutate({ id: tag.id }); }}
                           >
                             Delete
                           </AlertDialogAction>
@@ -459,7 +462,7 @@ export default function TagsPage() {
               )}
 
               <Link href={`/home/tags/${tag.id}`}>
-                <Button variant="outline" className="w-full h-8" size="sm">
+                <Button className="w-full h-8" size="sm" variant="outline">
                   View Details
                 </Button>
               </Link>
@@ -485,8 +488,8 @@ export default function TagsPage() {
               </div>
               {!searchQuery && (
                 <Button
-                  onClick={() => setShowCreateDialog(true)}
                   className="mt-4"
+                  onClick={() => { setShowCreateDialog(true); }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Tag
@@ -498,11 +501,11 @@ export default function TagsPage() {
       )}
 
       <Dialog
-        open={!!editingTag}
-        onOpenChange={(open) => !open && setEditingTag(null)}
         modal={false}
+        onOpenChange={(open) => !open && setEditingTag(null)}
+        open={!!editingTag}
       >
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
           <DialogHeader>
             <DialogTitle>Edit Tag</DialogTitle>
             <DialogDescription>
@@ -514,9 +517,9 @@ export default function TagsPage() {
               <Label htmlFor="edit-label">Label</Label>
               <Input
                 id="edit-label"
-                value={newTagLabel}
-                onChange={(e) => setNewTagLabel(e.target.value)}
+                onChange={(e) => { setNewTagLabel(e.target.value); }}
                 placeholder="Tag label..."
+                value={newTagLabel}
               />
             </div>
             <div>
@@ -528,12 +531,12 @@ export default function TagsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingTag(null)}>
+            <Button onClick={() => { setEditingTag(null); }} variant="outline">
               Cancel
             </Button>
             <Button
-              onClick={handleUpdateTag}
               disabled={!newTagLabel.trim() || updateTag.isPending}
+              onClick={handleUpdateTag}
             >
               {updateTag.isPending ? "Updating..." : "Update"}
             </Button>

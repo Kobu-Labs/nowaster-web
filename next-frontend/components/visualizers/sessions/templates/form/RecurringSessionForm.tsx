@@ -1,7 +1,7 @@
 "use client";
 
 import { CategoryWithIdSchema, TagWithIdSchema } from "@/api/definitions";
-import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
+import type { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { Card } from "@/components/shadcn/card";
 import {
   FormControl,
@@ -13,34 +13,34 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { IntervalBasedPicker } from "@/components/ui-providers/date-pickers/interval/IntevalBasedPicker";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
-import { TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
+import type { TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
-import { FC } from "react";
-import { Control } from "react-hook-form";
+import type { FC } from "react";
+import type { Control } from "react-hook-form";
 import { z } from "zod";
 
 export const recurringSessionPrecursor = z.object({
   category: CategoryWithIdSchema,
-  tags: z.array(TagWithIdSchema),
   description: z.string().optional(),
-  start_date_time: z.object({
-    hours: z.number().min(0).max(23),
-    minutes: z.number().min(0).max(59),
-    day: z.number().min(0).max(6),
-  }),
   end_date_time: z.object({
+    day: z.number().min(0).max(6),
     hours: z.number().min(0).max(23),
     minutes: z.number().min(0).max(59),
-    day: z.number().min(0).max(6),
   }),
+  start_date_time: z.object({
+    day: z.number().min(0).max(6),
+    hours: z.number().min(0).max(23),
+    minutes: z.number().min(0).max(59),
+  }),
+  tags: z.array(TagWithIdSchema),
 });
 
-export type RecurringSessionFormProps = {
+export interface RecurringSessionFormProps {
   control: Control<TemplateSessionPrecursor>;
-  intervalStart: Date;
   interval: RecurringSessionInterval;
+  intervalStart: Date;
   parentFieldIndex: number;
-};
+}
 
 export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
   return (
@@ -55,8 +55,8 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
               <FormControl>
                 <CategoryPicker
                   mode="single"
-                  selectedCategory={field.value ?? null}
                   onSelectCategory={field.onChange}
+                  selectedCategory={field.value ?? null}
                 />
               </FormControl>
               <FormMessage />
@@ -66,19 +66,19 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
 
         <div className="flex items-center gap-4">
           <FormField
-            name={`sessions.${props.parentFieldIndex}.start_date_time`}
             control={props.control}
+            name={`sessions.${props.parentFieldIndex}.start_date_time`}
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
                 <FormLabel className="block">Start</FormLabel>
                 <FormControl>
                   <IntervalBasedPicker
-                    selected={field.value}
-                    orientation="horizontal"
                     interval={props.interval}
                     onSelect={(val) => {
                       field.onChange(val);
                     }}
+                    orientation="horizontal"
+                    selected={field.value}
                   />
                 </FormControl>
                 <FormMessage />
@@ -87,19 +87,19 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
           />
 
           <FormField
-            name={`sessions.${props.parentFieldIndex}.end_date_time`}
             control={props.control}
+            name={`sessions.${props.parentFieldIndex}.end_date_time`}
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
                 <FormLabel className="block">End</FormLabel>
                 <FormControl>
                   <IntervalBasedPicker
-                    selected={field.value}
-                    orientation="horizontal"
                     interval={props.interval}
                     onSelect={(val) => {
                       field.onChange(val);
                     }}
+                    orientation="horizontal"
+                    selected={field.value}
                   />
                 </FormControl>
                 <FormMessage />
@@ -116,9 +116,9 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
               <FormLabel>Description (Optional)</FormLabel>
               <FormControl>
                 <Input
+                  onChange={field.onChange}
                   placeholder="Insert your description"
                   value={field.value ?? ""}
-                  onChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />
@@ -127,22 +127,22 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
         />
 
         <FormField
-          name={`sessions.${props.parentFieldIndex}.tags`}
           control={props.control}
+          name={`sessions.${props.parentFieldIndex}.tags`}
           render={({ field }) => (
             <FormItem className="flex flex-col gap-2">
               <FormLabel className="block">Tags</FormLabel>
               <FormControl>
                 <SimpleTagPicker
+                  onNewTagsSelected={(tags) => { field.onChange(tags); }}
                   selectedTags={
                     field.value?.map((t) => ({
                       ...t,
-                      usages: 0,
                       allowedCategories: [],
                       last_used_at: new Date(),
+                      usages: 0,
                     })) ?? []
                   }
-                  onNewTagsSelected={(tags) => field.onChange(tags)}
                 />
               </FormControl>
               <FormMessage />

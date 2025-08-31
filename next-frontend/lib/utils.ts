@@ -1,6 +1,6 @@
-import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { SessionFilter, TagDetails } from "@/api/definitions";
-import { clsx, type ClassValue } from "clsx";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilter, TagDetails } from "@/api/definitions";
+import { type ClassValue, clsx } from "clsx";
 import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
@@ -33,10 +33,10 @@ export const getFormattedTimeDifference = (from: Date, to: Date) => {
 
 export const randomColor = (): string => {
   return (
-    "#" +
-    Math.floor(Math.random() * 0xffffff)
+    `#${ 
+    Math.floor(Math.random() * 0xFF_FF_FF)
       .toString(16)
-      .padStart(6, "0")
+      .padStart(6, "0")}`
   );
 };
 
@@ -65,7 +65,7 @@ export function countLeaves(obj: any): number {
   const isObject = (val: any): val is object => typeof val === "object";
 
   const isTruthy = (val: any) => {
-    if (Array.isArray(val) && val.length === 0) return false;
+    if (Array.isArray(val) && val.length === 0) {return false;}
     return Boolean(val);
   };
 
@@ -92,7 +92,7 @@ export const translateFilterPrecursor = (
   }
   const {
     data,
-    settings: { tags, categories },
+    settings: { categories, tags },
   } = precursor;
 
   const filter: SessionFilter = {};
@@ -137,7 +137,7 @@ export const translateFilterPrecursor = (
 };
 
 export const emptyStringToUndefined = (
-  value: string | undefined | null,
+  value: null | string | undefined,
   options?: { trim?: boolean },
 ): string | undefined => {
   let workingValue = value;
@@ -152,7 +152,7 @@ export const emptyStringToUndefined = (
   return workingValue;
 };
 
-export const arrayFromUndefined = <T>(value?: T | null) => {
+export const arrayFromUndefined = <T>(value?: null | T) => {
   if (!value) {
     return [];
   }
