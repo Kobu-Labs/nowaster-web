@@ -7,7 +7,7 @@ import {
   overwriteData,
 } from "@/state/chart-filter";
 import { CircleHelp, Filter, RotateCcw } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useMemo } from "react";
 
 import { useChartFilter } from "@/components/hooks/use-chart-filter";
@@ -36,13 +36,15 @@ import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 export const ChartFilter: FC = () => {
   const { filter, setFilter } = useChartFilter();
 
-  const onSelectTag = (tags: TagDetails[]) =>
-    { setFilter((state) => overwriteData(state, { tags })); };
+  const onSelectTag = (tags: TagDetails[]) => {
+    setFilter((state) => overwriteData(state, { tags }));
+  };
 
-  const onSelectCategory = (category: CategoryWithId) =>
-    { setFilter((state) => handleSelectCategory(state, category)); };
+  const onSelectCategory = (category: CategoryWithId) => {
+    setFilter((state) => handleSelectCategory(state, category));
+  };
 
-  const resetFilter = () => { setFilter(defaultFilter); };
+  const resetFilter = () => setFilter(defaultFilter);
 
   const appliedFiltersCount = useMemo(
     () => countLeaves(translateFilterPrecursor(filter)),

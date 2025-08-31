@@ -63,7 +63,8 @@ const TemplatesPage = () => {
         >
           <AlertTriangle className="h-4 w-4 text-red-500" />
           <AlertDescription className="text-red-700 dark:text-red-300">
-            Failed to load templates: {q.error.message}
+            Failed to load templates:
+            {q.error.message}
           </AlertDescription>
         </Alert>
       </div>

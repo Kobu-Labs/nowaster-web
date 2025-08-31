@@ -8,7 +8,7 @@ import { UserAvatar } from "@/components/visualizers/user/UserAvatar";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Heart } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useMemo } from "react";
 
 interface GroupedReaction {
@@ -34,7 +34,7 @@ export const SessionReactionAddedNotificationItem: FC<
   SessionReactionAddedNotificationItemProps
 > = (props) => {
   const { allUsers, groupedReactions, sessionData } = useMemo(() => {
-    const {notifications} = props;
+    const { notifications } = props;
     const sessionData = notifications[0]!.notification.data;
 
     // Group reactions by emoji
@@ -81,10 +81,10 @@ export const SessionReactionAddedNotificationItem: FC<
       result += user1.username;
     }
     if (user2) {
-      result += ` and ${  user2.username}`;
+      result += ` and ${user2.username}`;
     }
 
-    return `${result  } reacted to your session`;
+    return `${result} reacted to your session`;
   };
 
   return (
@@ -140,7 +140,8 @@ export const SessionReactionAddedNotificationItem: FC<
                   zIndex: allUsers.length,
                 }}
               >
-                +{allUsers.length - 3}
+                +
+                {allUsers.length - 3}
               </div>
             )}
           </div>
@@ -159,8 +160,8 @@ export const SessionReactionAddedNotificationItem: FC<
         </div>
 
         <p className="text-xs text-muted-foreground">
-          {latestNotification &&
-            formatDistanceToNow(latestNotification.created_at, {
+          {latestNotification
+            && formatDistanceToNow(latestNotification.created_at, {
               addSuffix: true,
             })}
         </p>

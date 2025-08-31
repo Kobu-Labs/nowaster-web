@@ -1,5 +1,5 @@
 import { overwriteData } from "@/state/chart-filter";
-import type { FC, HTMLAttributes} from "react";
+import type { FC, HTMLAttributes } from "react";
 import { useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
@@ -7,7 +7,7 @@ import { useChartFilter } from "@/components/hooks/use-chart-filter";
 import { GranularityBasedDatePicker } from "@/components/ui-providers/date-pickers/GranularityBasedDatePicker";
 import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
 import type {
-  Granularity} from "@/components/visualizers/sessions/charts/GranularitySelect";
+  Granularity } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import {
   GranularitySelect,
 } from "@/components/visualizers/sessions/charts/GranularitySelect";

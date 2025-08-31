@@ -25,7 +25,7 @@ export const useFeed = () => {
       return lastPage.at(-1)!.created_at;
     },
     initialPageParam: undefined,
-    queryFn: async ({ pageParam }: { pageParam: Date | undefined }) =>
+    queryFn: async ({ pageParam }: { pageParam: Date | undefined; }) =>
       await FeedApi.getFeed({
         cursor: pageParam,
         limit: 20,
@@ -119,8 +119,8 @@ export const useRemoveReaction = () => {
                     ...event,
                     reactions: event.reactions.filter(
                       (reaction) =>
-                        reaction.emoji !== newTodo.emoji ||
-                        reaction.user.id !== userId,
+                        reaction.emoji !== newTodo.emoji
+                        || reaction.user.id !== userId,
                     ),
                   };
                 }

@@ -6,7 +6,7 @@ export const useDeleteTag = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: { id: string }) =>
+    mutationFn: async (params: { id: string; }) =>
       await TagApi.deleteTag(params),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });

@@ -24,7 +24,7 @@ export const useCreateStopwatchSession = () => {
         queryKey: queryKeys.sessions.active._def,
       });
       toast({
-        description: `Session created successfully!`,
+        description: "Session created successfully!",
         variant: "default",
       });
     },

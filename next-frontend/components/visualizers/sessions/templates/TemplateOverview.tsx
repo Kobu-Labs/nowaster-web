@@ -43,7 +43,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useMemo, useState } from "react";
 import type { TemplateSessionsAction } from "@/components/visualizers/sessions/templates/form/form-schemas";
 
@@ -121,7 +121,7 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
   return (
     <>
       <CreateTemplateFormDialog
-        defaultValues={{ ...template, name: `${template.name  } - duplicated` }}
+        defaultValues={{ ...template, name: `${template.name} - duplicated` }}
         open={isDuplicateOpen}
         setIsOpen={setIsDuplicateOpen}
       />
@@ -197,53 +197,58 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
           <div className="ml-5 flex items-center gap-2 text-xs text-muted-foreground pt-3 border-t border-pink-muted">
             <Calendar className="w-3 h-3" />
             <span>
-              {format(template.start_date, "MMM dd, yyyy")} -{" "}
+              {format(template.start_date, "MMM dd, yyyy")}
+              -
               {format(template.end_date, "MMM dd, yyyy")}
             </span>
           </div>
         </CardHeader>
 
         <CardContent className="pt-0">
-          {template.sessions.length > 0 ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <PlayCircle className="w-4 h-4 text-pink-primary" />
-                Upcoming Sessions
-              </div>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {sessionTimes.slice(0, 3).map((session, index) => (
-                  <div className="border rounded-lg" key={index}>
-                    <RecurringSessionCard
-                      session={{
-                        ...session,
-                        id: index.toString(),
-                      }}
-                      template={template}
-                    />
+          {template.sessions.length > 0
+            ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <PlayCircle className="w-4 h-4 text-pink-primary" />
+                    Upcoming Sessions
                   </div>
-                ))}
-                {sessionTimes.length > 3 && (
-                  <div className="text-center py-2">
-                    <Button
-                      className="text-xs text-pink-primary hover:text-pink-primary/80 hover:bg-pink-subtle"
-                      size="sm"
-                      variant="ghost"
-                    >
-                      +{sessionTimes.length - 3} more sessions
-                    </Button>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {sessionTimes.slice(0, 3).map((session, index) => (
+                      <div className="border rounded-lg" key={index}>
+                        <RecurringSessionCard
+                          session={{
+                            ...session,
+                            id: index.toString(),
+                          }}
+                          template={template}
+                        />
+                      </div>
+                    ))}
+                    {sessionTimes.length > 3 && (
+                      <div className="text-center py-2">
+                        <Button
+                          className="text-xs text-pink-primary hover:text-pink-primary/80 hover:bg-pink-subtle"
+                          size="sm"
+                          variant="ghost"
+                        >
+                          +
+                          {sessionTimes.length - 3}
+                          more sessions
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <div className="w-12 h-12 gradient-container-subtle rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Calendar className="w-6 h-6 text-pink-primary" />
-              </div>
-              <p className="text-sm font-medium">No sessions configured</p>
-              <p className="text-xs">Edit this template to add sessions</p>
-            </div>
-          )}
+                </div>
+              )
+            : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="w-12 h-12 gradient-container-subtle rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="w-6 h-6 text-pink-primary" />
+                  </div>
+                  <p className="text-sm font-medium">No sessions configured</p>
+                  <p className="text-xs">Edit this template to add sessions</p>
+                </div>
+              )}
         </CardContent>
       </Card>
     </>
@@ -265,7 +270,9 @@ const DeleteTemplateAlertDialog: FC<{
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Trash2 className="w-5 h-5 text-destructive" />
-            Delete Template &ldquo;{props.template.name}&rdquo;?
+            Delete Template &ldquo;
+            {props.template.name}
+            &rdquo;?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-base space-y-4">
             <p>

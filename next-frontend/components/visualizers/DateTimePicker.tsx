@@ -81,20 +81,22 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
           variant="outline"
         >
           <CalendarIcon className="size-4" />
-          {props.selected ? (
-            <>
-              <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
-              <div className="grow"></div>
-              <X
-                className="cursor-pointer rounded-md hover:bg-destructive "
-                onClick={() => {
-                  props.onSelect(undefined);
-                }}
-              />
-            </>
-          ) : (
-            <span>{props.label ?? "Pick a date"}</span>
-          )}
+          {props.selected
+            ? (
+                <>
+                  <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
+                  <div className="grow"></div>
+                  <X
+                    className="cursor-pointer rounded-md hover:bg-destructive "
+                    onClick={() => {
+                      props.onSelect(undefined);
+                    }}
+                  />
+                </>
+              )
+            : (
+                <span>{props.label ?? "Pick a date"}</span>
+              )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -168,7 +170,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
               props.onSelect(val.increment(props.selected ?? new Date()));
             }}
             type="button"
-            variant={"secondary"}
+            variant="secondary"
           >
             {val.label}
           </Button>

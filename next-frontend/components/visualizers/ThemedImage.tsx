@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import type { ComponentProps, FC} from "react";
+import type { ComponentProps, FC } from "react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 

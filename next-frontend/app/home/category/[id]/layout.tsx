@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { env } from "node:process";
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; }>;
 }
 
 interface RootLayoutProps {

@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useEffect, useState } from "react";
 
 import type { StopwatchSessionWithId } from "@/api/definitions";
@@ -80,7 +80,9 @@ const NoActiveSession: FC = () => {
           <Button
             className="group/start justify-start gap-2 bg-transparent"
             loading={createSession.isPending}
-            onClick={() => { createSession.mutate({ startTime: new Date() }); }}
+            onClick={() => {
+              createSession.mutate({ startTime: new Date() });
+            }}
             size="sm"
             variant="outline"
           >
@@ -120,7 +122,7 @@ const StopwatchSessionActive: FC<{
       const category = session.category ? ` [${session.category.name}]` : "";
       document.title = `${formatted}${category}`;
     }, 1000);
-    return () => { clearInterval(interval); };
+    return () => clearInterval(interval);
   }, [session]);
 
   return (
@@ -131,8 +133,12 @@ const StopwatchSessionActive: FC<{
             <DialogTitle className="m-1">Edit session data</DialogTitle>
             <Separator className="w-full" />
             <EditStopwatchSession
-              onDelete={() => { setOpen(false); }}
-              onSubmit={() => { setOpen(false); }}
+              onDelete={() => {
+                setOpen(false);
+              }}
+              onSubmit={() => {
+                setOpen(false);
+              }}
               session={session}
             />
           </DialogHeader>
@@ -153,7 +159,9 @@ const StopwatchSessionActive: FC<{
             <TooltipTrigger asChild>
               <Button
                 className={cn("flex gap-2 items-center")}
-                onClick={() => { setOpen(true); }}
+                onClick={() => {
+                  setOpen(true);
+                }}
                 variant="ghost"
               >
                 <Edit className="size-4" />
@@ -182,14 +190,16 @@ const StopwatchSessionActive: FC<{
               <TooltipTrigger asChild>
                 <Button
                   className="p-0 m-0"
-                  onClick={() =>
-                    { finishSession.mutate(session, {
-                      onError: () => { setOpen(true); },
+                  onClick={() => {
+                    finishSession.mutate(session, {
+                      onError: () => {
+                        setOpen(true);
+                      },
                       onSuccess: () => {
                         document.title = "Nowaster";
                       },
-                    }); }
-                  }
+                    });
+                  }}
                   size="sm"
                   variant="ghost"
                 >
@@ -204,14 +214,16 @@ const StopwatchSessionActive: FC<{
               <TooltipTrigger asChild>
                 <Button
                   className="p-0 m-0"
-                  onClick={() =>
-                    { deleteSessionMutation.mutate(
+                  onClick={() => {
+                    deleteSessionMutation.mutate(
                       { id: session.id },
                       {
-                        onSuccess: () => { setOpen(false); },
+                        onSuccess: () => {
+                          setOpen(false);
+                        },
                       },
-                    ); }
-                  }
+                    );
+                  }}
                   size="sm"
                   variant="ghost"
                 >

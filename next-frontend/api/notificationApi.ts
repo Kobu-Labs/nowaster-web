@@ -14,7 +14,7 @@ export const getNotifications = async (params?: NotificationQueryRequest) => {
   return await parseResponseUnsafe(data, NotificationResponseSchema.getNotifications);
 };
 
-export const getUnseenNotifications = async (params?: { limit?: number }) => {
+export const getUnseenNotifications = async (params?: { limit?: number; }) => {
   const { data } = await baseApi.get(`${BASE_URL}/unseen`, {
     params,
   });

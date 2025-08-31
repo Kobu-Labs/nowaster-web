@@ -8,14 +8,14 @@ const BASE_URL = "/user";
 
 export const update = async (
   params?: UserRequest["update"],
-)=> {
+) => {
   const { data } = await baseApi.patch(BASE_URL, params);
   return await parseResponseUnsafe(data, UserResponseSchema.update);
 };
 
 export const create = async (
   params: UserRequest["create"],
-)=> {
+) => {
   const { data } = await baseApi.post(BASE_URL, params);
   return await parseResponseUnsafe(data, UserResponseSchema.create);
 };
@@ -23,7 +23,7 @@ export const create = async (
 export const updateVisibility = async (
   params: UserRequest["updateVisibility"],
 ) => {
-  const { data } = await baseApi.patch(`${BASE_URL  }/visibility`, params);
+  const { data } = await baseApi.patch(`${BASE_URL}/visibility`, params);
   return await parseResponseUnsafe(data, UserResponseSchema.updateVisibility);
 };
 
@@ -35,7 +35,7 @@ export const getCurrentUser = async () => {
 export const getProfile = async (
   params?: UserRequest["getProfile"],
 ) => {
-  const { data } = await baseApi.get(`${BASE_URL  }/profile`, {
+  const { data } = await baseApi.get(`${BASE_URL}/profile`, {
     params: params ? { id: params.id } : undefined,
   });
   return await parseResponseUnsafe(data, UserResponseSchema.getProfile);

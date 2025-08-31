@@ -14,8 +14,8 @@ export type FilterSettings = NonNullable<OmitValue<SessionFilter>>;
  */
 export interface FilterValueFiller {
   categories?: CategoryWithId[];
-  endTimeFrom?: { value: Date };
-  endTimeTo?: { value: Date };
+  endTimeFrom?: { value: Date; };
+  endTimeTo?: { value: Date; };
   tags?: TagDetails[];
 }
 

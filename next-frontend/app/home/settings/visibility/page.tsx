@@ -28,7 +28,7 @@ export default function VisibilitySettingsPage() {
         Control who can see your activity and time tracking sessions.
       </p>
 
-      <VisibilitySettings user={user}/>
+      <VisibilitySettings user={user} />
     </div>
   );
 }

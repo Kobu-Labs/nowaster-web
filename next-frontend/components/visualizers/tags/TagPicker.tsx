@@ -1,9 +1,9 @@
 import { useTags } from "@/components/hooks/tag/useTags";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import type {
-  TagPickerUiProviderProps} from "@/components/ui-providers/tags/TagPickerUiProvider";
+  TagPickerUiProviderProps } from "@/components/ui-providers/tags/TagPickerUiProvider";
 import {
-  TagPickerUiProvider
+  TagPickerUiProvider,
 } from "@/components/ui-providers/tags/TagPickerUiProvider";
 import { Frown } from "lucide-react";
 import type { FC } from "react";

@@ -12,7 +12,7 @@ import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { format24Hour, numberToDay } from "@/lib/date-utils";
 import { addMinutes } from "date-fns";
 import { Clock } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useMemo } from "react";
 
 interface SessionCardProps {
@@ -32,13 +32,13 @@ export const RecurringSessionCard: FC<SessionCardProps> = (props) => {
     );
 
     switch (props.template.interval) {
-    case "daily": {
-      return `Every day at ${format24Hour(start)}-${format24Hour(end)}`;
-    }
+      case "daily": {
+        return `Every day at ${format24Hour(start)}-${format24Hour(end)}`;
+      }
 
-    case "weekly": {
-      return `Every ${numberToDay(start.getDay())} at ${format24Hour(start)}-${format24Hour(end)}`;
-    }
+      case "weekly": {
+        return `Every ${numberToDay(start.getDay())} at ${format24Hour(start)}-${format24Hour(end)}`;
+      }
     }
   }, [props.template, props.session]);
 

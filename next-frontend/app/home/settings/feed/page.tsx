@@ -7,7 +7,7 @@ export default function FeedSettingsPage() {
       <p className="text-muted-foreground mb-6">
         Manage your feed subscriptions. Control which content you see in your feed.
       </p>
-      
+
       <FeedSubscriptions />
     </div>
   );

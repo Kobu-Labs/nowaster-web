@@ -9,8 +9,8 @@ const getDashboardData = z.object({
 });
 
 export type StatisticsResponse = {
-    [Property in (keyof typeof StatisticsResponseSchema)]: z.infer<typeof StatisticsResponseSchema[Property]>
-}
+  [Property in (keyof typeof StatisticsResponseSchema)]: z.infer<typeof StatisticsResponseSchema[Property]>
+};
 
 export const StatisticsResponseSchema = {
   getDashboardData,

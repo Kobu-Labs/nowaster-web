@@ -45,18 +45,18 @@ export default function PreferencesPage() {
       const scrollToElement = () => {
         let targetRef;
         switch (setting) {
-        case "close-sidebar": {
-          targetRef = closeSidebarRef;
-          break;
-        }
-        case "sidebar-behavior": {
-          targetRef = sidebarBehaviorRef;
-          break;
-        }
-        default: {
-          targetRef = null;
-          break;
-        }
+          case "close-sidebar": {
+            targetRef = closeSidebarRef;
+            break;
+          }
+          case "sidebar-behavior": {
+            targetRef = sidebarBehaviorRef;
+            break;
+          }
+          default: {
+            targetRef = null;
+            break;
+          }
         }
 
         if (targetRef?.current) {
@@ -73,7 +73,7 @@ export default function PreferencesPage() {
         setHighlightedSetting(null);
       }, 2000);
 
-      return () => { clearTimeout(timer); };
+      return () => clearTimeout(timer);
     }
     // INFO: placeholder to keep type system happy
     /* eslint-disable @typescript-eslint/no-empty-function */
@@ -100,8 +100,8 @@ export default function PreferencesPage() {
           <div
             className={cn(
               "flex items-center justify-between p-3 rounded-lg transition-all duration-1000",
-              highlightedSetting === "sidebar-behavior" &&
-                "bg-accent/20 shadow-lg ring-2 ring-accent",
+              highlightedSetting === "sidebar-behavior"
+              && "bg-accent/20 shadow-lg ring-2 ring-accent",
             )}
             ref={sidebarBehaviorRef}
           >
@@ -124,8 +124,8 @@ export default function PreferencesPage() {
           <div
             className={cn(
               "flex items-center justify-between p-3 rounded-lg transition-all duration-300",
-              highlightedSetting === "close-sidebar" &&
-                "bg-accent/20 shadow-lg ring-2 ring-accent",
+              highlightedSetting === "close-sidebar"
+              && "bg-accent/20 shadow-lg ring-2 ring-accent",
             )}
             ref={closeSidebarRef}
           >

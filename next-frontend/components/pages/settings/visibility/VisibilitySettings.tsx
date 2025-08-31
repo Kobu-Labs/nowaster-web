@@ -16,10 +16,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
 import { useToast } from "@/components/shadcn/use-toast";
 import { VisibilityUtils } from "@/lib/visibilityUtils";
 import { Eye, EyeOff, Globe, Shield, UserCheck, Users } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 
-export const VisibilitySettings: FC<{ user: User }> = ({ user }) => {
+export const VisibilitySettings: FC<{ user: User; }> = ({ user }) => {
   const updateVisibility = useUpdateVisibility();
   const { toast } = useToast();
 
@@ -36,17 +36,17 @@ export const VisibilitySettings: FC<{ user: User }> = ({ user }) => {
 
     let newFlags: VisibilityFlags;
     switch (preset) {
-    case "private": {
-      newFlags = VisibilityUtils.none();
-      break;
-    }
-    case "public": {
-      newFlags = VisibilityUtils.public();
-      break;
-    }
-    default: {
-      newFlags = currentFlags;
-    }
+      case "private": {
+        newFlags = VisibilityUtils.none();
+        break;
+      }
+      case "public": {
+        newFlags = VisibilityUtils.public();
+        break;
+      }
+      default: {
+        newFlags = currentFlags;
+      }
     }
 
     if (preset !== "custom") {
@@ -103,19 +103,26 @@ export const VisibilitySettings: FC<{ user: User }> = ({ user }) => {
           </CardTitle>
           <div className="flex items-center gap-2">
             <Badge className="flex items-center gap-1" variant="outline">
-              {currentFlags.isPrivate ? (
-                <>
-                  <EyeOff className="h-3 w-3" /> Private
-                </>
-              ) : (currentFlags.isPublic ? (
-                <>
-                  <Globe className="h-3 w-3" /> Public
-                </>
-              ) : (
-                <>
-                  <Eye className="h-3 w-3" /> Custom
-                </>
-              ))}
+              {currentFlags.isPrivate
+                ? (
+                    <>
+                      <EyeOff className="h-3 w-3" />
+                      Private
+                    </>
+                  )
+                : (currentFlags.isPublic
+                    ? (
+                        <>
+                          <Globe className="h-3 w-3" />
+                          Public
+                        </>
+                      )
+                    : (
+                        <>
+                          <Eye className="h-3 w-3" />
+                          Custom
+                        </>
+                      ))}
             </Badge>
             <span className="text-sm text-muted-foreground">
               {VisibilityUtils.getDescription(currentFlags)}
@@ -200,8 +207,7 @@ export const VisibilitySettings: FC<{ user: User }> = ({ user }) => {
                 <Checkbox
                   checked={currentFlags.friends}
                   onCheckedChange={(checked) =>
-                    { handleIndividualFlagChange("friends", checked === true); }
-                  }
+                  { handleIndividualFlagChange("friends", checked === true); }}
                 />
               </div>
 
@@ -218,8 +224,7 @@ export const VisibilitySettings: FC<{ user: User }> = ({ user }) => {
                 <Checkbox
                   checked={currentFlags.groups}
                   onCheckedChange={(checked) =>
-                    { handleIndividualFlagChange("groups", checked === true); }
-                  }
+                  { handleIndividualFlagChange("groups", checked === true); }}
                 />
               </div>
             </div>

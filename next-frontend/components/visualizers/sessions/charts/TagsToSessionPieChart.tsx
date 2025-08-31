@@ -22,14 +22,13 @@ export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
           getKey={(session) =>
             session.tags.length
               ? session.tags.map((tag) => ({
-                key: tag.label,
-                metadata: { color: tag.color, name: tag.label },
-              }))
+                  key: tag.label,
+                  metadata: { color: tag.color, name: tag.label },
+                }))
               : {
-                key: "-",
-                metadata: { color: "#f129c1", name: "-" },
-              }
-          }
+                  key: "-",
+                  metadata: { color: "#f129c1", name: "-" },
+                }}
         />
       </CardContent>
     </Card>

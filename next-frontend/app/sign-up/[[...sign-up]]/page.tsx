@@ -49,7 +49,7 @@ export default function SignUpPage() {
                   Start Tracking Today
                 </h1>
                 <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                  Join users who are already tracking their time with{" "}
+                  Join users who are already tracking their time with
                   <span className="font-semibold text-accent">Nowaster</span>
                 </p>
               </div>
@@ -135,9 +135,9 @@ export default function SignUpPage() {
                               Create your account
                             </CardTitle>
                             <CardDescription className="text-center text-gray-600 dark:text-gray-300">
-                              Get started with your free{" "}
+                              Get started with your free
                               <span className="font-semibold text-accent">
-                                Nowaster{" "}
+                                Nowaster
                               </span>
                               account
                             </CardDescription>
@@ -153,15 +153,16 @@ export default function SignUpPage() {
                                 >
                                   <Clerk.Loading scope="provider:github">
                                     {(isLoading) =>
-                                      isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <Github className="mr-2 size-4" />
-                                          Continue with GitHub
-                                        </>
-                                      )
-                                    }
+                                      isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            <>
+                                              <Github className="mr-2 size-4" />
+                                              Continue with GitHub
+                                            </>
+                                          )}
                                   </Clerk.Loading>
                                 </Button>
                               </Clerk.Connection>
@@ -175,15 +176,16 @@ export default function SignUpPage() {
                                 >
                                   <Clerk.Loading scope="provider:discord">
                                     {(isLoading) =>
-                                      isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <DiscordLogoIcon className="mr-2 size-4" />
-                                          Continue with Discord
-                                        </>
-                                      )
-                                    }
+                                      isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            <>
+                                              <DiscordLogoIcon className="mr-2 size-4" />
+                                              Continue with Discord
+                                            </>
+                                          )}
                                   </Clerk.Loading>
                                 </Button>
                               </Clerk.Connection>
@@ -197,15 +199,16 @@ export default function SignUpPage() {
                                 >
                                   <Clerk.Loading scope="provider:google">
                                     {(isLoading) =>
-                                      isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <GoogleIcon className="mr-2 size-4" />
-                                          Continue with Google
-                                        </>
-                                      )
-                                    }
+                                      isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            <>
+                                              <GoogleIcon className="mr-2 size-4" />
+                                              Continue with Google
+                                            </>
+                                          )}
                                   </Clerk.Loading>
                                 </Button>
                               </Clerk.Connection>
@@ -214,7 +217,7 @@ export default function SignUpPage() {
                           <CardFooter className="pt-6">
                             <div className="w-full text-center">
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Already have an account?{" "}
+                                Already have an account?
                                 <Clerk.Link
                                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
                                   navigate="sign-in"
@@ -264,11 +267,13 @@ export default function SignUpPage() {
                               >
                                 <Clerk.Loading>
                                   {(isLoading) => {
-                                    return isLoading ? (
-                                      <LoaderCircle className="size-4 animate-spin" />
-                                    ) : (
-                                      "Create Account"
-                                    );
+                                    return isLoading
+                                      ? (
+                                          <LoaderCircle className="size-4 animate-spin" />
+                                        )
+                                      : (
+                                          "Create Account"
+                                        );
                                   }}
                                 </Clerk.Loading>
                               </Button>
@@ -306,8 +311,8 @@ export default function SignUpPage() {
                                               "relative flex size-12 items-center justify-center border-y border-r border-input text-lg font-medium transition-all first:rounded-l-md first:border-l last:rounded-r-md bg-white dark:bg-gray-800",
                                               {
                                                 "z-10 ring-2 ring-blue-500 ring-offset-background border-blue-500":
-                                                  status === "cursor" ||
-                                                  status === "selected",
+                                                  status === "cursor"
+                                                  || status === "selected",
                                               },
                                             )}
                                             data-status={status}
@@ -336,11 +341,13 @@ export default function SignUpPage() {
                                 >
                                   <Clerk.Loading>
                                     {(isLoading) => {
-                                      return isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        "Verify & Complete Setup"
-                                      );
+                                      return isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            "Verify & Complete Setup"
+                                          );
                                     }}
                                   </Clerk.Loading>
                                 </Button>
