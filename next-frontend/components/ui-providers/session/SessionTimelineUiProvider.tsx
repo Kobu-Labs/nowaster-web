@@ -1,9 +1,9 @@
 import type { ScheduledSessionWithId } from "@/api/definitions";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/shadcn/dialog";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
 import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
@@ -11,23 +11,12 @@ import { EditScheduledSession } from "@/components/visualizers/sessions/form/Edi
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { sessionToNonIntersection } from "@/lib/sessions/intervals";
 import { cn } from "@/lib/utils";
-<<<<<<< HEAD
-=======
+import type { SessionPrecursor } from "@/validation/session/creation";
 import {
   addHours,
   addMilliseconds,
   differenceInMilliseconds,
   format,
-} from "date-fns";
-import type { FC } from "react";
-import { useMemo, useRef, useState } from "react";
->>>>>>> d2112de (style: install stylistic)
-import type { SessionPrecursor } from "@/validation/session/creation";
-import {
-    addHours,
-    addMilliseconds,
-    differenceInMilliseconds,
-    format,
 } from "date-fns";
 import type { FC } from "react";
 import { useMemo, useRef, useState } from "react";
@@ -143,15 +132,9 @@ export function SessionTimelineUiProvider({
   // Function to handle mouse up after drag
   const handleMouseUp = () => {
     if (
-<<<<<<< HEAD
-      isDragging &&
-      dragStart !== null && // Only create session if drag distance is significant
-      dragStart.end - dragStart.start > 1
-=======
       isDragging
       && dragStart !== null // Only create session if drag distance is significant
       && dragStart.end - dragStart.start > 1
->>>>>>> d2112de (style: install stylistic)
     ) {
       const sessionStartDate = percentToDate(dragStart.start);
       const sessionEndDate = percentToDate(dragStart.end);
@@ -365,14 +348,8 @@ export function SessionTimelineUiProvider({
               <DialogTitle>Create Session</DialogTitle>
             </DialogHeader>
             <ScheduledSessionCreationForm
-<<<<<<< HEAD
-=======
-              onSave={() => {
-                setIsCreateDialogOpen(false);
-              }}
->>>>>>> d2112de (style: install stylistic)
-              precursor={sessionToCreate}
               onCreate={() => setIsCreateDialogOpen(false)}
+              precursor={sessionToCreate}
             />
           </DialogContent>
         </Dialog>
