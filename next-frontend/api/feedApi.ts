@@ -11,8 +11,8 @@ import type {
 const BASE_URL = "/feed";
 
 export const getFeed = async (params?: FeedQueryRequest) => {
-  const { data } = await baseApi.get(BASE_URL, { 
-    params, 
+  const { data } = await baseApi.get(BASE_URL, {
+    params,
   });
   return await parseResponseUnsafe(data, FeedResponseSchema.getFeed);
 };

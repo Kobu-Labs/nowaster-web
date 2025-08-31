@@ -6,7 +6,7 @@ import { Rocket } from "lucide-react";
 import type { FC } from "react";
 
 export const NewReleaseNotificationItem: FC<
-  { data: NewReleaseData } & NotificationItemProps
+  { data: NewReleaseData; } & NotificationItemProps
 > = (props) => {
   return (
     <div

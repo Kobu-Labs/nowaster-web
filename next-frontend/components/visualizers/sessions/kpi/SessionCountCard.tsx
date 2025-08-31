@@ -27,9 +27,9 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
     <KpiCardUiProvider
       error={isError}
       loading={isLoading}
-      title={"Total sessions"}
+      title="Total sessions"
       value={result}
-      variant={"big_value"}
+      variant="big_value"
     >
       <Sigma />
     </KpiCardUiProvider>

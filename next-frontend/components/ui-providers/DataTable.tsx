@@ -4,7 +4,7 @@ import React from "react";
 import type {
   ColumnDef,
   ColumnFiltersState,
-  SortingState} from "@tanstack/react-table";
+  SortingState } from "@tanstack/react-table";
 import {
   flexRender,
   getCoreRowModel,
@@ -65,9 +65,9 @@ export function DataTable<TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 );
               })}
@@ -75,32 +75,36 @@ export function DataTable<TData, TValue>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                data-state={row.getIsSelected() && "selected"}
-                key={row.id}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (loading ? (
-            <TableRow>
-              <TableCell className="h-24 text-center" colSpan={columns.length}>
-                <Skeleton className="w-full min-h-32" />
-              </TableCell>
-            </TableRow>
-          ) : (
-            <TableRow>
-              <TableCell className="h-24 text-center" colSpan={columns.length}>
-                No results.
-              </TableCell>
-            </TableRow>
-          ))}
+          {table.getRowModel().rows?.length
+            ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    data-state={row.getIsSelected() && "selected"}
+                    key={row.id}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )
+            : (loading
+                ? (
+                    <TableRow>
+                      <TableCell className="h-24 text-center" colSpan={columns.length}>
+                        <Skeleton className="w-full min-h-32" />
+                      </TableCell>
+                    </TableRow>
+                  )
+                : (
+                    <TableRow>
+                      <TableCell className="h-24 text-center" colSpan={columns.length}>
+                        No results.
+                      </TableCell>
+                    </TableRow>
+                  ))}
         </TableBody>
       </Table>
     </div>

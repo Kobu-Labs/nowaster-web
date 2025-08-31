@@ -1,14 +1,14 @@
 /* eslint-disable perfectionist/sort-objects */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as NotificationApi from "@/api/notificationApi";
+import type { Notification } from "@/api/definitions/models/notification";
 import type {
   MarkNotificationsSeenRequest,
   NotificationQueryRequest,
 } from "@/api/definitions/requests/notification";
-import type { Notification } from "@/api/definitions/models/notification";
+import * as NotificationApi from "@/api/notificationApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useUnseenNotifications = (params?: { limit?: number }) => {
+export const useUnseenNotifications = (params?: { limit?: number; }) => {
   return useQuery({
     queryFn: () => NotificationApi.getUnseenNotifications(params),
     queryKey: ["notifications", "unseen"],

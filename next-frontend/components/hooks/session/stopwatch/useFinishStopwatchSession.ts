@@ -1,8 +1,8 @@
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
 import type {
-  StopwatchSessionWithId} from "@/api/definitions";
+  StopwatchSessionWithId } from "@/api/definitions";
 import {
-  ScheduledSessionRequestSchema
+  ScheduledSessionRequestSchema,
 } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
@@ -46,7 +46,7 @@ export const useFinishStopwatchSession = () => {
         queryKey: queryKeys.categories._def,
       });
       toast({
-        description: `Session finished successfully!`,
+        description: "Session finished successfully!",
         variant: "default",
       });
     },

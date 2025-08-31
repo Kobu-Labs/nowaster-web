@@ -241,8 +241,8 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage alt={"d"} />
-                    <AvatarFallback>{"D"}</AvatarFallback>
+                    <AvatarImage alt="d" />
+                    <AvatarFallback>D</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-bold">d3jv</h4>
@@ -258,12 +258,10 @@ export default async function LandingPage() {
                 <div className="flex items-center gap-4">
                   <Avatar>
                     <AvatarImage
-                      alt={"izmi"}
-                      src={
-                        "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18yd0JBaEdLbThpTzdURkxQdUdZam5FcnBnR3IifQ"
-                      }
+                      alt="izmi"
+                      src="https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18yd0JBaEdLbThpTzdURkxQdUdZam5FcnBnR3IifQ"
                     />
-                    <AvatarFallback>{"I"}</AvatarFallback>
+                    <AvatarFallback>I</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-bold">izmi</h4>
@@ -282,12 +280,10 @@ export default async function LandingPage() {
                 <div className="flex items-center gap-4">
                   <Avatar>
                     <AvatarImage
-                      alt={"kobu"}
-                      src={
-                        "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ3Qm4zMGl0UkJRNTJGRHBBcExwV0c1VGFJSyJ9"
-                      }
+                      alt="kobu"
+                      src="https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ3Qm4zMGl0UkJRNTJGRHBBcExwV0c1VGFJSyJ9"
                     />
-                    <AvatarFallback>{"K"}</AvatarFallback>
+                    <AvatarFallback>K</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-bold">Kobu</h4>

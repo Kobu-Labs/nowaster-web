@@ -1,12 +1,12 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
-import type { CategoryRequest} from "@/api/definitions";
+import type { CategoryRequest } from "@/api/definitions";
 import { CategoryResponseSchema } from "@/api/definitions";
 import { z } from "zod";
 
 const BASE_URL = "/category";
 
 export const getSessionCountByCategory = async () => {
-  const { data } = await baseApi.get(`${BASE_URL  }/group-sessions`);
+  const { data } = await baseApi.get(`${BASE_URL}/group-sessions`);
   return await parseResponseUnsafe(
     data,
     z.array(CategoryResponseSchema.groupBySession),
@@ -34,16 +34,16 @@ export const update = async (params: CategoryRequest["update"]) => {
 };
 
 export const readById = async (params: CategoryRequest["readById"]) => {
-  const { data } = await baseApi.get(`${BASE_URL  }/${  params.id}`);
+  const { data } = await baseApi.get(`${BASE_URL}/${params.id}`);
   return await parseResponseUnsafe(data, CategoryResponseSchema.readById);
 };
 
 export const getStatistics = async () => {
-  const { data } = await baseApi.get(`${BASE_URL  }/statistics`);
+  const { data } = await baseApi.get(`${BASE_URL}/statistics`);
   return await parseResponseUnsafe(data, CategoryResponseSchema.statistics);
 };
 
 export const deleteCategory = async (params: CategoryRequest["deleteCategory"]) => {
-  const { data } = await baseApi.delete(`${BASE_URL  }/${  params.id}`);
+  const { data } = await baseApi.delete(`${BASE_URL}/${params.id}`);
   return await parseResponseUnsafe(data, CategoryResponseSchema.delete);
 };

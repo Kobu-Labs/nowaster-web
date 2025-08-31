@@ -17,7 +17,7 @@ import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { use } from "react";
 
-export default function Page(props: { params: Promise<{ id: string }> }) {
+export default function Page(props: { params: Promise<{ id: string; }>; }) {
   const { id: categoryId } = use(props.params);
   const query = useQuery({
     ...queryKeys.categories.byId(categoryId),
@@ -73,11 +73,10 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
           <ColorPicker
             initialColor={query.data.color}
             onSelect={(color) =>
-              { updateCategoryColor.mutate({
-                color,
-                id: categoryId,
-              }); }
-            }
+            { updateCategoryColor.mutate({
+              color,
+              id: categoryId,
+            }); }}
           />
         </h2>
       </div>

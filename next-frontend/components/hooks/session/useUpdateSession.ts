@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-objects */
+
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
 import type {
   ScheduledSessionRequest,
@@ -14,9 +16,9 @@ import { useToast } from "@/components/shadcn/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { z } from "zod";
 
-type ActiveSession =
-  | z.infer<typeof ScheduledSessionWithIdSchema>
-  | z.infer<typeof StopwatchSessionWithIdSchema>;
+type ActiveSession
+  = | z.infer<typeof ScheduledSessionWithIdSchema>
+    | z.infer<typeof StopwatchSessionWithIdSchema>;
 
 export function useUpdateSession(
   sessionType: "stopwatch",
@@ -47,19 +49,6 @@ const useUpdateStopwatchSession = () => {
     mutationFn: async (data: StopwatchSessionRequest["update"]) => {
       return await StopwatchApi.update(data);
     },
-    onError: (error, _, context) => {
-      if (context?.previousActiveSessions) {
-        queryClient.setQueryData(
-          queryKeys.sessions.active.queryKey,
-          context.previousActiveSessions,
-        );
-      }
-      toast({
-        description: error.message,
-        title: "Error updating session",
-        variant: "destructive",
-      });
-    },
     onMutate: async (newData) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.sessions.active.queryKey,
@@ -69,11 +58,11 @@ const useUpdateStopwatchSession = () => {
         queryKeys.sessions.active.queryKey,
       );
 
-      const tags: TagWithId[] =
-        queryClient.getQueryData(queryKeys.tags.all.queryKey) ?? [];
+      const tags: TagWithId[]
+        = queryClient.getQueryData(queryKeys.tags.all.queryKey) ?? [];
 
-      const categories: CategoryWithId[] =
-        queryClient.getQueryData(queryKeys.categories.all.queryKey) ?? [];
+      const categories: CategoryWithId[]
+        = queryClient.getQueryData(queryKeys.categories.all.queryKey) ?? [];
 
       let newCategories = undefined;
       if (newData.category_id !== undefined) {
@@ -112,6 +101,19 @@ const useUpdateStopwatchSession = () => {
 
       return { previousActiveSessions };
     },
+    onError: (error, _, context) => {
+      if (context?.previousActiveSessions) {
+        queryClient.setQueryData(
+          queryKeys.sessions.active.queryKey,
+          context.previousActiveSessions,
+        );
+      }
+      toast({
+        description: error.message,
+        title: "Error updating session",
+        variant: "destructive",
+      });
+    },
     onSettled: async () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions.active.queryKey,
@@ -122,7 +124,7 @@ const useUpdateStopwatchSession = () => {
         queryKey: queryKeys.sessions.active.queryKey,
       });
       toast({
-        description: `Session updated successfully!`,
+        description: "Session updated successfully!",
         variant: "default",
       });
     },
@@ -150,7 +152,7 @@ const useUpdateScheduledSession = () => {
         queryKey: queryKeys.sessions._def,
       });
       toast({
-        description: `Session updated successfully!`,
+        description: "Session updated successfully!",
         variant: "default",
       });
     },

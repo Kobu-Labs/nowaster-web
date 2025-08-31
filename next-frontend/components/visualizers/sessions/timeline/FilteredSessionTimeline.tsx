@@ -4,10 +4,10 @@ import { Separator } from "@/components/shadcn/separator";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
 import { SessionTimeline } from "@/components/visualizers/sessions/timeline/SessionTimeline";
-import type { FilterValueFiller} from "@/state/chart-filter";
+import type { FilterValueFiller } from "@/state/chart-filter";
 import { overwriteData } from "@/state/chart-filter";
 import { ArrowBigRight } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useCallback } from "react";
 
 export const FilteredSessionTimeline: FC = () => {
@@ -15,7 +15,7 @@ export const FilteredSessionTimeline: FC = () => {
 
   const setFilterData = useCallback(
     (filler: FilterValueFiller) =>
-      { setFilter((oldState) => overwriteData(oldState, filler)); },
+    { setFilter((oldState) => overwriteData(oldState, filler)); },
     [setFilter],
   );
 
@@ -30,15 +30,13 @@ export const FilteredSessionTimeline: FC = () => {
         <div className="flex items-center gap-2">
           <DateTimePicker
             onSelect={(val) =>
-              val && setFilterData({ endTimeFrom: { value: val } })
-            }
+              val && setFilterData({ endTimeFrom: { value: val } })}
             selected={filter.data.endTimeFrom?.value}
           />
           <ArrowBigRight className="w-20" />
           <DateTimePicker
             onSelect={(val) =>
-              val && setFilterData({ endTimeTo: { value: val } })
-            }
+              val && setFilterData({ endTimeTo: { value: val } })}
             selected={filter.data.endTimeTo?.value}
           />
         </div>

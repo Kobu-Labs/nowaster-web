@@ -18,13 +18,13 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { isBefore } from "date-fns";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import type {
   ScheduledSessionRequest,
-  ScheduledSessionWithId} from "@/api/definitions";
+  ScheduledSessionWithId } from "@/api/definitions";
 import {
   ScheduledSessionWithIdSchema,
 } from "@/api/definitions";
@@ -257,8 +257,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
                     setIsDeleteAlertOpen(false);
                   },
-                })
-              }
+                })}
             >
               Remove
             </AlertDialogAction>

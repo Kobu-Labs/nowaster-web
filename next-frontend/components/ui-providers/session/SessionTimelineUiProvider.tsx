@@ -11,6 +11,17 @@ import { EditScheduledSession } from "@/components/visualizers/sessions/form/Edi
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { sessionToNonIntersection } from "@/lib/sessions/intervals";
 import { cn } from "@/lib/utils";
+<<<<<<< HEAD
+=======
+import {
+  addHours,
+  addMilliseconds,
+  differenceInMilliseconds,
+  format,
+} from "date-fns";
+import type { FC } from "react";
+import { useMemo, useRef, useState } from "react";
+>>>>>>> d2112de (style: install stylistic)
 import type { SessionPrecursor } from "@/validation/session/creation";
 import {
     addHours,
@@ -41,10 +52,10 @@ export function SessionTimelineUiProvider({
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [sessionToEdit, setSessionToEdit] =
-    useState<null | ScheduledSessionWithId>(null);
-  const [sessionToCreate, setSessionToCreate] =
-    useState<null | SessionPrecursor>();
+  const [sessionToEdit, setSessionToEdit]
+    = useState<null | ScheduledSessionWithId>(null);
+  const [sessionToCreate, setSessionToCreate]
+    = useState<null | SessionPrecursor>();
   const timelineRef = useRef<HTMLDivElement>(null);
   const [hoveredSession, setHoveredSession] = useState<null | string>(null);
 
@@ -58,8 +69,8 @@ export function SessionTimelineUiProvider({
     sessionEndDate: Date,
   ): number => {
     // Ensure dates are within the timeline bounds
-    const clampedStartDate =
-      sessionStartDate < startDate ? startDate : sessionStartDate;
+    const clampedStartDate
+      = sessionStartDate < startDate ? startDate : sessionStartDate;
     const clampedEndDate = sessionEndDate > endDate ? endDate : sessionEndDate;
 
     const duration = differenceInMilliseconds(clampedEndDate, clampedStartDate);
@@ -132,9 +143,15 @@ export function SessionTimelineUiProvider({
   // Function to handle mouse up after drag
   const handleMouseUp = () => {
     if (
+<<<<<<< HEAD
       isDragging &&
       dragStart !== null && // Only create session if drag distance is significant
       dragStart.end - dragStart.start > 1
+=======
+      isDragging
+      && dragStart !== null // Only create session if drag distance is significant
+      && dragStart.end - dragStart.start > 1
+>>>>>>> d2112de (style: install stylistic)
     ) {
       const sessionStartDate = percentToDate(dragStart.start);
       const sessionEndDate = percentToDate(dragStart.end);
@@ -232,8 +249,8 @@ export function SessionTimelineUiProvider({
   };
 
   // Calculate drag selection area
-  const dragSelectionStyle =
-    isDragging && dragStart !== null
+  const dragSelectionStyle
+    = isDragging && dragStart !== null
       ? {
           backgroundColor: "#330e29",
           border: "2px dashed #630e20",
@@ -255,7 +272,7 @@ export function SessionTimelineUiProvider({
     return format(result, "MMM d, HH:mm");
   };
 
-  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[] }> = ({
+  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[]; }> = ({
     sessions,
   }) => {
     return (
@@ -275,8 +292,8 @@ export function SessionTimelineUiProvider({
                 "absolute overflow-hidden rounded-md cursor-pointer transition-all",
                 "hover:z-50 hover:border-pink-primary/50 hover:border-2",
                 "opacity-80 hover:opacity-100",
-                (isDragging || isEditDialogOpen || isCreateDialogOpen) &&
-                  "pointer-events-none",
+                (isDragging || isEditDialogOpen || isCreateDialogOpen)
+                && "pointer-events-none",
                 hoveredSession === session.id && "gradient-card-solid",
               )}
               key={session.id}
@@ -348,6 +365,12 @@ export function SessionTimelineUiProvider({
               <DialogTitle>Create Session</DialogTitle>
             </DialogHeader>
             <ScheduledSessionCreationForm
+<<<<<<< HEAD
+=======
+              onSave={() => {
+                setIsCreateDialogOpen(false);
+              }}
+>>>>>>> d2112de (style: install stylistic)
               precursor={sessionToCreate}
               onCreate={() => setIsCreateDialogOpen(false)}
             />

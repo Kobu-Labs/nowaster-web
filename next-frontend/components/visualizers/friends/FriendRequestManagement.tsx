@@ -56,39 +56,43 @@ export const FriendRequestsManagement = () => {
       </TabsList>
 
       <TabsContent className="space-y-4" value="incoming">
-        {incomingRequests.data.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-muted-foreground">No incoming friend requests</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {incomingRequests.data.map((request) => (
-              <FriendRequest
-                direction={"incoming"}
-                key={request.id}
-                request={request}
-              />
-            ))}
-          </div>
-        )}
+        {incomingRequests.data.length === 0
+          ? (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No incoming friend requests</p>
+              </div>
+            )
+          : (
+              <div className="space-y-4">
+                {incomingRequests.data.map((request) => (
+                  <FriendRequest
+                    direction="incoming"
+                    key={request.id}
+                    request={request}
+                  />
+                ))}
+              </div>
+            )}
       </TabsContent>
 
       <TabsContent className="space-y-4" value="outgoing">
-        {outgoingRequests.data.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-muted-foreground">No outgoing friend requests</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {outgoingRequests.data.map((request) => (
-              <FriendRequest
-                direction={"outgoing"}
-                key={request.id}
-                request={request}
-              />
-            ))}
-          </div>
-        )}
+        {outgoingRequests.data.length === 0
+          ? (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No outgoing friend requests</p>
+              </div>
+            )
+          : (
+              <div className="space-y-4">
+                {outgoingRequests.data.map((request) => (
+                  <FriendRequest
+                    direction="outgoing"
+                    key={request.id}
+                    request={request}
+                  />
+                ))}
+              </div>
+            )}
       </TabsContent>
     </Tabs>
   );

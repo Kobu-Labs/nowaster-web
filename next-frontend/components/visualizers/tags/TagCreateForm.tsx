@@ -138,12 +138,10 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent className="text-nowrap">
-                      Read more about category specific tags on our{" "}
+                      Read more about category specific tags on our
                       <Link
                         className="text-nowrap underline hover:text-blue-500"
-                        href={
-                          "https://github.com/Kobu-Labs/nowaster-web/wiki/Category-specific-tags"
-                        }
+                        href="https://github.com/Kobu-Labs/nowaster-web/wiki/Category-specific-tags"
                         rel="noopener noreferrer"
                         target="_blank"
                       >
@@ -181,7 +179,8 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
               );
             }}
           >
-            <Save className="mr-2 h-4 w-4" /> Save
+            <Save className="mr-2 h-4 w-4" />
+            Save
           </Button>
         </CardFooter>
       </CardContent>

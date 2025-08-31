@@ -2,7 +2,7 @@ import type { ScheduledSessionWithId } from "@/api/definitions";
 import type { ColumnDef } from "@tanstack/react-table";
 import { differenceInMinutes, format } from "date-fns";
 import { DownloadIcon, Edit, Trash2 } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
@@ -64,8 +64,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
             onClick={async () =>
               await deleteSession.mutateAsync(props.sessionId, {
                 onSuccess: () => { setIsDeleteAlertOpen(false); },
-              })
-            }
+              })}
           >
             Delete
           </AlertDialogAction>
@@ -75,7 +74,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   );
 };
 
-const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
+const EditSessionButton: FC<{ session: ScheduledSessionWithId; }> = (props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -127,7 +126,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
           onClick={() => { downloadJSON(rows, "export.json"); }}
           variant="ghost"
         >
-          <DownloadIcon className="size-4"/>
+          <DownloadIcon className="size-4" />
         </Button>
       );
     },
@@ -143,7 +142,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   {
     accessorKey: "tags",
     cell: (data) => {
-      const {tags} = data.row.original;
+      const { tags } = data.row.original;
 
       return (
         <div className="flex">

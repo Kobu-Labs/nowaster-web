@@ -1,5 +1,5 @@
 import type { ScheduledSession } from "@/api/definitions";
-import type { VariantProps} from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { FC } from "react";
 
@@ -17,8 +17,8 @@ import { CalendarSync } from "lucide-react";
 type SessionCardProps = {
   durationElement?: (startDate: Date, endDate: Date) => React.ReactNode;
   session: ScheduledSession;
-} & React.HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof historyCardVariants>;
+} & React.HTMLAttributes<HTMLDivElement>
+& VariantProps<typeof historyCardVariants>;
 
 const historyCardVariants = cva("hover:cursor-pointer", {
   defaultVariants: {

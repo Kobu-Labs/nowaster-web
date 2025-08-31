@@ -32,12 +32,9 @@ export const getFormattedTimeDifference = (from: Date, to: Date) => {
 };
 
 export const randomColor = (): string => {
-  return (
-    `#${ 
-    Math.floor(Math.random() * 0xFF_FF_FF)
-      .toString(16)
-      .padStart(6, "0")}`
-  );
+  return `#${Math.floor(Math.random() * 0xFF_FF_FF)
+    .toString(16)
+    .padStart(6, "0")}`;
 };
 
 export const isHexColor = (str: string) => /^#([0-9A-F]{3}){2}$/i.test(str);
@@ -65,7 +62,9 @@ export function countLeaves(obj: any): number {
   const isObject = (val: any): val is object => typeof val === "object";
 
   const isTruthy = (val: any) => {
-    if (Array.isArray(val) && val.length === 0) {return false;}
+    if (Array.isArray(val) && val.length === 0) {
+      return false;
+    }
     return Boolean(val);
   };
 
@@ -138,7 +137,7 @@ export const translateFilterPrecursor = (
 
 export const emptyStringToUndefined = (
   value: null | string | undefined,
-  options?: { trim?: boolean },
+  options?: { trim?: boolean; },
 ): string | undefined => {
   let workingValue = value;
   if (options?.trim) {

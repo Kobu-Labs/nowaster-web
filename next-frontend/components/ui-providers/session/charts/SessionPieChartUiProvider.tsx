@@ -75,8 +75,8 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   >(undefined);
 
   // Use external activeIndex if provided, otherwise use internal state
-  const activeIndex =
-    props.activeIndex === undefined
+  const activeIndex
+    = props.activeIndex === undefined
       ? internalActiveIndex
       : (props.activeIndex ?? undefined);
 
@@ -104,7 +104,7 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
       <ResponsiveContainer
         className="flex items-center justify-center"
         height={180}
-        width={"100%"}
+        width="100%"
       >
         <div className="flex items-center justify-center text-muted-foreground">
           No sessions
@@ -114,7 +114,7 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   }
 
   return (
-    <ResponsiveContainer height={180} width={"100%"}>
+    <ResponsiveContainer height={180} width="100%">
       <PieChart
         onMouseLeave={() => {
           handleActiveIndexChange(undefined);
@@ -148,7 +148,7 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           })}
           {activeIndex === undefined && (
             <Label
-              fill={"#fff"}
+              fill="#fff"
               position="center"
               value={formatTime(
                 props.data.reduce((acc, curr) => acc + curr.value, 0),

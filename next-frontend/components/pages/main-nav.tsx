@@ -34,7 +34,8 @@ export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
                     "block h-0.5 max-w-0 bg-accent-foreground transition-all duration-200 group-hover:max-w-full",
                     currentPath === item.href && "max-w-full",
                   )}
-                ></span>
+                >
+                </span>
               </div>
             </Link>
           ),

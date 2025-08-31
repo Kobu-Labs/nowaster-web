@@ -15,10 +15,10 @@ export const TotalSessionsKpiCard: FC<TotalSessionsKpiCardProps> = () => {
 
   return (
     <KpiCardUiProvider
-      description={"Many more to go.."}
+      description="Many more to go.."
       error={stats.isError}
       loading={stats.isLoading}
-      title={"Total Sessions"}
+      title="Total Sessions"
       value={stats.data}
     >
       <AlignVerticalDistributeEnd />

@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { FC } from "react";
 
 export const FriendRequestAcceptedNotificationItem: FC<
-  { data: FriendRequestAcceptedData } & NotificationItemProps
+  { data: FriendRequestAcceptedData; } & NotificationItemProps
 > = (props) => {
   return (
     <div
@@ -28,7 +28,7 @@ export const FriendRequestAcceptedNotificationItem: FC<
         </div>
 
         <div className="text-sm">
-          <span className="text-accent/70">{props.data.accepter.username}</span>{" "}
+          <span className="text-accent/70">{props.data.accepter.username}</span>
           <span>accepted your friend request</span>
         </div>
 

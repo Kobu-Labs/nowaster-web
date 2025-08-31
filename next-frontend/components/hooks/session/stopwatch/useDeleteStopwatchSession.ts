@@ -6,7 +6,7 @@ export const useDeleteStopwatchSession = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id }: { id: string }) =>
+    mutationFn: async ({ id }: { id: string; }) =>
       await StopwatchApi.remove({ id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({

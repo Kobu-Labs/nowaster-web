@@ -10,7 +10,7 @@ import type { VisibilityFlags } from "@/api/definitions/models/user";
 export class VisibilityUtils {
   // Permission bits (must match backend exactly)
   private static readonly FRIENDS = Math.trunc(1); // 1
-  private static readonly GROUPS = 1 << 1;  // 2
+  private static readonly GROUPS = 1 << 1; // 2
 
   /**
    * Creates visibility flags for friends only
@@ -27,7 +27,10 @@ export class VisibilityUtils {
     visible_to_groups: boolean;
     visible_to_public: boolean;
   }): VisibilityFlags {
-    return this.fromFlags(response.visible_to_friends, response.visible_to_groups);
+    return this.fromFlags(
+      response.visible_to_friends,
+      response.visible_to_groups,
+    );
   }
 
   /**
@@ -35,8 +38,12 @@ export class VisibilityUtils {
    */
   static fromFlags(friends: boolean, groups: boolean): VisibilityFlags {
     let rawValue = 0;
-    if (friends) {rawValue |= this.FRIENDS;}
-    if (groups) {rawValue |= this.GROUPS;}
+    if (friends) {
+      rawValue |= this.FRIENDS;
+    }
+    if (groups) {
+      rawValue |= this.GROUPS;
+    }
     return this.fromRaw(rawValue);
   }
 
@@ -80,10 +87,22 @@ export class VisibilityUtils {
    */
   static getLabels() {
     return {
-      friends: { description: "Your friends can see your activity", title: "Friends" },
-      groups: { description: "Group members can see your activity", title: "Groups" },
-      private: { description: "Only you can see your activity", title: "Private" },
-      public: { description: "Everyone can see your activity", title: "Public" },
+      friends: {
+        description: "Your friends can see your activity",
+        title: "Friends",
+      },
+      groups: {
+        description: "Group members can see your activity",
+        title: "Groups",
+      },
+      private: {
+        description: "Only you can see your activity",
+        title: "Private",
+      },
+      public: {
+        description: "Everyone can see your activity",
+        title: "Public",
+      },
     };
   }
 
