@@ -18,7 +18,7 @@ import { fuzzyFindSearch } from "@/lib/searching";
 import { cn, randomColor } from "@/lib/utils";
 import type { CategoryWithId } from "api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 
 export interface CategoryPickerUiProviderProps {
@@ -65,8 +65,8 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
 ) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [newCategoryColor, setNewCategoryColor] =
-    useState<string>(randomColor());
+  const [newCategoryColor, setNewCategoryColor]
+    = useState<string>(randomColor());
 
   const { mutateAsync: createCategory } = useCreateCategory();
 
@@ -77,8 +77,8 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
     matchStrategy(category, searchTerm),
   );
 
-  const displayStrategy =
-    props.categoryDisplayStrategy ?? showSelectedCategoryFirst;
+  const displayStrategy
+    = props.categoryDisplayStrategy ?? showSelectedCategoryFirst;
   categoriesInDisplayOrder = displayStrategy(
     props.selectedCategories,
     categoriesInDisplayOrder,
@@ -113,12 +113,12 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
-                    <CategoryBadge
-                      color={category.color}
-                      key={category.id}
-                      name={category.name}
-                    />
-                  ))}
+                      <CategoryBadge
+                        color={category.color}
+                        key={category.id}
+                        name={category.name}
+                      />
+                    ))}
               </ScrollArea>
             </div>
           </div>
@@ -128,11 +128,11 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
         <Command shouldFilter={false}>
           <CommandInput
             onValueChange={setSearchTerm}
-            placeholder={"Search categories"}
+            placeholder="Search categories"
             value={searchTerm}
           />
-          {searchTerm &&
-            props.availableCategories.every(
+          {searchTerm
+            && props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
             <Button
@@ -149,8 +149,7 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
                       setNewCategoryColor(randomColor());
                     },
                   },
-                )
-              }
+                )}
               variant="ghost"
             >
               <p>Create</p>
@@ -190,10 +189,10 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
               </ScrollArea>
             </CommandGroup>
           )}
-          {categoriesInDisplayOrder.length === 0 &&
-            searchTerm.trim().length === 0 && (
+          {categoriesInDisplayOrder.length === 0
+            && searchTerm.trim().length === 0 && (
             <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
-                Type to create!
+              Type to create!
             </div>
           )}
         </Command>

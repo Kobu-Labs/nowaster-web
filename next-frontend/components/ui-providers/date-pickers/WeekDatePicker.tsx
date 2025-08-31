@@ -54,11 +54,11 @@ export const WeekDatePicker: FC<MonthDatePickerProps> = (props) => {
               "w-fit justify-start text-left font-normal",
               !date && "text-muted-foreground",
             )}
-            variant={"outline"}
+            variant="outline"
           >
             <CalendarIcon className="mr-2 size-4" />
-            {`${format(range.from, "PPP") 
-              } - ${ 
+            {`${format(range.from, "PPP")
+            } - ${
               format(range.to, "PPP")}`}
           </Button>
         </PopoverTrigger>

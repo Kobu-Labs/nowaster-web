@@ -12,4 +12,4 @@ export const sessionFilter = z.object({
   toStartTime: dateFilter,
 }).partial();
 
-export type SessionFilter = z.infer<typeof sessionFilter>
+export type SessionFilter = z.infer<typeof sessionFilter>;

@@ -11,9 +11,9 @@ import { DailyIntervalPicker } from "@/components/ui-providers/date-pickers/inte
 import { daysOfWeek } from "@/lib/date-utils";
 
 export interface WeeklyIntervalPickerProps {
-  onSelect: (value: { day: number; hours: number; minutes: number }) => void;
+  onSelect: (value: { day: number; hours: number; minutes: number; }) => void;
   orientation?: "horizontal" | "vertical";
-  selected?: { day: number; hours: number; minutes: number };
+  selected?: { day: number; hours: number; minutes: number; };
 }
 
 export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
@@ -29,12 +29,11 @@ export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
               className="h-12 text-xs font-medium text-muted-foreground hover:text-white"
               key={day.value}
               onClick={() =>
-                { props.onSelect({
-                  day: day.value,
-                  hours: props.selected?.hours ?? 0,
-                  minutes: props.selected?.minutes ?? 0,
-                }); }
-              }
+              { props.onSelect({
+                day: day.value,
+                hours: props.selected?.hours ?? 0,
+                minutes: props.selected?.minutes ?? 0,
+              }); }}
               size="sm"
               type="button"
               variant={props.selected?.day === day.value ? "default" : "ghost"}
@@ -47,12 +46,11 @@ export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
         <Separator className="my-4" />
         <DailyIntervalPicker
           onSelect={(val) =>
-            { props.onSelect({
-              day: props.selected?.day ?? 0,
-              hours: val.hours,
-              minutes: val.minutes,
-            }); }
-          }
+          { props.onSelect({
+            day: props.selected?.day ?? 0,
+            hours: val.hours,
+            minutes: val.minutes,
+          }); }}
           orientation={props.orientation}
           selected={props.selected}
         />

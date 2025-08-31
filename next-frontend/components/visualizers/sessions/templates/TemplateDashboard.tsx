@@ -5,7 +5,7 @@ import { CreateTemplateFormDialog } from "@/components/visualizers/sessions/temp
 import { TemplateOverview } from "@/components/visualizers/sessions/templates/TemplateOverview";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Plus, Sparkles, Zap } from "lucide-react";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 
 export const TemplateDashboard: FC = () => {
@@ -22,7 +22,12 @@ export const TemplateDashboard: FC = () => {
   }
 
   if (q.isError) {
-    return <div>Error: {q.error.message}</div>;
+    return (
+      <div>
+        Error:
+        {q.error.message}
+      </div>
+    );
   }
 
   if (q.data.length === 0) {
@@ -140,7 +145,9 @@ export const TemplateDashboard: FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-linear-to-r from-pink-500/10 to-purple-500/10 rounded-full border border-pink-200/20">
             <Sparkles className="w-3 h-3 text-pink-500" />
             <span className="text-xs font-medium bg-linear-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide">
-              {q.data.length} Template{q.data.length === 1 ? "" : "s"}
+              {q.data.length}
+              Template
+              {q.data.length === 1 ? "" : "s"}
             </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -199,17 +206,17 @@ export const TemplateDashboard: FC = () => {
                 {Math.round(
                   (q.data.reduce(
                     (sum, t) =>
-                      sum +
-                      t.sessions.reduce(
+                      sum
+                      + t.sessions.reduce(
                         (sessionSum, s) =>
-                          sessionSum +
-                          (s.end_minute_offset - s.start_minute_offset),
+                          sessionSum
+                          + (s.end_minute_offset - s.start_minute_offset),
                         0,
                       ),
                     0,
-                  ) /
-                    60) *
-                    10,
+                  )
+                  / 60)
+                * 10,
                 ) / 10}
               </div>
               <div className="text-sm text-muted-foreground">Per Cycle</div>

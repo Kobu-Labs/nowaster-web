@@ -16,15 +16,15 @@ interface GroupedDataItem<TMetadata = any> {
   value: number;
 }
 
-type KeyExtractionResult<TMetadata = any> =
+type KeyExtractionResult<TMetadata = any>
+  = | {
+    key: string;
+    metadata?: TMetadata;
+  }
   | {
-      key: string;
-      metadata?: TMetadata;
-    }
-  | {
-      key: string;
-      metadata?: TMetadata;
-    }[];
+    key: string;
+    metadata?: TMetadata;
+  }[];
 
 interface SessionPieChartProps<TMetadata = any> {
   filter?: SessionFilterPrecursor;
@@ -33,7 +33,7 @@ interface SessionPieChartProps<TMetadata = any> {
   postProcess?: (
     data: AmountByCategory<TMetadata>[],
   ) => AmountByCategory<TMetadata>[];
-  renderLegend?: FC<{ data: AmountByCategory[] }>;
+  renderLegend?: FC<{ data: AmountByCategory[]; }>;
 }
 
 export const groupData = <TMetadata = any,>(
@@ -41,7 +41,7 @@ export const groupData = <TMetadata = any,>(
   getKey: (session: ScheduledSession) => KeyExtractionResult<TMetadata>,
   groupingMethod: (session: ScheduledSession) => number,
 ): AmountByCategory<TMetadata>[] => {
-  const result: Record<string, { metadata?: TMetadata; value: number }> = {};
+  const result: Record<string, { metadata?: TMetadata; value: number; }> = {};
 
   sessions.forEach((session) => {
     const keyResult = getKey(session);
@@ -64,10 +64,10 @@ const SessionPieChartInner = <TMetadata = any,>(
   props: SessionPieChartProps<TMetadata>,
 ) => {
   // differenceInMinutes as default grouping method
-  const groupingMethod =
-    props.groupingMethod ??
-    ((session: ScheduledSession) =>
-      differenceInMinutes(session.endTime, session.startTime));
+  const groupingMethod
+    = props.groupingMethod
+      ?? ((session: ScheduledSession) =>
+        differenceInMinutes(session.endTime, session.startTime));
 
   const context = use(ActiveIndexContext);
 

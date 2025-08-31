@@ -15,7 +15,7 @@ import Link from "next/link";
 import type { FC } from "react";
 
 export const NewFriendRequestNotificationItem: FC<
-  { data: NewFriendRequestData } & NotificationItemProps
+  { data: NewFriendRequestData; } & NotificationItemProps
 > = (props) => {
   const setNotificationsOpen = useSetAtom(notificationPopoverOpenAtom);
   const { toast } = useToast();
@@ -24,7 +24,7 @@ export const NewFriendRequestNotificationItem: FC<
   const markSeenMutation = useMarkNotificationsSeen();
 
   const updateFriendRequest = useMutation({
-    mutationFn: async ({ status }: { status: "accepted" | "rejected" }) => {
+    mutationFn: async ({ status }: { status: "accepted" | "rejected"; }) => {
       return await FriendRequestApi.update({
         request_id: props.data.request_id,
         status,
@@ -49,7 +49,8 @@ export const NewFriendRequestNotificationItem: FC<
                 username={props.data.requestor.username}
               />
               <span>
-                You are now friends with {props.data.requestor.username}
+                You are now friends with
+                {props.data.requestor.username}
               </span>
             </div>
           ),
@@ -66,7 +67,7 @@ export const NewFriendRequestNotificationItem: FC<
         "flex items-start gap-3 p-4 cursor-pointer transition-colors group relative bg-pink-subtle",
         !props.notification.seen && "border-l-4 border-l-pink-400",
       )}
-      href={"/home/friends?tab=requests"}
+      href="/home/friends?tab=requests"
       onClick={() => {
         setNotificationsOpen(false);
       }}
@@ -86,7 +87,7 @@ export const NewFriendRequestNotificationItem: FC<
         <div className="text-sm">
           <span className="text-accent/70">
             {props.data.requestor.username}
-          </span>{" "}
+          </span>
           <span>wants to be your friend</span>
         </div>
 

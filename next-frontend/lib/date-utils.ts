@@ -4,30 +4,30 @@ import { addDays, addWeeks, format, set } from "date-fns";
 
 export const numberToDay = (value: number): string => {
   switch (value) {
-  case 0: {
-    return "Sunday";
-  }
-  case 1: {
-    return "Monday";
-  }
-  case 2: {
-    return "Tuesday";
-  }
-  case 3: {
-    return "Wednesday";
-  }
-  case 4: {
-    return "Thursday";
-  }
-  case 5: {
-    return "Friday";
-  }
-  case 6: {
-    return "Saturday";
-  }
-  default: {
-    throw new Error("Invalid value for day of the week");
-  }
+    case 0: {
+      return "Sunday";
+    }
+    case 1: {
+      return "Monday";
+    }
+    case 2: {
+      return "Tuesday";
+    }
+    case 3: {
+      return "Wednesday";
+    }
+    case 4: {
+      return "Thursday";
+    }
+    case 5: {
+      return "Friday";
+    }
+    case 6: {
+      return "Saturday";
+    }
+    default: {
+      throw new Error("Invalid value for day of the week");
+    }
   }
 };
 
@@ -45,22 +45,22 @@ export const formatIntervalPickerLabel = (
   interval: RecurringSessionInterval,
   value:
     | {
-        day: number;
-        hours: number;
-        minutes: number;
-      }
+      day: number;
+      hours: number;
+      minutes: number;
+    }
     | undefined,
 ) => {
   if (value === undefined) {
     return "Pick a value";
   }
   switch (interval) {
-  case "daily": {
-    return `${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
-  }
-  case "weekly": {
-    return `${numberToDay(value.day).slice(0, 3)}, ${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
-  }
+    case "daily": {
+      return `${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
+    }
+    case "weekly": {
+      return `${numberToDay(value.day).slice(0, 3)}, ${zeroPad(value.hours)}:${zeroPad(value.minutes)}`;
+    }
   }
 };
 
@@ -73,12 +73,12 @@ export const incrementByInterval = (
   date: Date,
 ): Date => {
   switch (interval) {
-  case "daily": {
-    return addDays(date, 1);
-  }
-  case "weekly": {
-    return addWeeks(date, 1);
-  }
+    case "daily": {
+      return addDays(date, 1);
+    }
+    case "weekly": {
+      return addWeeks(date, 1);
+    }
   }
 };
 
@@ -122,11 +122,11 @@ export const getDaytimeAfterDate = (
   };
 
   switch (interval) {
-  case "daily": {
-    return dailyHandler();
-  }
-  case "weekly": {
-    return weeklyHandler();
-  }
+    case "daily": {
+      return dailyHandler();
+    }
+    case "weekly": {
+      return weeklyHandler();
+    }
   }
 };

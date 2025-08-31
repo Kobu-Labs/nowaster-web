@@ -4,7 +4,7 @@ import { SessionTimelineUiProvider } from "@/components/ui-providers/session/Ses
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { subHours } from "date-fns";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useMemo } from "react";
 
 interface SessionTimelineProps {
@@ -31,7 +31,12 @@ export const SessionTimeline: FC<SessionTimelineProps> = (props) => {
   }
 
   if (sessions.isError) {
-    return <div>Error: {sessions.error.message}</div>;
+    return (
+      <div>
+        Error:
+        {sessions.error.message}
+      </div>
+    );
   }
 
   return (

@@ -49,7 +49,7 @@ export default function SignInPage() {
                   Welcome Back
                 </h1>
                 <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                  Track your time efficiently with{" "}
+                  Track your time efficiently with
                   <span className="font-semibold text-accent">Nowaster</span>
                 </p>
                 <div className="mt-8 space-y-4 text-sm text-gray-500 dark:text-gray-400">
@@ -110,15 +110,16 @@ export default function SignInPage() {
                                 >
                                   <Clerk.Loading scope="provider:github">
                                     {(isLoading) =>
-                                      isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <Github className="mr-2 size-4" />
-                                          Continue with GitHub
-                                        </>
-                                      )
-                                    }
+                                      isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            <>
+                                              <Github className="mr-2 size-4" />
+                                              Continue with GitHub
+                                            </>
+                                          )}
                                   </Clerk.Loading>
                                 </Button>
                               </Clerk.Connection>
@@ -132,15 +133,16 @@ export default function SignInPage() {
                                 >
                                   <Clerk.Loading scope="provider:discord">
                                     {(isLoading) =>
-                                      isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <DiscordLogoIcon className="mr-2 size-4" />
-                                          Continue with Discord
-                                        </>
-                                      )
-                                    }
+                                      isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            <>
+                                              <DiscordLogoIcon className="mr-2 size-4" />
+                                              Continue with Discord
+                                            </>
+                                          )}
                                   </Clerk.Loading>
                                 </Button>
                               </Clerk.Connection>
@@ -154,15 +156,16 @@ export default function SignInPage() {
                                 >
                                   <Clerk.Loading scope="provider:google">
                                     {(isLoading) =>
-                                      isLoading ? (
-                                        <LoaderCircle className="size-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <GoogleIcon className="mr-2 size-4" />
-                                          Continue with Google
-                                        </>
-                                      )
-                                    }
+                                      isLoading
+                                        ? (
+                                            <LoaderCircle className="size-4 animate-spin" />
+                                          )
+                                        : (
+                                            <>
+                                              <GoogleIcon className="mr-2 size-4" />
+                                              Continue with Google
+                                            </>
+                                          )}
                                   </Clerk.Loading>
                                 </Button>
                               </Clerk.Connection>
@@ -171,7 +174,7 @@ export default function SignInPage() {
                           <CardFooter className="pt-6">
                             <div className="w-full text-center">
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Don&apos;t have an account?{" "}
+                                Don&apos;t have an account?
                                 <Clerk.Link
                                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
                                   navigate="sign-up"

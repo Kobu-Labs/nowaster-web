@@ -95,7 +95,7 @@ const customTooltip = (data: any, colors: Record<string, string>) => {
         return (
           <div className="flex items-center justify-between gap-2" key={i}>
             <p
-              className={"text-(--legend-color)"}
+              className="text-(--legend-color)"
               key={`${category}category`}
               style={
                 { "--legend-color": colors[category] } as React.CSSProperties
@@ -104,7 +104,7 @@ const customTooltip = (data: any, colors: Record<string, string>) => {
               {category}
             </p>
             <p
-              className={"text-(--legend-color)"}
+              className="text-(--legend-color)"
               key={`${category}time`}
               style={
                 { "--legend-color": colors[category] } as React.CSSProperties
@@ -117,8 +117,8 @@ const customTooltip = (data: any, colors: Record<string, string>) => {
       })}
       <Separator className="h-0.5" />
       <div className="flex items-center justify-between gap-2">
-        <p className={"text-(--legend-color)"}>Total Time</p>
-        <p className={"text-(--legend-color)"}>{formatTime(totalTime)}</p>
+        <p className="text-(--legend-color)">Total Time</p>
+        <p className="text-(--legend-color)">{formatTime(totalTime)}</p>
       </div>
     </Card>
   );

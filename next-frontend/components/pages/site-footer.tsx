@@ -9,7 +9,9 @@ export const SiteFooter = () => {
         <div className="flex flex-col items-center gap-4 md:flex-row md:gap-2">
           <Clock className="h-6 w-6" />
           <p className="text-center text-sm leading-loose md:text-left">
-            &copy; {new Date().getFullYear()} Nowaster. All rights reserved.
+            &copy;
+            {new Date().getFullYear()}
+            Nowaster. All rights reserved.
           </p>
         </div>
         <Button className="flex items-center gap-4" variant="link">

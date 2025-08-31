@@ -83,7 +83,9 @@ export default function TagsPage() {
   const deleteTag = useDeleteTag();
 
   const filteredAndSortedTags = useMemo(() => {
-    if (!tagsQuery.data) {return [];}
+    if (!tagsQuery.data) {
+      return [];
+    }
 
     const filtered = tagsQuery.data.filter((tag) =>
       tag.label.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -93,18 +95,18 @@ export default function TagsPage() {
       let comparison = 0;
 
       switch (sortBy) {
-      case "name": {
-        comparison = a.label.localeCompare(b.label);
-        break;
-      }
-      case "recent": {
-        comparison = 0;
-        break;
-      }
-      case "usages": {
-        comparison = a.usages - b.usages;
-        break;
-      }
+        case "name": {
+          comparison = a.label.localeCompare(b.label);
+          break;
+        }
+        case "recent": {
+          comparison = 0;
+          break;
+        }
+        case "usages": {
+          comparison = a.usages - b.usages;
+          break;
+        }
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -236,7 +238,11 @@ export default function TagsPage() {
               New Tag
             </Button>
           </DialogTrigger>
-          <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
+          <DialogContent
+            onInteractOutside={(e) => {
+              e.preventDefault();
+            }}
+          >
             <DialogHeader>
               <DialogTitle>Create New Tag</DialogTitle>
               <DialogDescription>
@@ -248,7 +254,9 @@ export default function TagsPage() {
                 <Label htmlFor="label">Label</Label>
                 <Input
                   id="label"
-                  onChange={(e) => { setNewTagLabel(e.target.value); }}
+                  onChange={(e) => {
+                    setNewTagLabel(e.target.value);
+                  }}
                   placeholder="Tag label..."
                   value={newTagLabel}
                 />
@@ -265,7 +273,9 @@ export default function TagsPage() {
             </div>
             <DialogFooter>
               <Button
-                onClick={() => { setShowCreateDialog(false); }}
+                onClick={() => {
+                  setShowCreateDialog(false);
+                }}
                 variant="outline"
               >
                 Cancel
@@ -315,11 +325,13 @@ export default function TagsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mostUsedTag ? (
-                <TagBadge tag={mostUsedTag} variant="auto" />
-              ) : (
-                "None"
-              )}
+              {mostUsedTag
+                ? (
+                    <TagBadge tag={mostUsedTag} variant="auto" />
+                  )
+                : (
+                    "None"
+                  )}
             </div>
             <p className="text-xs text-muted-foreground">
               Tag with the most session usages
@@ -333,7 +345,9 @@ export default function TagsPage() {
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-10"
-            onChange={(e) => { setSearchQuery(e.target.value); }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
             placeholder="Search tags..."
             value={searchQuery}
           />
@@ -342,32 +356,40 @@ export default function TagsPage() {
         <div className="flex gap-2">
           <Button
             className="flex items-center gap-1"
-            onClick={() => { toggleSort("name"); }}
+            onClick={() => {
+              toggleSort("name");
+            }}
             size="sm"
             variant={sortBy === "name" ? "default" : "outline"}
           >
             Name
-            {sortBy === "name" &&
-              (sortDirection === "asc" ? (
-                <SortAsc className="h-3 w-3" />
-              ) : (
-                <SortDesc className="h-3 w-3" />
-              ))}
+            {sortBy === "name"
+              && (sortDirection === "asc"
+                ? (
+                    <SortAsc className="h-3 w-3" />
+                  )
+                : (
+                    <SortDesc className="h-3 w-3" />
+                  ))}
           </Button>
 
           <Button
             className="flex items-center gap-1"
-            onClick={() => { toggleSort("usages"); }}
+            onClick={() => {
+              toggleSort("usages");
+            }}
             size="sm"
             variant={sortBy === "usages" ? "default" : "outline"}
           >
             Usages
-            {sortBy === "usages" &&
-              (sortDirection === "asc" ? (
-                <SortAsc className="h-3 w-3" />
-              ) : (
-                <SortDesc className="h-3 w-3" />
-              ))}
+            {sortBy === "usages"
+              && (sortDirection === "asc"
+                ? (
+                    <SortAsc className="h-3 w-3" />
+                  )
+                : (
+                    <SortDesc className="h-3 w-3" />
+                  ))}
           </Button>
         </div>
       </div>
@@ -399,7 +421,9 @@ export default function TagsPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="flex items-center gap-2 cursor-pointer"
-                      onClick={() => { openEditDialog(tag); }}
+                      onClick={() => {
+                        openEditDialog(tag);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                       Edit Tag
@@ -408,7 +432,9 @@ export default function TagsPage() {
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem
                           className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                          onSelect={(e) => { e.preventDefault(); }}
+                          onSelect={(e) => {
+                            e.preventDefault();
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                           Delete Tag
@@ -434,7 +460,9 @@ export default function TagsPage() {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => { deleteTag.mutate({ id: tag.id }); }}
+                            onClick={() => {
+                              deleteTag.mutate({ id: tag.id });
+                            }}
                           >
                             Delete
                           </AlertDialogAction>
@@ -489,7 +517,9 @@ export default function TagsPage() {
               {!searchQuery && (
                 <Button
                   className="mt-4"
-                  onClick={() => { setShowCreateDialog(true); }}
+                  onClick={() => {
+                    setShowCreateDialog(true);
+                  }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Tag
@@ -505,7 +535,11 @@ export default function TagsPage() {
         onOpenChange={(open) => !open && setEditingTag(null)}
         open={!!editingTag}
       >
-        <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
+        <DialogContent
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Edit Tag</DialogTitle>
             <DialogDescription>
@@ -517,7 +551,9 @@ export default function TagsPage() {
               <Label htmlFor="edit-label">Label</Label>
               <Input
                 id="edit-label"
-                onChange={(e) => { setNewTagLabel(e.target.value); }}
+                onChange={(e) => {
+                  setNewTagLabel(e.target.value);
+                }}
                 placeholder="Tag label..."
                 value={newTagLabel}
               />
@@ -531,7 +567,12 @@ export default function TagsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => { setEditingTag(null); }} variant="outline">
+            <Button
+              onClick={() => {
+                setEditingTag(null);
+              }}
+              variant="outline"
+            >
               Cancel
             </Button>
             <Button

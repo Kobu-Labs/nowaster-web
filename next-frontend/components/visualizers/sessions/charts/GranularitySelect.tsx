@@ -48,5 +48,3 @@ export const GranularitySelect: FC<GranularitySelectProps> = (props) => {
     </Select>
   );
 };
-
-

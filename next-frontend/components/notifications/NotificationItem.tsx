@@ -21,10 +21,10 @@ interface NotificationHandlerProps {
 export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
   const genericNotifications: Notification[] = [];
   const sessionReactionNotifications: Record<string, {
-      notification: {
-        data: SessionReactionAddedData;
-      } & Notification;
-    }[]> = {};
+    notification: {
+      data: SessionReactionAddedData;
+    } & Notification;
+  }[]> = {};
 
   props.notifications.forEach((n) => {
     if (n.notification_type === "session:reaction_added") {
@@ -67,30 +67,30 @@ export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
 
 const NotificationsRegistry: FC<NotificationItemProps> = (props) => {
   switch (props.notification.notification_type) {
-  case "friend:new_request": {
-    return (
-      <NewFriendRequestNotificationItem
-        data={props.notification.data}
-        {...props}
-      />
-    );
-  }
-  case "friend:request_accepted": {
-    return (
-      <FriendRequestAcceptedNotificationItem
-        data={props.notification.data}
-        {...props}
-      />
-    );
-  }
-  case "session:reaction_added": {
+    case "friend:new_request": {
+      return (
+        <NewFriendRequestNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "friend:request_accepted": {
+      return (
+        <FriendRequestAcceptedNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "session:reaction_added": {
     // INFO: handled by NotificationsHandler
-    return null;
-  }
-  case "system:new_release": {
-    return (
-      <NewReleaseNotificationItem data={props.notification.data} {...props} />
-    );
-  }
+      return null;
+    }
+    case "system:new_release": {
+      return (
+        <NewReleaseNotificationItem data={props.notification.data} {...props} />
+      );
+    }
   }
 };

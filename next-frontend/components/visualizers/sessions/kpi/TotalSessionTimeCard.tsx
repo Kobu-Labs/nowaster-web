@@ -6,9 +6,9 @@ import { differenceInMinutes } from "date-fns";
 import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import type {
-  KpiCardUiProviderProps} from "@/components/ui-providers/KpiCardUiProvider";
+  KpiCardUiProviderProps } from "@/components/ui-providers/KpiCardUiProvider";
 import {
-  KpiCardUiProvider
+  KpiCardUiProvider,
 } from "@/components/ui-providers/KpiCardUiProvider";
 import { Clock1 } from "lucide-react";
 

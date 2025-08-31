@@ -9,7 +9,7 @@ import {
 import { StopwatchApi } from "@/api";
 import type {
   StopwatchSessionRequest,
-  StopwatchSessionWithId} from "@/api/definitions";
+  StopwatchSessionWithId } from "@/api/definitions";
 import {
   CategoryWithIdSchema,
   ScheduledSessionRequestSchema,
@@ -37,7 +37,7 @@ import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { differenceInSeconds, isAfter, isBefore } from "date-fns";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -167,21 +167,21 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                   return (
                     <FormItem className="flex flex-col gap-2">
                       <FormLabel className="flex items-center gap-2">
-                        {`Start Time`}
-                        {value &&
-                          isAfter(new Date(), value) &&
-                          ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
+                        Start Time
+                        {value
+                          && isAfter(new Date(), value)
+                          && ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
                       </FormLabel>
                       <FormControl>
                         <DateTimePicker
                           onSelect={(val) => {
                             if (val && val && isBefore(new Date(), val)) {
-                                form.setError("startTime", {
-                                  message:
+                              form.setError("startTime", {
+                                message:
                                     "Cannot set start time in the future",
-                                });
-                                return;
-                              }
+                              });
+                              return;
+                            }
 
                             field.onChange(val);
                             form.clearErrors("startTime");
@@ -238,11 +238,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 <Button
                   loading={deleteSessionMutation.isPending}
                   onClick={() =>
-                    { deleteSessionMutation.mutate(
-                      { id: props.session.id },
-                      { onSuccess: props.onDelete },
-                    ); }
-                  }
+                  { deleteSessionMutation.mutate(
+                    { id: props.session.id },
+                    { onSuccess: props.onDelete },
+                  ); }}
                   type="button"
                   variant="destructive"
                 >
@@ -277,7 +276,7 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                           await StopwatchApi.remove({ id: props.session.id });
 
                           await createSession.mutateAsync(convertedSession, {
-                             
+
                             onSuccess: async () => {
                               await queryClient.invalidateQueries({
                                 queryKey: queryKeys.sessions.active._def,

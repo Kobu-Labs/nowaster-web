@@ -198,8 +198,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       className={cn(
                         "flex items-center gap-2",
                         currentLink === item.url && "bg-accent",
-                        currentLink !== item.url &&
-                          "hover:bg-sidebar-accent/50",
+                        currentLink !== item.url
+                        && "hover:bg-sidebar-accent/50",
                       )}
                       href={item.url}
                     >
@@ -223,16 +223,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link
                     className={cn(
                       "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
-                      currentLink === `/home/category/${  category.id}` &&
-                        "bg-accent",
-                      currentLink !== `/home/category/${  category.id}` &&
-                        "hover:bg-sidebar-accent/50",
+                      currentLink === `/home/category/${category.id}`
+                      && "bg-accent",
+                      currentLink !== `/home/category/${category.id}`
+                      && "hover:bg-sidebar-accent/50",
                     )}
-                    href={`/home/category/${  category.id}`}
+                    href={`/home/category/${category.id}`}
                     key={category.id}
                     onClick={() =>
-                      { handleLinkClick(`/home/category/${  category.id}`); }
-                    }
+                    { handleLinkClick(`/home/category/${category.id}`); }}
                   >
                     <CategoryBadge
                       color={category.color}
@@ -245,7 +244,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 ))}
               {sortedCategories.length > SHOW_CATEGORY_AMOUNT && (
                 <Link
-                  href={"/home/category"}
+                  href="/home/category"
                   onClick={() => { handleLinkClick("/home/category/"); }}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
@@ -268,13 +267,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Link
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
-                    currentLink === `/home/tags/${  tag.id}` && "bg-accent",
-                    currentLink !== `/home/tags/${  tag.id}` &&
-                      "hover:bg-sidebar-accent/50",
+                    currentLink === `/home/tags/${tag.id}` && "bg-accent",
+                    currentLink !== `/home/tags/${tag.id}`
+                    && "hover:bg-sidebar-accent/50",
                   )}
-                  href={`/home/tags/${  tag.id}`}
+                  href={`/home/tags/${tag.id}`}
                   key={tag.id}
-                  onClick={() => { handleLinkClick(`/home/tags/${  tag.id}`); }}
+                  onClick={() => { handleLinkClick(`/home/tags/${tag.id}`); }}
                 >
                   <TagBadge tag={tag} variant="auto" />
                   <Badge className="text-xs" variant="outline">
@@ -284,7 +283,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               ))}
               {sortedTags.length > SHOW_TAG_AMOUNT && (
                 <Link
-                  href={"/home/tags"}
+                  href="/home/tags"
                   onClick={() => { handleLinkClick("/home/tags/"); }}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">

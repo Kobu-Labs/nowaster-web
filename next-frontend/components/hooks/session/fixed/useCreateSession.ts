@@ -33,7 +33,7 @@ export const useCreateScheduledSession = () => {
       });
 
       toast({
-        description: `Session created successfully!`,
+        description: "Session created successfully!",
         variant: "default",
       });
     },

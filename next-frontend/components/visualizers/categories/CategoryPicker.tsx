@@ -1,4 +1,4 @@
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState } from "react";
 
 import type { CategoryWithId } from "@/api/definitions";
@@ -20,8 +20,8 @@ type CategoryPickerProps = {
   ) => number;
   onSelectCategory?: (category: CategoryWithId) => void;
 } & (
-  | { mode: "multiple"; selectedCategories?: CategoryWithId[] | null }
-  | { mode: "single"; selectedCategory?: CategoryWithId | null }
+  | { mode: "multiple"; selectedCategories?: CategoryWithId[] | null; }
+  | { mode: "single"; selectedCategory?: CategoryWithId | null; }
 );
 
 export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
@@ -35,15 +35,15 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   // 1. switch between 'single' and 'multiple' mode
   // 2. conditionally switch whether the input is controlled or not
   // 3. pass in availableCategories as a prop
-  const isControlled =
-    props.mode === "single"
+  const isControlled
+    = props.mode === "single"
       ? props.selectedCategory !== undefined
       : props.selectedCategories !== undefined;
 
   const value = isControlled
     ? (props.mode === "single"
-      ? arrayFromUndefined(props.selectedCategory)
-      : (props.selectedCategories ?? []))
+        ? arrayFromUndefined(props.selectedCategory)
+        : (props.selectedCategories ?? []))
     : selectedCategories;
 
   const onSelectCategory = (category: CategoryWithId) => {

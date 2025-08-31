@@ -20,8 +20,8 @@ interface FriendRequestProps {
 
 export const FriendRequest: FC<FriendRequestProps> = (props) => {
   const queryClient = useQueryClient();
-  const subject =
-    props.direction === "incoming"
+  const subject
+    = props.direction === "incoming"
       ? props.request.requestor
       : props.request.recipient;
 
@@ -46,7 +46,7 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
     <Card>
       <CardContent className="p-4 flex items-center gap-2">
         <Avatar>
-          <AvatarImage alt={subject.username} src={"/placeholder.svg"} />
+          <AvatarImage alt={subject.username} src="/placeholder.svg" />
           <AvatarFallback>{getInitials(subject.username)}</AvatarFallback>
         </Avatar>
         <div>
@@ -67,10 +67,9 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
             <Button
               className="text-green-600 border-green-600 hover:bg-green-50/10 hover:text-green-700"
               onClick={() =>
-                { updateFriendRequest.mutate({
-                  status: "accepted",
-                }); }
-              }
+              { updateFriendRequest.mutate({
+                status: "accepted",
+              }); }}
               size="sm"
               variant="outline"
             >
@@ -80,10 +79,9 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
             <Button
               className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() =>
-                { updateFriendRequest.mutate({
-                  status: "rejected",
-                }); }
-              }
+              { updateFriendRequest.mutate({
+                status: "rejected",
+              }); }}
               size="sm"
               variant="outline"
             >
@@ -96,10 +94,9 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
           <Button
             className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={() =>
-              { updateFriendRequest.mutate({
-                status: "cancelled",
-              }); }
-            }
+            { updateFriendRequest.mutate({
+              status: "cancelled",
+            }); }}
             size="sm"
             variant="outline"
           >

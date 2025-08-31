@@ -113,18 +113,18 @@ export function FeedSubscriptions() {
         <div className="space-y-4">
           {subscriptions.map((subscription) => {
             switch (subscription.source_type) {
-            case "placeholder": {
-              return null;
-            }
-            case "user": {
-              return (
-                <UserSubscriptionCard
-                  key={subscription.id}
-                  subscription={subscription}
-                  user={subscription.source_data}
-                />
-              );
-            }
+              case "placeholder": {
+                return null;
+              }
+              case "user": {
+                return (
+                  <UserSubscriptionCard
+                    key={subscription.id}
+                    subscription={subscription}
+                    user={subscription.source_data}
+                  />
+                );
+              }
             }
           })}
         </div>
@@ -193,7 +193,8 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
             {userId === user.id && <Badge variant="secondary">You</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">
-            Subscribed {new Date(subscription.created_at).toLocaleDateString()}
+            Subscribed
+            {new Date(subscription.created_at).toLocaleDateString()}
           </p>
         </div>
       </div>
@@ -228,11 +229,15 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                Unsubscribe from {user.username}?
+                Unsubscribe from
+                {user.username}
+                ?
               </AlertDialogTitle>
               <AlertDialogDescription>
                 This action will permanently remove this subscription from your
-                feed. You will no longer see activities from {user.username} in
+                feed. You will no longer see activities from
+                {user.username}
+                in
                 your feed. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>

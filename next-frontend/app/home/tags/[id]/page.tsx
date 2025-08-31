@@ -19,7 +19,7 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
-export default function Page(props: { params: Promise<{ id: string }> }) {
+export default function Page(props: { params: Promise<{ id: string; }>; }) {
   const params = use(props.params);
   const tagQuery = useQuery(queryKeys.tags.byId(params.id));
 
@@ -62,7 +62,7 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
         <FilterContextProvider initialFilter={filter}>
           <FilteredSessionAreaChart
             className="col-span-full h-[400px]"
-            initialGranularity={"days-in-month"}
+            initialGranularity="days-in-month"
           />
           <div className="col-span-full">
             <BaseSessionTable
@@ -114,7 +114,7 @@ function TagDetailSkeleton() {
   );
 }
 
-function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
+function TagNotFoundError({ onRetry }: { onRetry: () => void; }) {
   const router = useRouter();
 
   return (
