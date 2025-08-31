@@ -43,12 +43,12 @@ export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
   return <span>{formatted}</span>;
 };
 
-type ScheduledSessionCreationFormProps = {
-  precursor?: SessionPrecursor;
-  onCreate?: () => void;
+interface ScheduledSessionCreationFormProps {
   onClose?: () => void;
+  onCreate?: () => void;
   onCreateAndClose?: () => void;
-};
+  precursor?: SessionPrecursor;
+}
 
 const createSessionPrecursor = z.object({
   category: CategoryWithIdSchema,
@@ -233,23 +233,23 @@ export const ScheduledSessionCreationForm: FC<
             <CardFooter className="justify-between p-0">
               {props.onClose && (
                 <Button
+                  onClick={props.onClose}
                   type="button"
                   variant="secondary"
-                  onClick={props.onClose}
                 >
                   Close
                 </Button>
               )}
               <div className="grow"></div>
               <div className="flex items-center gap-2">
-                <Button type="submit" loading={createSession.isPending}>
+                <Button loading={createSession.isPending} type="submit">
                   Submit
                 </Button>
                 {props.onCreateAndClose && (
                   <Button
-                    type="submit"
                     loading={createSession.isPending}
                     onClick={props.onCreateAndClose}
+                    type="submit"
                   >
                     Submit and Close
                   </Button>
