@@ -160,8 +160,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SessionTimer />
               <Dialog
                 modal={false}
-                open={showQuickLog}
                 onOpenChange={setShowQuickLog}
+                open={showQuickLog}
               >
                 <DialogTrigger asChild>
                   <Button
@@ -175,8 +175,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </DialogTrigger>
                 <DialogContent className="w-fit max-w-fit">
                   <ScheduledSessionCreationForm
-                    onCreateAndClose={() => setShowQuickLog(false)}
                     onClose={() => setShowQuickLog(false)}
+                    onCreateAndClose={() => setShowQuickLog(false)}
                   />
                 </DialogContent>
               </Dialog>
