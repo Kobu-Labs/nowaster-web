@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const tagColors = atom<{ [label: string]: string }>({});
+export const tagColors = atom<Record<string, string>>({});

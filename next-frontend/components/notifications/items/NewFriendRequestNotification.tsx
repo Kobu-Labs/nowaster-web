@@ -1,7 +1,7 @@
 import { FriendRequestApi } from "@/api";
-import { NewFriendRequestData } from "@/api/definitions/models/notification";
+import type { NewFriendRequestData } from "@/api/definitions/models/notification";
 import { useMarkNotificationsSeen } from "@/components/hooks/notifications/useNotifications";
-import { NotificationItemProps } from "@/components/notifications/NotificationItem";
+import type { NotificationItemProps } from "@/components/notifications/NotificationItem";
 import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/components/shadcn/use-toast";
 import { UserAvatar } from "@/components/visualizers/user/UserAvatar";
@@ -12,10 +12,10 @@ import { formatDistanceToNow } from "date-fns";
 import { useSetAtom } from "jotai";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
-import { FC } from "react";
+import type { FC } from "react";
 
 export const NewFriendRequestNotificationItem: FC<
-  NotificationItemProps & { data: NewFriendRequestData }
+  { data: NewFriendRequestData } & NotificationItemProps
 > = (props) => {
   const setNotificationsOpen = useSetAtom(notificationPopoverOpenAtom);
   const { toast } = useToast();
@@ -42,18 +42,18 @@ export const NewFriendRequestNotificationItem: FC<
 
       if (variables.status === "accepted") {
         toast({
-          title: "Friend request accepted",
           description: (
             <div className="flex items-center gap-2">
               <UserAvatar
-                username={props.data.requestor.username}
                 avatar_url={props.data.requestor.avatar_url}
+                username={props.data.requestor.username}
               />
               <span>
                 You are now friends with {props.data.requestor.username}
               </span>
             </div>
           ),
+          title: "Friend request accepted",
           variant: "default",
         });
       }
@@ -62,18 +62,18 @@ export const NewFriendRequestNotificationItem: FC<
 
   return (
     <Link
-      href={"/home/friends?tab=requests"}
       className={cn(
         "flex items-start gap-3 p-4 cursor-pointer transition-colors group relative bg-pink-subtle",
         !props.notification.seen && "border-l-4 border-l-pink-400",
       )}
+      href={"/home/friends?tab=requests"}
       onClick={() => {
         setNotificationsOpen(false);
       }}
     >
       <UserAvatar
-        username={props.data.requestor.username}
         avatar_url={props.data.requestor.avatar_url}
+        username={props.data.requestor.username}
       />
 
       <div className="flex-1 min-w-0">
@@ -95,8 +95,6 @@ export const NewFriendRequestNotificationItem: FC<
         </p>
         <div className="flex items-center justify-start gap-2">
           <Button
-            size="sm"
-            variant="outline"
             className="text-green-600 border-green-600 hover:bg-green-50/10 hover:text-green-700"
             onClick={(e) => {
               e.stopPropagation();
@@ -105,13 +103,13 @@ export const NewFriendRequestNotificationItem: FC<
                 status: "accepted",
               });
             }}
+            size="sm"
+            variant="outline"
           >
             <Check className="mr-2 h-4 w-4" />
             Accept
           </Button>
           <Button
-            size="sm"
-            variant="outline"
             className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
@@ -120,6 +118,8 @@ export const NewFriendRequestNotificationItem: FC<
                 status: "rejected",
               });
             }}
+            size="sm"
+            variant="outline"
           >
             <X className="mr-2 h-4 w-4" />
             Reject

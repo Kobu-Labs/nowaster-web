@@ -1,28 +1,22 @@
 import { UserApi } from "@/api";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const evt = await verifyWebhook(req);
 
-    const { id } = evt.data;
     const eventType = evt.type;
-    console.log(
-      `Received webhook with ID ${id} and event type of ${eventType}`,
-    );
-    console.log("Event data:", evt.data);
 
     if (eventType === "user.created") {
       if (!evt.data.username) {
-        console.error("Username is required");
         return new Response("Username is required", { status: 400 });
       }
 
       await UserApi.create({
+        avatarUrl: evt.data.image_url,
         id: evt.data.id,
         username: evt.data.username,
-        avatarUrl: evt.data.image_url,
       });
 
       return new Response("User created", { status: 200 });
@@ -30,22 +24,20 @@ export async function POST(req: NextRequest) {
 
     if (eventType === "user.updated") {
       if (!evt.data.username) {
-        console.error("Username is required");
         return new Response("Username is required", { status: 400 });
       }
 
       await UserApi.update({
+        avatarUrl: evt.data.image_url,
         id: evt.data.id,
         username: evt.data.username,
-        avatarUrl: evt.data.image_url,
       });
 
       return new Response("User updated", { status: 200 });
     }
 
     return new Response("Webhook received", { status: 200 });
-  } catch (err) {
-    console.error("Error verifying webhook:", err);
+  } catch {
     return new Response("Error verifying webhook", { status: 400 });
   }
 }

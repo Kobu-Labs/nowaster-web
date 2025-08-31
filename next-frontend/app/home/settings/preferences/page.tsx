@@ -31,7 +31,7 @@ export default function PreferencesPage() {
   );
   const [sidebarBehavior, setSidebarBehavior] = useAtom(sidebarBehaviorAtom);
   const searchParams = useSearchParams();
-  const [highlightedSetting, setHighlightedSetting] = useState<string | null>(
+  const [highlightedSetting, setHighlightedSetting] = useState<null | string>(
     null,
   );
   const sidebarBehaviorRef = useRef<HTMLDivElement>(null);
@@ -45,15 +45,18 @@ export default function PreferencesPage() {
       const scrollToElement = () => {
         let targetRef;
         switch (setting) {
-        case "sidebar-behavior":
-          targetRef = sidebarBehaviorRef;
-          break;
-        case "close-sidebar":
+        case "close-sidebar": {
           targetRef = closeSidebarRef;
           break;
-        default:
+        }
+        case "sidebar-behavior": {
+          targetRef = sidebarBehaviorRef;
+          break;
+        }
+        default: {
           targetRef = null;
           break;
+        }
         }
 
         if (targetRef?.current) {
@@ -70,7 +73,7 @@ export default function PreferencesPage() {
         setHighlightedSetting(null);
       }, 2000);
 
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); };
     }
     // INFO: placeholder to keep type system happy
     /* eslint-disable @typescript-eslint/no-empty-function */
@@ -95,12 +98,12 @@ export default function PreferencesPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div
-            ref={sidebarBehaviorRef}
             className={cn(
               "flex items-center justify-between p-3 rounded-lg transition-all duration-1000",
               highlightedSetting === "sidebar-behavior" &&
                 "bg-accent/20 shadow-lg ring-2 ring-accent",
             )}
+            ref={sidebarBehaviorRef}
           >
             <div className="space-y-0.5">
               <Label htmlFor="sidebar-behavior">Sidebar behavior</Label>
@@ -108,7 +111,7 @@ export default function PreferencesPage() {
                 Choose how the sidebar behaves when opened
               </p>
             </div>
-            <Select value={sidebarBehavior} onValueChange={setSidebarBehavior}>
+            <Select onValueChange={setSidebarBehavior} value={sidebarBehavior}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -119,12 +122,12 @@ export default function PreferencesPage() {
             </Select>
           </div>
           <div
-            ref={closeSidebarRef}
             className={cn(
               "flex items-center justify-between p-3 rounded-lg transition-all duration-300",
               highlightedSetting === "close-sidebar" &&
                 "bg-accent/20 shadow-lg ring-2 ring-accent",
             )}
+            ref={closeSidebarRef}
           >
             <div className="space-y-0.5">
               <Label htmlFor="close-sidebar">Close sidebar on link click</Label>
@@ -136,8 +139,8 @@ export default function PreferencesPage() {
               </p>
             </div>
             <Switch
-              id="close-sidebar"
               checked={closeSidebarOnLinkClick}
+              id="close-sidebar"
               onCheckedChange={setCloseSidebarOnLinkClick}
             />
           </div>

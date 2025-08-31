@@ -7,14 +7,14 @@ export type CategoryRequest = {
 };
 
 const create = z.object({
-  name: z.string().trim().min(1),
   color: z.string().trim().min(1),
+  name: z.string().trim().min(1),
 });
 
 const update = z.object({
+  color: z.string().trim().min(1).optional(),
   id: z.string(),
   name: z.string().optional(),
-  color: z.string().trim().min(1).optional(),
 });
 
 const readByName = z.object({
@@ -30,19 +30,19 @@ const readMany = z.object({
 });
 
 const readById = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 const deleteCategory = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const CategoryRequestSchema = {
   create,
-  update,
-  readMany,
-  readByName,
-  remove,
-  readById,
   deleteCategory,
+  readById,
+  readByName,
+  readMany,
+  remove,
+  update,
 };

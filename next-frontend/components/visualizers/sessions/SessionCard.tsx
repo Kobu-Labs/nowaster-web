@@ -1,6 +1,7 @@
-import { ScheduledSession } from "@/api/definitions";
-import { VariantProps, cva } from "class-variance-authority";
-import { FC } from "react";
+import type { ScheduledSession } from "@/api/definitions";
+import type { VariantProps} from "class-variance-authority";
+import { cva } from "class-variance-authority";
+import type { FC } from "react";
 
 import {
   Card,
@@ -14,20 +15,20 @@ import { Badge } from "@/components/shadcn/badge";
 import { CalendarSync } from "lucide-react";
 
 type SessionCardProps = {
-  session: ScheduledSession;
   durationElement?: (startDate: Date, endDate: Date) => React.ReactNode;
-} & VariantProps<typeof historyCardVariants> &
-  React.HTMLAttributes<HTMLDivElement>;
+  session: ScheduledSession;
+} & React.HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof historyCardVariants>;
 
 const historyCardVariants = cva("hover:cursor-pointer", {
-  variants: {
-    variant: {
-      default: "border",
-      borderless: "border-hidden",
-    },
-  },
   defaultVariants: {
     variant: "default",
+  },
+  variants: {
+    variant: {
+      borderless: "border-hidden",
+      default: "border",
+    },
   },
 });
 
@@ -75,7 +76,7 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
           </p>
           <div className="mt-1 flex gap-1">
             {props.session.tags.map((tag) => (
-              <TagBadge tag={tag} variant="auto" key={tag.id} />
+              <TagBadge key={tag.id} tag={tag} variant="auto" />
             ))}
           </div>
         </div>

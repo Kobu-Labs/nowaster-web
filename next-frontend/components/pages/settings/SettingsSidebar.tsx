@@ -19,25 +19,25 @@ import { usePathname } from "next/navigation";
 
 const settingsNavItems = [
   {
+    description: "Manage your feed subscriptions",
+    icon: Rss,
     title: "Feed",
     url: "/home/settings/feed",
-    icon: Rss,
-    description: "Manage your feed subscriptions",
   },
   {
+    description: "Control who can see your activity",
+    icon: Shield,
     title: "Privacy",
     url: "/home/settings/visibility",
-    icon: Shield,
-    description: "Control who can see your activity",
   },
 ] as const;
 
 const preferencesNavItems = [
   {
+    description: "Customize your app experience",
+    icon: Sliders,
     title: "Preferences",
     url: "/home/settings/preferences",
-    icon: Sliders,
-    description: "Customize your app experience",
   },
 ] as const;
 
@@ -46,9 +46,9 @@ export function SettingsSidebar() {
 
   return (
     <Sidebar
-      variant="sidebar"
       className="w-64 border-r bg-transparent"
       collapsible="none"
+      variant="sidebar"
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ export function SettingsSidebar() {
               {settingsNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url} className="flex items-start gap-1">
+                    <Link className="flex items-start gap-1" href={item.url}>
                       <div className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -85,7 +85,7 @@ export function SettingsSidebar() {
               {preferencesNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url} className="flex items-start gap-1">
+                    <Link className="flex items-start gap-1" href={item.url}>
                       <div className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>

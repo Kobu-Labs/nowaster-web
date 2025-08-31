@@ -1,8 +1,8 @@
 "use client";
 
 import { SessionTemplateApi } from "@/api";
-import { SessionTemplate } from "@/api/definitions/models/session-template";
-import { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
+import type { SessionTemplate } from "@/api/definitions/models/session-template";
+import type { SessionTemplateRequest } from "@/api/definitions/requests/session-template";
 import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
@@ -28,8 +28,9 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
+import type {
+  TemplateSessionPrecursor} from "@/components/visualizers/sessions/templates/form/form-schemas";
 import {
-  TemplateSessionPrecursor,
   templateSessionPrecursorSchema,
 } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import { RecurringSessionForm } from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
@@ -39,7 +40,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addMinutes, differenceInMinutes, isAfter, set } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 const translateTemplateToPrecursor = (
@@ -68,19 +69,19 @@ const translateTemplateToPrecursor = (
   };
 };
 
-type TemplateFormProps = {
-  onSubmit: (data: TemplateSessionPrecursor) => void;
-  onError?: () => void;
-  isLoading?: boolean;
+interface TemplateFormProps {
   defaultValues?: SessionTemplate;
-};
+  isLoading?: boolean;
+  onError?: () => void;
+  onSubmit: (data: TemplateSessionPrecursor) => void;
+}
 
 export const TemplateForm: FC<TemplateFormProps> = (props) => {
   const form = useForm<TemplateSessionPrecursor>({
-    resolver: zodResolver(templateSessionPrecursorSchema),
     defaultValues: props.defaultValues
       ? translateTemplateToPrecursor(props.defaultValues)
       : undefined,
+    resolver: zodResolver(templateSessionPrecursorSchema),
   });
 
   const fieldArray = useFieldArray({ control: form.control, name: "sessions" });
@@ -93,8 +94,8 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(props.onSubmit, props.onError)}
         className="m-8 flex flex-col items-center justify-center gap-8"
+        onSubmit={form.handleSubmit(props.onSubmit, props.onError)}
       >
         <div className="grid w-full grid-cols-2 gap-4 content-center">
           <FormField
@@ -131,8 +132,8 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
           />
 
           <FormField
-            name="start_date"
             control={form.control}
+            name="start_date"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
                 <FormLabel className="block">Start Time</FormLabel>
@@ -142,17 +143,17 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
                       isAfter(
                         set(new Date(), {
                           hours: 0,
+                          milliseconds: 0,
                           minutes: 0,
                           seconds: 0,
-                          milliseconds: 0,
                         }),
                         val,
                       )
                     }
-                    selected={field.value ?? undefined}
                     onSelect={(val) => {
                       field.onChange(val);
                     }}
+                    selected={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormMessage />
@@ -161,17 +162,17 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
           />
 
           <FormField
-            name="end_date"
             control={form.control}
+            name="end_date"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
                 <FormLabel className="block">End Time</FormLabel>
                 <FormControl>
                   <DateTimePicker
-                    selected={field.value ?? undefined}
                     onSelect={(val) => {
                       field.onChange(val);
                     }}
+                    selected={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormMessage />
@@ -190,35 +191,35 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
             >
               <Button
                 className="rounded-md border p-4 group"
+                onClick={() => { fieldArray.remove(index); }}
                 variant="outline"
-                onClick={() => fieldArray.remove(index)}
               >
                 <Trash2 className="group-hover:text-red-500" />
               </Button>
               <RecurringSessionForm
+                control={form.control}
                 interval={form.watch("interval")}
                 intervalStart={form.watch("start_date")}
-                control={form.control}
                 parentFieldIndex={index}
               />
             </div>
           ))}
-          <TooltipProvider delayDuration={preventContinue ? 0 : 50000}>
+          <TooltipProvider delayDuration={preventContinue ? 0 : 50_000}>
             <Tooltip>
               <TooltipTrigger className="cursor-not-allowed">
                 <Button
-                  type="button"
-                  variant="outline"
                   className="group flex items-center gap-2 "
                   disabled={preventContinue}
                   onClick={() =>
-                    fieldArray.append({
+                    { fieldArray.append({
                       // @ts-expect-error - .append expects a full object, but we are providing a partial one because category and tags are not set yet
                       category: undefined,
-                      tags: [],
                       description: undefined,
-                    })
+                      tags: [],
+                    }); }
                   }
+                  type="button"
+                  variant="outline"
                 >
                   Add Session
                   <Plus
@@ -236,7 +237,7 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
 
         <div className="flex items-center justify-center w-full gap-4">
           <div className="grow" />
-          <Button type="submit" className="w-fit" variant="default" size="lg">
+          <Button className="w-fit" size="lg" type="submit" variant="default">
             Submit
           </Button>
         </div>
@@ -253,13 +254,13 @@ export const CreateTemplateFormDialog: FC<{
   const queryClient = useQueryClient();
 
   const createTemplateMutation = useMutation({
-    mutationKey: ["session-template"],
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
-    },
     mutationFn: async (precursor: TemplateSessionPrecursor) => {
       const translatedData = translateTemplatePrecursor(precursor);
       return await SessionTemplateApi.create(translatedData);
+    },
+    mutationKey: ["session-template"],
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
     },
   });
 
@@ -272,7 +273,7 @@ export const CreateTemplateFormDialog: FC<{
     <Dialog modal={false} onOpenChange={props.setIsOpen} open={props.open}>
       <DialogContent
         className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        onInteractOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => { e.preventDefault(); }}
       >
         <DialogHeader>
           <DialogTitle>Create New Template</DialogTitle>
@@ -282,9 +283,9 @@ export const CreateTemplateFormDialog: FC<{
           </DialogDescription>
         </DialogHeader>
         <TemplateForm
+          defaultValues={props.defaultValues}
           isLoading={createTemplateMutation.isPending}
           onSubmit={submitForm}
-          defaultValues={props.defaultValues}
         />
       </DialogContent>
     </Dialog>
@@ -293,10 +294,9 @@ export const CreateTemplateFormDialog: FC<{
 
 const translateTemplatePrecursor = (precursor: TemplateSessionPrecursor) => {
   const translatedData: SessionTemplateRequest["create"] = {
-    name: precursor.name,
-    interval: precursor.interval,
-    start_date: precursor.start_date,
     end_date: precursor.end_date,
+    interval: precursor.interval,
+    name: precursor.name,
     sessions: precursor.sessions.map((session) => {
       const session_start = getDaytimeAfterDate(
         precursor.start_date,
@@ -311,18 +311,19 @@ const translateTemplatePrecursor = (precursor: TemplateSessionPrecursor) => {
 
       return {
         category_id: session.category.id,
-        tag_ids: session.tags.map((tag) => tag.id),
         description: session.description ?? undefined,
-        start_minute_offset: differenceInMinutes(
-          session_start,
-          precursor.start_date,
-        ),
         end_minute_offset: differenceInMinutes(
           session_end,
           precursor.start_date,
         ),
+        start_minute_offset: differenceInMinutes(
+          session_start,
+          precursor.start_date,
+        ),
+        tag_ids: session.tags.map((tag) => tag.id),
       };
     }),
+    start_date: precursor.start_date,
   };
 
   return translatedData;

@@ -1,4 +1,4 @@
-import {
+import type {
   Notification,
   SessionReactionAddedData,
 } from "@/api/definitions/models/notification";
@@ -8,39 +8,40 @@ import { UserAvatar } from "@/components/visualizers/user/UserAvatar";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Heart } from "lucide-react";
-import { FC, useMemo } from "react";
+import type { FC} from "react";
+import { useMemo } from "react";
 
-type SessionReactionAddedNotificationItemProps = {
-  notifications: {
-    notification: Notification & {
-      data: SessionReactionAddedData;
-    };
-  }[];
-  sessionId: string;
-};
-
-type GroupedReaction = {
+interface GroupedReaction {
+  count: number;
   emoji: string;
-  users: Array<{
+  users: {
+    avatar_url: null | string;
     id: string;
     username: string;
-    avatar_url: string | null;
-  }>;
-  count: number;
-};
+  }[];
+}
+
+interface SessionReactionAddedNotificationItemProps {
+  notifications: {
+    notification: {
+      data: SessionReactionAddedData;
+    } & Notification;
+  }[];
+  sessionId: string;
+}
 
 export const SessionReactionAddedNotificationItem: FC<
   SessionReactionAddedNotificationItemProps
 > = (props) => {
-  const { sessionData, groupedReactions, allUsers } = useMemo(() => {
-    const notifications = props.notifications;
+  const { allUsers, groupedReactions, sessionData } = useMemo(() => {
+    const {notifications} = props;
     const sessionData = notifications[0]!.notification.data;
 
     // Group reactions by emoji
     const reactionMap = new Map<string, Set<string>>();
     const userMap = new Map<
       string,
-      { id: string; username: string; avatar_url: string | null }
+      { avatar_url: null | string; id: string; username: string; }
     >();
 
     notifications.forEach(({ notification }) => {
@@ -54,19 +55,17 @@ export const SessionReactionAddedNotificationItem: FC<
     });
 
     // Convert to grouped reactions and sort by count
-    const groupedReactions: GroupedReaction[] = Array.from(
-      reactionMap.entries(),
-    )
+    const groupedReactions: GroupedReaction[] = [...reactionMap.entries()]
       .map(([emoji, userIds]) => ({
-        emoji,
-        users: Array.from(userIds).map((id) => userMap.get(id)!),
         count: userIds.size,
+        emoji,
+        users: [...userIds].map((id) => userMap.get(id)!),
       }))
       .sort((a, b) => b.count - a.count);
 
-    const allUsers = Array.from(userMap.values());
+    const allUsers = [...userMap.values()];
 
-    return { sessionData, groupedReactions, allUsers };
+    return { allUsers, groupedReactions, sessionData };
   }, [props.notifications]);
 
   const latestNotification = props.notifications[0]?.notification;
@@ -82,10 +81,10 @@ export const SessionReactionAddedNotificationItem: FC<
       result += user1.username;
     }
     if (user2) {
-      result += " and " + user2.username;
+      result += ` and ${  user2.username}`;
     }
 
-    return result + " reacted to your session";
+    return `${result  } reacted to your session`;
   };
 
   return (
@@ -120,16 +119,16 @@ export const SessionReactionAddedNotificationItem: FC<
           <div className="relative flex">
             {allUsers.slice(0, 3).map((user, index) => (
               <div
-                key={user.id}
                 className="relative"
+                key={user.id}
                 style={{
                   marginLeft: index > 0 ? "-8px" : "0",
                   zIndex: index,
                 }}
               >
                 <UserAvatar
-                  username={user.username}
                   avatar_url={user.avatar_url}
+                  username={user.username}
                 />
               </div>
             ))}
@@ -148,9 +147,9 @@ export const SessionReactionAddedNotificationItem: FC<
           <div className="flex items-center gap-1">
             {groupedReactions.map((reaction) => (
               <Badge
-                variant="outline"
-                key={reaction.emoji}
                 className="flex items-center px-1 py-0 gap-1 rounded-full text-xs hover:bg-muted pointer-events-none"
+                key={reaction.emoji}
+                variant="outline"
               >
                 <span className="text-sm">{reaction.emoji}</span>
                 <span className="text-muted-foreground">{reaction.count}</span>

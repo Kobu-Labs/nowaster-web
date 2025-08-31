@@ -1,12 +1,12 @@
-import { NewReleaseData } from "@/api/definitions/models/notification";
-import { NotificationItemProps } from "@/components/notifications/NotificationItem";
+import type { NewReleaseData } from "@/api/definitions/models/notification";
+import type { NotificationItemProps } from "@/components/notifications/NotificationItem";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Rocket } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 
 export const NewReleaseNotificationItem: FC<
-  NotificationItemProps & { data: NewReleaseData }
+  { data: NewReleaseData } & NotificationItemProps
 > = (props) => {
   return (
     <div

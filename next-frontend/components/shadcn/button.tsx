@@ -8,10 +8,22 @@ import { LoaderCircle } from "lucide-react";
 const buttonVariants = cva(
   "cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
+    defaultVariants: {
+      size: "default",
+      variant: "default",
+    },
     variants: {
+      size: {
+        default: "h-10 px-4 py-2",
+        icon: "h-10 w-10",
+        lg: "h-11 rounded-md px-8",
+        sm: "h-9 rounded-md px-3",
+      },
       variant: {
         default: "gradient-button",
         destructive: "bg-destructive/80",
+        ghost: "hover:gradient-icon-container hover:text-accent-foreground",
+        link: "text-pink-primary gradient-text-hover transition-all hover:transition-all duration-300 relative inline-block after:content-[''] after:absolute after:left-1/2 after:bottom-2 after:h-[2px] after:bg-primary after:w-0 after:transition-all after:duration-300 hover:after:left-0 hover:after:w-full",
         outline: cn(
           "border  border-2  hover:text-accent-foreground",
           "relative overflow-hidden transition-all duration-300 ease-in-out",
@@ -26,19 +38,7 @@ const buttonVariants = cva(
           "after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-300 after:ease-in-out after:gradient-container-subtle",
           "hover:before:opacity-0 hover:after:opacity-100",
         ),
-        ghost: "hover:gradient-icon-container hover:text-accent-foreground",
-        link: "text-pink-primary gradient-text-hover transition-all hover:transition-all duration-300 relative inline-block after:content-[''] after:absolute after:left-1/2 after:bottom-2 after:h-[2px] after:bg-primary after:w-0 after:transition-all after:duration-300 hover:after:left-0 hover:after:w-full",
       },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
     },
   },
 );
@@ -53,12 +53,12 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      loading = false,
+      asChild = false,
       children,
       className,
-      variant,
+      loading = false,
       size,
-      asChild = false,
+      variant,
       ...props
     },
     ref,
@@ -66,9 +66,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        ref={ref}
+        className={cn(buttonVariants({ className, size, variant }))}
         disabled={loading}
-        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
         {...props}
       >
         {loading && <LoaderCircle className="animate-spin" />}

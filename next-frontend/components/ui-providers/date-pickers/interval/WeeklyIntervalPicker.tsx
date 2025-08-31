@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { Button } from "@/components/shadcn/button";
 import {
   Card,
@@ -10,11 +10,11 @@ import { Separator } from "@/components/shadcn/separator";
 import { DailyIntervalPicker } from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import { daysOfWeek } from "@/lib/date-utils";
 
-export type WeeklyIntervalPickerProps = {
+export interface WeeklyIntervalPickerProps {
   onSelect: (value: { day: number; hours: number; minutes: number }) => void;
-  selected?: { day: number; hours: number; minutes: number };
   orientation?: "horizontal" | "vertical";
-};
+  selected?: { day: number; hours: number; minutes: number };
+}
 
 export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
   return (
@@ -26,18 +26,18 @@ export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
         <div className="grid grid-cols-7 gap-2">
           {daysOfWeek.map((day) => (
             <Button
-              type="button"
-              key={day.value}
-              size="sm"
               className="h-12 text-xs font-medium text-muted-foreground hover:text-white"
-              variant={props.selected?.day === day.value ? "default" : "ghost"}
+              key={day.value}
               onClick={() =>
-                props.onSelect({
+                { props.onSelect({
                   day: day.value,
                   hours: props.selected?.hours ?? 0,
                   minutes: props.selected?.minutes ?? 0,
-                })
+                }); }
               }
+              size="sm"
+              type="button"
+              variant={props.selected?.day === day.value ? "default" : "ghost"}
             >
               <span className="hidden sm:inline">{day.short}</span>
               <span className="sm:hidden">{day.short.charAt(0)}</span>
@@ -46,15 +46,15 @@ export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
         </div>
         <Separator className="my-4" />
         <DailyIntervalPicker
-          orientation={props.orientation}
-          selected={props.selected}
           onSelect={(val) =>
-            props.onSelect({
+            { props.onSelect({
               day: props.selected?.day ?? 0,
               hours: val.hours,
               minutes: val.minutes,
-            })
+            }); }
           }
+          orientation={props.orientation}
+          selected={props.selected}
         />
       </CardContent>
     </Card>

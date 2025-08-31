@@ -1,9 +1,9 @@
-import { ScheduledSessionWithId } from "@/api/definitions";
+import type { ScheduledSessionWithId } from "@/api/definitions";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/shadcn/dialog";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
 import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
@@ -11,41 +11,42 @@ import { EditScheduledSession } from "@/components/visualizers/sessions/form/Edi
 import { ScheduledSessionCreationForm } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { sessionToNonIntersection } from "@/lib/sessions/intervals";
 import { cn } from "@/lib/utils";
+import type { SessionPrecursor } from "@/validation/session/creation";
 import {
-  addHours,
-  addMilliseconds,
-  differenceInMilliseconds,
-  format,
+    addHours,
+    addMilliseconds,
+    differenceInMilliseconds,
+    format,
 } from "date-fns";
-import { FC, useMemo, useRef, useState } from "react";
-import { SessionPrecursor } from "@/validation/session/creation";
+import type { FC } from "react";
+import { useMemo, useRef, useState } from "react";
 
 interface SessionTimelineUiProviderProps {
+  endDate: Date;
   sessions: ScheduledSessionWithId[];
   startDate: Date;
-  endDate: Date;
 }
 
 export function SessionTimelineUiProvider({
+  endDate,
   sessions,
   startDate,
-  endDate,
 }: SessionTimelineUiProviderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{
-    start: number;
     end: number;
     origin: number;
+    start: number;
   } | null>(null);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [sessionToEdit, setSessionToEdit] =
-    useState<ScheduledSessionWithId | null>(null);
+    useState<null | ScheduledSessionWithId>(null);
   const [sessionToCreate, setSessionToCreate] =
-    useState<SessionPrecursor | null>();
+    useState<null | SessionPrecursor>();
   const timelineRef = useRef<HTMLDivElement>(null);
-  const [hoveredSession, setHoveredSession] = useState<string | null>(null);
+  const [hoveredSession, setHoveredSession] = useState<null | string>(null);
 
   const groupedSessions = useMemo(() => {
     return sessionToNonIntersection(sessions);
@@ -68,7 +69,9 @@ export function SessionTimelineUiProvider({
   // Function to calculate left position percentage based on start date
   const calculateLeft = (sessionStartDate: Date): number => {
     // If session starts before timeline, clamp to timeline start
-    if (sessionStartDate < startDate) return 0;
+    if (sessionStartDate < startDate) {
+      return 0;
+    }
 
     const offset = differenceInMilliseconds(sessionStartDate, startDate);
     return (offset / totalDuration) * 100;
@@ -92,7 +95,7 @@ export function SessionTimelineUiProvider({
       const percent = ((e.clientX - rect.left) / rect.width) * 100;
 
       setIsDragging(true);
-      setDragStart({ start: percent, end: percent, origin: percent });
+      setDragStart({ end: percent, origin: percent, start: percent });
     }
   };
 
@@ -102,7 +105,9 @@ export function SessionTimelineUiProvider({
 
   // Function to handle mouse move during drag
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !timelineRef.current) return;
+    if (!isDragging || !timelineRef.current) {
+      return;
+    }
 
     const rect = timelineRef.current.getBoundingClientRect();
     const percent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -110,39 +115,40 @@ export function SessionTimelineUiProvider({
     // Clamp percent between 0 and 100
     const clampedPercent = Math.max(0, Math.min(100, percent));
 
-    if (!dragStart) {
-      setDragStart({
-        start: clampedPercent,
-        end: clampedPercent,
-        origin: clampedPercent,
-      });
-    } else {
+    if (dragStart) {
       // Calculate start and end based on origin and current position
       const start = Math.min(dragStart.origin, clampedPercent);
       const end = Math.max(dragStart.origin, clampedPercent);
-      setDragStart({ start, end, origin: dragStart.origin });
+      setDragStart({ end, origin: dragStart.origin, start });
+    } else {
+      setDragStart({
+        end: clampedPercent,
+        origin: clampedPercent,
+        start: clampedPercent,
+      });
     }
   };
 
   // Function to handle mouse up after drag
   const handleMouseUp = () => {
-    if (isDragging && dragStart !== null) {
-      // Only create session if drag distance is significant
-      if (dragStart.end - dragStart.start > 1) {
-        const sessionStartDate = percentToDate(dragStart.start);
-        const sessionEndDate = percentToDate(dragStart.end);
+    if (
+      isDragging &&
+      dragStart !== null && // Only create session if drag distance is significant
+      dragStart.end - dragStart.start > 1
+    ) {
+      const sessionStartDate = percentToDate(dragStart.start);
+      const sessionEndDate = percentToDate(dragStart.end);
 
-        const newSession: SessionPrecursor = {
-          startTime: sessionStartDate,
-          category: undefined,
-          description: null,
-          endTime: sessionEndDate,
-          session_type: "fixed",
-          tags: [],
-        };
-        setSessionToCreate(newSession);
-        setIsCreateDialogOpen(true);
-      }
+      const newSession: SessionPrecursor = {
+        category: undefined,
+        description: null,
+        endTime: sessionEndDate,
+        session_type: "fixed",
+        startTime: sessionStartDate,
+        tags: [],
+      };
+      setSessionToCreate(newSession);
+      setIsCreateDialogOpen(true);
     }
 
     setIsDragging(false);
@@ -157,7 +163,9 @@ export function SessionTimelineUiProvider({
 
   // Function to save edited session
   const handleSaveEditedSession = () => {
-    if (!sessionToEdit) return;
+    if (!sessionToEdit) {
+      return;
+    }
 
     setIsEditDialogOpen(false);
     setSessionToEdit(null);
@@ -165,7 +173,9 @@ export function SessionTimelineUiProvider({
 
   // Function to delete an session
   const handleDeleteSession = () => {
-    if (!sessionToEdit) return;
+    if (!sessionToEdit) {
+      return;
+    }
 
     setIsEditDialogOpen(false);
     setSessionToEdit(null);
@@ -178,7 +188,9 @@ export function SessionTimelineUiProvider({
 
   // Generate time markers for the timeline
   const generateTimeMarkers = () => {
-    if (groupedSessions.length === 0) return null;
+    if (groupedSessions.length === 0) {
+      return null;
+    }
     const markerStep = getMarkerSetp();
     // Calculate how many markers to show based on the timeline duration and marker step
     const totalHours = totalDuration / (1000 * 60 * 60);
@@ -188,18 +200,20 @@ export function SessionTimelineUiProvider({
       const markerDate = addHours(startDate, i * markerStep);
 
       // Skip if marker is beyond the end date
-      if (markerDate > endDate) return null;
+      if (markerDate > endDate) {
+        return null;
+      }
 
       const percent = calculateLeft(markerDate);
       const formattedTime = format(markerDate, "MMM d, HH:mm");
 
       return (
         <div
-          key={`marker-${i}`}
           className={cn(
             "absolute top-0 bottom-0 border-l border-pink-muted",
             (i === 0 || i === numMarkers - 1) && "border-0",
           )}
+          key={`marker-${i}`}
           style={{ left: `${percent}%` }}
         >
           <span
@@ -221,17 +235,17 @@ export function SessionTimelineUiProvider({
   const dragSelectionStyle =
     isDragging && dragStart !== null
       ? {
-        left: `${dragStart.start}%`,
-        width: `${dragStart.end - dragStart.start}%`,
-        bottom: "5%",
-        height: "90%",
-        position: "absolute" as const,
-        backgroundColor: "#330e29",
-        opacity: 0.6,
-        border: "2px dashed #630e20",
-        zIndex: 5,
-        pointerEvents: "none" as const,
-      }
+          backgroundColor: "#330e29",
+          border: "2px dashed #630e20",
+          bottom: "5%",
+          height: "90%",
+          left: `${dragStart.start}%`,
+          opacity: 0.6,
+          pointerEvents: "none" as const,
+          position: "absolute" as const,
+          width: `${dragStart.end - dragStart.start}%`,
+          zIndex: 5,
+        }
       : null;
 
   const timeFormatter = (percentage: number) => {
@@ -251,14 +265,12 @@ export function SessionTimelineUiProvider({
           const left = calculateLeft(session.startTime);
 
           // Skip if session is completely outside the timeline
-          if (width <= 0 || left >= 100 || left + width <= 0) return null;
+          if (width <= 0 || left >= 100 || left + width <= 0) {
+            return null;
+          }
 
           return (
             <SessionCard
-              key={session.id}
-              onMouseEnter={() => setHoveredSession(session.id)}
-              onMouseLeave={() => setHoveredSession(null)}
-              session={session}
               className={cn(
                 "absolute overflow-hidden rounded-md cursor-pointer transition-all",
                 "hover:z-50 hover:border-pink-primary/50 hover:border-2",
@@ -267,15 +279,23 @@ export function SessionTimelineUiProvider({
                   "pointer-events-none",
                 hoveredSession === session.id && "gradient-card-solid",
               )}
-              style={{
-                minWidth:
-                  hoveredSession === session.id ? `${width}%` : undefined,
-                width: hoveredSession === session.id ? undefined : `${width}%`,
-                left: `${left}%`,
-              }}
+              key={session.id}
               onClick={(e) => {
                 e.stopPropagation();
                 handleEditSession(session);
+              }}
+              onMouseEnter={() => {
+                setHoveredSession(session.id);
+              }}
+              onMouseLeave={() => {
+                setHoveredSession(null);
+              }}
+              session={session}
+              style={{
+                left: `${left}%`,
+                minWidth:
+                  hoveredSession === session.id ? `${width}%` : undefined,
+                width: hoveredSession === session.id ? undefined : `${width}%`,
               }}
             />
           );
@@ -294,11 +314,11 @@ export function SessionTimelineUiProvider({
         <HoverPercentageBar formatter={timeFormatter}>
           <div
             className="h-full relative cursor-crosshair"
-            ref={timelineRef}
             onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseExit}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseExit}
+            ref={timelineRef}
           >
             {/* Timeline background for click detection */}
             <div className="timeline-bg absolute inset-0"></div>
@@ -311,7 +331,7 @@ export function SessionTimelineUiProvider({
               </div>
             )}
             {groupedSessions.map((group, index) => (
-              <TimelineRow sessions={group} key={index} />
+              <TimelineRow key={index} sessions={group} />
             ))}
           </div>
         </HoverPercentageBar>
@@ -320,8 +340,8 @@ export function SessionTimelineUiProvider({
       {sessionToCreate && (
         <Dialog
           modal={false}
-          open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
+          open={isCreateDialogOpen}
         >
           <DialogContent className="w-fit max-w-fit">
             <DialogHeader>
@@ -338,8 +358,8 @@ export function SessionTimelineUiProvider({
       {/* Edit Session Dialog */}
       <Dialog
         modal={false}
-        open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
+        open={isEditDialogOpen}
       >
         <DialogContent className="w-full max-w-[60%]">
           <DialogHeader>
@@ -347,10 +367,12 @@ export function SessionTimelineUiProvider({
           </DialogHeader>
           {sessionToEdit && (
             <EditScheduledSession
-              session={sessionToEdit}
-              onSave={handleSaveEditedSession}
+              onCancel={() => {
+                setIsEditDialogOpen(false);
+              }}
               onDelete={handleDeleteSession}
-              onCancel={() => setIsEditDialogOpen(false)}
+              onSave={handleSaveEditedSession}
+              session={sessionToEdit}
             />
           )}
         </DialogContent>

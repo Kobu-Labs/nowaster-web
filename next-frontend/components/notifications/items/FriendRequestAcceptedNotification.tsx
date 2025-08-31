@@ -1,12 +1,12 @@
-import { FriendRequestAcceptedData } from "@/api/definitions/models/notification";
-import { NotificationItemProps } from "@/components/notifications/NotificationItem";
+import type { FriendRequestAcceptedData } from "@/api/definitions/models/notification";
+import type { NotificationItemProps } from "@/components/notifications/NotificationItem";
 import { UserAvatar } from "@/components/visualizers/user/UserAvatar";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { FC } from "react";
+import type { FC } from "react";
 
 export const FriendRequestAcceptedNotificationItem: FC<
-  NotificationItemProps & { data: FriendRequestAcceptedData }
+  { data: FriendRequestAcceptedData } & NotificationItemProps
 > = (props) => {
   return (
     <div
@@ -16,8 +16,8 @@ export const FriendRequestAcceptedNotificationItem: FC<
       )}
     >
       <UserAvatar
-        username={props.data.accepter.username}
         avatar_url={props.data.accepter.avatar_url}
+        username={props.data.accepter.username}
       />
 
       <div className="flex-1 min-w-0">

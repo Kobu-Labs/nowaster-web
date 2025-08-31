@@ -3,45 +3,45 @@ import { templateSessionsActionSchema } from "@/components/visualizers/sessions/
 import { z } from "zod";
 
 const create = z.object({
-  name: z.string().trim().min(1),
-  interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date<Date>(),
   end_date: z.coerce.date<Date>(),
+  interval: RecurringSessionIntervalSchema,
+  name: z.string().trim().min(1),
   sessions: z.array(
     z.object({
       category_id: z.string(),
-      tag_ids: z.array(z.string()),
-      start_minute_offset: z.number(),
-      end_minute_offset: z.number(),
       description: z.string().optional(),
+      end_minute_offset: z.number(),
+      start_minute_offset: z.number(),
+      tag_ids: z.array(z.string()),
     }),
   ),
+  start_date: z.coerce.date<Date>(),
 });
 
 const update = z.object({
-  id: z.string().uuid(),
-  name: z.string().trim().min(1),
-  interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date<Date>(),
   end_date: z.coerce.date<Date>(),
+  id: z.uuid(),
+  interval: RecurringSessionIntervalSchema,
+  name: z.string().trim().min(1),
   sessions: z.array(
     z.object({
       category_id: z.string(),
-      tag_ids: z.array(z.string()),
-      start_minute_offset: z.number(),
-      end_minute_offset: z.number(),
       description: z.string().optional(),
+      end_minute_offset: z.number(),
+      start_minute_offset: z.number(),
+      tag_ids: z.array(z.string()),
     }),
   ),
+  start_date: z.coerce.date<Date>(),
 });
 
 const deleteTemplate = z.object({
-  id: z.string().uuid(),
   existingSessionActions: templateSessionsActionSchema,
+  id: z.uuid(),
 });
 
 const deleteRecurringSession = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 const readMany = z.null();
@@ -54,8 +54,8 @@ export type SessionTemplateRequest = {
 
 export const SessionTemplateRequestSchema = {
   create,
-  update,
-  readMany,
-  deleteTemplate,
   deleteRecurringSession,
+  deleteTemplate,
+  readMany,
+  update,
 } as const;

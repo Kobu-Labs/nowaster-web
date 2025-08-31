@@ -4,11 +4,11 @@ import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
 export const StopwatchSessionSchema = z.object({
-  startTime: z.coerce.date<Date>(),
   category: CategoryWithIdSchema.nullable(),
   description: z.string().nullish(),
-  tags: z.array(TagWithIdSchema).nullable(),
   session_type: z.literal("stopwatch"),
+  startTime: z.coerce.date<Date>(),
+  tags: z.array(TagWithIdSchema).nullable(),
 });
 export const StopwatchSessionWithIdSchema = StopwatchSessionSchema.merge(HasID);
 

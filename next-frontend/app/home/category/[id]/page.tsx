@@ -13,7 +13,7 @@ import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/Tota
 import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
 import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { use } from "react";
 
@@ -52,15 +52,15 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const filter: SessionFilterPrecursor = {
+    data: {
+      categories: [query.data],
+    },
     settings: {
       categories: {
         name: {
           mode: "all",
         },
       },
-    },
-    data: {
-      categories: [query.data],
     },
   };
 
@@ -73,10 +73,10 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
           <ColorPicker
             initialColor={query.data.color}
             onSelect={(color) =>
-              updateCategoryColor.mutate({
+              { updateCategoryColor.mutate({
+                color,
                 id: categoryId,
-                color: color,
-              })
+              }); }
             }
           />
         </h2>
@@ -88,12 +88,12 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
         <TagsToSessionPieChart filter={filter} />
         <FilterContextProvider initialFilter={filter}>
           <FilteredSessionAreaChart
-            initialGranularity="days-in-month"
             className="col-span-full h-[350px]"
+            initialGranularity="days-in-month"
           />
         </FilterContextProvider>
         <div className="col-span-full">
-          <BaseSessionTable filter={filter} columns={BaseSessionTableColumns} />
+          <BaseSessionTable columns={BaseSessionTableColumns} filter={filter} />
         </div>
       </div>
     </div>

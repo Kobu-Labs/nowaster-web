@@ -1,15 +1,16 @@
-import { Button, ButtonProps } from "@/components/shadcn/button";
+import type { ButtonProps } from "@/components/shadcn/button";
+import { Button } from "@/components/shadcn/button";
 import { SignedOut, SignInButton as SignInButtonClerk } from "@clerk/nextjs";
-import { FC } from "react";
+import type { FC } from "react";
 
-export const SignInButton: FC<ButtonProps & { label?: string }> = (props) => {
+export const SignInButton: FC<{ label?: string } & ButtonProps> = (props) => {
   return (
     <SignedOut>
       <SignInButtonClerk>
         <Button
-          variant={props.variant ?? "outline"}
-          size={props.size ?? "sm"}
           className={props.className}
+          size={props.size ?? "sm"}
+          variant={props.variant ?? "outline"}
         >
           {props.label ?? "Sign in"}
         </Button>

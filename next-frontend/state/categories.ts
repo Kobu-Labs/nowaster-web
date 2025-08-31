@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const categoryColors = atom<{ [label: string]: string }>({});
+export const categoryColors = atom<Record<string, string>>({});

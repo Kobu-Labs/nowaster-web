@@ -13,7 +13,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { FC, PropsWithChildren, useEffect, useState } from "react";
+import type { FC, PropsWithChildren} from "react";
+import { useEffect, useState } from "react";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -64,7 +65,7 @@ const AxiosInterceptorWrapper: FC<PropsWithChildren> = ({ children }) => {
         {/* KPI Cards skeleton */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border bg-card p-6" key={i}>
               <div className="flex items-center justify-between">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-4 rounded" />
@@ -96,7 +97,7 @@ const AxiosInterceptorWrapper: FC<PropsWithChildren> = ({ children }) => {
           </div>
           <div className="px-6 space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between py-2">
+              <div className="flex items-center justify-between py-2" key={i}>
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-4 w-4 rounded" />
                   <Skeleton className="h-4 w-32" />

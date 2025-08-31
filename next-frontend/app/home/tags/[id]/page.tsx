@@ -13,11 +13,68 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
 import { Card } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
+
+export default function Page(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
+  const tagQuery = useQuery(queryKeys.tags.byId(params.id));
+
+  if (tagQuery.isLoading) {
+    return <TagDetailSkeleton />;
+  }
+
+  if (tagQuery.isError || !tagQuery.data) {
+    return <TagNotFoundError onRetry={() => tagQuery.refetch()} />;
+  }
+
+  const tag = tagQuery.data;
+
+  const filter: SessionFilterPrecursor = {
+    data: {
+      tags: [tag],
+    },
+    settings: {
+      tags: {
+        id: {
+          mode: "all",
+        },
+      },
+    },
+  };
+
+  return (
+    <div className="grow">
+      <div className="my-8 pl-8 ">
+        <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
+          Details page for
+          <TagBadge tag={tag} variant="auto" />
+        </h2>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <TotalSessionTimeCard filter={filter} />
+        <SessionAverageDurationProvider filter={filter} />
+        <SessionCountCard filter={filter} />
+
+        <FilterContextProvider initialFilter={filter}>
+          <FilteredSessionAreaChart
+            className="col-span-full h-[400px]"
+            initialGranularity={"days-in-month"}
+          />
+          <div className="col-span-full">
+            <BaseSessionTable
+              columns={BaseSessionTableColumns}
+              filter={filter}
+            />
+          </div>
+        </FilterContextProvider>
+      </div>
+    </div>
+  );
+}
 
 function TagDetailSkeleton() {
   return (
@@ -62,7 +119,7 @@ function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
 
   return (
     <div className="flex justify-center items-center min-h-96">
-      <Alert variant="destructive" className="max-w-md">
+      <Alert className="max-w-md" variant="destructive">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Tag Not Found</AlertTitle>
         <AlertDescription className="mt-2">
@@ -70,76 +127,19 @@ function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
           have access to it.
         </AlertDescription>
         <div className="flex gap-2 mt-4">
-          <Button variant="outline" size="sm" onClick={onRetry}>
+          <Button onClick={onRetry} size="sm" variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
           <Button
-            variant="outline"
+            onClick={() => { router.push("/home/tags"); }}
             size="sm"
-            onClick={() => router.push("/home/tags")}
+            variant="outline"
           >
             Back to Tags
           </Button>
         </div>
       </Alert>
-    </div>
-  );
-}
-
-export default function Page(props: { params: Promise<{ id: string }> }) {
-  const params = use(props.params);
-  const tagQuery = useQuery(queryKeys.tags.byId(params.id));
-
-  if (tagQuery.isLoading) {
-    return <TagDetailSkeleton />;
-  }
-
-  if (tagQuery.isError || !tagQuery.data) {
-    return <TagNotFoundError onRetry={() => tagQuery.refetch()} />;
-  }
-
-  const tag = tagQuery.data;
-
-  const filter: SessionFilterPrecursor = {
-    settings: {
-      tags: {
-        id: {
-          mode: "all",
-        },
-      },
-    },
-    data: {
-      tags: [tag],
-    },
-  };
-
-  return (
-    <div className="grow">
-      <div className="my-8 pl-8 ">
-        <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
-          Details page for
-          <TagBadge variant="auto" tag={tag} />
-        </h2>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <TotalSessionTimeCard filter={filter} />
-        <SessionAverageDurationProvider filter={filter} />
-        <SessionCountCard filter={filter} />
-
-        <FilterContextProvider initialFilter={filter}>
-          <FilteredSessionAreaChart
-            initialGranularity={"days-in-month"}
-            className="col-span-full h-[400px]"
-          />
-          <div className="col-span-full">
-            <BaseSessionTable
-              columns={BaseSessionTableColumns}
-              filter={filter}
-            />
-          </div>
-        </FilterContextProvider>
-      </div>
     </div>
   );
 }

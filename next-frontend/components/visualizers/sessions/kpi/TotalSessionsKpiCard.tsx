@@ -1,5 +1,5 @@
 import { AlignVerticalDistributeEnd } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useQuery } from "@tanstack/react-query";
@@ -15,11 +15,11 @@ export const TotalSessionsKpiCard: FC<TotalSessionsKpiCardProps> = () => {
 
   return (
     <KpiCardUiProvider
-      value={stats.data}
-      loading={stats.isLoading}
-      error={stats.isError}
-      title={"Total Sessions"}
       description={"Many more to go.."}
+      error={stats.isError}
+      loading={stats.isLoading}
+      title={"Total Sessions"}
+      value={stats.data}
     >
       <AlignVerticalDistributeEnd />
     </KpiCardUiProvider>

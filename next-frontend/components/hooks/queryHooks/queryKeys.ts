@@ -1,5 +1,5 @@
 import { CategoryApi, ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   createQueryKeys,
   mergeQueryKeys,
@@ -8,17 +8,17 @@ import {
 import { translateFilterPrecursor } from "@/lib/utils";
 
 const sessionkeys = createQueryKeys("sessions", {
+  active: {
+    queryFn: async () => await ScheduledSessionApi.getActiveSessions(),
+    queryKey: ["active"],
+  },
   filtered: (precursor?: SessionFilterPrecursor) => ({
-    queryKey: [precursor ?? {}],
     queryFn: async () => {
       const filter = translateFilterPrecursor(precursor);
       return await ScheduledSessionApi.getSessions(filter);
     },
+    queryKey: [precursor ?? {}],
   }),
-  active: {
-    queryKey: ["active"],
-    queryFn: async () => await ScheduledSessionApi.getActiveSessions(),
-  },
 });
 
 const tagKeys = createQueryKeys("tags", {
@@ -27,26 +27,26 @@ const tagKeys = createQueryKeys("tags", {
     queryKey: null,
   },
   byId: (id: string) => ({
+    queryFn: async () => await TagApi.getById({ id }),
     queryKey: [id],
-    queryFn: async () => await TagApi.getById({ id: id }),
   }),
 });
 
 const statisticsKeys = createQueryKeys("statistics", {
   dashboard: {
-    queryKey: ["dashboard"],
     queryFn: async () => await StatisticsApi.getDashboardData(),
+    queryKey: ["dashboard"],
   },
 });
 
 const categoryKeys = createQueryKeys("categories", {
   all: {
-    queryKey: null,
     queryFn: async () => await CategoryApi.getSessionCountByCategory(),
+    queryKey: null,
   },
   byId: (id: string) => ({
+    queryFn: async () => await CategoryApi.readById({ id }),
     queryKey: [id],
-    queryFn: async () => await CategoryApi.readById({ id: id }),
   }),
 });
 

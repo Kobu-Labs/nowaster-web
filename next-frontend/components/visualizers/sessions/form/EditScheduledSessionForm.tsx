@@ -18,12 +18,14 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { isBefore } from "date-fns";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import {
+import type {
   ScheduledSessionRequest,
-  ScheduledSessionWithId,
+  ScheduledSessionWithId} from "@/api/definitions";
+import {
   ScheduledSessionWithIdSchema,
 } from "@/api/definitions";
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
@@ -40,17 +42,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight } from "lucide-react";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
-type EditStopwatchSessionProps = {
-  session: ScheduledSessionWithId;
+interface EditStopwatchSessionProps {
+  onCancel?: () => void;
   onDelete?: () => void;
   onSave?: () => void;
-  onCancel?: () => void;
-};
+  session: ScheduledSessionWithId;
+}
 
 export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
   const form = useForm<ScheduledSessionWithId>({
-    resolver: zodResolver(ScheduledSessionWithIdSchema),
     defaultValues: { ...props.session },
+    resolver: zodResolver(ScheduledSessionWithIdSchema),
   });
 
   const updateSession = useUpdateSession("scheduled");
@@ -66,11 +68,11 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
     }
 
     const data: ScheduledSessionRequest["update"] = {
-      id: values.id,
-      startTime: values.startTime,
-      endTime: values.endTime,
       category_id: values.category.id,
       description: values.description,
+      endTime: values.endTime,
+      id: values.id,
+      startTime: values.startTime,
       tag_ids: values.tags.map((tag) => tag.id),
     };
 
@@ -84,8 +86,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
       <CardContent className="mt-3">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit, console.log)}
             className="space-y-8"
+            onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
               control={form.control}
@@ -96,8 +98,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                   <FormControl>
                     <CategoryPicker
                       mode="single"
-                      selectedCategory={field.value ?? null}
                       onSelectCategory={field.onChange}
+                      selectedCategory={field.value ?? null}
                     />
                   </FormControl>
                   <FormMessage />
@@ -113,9 +115,9 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Input
+                      onChange={field.onChange}
                       placeholder="Insert your description"
                       value={field.value ?? ""}
-                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -125,15 +127,13 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
             <div className="flex items-center gap-4">
               <FormField
-                name="startTime"
                 control={form.control}
+                name="startTime"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">Start Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={dateQuickOptions}
-                        selected={field.value || undefined}
                         onSelect={(val) => {
                           if (val) {
                             field.onChange(val);
@@ -144,6 +144,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                             form.resetField("startTime");
                           }
                         }}
+                        quickOptions={dateQuickOptions}
+                        selected={field.value || undefined}
                       />
                     </FormControl>
                     <FormMessage />
@@ -160,15 +162,13 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
               </div>
 
               <FormField
-                name="endTime"
                 control={form.control}
+                name="endTime"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={dateQuickOptions}
-                        selected={field.value}
                         onSelect={(val) => {
                           if (val) {
                             field.onChange(val);
@@ -176,6 +176,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                             form.resetField("endTime");
                           }
                         }}
+                        quickOptions={dateQuickOptions}
+                        selected={field.value}
                       />
                     </FormControl>
                     <FormMessage />
@@ -185,24 +187,24 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
             </div>
 
             <FormField
-              name="tags"
               control={form.control}
+              name="tags"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
+                      disabled={form.getValues("category") === undefined}
+                      forCategory={form.watch("category") ?? undefined}
+                      onNewTagsSelected={(tags) => { field.onChange(tags); }}
                       selectedTags={
                         field.value?.map((t) => ({
                           ...t,
-                          usages: 0,
                           allowedCategories: [],
                           last_used_at: new Date(),
+                          usages: 0,
                         })) ?? []
                       }
-                      forCategory={form.watch("category") ?? undefined}
-                      disabled={form.getValues("category") === undefined}
-                      onNewTagsSelected={(tags) => field.onChange(tags)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -211,19 +213,19 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
             />
             <CardFooter className="flex justify-between">
               <Button
-                variant="destructive"
+                onClick={() => { setIsDeleteAlertOpen(true); }}
                 type="button"
-                onClick={() => setIsDeleteAlertOpen(true)}
+                variant="destructive"
               >
                 Delete
               </Button>
 
               <div>
                 <Button
+                  className="mr-2"
+                  onClick={props.onCancel}
                   type="button"
                   variant="outline"
-                  onClick={props.onCancel}
-                  className="mr-2"
                 >
                   Cancel
                 </Button>
@@ -233,7 +235,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
           </form>
         </Form>
       </CardContent>
-      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+      <AlertDialog onOpenChange={setIsDeleteAlertOpen} open={isDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete session</AlertDialogTitle>
@@ -245,6 +247,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={async () =>
                 await deleteSession.mutateAsync(props.session.id, {
                   onSuccess: () => {
@@ -256,7 +259,6 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                   },
                 })
               }
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Remove
             </AlertDialogAction>

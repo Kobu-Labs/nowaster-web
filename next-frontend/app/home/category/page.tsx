@@ -1,6 +1,6 @@
 "use client";
 
-import { CategoryWithId } from "@/api/definitions";
+import type { CategoryWithId } from "@/api/definitions";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useCategoryStats } from "@/components/hooks/category/useCategoryStats";
 import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
@@ -69,8 +69,8 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-type SortOption = "name" | "sessions" | "time" | "recent";
 type SortDirection = "asc" | "desc";
+type SortOption = "name" | "recent" | "sessions" | "time";
 
 export default function CategoriesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,7 +91,7 @@ export default function CategoriesPage() {
   const deleteCategory = useDeleteCategory();
 
   const filteredAndSortedCategories = useMemo(() => {
-    if (!categoriesQuery.data) return [];
+    if (!categoriesQuery.data) {return [];}
 
     const filtered = categoriesQuery.data.filter((category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -101,20 +101,24 @@ export default function CategoriesPage() {
       let comparison = 0;
 
       switch (sortBy) {
-      case "name":
+      case "name": {
         comparison = a.name.localeCompare(b.name);
         break;
-      case "sessions":
-        comparison = a.sessionCount - b.sessionCount;
-        break;
-      case "time":
-        // Assuming totalTime exists or calculate from sessionCount
-        comparison = a.sessionCount * 60 - b.sessionCount * 60;
-        break;
-      case "recent":
+      }
+      case "recent": {
         // This would require lastUsedAt field
         comparison = 0; // Placeholder
         break;
+      }
+      case "sessions": {
+        comparison = a.sessionCount - b.sessionCount;
+        break;
+      }
+      case "time": {
+        // Assuming totalTime exists or calculate from sessionCount
+        comparison = a.sessionCount * 60 - b.sessionCount * 60;
+        break;
+      }
       }
 
       return sortDirection === "asc" ? comparison : -comparison;
@@ -125,8 +129,8 @@ export default function CategoriesPage() {
     if (newCategoryName.trim()) {
       createCategory.mutate(
         {
-          name: newCategoryName.trim(),
           color: newCategoryColor,
+          name: newCategoryName.trim(),
         },
         {
           onSuccess: () => {
@@ -143,9 +147,9 @@ export default function CategoriesPage() {
     if (editingCategory && newCategoryName.trim()) {
       updateCategory.mutate(
         {
+          color: newCategoryColor,
           id: editingCategory.id,
           name: newCategoryName.trim(),
-          color: newCategoryColor,
         },
         {
           onSuccess: () => {
@@ -194,7 +198,7 @@ export default function CategoriesPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48" />
+            <Skeleton className="h-48" key={i} />
           ))}
         </div>
       </div>
@@ -239,9 +243,9 @@ export default function CategoriesPage() {
         </div>
 
         <Dialog
-          open={showCreateDialog}
-          onOpenChange={setShowCreateDialog}
           modal={false}
+          onOpenChange={setShowCreateDialog}
+          open={showCreateDialog}
         >
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -249,7 +253,7 @@ export default function CategoriesPage() {
               New Category
             </Button>
           </DialogTrigger>
-          <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+          <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
             <DialogHeader>
               <DialogTitle>Create New Category</DialogTitle>
               <DialogDescription>
@@ -261,13 +265,13 @@ export default function CategoriesPage() {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onChange={(e) => { setNewCategoryName(e.target.value); }}
                   placeholder="Category name..."
+                  value={newCategoryName}
                 />
               </div>
               <div>
-                <Label htmlFor="color" className="mr-2">
+                <Label className="mr-2" htmlFor="color">
                   Color
                 </Label>
                 <ColorPicker
@@ -278,14 +282,14 @@ export default function CategoriesPage() {
             </div>
             <DialogFooter>
               <Button
+                onClick={() => { setShowCreateDialog(false); }}
                 variant="outline"
-                onClick={() => setShowCreateDialog(false)}
               >
                 Cancel
               </Button>
               <Button
-                onClick={handleCreateCategory}
                 disabled={!newCategoryName.trim() || createCategory.isPending}
+                onClick={handleCreateCategory}
               >
                 {createCategory.isPending ? "Creating..." : "Create"}
               </Button>
@@ -364,19 +368,19 @@ export default function CategoriesPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
+            className="pl-10"
+            onChange={(e) => { setSearchQuery(e.target.value); }}
             placeholder="Search categories..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
           />
         </div>
 
         <div className="flex gap-2">
           <Button
-            variant={sortBy === "name" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("name")}
             className="flex items-center gap-1"
+            onClick={() => { toggleSort("name"); }}
+            size="sm"
+            variant={sortBy === "name" ? "default" : "outline"}
           >
             Name
             {sortBy === "name" &&
@@ -388,10 +392,10 @@ export default function CategoriesPage() {
           </Button>
 
           <Button
-            variant={sortBy === "sessions" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("sessions")}
             className="flex items-center gap-1"
+            onClick={() => { toggleSort("sessions"); }}
+            size="sm"
+            variant={sortBy === "sessions" ? "default" : "outline"}
           >
             Sessions
             {sortBy === "sessions" &&
@@ -408,31 +412,31 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {filteredAndSortedCategories.map((category) => (
           <Card
-            key={category.id}
             className="group hover:shadow-md transition-shadow"
+            key={category.id}
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <CategoryBadge color={category.color} name={category.name} />
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Button className="h-6 w-6 p-0" size="sm" variant="ghost">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/home/category/${category.id}`}
                         className="flex items-center gap-2 cursor-pointer"
+                        href={`/home/category/${category.id}`}
                       >
                         <Eye className="h-4 w-4" />
                         View Details
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => openEditDialog(category)}
                       className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => { openEditDialog(category); }}
                     >
                       <Edit className="h-4 w-4" />
                       Edit Category
@@ -444,8 +448,8 @@ export default function CategoriesPage() {
                             <TooltipTrigger>
                               <AlertDialogTrigger disabled>
                                 <DropdownMenuItem
-                                  disabled
                                   className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                                  disabled
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   Delete Category
@@ -461,8 +465,8 @@ export default function CategoriesPage() {
                       ) : (
                         <AlertDialogTrigger asChild>
                           <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}
                             className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                            onSelect={(e) => { e.preventDefault(); }}
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete Category
@@ -488,10 +492,10 @@ export default function CategoriesPage() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() =>
-                              deleteCategory.mutate({ id: category.id })
-                            }
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() =>
+                              { deleteCategory.mutate({ id: category.id }); }
+                            }
                           >
                             Delete
                           </AlertDialogAction>
@@ -508,7 +512,7 @@ export default function CategoriesPage() {
               </div>
 
               <Link href={`/home/category/${category.id}`}>
-                <Button variant="outline" className="w-full h-8" size="sm">
+                <Button className="w-full h-8" size="sm" variant="outline">
                   View Details
                 </Button>
               </Link>
@@ -534,8 +538,8 @@ export default function CategoriesPage() {
               </div>
               {!searchQuery && (
                 <Button
-                  onClick={() => setShowCreateDialog(true)}
                   className="mt-4"
+                  onClick={() => { setShowCreateDialog(true); }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Category
@@ -548,11 +552,11 @@ export default function CategoriesPage() {
 
       {/* Edit Category Dialog */}
       <Dialog
-        open={!!editingCategory}
-        onOpenChange={(open) => !open && setEditingCategory(null)}
         modal={false}
+        onOpenChange={(open) => !open && setEditingCategory(null)}
+        open={!!editingCategory}
       >
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent onInteractOutside={(e) => { e.preventDefault(); }}>
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
             <DialogDescription>
@@ -564,9 +568,9 @@ export default function CategoriesPage() {
               <Label htmlFor="edit-name">Name</Label>
               <Input
                 id="edit-name"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
+                onChange={(e) => { setNewCategoryName(e.target.value); }}
                 placeholder="Category name..."
+                value={newCategoryName}
               />
             </div>
             <div>
@@ -578,12 +582,12 @@ export default function CategoriesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingCategory(null)}>
+            <Button onClick={() => { setEditingCategory(null); }} variant="outline">
               Cancel
             </Button>
             <Button
-              onClick={handleUpdateCategory}
               disabled={!newCategoryName.trim() || updateCategory.isPending}
+              onClick={handleUpdateCategory}
             >
               {updateCategory.isPending ? "Updating..." : "Update"}
             </Button>

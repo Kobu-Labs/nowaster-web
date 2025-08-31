@@ -6,22 +6,22 @@ export const useMyFriends = () => {
   const { userId } = useAuth();
 
   const query = useQuery({
-    queryKey: ["friends", "my"],
+    enabled: !!userId,
     queryFn: async () => {
       const data = await FriendsApi.read();
 
       return data.map((friendship) => {
         return {
-          id: friendship.id,
+          cratedAt: friendship.created_at,
           friend:
             friendship.friend1.id === userId
               ? friendship.friend2
               : friendship.friend1,
-          cratedAt: friendship.created_at,
+          id: friendship.id,
         };
       });
     },
-    enabled: !!userId,
+    queryKey: ["friends", "my"],
   });
 
   return query;

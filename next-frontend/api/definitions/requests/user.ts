@@ -1,15 +1,15 @@
 import { z } from "zod";
 
 const create = z.object({
+  avatarUrl: z.string().optional(),
   id: z.string(),
   username: z.string().trim().min(1),
-  avatarUrl: z.string().optional(),
 });
 
 const update = z.object({
+  avatarUrl: z.string().optional(),
   id: z.string(),
   username: z.string().trim().min(1).optional(),
-  avatarUrl: z.string().optional(),
 });
 
 const updateVisibility = z.object({
@@ -30,7 +30,7 @@ export type UserRequest = {
 
 export const UserRequestSchema = {
   create,
+  getProfile,
   update,
   updateVisibility,
-  getProfile,
 } as const;

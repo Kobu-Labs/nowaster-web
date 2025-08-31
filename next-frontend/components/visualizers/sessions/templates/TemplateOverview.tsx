@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/shadcn/alert-dialog";
-import {
+import type {
   RecurringSession,
   SessionTemplate,
 } from "@/api/definitions/models/session-template";
@@ -38,13 +38,14 @@ import {
   Clock,
   CopyIcon,
   MoreHorizontal,
+  PlayCircle,
   Trash,
   Trash2,
-  PlayCircle,
   Users,
 } from "lucide-react";
-import { FC, useMemo, useState } from "react";
-import { TemplateSessionsAction } from "@/components/visualizers/sessions/templates/form/form-schemas";
+import type { FC} from "react";
+import { useMemo, useState } from "react";
+import type { TemplateSessionsAction } from "@/components/visualizers/sessions/templates/form/form-schemas";
 
 const calculateClosestSession = (
   session: Omit<RecurringSession, "id">,
@@ -72,14 +73,14 @@ const calculateClosestSession = (
 
   return {
     ...session,
-    closestStartTime,
     closestEndTime,
+    closestStartTime,
   };
 };
 
-type TemplateOverviewProps = {
+interface TemplateOverviewProps {
   template: SessionTemplate;
-};
+}
 
 export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
   // INFO: Calculate session times based on the template and todays date, only future session dates are shown
@@ -91,7 +92,7 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
         .sort(
           (a, b) => a.closestStartTime.getTime() - b.closestStartTime.getTime(),
         ),
-    [template.sessions, template.interval],
+    [template],
   );
 
   const totalSessionDuration = useMemo(() => {
@@ -103,13 +104,13 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
   const queryClient = useQueryClient();
 
   const handleDeleteTemplate = useMutation({
-    mutationKey: ["session-template", "deleteTemplate"],
     mutationFn: async (action: TemplateSessionsAction) => {
       await SessionTemplateApi.deleteTemplate({
-        id: template.id,
         existingSessionActions: action,
+        id: template.id,
       });
     },
+    mutationKey: ["session-template", "deleteTemplate"],
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["session-templates"] });
     },
@@ -120,9 +121,9 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
   return (
     <>
       <CreateTemplateFormDialog
+        defaultValues={{ ...template, name: `${template.name  } - duplicated` }}
         open={isDuplicateOpen}
         setIsOpen={setIsDuplicateOpen}
-        defaultValues={{ ...template, name: template.name + " - duplicated" }}
       />
       <Card className="group overflow-hidden transition-all duration-400 shadow-md hover:shadow-xl">
         <CardHeader className="pb-4 relative">
@@ -140,9 +141,9 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="ghost"
-                  size="icon"
                   className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  size="icon"
+                  variant="ghost"
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
@@ -150,16 +151,15 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   className="flex items-center gap-2"
-                  onSelect={() => setIsDuplicateOpen(true)}
+                  onSelect={() => { setIsDuplicateOpen(true); }}
                 >
                   <CopyIcon className="w-4 h-4" />
                   Duplicate
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); }}>
                   <DeleteTemplateAlertDialog
-                    template={template}
                     onConfirm={handleDeleteTemplate.mutate}
-                    onCancel={console.log}
+                    template={template}
                   />
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -212,7 +212,7 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {sessionTimes.slice(0, 3).map((session, index) => (
-                  <div key={index} className="border rounded-lg">
+                  <div className="border rounded-lg" key={index}>
                     <RecurringSessionCard
                       session={{
                         ...session,
@@ -225,9 +225,9 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
                 {sessionTimes.length > 3 && (
                   <div className="text-center py-2">
                     <Button
-                      variant="ghost"
-                      size="sm"
                       className="text-xs text-pink-primary hover:text-pink-primary/80 hover:bg-pink-subtle"
+                      size="sm"
+                      variant="ghost"
                     >
                       +{sessionTimes.length - 3} more sessions
                     </Button>
@@ -251,9 +251,9 @@ export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
 };
 
 const DeleteTemplateAlertDialog: FC<{
-  template: SessionTemplate;
+  onCancel?: () => void;
   onConfirm: (action: TemplateSessionsAction) => void;
-  onCancel: () => void;
+  template: SessionTemplate;
 }> = (props) => {
   return (
     <AlertDialog>
@@ -284,10 +284,10 @@ const DeleteTemplateAlertDialog: FC<{
                   </div>
                 </div>
                 <Button
-                  onClick={() => props.onConfirm("keep-all")}
-                  variant="outline"
-                  size="sm"
                   className="w-full sm:w-auto sm:min-w-24 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950/20"
+                  onClick={() => { props.onConfirm("keep-all"); }}
+                  size="sm"
+                  variant="outline"
                 >
                   Keep
                 </Button>
@@ -306,9 +306,9 @@ const DeleteTemplateAlertDialog: FC<{
                   </div>
                 </div>
                 <Button
-                  onClick={() => props.onConfirm("delete-future")}
-                  size="sm"
                   className="w-full sm:w-auto sm:min-w-24 bg-linear-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white border-0"
+                  onClick={() => { props.onConfirm("delete-future"); }}
+                  size="sm"
                 >
                   Delete Future
                 </Button>
@@ -327,9 +327,9 @@ const DeleteTemplateAlertDialog: FC<{
                   </div>
                 </div>
                 <Button
-                  onClick={() => props.onConfirm("delete-all")}
-                  size="sm"
                   className="w-full sm:w-auto sm:min-w-24 bg-linear-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0"
+                  onClick={() => { props.onConfirm("delete-all"); }}
+                  size="sm"
                 >
                   Delete All
                 </Button>
@@ -338,7 +338,7 @@ const DeleteTemplateAlertDialog: FC<{
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={props.onCancel} className="w-full">
+          <AlertDialogCancel className="w-full" onClick={props.onCancel}>
             Cancel
           </AlertDialogCancel>
         </AlertDialogFooter>

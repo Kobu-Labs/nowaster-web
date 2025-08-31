@@ -1,4 +1,4 @@
-import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
+import type { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import {
   Select,
   SelectContent,
@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-import { SelectProps } from "@radix-ui/react-select";
-import { FC } from "react";
+import type { SelectProps } from "@radix-ui/react-select";
+import type { FC } from "react";
 
 const IntervalToLabel: Record<RecurringSessionInterval, string> = {
   daily: "Daily",
@@ -20,8 +20,8 @@ export const TemplateIntervalSelect: FC<SelectProps> = ({ ...props }) => {
     <Select {...props}>
       <SelectTrigger>
         <SelectValue
-          placeholder="Select an interval!"
           className="text-muted-foreground"
+          placeholder="Select an interval!"
         />
       </SelectTrigger>
       <SelectContent>
