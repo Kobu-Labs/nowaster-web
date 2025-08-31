@@ -2,9 +2,9 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, Clock } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 
-import {
+import type {
   ReadFeedEvent,
   ReadUserAvatar,
   SessionCompletedEventSchema,
@@ -19,13 +19,13 @@ import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge
 import { ReactionBar } from "@/components/visualizers/feed/ReactionBar";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { getFormattedTimeDifference, getInitials } from "@/lib/utils";
-import { z } from "zod";
+import type { z } from "zod";
 
-type SessionFeedCardProps = {
+interface SessionFeedCardProps {
   event: ReadFeedEvent;
   event_data: z.infer<typeof SessionCompletedEventSchema>;
   user: ReadUserAvatar;
-};
+}
 
 export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
   event,
@@ -38,8 +38,8 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={user.avatar_url ?? undefined}
               alt={user.username}
+              src={user.avatar_url ?? undefined}
             />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               {getInitials(user.username)}
@@ -77,7 +77,7 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex gap-2 flex-wrap">
             {event_data.tags.map((tag, index) => (
-              <TagBadge variant="auto" tag={tag} key={index} />
+              <TagBadge key={index} tag={tag} variant="auto" />
             ))}
           </div>
 

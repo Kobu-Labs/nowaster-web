@@ -1,13 +1,14 @@
-import { FC } from "react";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { FC } from "react";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes } from "date-fns";
 
 import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import type {
+  KpiCardUiProviderProps} from "@/components/ui-providers/KpiCardUiProvider";
 import {
-  KpiCardUiProvider,
-  KpiCardUiProviderProps,
+  KpiCardUiProvider
 } from "@/components/ui-providers/KpiCardUiProvider";
 import { Clock1 } from "lucide-react";
 
@@ -16,15 +17,15 @@ type TotalSessionTimeCardProps = {
 } & Partial<
   Pick<
     KpiCardUiProviderProps<number>,
-    "title" | "description" | "variant" | "mapper"
+    "description" | "mapper" | "title" | "variant"
   >
 >;
 
 export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
   const {
     data: result,
-    isLoading,
     isError,
+    isLoading,
   } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
     retry: false,
@@ -41,10 +42,10 @@ export const TotalSessionTimeCard: FC<TotalSessionTimeCardProps> = (props) => {
       description={props.description}
       error={isError}
       loading={isLoading}
-      variant={props.variant ?? "big_value"}
       mapper={props.mapper ?? formatTime}
-      value={result}
       title={props.title ?? "Total time"}
+      value={result}
+      variant={props.variant ?? "big_value"}
     >
       <Clock1 />
     </KpiCardUiProvider>

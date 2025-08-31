@@ -1,5 +1,5 @@
 import { TagApi } from "@/api";
-import { TagRequest } from "@/api/definitions";
+import type { TagRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
@@ -14,8 +14,8 @@ export const useUpdateTag = () => {
 
   const toastError = (message: string) => {
     toast({
-      title: "Error updating tag",
       description: message,
+      title: "Error updating tag",
       variant: "destructive",
     });
   };
@@ -24,6 +24,7 @@ export const useUpdateTag = () => {
     mutationFn: async (data: TagRequest["update"]) => {
       return await TagApi.update(data);
     },
+    onError: (error) => { toastError(error.message); },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.tags._def });
 
@@ -42,7 +43,6 @@ export const useUpdateTag = () => {
         variant: "default",
       });
     },
-    onError: (error) => toastError(error.message),
   });
 
   return mutation;

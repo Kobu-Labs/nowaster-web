@@ -1,5 +1,5 @@
 import { TagApi } from "@/api";
-import { TagRequest } from "@/api/definitions";
+import type { TagRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";

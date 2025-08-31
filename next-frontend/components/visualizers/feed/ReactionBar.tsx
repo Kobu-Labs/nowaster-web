@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 import { Plus, Smile } from "lucide-react";
 
 import { Button } from "@/components/shadcn/button";
@@ -10,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { cn } from "@/lib/utils";
-import { ReadFeedEvent, ReadFeedReaction } from "@/api/definitions/models/feed";
+import type { ReadFeedEvent, ReadFeedReaction } from "@/api/definitions/models/feed";
 import {
   useAddReaction,
   useRemoveReaction,
@@ -20,7 +21,7 @@ import { useAuth } from "@clerk/nextjs";
 interface ReactionBarProps {
   event: ReadFeedEvent;
   reactions: ReadFeedReaction[];
-  userReaction?: string | null;
+  userReaction?: null | string;
 }
 
 const COMMON_EMOJIS = [
@@ -47,7 +48,7 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
   }
 
   const sortedGroupedReactions = Object.entries(
-    reactions.reduce(
+    reactions.reduce<Record<string, { count: number; currentUserReacted: boolean }>>(
       (acc, reaction) => {
         acc[reaction.emoji] = {
           count: (acc[reaction.emoji]?.count ?? 0) + 1,
@@ -57,7 +58,7 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
         };
         return acc;
       },
-      {} as Record<string, { count: number; currentUserReacted: boolean }>,
+      {},
     ),
   ).sort(([emojiA, a], [emojiB, b]) => {
     if (a.count === b.count) {
@@ -75,13 +76,13 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
     const emojiData = sortedGroupedReactions.find(([e]) => e === emoji)?.[1];
     if (emojiData?.currentUserReacted) {
       removeReaction.mutate({
+        emoji,
         feed_event_id: event.id,
-        emoji: emoji,
       });
     } else {
       addReaction.mutate({
+        emoji,
         feed_event_id: event.id,
-        emoji: emoji,
       });
     }
     setIsPopoverOpen(false);
@@ -93,16 +94,16 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
         {sortedGroupedReactions.map(
           ([emoji, { count, currentUserReacted }]) => (
             <Button
-              key={emoji}
-              variant="ghost"
-              size="sm"
               className={cn(
                 "h-8 px-2 text-xs rounded-full border",
                 currentUserReacted
                   ? "bg-primary/10 border-primary/30 text-primary"
                   : "hover:bg-muted",
               )}
-              onClick={() => handleEmojiClick(emoji)}
+              key={emoji}
+              onClick={() => { handleEmojiClick(emoji); }}
+              size="sm"
+              variant="ghost"
             >
               <span className="mr-1">{emoji}</span>
               <span>{count}</span>
@@ -111,12 +112,12 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
         )}
       </div>
 
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <Popover onOpenChange={setIsPopoverOpen} open={isPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
             className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
+            size="sm"
+            variant="ghost"
           >
             {totalReactions > 0 ? (
               <Plus className="h-4 w-4" />
@@ -125,15 +126,15 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-2" align="start">
+        <PopoverContent align="start" className="w-auto p-2">
           <div className="grid grid-cols-5 gap-2">
             {COMMON_EMOJIS.map((emoji) => (
               <Button
-                key={emoji}
-                variant="ghost"
-                size="sm"
                 className="h-8 w-8 p-0 text-lg hover:bg-muted rounded"
-                onClick={() => handleEmojiClick(emoji)}
+                key={emoji}
+                onClick={() => { handleEmojiClick(emoji); }}
+                size="sm"
+                variant="ghost"
               >
                 {emoji}
               </Button>

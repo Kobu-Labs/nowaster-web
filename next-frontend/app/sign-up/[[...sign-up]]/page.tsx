@@ -22,8 +22,8 @@ type IconProps = React.HTMLAttributes<SVGElement>;
 const GoogleIcon = (props: IconProps) => (
   <svg role="img" viewBox="0 0 24 24" {...props}>
     <path
-      fill="currentColor"
       d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+      fill="currentColor"
     />
   </svg>
 );
@@ -38,11 +38,11 @@ export default function SignUpPage() {
               <div className="text-center mb-12">
                 <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full  shadow-lg">
                   <Image
-                    src="/logo.png"
                     alt="Nowaster Logo"
                     className="h-12 w-12"
-                    width={48}
                     height={48}
+                    src="/logo.png"
+                    width={48}
                   />
                 </div>
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -119,11 +119,11 @@ export default function SignUpPage() {
                         <div className="mb-8 lg:hidden text-center">
                           <div className="mx-auto mb-4 flex gap-2 h-16 w-16 items-center justify-center rounded-full">
                             <Image
-                              src="/logo.png"
                               alt="Nowaster Logo"
                               className="h-10 w-10"
-                              width={40}
                               height={40}
+                              src="/logo.png"
+                              width={40}
                             />
                             <span className="font-bold text-2xl">Nowaster</span>
                           </div>
@@ -144,12 +144,12 @@ export default function SignUpPage() {
                           </CardHeader>
                           <CardContent className="space-y-4">
                             <div className="grid gap-3">
-                              <Clerk.Connection name="github" asChild>
+                              <Clerk.Connection asChild name="github">
                                 <Button
-                                  variant="outline"
-                                  type="button"
-                                  disabled={isGlobalLoading}
                                   className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                                  disabled={isGlobalLoading}
+                                  type="button"
+                                  variant="outline"
                                 >
                                   <Clerk.Loading scope="provider:github">
                                     {(isLoading) =>
@@ -166,12 +166,12 @@ export default function SignUpPage() {
                                 </Button>
                               </Clerk.Connection>
 
-                              <Clerk.Connection name="discord" asChild>
+                              <Clerk.Connection asChild name="discord">
                                 <Button
-                                  variant="outline"
-                                  type="button"
-                                  disabled={isGlobalLoading}
                                   className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                                  disabled={isGlobalLoading}
+                                  type="button"
+                                  variant="outline"
                                 >
                                   <Clerk.Loading scope="provider:discord">
                                     {(isLoading) =>
@@ -188,12 +188,12 @@ export default function SignUpPage() {
                                 </Button>
                               </Clerk.Connection>
 
-                              <Clerk.Connection name="google" asChild>
+                              <Clerk.Connection asChild name="google">
                                 <Button
-                                  variant="outline"
-                                  type="button"
-                                  disabled={isGlobalLoading}
                                   className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                                  disabled={isGlobalLoading}
+                                  type="button"
+                                  variant="outline"
                                 >
                                   <Clerk.Loading scope="provider:google">
                                     {(isLoading) =>
@@ -216,8 +216,8 @@ export default function SignUpPage() {
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Already have an account?{" "}
                                 <Clerk.Link
-                                  navigate="sign-in"
                                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                                  navigate="sign-in"
                                 >
                                   Sign in instead
                                 </Clerk.Link>
@@ -238,29 +238,29 @@ export default function SignUpPage() {
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <Clerk.Field name="username" className="space-y-2">
+                            <Clerk.Field className="space-y-2" name="username">
                               <Clerk.Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 Username
                               </Clerk.Label>
                               <Clerk.Input
-                                type="text"
-                                required
                                 asChild
                                 className="w-full"
+                                required
+                                type="text"
                               >
                                 <Input
-                                  placeholder="Enter your username"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Enter your username"
                                 />
                               </Clerk.Input>
                               <Clerk.FieldError className="block text-sm text-red-600 dark:text-red-400" />
                             </Clerk.Field>
                           </CardContent>
                           <CardFooter>
-                            <SignUp.Action submit asChild>
+                            <SignUp.Action asChild submit>
                               <Button
-                                disabled={isGlobalLoading}
                                 className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                                disabled={isGlobalLoading}
                               >
                                 <Clerk.Loading>
                                   {(isLoading) => {
@@ -291,19 +291,17 @@ export default function SignUpPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div className="grid items-center justify-center gap-y-4">
-                                <Clerk.Field name="code" className="space-y-2">
+                                <Clerk.Field className="space-y-2" name="code">
                                   <Clerk.Label className="sr-only">
                                     Verification Code
                                   </Clerk.Label>
                                   <div className="flex justify-center">
                                     <Clerk.Input
-                                      type="otp"
-                                      className="flex justify-center has-disabled:opacity-50"
                                       autoSubmit
-                                      render={({ value, status }) => {
+                                      className="flex justify-center has-disabled:opacity-50"
+                                      render={({ status, value }) => {
                                         return (
                                           <div
-                                            data-status={status}
                                             className={cn(
                                               "relative flex size-12 items-center justify-center border-y border-r border-input text-lg font-medium transition-all first:rounded-l-md first:border-l last:rounded-r-md bg-white dark:bg-gray-800",
                                               {
@@ -312,6 +310,7 @@ export default function SignUpPage() {
                                                   status === "selected",
                                               },
                                             )}
+                                            data-status={status}
                                           >
                                             {value}
                                             {status === "cursor" && (
@@ -322,6 +321,7 @@ export default function SignUpPage() {
                                           </div>
                                         );
                                       }}
+                                      type="otp"
                                     />
                                   </div>
                                   <Clerk.FieldError className="block text-center text-sm text-red-600 dark:text-red-400" />
@@ -329,10 +329,10 @@ export default function SignUpPage() {
                               </div>
                             </CardContent>
                             <CardFooter>
-                              <SignUp.Action submit asChild>
+                              <SignUp.Action asChild submit>
                                 <Button
-                                  disabled={isGlobalLoading}
                                   className="w-full bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-200"
+                                  disabled={isGlobalLoading}
                                 >
                                   <Clerk.Loading>
                                     {(isLoading) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { format, addYears, subYears, startOfYear, endOfYear } from "date-fns";
+import { addYears, endOfYear, format, startOfYear, subYears } from "date-fns";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -17,12 +17,12 @@ import {
 } from "@/components/shadcn/popover";
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 
-type YearDatePickerProps = {
-  onSelected?: (date: DeepRequired<DateRange>) => void;
+interface YearDatePickerProps {
   initialDate?: Date;
-};
+  onSelected?: (date: DeepRequired<DateRange>) => void;
+}
 
 export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
   const [date, setDate] = React.useState<Date>(props.initialDate ?? new Date());
@@ -52,7 +52,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
 
   const handlePreviousYear = () => {
     const newYear = subYears(date, 1);
-    const minYear = years.reduce((latest, current) => current < latest ? current : latest);
+    const minYear = years.reduce((latest, current) => Math.min(current, latest));
     if (newYear.getFullYear() < minYear) {
       setYears(() => Array.from(
         { length: 12 },
@@ -65,7 +65,7 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
 
   const handleNextYear = () => {
     const newYear = addYears(date, 1);
-    const maxYear = years.reduce((latest, current) => current > latest ? current : latest);
+    const maxYear = years.reduce((latest, current) => Math.max(current, latest));
     if (newYear.getFullYear() > maxYear) {
       setYears(() => Array.from(
         { length: 12 },
@@ -84,11 +84,11 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant={"outline"}
           className={cn(
             "w-[240px] justify-start text-left font-normal",
             !date && "text-muted-foreground",
           )}
+          variant={"outline"}
         >
           <CalendarIcon className="mr-2 size-4" />
           {date ? (
@@ -98,25 +98,25 @@ export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent align="start" className="w-auto p-0">
         <div className="flex items-center justify-between p-2">
-          <Button variant="outline" size="icon" onClick={handlePreviousYear}>
+          <Button onClick={handlePreviousYear} size="icon" variant="outline">
             <ChevronLeft className="size-4" />
           </Button>
           <div className="font-semibold">
             {format(date, "yyyy")}
           </div>
-          <Button variant="outline" size="icon" onClick={handleNextYear}>
+          <Button onClick={handleNextYear} size="icon" variant="outline">
             <ChevronRight className="size-4" />
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2 p-2">
           {years.map((year) => (
             <Button
-              key={year}
-              variant={date.getFullYear() === year ? "default" : "outline"}
               className="text-sm"
-              onClick={() => handleYearSelect(year)}
+              key={year}
+              onClick={() => { handleYearSelect(year); }}
+              variant={date.getFullYear() === year ? "default" : "outline"}
             >
               {year}
             </Button>

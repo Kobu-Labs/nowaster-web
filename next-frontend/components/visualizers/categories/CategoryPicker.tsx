@@ -1,6 +1,7 @@
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 
-import { CategoryWithId } from "@/api/definitions";
+import type { CategoryWithId } from "@/api/definitions";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Frown } from "lucide-react";
 import { CategoryPickerUiProvider } from "@/components/ui-providers/categories/CategoryPickerUiProvider";
@@ -9,7 +10,6 @@ import { arrayFromUndefined } from "@/lib/utils";
 
 type CategoryPickerProps = {
   availableCategories?: CategoryWithId[];
-  onSelectCategory?: (category: CategoryWithId) => void;
   categoryDisplayStrategy?: (
     selectedCategories: CategoryWithId[],
     availableCategories: CategoryWithId[],
@@ -18,9 +18,10 @@ type CategoryPickerProps = {
     category: CategoryWithId,
     searchTerm: string,
   ) => number;
+  onSelectCategory?: (category: CategoryWithId) => void;
 } & (
-  | { mode: "single"; selectedCategory?: CategoryWithId | null }
   | { mode: "multiple"; selectedCategories?: CategoryWithId[] | null }
+  | { mode: "single"; selectedCategory?: CategoryWithId | null }
 );
 
 export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
@@ -40,9 +41,9 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
       : props.selectedCategories !== undefined;
 
   const value = isControlled
-    ? props.mode === "single"
+    ? (props.mode === "single"
       ? arrayFromUndefined(props.selectedCategory)
-      : (props.selectedCategories ?? [])
+      : (props.selectedCategories ?? []))
     : selectedCategories;
 
   const onSelectCategory = (category: CategoryWithId) => {
@@ -76,10 +77,10 @@ export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   return (
     <CategoryPickerUiProvider
       availableCategories={props.availableCategories ?? categories.data ?? []}
-      selectedCategories={value}
-      onSelectCategory={onSelectCategory}
-      categoryMatchStrategy={props.categoryMatchStrategy}
       categoryDisplayStrategy={props.categoryDisplayStrategy}
+      categoryMatchStrategy={props.categoryMatchStrategy}
+      onSelectCategory={onSelectCategory}
+      selectedCategories={value}
     />
   );
 };

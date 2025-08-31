@@ -12,7 +12,7 @@ export type StopwatchSessionResponse = {
 };
 
 export const StopwatchSessionResponseSchema = {
+  create,
   remove,
   update,
-  create,
 } as const;

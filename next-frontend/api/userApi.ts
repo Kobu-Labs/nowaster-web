@@ -1,5 +1,5 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
-import { UserRequest } from "@/api/definitions/requests/user";
+import type { UserRequest } from "@/api/definitions/requests/user";
 import {
   UserResponseSchema,
 } from "@/api/definitions/responses/user";
@@ -23,7 +23,7 @@ export const create = async (
 export const updateVisibility = async (
   params: UserRequest["updateVisibility"],
 ) => {
-  const { data } = await baseApi.patch(BASE_URL + "/visibility", params);
+  const { data } = await baseApi.patch(`${BASE_URL  }/visibility`, params);
   return await parseResponseUnsafe(data, UserResponseSchema.updateVisibility);
 };
 
@@ -35,7 +35,7 @@ export const getCurrentUser = async () => {
 export const getProfile = async (
   params?: UserRequest["getProfile"],
 ) => {
-  const { data } = await baseApi.get(BASE_URL + "/profile", {
+  const { data } = await baseApi.get(`${BASE_URL  }/profile`, {
     params: params ? { id: params.id } : undefined,
   });
   return await parseResponseUnsafe(data, UserResponseSchema.getProfile);

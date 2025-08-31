@@ -1,16 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+/* eslint-disable perfectionist/sort-objects */
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as NotificationApi from "@/api/notificationApi";
-import {
-  NotificationQueryRequest,
+import type {
   MarkNotificationsSeenRequest,
+  NotificationQueryRequest,
 } from "@/api/definitions/requests/notification";
-import { Notification } from "@/api/definitions/models/notification";
+import type { Notification } from "@/api/definitions/models/notification";
 
 export const useUnseenNotifications = (params?: { limit?: number }) => {
   return useQuery({
-    queryKey: ["notifications", "unseen"],
     queryFn: () => NotificationApi.getUnseenNotifications(params),
-    refetchInterval: 60000,
+    queryKey: ["notifications", "unseen"],
+    refetchInterval: 60_000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
@@ -18,9 +20,9 @@ export const useUnseenNotifications = (params?: { limit?: number }) => {
 
 export const useNotifications = (params?: NotificationQueryRequest) => {
   return useQuery({
-    queryKey: ["notifications"],
     queryFn: () => NotificationApi.getNotifications(params),
-    staleTime: 60000,
+    queryKey: ["notifications"],
+    staleTime: 60_000,
   });
 };
 
@@ -55,16 +57,16 @@ export const useMarkNotificationsSeen = () => {
 
       return { previousNotifications };
     },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["notifications", "unseen"],
-      });
-    },
     onError: (_err, _addedReaction, context) => {
       queryClient.setQueryData(
         ["notifications", "unseen"],
         context?.previousNotifications,
       );
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["notifications", "unseen"],
+      });
     },
   });
 };

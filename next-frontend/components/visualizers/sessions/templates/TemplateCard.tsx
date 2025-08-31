@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import type {
   RecurringSessionInterval,
   SessionTemplate,
 } from "@/api/definitions/models/session-template";
@@ -13,21 +13,23 @@ import {
 import { Separator } from "@/components/shadcn/separator";
 import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
 import { addMinutes, format, startOfDay, startOfWeek } from "date-fns";
-import { FC } from "react";
+import type { FC } from "react";
 
-type TemplateCardProps = {
+interface TemplateCardProps {
   template: SessionTemplate;
-};
+}
 
 export const intervalToStartOf = (
   interval: RecurringSessionInterval,
   asOf: Date,
 ): Date => {
   switch (interval) {
-  case "daily":
+  case "daily": {
     return startOfDay(asOf);
-  case "weekly":
+  }
+  case "weekly": {
     return startOfWeek(asOf);
+  }
   }
 };
 
@@ -98,10 +100,10 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
                     <SessionCard
                       session={{
                         ...session,
-                        template: props.template,
-                        startTime,
                         endTime,
                         session_type: "fixed",
+                        startTime,
+                        template: props.template,
                       }}
                     />
                   </div>

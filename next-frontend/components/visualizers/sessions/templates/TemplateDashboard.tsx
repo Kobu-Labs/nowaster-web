@@ -5,7 +5,8 @@ import { CreateTemplateFormDialog } from "@/components/visualizers/sessions/temp
 import { TemplateOverview } from "@/components/visualizers/sessions/templates/TemplateOverview";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Plus, Sparkles, Zap } from "lucide-react";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 
 export const TemplateDashboard: FC = () => {
   const q = useQuery({
@@ -66,9 +67,9 @@ export const TemplateDashboard: FC = () => {
               </p>
 
               <Button
-                onClick={() => setOpen(true)}
-                size="lg"
                 className="h-12 px-8 text-base font-medium bg-linear-to-r from-pink-500 to-purple-600 text-white border-0 hover:scale-105 hover:shadow-xl hover:shadow-pink-500/30 relative overflow-hidden group transition-transform duration-300 ease-in-out"
+                onClick={() => { setOpen(true); }}
+                size="lg"
               >
                 {/* Base gradient background */}
                 <div className="absolute inset-0 bg-linear-to-r from-pink-500 to-purple-600 transition-opacity duration-300 ease-in-out" />
@@ -139,7 +140,7 @@ export const TemplateDashboard: FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-linear-to-r from-pink-500/10 to-purple-500/10 rounded-full border border-pink-200/20">
             <Sparkles className="w-3 h-3 text-pink-500" />
             <span className="text-xs font-medium bg-linear-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide">
-              {q.data.length} Template{q.data.length !== 1 ? "s" : ""}
+              {q.data.length} Template{q.data.length === 1 ? "" : "s"}
             </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -151,9 +152,9 @@ export const TemplateDashboard: FC = () => {
         </div>
 
         <Button
-          onClick={() => setOpen(true)}
-          size="lg"
           className="h-12 px-6 bg-linear-to-r from-pink-500 to-purple-600 text-white border-0 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25 relative overflow-hidden group transition-transform duration-300 ease-in-out"
+          onClick={() => { setOpen(true); }}
+          size="lg"
         >
           {/* Base gradient background */}
           <div className="absolute inset-0 bg-linear-to-r from-pink-500 to-purple-600 transition-opacity duration-300 ease-in-out" />
@@ -169,7 +170,7 @@ export const TemplateDashboard: FC = () => {
       {/* Templates Grid */}
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {q.data.map((template) => (
-          <TemplateOverview template={template} key={template.id} />
+          <TemplateOverview key={template.id} template={template} />
         ))}
       </div>
 

@@ -6,34 +6,34 @@ import {
   subMinutes,
 } from "date-fns";
 
-export type QuickOption = {
-  label: string;
+export interface QuickOption {
   increment: (date: Date) => Date;
-};
+  label: string;
+}
 
 export const dateQuickOptions: QuickOption[] = [
   {
-    label: "now",
     increment: () => new Date(),
+    label: "now",
   },
   {
-    label: "clamp",
     increment: (date) => setMinutes(date, 0),
+    label: "clamp",
   },
   {
-    label: "+ 15m",
     increment: (date) => addMinutes(date, 15),
+    label: "+ 15m",
   },
   {
-    label: "- 15m",
     increment: (date) => subMinutes(date, 15),
+    label: "- 15m",
   },
   {
-    label: "+ 1h",
     increment: (date) => addHours(date, 1),
+    label: "+ 1h",
   },
   {
-    label: "- 1h",
     increment: (date) => subHours(date, 1),
+    label: "- 1h",
   },
 ];

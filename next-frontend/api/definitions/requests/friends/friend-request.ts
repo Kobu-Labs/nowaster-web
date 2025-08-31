@@ -2,22 +2,22 @@ import { FriendRequestDirectionSchema } from "@/api/definitions/models/friendshi
 import { z } from "zod";
 
 const create = z.object({
-  recipient_name: z.string(),
   introduction_message: z.string().optional(),
+  recipient_name: z.string(),
 });
 
 const accept = z.object({
-  request_id: z.string().uuid(),
+  request_id: z.uuid(),
   status: z.literal("accepted"),
 });
 
 const reject = z.object({
-  request_id: z.string().uuid(),
+  request_id: z.uuid(),
   status: z.literal("rejected"),
 });
 
 const cancel = z.object({
-  request_id: z.string().uuid(),
+  request_id: z.uuid(),
   status: z.literal("cancelled"),
 });
 
@@ -26,9 +26,9 @@ const read = z.object({
 });
 
 export const FriendRequestRequestSchema = {
-  update: accept.or(reject).or(cancel),
   create,
   read,
+  update: accept.or(reject).or(cancel),
 };
 
 export type FriendRequestRequest = {

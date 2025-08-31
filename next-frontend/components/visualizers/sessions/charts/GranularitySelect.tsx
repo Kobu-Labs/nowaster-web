@@ -7,16 +7,16 @@ import {
   SelectValue } from "@/components/shadcn/select";
 import { type FC, useState } from "react";
 
-export type Granularity = "days-in-week" | "days-in-month" | "months-in-year";
+export type Granularity = "days-in-month" | "days-in-week" | "months-in-year";
 
-type GranularitySelectProps = {
-  onSelect: (val: Granularity) => void;
+interface GranularitySelectProps {
   defaultValue?: Granularity;
-};
+  onSelect: (val: Granularity) => void;
+}
 
-export const GranularityToLabel: { [K in Granularity]: string } = {
-  "days-in-week": "Week",
+export const GranularityToLabel: Record<Granularity, string> = {
   "days-in-month": "Month",
+  "days-in-week": "Week",
   "months-in-year": "Year",
 } as const;
 
@@ -27,11 +27,11 @@ export const GranularitySelect: FC<GranularitySelectProps> = (props) => {
 
   return (
     <Select
-      value={granularity}
       onValueChange={(a: Granularity) => {
         setGranularity(a);
         props.onSelect(a);
       }}
+      value={granularity}
     >
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder={GranularityToLabel[granularity]} />
@@ -39,7 +39,7 @@ export const GranularitySelect: FC<GranularitySelectProps> = (props) => {
       <SelectContent>
         <SelectGroup defaultChecked>
           {Object.entries(GranularityToLabel).map(([k, v]) => (
-            <SelectItem key={k} disabled={k === granularity} value={k}>
+            <SelectItem disabled={k === granularity} key={k} value={k}>
               {v}
             </SelectItem>
           ))}

@@ -10,7 +10,7 @@ interface SettingsLayoutProps {
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <div className="flex h-full w-full">
-      <SidebarProvider defaultOpen className="flex-1">
+      <SidebarProvider className="flex-1" defaultOpen>
         <SettingsSidebar />
         <SidebarInset className="flex-1">
           <div className="p-6">{children}</div>

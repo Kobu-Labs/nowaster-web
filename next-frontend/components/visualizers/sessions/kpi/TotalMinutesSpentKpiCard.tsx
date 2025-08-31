@@ -15,16 +15,16 @@ export const TotalSessionTimeKpiCard: FC<TotalSessionTimeKpiCardProps> = () => {
 
   return (
     <KpiCardUiProvider
-      loading={stats.isLoading}
-      error={stats.isError}
-      value={stats.data}
-      mapper={(val) => val.toFixed(0)}
-      title="Total Minutes Spent"
       description={
         stats.data === undefined
           ? ""
           : `That's almost ${Math.ceil(stats.data / 60) + 1} hours!`
       }
+      error={stats.isError}
+      loading={stats.isLoading}
+      mapper={(val) => val.toFixed(0)}
+      title="Total Minutes Spent"
+      value={stats.data}
     >
       <Hourglass />
     </KpiCardUiProvider>

@@ -1,19 +1,23 @@
-import { RecurringSessionInterval } from "@/api/definitions/models/session-template";
+import type { RecurringSessionInterval } from "@/api/definitions/models/session-template";
 import { Badge } from "@/components/shadcn/badge";
 import { cn } from "@/lib/utils";
 import { CalendarSync } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 
 const getIntervalBadgeColor = (interval: string) => {
   switch (interval) {
-  case "daily":
+  case "daily": {
     return "text-purple-300";
-  case "weekly":
-    return "text-pink-600";
-  case "monthly":
+  }
+  case "monthly": {
     return "text-purple-800";
-  default:
+  }
+  case "weekly": {
+    return "text-pink-600";
+  }
+  default: {
     return "text-gray-800";
+  }
   }
 };
 

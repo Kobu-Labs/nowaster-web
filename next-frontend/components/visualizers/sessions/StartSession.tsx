@@ -11,9 +11,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { FC, useEffect, useState } from "react";
+import type { FC} from "react";
+import { useEffect, useState } from "react";
 
-import { StopwatchSessionWithId } from "@/api/definitions";
+import type { StopwatchSessionWithId } from "@/api/definitions";
 import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
 import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
 import { useFinishStopwatchSession } from "@/components/hooks/session/stopwatch/useFinishStopwatchSession";
@@ -56,10 +57,10 @@ export const SessionTimer: FC = () => {
   return <NoActiveSession />;
 };
 
-type TimerProps = {
+interface TimerProps {
   durationInSeconds: number;
   formatingFunction?: (duration: number) => string;
-};
+}
 
 const Timer: FC<TimerProps> = (props) => {
   let duration = formatTime(props.durationInSeconds / 60);
@@ -69,7 +70,7 @@ const Timer: FC<TimerProps> = (props) => {
   return <div className="flex items-center">{duration}</div>;
 };
 
-const NoActiveSession: FC = ({}) => {
+const NoActiveSession: FC = () => {
   const createSession = useCreateStopwatchSession();
 
   return (
@@ -77,11 +78,11 @@ const NoActiveSession: FC = ({}) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="outline"
-            size="sm"
             className="group/start justify-start gap-2 bg-transparent"
-            onClick={() => createSession.mutate({ startTime: new Date() })}
             loading={createSession.isPending}
+            onClick={() => { createSession.mutate({ startTime: new Date() }); }}
+            size="sm"
+            variant="outline"
           >
             <>
               {!createSession.isPending && (
@@ -119,20 +120,20 @@ const StopwatchSessionActive: FC<{
       const category = session.category ? ` [${session.category.name}]` : "";
       document.title = `${formatted}${category}`;
     }, 1000);
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); };
   }, [session]);
 
   return (
     <TooltipProvider delayDuration={50}>
-      <Dialog modal={false} open={open} onOpenChange={setOpen}>
+      <Dialog modal={false} onOpenChange={setOpen} open={open}>
         <DialogContent className="w-fit max-w-fit">
           <DialogHeader>
             <DialogTitle className="m-1">Edit session data</DialogTitle>
             <Separator className="w-full" />
             <EditStopwatchSession
+              onDelete={() => { setOpen(false); }}
+              onSubmit={() => { setOpen(false); }}
               session={session}
-              onDelete={() => setOpen(false)}
-              onSubmit={() => setOpen(false)}
             />
           </DialogHeader>
         </DialogContent>
@@ -151,9 +152,9 @@ const StopwatchSessionActive: FC<{
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
                 className={cn("flex gap-2 items-center")}
-                onClick={() => setOpen(true)}
+                onClick={() => { setOpen(true); }}
+                variant="ghost"
               >
                 <Edit className="size-4" />
                 <div className="flex flex-wrap items-center justify-center">
@@ -180,17 +181,17 @@ const StopwatchSessionActive: FC<{
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="ghost"
-                  size="sm"
                   className="p-0 m-0"
                   onClick={() =>
-                    finishSession.mutate(session, {
+                    { finishSession.mutate(session, {
+                      onError: () => { setOpen(true); },
                       onSuccess: () => {
                         document.title = "Nowaster";
                       },
-                      onError: () => setOpen(true),
-                    })
+                    }); }
                   }
+                  size="sm"
+                  variant="ghost"
                 >
                   <CircleCheck className="hover:text-green-500 size-4" />
                 </Button>
@@ -203,16 +204,16 @@ const StopwatchSessionActive: FC<{
               <TooltipTrigger asChild>
                 <Button
                   className="p-0 m-0"
-                  size="sm"
-                  variant="ghost"
                   onClick={() =>
-                    deleteSessionMutation.mutate(
+                    { deleteSessionMutation.mutate(
                       { id: session.id },
                       {
-                        onSuccess: () => setOpen(false),
+                        onSuccess: () => { setOpen(false); },
                       },
-                    )
+                    ); }
                   }
+                  size="sm"
+                  variant="ghost"
                 >
                   <Trash className="hover:text-red-500 size-4" />
                 </Button>

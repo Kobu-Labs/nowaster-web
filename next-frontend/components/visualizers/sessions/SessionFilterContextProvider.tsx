@@ -1,6 +1,8 @@
 import { ChartFilterContext } from "@/components/context/chart-filter";
-import { SessionFilterPrecursor, defaultFilter } from "@/state/chart-filter";
-import { FC, PropsWithChildren, useState } from "react";
+import type { SessionFilterPrecursor} from "@/state/chart-filter";
+import { defaultFilter } from "@/state/chart-filter";
+import type { FC, PropsWithChildren} from "react";
+import { useState } from "react";
 
 export const FilterContextProvider: FC<
   PropsWithChildren<{ initialFilter?: SessionFilterPrecursor }>
@@ -8,8 +10,8 @@ export const FilterContextProvider: FC<
   const [filter, setFilter] = useState(initialFilter ?? defaultFilter);
 
   return (
-    <ChartFilterContext.Provider value={{ filter, setFilter }}>
+    <ChartFilterContext value={{ filter, setFilter }}>
       {children}
-    </ChartFilterContext.Provider>
+    </ChartFilterContext>
   );
 };

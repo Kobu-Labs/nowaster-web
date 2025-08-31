@@ -1,15 +1,16 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { ComponentProps, FC, useEffect, useState } from "react";
+import type { ComponentProps, FC} from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export const ThemedImage: FC<
   Omit<
-    ComponentProps<typeof Image> & {
-      lightUrl: string;
+    {
       darkUrl: string;
-    },
+      lightUrl: string;
+    } & ComponentProps<typeof Image>,
     "src"
   >
 > = (props) => {

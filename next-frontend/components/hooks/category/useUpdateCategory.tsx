@@ -13,6 +13,13 @@ export const useUpdateCategory = () => {
 
   const mutation = useMutation({
     mutationFn: CategoryApi.update,
+    onError: (error) => {
+      toast({
+        description: error.message,
+        title: "Error updating category",
+        variant: "destructive",
+      });
+    },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries(queryKeys.categories.all);
       setColors((prev) => ({
@@ -24,17 +31,10 @@ export const useUpdateCategory = () => {
         description: (
           <div className="flex items-center gap-2">
             Category
-            <CategoryBadge name={data.name} color={data.color} />
+            <CategoryBadge color={data.color} name={data.name} />
             updated
           </div>
         ),
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error updating category",
-        description: error.message,
-        variant: "destructive",
       });
     },
   });

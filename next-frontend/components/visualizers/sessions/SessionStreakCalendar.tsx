@@ -1,6 +1,7 @@
 import { cva } from "class-variance-authority";
 import { addDays, isSameDay, subDays } from "date-fns";
-import { DayButton, DayButtonProps } from "react-day-picker";
+import type { DayButtonProps } from "react-day-picker";
+import { DayButton } from "react-day-picker";
 
 import { Calendar } from "@/components/shadcn/calendar";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -8,21 +9,21 @@ import { Card, CardContent } from "@/components/shadcn/card";
 export const dayCellVariants = cva(
   "m-[2px] inline-flex h-9 w-9 hover:cursor-pointer items-center justify-center rounded-3xl  p-0 text-sm font-normal",
   {
-    variants: {
-      variant: {
-        default: "hover:bg-accent hover:text-accent-foreground",
-        active: "border hover:bg-pink-400 border-2 border-pink-500",
-      },
-    },
     defaultVariants: {
       variant: "default",
+    },
+    variants: {
+      variant: {
+        active: "border hover:bg-pink-400 border-2 border-pink-500",
+        default: "hover:bg-accent hover:text-accent-foreground",
+      },
     },
   },
 );
 
-type SessionStreakCalendarProps = {
+interface SessionStreakCalendarProps {
   sessionsDates: Date[];
-};
+}
 
 export const SessionStreakCalendar = ({
   sessionsDates: sessions,
@@ -58,10 +59,10 @@ export const SessionStreakCalendar = ({
     <Card className="inline-flex">
       <CardContent>
         <Calendar
-          components={{ DayButton: StreakCalculator }}
           classNames={{
             day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 focus-visible:ring-ring ring-offset-background inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           }}
+          components={{ DayButton: StreakCalculator }}
         />
       </CardContent>
     </Card>

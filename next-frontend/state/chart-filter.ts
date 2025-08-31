@@ -1,4 +1,4 @@
-import {
+import type {
   CategoryWithId,
   ScheduledSessionRequest,
   TagDetails,
@@ -9,22 +9,22 @@ import {
  */
 export type FilterSettings = NonNullable<OmitValue<SessionFilter>>;
 
-export type SessionFilter = ScheduledSessionRequest["readMany"];
-
 /*
  * Object that will provide the values for filtering
  */
-export type FilterValueFiller = {
-  tags?: TagDetails[];
+export interface FilterValueFiller {
   categories?: CategoryWithId[];
   endTimeFrom?: { value: Date };
   endTimeTo?: { value: Date };
-};
+  tags?: TagDetails[];
+}
 
-export type SessionFilterPrecursor = {
-  settings: FilterSettings;
+export type SessionFilter = ScheduledSessionRequest["readMany"];
+
+export interface SessionFilterPrecursor {
   data: FilterValueFiller;
-};
+  settings: FilterSettings;
+}
 
 type OmitValue<T> = T extends object
   ? {
@@ -33,30 +33,30 @@ type OmitValue<T> = T extends object
   : T;
 
 const defaultFilterSettings: FilterSettings = {
-  tags: {
-    label: {
-      mode: "some",
-    },
-  },
   categories: {
     name: {
       mode: "some",
     },
   },
+  tags: {
+    label: {
+      mode: "some",
+    },
+  },
 };
 const defaultFilterData: FilterValueFiller = {
-  tags: [],
   categories: [],
+  tags: [],
 };
 
 export const changeTagFilterMode = (
   oldState: SessionFilterPrecursor,
-  mode: "some" | "all",
+  mode: "all" | "some",
 ): SessionFilterPrecursor => {
   const {
-    settings: { tags, ...filterRest },
     data,
-  } = oldState ?? {};
+    settings: { tags, ...filterRest },
+  } = oldState || {};
 
   return {
     data,
@@ -65,7 +65,7 @@ export const changeTagFilterMode = (
       tags: {
         ...tags,
         label: {
-          mode: mode,
+          mode,
         },
       },
     },
@@ -77,8 +77,8 @@ export const changeCategoryFilterMode = (
   mode: "all" | "some",
 ): SessionFilterPrecursor => {
   const {
-    settings: { categories, ...filterRest },
     data,
+    settings: { categories, ...filterRest },
   } = oldState ?? {};
 
   return {
@@ -88,7 +88,7 @@ export const changeCategoryFilterMode = (
       categories: {
         ...categories,
         name: {
-          mode: mode,
+          mode,
         },
       },
     },
@@ -100,11 +100,11 @@ export const overwriteData = (
   newData: Partial<FilterValueFiller>,
 ): SessionFilterPrecursor => {
   return {
-    settings: oldState.settings,
     data: {
       ...oldState.data,
       ...newData,
     },
+    settings: oldState.settings,
   };
 };
 

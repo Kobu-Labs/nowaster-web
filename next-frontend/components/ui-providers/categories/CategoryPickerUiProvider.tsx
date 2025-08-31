@@ -16,14 +16,13 @@ import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { fuzzyFindSearch } from "@/lib/searching";
 import { cn, randomColor } from "@/lib/utils";
-import { CategoryWithId } from "api/definitions";
+import type { CategoryWithId } from "api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 
-export type CategoryPickerUiProviderProps = {
+export interface CategoryPickerUiProviderProps {
   availableCategories: CategoryWithId[];
-  selectedCategories: CategoryWithId[];
-  onSelectCategory: (category: CategoryWithId) => void;
   categoryDisplayStrategy?: (
     selectedCategories: CategoryWithId[],
     availableCategories: CategoryWithId[],
@@ -33,7 +32,9 @@ export type CategoryPickerUiProviderProps = {
     searchTerm: string,
   ) => number;
   modal?: boolean;
-};
+  onSelectCategory: (category: CategoryWithId) => void;
+  selectedCategories: CategoryWithId[];
+}
 
 export const showSelectedCategoryFirst = (
   selectedCateogries: CategoryWithId[],
@@ -85,37 +86,37 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
 
   return (
     <Popover
-      open={isOpen}
+      modal={props.modal}
       onOpenChange={(shouldOpen) => {
         if (!shouldOpen) {
           setSearchTerm("");
         }
         setIsOpen(shouldOpen);
       }}
-      modal={props.modal}
+      open={isOpen}
     >
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
           aria-expanded={isOpen}
           className="max-w-full grow justify-start"
+          role="combobox"
+          variant="outline"
         >
           <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
           <div className="flex  max-w-full overflow-hidden ">
             <div className="flex w-max max-w-full gap-1">
               <ScrollArea
-                type="hover"
                 className="max-w-fit overflow-y-auto rounded-md border-none"
+                type="hover"
               >
-                <ScrollBar orientation="horizontal" className="top-4" />
+                <ScrollBar className="top-4" orientation="horizontal" />
                 {props.selectedCategories.length === 0
                   ? "Search Category"
                   : props.selectedCategories.map((category) => (
                     <CategoryBadge
+                      color={category.color}
                       key={category.id}
                       name={category.name}
-                      color={category.color}
                     />
                   ))}
               </ScrollArea>
@@ -135,7 +136,6 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
               (cat) => cat.name !== searchTerm,
             ) && (
             <Button
-              variant="ghost"
               className="m-0"
               onClick={async () =>
                 await createCategory(
@@ -151,6 +151,7 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
                   },
                 )
               }
+              variant="ghost"
             >
               <p>Create</p>
               <div className="grow"></div>
@@ -161,14 +162,14 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
               <ScrollArea
-                type="always"
                 className="max-h-48 overflow-y-auto rounded-md border-none"
+                type="always"
               >
                 {categoriesInDisplayOrder.map((category) => (
                   <CommandItem
-                    value={category.name}
                     key={category.id}
-                    onSelect={() => props.onSelectCategory(category)}
+                    onSelect={() => { props.onSelectCategory(category); }}
+                    value={category.name}
                   >
                     <Check
                       className={cn(

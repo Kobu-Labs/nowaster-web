@@ -1,23 +1,24 @@
-import {
+import type {
   RecurringSession,
   SessionTemplate,
 } from "@/api/definitions/models/session-template";
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
 } from "@/components/shadcn/card";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { format24Hour, numberToDay } from "@/lib/date-utils";
 import { addMinutes } from "date-fns";
 import { Clock } from "lucide-react";
-import { FC, useMemo } from "react";
+import type { FC} from "react";
+import { useMemo } from "react";
 
-type SessionCardProps = {
+interface SessionCardProps {
   session: RecurringSession;
   template: SessionTemplate;
-};
+}
 
 export const RecurringSessionCard: FC<SessionCardProps> = (props) => {
   const calculatePeriod = useMemo(() => {
@@ -60,7 +61,7 @@ export const RecurringSessionCard: FC<SessionCardProps> = (props) => {
         {props.session.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {props.session.tags.map((tag) => (
-              <TagBadge tag={tag} variant="auto" key={tag.id} />
+              <TagBadge key={tag.id} tag={tag} variant="auto" />
             ))}
           </div>
         )}

@@ -17,29 +17,29 @@ export type RecurringSessionInterval = z.infer<
 
 export const RecurringSessionSchema = z.object({
   category: CategoryWithIdSchema,
-  tags: z.array(TagWithIdSchema),
-  start_minute_offset: z.number(),
-  end_minute_offset: z.number(),
   description: z.string().nullable(),
+  end_minute_offset: z.number(),
+  start_minute_offset: z.number(),
+  tags: z.array(TagWithIdSchema),
 });
 
 export const SessionTemplateShallowSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().trim().min(1),
-  interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date<Date>(),
   end_date: z.coerce.date<Date>(),
+  id: z.uuid(),
+  interval: RecurringSessionIntervalSchema,
+  name: z.string().trim().min(1),
+  start_date: z.coerce.date<Date>(),
 });
 
 export const SessionTemplateSchema = z.object({
-  name: z.string().trim().min(1),
-  interval: RecurringSessionIntervalSchema,
-  start_date: z.coerce.date<Date>(),
   end_date: z.coerce.date<Date>(),
+  interval: RecurringSessionIntervalSchema,
+  name: z.string().trim().min(1),
   sessions: z.array(RecurringSessionSchema),
+  start_date: z.coerce.date<Date>(),
 });
 
 export const SessionTemplateIdSchema = SessionTemplateSchema.merge(HasID);
 export const RecurringSessionIdSchema = RecurringSessionSchema.merge(HasID);
-export type SessionTemplate = z.infer<typeof SessionTemplateIdSchema>;
 export type RecurringSession = z.infer<typeof RecurringSessionIdSchema>;
+export type SessionTemplate = z.infer<typeof SessionTemplateIdSchema>;

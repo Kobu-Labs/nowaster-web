@@ -1,18 +1,18 @@
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import { FeedResponseSchema } from "@/api/definitions/responses/feed";
-import {
-  FeedQueryRequest,
+import type {
   CreateFeedReactionRequest,
+  FeedQueryRequest,
   RemoveFeedReactionRequest,
-  UpdateFeedSubscriptionRequest,
   UnsubscribeRequest,
+  UpdateFeedSubscriptionRequest,
 } from "@/api/definitions/requests/feed";
 
 const BASE_URL = "/feed";
 
 export const getFeed = async (params?: FeedQueryRequest) => {
   const { data } = await baseApi.get(BASE_URL, { 
-    params: params, 
+    params, 
   });
   return await parseResponseUnsafe(data, FeedResponseSchema.getFeed);
 };

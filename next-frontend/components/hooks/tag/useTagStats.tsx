@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useTagStats = () => {
   return useQuery({
-    queryKey: [queryKeys.tags._def, "statistics"],
     queryFn: TagApi.getStatistics,
+    queryKey: [queryKeys.tags._def, "statistics"],
   });
 };

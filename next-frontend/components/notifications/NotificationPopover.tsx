@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { notificationPopoverOpenAtom } from "@/state/notifications";
 import { useAtom } from "jotai";
 import { Bell, X } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 
 export const NotificationPopover: FC = () => {
   const [isOpen, setIsOpen] = useAtom(notificationPopoverOpenAtom);
@@ -29,18 +29,18 @@ export const NotificationPopover: FC = () => {
   const unseenCount = notifications.length;
 
   const handleMarkAllSeen = () =>
-    markSeenMutation.mutate({
+    { markSeenMutation.mutate({
       notification_ids: notifications.map((n) => n.id),
-    });
+    }); };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
+    <Popover modal={false} onOpenChange={setIsOpen} open={isOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
           aria-label={`Notifications${unseenCount > 0 ? ` (${unseenCount} unread)` : ""}`}
+          className="relative"
+          size="icon"
+          variant="ghost"
         >
           <Bell
             className={cn(
@@ -61,8 +61,8 @@ export const NotificationPopover: FC = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-96 p-0 border gradient-container"
         align="end"
+        className="w-96 p-0 border gradient-container"
         sideOffset={8}
       >
         <div className="flex items-center justify-between p-4 border-b">
@@ -70,18 +70,18 @@ export const NotificationPopover: FC = () => {
           <div className="flex items-center gap-2">
             {unseenCount > 0 && (
               <Button
-                variant="ghost"
-                onClick={handleMarkAllSeen}
                 className="text-xs m-0 p-0 h-min"
+                onClick={handleMarkAllSeen}
+                variant="ghost"
               >
                 Mark all read
               </Button>
             )}
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
               className="h-8 w-8"
+              onClick={() => { setIsOpen(false); }}
+              size="icon"
+              variant="ghost"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -93,7 +93,7 @@ export const NotificationPopover: FC = () => {
             <div className="flex items-center justify-center p-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2" />
             </div>
-          ) : notifications.length === 0 ? (
+          ) : (notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <Bell className="h-12 w-12 mb-2" />
               <p className="font-medium">No notifications yet</p>
@@ -105,7 +105,7 @@ export const NotificationPopover: FC = () => {
             <div className="divide-y">
               <NotificationsHandler notifications={notifications} />
             </div>
-          )}
+          ))}
         </div>
       </PopoverContent>
     </Popover>
