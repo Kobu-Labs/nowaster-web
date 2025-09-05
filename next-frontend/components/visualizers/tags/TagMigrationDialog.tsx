@@ -6,7 +6,7 @@ import {
 import { useToast } from "@/components/shadcn/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -19,6 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/shadcn/alert-dialog";
 import {
   Form,
   FormControl,
@@ -49,7 +59,9 @@ import {
   subHours,
   subMonths,
   subYears,
+  format,
 } from "date-fns";
+import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 
 const MigrationFormPrecursorSchema = z.object({
   fromTag: TagDetailsSchema,
@@ -85,6 +97,10 @@ export const TagMigrationDialog: FC<TagMigrationDialogProps> = ({
   onMigrationComplete,
 }) => {
   const { toast } = useToast();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingSubmission, setPendingSubmission] =
+    useState<MigrationFormData | null>(null);
+
   const form = useForm<MigrationFormData>({
     resolver: zodResolver(MigrationFormPrecursorSchema),
     defaultValues: {},
@@ -148,189 +164,289 @@ export const TagMigrationDialog: FC<TagMigrationDialogProps> = ({
 
       return;
     }
+
+    setPendingSubmission(data);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmMigration = () => {
+    if (!pendingSubmission) return;
+
     const filters: TagRequest["migrate"]["filters"] = {};
 
-    if (data.categories?.length)
-      filters.category_ids = data.categories.map((cat) => cat.id);
-    if (data.fromStartTime) filters.from_start_time = data.fromStartTime;
-    if (data.toEndTime) filters.to_end_time = data.toEndTime;
+    if (pendingSubmission.categories?.length)
+      filters.category_ids = pendingSubmission.categories.map((cat) => cat.id);
+    if (pendingSubmission.fromStartTime)
+      filters.from_start_time = pendingSubmission.fromStartTime;
+    if (pendingSubmission.toEndTime)
+      filters.to_end_time = pendingSubmission.toEndTime;
 
     migrationMutation.mutate({
-      from_tag_id: data.fromTag.id,
-      target_tag_id: data.targetTag?.id,
+      from_tag_id: pendingSubmission.fromTag.id,
+      target_tag_id: pendingSubmission.targetTag?.id,
       filters,
     });
+
+    setShowConfirmDialog(false);
+    setPendingSubmission(null);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="w-fit max-w-fit">
-        <DialogHeader>
-          <DialogTitle>Migrate Tag</DialogTitle>
-          <DialogDescription>
-            Move sessions from one tag to another, or remove a tag from
-            sessions. This will update all matching sessions.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="fromTag"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>From Tag</FormLabel>
-                  <FormControl>
-                    <SimpleTagPicker
-                      selectedTags={field.value ? [field.value] : []}
-                      onNewTagsSelected={(tags) => field.onChange(tags.at(0))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="removeTag"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Remove tag</FormLabel>
-                    <FormDescription>
-                      Remove the tag from sessions instead of replacing it with
-                      another tag
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              disabled={!!form.watch("removeTag")}
-              control={form.control}
-              name="targetTag"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>To Tag</FormLabel>
-                  <FormControl>
-                    <SimpleTagPicker
-                      disabled={!!form.watch("removeTag")}
-                      selectedTags={field.value ? [field.value] : []}
-                      onNewTagsSelected={(tags) => field.onChange(tags.at(0))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Filters (Optional)</h4>
-
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent className="w-fit max-w-fit">
+          <DialogHeader>
+            <DialogTitle>Migrate Tag</DialogTitle>
+            <DialogDescription>
+              Move sessions from one tag to another, or remove a tag from
+              sessions. This will update all matching sessions.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="categories"
+                name="fromTag"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
-                    <FormLabel>Only sessions in categories</FormLabel>
-
+                    <FormLabel>From Tag</FormLabel>
                     <FormControl>
-                      <MultipleCategoryPicker
-                        selectedCategories={field.value ?? []}
-                        onSelectCategory={(cat) => {
-                          if (field.value?.find((cate) => cate.id === cat.id)) {
-                            field.onChange(
-                              field.value?.filter((cate) => cate.id !== cat.id),
-                            );
-                          } else {
-                            field.onChange([cat, ...(field.value ?? [])]);
-                          }
-                        }}
+                      <SimpleTagPicker
+                        selectedTags={field.value ? [field.value] : []}
+                        onNewTagsSelected={(tags) => field.onChange(tags.at(0))}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Only migrate sessions that belong to one of these
-                      categories
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="removeTag"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Remove tag</FormLabel>
+                      <FormDescription>
+                        Remove the tag from sessions instead of replacing it
+                        with another tag
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                disabled={!!form.watch("removeTag")}
+                control={form.control}
+                name="targetTag"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel>To Tag</FormLabel>
+                    <FormControl>
+                      <SimpleTagPicker
+                        disabled={!!form.watch("removeTag")}
+                        selectedTags={field.value ? [field.value] : []}
+                        onNewTagsSelected={(tags) => field.onChange(tags.at(0))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Filters (Optional)</h4>
+
                 <FormField
                   control={form.control}
-                  name="fromStartTime"
+                  name="categories"
                   render={({ field }) => (
                     <FormItem className="flex flex-col gap-2">
-                      <FormLabel>From Time</FormLabel>
+                      <FormLabel>Only sessions in categories</FormLabel>
+
                       <FormControl>
-                        <DateTimePicker
-                          quickOptions={dateOpts}
-                          selected={field.value || undefined}
-                          onSelect={(val) => {
-                            field.onChange(val);
+                        <MultipleCategoryPicker
+                          selectedCategories={field.value ?? []}
+                          onSelectCategory={(cat) => {
+                            if (
+                              field.value?.find((cate) => cate.id === cat.id)
+                            ) {
+                              field.onChange(
+                                field.value?.filter(
+                                  (cate) => cate.id !== cat.id,
+                                ),
+                              );
+                            } else {
+                              field.onChange([cat, ...(field.value ?? [])]);
+                            }
                           }}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Only migrate sessions that belong to one of these
+                        categories
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="toEndTime"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col gap-2">
-                      <FormLabel>To Time</FormLabel>
-                      <FormControl>
-                        <DateTimePicker
-                          quickOptions={dateOpts}
-                          selected={field.value}
-                          onSelect={(val) => {
-                            field.onChange(val);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fromStartTime"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel>From Time</FormLabel>
+                        <FormControl>
+                          <DateTimePicker
+                            quickOptions={dateOpts}
+                            selected={field.value || undefined}
+                            onSelect={(val) => {
+                              field.onChange(val);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="toEndTime"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel>To Time</FormLabel>
+                        <FormControl>
+                          <DateTimePicker
+                            quickOptions={dateOpts}
+                            selected={field.value}
+                            onSelect={(val) => {
+                              field.onChange(val);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={migrationMutation.isPending}>
-                Submit
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-        <p className="font-bold text-2xl">{`Affected sessions (${data?.length ?? "?"})`}</p>
-        <ScrollArea className="h-[30vh]">
-          <DataTable
-            loading={isPending}
-            columns={BaseSessionTableColumns}
-            data={data ?? []}
-          />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={migrationMutation.isPending}>
+                  Submit
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+          <p className="font-bold text-2xl">{`Affected sessions (${data?.length ?? "?"})`}</p>
+          <ScrollArea className="h-[30vh]">
+            <DataTable columns={BaseSessionTableColumns} data={data ?? []} />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Tag Migration</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                {pendingSubmission && (
+                  <>
+                    <span>Do you wish to </span>
+                    {pendingSubmission.removeTag ? (
+                      <>
+                        <span>remove{" "}</span>
+                        <TagBadge
+                          variant="auto"
+                          tag={pendingSubmission.fromTag}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <span>replace{" "}</span>
+                        <TagBadge
+                          variant="auto"
+                          tag={pendingSubmission.fromTag}
+                        />
+                        <span>{" "}with{" "}</span>
+                        <TagBadge
+                          variant="auto"
+                          tag={pendingSubmission.targetTag!}
+                        />
+                      </>
+                    )}
+
+                    {(pendingSubmission.categories?.length ||
+                      pendingSubmission.fromStartTime ||
+                      pendingSubmission.toEndTime) && (
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        <p className="font-medium">Filters applied:</p>
+                        {pendingSubmission.categories?.length && (
+                          <p>
+                            • Categories:{" "}
+                            {pendingSubmission.categories
+                              .map((c) => c.name)
+                              .join(", ")}
+                          </p>
+                        )}
+                        {pendingSubmission.fromStartTime && (
+                          <p>
+                            • From:{" "}
+                            {format(
+                              pendingSubmission.fromStartTime,
+                              "MMM d, yyyy 'at' h:mm a",
+                            )}
+                          </p>
+                        )}
+                        {pendingSubmission.toEndTime && (
+                          <p>
+                            • To:{" "}
+                            {format(
+                              pendingSubmission.toEndTime,
+                              "MMM d, yyyy 'at' h:mm a",
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-sm text-muted-foreground">
+                      This action cannot be undone.
+                    </p>
+                  </>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => onOpenChange(true)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmMigration}>
+              {pendingSubmission?.removeTag ? "Remove Tag" : "Migrate Tag"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
