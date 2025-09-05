@@ -60,3 +60,13 @@ export const getStatistics = async () => {
   const { data } = await baseApi.get(BASE_URL + "/statistics");
   return await parseResponseUnsafe(data, TagResponseSchema.statistics);
 };
+
+export const getMigrationPreview = async (params: TagRequest["migratePreview"]) => {
+  const { data } = await baseApi.post(BASE_URL + "/migrate/preview", params);
+  return await parseResponseUnsafe(data, TagResponseSchema.migratePreview);
+};
+
+export const migrateTag = async (params: TagRequest["migrate"]) => {
+  const { data } = await baseApi.post(BASE_URL + "/migrate", params);
+  return await parseResponseUnsafe(data, TagResponseSchema.migrate);
+};

@@ -2,14 +2,18 @@ use anyhow::{Ok, Result};
 use uuid::Uuid;
 
 use crate::{
-    dto::tag::{
-        create_tag::{CreateTagDto, UpdateTagDto},
-        filter_tags::TagFilterDto,
-        read_tag::{ReadTagDetailsDto, TagStatsDto},
+    dto::{
+        category::migrate_category::MigrationPreviewResponse,
+        tag::{
+            create_tag::{CreateTagDto, UpdateTagDto},
+            filter_tags::TagFilterDto,
+            migrate_tag::TagMigrationFilters,
+            read_tag::{ReadTagDetailsDto, TagStatsDto},
+        },
     },
     entity::{category::Category, tag::TagDetails},
     repository::{
-        category::CategoryRepository,
+        category::{CategoryRepository, CategoryRepositoryTrait},
         tag::{TagRepository, TagRepositoryTrait},
     },
     router::clerk::ClerkUser,
@@ -105,5 +109,54 @@ impl TagService {
 
     pub async fn get_tag_statistics(&self, actor: ClerkUser) -> Result<TagStatsDto> {
         self.repo.get_tag_statistics(actor).await
+    }
+
+    pub async fn get_tag_migration_preview(
+        &self,
+        from_tag_id: Uuid,
+        filters: &TagMigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<MigrationPreviewResponse> {
+        // Validate that the from_tag belongs to the user
+        self.repo.find_by_id(from_tag_id, actor.clone()).await?;
+        
+        // Validate category filters if provided
+        if let Some(category_ids) = &filters.category_ids {
+            for category_id in category_ids {
+                self.category_repo.find_by_id(*category_id, actor.clone()).await?;
+            }
+        }
+        
+        self.repo.get_tag_migration_preview(from_tag_id, filters, actor).await
+    }
+
+    pub async fn migrate_tag(
+        &self,
+        from_tag_id: Uuid,
+        target_tag_id: Option<Uuid>,
+        filters: &TagMigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<u64> {
+        // Validate that the from_tag belongs to the user
+        self.repo.find_by_id(from_tag_id, actor.clone()).await?;
+        
+        // Validate target_tag if provided
+        if let Some(target_id) = target_tag_id {
+            self.repo.find_by_id(target_id, actor.clone()).await?;
+            
+            // Prevent migrating from a tag to itself
+            if from_tag_id == target_id {
+                return Err(anyhow::anyhow!("Cannot migrate tag to itself"));
+            }
+        }
+        
+        // Validate category filters if provided
+        if let Some(category_ids) = &filters.category_ids {
+            for category_id in category_ids {
+                self.category_repo.find_by_id(*category_id, actor.clone()).await?;
+            }
+        }
+        
+        self.repo.migrate_tag(from_tag_id, target_tag_id, filters, actor).await
     }
 }

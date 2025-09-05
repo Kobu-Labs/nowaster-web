@@ -8,7 +8,9 @@ use uuid::Uuid;
 use crate::dto::tag::add_category::AddAllowedCategoryDto;
 use crate::dto::tag::create_tag::{CreateTagDto, UpdateTagDto};
 use crate::dto::tag::filter_tags::TagFilterDto;
+use crate::dto::tag::migrate_tag::{MigrateTagDto, TagMigrationPreviewDto};
 use crate::dto::tag::read_tag::{ReadTagDetailsDto, TagStatsDto};
+use crate::dto::category::migrate_category::MigrationPreviewResponse;
 use crate::router::clerk::ClerkUser;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
@@ -22,6 +24,14 @@ pub fn tag_router() -> Router<AppState> {
         )
         .route("/", post(create_tag_handler).get(filter_tags_handler))
         .route("/statistics", axum::routing::get(get_tag_statistics_handler))
+        .route(
+            "/migrate",
+            post(migrate_tag_handler)
+        )
+        .route(
+            "/migrate/preview",
+            post(migrate_tag_preview_handler)
+        )
         .route(
             "/{tag_id}",
             delete(delete_tag_handler)
@@ -148,6 +158,30 @@ async fn get_tag_statistics_handler(
     actor: ClerkUser,
 ) -> ApiResponse<TagStatsDto> {
     let res = state.tag_service.get_tag_statistics(actor).await;
+    ApiResponse::from_result(res)
+}
+
+async fn migrate_tag_preview_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<TagMigrationPreviewDto>,
+) -> ApiResponse<MigrationPreviewResponse> {
+    let res = state
+        .tag_service
+        .get_tag_migration_preview(payload.from_tag_id, &payload.filters, actor)
+        .await;
+    ApiResponse::from_result(res)
+}
+
+async fn migrate_tag_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<MigrateTagDto>,
+) -> ApiResponse<u64> {
+    let res = state
+        .tag_service
+        .migrate_tag(payload.from_tag_id, payload.target_tag_id, &payload.filters, actor)
+        .await;
     ApiResponse::from_result(res)
 }
 

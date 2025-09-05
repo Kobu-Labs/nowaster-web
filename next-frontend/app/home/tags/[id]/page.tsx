@@ -17,6 +17,8 @@ import { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { TagMigrationDialog } from "@/components/visualizers/tags/TagMigrationDialog";
+import { useState } from "react";
 
 function TagDetailSkeleton() {
   return (
@@ -58,21 +60,26 @@ function TagDetailSkeleton() {
 
 function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
   const router = useRouter();
-  
+
   return (
     <div className="flex justify-center items-center min-h-96">
       <Alert variant="destructive" className="max-w-md">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Tag Not Found</AlertTitle>
         <AlertDescription className="mt-2">
-          The tag you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
+          The tag you&apos;re looking for doesn&apos;t exist or you don&apos;t
+          have access to it.
         </AlertDescription>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" size="sm" onClick={onRetry}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push('/home/tags')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/home/tags")}
+          >
             Back to Tags
           </Button>
         </div>
@@ -83,6 +90,7 @@ function TagNotFoundError({ onRetry }: { onRetry: () => void }) {
 
 export default function Page(props: { params: { id: string } }) {
   const tagQuery = useQuery(queryKeys.tags.byId(props.params.id));
+  const [open, setOpen] = useState(false);
 
   if (tagQuery.isLoading) {
     return <TagDetailSkeleton />;
@@ -115,6 +123,8 @@ export default function Page(props: { params: { id: string } }) {
           <TagBadge variant="auto" tag={tag} />
         </h2>
       </div>
+      <TagMigrationDialog open={open} onOpenChange={setOpen} />
+      <Button onClick={() => setOpen(true)}>Migrate</Button>
       <div className="grid grid-cols-3 gap-4">
         <TotalSessionTimeCard filter={filter} />
         <SessionAverageDurationProvider filter={filter} />

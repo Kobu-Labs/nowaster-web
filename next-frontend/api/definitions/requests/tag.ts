@@ -33,6 +33,26 @@ const getById = z.object({
 
 const update = TagDetailsSchema.deepPartial().merge(HasID);
 
+const migratePreview = z.object({
+  from_tag_id: z.string().uuid(),
+  target_tag_id: z.string().uuid().optional(), // null means remove tag
+  filters: z.object({
+    category_ids: z.array(z.string().uuid()).optional(), // sessions must have at least one of these
+    from_start_time: z.string().datetime().optional(),
+    to_end_time: z.string().datetime().optional(),
+  }).optional().default({}),
+});
+
+const migrate = z.object({
+  from_tag_id: z.string().uuid(),
+  target_tag_id: z.string().uuid().optional(), // null means remove tag
+  filters: z.object({
+    category_ids: z.array(z.string().uuid()).optional(), // sessions must have at least one of these
+    from_start_time: z.coerce.date().optional(),
+    to_end_time: z.coerce.date().optional(),
+  }).optional().default({}),
+});
+
 export type TagRequest = {
   [Property in keyof typeof TagRequestSchema]: z.infer<
     (typeof TagRequestSchema)[Property]
@@ -47,4 +67,6 @@ export const TagRequestSchema = {
   addAllowedCategory,
   removeAllowedCategory,
   deleteTag,
+  migratePreview,
+  migrate,
 } as const;
