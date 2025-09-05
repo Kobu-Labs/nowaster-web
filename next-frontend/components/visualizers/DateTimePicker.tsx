@@ -60,97 +60,106 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          variant="outline"
-          className={cn(
-            "w-full text-center font-normal gap-2",
-            !props.selected && "text-muted-foreground",
-          )}
-          onWheel={(e) =>
-            props.onSelect(
-              addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
-            )
-          }
-        >
-          <CalendarIcon className="size-4" />
-          {props.selected ? (
-            <>
-              <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
-              <div className="grow"></div>
-              <X
-                onClick={() => props.onSelect(undefined)}
-                className="cursor-pointer rounded-md hover:bg-destructive "
-              />
-            </>
-          ) : (
-            <span>{props.label ?? "Pick a date"}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <div className="sm:flex">
-          <Calendar
-            disabled={props.disabled}
-            weekStartsOn={1}
-            mode="single"
-            selected={props.selected}
-            onSelect={(v) => v && props.onSelect(v)}
-            initialFocus
-          />
-          <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
-            <ScrollArea className="w-64 sm:w-auto">
-              <div className="flex sm:flex-col p-2 items-center">
-                <p className="text-muted-foreground">HH</p>
-                <Separator />
-                {hours.map((hour) => (
-                  <Button
-                    key={hour}
-                    size="icon"
-                    variant={
-                      props.selected && props.selected.getHours() === hour
-                        ? "default"
-                        : "ghost"
-                    }
-                    className="sm:w-full shrink-0 aspect-square"
-                    onClick={() => handleTimeChange("hour", hour.toString())}
-                  >
-                    {hour}
-                  </Button>
-                ))}
-              </div>
-              <ScrollBar orientation="horizontal" className="sm:hidden" />
-            </ScrollArea>
-            <ScrollArea className="w-64 sm:w-auto">
-              <div className="flex sm:flex-col p-2 items-center">
-                <p className="text-muted-foreground">MM</p>
-                <Separator />
-                {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
-                  <Button
-                    key={minute}
-                    size="icon"
-                    variant={
-                      props.selected && props.selected.getMinutes() === minute
-                        ? "default"
-                        : "ghost"
-                    }
-                    className="sm:w-full shrink-0 aspect-square"
-                    onClick={() =>
-                      handleTimeChange("minute", minute.toString())
-                    }
-                  >
-                    {minute.toString().padStart(2, "0")}
-                  </Button>
-                ))}
-              </div>
-              <ScrollBar orientation="horizontal" className="sm:hidden" />
-            </ScrollArea>
+      <div className="flex items-center gap-1">
+        <PopoverTrigger asChild>
+          <Button
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            variant="outline"
+            className={cn(
+              "w-full text-center font-normal gap-2",
+              !props.selected && "text-muted-foreground",
+            )}
+            onWheel={(e) =>
+              props.onSelect(
+                addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
+              )
+            }
+          >
+            <CalendarIcon className="size-4" />
+            {props.selected ? (
+              <>
+                <p>
+                  {DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}
+                </p>
+                <div className="grow"></div>
+              </>
+            ) : (
+              <span>{props.label ?? "Pick a date"}</span>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <div className="sm:flex">
+            <Calendar
+              disabled={props.disabled}
+              weekStartsOn={1}
+              mode="single"
+              selected={props.selected}
+              onSelect={(v) => v && props.onSelect(v)}
+              initialFocus
+            />
+            <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
+              <ScrollArea className="w-64 sm:w-auto">
+                <div className="flex sm:flex-col p-2 items-center">
+                  <p className="text-muted-foreground">HH</p>
+                  <Separator />
+                  {hours.map((hour) => (
+                    <Button
+                      key={hour}
+                      size="icon"
+                      variant={
+                        props.selected && props.selected.getHours() === hour
+                          ? "default"
+                          : "ghost"
+                      }
+                      className="sm:w-full shrink-0 aspect-square"
+                      onClick={() => handleTimeChange("hour", hour.toString())}
+                    >
+                      {hour}
+                    </Button>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" className="sm:hidden" />
+              </ScrollArea>
+              <ScrollArea className="w-64 sm:w-auto">
+                <div className="flex sm:flex-col p-2 items-center">
+                  <p className="text-muted-foreground">MM</p>
+                  <Separator />
+                  {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
+                    <Button
+                      key={minute}
+                      size="icon"
+                      variant={
+                        props.selected && props.selected.getMinutes() === minute
+                          ? "default"
+                          : "ghost"
+                      }
+                      className="sm:w-full shrink-0 aspect-square"
+                      onClick={() =>
+                        handleTimeChange("minute", minute.toString())
+                      }
+                    >
+                      {minute.toString().padStart(2, "0")}
+                    </Button>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" className="sm:hidden" />
+              </ScrollArea>
+            </div>
           </div>
-        </div>
-      </PopoverContent>
-      <div className="flex gap-1">
+        </PopoverContent>
+
+        <Button
+          onClick={() => props.onSelect(undefined)}
+          className="cursor-pointer rounded-md hover:bg-destructive p-2 m-0"
+          variant="outline"
+          type="button"
+        >
+          <X />
+        </Button>
+      </div>
+      <div className="flex gap-1 items-center justify-center">
         {props.quickOptions?.map((val) => (
           <Button
             className="block h-min p-1"
