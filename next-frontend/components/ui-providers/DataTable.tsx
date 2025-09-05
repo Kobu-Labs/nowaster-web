@@ -53,7 +53,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border h-full">
       <Table>
         <TableHeader className="sticky top-0">
           {table.getHeaderGroups().map((headerGroup) => (
