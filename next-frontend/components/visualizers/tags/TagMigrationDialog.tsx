@@ -3,8 +3,9 @@ import {
   TagDetailsSchema,
   TagRequest,
 } from "@/api/definitions";
+import { useToast } from "@/components/shadcn/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,10 +31,13 @@ import {
 import { Switch } from "@/components/shadcn/switch";
 
 import { TagApi } from "@/api";
+import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
+import { ScrollArea } from "@/components/shadcn/scroll-area";
+import { DataTable } from "@/components/ui-providers/DataTable";
 import { QuickOption } from "@/components/ui-providers/date-pickers/QuickOptions";
 import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
-import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
@@ -80,6 +84,7 @@ export const TagMigrationDialog: FC<TagMigrationDialogProps> = ({
   onOpenChange,
   onMigrationComplete,
 }) => {
+  const { toast } = useToast();
   const form = useForm<MigrationFormData>({
     resolver: zodResolver(MigrationFormPrecursorSchema),
     defaultValues: {},
@@ -109,11 +114,28 @@ export const TagMigrationDialog: FC<TagMigrationDialogProps> = ({
     },
   };
 
+  const { data, isPending } = useQuery({
+    ...queryKeys.sessions.filtered(filter),
+    placeholderData: keepPreviousData,
+    enabled: !!form.watch("fromTag"),
+  });
+
   const migrationMutation = useMutation({
     mutationFn: async (data: TagRequest["migrate"]) =>
       await TagApi.migrateTag(data),
     onSuccess: (affectedCount) => {
+      const fromTag = form.getValues("fromTag");
+      const targetTag = form.getValues("targetTag");
+      const removeTag = form.getValues("removeTag");
+
+      toast({
+        description: removeTag
+          ? `Successfully removed "${fromTag.label}" from ${affectedCount} sessions`
+          : `Successfully migrated ${affectedCount} sessions from "${fromTag.label}" to "${targetTag?.label}"`,
+      });
+
       onMigrationComplete?.(affectedCount);
+      form.reset();
       onOpenChange(false);
     },
   });
@@ -142,7 +164,7 @@ export const TagMigrationDialog: FC<TagMigrationDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="w-full max-w-full">
+      <DialogContent className="w-fit max-w-fit">
         <DialogHeader>
           <DialogTitle>Migrate Tag</DialogTitle>
           <DialogDescription>
@@ -300,8 +322,14 @@ export const TagMigrationDialog: FC<TagMigrationDialogProps> = ({
             </DialogFooter>
           </form>
         </Form>
-        <p className="font-bold text-2xl">Affected sessions</p>
-        <BaseSessionTable filter={filter} />
+        <p className="font-bold text-2xl">{`Affected sessions (${data?.length ?? "?"})`}</p>
+        <ScrollArea className="h-[30vh]">
+          <DataTable
+            loading={isPending}
+            columns={BaseSessionTableColumns}
+            data={data ?? []}
+          />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
