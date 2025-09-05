@@ -116,6 +116,8 @@
     --purple-primary: 262 60% 45%;
     --purple-muted: 262 60% 45% / 0.1;
     --purple-subtle: 262 60% 45% / 0.05;
+    --pink-muted-solid: #19091e;
+    --purple-muted-solid: #0c0a22;
   }
 }
 
@@ -171,6 +173,10 @@
   /* Icon containers with gradients */
   .gradient-container {
     background: linear-gradient(135deg, hsl(var(--pink-muted)) 0%, hsl(var(--purple-muted)) 100%);
+  }
+
+  .gradient-container-solid {
+    background: linear-gradient( 135deg, var(--pink-muted-solid) 0%, var(--purple-muted-solid) 100%);
   }
   
   .gradient-container-subtle {

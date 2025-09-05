@@ -179,6 +179,10 @@ module.exports = {
           background:
             "linear-gradient(135deg, hsl(var(--pink-muted)) 0%, hsl(var(--purple-muted)) 100%)",
         },
+        ".gradient-container-solid": {
+          background:
+            "linear-gradient( 135deg, var(--pink-muted-solid) 0%, var(--purple-muted-solid) 100%)",
+        },
         ".gradient-container-subtle": {
           background:
             "linear-gradient(135deg, hsl(var(--pink-subtle)) 0%, hsl(var(--purple-subtle)) 100%)",
