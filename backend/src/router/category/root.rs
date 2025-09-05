@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
-    routing::{delete, get},
+    routing::{delete, get, post},
     Router,
 };
 use thiserror::Error;
@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::{
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
+        migrate_category::{MigrateCategoryDto, MigrationPreviewDto, MigrationPreviewResponse},
         read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
     },
     router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
@@ -29,6 +30,14 @@ pub fn category_router() -> Router<AppState> {
         .route(
             "/statistics",
             get(get_category_statistics_handler),
+        )
+        .route(
+            "/migrate",
+            post(migrate_category_handler)
+        )
+        .route(
+            "/migrate/preview",
+            post(migrate_category_preview_handler)
         )
         .route(
             "/{category_id}",
@@ -111,6 +120,30 @@ async fn get_category_statistics_handler(
     let res = state
         .category_service
         .get_category_statistics(actor)
+        .await;
+    ApiResponse::from_result(res)
+}
+
+async fn migrate_category_preview_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<MigrationPreviewDto>,
+) -> ApiResponse<MigrationPreviewResponse> {
+    let res = state
+        .category_service
+        .get_migration_preview(payload.from_category_id, &payload.filters, actor)
+        .await;
+    ApiResponse::from_result(res)
+}
+
+async fn migrate_category_handler(
+    State(state): State<AppState>,
+    actor: ClerkUser,
+    ValidatedRequest(payload): ValidatedRequest<MigrateCategoryDto>,
+) -> ApiResponse<u64> {
+    let res = state
+        .category_service
+        .migrate_category(payload.from_category_id, payload.target_category_id, &payload.filters, actor)
         .await;
     ApiResponse::from_result(res)
 }

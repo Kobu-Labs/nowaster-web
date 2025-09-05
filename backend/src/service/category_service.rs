@@ -4,6 +4,7 @@ use uuid::Uuid;
 use crate::{
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
+        migrate_category::{MigrationFilters, MigrationPreviewResponse},
         read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
     },
     entity::category::Category,
@@ -75,5 +76,36 @@ impl CategoryService {
         actor: ClerkUser,
     ) -> Result<CategoryStatsDto> {
         self.repo.get_category_statistics(actor).await
+    }
+
+    pub async fn get_migration_preview(
+        &self,
+        from_category_id: Uuid,
+        filters: &MigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<MigrationPreviewResponse> {
+        // Validate that the from_category belongs to the user
+        self.repo.find_by_id(from_category_id, actor.clone()).await?;
+        
+        self.repo.get_migration_preview(from_category_id, filters, actor).await
+    }
+
+    pub async fn migrate_category(
+        &self,
+        from_category_id: Uuid,
+        target_category_id: Uuid,
+        filters: &MigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<u64> {
+        // Validate that both categories belong to the user
+        self.repo.find_by_id(from_category_id, actor.clone()).await?;
+        self.repo.find_by_id(target_category_id, actor.clone()).await?;
+        
+        // Prevent migrating from a category to itself
+        if from_category_id == target_category_id {
+            return Err(anyhow::anyhow!("Cannot migrate category to itself"));
+        }
+        
+        self.repo.migrate_category(from_category_id, target_category_id, filters, actor).await
     }
 }

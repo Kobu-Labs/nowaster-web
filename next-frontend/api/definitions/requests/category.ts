@@ -33,6 +33,26 @@ const readById = z.object({
   id: z.string().uuid(),
 });
 
+const migratePreview = z.object({
+  from_category_id: z.string().uuid(),
+  target_category_id: z.string().uuid().optional(),
+  filters: z.object({
+    tag_ids: z.array(z.string().uuid()).optional(),
+    from_start_time: z.string().datetime().optional(),
+    to_end_time: z.string().datetime().optional(),
+  }).optional().default({}),
+});
+
+const migrate = z.object({
+  from_category_id: z.string().uuid(),
+  target_category_id: z.string().uuid(),
+  filters: z.object({
+    tag_ids: z.array(z.string().uuid()).optional(),
+    from_start_time: z.string().datetime().optional(),
+    to_end_time: z.string().datetime().optional(),
+  }).optional().default({}),
+});
+
 export const CategoryRequestSchema = {
   create,
   update,
@@ -40,4 +60,6 @@ export const CategoryRequestSchema = {
   readByName,
   remove,
   readById,
+  migratePreview,
+  migrate,
 };

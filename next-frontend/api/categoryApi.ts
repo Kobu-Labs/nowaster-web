@@ -41,3 +41,13 @@ export const getStatistics = async () => {
   const { data } = await baseApi.get(BASE_URL + "/statistics");
   return await parseResponseUnsafe(data, CategoryResponseSchema.statistics);
 };
+
+export const getMigrationPreview = async (params: CategoryRequest["migratePreview"]) => {
+  const { data } = await baseApi.post(BASE_URL + "/migrate/preview", params);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.migratePreview);
+};
+
+export const migrateCategory = async (params: CategoryRequest["migrate"]) => {
+  const { data } = await baseApi.post(BASE_URL + "/migrate", params);
+  return await parseResponseUnsafe(data, CategoryResponseSchema.migrate);
+};

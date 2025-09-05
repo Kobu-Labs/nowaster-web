@@ -8,6 +8,7 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::category::{
         create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
+        migrate_category::{MigrationFilters, MigrationPreviewResponse, SessionPreview},
         read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto}, update_category::UpdateCategoryDto,
     },
     entity::category::Category,
@@ -41,6 +42,19 @@ pub trait CategoryRepositoryTrait {
         actor: ClerkUser,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
     async fn get_category_statistics(&self, actor: ClerkUser) -> Result<CategoryStatsDto>;
+    async fn get_migration_preview(
+        &self,
+        from_category_id: Uuid,
+        filters: &MigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<MigrationPreviewResponse>;
+    async fn migrate_category(
+        &self,
+        from_category_id: Uuid,
+        target_category_id: Uuid,
+        filters: &MigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<u64>;
     fn new(db_conn: &Arc<Database>) -> Self;
     async fn upsert(&self, dto: CreateCategoryDto, actor: ClerkUser) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
@@ -268,5 +282,151 @@ impl CategoryRepositoryTrait for CategoryRepository {
             average_sessions_per_category,
             most_used_category,
         })
+    }
+
+    async fn get_migration_preview(
+        &self,
+        from_category_id: Uuid,
+        filters: &MigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<MigrationPreviewResponse> {
+        let mut query = QueryBuilder::<Postgres>::new(
+            r#"
+                SELECT DISTINCT
+                    s.id,
+                    s.description,
+                    s.start_time,
+                    s.end_time,
+                    c.name as current_category_name,
+                    COALESCE(string_agg(t.name, ',' ORDER BY t.name), '') as current_tag_names
+                FROM session s
+                JOIN category c ON s.category_id = c.id
+                LEFT JOIN tag_to_session st ON s.id = st.session_id
+                LEFT JOIN tag t ON st.tag_id = t.id AND t.created_by = 
+            "#
+        );
+
+        query.push_bind(&actor.user_id);
+        query.push(
+            r#"
+                WHERE s.user_id = 
+            "#
+        );
+        query.push_bind(&actor.user_id);
+        query.push(" AND s.category_id = ");
+        query.push_bind(from_category_id);
+
+        // Apply filters
+        if let Some(tag_ids) = &filters.tag_ids {
+            if !tag_ids.is_empty() {
+                query.push(" AND EXISTS (SELECT 1 FROM tag_to_session st2 WHERE st2.session_id = s.id AND st2.tag_id = ANY(");
+                query.push_bind(tag_ids);
+                query.push("))");
+            }
+        }
+
+        if let Some(start_time) = &filters.from_start_time {
+            query.push(" AND s.start_time >= ");
+            query.push_bind(start_time);
+        }
+
+        if let Some(end_time) = &filters.to_end_time {
+            query.push(" AND s.start_time <= ");
+            query.push_bind(end_time);
+        }
+
+        query.push(" GROUP BY s.id, s.description, s.start_time, s.end_time, c.name ORDER BY s.start_time DESC LIMIT 10");
+
+        let session_previews = query
+            .build_query_as::<SessionPreview>()
+            .fetch_all(self.db_conn.get_pool())
+            .await?;
+
+        // Get count of affected sessions
+        let mut count_query = QueryBuilder::<Postgres>::new(
+            r#"
+                SELECT COUNT(DISTINCT s.id) as count
+                FROM session s
+                WHERE s.user_id = 
+            "#
+        );
+        count_query.push_bind(&actor.user_id);
+        count_query.push(" AND s.category_id = ");
+        count_query.push_bind(from_category_id);
+
+        // Apply same filters for count
+        if let Some(tag_ids) = &filters.tag_ids {
+            if !tag_ids.is_empty() {
+                count_query.push(" AND EXISTS (SELECT 1 FROM tag_to_session st WHERE st.session_id = s.id AND st.tag_id = ANY(");
+                count_query.push_bind(tag_ids);
+                count_query.push("))");
+            }
+        }
+
+        if let Some(start_time) = &filters.from_start_time {
+            count_query.push(" AND s.start_time >= ");
+            count_query.push_bind(start_time);
+        }
+
+        if let Some(end_time) = &filters.to_end_time {
+            count_query.push(" AND s.start_time <= ");
+            count_query.push_bind(end_time);
+        }
+
+        let count_result: (i64,) = count_query
+            .build_query_as()
+            .fetch_one(self.db_conn.get_pool())
+            .await?;
+
+        Ok(MigrationPreviewResponse {
+            affected_sessions_count: count_result.0,
+            session_previews,
+        })
+    }
+
+    async fn migrate_category(
+        &self,
+        from_category_id: Uuid,
+        target_category_id: Uuid,
+        filters: &MigrationFilters,
+        actor: ClerkUser,
+    ) -> Result<u64> {
+        let mut query = QueryBuilder::<Postgres>::new(
+            r#"
+                UPDATE session 
+                SET category_id = 
+            "#
+        );
+        query.push_bind(target_category_id);
+        query.push(" WHERE user_id = ");
+        query.push_bind(&actor.user_id);
+        query.push(" AND category_id = ");
+        query.push_bind(from_category_id);
+
+        // Apply filters
+        if let Some(tag_ids) = &filters.tag_ids {
+            if !tag_ids.is_empty() {
+                query.push(" AND EXISTS (SELECT 1 FROM tag_to_session st WHERE st.session_id = session.id AND st.tag_id = ANY(");
+                query.push_bind(tag_ids);
+                query.push("))");
+            }
+        }
+
+        if let Some(start_time) = &filters.from_start_time {
+            query.push(" AND start_time >= ");
+            query.push_bind(start_time);
+        }
+
+        if let Some(end_time) = &filters.to_end_time {
+            query.push(" AND start_time <= ");
+            query.push_bind(end_time);
+        }
+
+        let result = query
+            .build()
+            .execute(self.db_conn.get_pool())
+            .await?;
+
+        Ok(result.rows_affected())
     }
 }
