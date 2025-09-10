@@ -8,11 +8,16 @@ module.exports = {
     "./stories/**/*.{ts,tsx}",
   ],
   theme: {
+    screens: {
+      xs: "400px",
+      "2xl": "1400px",
+    },
     container: {
       center: true,
       padding: "2rem",
       screens: {
         "2xl": "1400px",
+        xs: "320px",
       },
     },
     extend: {
