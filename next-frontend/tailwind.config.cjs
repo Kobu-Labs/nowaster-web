@@ -8,10 +8,6 @@ module.exports = {
     "./stories/**/*.{ts,tsx}",
   ],
   theme: {
-    screens: {
-      xs: "400px",
-      "2xl": "1400px",
-    },
     container: {
       center: true,
       padding: "2rem",
@@ -21,6 +17,10 @@ module.exports = {
       },
     },
     extend: {
+      screens: {
+        xs: "400px",
+        "2xl": "1400px",
+      },
       colors: {
         border: "hsl(var(--pink-muted))",
         input:
