@@ -1,19 +1,22 @@
 "use client";
 
-import { siteConfig } from "@/config/site";
-import Link from "next/link";
-import Image from "next/image";
-import type { FC } from "react";
 import { useSidebar } from "@/components/shadcn/sidebar";
+import Image from "next/image";
+import Link from "next/link";
+import type { FC, PropsWithChildren } from "react";
 
-export const NowasterLogo: FC<{ href?: string; }> = (props) => {
+export const NowasterLogo: FC<PropsWithChildren<{ href?: string; }>> = (
+  props,
+) => {
   const { setOpen } = useSidebar();
 
   return (
     <Link
       className="flex items-center space-x-2 hover:scale-110 hover:transition"
       href={props.href ?? "/"}
-      onClick={() => { setOpen(false); }}
+      onClick={() => {
+        setOpen(false);
+      }}
     >
       <Image
         alt="Logo"
@@ -22,7 +25,7 @@ export const NowasterLogo: FC<{ href?: string; }> = (props) => {
         src="/logo.png"
         width={80}
       />
-      <span className="inline-block font-bold">{siteConfig.name}</span>
+      {props.children}
     </Link>
   );
 };
