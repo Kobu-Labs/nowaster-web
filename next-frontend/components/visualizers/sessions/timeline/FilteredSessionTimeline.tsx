@@ -43,7 +43,7 @@ export const FilteredSessionTimeline: FC = () => {
         <ChartFilter />
       </CardHeader>
       <Separator />
-      <CardContent className="p-0">
+      <CardContent className="grow p-0 sm:p-2 md:p-6 pt-0">
         <SessionTimeline filter={filter} />
       </CardContent>
     </Card>

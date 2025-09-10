@@ -55,7 +55,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
         />
         <ChartFilter />
       </CardHeader>
-      <CardContent className="grow p-0">
+      <CardContent className="grow p-0 sm:p-2 md:p-6 pt-0">
         <SessionBaseAreaChart
           filter={filter}
           groupingOpts={{
