@@ -20,8 +20,8 @@ export const FilteredSessionTimeline: FC = () => {
   );
 
   return (
-    <Card className="p-0 overflow-hidden">
-      <CardHeader className="md:hidden flex items-center p-4">
+    <Card>
+      <CardHeader className="md:hidden flex items-center p-2">
         <div className="self-end">
           <ChartFilter />
         </div>
