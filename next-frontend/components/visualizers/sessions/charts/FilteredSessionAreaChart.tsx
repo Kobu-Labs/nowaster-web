@@ -38,10 +38,10 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
 
   return (
     <Card className={cn("flex flex-col w-full", props.className)}>
-      <CardHeader className="md:hidden self-end">
+      <CardHeader className="md:hidden self-end p-2">
         <ChartFilter />
       </CardHeader>
-      <CardHeader className="hidden md:flex flex-row items-center gap-2 space-y-0">
+      <CardHeader className="hidden md:flex flex-row items-center gap-2 space-y-0 p-4">
         <GranularitySelect
           defaultValue={granularity}
           onSelect={setGranularity}
@@ -55,7 +55,7 @@ export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
         />
         <ChartFilter />
       </CardHeader>
-      <CardContent className="grow">
+      <CardContent className="grow p-0">
         <SessionBaseAreaChart
           filter={filter}
           groupingOpts={{
