@@ -17,9 +17,9 @@ export function SiteHeader() {
           src="/logo.png"
           width={80}
         />
-        <span className="inline-block font-bold">Nowaster</span>
+        <span className="inline-block font-bold hidden xs:block">Nowaster</span>
       </Link>
-      <nav className="flex-1 flex justify-end" aria-label="Main navigation">
+      <nav aria-label="Main navigation" className="flex-1 flex justify-end">
         <Link href="/home/">
           <Button aria-label="Navigate to application">
             Go to application
