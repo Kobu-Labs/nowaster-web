@@ -306,7 +306,7 @@ export function SessionTimelineUiProvider({
 
   return (
     <>
-      <div className="relative mt-8 px-4 pb-4 h-full">
+      <div className="relative mt-8 h-full">
         {/* Time markers */}
         {generateTimeMarkers()}
 
