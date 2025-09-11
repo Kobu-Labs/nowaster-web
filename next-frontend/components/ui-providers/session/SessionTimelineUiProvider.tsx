@@ -107,7 +107,9 @@ export function SessionTimelineUiProvider({
 
   // Core handler for pointer movement
   const handlePointerMove = (clientX: number) => {
-    if (!isDragging || !timelineRef.current) { return; }
+    if (!isDragging || !timelineRef.current) {
+      return;
+    }
 
     const rect = timelineRef.current.getBoundingClientRect();
     const percent = ((clientX - rect.left) / rect.width) * 100;
