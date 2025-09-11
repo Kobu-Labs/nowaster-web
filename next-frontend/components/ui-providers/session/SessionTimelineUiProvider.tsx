@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
+import { useIsMobile } from "@/components/shadcn/use-mobile";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
 import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
 import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
@@ -41,12 +42,13 @@ export function SessionTimelineUiProvider({
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [sessionToEdit, setSessionToEdit]
-    = useState<null | ScheduledSessionWithId>(null);
-  const [sessionToCreate, setSessionToCreate]
-    = useState<null | SessionPrecursor>();
+  const [sessionToEdit, setSessionToEdit] =
+    useState<null | ScheduledSessionWithId>(null);
+  const [sessionToCreate, setSessionToCreate] =
+    useState<null | SessionPrecursor>();
   const timelineRef = useRef<HTMLDivElement>(null);
-  const [hoveredSession, setHoveredSession] = useState<null | string>(null);
+  const [hoveredSession, setHoveredSession] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const groupedSessions = useMemo(() => {
     return sessionToNonIntersection(sessions);
@@ -58,8 +60,8 @@ export function SessionTimelineUiProvider({
     sessionEndDate: Date,
   ): number => {
     // Ensure dates are within the timeline bounds
-    const clampedStartDate
-      = sessionStartDate < startDate ? startDate : sessionStartDate;
+    const clampedStartDate =
+      sessionStartDate < startDate ? startDate : sessionStartDate;
     const clampedEndDate = sessionEndDate > endDate ? endDate : sessionEndDate;
 
     const duration = differenceInMilliseconds(clampedEndDate, clampedStartDate);
@@ -83,16 +85,16 @@ export function SessionTimelineUiProvider({
     return addMilliseconds(startDate, milliseconds);
   };
 
-  // Function to handle mouse down on timeline
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Core handler that works with extracted data
+  const handlePointerStart = (clientX: number, target: EventTarget | null) => {
     if (!timelineRef.current) {
       return;
     }
 
-    // Only start drag if clicking directly on the timeline background (not on an session)
-    if ((e.target as HTMLElement).classList.contains("timeline-bg")) {
+    // Only start drag if clicking/touching directly on the timeline background
+    if ((target as HTMLElement)?.classList.contains("timeline-bg")) {
       const rect = timelineRef.current.getBoundingClientRect();
-      const percent = ((e.clientX - rect.left) / rect.width) * 100;
+      const percent = ((clientX - rect.left) / rect.width) * 100;
 
       setIsDragging(true);
       setDragStart({ end: percent, origin: percent, start: percent });
@@ -103,14 +105,12 @@ export function SessionTimelineUiProvider({
     setIsDragging(false);
   };
 
-  // Function to handle mouse move during drag
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !timelineRef.current) {
-      return;
-    }
+  // Core handler for pointer movement
+  const handlePointerMove = (clientX: number) => {
+    if (!isDragging || !timelineRef.current) return;
 
     const rect = timelineRef.current.getBoundingClientRect();
-    const percent = ((e.clientX - rect.left) / rect.width) * 100;
+    const percent = ((clientX - rect.left) / rect.width) * 100;
 
     // Clamp percent between 0 and 100
     const clampedPercent = Math.max(0, Math.min(100, percent));
@@ -129,12 +129,13 @@ export function SessionTimelineUiProvider({
     }
   };
 
-  // Function to handle mouse up after drag
-  const handleMouseUp = () => {
+  // Core handler for pointer end
+  const handlePointerEnd = () => {
+    // Only create session if drag distance is significant
     if (
-      isDragging
-      && dragStart !== null // Only create session if drag distance is significant
-      && dragStart.end - dragStart.start > 1
+      isDragging &&
+      dragStart !== null &&
+      dragStart.end - dragStart.start > 1
     ) {
       const sessionStartDate = percentToDate(dragStart.start);
       const sessionEndDate = percentToDate(dragStart.end);
@@ -232,8 +233,8 @@ export function SessionTimelineUiProvider({
   };
 
   // Calculate drag selection area
-  const dragSelectionStyle
-    = isDragging && dragStart !== null
+  const dragSelectionStyle =
+    isDragging && dragStart !== null
       ? {
           backgroundColor: "#330e29",
           border: "2px dashed #630e20",
@@ -255,7 +256,7 @@ export function SessionTimelineUiProvider({
     return format(result, "MMM d, HH:mm");
   };
 
-  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[]; }> = ({
+  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[] }> = ({
     sessions,
   }) => {
     return (
@@ -275,8 +276,8 @@ export function SessionTimelineUiProvider({
                 "absolute overflow-hidden rounded-md cursor-pointer transition-all",
                 "hover:z-50 hover:border-pink-primary/50 hover:border-2",
                 "opacity-80 hover:opacity-100",
-                (isDragging || isEditDialogOpen || isCreateDialogOpen)
-                && "pointer-events-none",
+                (isDragging || isEditDialogOpen || isCreateDialogOpen) &&
+                  "pointer-events-none",
                 hoveredSession === session.id && "gradient-card-solid",
               )}
               key={session.id}
@@ -308,17 +309,31 @@ export function SessionTimelineUiProvider({
     <>
       <div className="relative mt-8 h-full">
         {/* Time markers */}
-        {generateTimeMarkers()}
+        {!isMobile && generateTimeMarkers()}
 
         {/* Timeline bar */}
         <HoverPercentageBar formatter={timeFormatter}>
           <div
             className="h-full relative cursor-crosshair"
-            onMouseDown={handleMouseDown}
-            onMouseLeave={handleMouseExit}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
             ref={timelineRef}
+            onDrag={(e) => handlePointerMove(e.clientX)}
+            onMouseDown={(e) => handlePointerStart(e.clientX, e.target)}
+            onMouseMove={(e) => handlePointerMove(e.clientX)}
+            onMouseUp={handlePointerEnd}
+            onMouseLeave={handleMouseExit}
+            onTouchStart={(e) => {
+              if (e.touches.length === 1) {
+                e.preventDefault();
+                handlePointerStart(e.touches[0]?.clientX ?? 0, e.target);
+              }
+            }}
+            onTouchMove={(e) => {
+              if (e.touches.length === 1) {
+                e.preventDefault();
+                handlePointerMove(e.touches[0]?.clientX ?? 0);
+              }
+            }}
+            onTouchEnd={handlePointerEnd}
           >
             {/* Timeline background for click detection */}
             <div className="timeline-bg absolute inset-0"></div>
