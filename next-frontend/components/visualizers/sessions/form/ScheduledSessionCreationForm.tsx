@@ -26,7 +26,7 @@ import type { SessionPrecursor } from "@/validation/session/creation";
 import { z } from "zod";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
-export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
+export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
   if (!props.from || !props.to) {
     return <span>--:--</span>;
   }
@@ -71,8 +71,8 @@ export const ScheduledSessionCreationForm: FC<
 
   async function onSubmit(values: z.infer<typeof createSessionPrecursor>) {
     if (
-      isBefore(values.endTime, values.startTime) ||
-      isEqual(values.endTime, values.startTime)
+      isBefore(values.endTime, values.startTime)
+      || isEqual(values.endTime, values.startTime)
     ) {
       form.setError("endTime", {
         message: "End time must be after start time",
@@ -99,11 +99,11 @@ export const ScheduledSessionCreationForm: FC<
 
   return (
     <Card className="p-0 m-0">
-      <CardContent className="mt-3 max-w-full overflow-hidden">
+      <CardContent className="mt-3 max-w-full overflow-hidden p-2 md:p-6">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6 md:space-y-8"
+            onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
               control={form.control}
