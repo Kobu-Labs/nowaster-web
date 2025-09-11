@@ -175,7 +175,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     Quick Log
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-fit max-w-fit">
+                <DialogContent className="w-[90vw] p-0 rounded-lg max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
                   <ScheduledSessionCreationForm
                     onClose={() => setShowQuickLog(false)}
                     onCreateAndClose={() => setShowQuickLog(false)}
@@ -193,7 +193,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {navItems.map((item) => (
                 <SidebarMenuItem
                   key={item.title}
-                  onClick={() => { handleLinkClick(item.url); }}
+                  onClick={() => {
+                    handleLinkClick(item.url);
+                  }}
                 >
                   <SidebarMenuButton asChild>
                     <Link
@@ -232,8 +234,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     )}
                     href={`/home/category/${category.id}`}
                     key={category.id}
-                    onClick={() =>
-                    { handleLinkClick(`/home/category/${category.id}`); }}
+                    onClick={() => {
+                      handleLinkClick(`/home/category/${category.id}`);
+                    }}
                   >
                     <CategoryBadge
                       color={category.color}
@@ -247,7 +250,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {sortedCategories.length > SHOW_CATEGORY_AMOUNT && (
                 <Link
                   href="/home/category"
-                  onClick={() => { handleLinkClick("/home/category/"); }}
+                  onClick={() => {
+                    handleLinkClick("/home/category/");
+                  }}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
@@ -275,7 +280,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   )}
                   href={`/home/tags/${tag.id}`}
                   key={tag.id}
-                  onClick={() => { handleLinkClick(`/home/tags/${tag.id}`); }}
+                  onClick={() => {
+                    handleLinkClick(`/home/tags/${tag.id}`);
+                  }}
                 >
                   <TagBadge tag={tag} variant="auto" />
                   <Badge className="text-xs" variant="outline">
@@ -286,7 +293,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {sortedTags.length > SHOW_TAG_AMOUNT && (
                 <Link
                   href="/home/tags"
-                  onClick={() => { handleLinkClick("/home/tags/"); }}
+                  onClick={() => {
+                    handleLinkClick("/home/tags/");
+                  }}
                 >
                   <SidebarMenuButton className="text-muted-foreground flex items-center justify-center">
                     <p className="text-accent-foreground">
