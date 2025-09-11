@@ -44,8 +44,8 @@ export interface RecurringSessionFormProps {
 
 export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
   return (
-    <Card className="p-4">
-      <fieldset className="flex flex-col gap-2">
+    <Card className="p-2 md:p-4">
+      <fieldset className="flex flex-col gap-4 md:gap-2">
         <FormField
           control={props.control}
           name={`sessions.${props.parentFieldIndex}.category`}
@@ -64,12 +64,12 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
           )}
         />
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
           <FormField
             control={props.control}
             name={`sessions.${props.parentFieldIndex}.start_date_time`}
             render={({ field }) => (
-              <FormItem className="flex flex-col gap-2">
+              <FormItem className="flex flex-col gap-2 flex-1">
                 <FormLabel className="block">Start</FormLabel>
                 <FormControl>
                   <IntervalBasedPicker
@@ -90,7 +90,7 @@ export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
             control={props.control}
             name={`sessions.${props.parentFieldIndex}.end_date_time`}
             render={({ field }) => (
-              <FormItem className="flex flex-col gap-2">
+              <FormItem className="flex flex-col gap-2 flex-1">
                 <FormLabel className="block">End</FormLabel>
                 <FormControl>
                   <IntervalBasedPicker
