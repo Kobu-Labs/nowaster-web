@@ -29,7 +29,7 @@ export default [
       "@stylistic/semi": ["error", "always"],
       "@stylistic/arrow-parens": ["error", "always"],
       "@stylistic/quotes": ["error", "double"],
-            "@stylistic/brace-style":"off",
+      "@stylistic/brace-style": "off",
       "@stylistic/member-delimiter-style": [
         "error",
         {
@@ -60,6 +60,7 @@ export default [
       "no-fallthrough": "off", // agree, but does not recognize literal unions
       "jsx-a11y/no-autofocus": "off",
       "jsx-a11y/no-static-element-interactions": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
       "react-hooks/exhaustive-deps": "off",
       "unicorn/no-nested-ternary": "off",
       "@typescript-eslint/require-await": "off", // this does not play nicely with server components

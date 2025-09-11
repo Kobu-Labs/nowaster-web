@@ -65,7 +65,7 @@ export function KpiCardUiProvider<T extends ReactNode>(
             ? (
                 <Skeleton className="w-full h-full min-h-12 md:min-h-20" />
               )
-            : props.mapper && props.value != undefined
+            : props.mapper && props.value !== undefined
               ? (
                   <div className="w-full break-words hyphens-auto text-center">
                     {props.mapper(props.value) as React.ReactNode}
