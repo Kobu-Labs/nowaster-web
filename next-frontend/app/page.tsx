@@ -82,7 +82,7 @@ export default async function LandingPage() {
                   width={1320}
                 />
               </div>
-              <div className="flex flex-col justify-center space-y-4 m-10">
+              <div className="flex flex-col justify-center space-y-4 md:m-10">
                 <ul className="grid gap-6">
                   <li className="flex items-start gap-4">
                     <div className="rounded-full bg-primary/10 p-2 text-primary">
