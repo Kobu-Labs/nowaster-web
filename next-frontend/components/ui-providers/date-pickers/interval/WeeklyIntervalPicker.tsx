@@ -18,22 +18,23 @@ export interface WeeklyIntervalPickerProps {
 
 export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
   return (
-    <Card className="w-full ">
-      <CardHeader>
-        <CardTitle>Select a Day</CardTitle>
+    <Card className="w-full">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base">Select a Day</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 w-full">
-        <div className="grid grid-cols-7 gap-2">
+      <CardContent className="space-y-4 w-full p-4">
+        <div className="grid grid-cols-7 gap-1 md:gap-2">
           {daysOfWeek.map((day) => (
             <Button
-              className="h-12 text-xs font-medium text-muted-foreground hover:text-white"
+              className="h-10 md:h-12 text-xs font-medium text-muted-foreground hover:text-white"
               key={day.value}
-              onClick={() =>
-              { props.onSelect({
-                day: day.value,
-                hours: props.selected?.hours ?? 0,
-                minutes: props.selected?.minutes ?? 0,
-              }); }}
+              onClick={() => {
+                props.onSelect({
+                  day: day.value,
+                  hours: props.selected?.hours ?? 0,
+                  minutes: props.selected?.minutes ?? 0,
+                });
+              }}
               size="sm"
               type="button"
               variant={props.selected?.day === day.value ? "default" : "ghost"}
@@ -45,12 +46,13 @@ export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
         </div>
         <Separator className="my-4" />
         <DailyIntervalPicker
-          onSelect={(val) =>
-          { props.onSelect({
-            day: props.selected?.day ?? 0,
-            hours: val.hours,
-            minutes: val.minutes,
-          }); }}
+          onSelect={(val) => {
+            props.onSelect({
+              day: props.selected?.day ?? 0,
+              hours: val.hours,
+              minutes: val.minutes,
+            });
+          }}
           orientation={props.orientation}
           selected={props.selected}
         />

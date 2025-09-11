@@ -28,11 +28,8 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
-import type {
-  TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
-import {
-  templateSessionPrecursorSchema,
-} from "@/components/visualizers/sessions/templates/form/form-schemas";
+import type { TemplateSessionPrecursor } from "@/components/visualizers/sessions/templates/form/form-schemas";
+import { templateSessionPrecursorSchema } from "@/components/visualizers/sessions/templates/form/form-schemas";
 import { RecurringSessionForm } from "@/components/visualizers/sessions/templates/form/RecurringSessionForm";
 import { TemplateIntervalSelect } from "@/components/visualizers/sessions/templates/TemplateIntervalSelect";
 import { getDaytimeAfterDate } from "@/lib/date-utils";
@@ -94,10 +91,10 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
   return (
     <Form {...form}>
       <form
-        className="m-8 flex flex-col items-center justify-center gap-8"
+        className="mx-2 my-6 md:mx-8 md:my-4 flex flex-col items-center justify-center gap-6 md:gap-4"
         onSubmit={form.handleSubmit(props.onSubmit, props.onError)}
       >
-        <div className="grid w-full grid-cols-2 gap-4 content-center">
+        <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-4 content-center">
           <FormField
             control={form.control}
             name="name"
@@ -182,25 +179,29 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
 
         <Separator className="w-full" />
 
-        <div className="flex flex-col gap-4 mt-8 items-center">
+        <div className="flex flex-col gap-4 mt-6 md:mt-4 items-center w-full">
           {fieldArray.fields.map((field, index) => (
             <div
-              className="flex items-center gap-2 col-span-full"
+              className="flex flex-col md:flex-row items-center gap-2 col-span-full w-full"
               key={field.id}
             >
               <Button
-                className="rounded-md border p-4 group"
-                onClick={() => { fieldArray.remove(index); }}
+                className="rounded-md border p-4 group self-start md:self-center"
+                onClick={() => {
+                  fieldArray.remove(index);
+                }}
                 variant="outline"
               >
                 <Trash2 className="group-hover:text-red-500" />
               </Button>
-              <RecurringSessionForm
-                control={form.control}
-                interval={form.watch("interval")}
-                intervalStart={form.watch("start_date")}
-                parentFieldIndex={index}
-              />
+              <div className="w-full">
+                <RecurringSessionForm
+                  control={form.control}
+                  interval={form.watch("interval")}
+                  intervalStart={form.watch("start_date")}
+                  parentFieldIndex={index}
+                />
+              </div>
             </div>
           ))}
           <TooltipProvider delayDuration={preventContinue ? 0 : 50_000}>
@@ -209,13 +210,14 @@ export const TemplateForm: FC<TemplateFormProps> = (props) => {
                 <Button
                   className="group flex items-center gap-2 "
                   disabled={preventContinue}
-                  onClick={() =>
-                  { fieldArray.append({
-                    // @ts-expect-error - .append expects a full object, but we are providing a partial one because category and tags are not set yet
-                    category: undefined,
-                    description: undefined,
-                    tags: [],
-                  }); }}
+                  onClick={() => {
+                    fieldArray.append({
+                      // @ts-expect-error - .append expects a full object, but we are providing a partial one because category and tags are not set yet
+                      category: undefined,
+                      description: undefined,
+                      tags: [],
+                    });
+                  }}
                   type="button"
                   variant="outline"
                 >
@@ -270,10 +272,10 @@ export const CreateTemplateFormDialog: FC<{
   return (
     <Dialog modal={false} onOpenChange={props.setIsOpen} open={props.open}>
       <DialogContent
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        onInteractOutside={(e) => { e.preventDefault(); }}
+        className="w-[90vw] h-fit max-w-[90vw] max-h-[90vh] px-0 pb-0 overflow-y-auto md:max-w-4xl md:p-6"
+        onInteractOutside={(e) => e.preventDefault()}
       >
-        <DialogHeader>
+        <DialogHeader className="px-2 md:px-6 pb-2 md:pb-4">
           <DialogTitle>Create New Template</DialogTitle>
           <DialogDescription>
             Create a template with recurring sessions that will repeat based on

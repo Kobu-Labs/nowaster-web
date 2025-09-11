@@ -111,9 +111,13 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
           />
           <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
             <ScrollArea className="w-64 sm:w-auto">
-              <div className="flex sm:flex-col p-2 items-center">
-                <p className="text-muted-foreground">HH</p>
-                <Separator />
+              <div className="flex sm:flex-col px-2 items-center">
+                <p className="text-white">HH</p>
+                <Separator className="sm:hidden" orientation="vertical" />
+                <Separator
+                  className="hidden sm:block"
+                  orientation="horizontal"
+                />
                 {hours.map((hour) => (
                   <Button
                     className="sm:w-full shrink-0 aspect-square"
@@ -133,11 +137,16 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
                 ))}
               </div>
               <ScrollBar className="sm:hidden" orientation="horizontal" />
+              <ScrollBar className="hidden sm:block" orientation="vertical" />
             </ScrollArea>
             <ScrollArea className="w-64 sm:w-auto">
-              <div className="flex sm:flex-col p-2 items-center">
-                <p className="text-muted-foreground">MM</p>
-                <Separator />
+              <div className="flex sm:flex-col px-2 items-center">
+                <p className="text-white">MM</p>
+                <Separator className="sm:hidden" orientation="vertical" />
+                <Separator
+                  className="hidden sm:block"
+                  orientation="horizontal"
+                />
                 {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
                   <Button
                     className="sm:w-full shrink-0 aspect-square"
@@ -157,6 +166,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
                 ))}
               </div>
               <ScrollBar className="sm:hidden" orientation="horizontal" />
+              <ScrollBar className="hidden sm:block" orientation="vertical" />
             </ScrollArea>
           </div>
         </div>
