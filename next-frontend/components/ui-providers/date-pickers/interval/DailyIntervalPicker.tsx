@@ -18,22 +18,22 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
     <div
       className={cn(
         "flex w-full",
-        orientation === "horizontal" && "flex-col ",
-        orientation === "vertical" && "flex-row ",
+        orientation === "horizontal" && "flex-col",
+        orientation === "vertical" && "flex-row",
       )}
     >
       <ScrollArea>
         <div
           className={cn(
             "flex p-2 gap-1",
-            orientation === "horizontal" && "flex-row items-center w-[300px]",
+            orientation === "horizontal"
+            && "flex-row items-center w-full max-w-[300px]",
             orientation === "vertical" && "flex-col h-[300px] items-center",
           )}
         >
           <div className="relative">
             <p className="top-0 text-white sticky">HH</p>
           </div>
-          <Separator orientation={toggleOrientation(orientation)} />
           {hours.map((hour) => (
             <Button
               className="shrink-0 aspect-square text-muted-foreground hover:text-white"
@@ -58,7 +58,8 @@ export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
         <div
           className={cn(
             "flex p-2 gap-1",
-            orientation === "horizontal" && "flex-row items-center w-[300px]",
+            orientation === "horizontal"
+            && "flex-row items-center w-full max-w-[300px]",
             orientation === "vertical" && "flex-col items-center h-[300px]",
           )}
         >
