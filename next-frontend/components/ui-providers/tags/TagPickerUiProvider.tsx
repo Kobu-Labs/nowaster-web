@@ -96,8 +96,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   // group tags based on their allowed categories
   const categories = new Map<string, TagDetails[]>([["-", []]]);
   tagsToDisplay.forEach((tag) => {
-    const categoryNames
-      = tag.allowedCategories.length > 0
+    const categoryNames =
+      tag.allowedCategories.length > 0
         ? tag.allowedCategories.map((c) => c.name)
         : ["-"];
 
@@ -152,31 +152,32 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
             onValueChange={setSearchTerm}
             placeholder="Search tags"
           />
-          {searchTerm
-            && props.availableTags.every((t) => t.label !== searchTerm) && (
-            <CommandGroup>
-              <CommandItem
-                className="flex"
-                onSelect={() =>
-                { createTag(
-                  {
-                    allowedCategories: [],
-                    color: newTagColor,
-                    label: searchTerm,
-                  },
-                  { onSuccess: handleTagCreate },
-                ); }}
-              >
-                <p>Create</p>
-                <div className="grow"></div>
-                <TagBadge
-                  colors={newTagColor}
-                  value={searchTerm}
-                  variant="manual"
-                />
-              </CommandItem>
-            </CommandGroup>
-          )}
+          {searchTerm &&
+            props.availableTags.every((t) => t.label !== searchTerm) && (
+              <CommandGroup>
+                <CommandItem
+                  className="flex"
+                  onSelect={() => {
+                    createTag(
+                      {
+                        allowedCategories: [],
+                        color: newTagColor,
+                        label: searchTerm,
+                      },
+                      { onSuccess: handleTagCreate },
+                    );
+                  }}
+                >
+                  <p>Create</p>
+                  <div className="grow"></div>
+                  <TagBadge
+                    colors={newTagColor}
+                    value={searchTerm}
+                    variant="manual"
+                  />
+                </CommandItem>
+              </CommandGroup>
+            )}
           <ScrollArea
             className="max-h-48 overflow-y-auto rounded-md border-none"
             type="always"
@@ -186,7 +187,9 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                 {tagsOrderStrategy(tagsValue, tags).map((tag) => (
                   <CommandItem
                     key={tag.id}
-                    onSelect={() => { handleTagSelect(tag); }}
+                    onSelect={() => {
+                      handleTagSelect(tag);
+                    }}
                     value={tag.id}
                   >
                     <Check

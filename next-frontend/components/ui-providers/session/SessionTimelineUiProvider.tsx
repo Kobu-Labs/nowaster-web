@@ -42,12 +42,12 @@ export function SessionTimelineUiProvider({
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [sessionToEdit, setSessionToEdit] =
-    useState<null | ScheduledSessionWithId>(null);
-  const [sessionToCreate, setSessionToCreate] =
-    useState<null | SessionPrecursor>();
+  const [sessionToEdit, setSessionToEdit]
+    = useState<null | ScheduledSessionWithId>(null);
+  const [sessionToCreate, setSessionToCreate]
+    = useState<null | SessionPrecursor>();
   const timelineRef = useRef<HTMLDivElement>(null);
-  const [hoveredSession, setHoveredSession] = useState<string | null>(null);
+  const [hoveredSession, setHoveredSession] = useState<null | string>(null);
   const isMobile = useIsMobile();
 
   const groupedSessions = useMemo(() => {
@@ -60,8 +60,8 @@ export function SessionTimelineUiProvider({
     sessionEndDate: Date,
   ): number => {
     // Ensure dates are within the timeline bounds
-    const clampedStartDate =
-      sessionStartDate < startDate ? startDate : sessionStartDate;
+    const clampedStartDate
+      = sessionStartDate < startDate ? startDate : sessionStartDate;
     const clampedEndDate = sessionEndDate > endDate ? endDate : sessionEndDate;
 
     const duration = differenceInMilliseconds(clampedEndDate, clampedStartDate);
@@ -107,7 +107,7 @@ export function SessionTimelineUiProvider({
 
   // Core handler for pointer movement
   const handlePointerMove = (clientX: number) => {
-    if (!isDragging || !timelineRef.current) return;
+    if (!isDragging || !timelineRef.current) { return; }
 
     const rect = timelineRef.current.getBoundingClientRect();
     const percent = ((clientX - rect.left) / rect.width) * 100;
@@ -133,9 +133,9 @@ export function SessionTimelineUiProvider({
   const handlePointerEnd = () => {
     // Only create session if drag distance is significant
     if (
-      isDragging &&
-      dragStart !== null &&
-      dragStart.end - dragStart.start > 1
+      isDragging
+      && dragStart !== null
+      && dragStart.end - dragStart.start > 1
     ) {
       const sessionStartDate = percentToDate(dragStart.start);
       const sessionEndDate = percentToDate(dragStart.end);
@@ -246,8 +246,8 @@ export function SessionTimelineUiProvider({
   };
 
   // Calculate drag selection area
-  const dragSelectionStyle =
-    isDragging && dragStart !== null
+  const dragSelectionStyle
+    = isDragging && dragStart !== null
       ? {
           backgroundColor: "#330e29",
           border: "2px dashed #630e20",
@@ -269,7 +269,7 @@ export function SessionTimelineUiProvider({
     return format(result, "MMM d, HH:mm");
   };
 
-  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[] }> = ({
+  const TimelineRow: FC<{ sessions: ScheduledSessionWithId[]; }> = ({
     sessions,
   }) => {
     return (
@@ -289,8 +289,8 @@ export function SessionTimelineUiProvider({
                 "absolute overflow-hidden rounded-md cursor-pointer transition-all",
                 "hover:z-50 hover:border-pink-primary/50 hover:border-2",
                 "opacity-80 hover:opacity-100",
-                (isDragging || isEditDialogOpen || isCreateDialogOpen) &&
-                  "pointer-events-none",
+                (isDragging || isEditDialogOpen || isCreateDialogOpen)
+                && "pointer-events-none",
                 hoveredSession === session.id && "gradient-card-solid",
               )}
               key={session.id}
@@ -328,25 +328,25 @@ export function SessionTimelineUiProvider({
         <HoverPercentageBar formatter={timeFormatter}>
           <div
             className="h-full relative cursor-crosshair"
-            ref={timelineRef}
             onDrag={(e) => handlePointerMove(e.clientX)}
             onMouseDown={(e) => handlePointerStart(e.clientX, e.target)}
+            onMouseLeave={handleMouseExit}
             onMouseMove={(e) => handlePointerMove(e.clientX)}
             onMouseUp={handlePointerEnd}
-            onMouseLeave={handleMouseExit}
-            onTouchStart={(e) => {
-              if (e.touches.length === 1) {
-                e.preventDefault();
-                handlePointerStart(e.touches[0]?.clientX ?? 0, e.target);
-              }
-            }}
+            onTouchEnd={handlePointerEnd}
             onTouchMove={(e) => {
               if (e.touches.length === 1) {
                 e.preventDefault();
                 handlePointerMove(e.touches[0]?.clientX ?? 0);
               }
             }}
-            onTouchEnd={handlePointerEnd}
+            onTouchStart={(e) => {
+              if (e.touches.length === 1) {
+                e.preventDefault();
+                handlePointerStart(e.touches[0]?.clientX ?? 0, e.target);
+              }
+            }}
+            ref={timelineRef}
           >
             {/* Timeline background for click detection */}
             <div className="timeline-bg absolute inset-0"></div>
@@ -371,8 +371,8 @@ export function SessionTimelineUiProvider({
           onOpenChange={setIsCreateDialogOpen}
           open={isCreateDialogOpen}
         >
-          <DialogContent className="w-[90vw] px-0 max-w-[90vw]  overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
-            <DialogHeader>
+          <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
+            <DialogHeader className="px-2">
               <DialogTitle>Create Session</DialogTitle>
             </DialogHeader>
             <ScheduledSessionCreationForm
@@ -383,14 +383,13 @@ export function SessionTimelineUiProvider({
         </Dialog>
       )}
 
-      {/* Edit Session Dialog */}
       <Dialog
         modal={false}
         onOpenChange={setIsEditDialogOpen}
         open={isEditDialogOpen}
       >
-        <DialogContent className="w-[90vw] max-w-[90vw] h-[85vh] max-h-[85vh] overflow-y-auto p-4 md:w-full md:max-w-[60%] md:h-auto md:max-h-none md:overflow-visible md:p-6">
-          <DialogHeader>
+        <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
+          <DialogHeader className="px-2">
             <DialogTitle>Edit Session</DialogTitle>
           </DialogHeader>
           {sessionToEdit && (
