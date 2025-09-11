@@ -24,10 +24,9 @@ import { useForm } from "react-hook-form";
 
 import type {
   ScheduledSessionRequest,
-  ScheduledSessionWithId } from "@/api/definitions";
-import {
-  ScheduledSessionWithIdSchema,
+  ScheduledSessionWithId,
 } from "@/api/definitions";
+import { ScheduledSessionWithIdSchema } from "@/api/definitions";
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Button } from "@/components/shadcn/button";
@@ -83,11 +82,11 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
   return (
     <Card className={cn("border-0")}>
-      <CardContent className="mt-3">
+      <CardContent className="mt-3 max-w-full overflow-hidden">
         <Form {...form}>
           <form
-            className="space-y-8"
             onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 md:space-y-8"
           >
             <FormField
               control={form.control}
@@ -125,7 +124,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
               )}
             />
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
               <FormField
                 control={form.control}
                 name="startTime"
@@ -153,7 +152,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                 )}
               />
 
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-row items-center justify-center gap-2 py-2 md:flex-col md:gap-0 md:py-0">
                 <DurationLabel
                   from={form.watch("startTime")}
                   to={form.watch("endTime")}
@@ -196,7 +195,9 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                     <SimpleTagPicker
                       disabled={form.getValues("category") === undefined}
                       forCategory={form.watch("category") ?? undefined}
-                      onNewTagsSelected={(tags) => { field.onChange(tags); }}
+                      onNewTagsSelected={(tags) => {
+                        field.onChange(tags);
+                      }}
                       selectedTags={
                         field.value?.map((t) => ({
                           ...t,
@@ -213,7 +214,9 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
             />
             <CardFooter className="flex justify-between">
               <Button
-                onClick={() => { setIsDeleteAlertOpen(true); }}
+                onClick={() => {
+                  setIsDeleteAlertOpen(true);
+                }}
                 type="button"
                 variant="destructive"
               >
@@ -257,7 +260,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
                     setIsDeleteAlertOpen(false);
                   },
-                })}
+                })
+              }
             >
               Remove
             </AlertDialogAction>

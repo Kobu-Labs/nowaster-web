@@ -26,10 +26,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
 import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 
 interface DeleteSessionIconProps {
   sessionId: string;
@@ -63,7 +63,9 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={async () =>
               await deleteSession.mutateAsync(props.sessionId, {
-                onSuccess: () => { setIsDeleteAlertOpen(false); },
+                onSuccess: () => {
+                  setIsDeleteAlertOpen(false);
+                },
               })}
           >
             Delete
@@ -135,7 +137,12 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   {
     accessorKey: "category",
     cell: (data) => {
-      return <CategoryLabel category={data.row.original.category} />;
+      return (
+        <CategoryBadge
+          color={data.row.original.category.color}
+          name={data.row.original.category.name}
+        />
+      );
     },
     header: "Category",
   },
@@ -145,10 +152,16 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       const { tags } = data.row.original;
 
       return (
-        <div className="flex">
-          {tags.map((tag) => (
+        <div className="flex flex-wrap gap-1 max-w-[120px] md:max-w-none">
+          {tags.slice(0, 2).map((tag) => (
             <TagBadge key={tag.id} tag={tag} variant="auto" />
           ))}
+          {tags.length > 2 && (
+            <span className="text-xs text-muted-foreground">
+              +
+              {tags.length - 2}
+            </span>
+          )}
         </div>
       );
     },
@@ -156,22 +169,47 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   },
   {
     accessorKey: "description",
-    header: "Description",
+    cell: (data) => {
+      const desc = data.row.original.description;
+      return (
+        <div
+          className="max-w-[100px] md:max-w-[200px] truncate text-xs md:text-sm"
+          title={desc ?? undefined}
+        >
+          {desc}
+        </div>
+      );
+    },
+    header: "Desc.",
   },
   {
     accessorKey: "startTime",
-    cell: ({ row: { original } }) =>
-      format(original.startTime, "dd-MM-yyyy HH:mm"),
+    cell: ({ row: { original } }) => (
+      <div className="text-xs md:text-sm">
+        <div className="md:hidden">{format(original.startTime, "dd/MM")}</div>
+        <div className="md:hidden">{format(original.startTime, "HH:mm")}</div>
+        <div className="hidden md:block">
+          {format(original.startTime, "dd-MM-yyyy HH:mm")}
+        </div>
+      </div>
+    ),
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Start Time" />
+      <DataTableColumnHeader column={column} title="Start" />
     ),
   },
   {
     accessorKey: "endTime",
-    cell: ({ row: { original } }) =>
-      format(original.endTime, "dd-MM-yyyy HH:mm"),
+    cell: ({ row: { original } }) => (
+      <div className="text-xs md:text-sm">
+        <div className="md:hidden">{format(original.endTime, "dd/MM")}</div>
+        <div className="md:hidden">{format(original.endTime, "HH:mm")}</div>
+        <div className="hidden md:block">
+          {format(original.endTime, "dd-MM-yyyy HH:mm")}
+        </div>
+      </div>
+    ),
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="End Time" />
+      <DataTableColumnHeader column={column} title="End" />
     ),
   },
   {

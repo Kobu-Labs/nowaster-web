@@ -1,8 +1,5 @@
-import type {
-  ScheduledSessionRequest } from "@/api/definitions";
-import {
-  CategoryWithIdSchema,
-} from "@/api/definitions";
+import type { ScheduledSessionRequest } from "@/api/definitions";
+import { CategoryWithIdSchema } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInMinutes, isBefore, isEqual } from "date-fns";
 import { ArrowBigRight } from "lucide-react";
@@ -29,7 +26,7 @@ import type { SessionPrecursor } from "@/validation/session/creation";
 import { z } from "zod";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
-export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
+export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
   if (!props.from || !props.to) {
     return <span>--:--</span>;
   }
@@ -74,8 +71,8 @@ export const ScheduledSessionCreationForm: FC<
 
   async function onSubmit(values: z.infer<typeof createSessionPrecursor>) {
     if (
-      isBefore(values.endTime, values.startTime)
-      || isEqual(values.endTime, values.startTime)
+      isBefore(values.endTime, values.startTime) ||
+      isEqual(values.endTime, values.startTime)
     ) {
       form.setError("endTime", {
         message: "End time must be after start time",
@@ -101,10 +98,13 @@ export const ScheduledSessionCreationForm: FC<
   }
 
   return (
-    <Card>
-      <CardContent className="mt-3 ">
+    <Card className="p-0 m-0">
+      <CardContent className="mt-3 max-w-full overflow-hidden">
         <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 md:space-y-8"
+          >
             <FormField
               control={form.control}
               name="category"
@@ -148,7 +148,7 @@ export const ScheduledSessionCreationForm: FC<
               )}
             />
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
               <FormField
                 control={form.control}
                 name="startTime"
@@ -176,7 +176,7 @@ export const ScheduledSessionCreationForm: FC<
                 )}
               />
 
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-row items-center justify-center gap-2 py-2 md:flex-col md:gap-0 md:py-0">
                 <DurationLabel
                   from={form.watch("startTime")}
                   to={form.watch("endTime")}

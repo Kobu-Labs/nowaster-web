@@ -371,7 +371,7 @@ export function SessionTimelineUiProvider({
           onOpenChange={setIsCreateDialogOpen}
           open={isCreateDialogOpen}
         >
-          <DialogContent className="w-fit max-w-fit">
+          <DialogContent className="w-[90vw] px-0 max-w-[90vw]  overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
             <DialogHeader>
               <DialogTitle>Create Session</DialogTitle>
             </DialogHeader>
@@ -389,7 +389,7 @@ export function SessionTimelineUiProvider({
         onOpenChange={setIsEditDialogOpen}
         open={isEditDialogOpen}
       >
-        <DialogContent className="w-full max-w-[60%]">
+        <DialogContent className="w-[90vw] max-w-[90vw] h-[85vh] max-h-[85vh] overflow-y-auto p-4 md:w-full md:max-w-[60%] md:h-auto md:max-h-none md:overflow-visible md:p-6">
           <DialogHeader>
             <DialogTitle>Edit Session</DialogTitle>
           </DialogHeader>
