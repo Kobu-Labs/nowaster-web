@@ -184,18 +184,30 @@ export function SessionTimelineUiProvider({
 
   const getMarkerSetp = () => {
     const diffInHours = Math.floor(totalDuration / (1000 * 60 * 60));
-    return Math.floor(diffInHours / 5);
+
+    if (isMobile) {
+      // INFO: show maximum 2-3 markers regardless of duration
+      return Math.max(Math.floor(diffInHours / 2), 1);
+    }
+
+    return Math.max(Math.floor(diffInHours / 5), 1);
   };
 
-  // Generate time markers for the timeline
   const generateTimeMarkers = () => {
     if (groupedSessions.length === 0) {
       return null;
     }
     const markerStep = getMarkerSetp();
-    // Calculate how many markers to show based on the timeline duration and marker step
+
     const totalHours = totalDuration / (1000 * 60 * 60);
-    const numMarkers = Math.ceil(totalHours / markerStep) + 1;
+    let numMarkers = Math.ceil(totalHours / markerStep) + 1;
+
+    // Limit maximum markers on mobile to prevent overcrowding
+    if (isMobile) {
+      numMarkers = Math.min(numMarkers, 3);
+    } else {
+      numMarkers = Math.min(numMarkers, 8);
+    }
 
     return Array.from({ length: numMarkers }, (_, i) => {
       const markerDate = addHours(startDate, i * markerStep);
@@ -219,10 +231,11 @@ export function SessionTimelineUiProvider({
         >
           <span
             className={cn(
-              "absolute -top-6 -translate-x-1/4 text-xs text-white whitespace-nowrap overflow-hidden",
-
-              i === 0 && "left-2",
-              i === numMarkers - 1 && "-right-5",
+              "absolute -top-6 text-xs text-white whitespace-nowrap",
+              // INFO: revent overflow by adjusting positioning based on marker position
+              percent < 10 && "left-0",
+              percent > 90 && "right-0",
+              percent >= 10 && percent <= 90 && "-translate-x-1/2",
             )}
           >
             {formattedTime}
@@ -309,7 +322,7 @@ export function SessionTimelineUiProvider({
     <>
       <div className="relative mt-8 h-full">
         {/* Time markers */}
-        {!isMobile && generateTimeMarkers()}
+        {generateTimeMarkers()}
 
         {/* Timeline bar */}
         <HoverPercentageBar formatter={timeFormatter}>
