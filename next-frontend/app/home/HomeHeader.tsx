@@ -12,7 +12,9 @@ export const HomeHeader: FC = () => {
       <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
         <SidebarTrigger />
         <Separator className="w-[2px]" orientation="vertical" />
-        <NowasterLogo href="/home/" />
+        <NowasterLogo href="/home/">
+          <p className="hidden sm:block font-bold text-2xl">Nowaster</p>
+        </NowasterLogo>
         <div className="grow"></div>
         <SessionTimer />
         <NotificationPopover />
