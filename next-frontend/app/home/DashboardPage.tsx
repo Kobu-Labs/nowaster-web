@@ -3,11 +3,11 @@
 import type { CategoryWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
+import { useIsMobile } from "@/components/shadcn/use-mobile";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { Feed } from "@/components/visualizers/feed/Feed";
 import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
-import type {
-  AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
+import type { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
 import {
   ActiveIndexContext,
   SessionPieChart,
@@ -19,7 +19,7 @@ import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/Tota
 import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
 import { FilteredSessionTimeline } from "@/components/visualizers/sessions/timeline/FilteredSessionTimeline";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
-import { formatTime } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -34,6 +34,7 @@ import { TrendingDown, TrendingUp, TrendingUpDown } from "lucide-react";
 import { use, useMemo } from "react";
 
 export default function DashboardPage() {
+  const isMobile = useIsMobile();
   const timelineFilter: SessionFilterPrecursor = useMemo(
     () => ({
       data: {
@@ -180,8 +181,14 @@ export default function DashboardPage() {
                   <div className="flex flex-col items-center grow w-full gap-1">
                     {props.data.map((val, i) => (
                       <div
-                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
+                        className={cn(
+                          "hover:bg-pink-muted flex items-center justify-between w-full rounded px-2",
+                          context?.index === i && "bg-pink-muted",
+                        )}
                         key={val.key}
+                        onClick={() =>
+                          isMobile
+                          && context?.setIndex(i === context.index ? null : i)}
                         onMouseEnter={() => context?.setIndex(i)}
                         onMouseLeave={() => context?.setIndex(null)}
                       >
@@ -231,8 +238,14 @@ export default function DashboardPage() {
                   <div className="flex flex-col items-center grow w-full gap-1">
                     {props.data.map((val, i) => (
                       <div
-                        className="flex items-center gap-2 justify-between w-full hover:bg-pink-muted rounded px-2"
+                        className={cn(
+                          "flex items-center justify-between w-full rounded px-2 hover:bg-pink-muted",
+                          context?.index === i && "bg-pink-muted",
+                        )}
                         key={val.key}
+                        onClick={() =>
+                          isMobile
+                          && context?.setIndex(i === context.index ? null : i)}
                         onMouseEnter={() => context?.setIndex(i)}
                         onMouseLeave={() => context?.setIndex(null)}
                       >

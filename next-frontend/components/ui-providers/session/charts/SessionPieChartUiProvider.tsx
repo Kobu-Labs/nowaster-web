@@ -18,6 +18,7 @@ import {
 import type { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
 import { formatTime, randomColor } from "@/lib/utils";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
+import { useIsMobile } from "@/components/shadcn/use-mobile";
 
 interface SessionPieChartUiProviderProps {
   activeIndex?: null | number;
@@ -73,6 +74,7 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   const [internalActiveIndex, setInternalActiveIndex] = useState<
     number | undefined
   >(undefined);
+  const isMobile = useIsMobile();
 
   // Use external activeIndex if provided, otherwise use internal state
   const activeIndex
@@ -130,9 +132,10 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           dataKey="value"
           innerRadius={60}
           nameKey="key"
-          onMouseEnter={(_, i) => {
-            handleActiveIndexChange(i);
-          }}
+          onClick={(_, i) =>
+            isMobile
+            && handleActiveIndexChange(i === activeIndex ? undefined : i)}
+          onMouseEnter={(_, i) => handleActiveIndexChange(i)}
           outerRadius={80}
           paddingAngle={5}
         >
