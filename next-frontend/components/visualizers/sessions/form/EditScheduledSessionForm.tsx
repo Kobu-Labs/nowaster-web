@@ -81,8 +81,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
   }
 
   return (
-    <Card className={cn("border-0")}>
-      <CardContent className="mt-3 max-w-full overflow-hidden">
+    <Card className="border-0 p-0 m-0">
+      <CardContent className="mt-3 max-w-full overflow-hidden p-2 md:p-6">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -212,7 +212,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                 </FormItem>
               )}
             />
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex justify-between px-0">
               <Button
                 onClick={() => {
                   setIsDeleteAlertOpen(true);

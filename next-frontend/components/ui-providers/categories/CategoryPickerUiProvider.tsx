@@ -65,8 +65,8 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
 ) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [newCategoryColor, setNewCategoryColor]
-    = useState<string>(randomColor());
+  const [newCategoryColor, setNewCategoryColor] =
+    useState<string>(randomColor());
 
   const { mutateAsync: createCategory } = useCreateCategory();
 
@@ -77,8 +77,8 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
     matchStrategy(category, searchTerm),
   );
 
-  const displayStrategy
-    = props.categoryDisplayStrategy ?? showSelectedCategoryFirst;
+  const displayStrategy =
+    props.categoryDisplayStrategy ?? showSelectedCategoryFirst;
   categoriesInDisplayOrder = displayStrategy(
     props.selectedCategories,
     categoriesInDisplayOrder,
@@ -124,39 +124,40 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-auto min-w-[300px] max-w-[400px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
             onValueChange={setSearchTerm}
             placeholder="Search categories"
             value={searchTerm}
           />
-          {searchTerm
-            && props.availableCategories.every(
+          {searchTerm &&
+            props.availableCategories.every(
               (cat) => cat.name !== searchTerm,
             ) && (
-            <Button
-              className="m-0"
-              onClick={async () =>
-                await createCategory(
-                  {
-                    color: newCategoryColor,
-                    name: searchTerm,
-                  },
-                  {
-                    onSuccess: (cat) => {
-                      props.onSelectCategory(cat);
-                      setNewCategoryColor(randomColor());
+              <Button
+                variant="ghost"
+                className="m-0"
+                onClick={async () =>
+                  await createCategory(
+                    {
+                      color: newCategoryColor,
+                      name: searchTerm,
                     },
-                  },
-                )}
-              variant="ghost"
-            >
-              <p>Create</p>
-              <div className="grow"></div>
-              <CategoryBadge color={newCategoryColor} name={searchTerm} />
-            </Button>
-          )}
+                    {
+                      onSuccess: (cat) => {
+                        props.onSelectCategory(cat);
+                        setNewCategoryColor(newCategoryColor);
+                      },
+                    },
+                  )
+                }
+              >
+                <p>Create</p>
+                <div className="grow"></div>
+                <CategoryBadge color={newCategoryColor} name={searchTerm} />
+              </Button>
+            )}
           <CommandSeparator />
           {categoriesInDisplayOrder.length > 0 && (
             <CommandGroup heading="Existing Categories">
@@ -167,7 +168,9 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
                 {categoriesInDisplayOrder.map((category) => (
                   <CommandItem
                     key={category.id}
-                    onSelect={() => { props.onSelectCategory(category); }}
+                    onSelect={() => {
+                      props.onSelectCategory(category);
+                    }}
                     value={category.name}
                   >
                     <Check
@@ -189,12 +192,12 @@ export const CategoryPickerUiProvider: FC<CategoryPickerUiProviderProps> = (
               </ScrollArea>
             </CommandGroup>
           )}
-          {categoriesInDisplayOrder.length === 0
-            && searchTerm.trim().length === 0 && (
-            <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
-              Type to create!
-            </div>
-          )}
+          {categoriesInDisplayOrder.length === 0 &&
+            searchTerm.trim().length === 0 && (
+              <div className="p-1 text-center text-sm text-muted-foreground placeholder:text-muted-foreground">
+                Type to create!
+              </div>
+            )}
         </Command>
       </PopoverContent>
     </Popover>
