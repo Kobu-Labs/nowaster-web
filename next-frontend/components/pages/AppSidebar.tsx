@@ -140,7 +140,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       )}
     >
       <SidebarHeader className="flex flex-row items-center px-4 justify-between gradient-button">
-        <NowasterLogo href="/home" />
+        <NowasterLogo href="/home">
+          <p className="font-bold text-2xl">Nowaster</p>
+        </NowasterLogo>
         {pref !== "permanent" && (
           <Button
             className="hover:bg-accent p-0 m-0 aspect-square"
