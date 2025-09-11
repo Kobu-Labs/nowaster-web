@@ -35,7 +35,6 @@ export const TemplateDashboard: FC = () => {
       <div className="w-full px-4 py-8 max-w-6xl mx-auto">
         <CreateTemplateFormDialog open={open} setIsOpen={setOpen} />
 
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-pink-500/10 to-purple-500/10 rounded-full mb-4 border border-pink-200/20">
             <Sparkles className="w-4 h-4 text-pink-500" />
@@ -52,7 +51,6 @@ export const TemplateDashboard: FC = () => {
           </p>
         </div>
 
-        {/* Empty State */}
         <div className="max-w-4xl mx-auto">
           <Card className="border-dashed border-2 border-pink-200/30 bg-linear-to-br from-pink-50/30 via-purple-50/20 to-pink-50/10 dark:from-pink-950/20 dark:via-purple-950/10 dark:to-pink-950/5">
             <CardContent className="flex flex-col items-center justify-center py-16 px-6">
@@ -70,26 +68,13 @@ export const TemplateDashboard: FC = () => {
                 scheduling recurring activities like workouts, study sessions,
                 or meetings.
               </p>
-
-              <Button
-                className="h-12 px-8 text-base font-medium bg-linear-to-r from-pink-500 to-purple-600 text-white border-0 hover:scale-105 hover:shadow-xl hover:shadow-pink-500/30 relative overflow-hidden group transition-transform duration-300 ease-in-out"
-                onClick={() => { setOpen(true); }}
-                size="lg"
-              >
-                {/* Base gradient background */}
-                <div className="absolute inset-0 bg-linear-to-r from-pink-500 to-purple-600 transition-opacity duration-300 ease-in-out" />
-
-                {/* Hover gradient overlay */}
-                <div className="absolute inset-0 bg-linear-to-r from-pink-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out" />
-                <Plus className="w-5 h-5 mr-2 relative z-10" />
-                <span className="relative z-10">
-                  Create Your First Template
-                </span>
+              <Button onClick={() => setOpen(true)} size="lg">
+                <Plus className="w-5 h-5 mr-2" />
+                <span>Create Your First Template</span>
               </Button>
             </CardContent>
           </Card>
 
-          {/* Feature cards */}
           <div className="grid md:grid-cols-3 gap-6 mt-12">
             <Card className="text-center border-pink-100/50 bg-linear-to-br from-pink-50/50 to-purple-50/30 dark:border-pink-900/20 dark:from-pink-950/30 dark:to-purple-950/20">
               <CardContent className="pt-6 pb-8">
@@ -98,8 +83,8 @@ export const TemplateDashboard: FC = () => {
                 </div>
                 <h4 className="font-semibold mb-2">Automated Scheduling</h4>
                 <p className="text-sm text-muted-foreground">
-                  Set your pattern once and we&apos;ll create all future sessions
-                  automatically
+                  Set your pattern once and we&apos;ll create all future
+                  sessions automatically
                 </p>
               </CardContent>
             </Card>
@@ -139,7 +124,6 @@ export const TemplateDashboard: FC = () => {
     <div className="w-full px-4 py-8 max-w-6xl mx-auto">
       <CreateTemplateFormDialog open={open} setIsOpen={setOpen} />
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-linear-to-r from-pink-500/10 to-purple-500/10 rounded-full border border-pink-200/20">
@@ -158,30 +142,18 @@ export const TemplateDashboard: FC = () => {
           </p>
         </div>
 
-        <Button
-          className="h-12 px-6 bg-linear-to-r from-pink-500 to-purple-600 text-white border-0 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25 relative overflow-hidden group transition-transform duration-300 ease-in-out"
-          onClick={() => { setOpen(true); }}
-          size="lg"
-        >
-          {/* Base gradient background */}
-          <div className="absolute inset-0 bg-linear-to-r from-pink-500 to-purple-600 transition-opacity duration-300 ease-in-out" />
-
-          {/* Hover gradient overlay */}
-          <div className="absolute inset-0 bg-linear-to-r from-pink-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out" />
-
-          <Plus className="w-5 h-5 mr-2 relative z-10" />
-          <span className="relative z-10">Add Template</span>
+        <Button onClick={() => setOpen(true)} size="lg">
+          <Plus className="w-5 h-5 mr-2" />
+          <span>Add Template</span>
         </Button>
       </div>
 
-      {/* Templates Grid */}
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {q.data.map((template) => (
           <TemplateOverview key={template.id} template={template} />
         ))}
       </div>
 
-      {/* Stats Footer */}
       {q.data.length > 0 && (
         <div className="mt-12 pt-8 border-t">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
