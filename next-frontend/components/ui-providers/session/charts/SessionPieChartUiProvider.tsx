@@ -104,7 +104,6 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   if (props.data.length === 0) {
     return (
       <ResponsiveContainer
-        className="flex items-center justify-center"
         height={180}
         width="100%"
       >
