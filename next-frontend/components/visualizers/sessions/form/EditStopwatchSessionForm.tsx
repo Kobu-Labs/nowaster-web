@@ -114,11 +114,11 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
   };
 
   return (
-    <Card className="border-0 gradient-container p-2">
-      <CardContent className="mt-3">
+    <Card className="border-0 gradient-container p-0 m-0">
+      <CardContent className="mt-3 max-w-full overflow-hidden p-2 md:p-6">
         <Form {...form}>
           <form
-            className="space-y-8"
+            className="space-y-6 md:space-y-8"
             onSubmit={form.handleSubmit(onUpdateSession)}
           >
             <FormField
@@ -157,7 +157,7 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
               )}
             />
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
               <FormField
                 control={form.control}
                 name="startTime"
