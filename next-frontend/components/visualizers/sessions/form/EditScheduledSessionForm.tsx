@@ -36,7 +36,6 @@ import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOp
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
-import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight } from "lucide-react";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
@@ -85,8 +84,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
       <CardContent className="mt-3 max-w-full overflow-hidden p-2 md:p-6">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6 md:space-y-8"
+            onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
               control={form.control}
@@ -260,8 +259,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
                     setIsDeleteAlertOpen(false);
                   },
-                })
-              }
+                })}
             >
               Remove
             </AlertDialogAction>
