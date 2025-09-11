@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-import { ScrollArea } from "@/components/shadcn/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { fuzzyFindSearch } from "@/lib/searching";
 import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";

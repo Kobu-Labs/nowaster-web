@@ -66,8 +66,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
                 onSuccess: () => {
                   setIsDeleteAlertOpen(false);
                 },
-              })
-            }
+              })}
           >
             Delete
           </AlertDialogAction>
@@ -77,7 +76,7 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   );
 };
 
-const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
+const EditSessionButton: FC<{ session: ScheduledSessionWithId; }> = (props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -161,11 +160,12 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       return (
         <div className="flex flex-wrap gap-1 max-w-[120px] md:max-w-none">
           {tags.slice(0, 2).map((tag) => (
-            <TagBadge tag={tag} variant="auto" key={tag.id} />
+            <TagBadge key={tag.id} tag={tag} variant="auto" />
           ))}
           {tags.length > 2 && (
             <span className="text-xs text-muted-foreground">
-              +{tags.length - 2}
+              +
+              {tags.length - 2}
             </span>
           )}
         </div>
@@ -233,13 +233,13 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
     id: "duration-column",
   },
   {
-    id: "actions",
-    header: "",
     cell: (data) => (
       <div className="flex gap-1">
         <EditSessionButton session={data.row.original} />
         <DeleteSessionIcon sessionId={data.row.original.id} />
       </div>
     ),
+    header: "",
+    id: "actions",
   },
 ];
