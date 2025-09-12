@@ -2,7 +2,7 @@ import type { ScheduledSessionRequest } from "@/api/definitions";
 import { CategoryWithIdSchema } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInMinutes, isBefore, isEqual } from "date-fns";
-import { ArrowBigRight } from "lucide-react";
+import { ArrowBigDown } from "lucide-react";
 import type { FC } from "react";
 import { useForm } from "react-hook-form";
 
@@ -181,7 +181,7 @@ export const ScheduledSessionCreationForm: FC<
                   from={form.watch("startTime")}
                   to={form.watch("endTime")}
                 />
-                <ArrowBigRight />
+                <ArrowBigDown className="md:-rotate-90" />
               </div>
 
               <FormField

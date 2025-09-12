@@ -128,11 +128,11 @@ const StopwatchSessionActive: FC<{
   return (
     <TooltipProvider delayDuration={50}>
       <Dialog modal={false} onOpenChange={setOpen} open={open}>
-        <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
+        <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
           <DialogHeader className="px-2">
             <DialogTitle className="m-1">Edit session data</DialogTitle>
-            <Separator className="w-full" />
           </DialogHeader>
+          <Separator className="w-full" />
           <EditStopwatchSession
             onDelete={() => setOpen(false)}
             onSubmit={() => setOpen(false)}

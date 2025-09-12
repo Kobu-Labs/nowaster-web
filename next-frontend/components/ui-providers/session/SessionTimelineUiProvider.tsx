@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
+import { Separator } from "@/components/shadcn/separator";
 import { useIsMobile } from "@/components/shadcn/use-mobile";
 import { HoverPercentageBar } from "@/components/ui-providers/HoverPercentageBar";
 import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
@@ -373,10 +374,11 @@ export function SessionTimelineUiProvider({
           onOpenChange={setIsCreateDialogOpen}
           open={isCreateDialogOpen}
         >
-          <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
+          <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
             <DialogHeader className="px-2">
-              <DialogTitle>Create Session</DialogTitle>
+              <DialogTitle className="m-1">Create Session</DialogTitle>
             </DialogHeader>
+            <Separator className="w-full" />
             <ScheduledSessionCreationForm
               onCreate={() => setIsCreateDialogOpen(false)}
               precursor={sessionToCreate}
@@ -390,10 +392,11 @@ export function SessionTimelineUiProvider({
         onOpenChange={setIsEditDialogOpen}
         open={isEditDialogOpen}
       >
-        <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
+        <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
           <DialogHeader className="px-2">
             <DialogTitle>Edit Session</DialogTitle>
           </DialogHeader>
+          <Separator className="w-full" />
           {sessionToEdit && (
             <EditScheduledSession
               onCancel={() => {
