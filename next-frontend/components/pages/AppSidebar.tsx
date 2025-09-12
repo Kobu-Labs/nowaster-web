@@ -21,6 +21,8 @@ import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
 import {
@@ -50,6 +52,7 @@ import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { Separator } from "@/components/shadcn/separator";
 
 const SHOW_CATEGORY_AMOUNT = 5;
 const SHOW_TAG_AMOUNT = 7;
@@ -175,7 +178,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     Quick Log
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-[90vw] p-0 rounded-lg max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6">
+                <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
+                  <DialogHeader className="px-2">
+                    <DialogTitle className="m-1">Create Session</DialogTitle>
+                  </DialogHeader>
+                  <Separator className="w-full" />
                   <ScheduledSessionCreationForm
                     onClose={() => setShowQuickLog(false)}
                     onCreateAndClose={() => setShowQuickLog(false)}
