@@ -37,7 +37,7 @@ import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowBigRight } from "lucide-react";
+import { ArrowBigDown } from "lucide-react";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
 interface EditStopwatchSessionProps {
@@ -156,7 +156,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                   from={form.watch("startTime")}
                   to={form.watch("endTime")}
                 />
-                <ArrowBigRight />
+                <ArrowBigDown className="md:-rotate-90" />
               </div>
 
               <FormField
