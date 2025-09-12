@@ -100,9 +100,10 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <div className="sm:flex">
+        <div className="sm:flex bg-purple-muted w-full">
           <Calendar
             autoFocus
+            className="w-full"
             disabled={props.disabled}
             mode="single"
             onSelect={(v) => v && props.onSelect(v)}
