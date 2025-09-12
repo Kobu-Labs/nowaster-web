@@ -26,10 +26,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
-import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 
 interface DeleteSessionIconProps {
   sessionId: string;
@@ -43,10 +43,10 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
     <AlertDialog onOpenChange={setIsDeleteAlertOpen} open={isDeleteAlertOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          className="group cursor-pointer p-0 m-0 aspect-square"
+          className="group cursor-pointer p-0 m-0 aspect-square h-6 w-6 md:h-8 md:w-8"
           variant="ghost"
         >
-          <Trash2 className="group-hover:text-red-500 group-hover:scale-110 group-hover:transition" />
+          <Trash2 className="h-3 w-3 md:h-4 md:w-4 group-hover:text-red-500 group-hover:scale-110 group-hover:transition" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -66,7 +66,8 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
                 onSuccess: () => {
                   setIsDeleteAlertOpen(false);
                 },
-              })}
+              })
+            }
           >
             Delete
           </AlertDialogAction>
@@ -76,17 +77,17 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   );
 };
 
-const EditSessionButton: FC<{ session: ScheduledSessionWithId; }> = (props) => {
+const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <Dialog modal={false} onOpenChange={setIsDialogOpen} open={isDialogOpen}>
       <DialogTrigger asChild>
         <Button
-          className="group cursor-pointer p-0 m-0 aspect-square"
+          className="group cursor-pointer p-0 m-0 aspect-square h-6 w-6 md:h-8 md:w-8"
           variant="ghost"
         >
-          <Edit className="group-hover:scale-110 group-hover:transition" />
+          <Edit className="h-3 w-3 md:h-4 md:w-4 group-hover:scale-110 group-hover:transition" />
         </Button>
       </DialogTrigger>
       <DialogContent className="w-full max-w-[60%]">
@@ -94,9 +95,15 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId; }> = (props) => {
           <DialogTitle>Edit Session</DialogTitle>
         </DialogHeader>
         <EditScheduledSession
-          onCancel={() => { setIsDialogOpen(false); }}
-          onDelete={() => { setIsDialogOpen(false); }}
-          onSave={() => { setIsDialogOpen(false); }}
+          onCancel={() => {
+            setIsDialogOpen(false);
+          }}
+          onDelete={() => {
+            setIsDialogOpen(false);
+          }}
+          onSave={() => {
+            setIsDialogOpen(false);
+          }}
           session={props.session}
         />
       </DialogContent>
@@ -124,11 +131,11 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       const rows = data.table.getRowModel().rows.map((row) => row.original);
       return (
         <Button
-          className="p-0 m-0"
-          onClick={() => { downloadJSON(rows, "export.json"); }}
+          className="p-0 m-0 h-6 w-6 md:h-8 md:w-8"
+          onClick={() => downloadJSON(rows, "export.json")}
           variant="ghost"
         >
-          <DownloadIcon className="size-4" />
+          <DownloadIcon className="h-3 w-3 md:h-4 md:w-4" />
         </Button>
       );
     },
@@ -154,12 +161,11 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       return (
         <div className="flex flex-wrap gap-1 max-w-[120px] md:max-w-none">
           {tags.slice(0, 2).map((tag) => (
-            <TagBadge key={tag.id} tag={tag} variant="auto" />
+            <TagBadge tag={tag} variant="auto" key={tag.id} />
           ))}
           {tags.length > 2 && (
             <span className="text-xs text-muted-foreground">
-              +
-              {tags.length - 2}
+              +{tags.length - 2}
             </span>
           )}
         </div>
@@ -217,7 +223,9 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
       differenceInMinutes(session.endTime, session.startTime),
     cell: (test) => {
       const time = test.cell.getValue<number>();
-      return <div>{formatTime(time)}</div>;
+      return (
+        <div className="text-xs md:text-sm font-mono">{formatTime(time)}</div>
+      );
     },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Duration" />
@@ -225,12 +233,13 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
     id: "duration-column",
   },
   {
+    id: "actions",
+    header: "",
     cell: (data) => (
-      <>
+      <div className="flex gap-1">
         <EditSessionButton session={data.row.original} />
         <DeleteSessionIcon sessionId={data.row.original.id} />
-      </>
+      </div>
     ),
-    id: "actions",
   },
 ];
