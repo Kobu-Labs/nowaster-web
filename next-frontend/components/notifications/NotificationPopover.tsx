@@ -62,7 +62,7 @@ export const NotificationPopover: FC = () => {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-96 p-0 border gradient-container"
+        className="w-96 p-0 border gradient-card-solid"
         sideOffset={8}
       >
         <div className="flex items-center justify-between p-4 border-b">
