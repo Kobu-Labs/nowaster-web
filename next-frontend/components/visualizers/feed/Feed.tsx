@@ -99,14 +99,16 @@ export const Feed: FC = () => {
   return (
     <div className="space-y-4">
       {allEvents.map((event, index) => {
-        if (index === allEvents.length - 3) {
-          return (
-            <div key={event.id} ref={lastEventElementRef}>
-              {renderEventCard(event)}
-            </div>
-          );
-        }
-        return renderEventCard(event);
+        return (
+          <div
+            key={event.id}
+            ref={
+              index === allEvents.length - 3 ? lastEventElementRef : undefined
+            }
+          >
+            {renderEventCard(event)}
+          </div>
+        );
       })}
 
       {isFetchingNextPage && (
