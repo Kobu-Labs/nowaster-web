@@ -23,7 +23,7 @@ export default async function LandingPage() {
       <SiteHeader />
       <div className="flex flex-col min-h-screen">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-linear-to-b from-background to-muted">
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="grid gap-6  md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px]">
               <div className="flex flex-col justify-center space-y-4 ">
                 <div className="space-y-2">
@@ -60,7 +60,7 @@ export default async function LandingPage() {
           className="w-full py-12 md:py-24 lg:py-32 bg-background relative"
           id="features"
         >
-          <div className="container px-10 md:px-6 relative">
+          <div className="px-10 md:px-6 relative">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -130,7 +130,7 @@ export default async function LandingPage() {
 
         {/* How It Works */}
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -178,7 +178,7 @@ export default async function LandingPage() {
           className="w-full py-12 md:py-24 lg:py-32 bg-background "
           id="pricing"
         >
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -225,7 +225,7 @@ export default async function LandingPage() {
 
         {/* Testimonials */}
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted gradient-container">
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -301,7 +301,7 @@ export default async function LandingPage() {
         </section>
 
         <section className="w-full py-12 md:py-24 lg:py-32 gradient-card text-foreground">
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
