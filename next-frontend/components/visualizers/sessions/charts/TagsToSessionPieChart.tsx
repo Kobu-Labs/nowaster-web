@@ -13,7 +13,8 @@ import { useIsMobile } from "@/components/shadcn/use-mobile";
 
 interface TagsToSessionPieChartProps {
   filter?: SessionFilterPrecursor;
-  renderLegeng?: boolean;
+  legendPosition?: "bottom" | "left" | "right" | "top";
+  renderLegend?: boolean;
 }
 
 export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
@@ -39,6 +40,7 @@ export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
                   key: "-",
                   metadata: { color: "#f129c1", name: "-" },
                 }}
+          legendPosition={props.legendPosition}
           renderLegend={(values: {
             data: AmountByCategory<{
               color: string;
@@ -47,7 +49,7 @@ export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
           }) => {
             /* eslint-disable react-hooks/rules-of-hooks */
             const context = useContext(ActiveIndexContext);
-            if (!props.renderLegeng) {
+            if (!props.renderLegend) {
               return null;
             }
 
