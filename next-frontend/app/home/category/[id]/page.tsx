@@ -82,7 +82,11 @@ export default function Page(props: { params: Promise<{ id: string; }>; }) {
         <TotalSessionTimeCard filter={filter} />
         <SessionAverageDurationProvider filter={filter} />
         <div className="col-span-full">
-          <TagsToSessionPieChart filter={filter} renderLegeng={!isMobile} />
+          <TagsToSessionPieChart
+            filter={filter}
+            legendPosition={isMobile ? "bottom" : "right"}
+            renderLegend
+          />
         </div>
         <FilterContextProvider initialFilter={filter}>
           <FilteredSessionAreaChart
