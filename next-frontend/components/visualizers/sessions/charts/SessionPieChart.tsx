@@ -7,6 +7,7 @@ import { SessionPieChartUiProvider } from "@/components/ui-providers/session/cha
 import { differenceInMinutes } from "date-fns";
 import type { FC } from "react";
 import { createContext, use, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export type AmountByCategory<TMetadata = any> = GroupedDataItem<TMetadata>;
 
@@ -30,6 +31,7 @@ interface SessionPieChartProps<TMetadata = any> {
   filter?: SessionFilterPrecursor;
   getKey: (session: ScheduledSession) => KeyExtractionResult<TMetadata>;
   groupingMethod?: (session: ScheduledSession) => number;
+  legendPosition?: "bottom" | "left" | "right" | "top";
   postProcess?: (
     data: AmountByCategory<TMetadata>[],
   ) => AmountByCategory<TMetadata>[];
@@ -95,7 +97,15 @@ const SessionPieChartInner = <TMetadata = any,>(
   }
 
   return (
-    <div className="flex items-center">
+    <div
+      className={cn(
+        "flex items-center",
+        props.legendPosition === "top" && "flex-col-reverse",
+        props.legendPosition === "bottom" && "flex-col",
+        props.legendPosition === "left" && "flex-row-reverse",
+        props.legendPosition === "right" && "flex-row",
+      )}
+    >
       <SessionPieChartUiProvider
         activeIndex={context.index}
         data={result ?? []}
