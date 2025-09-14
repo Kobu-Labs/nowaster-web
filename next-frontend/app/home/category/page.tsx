@@ -504,17 +504,17 @@ export default function CategoriesPage() {
 
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Category</AlertDialogTitle>
-                          <AlertDialogDescription className="space-y-0">
+                          <AlertDialogTitle>
                             <span>Are you sure you want to delete </span>
                             <CategoryBadge
                               color={category.color}
                               name={category.name}
                             />
-                            <span>
-                              ? This action cannot be undone and will remove the
-                              category from all associated sessions.
-                            </span>
+                            ?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="space-y-0 text-sm text-muted-foreground">
+                            This action cannot be undone and will remove the
+                            category from all associated sessions.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
