@@ -168,7 +168,7 @@ export default function TagsPage() {
 
   if (tagsQuery.isPending || statsQuery.isPending) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="w-full p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <Skeleton className="h-8 w-48 mb-2" />
@@ -196,7 +196,7 @@ export default function TagsPage() {
 
   if (tagsQuery.isError || statsQuery.isError) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="w-full p-6">
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle className="text-destructive">
