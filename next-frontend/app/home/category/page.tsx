@@ -473,11 +473,14 @@ export default function CategoriesPage() {
                                 <TooltipTrigger>
                                   <AlertDialogTrigger disabled>
                                     <DropdownMenuItem
+                                      asChild
                                       className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
                                       disabled
                                     >
-                                      <Trash2 className="h-4 w-4" />
-                                      Delete Category
+                                      <div>
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete Category
+                                      </div>
                                     </DropdownMenuItem>
                                   </AlertDialogTrigger>
                                 </TooltipTrigger>
