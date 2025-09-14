@@ -72,7 +72,8 @@ impl RecurringSessionRepository {
                                 'id', c.id,
                                 'name', c.name,
                                 'created_by', c.created_by,
-                                'color', c.color
+                                'color', c.color,
+                                'last_used_at', c.last_used_at
                             ) 
                         ),
                         'description', rs.description,
@@ -84,7 +85,8 @@ impl RecurringSessionRepository {
                                     'id', t.id,
                                     'label', t.label,
                                     'color', t.color,
-                                    'created_by', t.created_by
+                                    'created_by', t.created_by,
+                                    'last_used_at', t.last_used_at
                                 )
                             ) FILTER (WHERE t.id IS NOT NULL), '[]')
                             FROM tag_to_recurring_session ttrc
