@@ -230,7 +230,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   },
   {
     cell: (data) => (
-      <div className="flex gap-1">
+      <div className="flex flex-col sm:gap-1 sm:flex-row">
         <EditSessionButton session={data.row.original} />
         <DeleteSessionIcon sessionId={data.row.original.id} />
       </div>
