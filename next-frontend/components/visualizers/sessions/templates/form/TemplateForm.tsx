@@ -271,22 +271,22 @@ export const CreateTemplateFormDialog: FC<{
 
   return (
     <Dialog modal={false} onOpenChange={props.setIsOpen} open={props.open}>
-      <DialogContent
-        className="w-[90vw] h-fit max-w-[90vw] max-h-[90vh] px-0 pb-0 overflow-y-auto md:max-w-4xl md:p-6"
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader className="px-2 md:px-6 pb-2 md:pb-4">
-          <DialogTitle>Create New Template</DialogTitle>
+      <DialogContent className="px-0 md:p-6 pb-0 w-[90vw] max-w-[90vw] max-h-[90vh] md:w-fit md:max-w-4xl md:max-h-[90vh] gradient-card-solid rounded-lg flex flex-col">
+        <DialogHeader className="px-2 md:px-6 pb-2 md:pb-4 flex-shrink-0">
+          <DialogTitle className="m-1">Create New Template</DialogTitle>
           <DialogDescription>
             Create a template with recurring sessions that will repeat based on
             your schedule.
           </DialogDescription>
         </DialogHeader>
-        <TemplateForm
-          defaultValues={props.defaultValues}
-          isLoading={createTemplateMutation.isPending}
-          onSubmit={submitForm}
-        />
+        <Separator className="w-full flex-shrink-0" />
+        <div className="overflow-y-auto flex-1 px-0 pb-0 md:px-6 md:pb-6">
+          <TemplateForm
+            defaultValues={props.defaultValues}
+            isLoading={createTemplateMutation.isPending}
+            onSubmit={submitForm}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
