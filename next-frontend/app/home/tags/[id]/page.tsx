@@ -47,14 +47,13 @@ export default function Page(props: { params: Promise<{ id: string; }>; }) {
   };
 
   return (
-    <div className="grow">
-      <div className="my-8 pl-8 ">
-        <h2 className="flex items-center gap-4 text-3xl font-bold tracking-tight">
-          Details page for
-          <TagBadge tag={tag} variant="auto" />
-        </h2>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
+    <div className="flex grow flex-col p-4 md:p-8 gap-4 md:gap-8">
+      <span className="inline-flex flex-wrap items-center gap-2 text-3xl font-bold tracking-tight">
+        <span className="text-nowrap">Details page for</span>
+        <TagBadge tag={tag} variant="auto" />
+      </span>
+
+      <div className="grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-8">
         <TotalSessionTimeCard filter={filter} />
         <SessionAverageDurationProvider filter={filter} />
         <SessionCountCard filter={filter} />
