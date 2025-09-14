@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
+import { Separator } from "@/components/shadcn/separator";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
@@ -89,20 +90,15 @@ const EditSessionButton: FC<{ session: ScheduledSessionWithId; }> = (props) => {
           <Edit className="h-3 w-3 md:h-4 md:w-4 group-hover:scale-110 group-hover:transition" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-[60%]">
-        <DialogHeader>
-          <DialogTitle>Edit Session</DialogTitle>
+      <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
+        <DialogHeader className="px-2">
+          <DialogTitle className="m-1">Edit Session</DialogTitle>
         </DialogHeader>
+        <Separator className="w-full" />
         <EditScheduledSession
-          onCancel={() => {
-            setIsDialogOpen(false);
-          }}
-          onDelete={() => {
-            setIsDialogOpen(false);
-          }}
-          onSave={() => {
-            setIsDialogOpen(false);
-          }}
+          onCancel={() => setIsDialogOpen(false)}
+          onDelete={() => setIsDialogOpen(false)}
+          onSave={() => setIsDialogOpen(false)}
           session={props.session}
         />
       </DialogContent>
