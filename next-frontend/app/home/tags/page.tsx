@@ -218,7 +218,7 @@ export default function TagsPage() {
   const mostUsedTag = stats?.most_used_tag;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="p-6 space-y-6 w-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
@@ -431,23 +431,28 @@ export default function TagsPage() {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem
+                          asChild
                           className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
                           onSelect={(e) => {
                             e.preventDefault();
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
-                          Delete Tag
+                          <div>
+                            <Trash2 className="h-4 w-4" />
+                            Delete Tag
+                          </div>
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Tag</AlertDialogTitle>
-                          <AlertDialogDescription className="space-y-0">
+                          <AlertDialogTitle>
                             <span>Are you sure you want to delete </span>
                             <TagBadge tag={tag} variant="auto" />
+                            ?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="space-y-0">
                             <span>
-                              ? This action cannot be undone and will remove the
+                              This action cannot be undone and will remove the
                               tag from all the
                             </span>
                             <span className="text-foreground">
