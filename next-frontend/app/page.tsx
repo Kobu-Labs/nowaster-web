@@ -23,35 +23,33 @@ export default async function LandingPage() {
       <SiteHeader />
       <div className="flex flex-col min-h-screen">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-linear-to-b from-background to-muted">
-          <div className="px-4 md:px-6">
-            <div className="grid gap-6  md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px]">
-              <div className="flex flex-col justify-center space-y-4 ">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Track Your Time, Boost Your Productivity
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Effortlessly track time, manage projects, and analyze
-                    productivity with our intuitive time tracking solution.
-                  </p>
-                </div>
+          <div className="px-4 md:px-6 grid gap-6 md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px] max-w-7xl mx-auto">
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  Track Your Time, Boost Your Productivity
+                </h1>
+                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  Effortlessly track time, manage projects, and analyze
+                  productivity with our intuitive time tracking solution.
+                </p>
+              </div>
 
-                <Link href="/home/">
-                  <Button variant="secondary">
-                    <p>Sign up now</p>
-                  </Button>
-                </Link>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
-              </div>
-              <div className="flex items-center justify-center">
-                <Image
-                  alt="Time tracking dashboard"
-                  height={990}
-                  priority
-                  src="/nowaster-landing-1-dark.jpg"
-                  width={1320}
-                />
-              </div>
+              <Link href="/home/">
+                <Button variant="secondary">
+                  <p>Sign up now</p>
+                </Button>
+              </Link>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
+            </div>
+            <div className="flex items-center justify-center">
+              <Image
+                alt="Time tracking dashboard"
+                height={990}
+                priority
+                src="/nowaster-landing-1-dark.jpg"
+                width={1320}
+              />
             </div>
           </div>
         </section>
