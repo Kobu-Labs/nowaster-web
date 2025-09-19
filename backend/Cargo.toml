@@ -12,7 +12,8 @@ tower = { version = "0.5.2", features = ["full"] }
 tower-http = { version = "0.6.2", features = ["cors", "trace"] }
 validator = { version = "0.20.0", features = ["derive"] }
 tracing = { version = "0.1.40", features = ["log"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "time"] }
+tracing-appender = "0.2"
 async-trait = "0.1.86"
 serde_json= { version = "1.0.139", features = ["raw_value"] }
 jsonwebtoken = "9.3.1"
