@@ -640,149 +640,179 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
-            r#"SELECT 
-                "#,
-        );
+        match group {
+            GroupingOption::User => self.group_sessions_by_user(dto, aggregate, actor).await,
+            GroupingOption::Tag => self.group_sessions_by_tag(dto, aggregate, actor).await,
+            GroupingOption::Category => {
+                self.group_sessions_by_category(dto, aggregate, actor).await
+            }
+            GroupingOption::Template => {
+                self.group_sessions_by_template(dto, aggregate, actor).await
+            }
+            GroupingOption::Date(date_grouping) => {
+                self.group_sessions_by_date(dto, aggregate, actor, date_grouping)
+                    .await
+            }
+        }
+    }
+}
 
-        let select = match aggregate {
-            AggregatingOptions::Count => {
-                r#"
-                COUNT(*) as count,
-            "#
-            }
-            AggregatingOptions::SumTime => {
-                r#"
-                SUM(end_time - start_time) AS total_duration,
-            "#
-            }
-        };
+impl FixedSessionRepository {
+    async fn group_sessions_by_user(
+        &self,
+        _dto: FilterSessionDto,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>> {
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
 
-        let grouped_by = match group {
-            GroupingOption::User => {
-                r#"
-                s.user_id
-            "#
-            }
-            GroupingOption::Tag => {
+        let select = self.get_aggregate_select(aggregate);
+
+        query
+            .push(select)
+            .push(r#"s.user_id FROM session s WHERE s.user_id = "#)
+            .push_bind(actor.user_id)
+            .push(" GROUP BY s.user_id");
+
+        let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
+        map_grouped_rows_to_results(rows, GroupingOption::User, aggregate)
+    }
+
+    async fn group_sessions_by_tag(
+        &self,
+        _dto: FilterSessionDto,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>> {
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+
+        let select = self.get_aggregate_select(aggregate);
+
+        query
+            .push(select)
+            .push(
                 r#"
                 t.id as tag_id,
                 t.label as tag_label,
                 t.color as tag_color,
                 t.last_used_at as "tag_last_used_at"
+            FROM session s
+            LEFT JOIN tag_to_session tts
+                on tts.session_id = s.id
+            LEFT JOIN tag t
+                on tts.tag_id = t.id
+            WHERE
+                s.user_id = "#,
+            )
+            .push_bind(actor.user_id)
+            .push(" GROUP BY t.id");
 
-            "#
-            }
-            GroupingOption::Category => {
+        let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
+        map_grouped_rows_to_results(rows, GroupingOption::Tag, aggregate)
+    }
+
+    async fn group_sessions_by_category(
+        &self,
+        _dto: FilterSessionDto,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>> {
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+
+        let select = self.get_aggregate_select(aggregate);
+
+        query
+            .push(select)
+            .push(
                 r#"
                 c.id as category_id,
                 c.name as category,
                 c.color as category_color,
                 c.last_used_at as "category_last_used_at"
-            "#
-            }
-            GroupingOption::Template => {
+            FROM session s
+            JOIN category c
+                on c.id = s.category_id
+            WHERE
+                s.user_id = "#,
+            )
+            .push_bind(actor.user_id)
+            .push(" GROUP BY c.id");
+
+        let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
+        map_grouped_rows_to_results(rows, GroupingOption::Category, aggregate)
+    }
+
+    async fn group_sessions_by_template(
+        &self,
+        _dto: FilterSessionDto,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>> {
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+
+        let select = self.get_aggregate_select(aggregate);
+
+        query
+            .push(select)
+            .push(
                 r#"
                 st.id as template_id,
                 st.name as template_name,
                 st.start_date as "template_start_date",
                 st.end_date as "template_end_date",
                 st.interval AS "template_interval"
-            "#
-            }
-            GroupingOption::Date(date_grouping) => match date_grouping {
-                DateGrouping::Year => {
-                    r#"
-                        DATE_TRUNC("year", s.end_time) grouped_date
-                    "#
-                }
-                DateGrouping::Month => {
-                    r#"
-                        DATE_TRUNC("month", s.end_time) grouped_date
-                    "#
-                }
-                DateGrouping::Week => {
-                    r#"
-                        DATE_TRUNC("week", s.end_time) grouped_date
-                    "#
-                }
-                DateGrouping::Day => {
-                    r#"
-                        DATE_TRUNC("day", s.end_time) grouped_date
-                    "#
-                }
-            },
-        };
-
-        let joins = match group.clone() {
-            GroupingOption::User => "",
-            GroupingOption::Tag => {
-                r#"
-            LEFT JOIN tag_to_session tts
-                on tts.session_id = s.id
-            LEFT JOIN tag t
-                on tts.tag_id = t.id
-            "#
-            }
-            GroupingOption::Category => {
-                r#"
-
-            JOIN category c
-                on c.id = s.category_id
-            "#
-            }
-            GroupingOption::Template => {
-                r#"
+            FROM session s
             LEFT JOIN session_template st
                 on st.id = s.template_id
-            "#
-            }
-            GroupingOption::Date(date_grouping) => "",
-        };
-        query
-            .push(select)
-            .push(grouped_by)
-            .push(
-                r#"
-            FROM session s
-            "#,
-            )
-            .push(joins)
-            .push(
-                r#"
-            WHERE 
-                s.user_id = 
-        "#,
+            WHERE
+                s.user_id = "#,
             )
             .push_bind(actor.user_id)
-            .push(" GROUP BY ");
+            .push(" GROUP BY st.id");
 
-        // FILTERS HERE
-        let actual_group_by = match group.clone() {
-            GroupingOption::User => "s.user_id",
-            GroupingOption::Tag => {
-                r#"
-                t.id 
-            "#
-            }
-            GroupingOption::Category => {
-                r#"
-                c.id
-            "#
-            }
-            GroupingOption::Template => {
-                r#"
-                st.id
-            "#
-            }
-            GroupingOption::Date(_) => " grouped_date ",
-        };
-        query.push(actual_group_by);
         let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
+        map_grouped_rows_to_results(rows, GroupingOption::Template, aggregate)
+    }
 
-        let grouped_results = map_grouped_rows_to_results(rows, group, aggregate)?;
+    async fn group_sessions_by_date(
+        &self,
+        _dto: FilterSessionDto,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+        date_grouping: DateGrouping,
+    ) -> Result<Vec<GroupedResult>> {
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
 
-        Ok(grouped_results)
+        let select = self.get_aggregate_select(aggregate);
+        let date_expr = self.get_date_truncate_expression(date_grouping);
+
+        query
+            .push(select)
+            .push(date_expr)
+            .push(r#" FROM session s WHERE s.user_id = "#)
+            .push_bind(actor.user_id)
+            .push(" GROUP BY grouped_date");
+
+        let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
+        map_grouped_rows_to_results(rows, GroupingOption::Date(date_grouping), aggregate)
+    }
+
+    fn get_aggregate_select(&self, aggregate: AggregatingOptions) -> &'static str {
+        match aggregate {
+            AggregatingOptions::Count => "COUNT(*) as count,",
+            AggregatingOptions::SumTime => {
+                "CAST(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60 AS FLOAT8) AS total_minutes,"
+            }
+        }
+    }
+
+    fn get_date_truncate_expression(&self, date_grouping: DateGrouping) -> &'static str {
+        match date_grouping {
+            DateGrouping::Year => r#"DATE_TRUNC("year", s.end_time) grouped_date"#,
+            DateGrouping::Month => r#"DATE_TRUNC("month", s.end_time) grouped_date"#,
+            DateGrouping::Week => r#"DATE_TRUNC("week", s.end_time) grouped_date"#,
+            DateGrouping::Day => r#"DATE_TRUNC("day", s.end_time) grouped_date"#,
+        }
     }
 }
 
@@ -812,7 +842,7 @@ pub enum AggregatingOptions {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AggregateValue {
     Count(i64),
-    Duration(chrono::Duration),
+    Duration(f64),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -881,12 +911,8 @@ pub fn map_grouped_rows_to_results(
             }
             AggregatingOptions::SumTime => {
                 // PostgreSQL returns INTERVAL as a custom type, let's use a generic approach
-                let interval: sqlx::postgres::types::PgInterval = row.try_get("total_duration")?;
-                let total_microseconds = interval.microseconds
-                    + interval.days as i64 * 24 * 60 * 60 * 1_000_000
-                    + interval.months as i64 * 30 * 24 * 60 * 60 * 1_000_000;
-                let chrono_duration = chrono::Duration::microseconds(total_microseconds);
-                AggregateValue::Duration(chrono_duration)
+                let interval: f64 = row.try_get("total_minutes")?;
+                AggregateValue::Duration(interval)
             }
         };
 

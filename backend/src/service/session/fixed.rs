@@ -15,7 +15,7 @@ use crate::{
     },
     entity::feed::{FeedEventSource, FeedEventType, SessionEventData},
     repository::{
-        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+        fixed_session::{FixedSessionRepository, SessionRepositoryTrait, GroupedResult, GroupingOption, AggregatingOptions},
         stopwatch_session::StopwatchSessionRepository,
     },
     router::clerk::Actor,
@@ -156,5 +156,16 @@ impl FixedSessionService {
         let res = self.fixed_repo.update_session(dto, actor).await?;
 
         Ok(ReadFixedSessionDto::from(res))
+    }
+
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn group_sessions(
+        &self,
+        dto: FilterSessionDto,
+        group: GroupingOption,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>> {
+        self.fixed_repo.group_sessions(dto, group, aggregate, actor).await
     }
 }

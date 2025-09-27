@@ -9,11 +9,13 @@ use crate::dto::session::filter_session::FilterSessionDto;
 use crate::dto::session::fixed_session::{
     CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto,
 };
+use crate::dto::session::grouped_session::GroupSessionsDto;
 use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
 use crate::service::session::fixed::ActiveSession;
+use crate::repository::fixed_session::GroupedResult;
 
 pub fn fixed_session_router() -> Router<AppState> {
     Router::new()
@@ -21,6 +23,7 @@ pub fn fixed_session_router() -> Router<AppState> {
         .route("/", post(create_handler).patch(update_handler))
         .route("/{session_id}", delete(delete_handler))
         .route("/filter", post(filter_handler))
+        .route("/group", post(group_handler))
 }
 
 #[instrument( skip(state), fields(user_id = %actor))]
@@ -80,6 +83,19 @@ async fn update_handler(
     let res = state
         .session_service
         .update_fixed_session(payload, actor)
+        .await;
+    ApiResponse::from_result(res)
+}
+
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn group_handler(
+    State(state): State<AppState>,
+    actor: Actor,
+    ValidatedRequest(payload): ValidatedRequest<GroupSessionsDto>,
+) -> ApiResponse<Vec<GroupedResult>> {
+    let res = state
+        .session_service
+        .group_sessions(payload.filter, payload.grouping, payload.aggregating, actor)
         .await;
     ApiResponse::from_result(res)
 }
