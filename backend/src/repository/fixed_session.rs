@@ -29,6 +29,13 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
+    async fn group_sessions(
+        &self,
+        dto: FilterSessionDto,
+        group: GroupingOption,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>>;
     async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()>;
     async fn update_session(
         &self,
@@ -328,27 +335,27 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             WHERE 
                 s.user_id = "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(actor.clone().user_id);
 
-        if let Some(from_endtime) = dto.from_end_time {
+        if let Some(from_endtime) = dto.clone().from_end_time {
             query
                 .push(" and s.end_time >= ")
                 .push_bind(from_endtime.value);
         }
 
-        if let Some(to_endtime) = dto.to_end_time {
+        if let Some(to_endtime) = dto.clone().to_end_time {
             query
                 .push(" and s.end_time <= ")
                 .push_bind(to_endtime.value);
         }
 
-        if let Some(from_starttime) = dto.from_start_time {
+        if let Some(from_starttime) = dto.clone().from_start_time {
             query
                 .push(" and s.start_time >= ")
                 .push_bind(from_starttime.value);
         }
 
-        if let Some(to_starttime) = dto.to_start_time {
+        if let Some(to_starttime) = dto.clone().to_start_time {
             query
                 .push(" and s.start_time <= ")
                 .push_bind(to_starttime.value);
@@ -360,8 +367,17 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             .build_query_as::<GenericFullRowSession>()
             .fetch_all(self.db_conn.get_pool())
             .await?;
+        let newDto = dto.clone();
 
         let mut sessions = self.convert(rows)?;
+        let _grouped_results = self
+            .group_sessions(
+                newDto,
+                GroupingOption::User,
+                AggregatingOptions::Count,
+                actor.clone(),
+            )
+            .await?;
 
         // TODO: these filterings should be done on database level
         if let Some(tag_filter) = dto.tags {
@@ -616,4 +632,324 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             None => Ok(None),
         }
     }
+
+    async fn group_sessions(
+        &self,
+        dto: FilterSessionDto,
+        group: GroupingOption,
+        aggregate: AggregatingOptions,
+        actor: Actor,
+    ) -> Result<Vec<GroupedResult>> {
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"SELECT 
+                "#,
+        );
+
+        let select = match aggregate {
+            AggregatingOptions::Count => {
+                r#"
+                COUNT(*) as count,
+            "#
+            }
+            AggregatingOptions::SumTime => {
+                r#"
+                SUM(end_time - start_time) AS total_duration,
+            "#
+            }
+        };
+
+        let grouped_by = match group {
+            GroupingOption::User => {
+                r#"
+                s.user_id
+            "#
+            }
+            GroupingOption::Tag => {
+                r#"
+                t.id as tag_id,
+                t.label as tag_label,
+                t.color as tag_color,
+                t.last_used_at as "tag_last_used_at"
+
+            "#
+            }
+            GroupingOption::Category => {
+                r#"
+                c.id as category_id,
+                c.name as category,
+                c.color as category_color,
+                c.last_used_at as "category_last_used_at"
+            "#
+            }
+            GroupingOption::Template => {
+                r#"
+                st.id as template_id,
+                st.name as template_name,
+                st.start_date as "template_start_date",
+                st.end_date as "template_end_date",
+                st.interval AS "template_interval"
+            "#
+            }
+            GroupingOption::Date(date_grouping) => match date_grouping {
+                DateGrouping::Year => {
+                    r#"
+                        DATE_TRUNC("year", s.end_time) grouped_date
+                    "#
+                }
+                DateGrouping::Month => {
+                    r#"
+                        DATE_TRUNC("month", s.end_time) grouped_date
+                    "#
+                }
+                DateGrouping::Week => {
+                    r#"
+                        DATE_TRUNC("week", s.end_time) grouped_date
+                    "#
+                }
+                DateGrouping::Day => {
+                    r#"
+                        DATE_TRUNC("day", s.end_time) grouped_date
+                    "#
+                }
+            },
+        };
+
+        let joins = match group.clone() {
+            GroupingOption::User => "",
+            GroupingOption::Tag => {
+                r#"
+            LEFT JOIN tag_to_session tts
+                on tts.session_id = s.id
+            LEFT JOIN tag t
+                on tts.tag_id = t.id
+            "#
+            }
+            GroupingOption::Category => {
+                r#"
+
+            JOIN category c
+                on c.id = s.category_id
+            "#
+            }
+            GroupingOption::Template => {
+                r#"
+            LEFT JOIN session_template st
+                on st.id = s.template_id
+            "#
+            }
+            GroupingOption::Date(date_grouping) => "",
+        };
+        query
+            .push(select)
+            .push(grouped_by)
+            .push(
+                r#"
+            FROM session s
+            "#,
+            )
+            .push(joins)
+            .push(
+                r#"
+            WHERE 
+                s.user_id = 
+        "#,
+            )
+            .push_bind(actor.user_id)
+            .push(" GROUP BY ");
+
+        // FILTERS HERE
+        let actual_group_by = match group.clone() {
+            GroupingOption::User => "s.user_id",
+            GroupingOption::Tag => {
+                r#"
+                t.id 
+            "#
+            }
+            GroupingOption::Category => {
+                r#"
+                c.id
+            "#
+            }
+            GroupingOption::Template => {
+                r#"
+                st.id
+            "#
+            }
+            GroupingOption::Date(_) => " grouped_date ",
+        };
+        query.push(actual_group_by);
+        let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
+
+        let grouped_results = map_grouped_rows_to_results(rows, group, aggregate)?;
+
+        Ok(grouped_results)
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum DateGrouping {
+    Year,
+    Month,
+    Week,
+    Day,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum GroupingOption {
+    User,
+    Tag,
+    Category,
+    Template,
+    Date(DateGrouping),
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum AggregatingOptions {
+    Count,
+    SumTime,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum AggregateValue {
+    Count(i64),
+    Duration(chrono::Duration),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UserGroupedResult {
+    pub user_id: String,
+    pub aggregate: AggregateValue,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TagGroupedResult {
+    pub tag_id: Option<Uuid>,
+    pub tag_label: Option<String>,
+    pub tag_color: Option<String>,
+    pub tag_last_used_at: Option<DateTime<Utc>>,
+    pub aggregate: AggregateValue,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CategoryGroupedResult {
+    pub category_id: Uuid,
+    pub category: String,
+    pub category_color: String,
+    pub category_last_used_at: DateTime<Utc>,
+    pub aggregate: AggregateValue,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TemplateGroupedResult {
+    pub template_id: Option<Uuid>,
+    pub template_name: Option<String>,
+    pub template_start_date: Option<DateTime<Utc>>,
+    pub template_end_date: Option<DateTime<Utc>>,
+    pub template_interval: Option<RecurringSessionInterval>,
+    pub aggregate: AggregateValue,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DateGroupedResult {
+    pub grouped_date: DateTime<Utc>,
+    pub aggregate: AggregateValue,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum GroupedResult {
+    User(UserGroupedResult),
+    Tag(TagGroupedResult),
+    Category(CategoryGroupedResult),
+    Template(TemplateGroupedResult),
+    Date(DateGroupedResult),
+}
+
+pub fn map_grouped_rows_to_results(
+    rows: Vec<sqlx::postgres::PgRow>,
+    grouping: GroupingOption,
+    aggregating: AggregatingOptions,
+) -> Result<Vec<GroupedResult>> {
+    use sqlx::Row;
+
+    let mut results = Vec::new();
+
+    for row in rows {
+        let aggregate = match aggregating {
+            AggregatingOptions::Count => {
+                let count: i64 = row.try_get("count")?;
+                AggregateValue::Count(count)
+            }
+            AggregatingOptions::SumTime => {
+                // PostgreSQL returns INTERVAL as a custom type, let's use a generic approach
+                let interval: sqlx::postgres::types::PgInterval = row.try_get("total_duration")?;
+                let total_microseconds = interval.microseconds
+                    + interval.days as i64 * 24 * 60 * 60 * 1_000_000
+                    + interval.months as i64 * 30 * 24 * 60 * 60 * 1_000_000;
+                let chrono_duration = chrono::Duration::microseconds(total_microseconds);
+                AggregateValue::Duration(chrono_duration)
+            }
+        };
+
+        let grouped_result = match grouping {
+            GroupingOption::User => {
+                let user_id: String = row.try_get("user_id")?;
+                GroupedResult::User(UserGroupedResult { user_id, aggregate })
+            }
+            GroupingOption::Tag => {
+                let tag_id: Option<Uuid> = row.try_get("tag_id").ok();
+                let tag_label: Option<String> = row.try_get("tag_label").ok();
+                let tag_color: Option<String> = row.try_get("tag_color").ok();
+                let tag_last_used_at: Option<DateTime<Utc>> = row.try_get("tag_last_used_at").ok();
+                GroupedResult::Tag(TagGroupedResult {
+                    tag_id,
+                    tag_label,
+                    tag_color,
+                    tag_last_used_at,
+                    aggregate,
+                })
+            }
+            GroupingOption::Category => {
+                let category_id: Uuid = row.try_get("category_id")?;
+                let category: String = row.try_get("category")?;
+                let category_color: String = row.try_get("category_color")?;
+                let category_last_used_at: DateTime<Utc> = row.try_get("category_last_used_at")?;
+                GroupedResult::Category(CategoryGroupedResult {
+                    category_id,
+                    category,
+                    category_color,
+                    category_last_used_at,
+                    aggregate,
+                })
+            }
+            GroupingOption::Template => {
+                let template_id: Option<Uuid> = row.try_get("template_id").ok();
+                let template_name: Option<String> = row.try_get("template_name").ok();
+                let template_start_date: Option<DateTime<Utc>> =
+                    row.try_get("template_start_date").ok();
+                let template_end_date: Option<DateTime<Utc>> =
+                    row.try_get("template_end_date").ok();
+                let template_interval: Option<RecurringSessionInterval> =
+                    row.try_get("template_interval").ok();
+                GroupedResult::Template(TemplateGroupedResult {
+                    template_id,
+                    template_name,
+                    template_start_date,
+                    template_end_date,
+                    template_interval,
+                    aggregate,
+                })
+            }
+            GroupingOption::Date(_) => {
+                let grouped_date: DateTime<Utc> = row.try_get("grouped_date")?;
+                GroupedResult::Date(DateGroupedResult {
+                    grouped_date,
+                    aggregate,
+                })
+            }
+        };
+
+        results.push(grouped_result);
+    }
+
+    Ok(results)
 }
