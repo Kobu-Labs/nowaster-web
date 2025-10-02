@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     dto::session::{
-        filter_session::{DateFilter, FilterSessionDto},
+        filter::{DateFilter, FilterSession, IdFilter, TemplateFilter, TemplateFilterFilter},
         fixed_session::CreateFixedSessionDto,
         template::{CreateSessionTemplateDto, UpdateSessionTemplateDto},
     },
@@ -105,26 +105,25 @@ impl SessionTemplateService {
         match action {
             ExistingSessionsAction::KeepAll => {}
             ExistingSessionsAction::DeleteAll => {
-                println!("Delete all");
                 self.session_repo
                     .delete_sessions_by_filter(
-                        FilterSessionDto {
-                            template_id: Some(id),
-                            ..Default::default()
-                        },
+                        FilterSession::default().template(TemplateFilter::Filter(
+                            TemplateFilterFilter {
+                                id: Some(IdFilter::One(id)),
+                            },
+                        )),
                         actor.clone(),
                     )
                     .await?;
             }
             ExistingSessionsAction::DeleteFuture => {
-                println!("Delete future");
                 self.session_repo
                     .delete_sessions_by_filter(
-                        FilterSessionDto {
-                            template_id: Some(id),
-                            from_start_time: Some(DateFilter { value: Utc::now() }),
-                            ..Default::default()
-                        },
+                        FilterSession::default()
+                            .template(TemplateFilter::Filter(TemplateFilterFilter {
+                                id: Some(IdFilter::One(id)),
+                            }))
+                            .start_time(DateFilter::GreaterThan(Utc::now())),
                         actor.clone(),
                     )
                     .await?;

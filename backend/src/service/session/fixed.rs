@@ -8,14 +8,15 @@ use crate::{
     dto::{
         feed::CreateFeedEventDto,
         session::{
-            filter_session::{DateFilter, FilterSessionDto},
+            filter::{DateFilter, IdFilter, ManyIdFilter, FilterSession},
             fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
+            grouped_session::{AggregatingOptions, GroupedResult, GroupingOption},
             stopwatch_session::ReadStopwatchSessionDto,
         },
     },
     entity::feed::{FeedEventSource, FeedEventType, SessionEventData},
     repository::{
-        fixed_session::{FixedSessionRepository, SessionRepositoryTrait, GroupedResult, GroupingOption, AggregatingOptions},
+        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,
     },
     router::clerk::Actor,
@@ -86,7 +87,7 @@ impl FixedSessionService {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn filter_fixed_sessions(
         &self,
-        dto: FilterSessionDto,
+        dto: FilterSession,
         actor: Actor,
     ) -> Result<Vec<ReadFixedSessionDto>> {
         let res = self.fixed_repo.filter_sessions(dto, actor).await?;
@@ -139,16 +140,9 @@ impl FixedSessionService {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn get_active_sessions(&self, actor: Actor) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
-        let active_session_filter: FilterSessionDto = FilterSessionDto {
-            from_end_time: Some(DateFilter {
-                value: DateTime::from(now),
-            }),
-
-            to_start_time: Some(DateFilter {
-                value: DateTime::from(now),
-            }),
-            ..Default::default()
-        };
+        let active_session_filter = FilterSession::default()
+            .start_time(DateFilter::LessThanEqual(DateTime::from(now)))
+            .end_time(DateFilter::GreaterThanEqual(DateTime::from(now)));
 
         let fixed_sessions = self
             .fixed_repo
@@ -185,11 +179,13 @@ impl FixedSessionService {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn group_sessions(
         &self,
-        dto: FilterSessionDto,
+        filter: FilterSession,
         group: GroupingOption,
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
-        self.fixed_repo.group_sessions(dto, group, aggregate, actor).await
+        self.fixed_repo
+            .group_sessions(filter, group, aggregate, actor)
+            .await
     }
 }
