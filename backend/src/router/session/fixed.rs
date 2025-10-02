@@ -5,17 +5,16 @@ use thiserror::Error;
 use tracing::instrument;
 use uuid::Uuid;
 
-use crate::dto::session::filter_session::FilterSessionDto;
+use crate::dto::session::filter::FilterSession;
 use crate::dto::session::fixed_session::{
     CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto,
 };
-use crate::dto::session::grouped_session::GroupSessionsDto;
+use crate::dto::session::grouped_session::{GroupSessionsDto, GroupedResult};
 use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
 use crate::service::session::fixed::ActiveSession;
-use crate::repository::fixed_session::GroupedResult;
 
 pub fn fixed_session_router() -> Router<AppState> {
     Router::new()
@@ -65,7 +64,7 @@ async fn delete_handler(
 async fn filter_handler(
     State(state): State<AppState>,
     actor: Actor,
-    ValidatedRequest(payload): ValidatedRequest<FilterSessionDto>,
+    ValidatedRequest(payload): ValidatedRequest<FilterSession>,
 ) -> ApiResponse<Vec<ReadFixedSessionDto>> {
     let res = state
         .session_service

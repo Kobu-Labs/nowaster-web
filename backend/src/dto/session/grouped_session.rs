@@ -4,7 +4,7 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    dto::session::new_filters::NewFilter, entity::session_template::RecurringSessionInterval,
+    dto::session::filter::FilterSession, entity::session_template::RecurringSessionInterval,
 };
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -38,7 +38,7 @@ pub enum AggregateValue {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct GroupSessionsDto {
-    pub filter: NewFilter,
+    pub filter: FilterSession,
     pub grouping: GroupingOption,
     pub aggregating: AggregatingOptions,
 }
