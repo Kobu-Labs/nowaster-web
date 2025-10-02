@@ -100,11 +100,35 @@ impl FixedSessionService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn delete_sessions_by_filter(
-        &self,
-        dto: FilterSessionDto,
-        actor: Actor,
-    ) -> Result<u64> {
+    pub async fn delete_sessions_by_filter(&self, dto: FilterSession, actor: Actor) -> Result<u64> {
+        // Validate that user can only delete their own sessions
+        if let Some(user_filter) = &dto.user_filter {
+            if let Some(id_filter) = &user_filter.id {
+                match id_filter {
+                    IdFilter::One(id) => {
+                        if id != &actor.user_id {
+                            return Err(anyhow::anyhow!(
+                                "Cannot delete sessions for other users. You can only delete your own sessions."
+                            ));
+                        }
+                    }
+                    IdFilter::Many(many) => {
+                        let user_ids = match many {
+                            ManyIdFilter::All(ids) => ids,
+                            ManyIdFilter::Any(ids) => ids,
+                        };
+
+                        // Check if all IDs are the actor's ID
+                        if user_ids.len() != 1 || user_ids.first() != Some(&actor.user_id) {
+                            return Err(anyhow::anyhow!(
+                                "Cannot delete sessions for other users. You can only delete your own sessions."
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
         let affected_rows = self
             .fixed_repo
             .delete_sessions_by_filter(dto, actor)
