@@ -272,18 +272,21 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         .await?;
 
         // INFO: pair tags with created session
-        for tag_id in dto.tag_ids {
-            // TODO: this should be done with either UNNEST or bulk insert
-            sqlx::query!(
-                r#"
-                    INSERT INTO tag_to_session (tag_id, session_id)
-                    VALUES ($1, $2)
-                "#,
-                tag_id,
-                result.id
-            )
-            .execute(self.db_conn.get_pool())
-            .await?;
+        let mut tag_query_builder: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+                INSERT INTO tag_to_session (session_id, tag_id)
+            "#,
+        );
+
+        if !dto.tag_ids.is_empty() {
+            tag_query_builder.push_values(dto.tag_ids, |mut b, tag_tuple| {
+                b.push_bind(result.id).push_bind(tag_tuple);
+            });
+
+            tag_query_builder
+                .build()
+                .execute(self.db_conn.get_pool())
+                .await?;
         }
 
         let session = self.find_by_id(result.id, actor.clone()).await?;
