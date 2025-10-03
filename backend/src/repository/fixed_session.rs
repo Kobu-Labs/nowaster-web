@@ -204,26 +204,38 @@ impl FixedSessionRepository {
 
         query_builder.build().execute(tx.as_mut()).await?;
 
+        let tag_ids: Vec<(Uuid, Uuid)> = sessions
+            .into_iter()
+            .flat_map(|ts| ts.tag_ids.into_iter().map(move |tag_id| (ts.id, tag_id)))
+            .collect();
+
+        self.pair_tags_to_session(tag_ids).await?;
+
+        tx.commit().await?;
+        Ok(())
+    }
+
+    async fn pair_tags_to_session(&self, tag_session_ids: Vec<(Uuid, Uuid)>) -> Result<()> {
+        if tag_session_ids.is_empty() {
+            return Ok(());
+        }
+
+        // INFO: pair tags with created session
         let mut tag_query_builder: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 INSERT INTO tag_to_session (session_id, tag_id)
             "#,
         );
 
-        let tag_ids: Vec<(Uuid, Uuid)> = sessions
-            .into_iter()
-            .flat_map(|ts| ts.tag_ids.into_iter().map(move |tag_id| (ts.id, tag_id)))
-            .collect();
+        tag_query_builder.push_values(tag_session_ids, |mut b, tag_tuple| {
+            b.push_bind(tag_tuple.0).push_bind(tag_tuple.1);
+        });
 
-        if !tag_ids.is_empty() {
-            tag_query_builder.push_values(tag_ids, |mut b, tag_tuple| {
-                b.push_bind(tag_tuple.0).push_bind(tag_tuple.1);
-            });
+        tag_query_builder
+            .build()
+            .execute(self.db_conn.get_pool())
+            .await?;
 
-            tag_query_builder.build().execute(tx.as_mut()).await?;
-        }
-
-        tx.commit().await?;
         Ok(())
     }
 
@@ -246,23 +258,13 @@ impl FixedSessionRepository {
         .fetch_one(self.db_conn.get_pool())
         .await?;
 
-        // INFO: pair tags with created session
-        let mut tag_query_builder: QueryBuilder<'_, Postgres> = QueryBuilder::new(
-            r#"
-                INSERT INTO tag_to_session (session_id, tag_id)
-            "#,
-        );
+        let tag_to_session = dto
+            .tag_ids
+            .into_iter()
+            .map(move |tag_id| (result.id, tag_id))
+            .collect();
 
-        if !dto.tag_ids.is_empty() {
-            tag_query_builder.push_values(dto.tag_ids, |mut b, tag_tuple| {
-                b.push_bind(result.id).push_bind(tag_tuple);
-            });
-
-            tag_query_builder
-                .build()
-                .execute(self.db_conn.get_pool())
-                .await?;
-        }
+        self.pair_tags_to_session(tag_to_session).await?;
 
         let session = self.find_by_id(result.id, actor.clone()).await?;
         match session {
@@ -272,7 +274,11 @@ impl FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    pub async fn filter_sessions(&self, dto: FilterSession, actor: Actor) -> Result<Vec<FixedSession>> {
+    pub async fn filter_sessions(
+        &self,
+        dto: FilterSession,
+        actor: Actor,
+    ) -> Result<Vec<FixedSession>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT 
                 s.id,
@@ -338,7 +344,11 @@ impl FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    pub async fn delete_sessions_by_filter(&self, filter: FilterSession, actor: Actor) -> Result<u64> {
+    pub async fn delete_sessions_by_filter(
+        &self,
+        filter: FilterSession,
+        actor: Actor,
+    ) -> Result<u64> {
         if filter.is_empty() {
             return Err(anyhow!(
                 "No filters were specified - aborting session deletion"
