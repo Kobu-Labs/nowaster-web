@@ -7,15 +7,21 @@ use std::{sync::Arc, vec};
 use tracing::instrument;
 use uuid::Uuid;
 
+use crate::dto::session::{
+    filter::{
+        DateFilter, DurationFilter, FilterSession, IdFilter, ManyIdFilter, TagFilter,
+        TemplateFilter,
+    },
+    fixed_session::{CreateFixedSessionDto, CreateFixedSessionDtoWithId, UpdateFixedSessionDto},
+    grouped_session::{
+        AggregateValue, AggregatingOptions, CategoryGroupedResult, DateGroupedResult, DateGrouping,
+        GroupedResult, GroupingOption, TagGroupedResult, TemplateGroupedResult, UserGroupedResult,
+    },
+    template::ReadTemplateShallowDto,
+};
+
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::session::{
-        filter_session::{FilterSessionDto, Mode},
-        fixed_session::{
-            CreateFixedSessionDto, CreateFixedSessionDtoWithId, UpdateFixedSessionDto,
-        },
-        template::ReadTemplateShallowDto,
-    },
     entity::{
         category::Category, session::FixedSession, session_template::RecurringSessionInterval,
         tag::Tag,
@@ -26,35 +32,6 @@ use crate::{
 #[derive(Clone)]
 pub struct FixedSessionRepository {
     db_conn: Arc<Database>,
-}
-
-pub trait SessionRepositoryTrait {
-    async fn group_sessions(
-        &self,
-        dto: FilterSessionDto,
-        group: GroupingOption,
-        aggregate: AggregatingOptions,
-        actor: Actor,
-    ) -> Result<Vec<GroupedResult>>;
-    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()>;
-    async fn update_session(
-        &self,
-        dto: UpdateFixedSessionDto,
-        actor: Actor,
-    ) -> Result<Self::SessionType>;
-    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64>;
-    async fn filter_sessions(
-        &self,
-        dto: FilterSessionDto,
-        actor: Actor,
-    ) -> Result<Vec<Self::SessionType>>;
-    type SessionType;
-    fn new(db_conn: &Arc<Database>) -> Self;
-    fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>>;
-    async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>>;
-    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession>;
 }
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
@@ -83,16 +60,14 @@ pub struct GenericFullRowSession {
     template_interval: Option<RecurringSessionInterval>,
 }
 
-impl SessionRepositoryTrait for FixedSessionRepository {
-    type SessionType = FixedSession;
-
-    fn new(db_conn: &Arc<Database>) -> Self {
+impl FixedSessionRepository {
+    pub fn new(db_conn: &Arc<Database>) -> Self {
         Self {
             db_conn: Arc::clone(db_conn),
         }
     }
 
-    fn convert(&self, sessions: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>> {
+    fn convert(&self, sessions: Vec<GenericFullRowSession>) -> Result<Vec<FixedSession>> {
         let mut grouped_tags: IndexMap<Uuid, FixedSession> = IndexMap::new();
         for session in sessions {
             if session.session_type != "fixed" {
@@ -152,7 +127,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>> {
+    pub async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<FixedSession>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
             r#"SELECT 
@@ -205,7 +180,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, session_count = dtos.len()))]
-    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()> {
+    pub async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()> {
         let sessions: Vec<CreateFixedSessionDtoWithId> =
             dtos.iter().cloned().map(Into::into).collect();
 
@@ -253,7 +228,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = %dto.category_id))]
-    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
+    pub async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
                 INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id)
@@ -297,11 +272,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    async fn filter_sessions(
-        &self,
-        dto: FilterSessionDto,
-        actor: Actor,
-    ) -> Result<Vec<Self::SessionType>> {
+    pub async fn filter_sessions(&self, dto: FilterSession, actor: Actor) -> Result<Vec<FixedSession>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT 
                 s.id,
@@ -339,132 +310,19 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.user_id = "#,
         );
         query.push_bind(actor.clone().user_id);
-
-        if let Some(from_endtime) = dto.clone().from_end_time {
-            query
-                .push(" and s.end_time >= ")
-                .push_bind(from_endtime.value);
-        }
-
-        if let Some(to_endtime) = dto.clone().to_end_time {
-            query
-                .push(" and s.end_time <= ")
-                .push_bind(to_endtime.value);
-        }
-
-        if let Some(from_starttime) = dto.clone().from_start_time {
-            query
-                .push(" and s.start_time >= ")
-                .push_bind(from_starttime.value);
-        }
-
-        if let Some(to_starttime) = dto.clone().to_start_time {
-            query
-                .push(" and s.start_time <= ")
-                .push_bind(to_starttime.value);
-        }
-
-        query.push(" ORDER BY s.start_time DESC");
+        self.build_new_filter_query(&dto, &mut query);
 
         let rows = query
             .build_query_as::<GenericFullRowSession>()
             .fetch_all(self.db_conn.get_pool())
             .await?;
-        let newDto = dto.clone();
-
         let mut sessions = self.convert(rows)?;
-        let _grouped_results = self
-            .group_sessions(
-                newDto,
-                GroupingOption::User,
-                AggregatingOptions::Count,
-                actor.clone(),
-            )
-            .await?;
 
-        // TODO: these filterings should be done on database level
-        if let Some(tag_filter) = dto.tags {
-            if let Some(label_filter) = tag_filter.label {
-                match label_filter.mode {
-                    Mode::All => {
-                        sessions.retain(|session| {
-                            label_filter
-                                .value
-                                .iter()
-                                .all(|val| session.tags.iter().any(|t| t.label.eq(val)))
-                        });
-                    }
-                    Mode::Some => {
-                        sessions.retain(|session| {
-                            !session.tags.is_empty()
-                                && label_filter.value.iter().any(|name| {
-                                    session.tags.iter().any(|tag| tag.label.contains(name))
-                                })
-                        });
-                    }
-                }
-            }
-
-            if let Some(id_filter) = tag_filter.id {
-                match id_filter.mode {
-                    Mode::All => {
-                        sessions.retain(|session| {
-                            id_filter
-                                .value
-                                .iter()
-                                .all(|val| session.tags.iter().any(|t| t.id.eq(val)))
-                        });
-                    }
-                    Mode::Some => {
-                        sessions.retain(|session| {
-                            !session.tags.is_empty()
-                                && id_filter
-                                    .value
-                                    .iter()
-                                    .any(|id| session.tags.iter().any(|tag| tag.id.eq(id)))
-                        });
-                    }
-                }
-            }
-        }
-
-        if let Some(category_filter) = dto.categories {
-            if let Some(name_filter) = category_filter.name {
-                match name_filter.mode {
-                    Mode::All => {
-                        sessions
-                            .retain(|session| name_filter.value.contains(&session.category.name));
-                    }
-                    Mode::Some => {
-                        sessions.retain(|session| {
-                            name_filter
-                                .value
-                                .iter()
-                                .any(|name| session.category.name.contains(name))
-                        });
-                    }
-                }
-
-                if let Some(id_filter) = category_filter.id {
-                    match id_filter.mode {
-                        Mode::All => {
-                            sessions
-                                .retain(|session| id_filter.value.contains(&session.category.id));
-                        }
-                        Mode::Some => {
-                            sessions.retain(|session| {
-                                id_filter.value.iter().any(|id| session.category.id.eq(id))
-                            });
-                        }
-                    }
-                }
-            }
-        }
         Ok(sessions)
     }
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
-    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM session
@@ -480,48 +338,20 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64> {
-        if dto.is_empty() {
+    pub async fn delete_sessions_by_filter(&self, filter: FilterSession, actor: Actor) -> Result<u64> {
+        if filter.is_empty() {
             return Err(anyhow!(
                 "No filters were specified - aborting session deletion"
             ));
         }
-        println!("Tags: {:?}", dto);
 
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"DELETE FROM session s
             WHERE s.user_id = "#,
         );
         query.push_bind(actor.user_id);
-        query.push(" AND s.type = 'fixed'");
 
-        if let Some(from_endtime) = dto.from_end_time {
-            query
-                .push(" AND s.end_time >= ")
-                .push_bind(from_endtime.value);
-        }
-
-        if let Some(to_endtime) = dto.to_end_time {
-            query
-                .push(" AND s.end_time <= ")
-                .push_bind(to_endtime.value);
-        }
-
-        if let Some(from_starttime) = dto.from_start_time {
-            query
-                .push(" AND s.start_time >= ")
-                .push_bind(from_starttime.value);
-        }
-
-        if let Some(to_starttime) = dto.to_start_time {
-            query
-                .push(" AND s.start_time <= ")
-                .push_bind(to_starttime.value);
-        }
-
-        if let Some(template_id) = dto.template_id {
-            query.push(" AND s.template_id = ").push_bind(template_id);
-        }
+        self.build_new_filter_query(&filter, &mut query);
 
         let result = query.build().execute(self.db_conn.get_pool()).await?;
 
@@ -529,11 +359,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(session_id = %dto.id, user_id = %actor.user_id))]
-    async fn update_session(
+    pub async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
         actor: Actor,
-    ) -> Result<Self::SessionType> {
+    ) -> Result<FixedSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         sqlx::query(
             r#"
@@ -585,7 +415,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(id = %id))]
-    async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>> {
+    pub async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<FixedSession>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
             r#"SELECT 
@@ -636,24 +466,26 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         }
     }
 
-    async fn group_sessions(
+    pub async fn group_sessions(
         &self,
-        dto: FilterSessionDto,
+        filter: FilterSession,
         group: GroupingOption,
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
         match group {
-            GroupingOption::User => self.group_sessions_by_user(dto, aggregate, actor).await,
-            GroupingOption::Tag => self.group_sessions_by_tag(dto, aggregate, actor).await,
+            GroupingOption::User => self.group_sessions_by_user(filter, aggregate, actor).await,
+            GroupingOption::Tag => self.group_sessions_by_tag(filter, aggregate, actor).await,
             GroupingOption::Category => {
-                self.group_sessions_by_category(dto, aggregate, actor).await
+                self.group_sessions_by_category(filter, aggregate, actor)
+                    .await
             }
             GroupingOption::Template => {
-                self.group_sessions_by_template(dto, aggregate, actor).await
+                self.group_sessions_by_template(filter, aggregate, actor)
+                    .await
             }
             GroupingOption::Date(date_grouping) => {
-                self.group_sessions_by_date(dto, aggregate, actor, date_grouping)
+                self.group_sessions_by_date(filter, aggregate, actor, date_grouping)
                     .await
             }
         }
@@ -661,130 +493,252 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 }
 
 impl FixedSessionRepository {
-    async fn group_sessions_by_user(
+    pub async fn group_sessions_by_user(
         &self,
-        _dto: FilterSessionDto,
+        filter: FilterSession,
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+            WITH filtered AS (
+                SELECT DISTINCT
+                    s.*
+                FROM session s
+                JOIN category c
+                    on c.id = s.category_id
+                LEFT JOIN tag_to_session tts
+                    on tts.session_id = s.id
+                LEFT JOIN tag t
+                    on tts.tag_id = t.id
+                LEFT JOIN session_template st
+                    on st.id = s.template_id
+                WHERE
+                    s.user_id = 
+        "#,
+        );
+
+        query.push_bind(actor.user_id);
+
+        self.build_new_filter_query(&filter, &mut query);
+        query.push(
+            r#"
+                )
+            SELECT 
+        "#,
+        );
 
         let select = self.get_aggregate_select(aggregate);
 
         query
             .push(select)
-            .push(r#"s.user_id FROM session s WHERE s.user_id = "#)
-            .push_bind(actor.user_id)
-            .push(" GROUP BY s.user_id");
+            .push(r#" s.user_id FROM filtered s WHERE s.type = 'fixed' "#);
+
+        self.build_new_filter_query(&filter, &mut query);
+
+        query.push(" GROUP BY s.user_id ");
 
         let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
         map_grouped_rows_to_results(rows, GroupingOption::User, aggregate)
     }
 
-    async fn group_sessions_by_tag(
+    pub async fn group_sessions_by_tag(
         &self,
-        _dto: FilterSessionDto,
+        filter: FilterSession,
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+            WITH filtered AS (
+                SELECT DISTINCT
+                    s.*
+                FROM session s
+                JOIN category c
+                    on c.id = s.category_id
+                LEFT JOIN tag_to_session tts
+                    on tts.session_id = s.id
+                LEFT JOIN tag t
+                    on tts.tag_id = t.id
+                LEFT JOIN session_template st
+                    on st.id = s.template_id
+                WHERE
+                    1=1
+        "#,
+        );
+        self.build_new_filter_query(&filter, &mut query);
+        query.push(
+            r#"
+            )
+        SELECT 
+        "#,
+        );
 
         let select = self.get_aggregate_select(aggregate);
 
-        query
-            .push(select)
-            .push(
-                r#"
+        query.push(select).push(
+            r#"
                 t.id as tag_id,
                 t.label as tag_label,
                 t.color as tag_color,
                 t.last_used_at as "tag_last_used_at"
-            FROM session s
+            FROM filtered s
             LEFT JOIN tag_to_session tts
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
-            WHERE
-                s.user_id = "#,
-            )
-            .push_bind(actor.user_id)
-            .push(" GROUP BY t.id");
+            WHERE s.type = 'fixed'"#,
+        );
+
+        self.build_new_filter_query(&filter, &mut query);
+
+        query.push(" GROUP BY t.id");
 
         let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
         map_grouped_rows_to_results(rows, GroupingOption::Tag, aggregate)
     }
 
-    async fn group_sessions_by_category(
+    pub async fn group_sessions_by_category(
         &self,
-        _dto: FilterSessionDto,
+        filter: FilterSession,
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+            WITH filtered AS (
+                SELECT DISTINCT
+                    s.*
+                FROM session s
+                JOIN category c
+                    on c.id = s.category_id
+                LEFT JOIN tag_to_session tts
+                    on tts.session_id = s.id
+                LEFT JOIN tag t
+                    on tts.tag_id = t.id
+                LEFT JOIN session_template st
+                    on st.id = s.template_id
+                WHERE
+                    1=1
+        "#,
+        );
+        self.build_new_filter_query(&filter, &mut query);
+        query.push(
+            r#"
+            )
+        SELECT 
+        "#,
+        );
 
         let select = self.get_aggregate_select(aggregate);
 
-        query
-            .push(select)
-            .push(
-                r#"
+        query.push(select).push(
+            r#"
                 c.id as category_id,
                 c.name as category,
                 c.color as category_color,
                 c.last_used_at as "category_last_used_at"
-            FROM session s
+            FROM filtered s
             JOIN category c
                 on c.id = s.category_id
-            WHERE
-                s.user_id = "#,
-            )
-            .push_bind(actor.user_id)
-            .push(" GROUP BY c.id");
+            WHERE s.type = 'fixed'"#,
+        );
+
+        self.build_new_filter_query(&filter, &mut query);
+
+        query.push(" GROUP BY c.id");
 
         let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
         map_grouped_rows_to_results(rows, GroupingOption::Category, aggregate)
     }
 
-    async fn group_sessions_by_template(
+    pub async fn group_sessions_by_template(
         &self,
-        _dto: FilterSessionDto,
+        filter: FilterSession,
         aggregate: AggregatingOptions,
         actor: Actor,
     ) -> Result<Vec<GroupedResult>> {
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+            WITH filtered AS (
+                SELECT DISTINCT
+                    s.*
+                FROM session s
+                JOIN category c
+                    on c.id = s.category_id
+                LEFT JOIN tag_to_session tts
+                    on tts.session_id = s.id
+                LEFT JOIN tag t
+                    on tts.tag_id = t.id
+                LEFT JOIN session_template st
+                    on st.id = s.template_id
+                WHERE
+                    1=1
+        "#,
+        );
+        self.build_new_filter_query(&filter, &mut query);
+        query.push(
+            r#"
+            )
+        SELECT 
+        "#,
+        );
 
         let select = self.get_aggregate_select(aggregate);
 
-        query
-            .push(select)
-            .push(
-                r#"
+        query.push(select).push(
+            r#"
                 st.id as template_id,
                 st.name as template_name,
                 st.start_date as "template_start_date",
                 st.end_date as "template_end_date",
                 st.interval AS "template_interval"
-            FROM session s
+            FROM filtered s
             LEFT JOIN session_template st
                 on st.id = s.template_id
-            WHERE
-                s.user_id = "#,
-            )
-            .push_bind(actor.user_id)
-            .push(" GROUP BY st.id");
+            WHERE s.type = 'fixed'"#,
+        );
+
+        self.build_new_filter_query(&filter, &mut query);
+
+        query.push(" GROUP BY st.id");
 
         let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
         map_grouped_rows_to_results(rows, GroupingOption::Template, aggregate)
     }
 
-    async fn group_sessions_by_date(
+    pub async fn group_sessions_by_date(
         &self,
-        _dto: FilterSessionDto,
+        filter: FilterSession,
         aggregate: AggregatingOptions,
         actor: Actor,
         date_grouping: DateGrouping,
     ) -> Result<Vec<GroupedResult>> {
-        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(r#"SELECT "#);
+        let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
+            r#"
+            WITH filtered AS (
+                SELECT DISTINCT
+                    s.*
+                FROM session s
+                JOIN category c
+                    on c.id = s.category_id
+                LEFT JOIN tag_to_session tts
+                    on tts.session_id = s.id
+                LEFT JOIN tag t
+                    on tts.tag_id = t.id
+                LEFT JOIN session_template st
+                    on st.id = s.template_id
+                WHERE
+                    1=1
+        "#,
+        );
+        self.build_new_filter_query(&filter, &mut query);
+        query.push(
+            r#"
+            )
+        SELECT 
+        "#,
+        );
 
         let select = self.get_aggregate_select(aggregate);
         let date_expr = self.get_date_truncate_expression(date_grouping);
@@ -792,9 +746,11 @@ impl FixedSessionRepository {
         query
             .push(select)
             .push(date_expr)
-            .push(r#" FROM session s WHERE s.user_id = "#)
-            .push_bind(actor.user_id)
-            .push(" GROUP BY grouped_date");
+            .push(r#" FROM filtered s WHERE s.type = 'fixed'"#);
+
+        self.build_new_filter_query(&filter, &mut query);
+
+        query.push(" GROUP BY grouped_date");
 
         let rows = query.build().fetch_all(self.db_conn.get_pool()).await?;
         map_grouped_rows_to_results(rows, GroupingOption::Date(date_grouping), aggregate)
@@ -817,86 +773,203 @@ impl FixedSessionRepository {
             DateGrouping::Day => r#"DATE_TRUNC("day", s.end_time) grouped_date"#,
         }
     }
-}
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum DateGrouping {
-    Year,
-    Month,
-    Week,
-    Day,
-}
+    fn build_new_filter_query<'a>(
+        &self,
+        filter: &'a FilterSession,
+        query: &mut QueryBuilder<'a, Postgres>,
+    ) {
+        // Handle user filter
+        if let Some(user_filter) = &filter.user_filter {
+            if let Some(id_filter) = &user_filter.id {
+                match id_filter {
+                    IdFilter::One(user_id) => {
+                        query.push(" AND s.user_id = ").push_bind(user_id);
+                    }
+                    IdFilter::Many(many_filter) => {
+                        // For user filter, treat both All and Any as ANY since it's a single field
+                        match many_filter {
+                            ManyIdFilter::All(user_ids) => {
+                                query
+                                    .push(" AND s.user_id = ANY(")
+                                    .push_bind(user_ids)
+                                    .push(")");
+                            }
+                            ManyIdFilter::Any(user_ids) => {
+                                query
+                                    .push(" AND s.user_id = ANY(")
+                                    .push_bind(user_ids)
+                                    .push(")");
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum GroupingOption {
-    User,
-    Tag,
-    Category,
-    Template,
-    Date(DateGrouping),
-}
+        // Handle category filter
+        if let Some(category_filter) = &filter.category_filter {
+            if let Some(id_filter) = &category_filter.id {
+                match id_filter {
+                    IdFilter::One(category_id) => {
+                        query.push(" AND s.category_id = ").push_bind(category_id);
+                    }
+                    IdFilter::Many(many_filter) => match many_filter {
+                        ManyIdFilter::All(category_ids) => {
+                            query
+                                .push(" AND s.category_id = ANY(")
+                                .push_bind(category_ids)
+                                .push(")");
+                        }
+                        ManyIdFilter::Any(category_ids) => {
+                            query
+                                .push(" AND s.category_id = ANY(")
+                                .push_bind(category_ids)
+                                .push(")");
+                        }
+                    },
+                }
+            }
+        }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum AggregatingOptions {
-    Count,
-    SumTime,
-}
+        // Handle tag filter
+        if let Some(tag_filter) = &filter.tag_filter {
+            match tag_filter {
+                TagFilter::NoTag => {
+                    query.push(" AND NOT EXISTS (SELECT 1 FROM tag_to_session tts WHERE tts.session_id = s.id)");
+                }
+                TagFilter::Filter(tag_filter_filter) => {
+                    if let Some(id_filter) = &tag_filter_filter.id {
+                        match id_filter {
+                            IdFilter::One(tag_id) => {
+                                query.push(" AND EXISTS (SELECT 1 FROM tag_to_session tts WHERE tts.session_id = s.id AND tts.tag_id = ").push_bind(tag_id).push(")");
+                            }
+                            IdFilter::Many(many_filter) => {
+                                match many_filter {
+                                    ManyIdFilter::All(tag_ids) => {
+                                        // INFO: session must have ALL specified tags
+                                        for tag_id in tag_ids {
+                                            query.push(" AND EXISTS (SELECT 1 FROM tag_to_session tts WHERE tts.session_id = s.id AND tts.tag_id = ").push_bind(tag_id).push(")");
+                                        }
+                                    }
+                                    ManyIdFilter::Any(tag_ids) => {
+                                        // INFO: session must have at least one of the specified tags
+                                        query.push(" AND EXISTS (SELECT 1 FROM tag_to_session tts WHERE tts.session_id = s.id AND tts.tag_id = ANY(").push_bind(tag_ids).push("))");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum AggregateValue {
-    Count(i64),
-    Duration(f64),
-}
+        // Handle start time filter
+        if let Some(start_time_filter) = &filter.start_time_filter {
+            match start_time_filter {
+                DateFilter::GreaterThanEqual(date) => {
+                    query.push(" AND s.start_time >= ").push_bind(date);
+                }
+                DateFilter::GreaterThan(date) => {
+                    query.push(" AND s.start_time > ").push_bind(date);
+                }
+                DateFilter::LessThanEqual(date) => {
+                    query.push(" AND s.start_time <= ").push_bind(date);
+                }
+                DateFilter::LessThan(date) => {
+                    query.push(" AND s.start_time < ").push_bind(date);
+                }
+                DateFilter::Equal(date) => {
+                    query.push(" AND s.start_time = ").push_bind(date);
+                }
+            }
+        }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UserGroupedResult {
-    pub user_id: String,
-    pub aggregate: AggregateValue,
-}
+        // Handle end time filter
+        if let Some(end_time_filter) = &filter.end_time_filter {
+            match end_time_filter {
+                DateFilter::GreaterThanEqual(date) => {
+                    query.push(" AND s.end_time >= ").push_bind(date);
+                }
+                DateFilter::GreaterThan(date) => {
+                    query.push(" AND s.end_time > ").push_bind(date);
+                }
+                DateFilter::LessThanEqual(date) => {
+                    query.push(" AND s.end_time <= ").push_bind(date);
+                }
+                DateFilter::LessThan(date) => {
+                    query.push(" AND s.end_time < ").push_bind(date);
+                }
+                DateFilter::Equal(date) => {
+                    query.push(" AND s.end_time = ").push_bind(date);
+                }
+            }
+        }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TagGroupedResult {
-    pub tag_id: Option<Uuid>,
-    pub tag_label: Option<String>,
-    pub tag_color: Option<String>,
-    pub tag_last_used_at: Option<DateTime<Utc>>,
-    pub aggregate: AggregateValue,
-}
+        // Handle template filter
+        if let Some(template_filter) = &filter.template_filter {
+            match template_filter {
+                TemplateFilter::NoTemplate => {
+                    query.push(" AND s.template_id IS NULL");
+                }
+                TemplateFilter::Filter(template_filter_filter) => {
+                    if let Some(id_filter) = &template_filter_filter.id {
+                        match id_filter {
+                            IdFilter::One(template_id) => {
+                                query.push(" AND s.template_id = ").push_bind(template_id);
+                            }
+                            IdFilter::Many(many_filter) => match many_filter {
+                                ManyIdFilter::All(template_ids) => {
+                                    query
+                                        .push(" AND s.template_id = ANY(")
+                                        .push_bind(template_ids)
+                                        .push(")");
+                                }
+                                ManyIdFilter::Any(template_ids) => {
+                                    query
+                                        .push(" AND s.template_id = ANY(")
+                                        .push_bind(template_ids)
+                                        .push(")");
+                                }
+                            },
+                        }
+                    }
+                }
+            }
+        }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CategoryGroupedResult {
-    pub category_id: Uuid,
-    pub category: String,
-    pub category_color: String,
-    pub category_last_used_at: DateTime<Utc>,
-    pub aggregate: AggregateValue,
+        // Handle duration filter (for fixed sessions with non-null end_time)
+        if let Some(duration_filter) = &filter.duration_filter {
+            match duration_filter {
+                DurationFilter::GreaterThanEqual(minutes) => {
+                    query
+                        .push(" AND EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60 >= ")
+                        .push_bind(minutes);
+                }
+                DurationFilter::GreaterThan(minutes) => {
+                    query
+                        .push(" AND EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60 > ")
+                        .push_bind(minutes);
+                }
+                DurationFilter::LessThanEqual(minutes) => {
+                    query
+                        .push(" AND EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60 <= ")
+                        .push_bind(minutes);
+                }
+                DurationFilter::LessThan(minutes) => {
+                    query
+                        .push(" AND EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60 < ")
+                        .push_bind(minutes);
+                }
+                DurationFilter::Equal(minutes) => {
+                    query
+                        .push(" AND EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60 = ")
+                        .push_bind(minutes);
+                }
+            }
+        }
+    }
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TemplateGroupedResult {
-    pub template_id: Option<Uuid>,
-    pub template_name: Option<String>,
-    pub template_start_date: Option<DateTime<Utc>>,
-    pub template_end_date: Option<DateTime<Utc>>,
-    pub template_interval: Option<RecurringSessionInterval>,
-    pub aggregate: AggregateValue,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DateGroupedResult {
-    pub grouped_date: DateTime<Utc>,
-    pub aggregate: AggregateValue,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum GroupedResult {
-    User(UserGroupedResult),
-    Tag(TagGroupedResult),
-    Category(CategoryGroupedResult),
-    Template(TemplateGroupedResult),
-    Date(DateGroupedResult),
-}
-
 pub fn map_grouped_rows_to_results(
     rows: Vec<sqlx::postgres::PgRow>,
     grouping: GroupingOption,
@@ -913,7 +986,6 @@ pub fn map_grouped_rows_to_results(
                 AggregateValue::Count(count)
             }
             AggregatingOptions::SumTime => {
-                // PostgreSQL returns INTERVAL as a custom type, let's use a generic approach
                 let interval: f64 = row.try_get("total_minutes")?;
                 AggregateValue::Duration(interval)
             }
