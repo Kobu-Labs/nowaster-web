@@ -144,9 +144,9 @@ impl TemplateFilterFilter {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-#[serde(untagged)]
 pub enum TagFilter {
     NoTag,
+    #[serde(untagged)]
     Filter(TagFilterFilter),
 }
 
@@ -224,9 +224,9 @@ pub enum DateFilter {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(untagged)]
 pub enum TemplateFilter {
     NoTemplate,
+    #[serde(untagged)]
     Filter(TemplateFilterFilter),
 }
 
