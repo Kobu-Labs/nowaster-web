@@ -316,7 +316,7 @@ impl FixedSessionRepository {
             .build_query_as::<GenericFullRowSession>()
             .fetch_all(self.db_conn.get_pool())
             .await?;
-        let mut sessions = self.convert(rows)?;
+        let sessions = self.convert(rows)?;
 
         Ok(sessions)
     }
