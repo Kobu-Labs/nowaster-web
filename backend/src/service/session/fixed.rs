@@ -8,7 +8,7 @@ use crate::{
     dto::{
         feed::CreateFeedEventDto,
         session::{
-            filter::{DateFilter, IdFilter, ManyIdFilter, FilterSession},
+            filter::{DateFilter, FilterSession, IdFilter, ManyIdFilter},
             fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
             grouped_session::{AggregatingOptions, GroupedResult, GroupingOption},
             stopwatch_session::ReadStopwatchSessionDto,
@@ -16,8 +16,7 @@ use crate::{
     },
     entity::feed::{FeedEventSource, FeedEventType, SessionEventData},
     repository::{
-        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
-        stopwatch_session::StopwatchSessionRepository,
+        fixed_session::FixedSessionRepository, stopwatch_session::StopwatchSessionRepository,
     },
     router::clerk::Actor,
     service::{feed::events::FeedEventService, user_service::UserService},

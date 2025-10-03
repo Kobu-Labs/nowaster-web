@@ -11,7 +11,7 @@ use crate::{
     },
     entity::session_template::{ExistingSessionsAction, RecurringSessionInterval},
     repository::{
-        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+        fixed_session::FixedSessionRepository,
         session_template::{ReadSesionTemplateRow, RecurringSessionRepository},
     },
     router::clerk::Actor,

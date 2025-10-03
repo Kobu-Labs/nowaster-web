@@ -5,10 +5,7 @@ use uuid::Uuid;
 use crate::{
     dto::feed::{CreateFeedReactionDto, ReadFeedReactionDto},
     entity::feed::FeedEventType,
-    repository::{
-        feed::FeedRepository,
-        fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
-    },
+    repository::{feed::FeedRepository, fixed_session::FixedSessionRepository},
     router::clerk::Actor,
     service::notification_service::NotificationService,
 };
