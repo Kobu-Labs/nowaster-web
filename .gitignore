@@ -48,3 +48,6 @@ test/*.js
 backend/.DS_Store
 backend/prisma/database
 backend/prisma/database-journal
+
+# JWT keys (keep private key secret)
+keys/private.pem
