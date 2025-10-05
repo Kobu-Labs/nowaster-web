@@ -24,8 +24,15 @@ dotenv = "0.15.0"
 chrono = {version="0.4.39", features=["serde"]}
 anyhow = "1.0.96"
 check = "1.0.0"
-clerk-rs = { version = "0.4.1", features = ["axum"] }
 headers = "0.4.0"
-axum-extra = { version = "0.10.1", features = ["typed-header"] }
+axum-extra = { version = "0.10.1", features = ["typed-header", "cookie"] }
+
+# OAuth and JWT dependencies
+oauth2 = "4.4"
+reqwest = { version = "0.12", features = ["json"] }
+rand = "0.8"
+sha2 = "0.10"
+hex = "0.4"
+once_cell = "1.20"
 
 
