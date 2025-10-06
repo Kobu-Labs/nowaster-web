@@ -242,4 +242,83 @@ impl UserRepository {
             None => Ok(None),
         }
     }
+
+    /// Find user by email address
+    #[instrument(err, skip(self))]
+    pub async fn find_by_email(&self, email: &str) -> Result<Option<User>> {
+        let row = sqlx::query_as!(
+            ReadUserRow,
+            r#"
+                SELECT id, displayname, avatar_url, visibility_flags
+                FROM "user"
+                WHERE email = $1
+            "#,
+            email
+        )
+        .fetch_optional(self.db_conn.get_pool())
+        .await?;
+
+        match row {
+            Some(row) => Ok(Some(self.mapper(row))),
+            None => Ok(None),
+        }
+    }
+
+    /// Create user from OAuth profile
+    #[instrument(err, skip(self))]
+    pub async fn create_from_oauth(
+        &self,
+        id: String,
+        email: String,
+        display_name: String,
+        avatar_url: Option<String>,
+    ) -> Result<User> {
+        let row = sqlx::query_as!(
+            ReadUserRow,
+            r#"
+                INSERT INTO "user" (id, displayname, email, avatar_url, visibility_flags)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id, displayname, avatar_url, visibility_flags
+            "#,
+            id,
+            display_name,
+            email,
+            avatar_url,
+            VisibilityFlags::default().as_raw()
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        Ok(self.mapper(row))
+    }
+
+    /// Upsert user from OAuth (create or update if exists by email)
+    #[instrument(err, skip(self))]
+    pub async fn upsert_from_oauth(
+        &self,
+        email: &str,
+        display_name: &str,
+        avatar_url: Option<&str>,
+    ) -> Result<User> {
+        let row = sqlx::query_as!(
+            ReadUserRow,
+            r#"
+                INSERT INTO "user" (id, displayname, email, avatar_url, visibility_flags)
+                VALUES (gen_random_uuid()::text, $1, $2, $3, $4)
+                ON CONFLICT (email)
+                DO UPDATE SET
+                    displayname = EXCLUDED.displayname,
+                    avatar_url = EXCLUDED.avatar_url
+                RETURNING id, displayname, avatar_url, visibility_flags
+            "#,
+            display_name,
+            email,
+            avatar_url,
+            VisibilityFlags::default().as_raw()
+        )
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        Ok(self.mapper(row))
+    }
 }
