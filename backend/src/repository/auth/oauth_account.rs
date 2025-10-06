@@ -5,7 +5,7 @@ use std::sync::Arc;
 use tracing::instrument;
 use uuid::Uuid;
 
-use crate::config::database::Database;
+use crate::config::database::{Database, DatabaseTrait};
 
 #[derive(Clone)]
 pub struct OAuthAccountRepository {
@@ -84,7 +84,7 @@ impl OAuthAccountRepositoryTrait for OAuthAccountRepository {
                 updated_at
             "#,
             user_id,
-            provider,
+            provider as _,
             provider_user_id,
             provider_email
         )
@@ -114,7 +114,7 @@ impl OAuthAccountRepositoryTrait for OAuthAccountRepository {
             FROM oauth_accounts
             WHERE provider = $1::oauth_provider AND provider_user_id = $2
             "#,
-            provider,
+            provider as _,
             provider_user_id
         )
         .fetch_optional(self.db_conn.get_pool())
@@ -168,7 +168,7 @@ impl OAuthAccountRepositoryTrait for OAuthAccountRepository {
             FROM oauth_accounts
             WHERE provider = $1::oauth_provider AND provider_email = $2
             "#,
-            provider,
+            provider as _,
             email
         )
         .fetch_optional(self.db_conn.get_pool())

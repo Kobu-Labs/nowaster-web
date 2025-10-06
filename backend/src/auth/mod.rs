@@ -1,11 +1,10 @@
 pub mod crypto;
 pub mod jwt;
-pub mod tokens;
 pub mod providers;
 
 // Re-export commonly used items
 pub use jwt::{Claims, generate_access_token, validate_access_token};
-pub use tokens::{
+pub use crate::repository::auth::tokens::{
     generate_refresh_token,
     validate_refresh_token,
     revoke_refresh_token,
