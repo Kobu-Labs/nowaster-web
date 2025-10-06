@@ -1,8 +1,10 @@
-use std::{env, sync::Arc};
+use std::sync::Arc;
 
 use config::database::{Database, DatabaseTrait};
 use router::root::get_router;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+
+use crate::config::env::Config;
 
 mod auth;
 mod config;
@@ -15,34 +17,38 @@ mod service;
 #[tokio::main]
 async fn main() {
     let log_level = if cfg!(debug_assertions) {
-        "debug"
+        "info"
     } else {
         "info"
     };
 
+    dotenv::dotenv().ok();
+    let config = envy::from_env::<Config>()
+        .unwrap_or_else(|e| panic!("Failed to load configuration from environment: {}", e));
+
+    println!("🔧 [CONFIG] Loaded configuration successfully");
+    println!(
+        "🔧 [CONFIG] Server: {}:{}",
+        config.server.address, config.server.port
+    );
+    println!("🔧 [CONFIG] Frontend URL: {}", config.frontend.url);
+
     tracing_subscriber::registry()
-        .with(fmt::layer().pretty())
+        .with(fmt::layer())
         .with(EnvFilter::new(log_level))
         .init();
 
-    #[cfg(debug_assertions)]
-    {
-        dotenv::dotenv().ok();
-    }
-
-    let port = env::var("BACKEND_PORT").unwrap_or("4005".to_string());
-    let database_url = env::var("DATABASE_URL")
-        .unwrap_or("postgres://devuser:devpass@localhost:5432/postgres".to_string());
-    let addr = env::var("BACKEND_ADDRESS").unwrap_or("localhost".to_string());
-
-    let db = Database::init(database_url)
+    let db = Database::init(config.database.connection_url.clone())
         .await
         .unwrap_or_else(|e| panic!("Database error: {}", e));
 
-    let router = get_router(Arc::new(db));
-    let addr = format!("{}:{}", addr, port);
+    let router = get_router(Arc::new(db), Arc::new(config.clone()));
+    let addr = format!("{}:{}", config.server.address, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
-    tracing::debug!("listening on {}", listener.local_addr().unwrap());
+    println!(
+        "🚀 [SERVER] Listening on {}",
+        listener.local_addr().unwrap()
+    );
     axum::serve(listener, router).await.unwrap()
 }

@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
-use std::env;
+
+use crate::config::env::GoogleOAuthConfig;
 
 use super::{OAuthConfig, OAuthProvider, UserProfile};
 
@@ -13,35 +14,32 @@ struct GoogleTokenResponse {
 
 #[derive(Deserialize)]
 struct GoogleUserInfo {
-    sub: String,           // Google's user ID
-    email: String,
+    id: String,
+    email: Option<String>,
     name: Option<String>,
     picture: Option<String>,
+    #[serde(default)]
+    verified_email: bool,
 }
 
-impl OAuthProvider for GoogleProvider {
-    fn get_config() -> Result<OAuthConfig> {
-        let client_id = env::var("GOOGLE_CLIENT_ID")
-            .context("GOOGLE_CLIENT_ID not set")?;
-        let client_secret = env::var("GOOGLE_CLIENT_SECRET")
-            .context("GOOGLE_CLIENT_SECRET not set")?;
-        let base_url = env::var("BASE_URL")
-            .unwrap_or_else(|_| "http://localhost:4008".to_string());
-
-        Ok(OAuthConfig {
-            client_id,
-            client_secret,
+impl GoogleProvider {
+    pub fn config_from(google_config: &GoogleOAuthConfig) -> OAuthConfig {
+        OAuthConfig {
+            client_id: google_config.client_id.clone(),
+            client_secret: google_config.client_secret.clone(),
             auth_url: "https://accounts.google.com/o/oauth2/v2/auth".to_string(),
             token_url: "https://oauth2.googleapis.com/token".to_string(),
-            redirect_url: format!("{}/api/auth/callback/google", base_url),
+            redirect_url: google_config.redirect_uri.clone(),
             scopes: vec![
                 "openid".to_string(),
                 "profile".to_string(),
                 "email".to_string(),
             ],
-        })
+        }
     }
+}
 
+impl OAuthProvider for GoogleProvider {
     fn build_authorization_url(config: &OAuthConfig, state: &str) -> String {
         let scope = config.scopes.join(" ");
         format!(
@@ -100,15 +98,27 @@ impl OAuthProvider for GoogleProvider {
             anyhow::bail!("Failed to fetch user profile: {}", error_text);
         }
 
-        let user_info: GoogleUserInfo = response
-            .json()
-            .await
-            .context("Failed to parse user info")?;
+        // Debug: Print raw response
+        let response_text = response.text().await.context("Failed to read response")?;
+        println!("📥 [GOOGLE] Raw user info response: {}", response_text);
+
+        let user_info: GoogleUserInfo =
+            serde_json::from_str(&response_text).context("Failed to parse user info")?;
+
+        println!(
+            "📥 [GOOGLE] Parsed user info: id={}, email={:?}, name={:?}",
+            user_info.id, user_info.email, user_info.name
+        );
+
+        // Validate email is present
+        let email = user_info
+            .email
+            .context("Google user has no email (email scope may not be granted)")?;
 
         Ok(UserProfile {
-            provider_user_id: user_info.sub,
-            email: user_info.email.clone(),
-            username: user_info.email.split('@').next().map(|s| s.to_string()),
+            provider_user_id: user_info.id,
+            email: email.clone(),
+            username: email.split('@').next().map(|s| s.to_string()),
             display_name: user_info.name,
             avatar_url: user_info.picture,
         })
