@@ -1,10 +1,11 @@
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
+use ipnetwork::IpNetwork;
 use sqlx::PgPool;
 use std::net::IpAddr;
 use uuid::Uuid;
 
-use super::crypto::{generate_random_hex, sha256_hash};
+use crate::auth::crypto::{generate_random_hex, sha256_hash};
 
 /// Generate a refresh token and store it in the database
 ///
@@ -22,16 +23,10 @@ pub async fn generate_refresh_token(
     ip: Option<IpAddr>,
     pool: &PgPool,
 ) -> Result<String> {
-    // Generate cryptographically random token (32 bytes = 64 hex chars)
     let token = generate_random_hex(32);
-
-    // Hash for database storage
     let token_hash = sha256_hash(&token);
-
-    // Calculate expiry (30 days from now)
     let expires_at = Utc::now() + Duration::days(30);
 
-    // Store in database
     sqlx::query!(
         r#"
         INSERT INTO refresh_tokens (user_id, token_hash, expires_at, user_agent, ip_address)
@@ -39,15 +34,14 @@ pub async fn generate_refresh_token(
         "#,
         user_id.to_string(),
         token_hash,
-        expires_at.naive_utc(),
+        expires_at,
         user_agent,
-        ip
+        ip.map(IpNetwork::from)
     )
     .execute(pool)
     .await
     .context("Failed to store refresh token")?;
 
-    // Return plaintext token (only time we have access to it)
     Ok(token)
 }
 
@@ -60,10 +54,8 @@ pub async fn generate_refresh_token(
 /// # Returns
 /// User ID if token is valid and not expired/revoked
 pub async fn validate_refresh_token(token: &str, pool: &PgPool) -> Result<Uuid> {
-    // Hash the incoming token
     let token_hash = sha256_hash(token);
 
-    // Query database
     let record = sqlx::query!(
         r#"
         SELECT user_id, expires_at, revoked_at
@@ -77,27 +69,23 @@ pub async fn validate_refresh_token(token: &str, pool: &PgPool) -> Result<Uuid> 
     .context("Database query failed")?
     .context("Invalid refresh token")?;
 
-    // Check expiration
-    let now = Utc::now().naive_utc();
+    let now = Utc::now();
     if record.expires_at < now {
         anyhow::bail!("Refresh token expired");
     }
 
-    // Check revocation
     if record.revoked_at.is_some() {
         anyhow::bail!("Refresh token revoked");
     }
 
-    // Update last_used_at
     sqlx::query!(
         "UPDATE refresh_tokens SET last_used_at = NOW() WHERE token_hash = $1",
         token_hash
     )
     .execute(pool)
     .await
-    .ok(); // Ignore error - not critical
+    .ok();
 
-    // Return user_id
     Uuid::parse_str(&record.user_id).context("Invalid user_id format")
 }
 
