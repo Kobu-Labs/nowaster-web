@@ -1,10 +1,6 @@
 use std::sync::Arc;
 
 use axum::{http::Request, routing::IntoMakeService, Router};
-use clerk_rs::{
-    clerk::Clerk,
-    validators::{axum::ClerkLayer, jwks::MemoryCacheJwksProvider},
-};
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use uuid::Uuid;
@@ -24,6 +20,7 @@ use crate::{
     },
     router::user::root::protected_user_router,
     service::{
+        auth_service::AuthService,
         category_service::CategoryService,
         feed::{
             events::FeedEventService, reactions::FeedReactionService,
@@ -40,6 +37,7 @@ use crate::{
 };
 
 use super::{
+    auth::auth_router,
     category::root::category_router, feed::root::feed_router, friend::root::friend_router,
     notification::root::notification_router, session::root::session_router,
     statistics::root::statistics_router, tag::root::tag_router, user::root::public_user_router,
@@ -57,7 +55,7 @@ pub struct Feed {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub clerk: Clerk,
+    pub auth_service: AuthService,
     pub session_service: FixedSessionService,
     pub stopwatch_service: StopwatchSessionService,
     pub tag_service: TagService,
@@ -70,7 +68,7 @@ pub struct AppState {
     pub feed: Feed,
 }
 
-pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
+pub fn get_router(db: Arc<Database>) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
@@ -81,6 +79,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let template_session_repo = RecurringSessionRepository::new(&db);
     let feed_repo = FeedRepository::new(&db);
 
+    let auth_service = AuthService::new(&db);
     let category_service = CategoryService::new(category_repo.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);
@@ -121,7 +120,7 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         SessionTemplateService::new(template_session_repo, session_repo.clone());
 
     let state = AppState {
-        clerk: clerk.clone(),
+        auth_service,
         friend_service: Arc::new(friend_service),
         session_service,
         tag_service,
@@ -139,9 +138,16 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         },
     };
 
+    // Auth routes (public)
+    let auth_routes = Router::new()
+        .nest("/auth", auth_router())
+        .with_state(state.clone());
+
+    // Public user routes (no authentication)
     let publicuser_route =
         Router::new().nest("/user", public_user_router().with_state(state.clone()));
 
+    // Protected routes (Actor extractor validates JWT)
     let protected_routes = Router::new()
         .nest("/user", protected_user_router().with_state(state.clone()))
         .nest("/session", session_router().with_state(state.clone()))
@@ -153,14 +159,11 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
         .nest(
             "/notifications",
             notification_router().with_state(state.clone()),
-        )
-        .layer(ClerkLayer::new(
-            MemoryCacheJwksProvider::new(clerk),
-            None,
-            false,
-        ));
+        );
+        // No ClerkLayer needed - Actor extractor does JWT validation
 
     let api_router = Router::new()
+        .merge(auth_routes)
         .merge(publicuser_route)
         .merge(protected_routes);
 
