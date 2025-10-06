@@ -5,6 +5,7 @@ use config::database::{Database, DatabaseTrait};
 use router::root::get_router;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
+mod auth;
 mod config;
 mod dto;
 mod entity;
