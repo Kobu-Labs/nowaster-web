@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use axum::{http::Request, routing::IntoMakeService, Router};
+use axum::{
+    http::{self, Request},
+    routing::IntoMakeService,
+    Router,
+};
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use uuid::Uuid;
@@ -37,10 +41,10 @@ use crate::{
 };
 
 use super::{
-    auth::auth_router,
-    category::root::category_router, feed::root::feed_router, friend::root::friend_router,
-    notification::root::notification_router, session::root::session_router,
-    statistics::root::statistics_router, tag::root::tag_router, user::root::public_user_router,
+    auth::auth_router, category::root::category_router, feed::root::feed_router,
+    friend::root::friend_router, notification::root::notification_router,
+    session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
+    user::root::public_user_router,
 };
 
 use tracing::{info_span, Level};
@@ -55,6 +59,7 @@ pub struct Feed {
 
 #[derive(Clone)]
 pub struct AppState {
+    pub config: Arc<crate::Config>,
     pub auth_service: AuthService,
     pub session_service: FixedSessionService,
     pub stopwatch_service: StopwatchSessionService,
@@ -68,7 +73,7 @@ pub struct AppState {
     pub feed: Feed,
 }
 
-pub fn get_router(db: Arc<Database>) -> IntoMakeService<Router> {
+pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
@@ -120,6 +125,7 @@ pub fn get_router(db: Arc<Database>) -> IntoMakeService<Router> {
         SessionTemplateService::new(template_session_repo, session_repo.clone());
 
     let state = AppState {
+        config: config.clone(),
         auth_service,
         friend_service: Arc::new(friend_service),
         session_service,
@@ -160,25 +166,41 @@ pub fn get_router(db: Arc<Database>) -> IntoMakeService<Router> {
             "/notifications",
             notification_router().with_state(state.clone()),
         );
-        // No ClerkLayer needed - Actor extractor does JWT validation
+    // No ClerkLayer needed - Actor extractor does JWT validation
 
     let api_router = Router::new()
         .merge(auth_routes)
         .merge(publicuser_route)
         .merge(protected_routes);
 
+    // Configure CORS to allow credentials from frontend
+    // Note: When using allow_credentials(true), cannot use wildcards for origin/headers
+    let frontend_url = &config.frontend.url;
+
+    println!("🌐 [CORS] Allowing origin: {}", frontend_url);
+
+    let cors = tower_http::cors::CorsLayer::new()
+        .allow_origin(frontend_url.parse::<http::HeaderValue>().unwrap())
+        .allow_methods([
+            http::Method::GET,
+            http::Method::POST,
+            http::Method::PUT,
+            http::Method::DELETE,
+            http::Method::PATCH,
+            http::Method::OPTIONS,
+        ])
+        .allow_headers([
+            http::header::CONTENT_TYPE,
+            http::header::AUTHORIZATION,
+            http::header::ACCEPT,
+            http::header::COOKIE,
+        ])
+        .allow_credentials(true);
+
     Router::new()
-        .nest("/api", api_router)
-        .layer(tower_http::cors::CorsLayer::permissive())
-        .layer(
-            ServiceBuilder::new().layer(
-                TraceLayer::new_for_http()
-                    .make_span_with(make_span_for_request)
-                    .on_request(DefaultOnRequest::new().level(Level::INFO))
-                    .on_response(DefaultOnResponse::new().level(Level::INFO)),
-            ),
-        )
-        .into_make_service()
+    .nest("/api", api_router)
+    .layer(cors)
+    .into_make_service()
 }
 
 fn make_span_for_request<B>(req: &Request<B>) -> tracing::Span {
