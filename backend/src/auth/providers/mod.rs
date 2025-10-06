@@ -5,7 +5,6 @@ pub mod discord;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-/// OAuth provider configuration
 #[derive(Clone)]
 pub struct OAuthConfig {
     pub client_id: String,
@@ -26,17 +25,10 @@ pub struct UserProfile {
     pub avatar_url: Option<String>,
 }
 
-/// Trait that all OAuth providers must implement
 pub trait OAuthProvider {
-    /// Get the provider configuration
-    fn get_config() -> Result<OAuthConfig>;
-
-    /// Build the authorization URL for OAuth flow
     fn build_authorization_url(config: &OAuthConfig, state: &str) -> String;
 
-    /// Exchange authorization code for access token
     async fn exchange_code(config: &OAuthConfig, code: &str) -> Result<String>;
 
-    /// Fetch user profile using access token
     async fn fetch_user_profile(access_token: &str) -> Result<UserProfile>;
 }

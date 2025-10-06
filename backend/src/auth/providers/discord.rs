@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
-use std::env;
+
+use crate::config::env::DiscordOAuthConfig;
 
 use super::{OAuthConfig, OAuthProvider, UserProfile};
 
@@ -20,28 +21,21 @@ struct DiscordUserInfo {
     avatar: Option<String>,
 }
 
-impl OAuthProvider for DiscordProvider {
-    fn get_config() -> Result<OAuthConfig> {
-        let client_id = env::var("DISCORD_CLIENT_ID")
-            .context("DISCORD_CLIENT_ID not set")?;
-        let client_secret = env::var("DISCORD_CLIENT_SECRET")
-            .context("DISCORD_CLIENT_SECRET not set")?;
-        let base_url = env::var("BASE_URL")
-            .unwrap_or_else(|_| "http://localhost:4008".to_string());
-
-        Ok(OAuthConfig {
-            client_id,
-            client_secret,
+impl DiscordProvider {
+    /// Create OAuthConfig from typed config
+    pub fn config_from(discord_config: &DiscordOAuthConfig) -> OAuthConfig {
+        OAuthConfig {
+            client_id: discord_config.client_id.clone(),
+            client_secret: discord_config.client_secret.clone(),
             auth_url: "https://discord.com/api/oauth2/authorize".to_string(),
             token_url: "https://discord.com/api/oauth2/token".to_string(),
-            redirect_url: format!("{}/api/auth/callback/discord", base_url),
-            scopes: vec![
-                "identify".to_string(),
-                "email".to_string(),
-            ],
-        })
+            redirect_url: discord_config.redirect_uri.clone(),
+            scopes: vec!["identify".to_string(), "email".to_string()],
+        }
     }
+}
 
+impl OAuthProvider for DiscordProvider {
     fn build_authorization_url(config: &OAuthConfig, state: &str) -> String {
         let scope = config.scopes.join(" ");
         format!(
@@ -101,12 +95,11 @@ impl OAuthProvider for DiscordProvider {
             anyhow::bail!("Failed to fetch user profile: {}", error_text);
         }
 
-        let user_info: DiscordUserInfo = response
-            .json()
-            .await
-            .context("Failed to parse user info")?;
+        let user_info: DiscordUserInfo =
+            response.json().await.context("Failed to parse user info")?;
 
-        let email = user_info.email
+        let email = user_info
+            .email
             .context("Discord user has no email (email scope may not be granted)")?;
 
         // Build avatar URL if available

@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
-use std::env;
+
+use crate::config::env::GitHubOAuthConfig;
 
 use super::{OAuthConfig, OAuthProvider, UserProfile};
 
@@ -27,28 +28,20 @@ struct GitHubEmail {
     verified: bool,
 }
 
-impl OAuthProvider for GitHubProvider {
-    fn get_config() -> Result<OAuthConfig> {
-        let client_id = env::var("GITHUB_CLIENT_ID")
-            .context("GITHUB_CLIENT_ID not set")?;
-        let client_secret = env::var("GITHUB_CLIENT_SECRET")
-            .context("GITHUB_CLIENT_SECRET not set")?;
-        let base_url = env::var("BASE_URL")
-            .unwrap_or_else(|_| "http://localhost:4008".to_string());
-
-        Ok(OAuthConfig {
-            client_id,
-            client_secret,
+impl GitHubProvider {
+    pub fn config_from(github_config: &GitHubOAuthConfig) -> OAuthConfig {
+        OAuthConfig {
+            client_id: github_config.client_id.clone(),
+            client_secret: github_config.client_secret.clone(),
             auth_url: "https://github.com/login/oauth/authorize".to_string(),
             token_url: "https://github.com/login/oauth/access_token".to_string(),
-            redirect_url: format!("{}/api/auth/callback/github", base_url),
-            scopes: vec![
-                "read:user".to_string(),
-                "user:email".to_string(),
-            ],
-        })
+            redirect_url: github_config.redirect_uri.clone(),
+            scopes: vec!["read:user".to_string(), "user:email".to_string()],
+        }
     }
+}
 
+impl OAuthProvider for GitHubProvider {
     fn build_authorization_url(config: &OAuthConfig, state: &str) -> String {
         let scope = config.scopes.join(" ");
         format!(
