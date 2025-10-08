@@ -1,11 +1,11 @@
 import { CategoryApi, ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
-import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   createQueryKeys,
   mergeQueryKeys,
 } from "@lukemorales/query-key-factory";
 
 import { translateFilterPrecursor } from "@/lib/utils";
+import { convertToFilterSession, SessionFilterPrecursor } from "@/validation/session/filter-precursor";
 
 const sessionkeys = createQueryKeys("sessions", {
   active: {
@@ -14,7 +14,7 @@ const sessionkeys = createQueryKeys("sessions", {
   },
   filtered: (precursor?: SessionFilterPrecursor) => ({
     queryFn: async () => {
-      const filter = translateFilterPrecursor(precursor);
+      const filter = convertToFilterSession(precursor);
       return await ScheduledSessionApi.getSessions(filter);
     },
     queryKey: [precursor ?? {}],

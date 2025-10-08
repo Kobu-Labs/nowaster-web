@@ -20,11 +20,6 @@ async fn main() {
         "info"
     };
 
-    tracing_subscriber::registry()
-        .with(fmt::layer().pretty())
-        .with(EnvFilter::new(log_level))
-        .init();
-
     #[cfg(debug_assertions)]
     {
         dotenv::dotenv().ok();
