@@ -16,7 +16,7 @@ import {
   useAddReaction,
   useRemoveReaction,
 } from "@/components/hooks/feed/useFeed";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/app/auth-context";
 
 interface ReactionBarProps {
   event: ReadFeedEvent;
@@ -40,10 +40,10 @@ const COMMON_EMOJIS = [
 export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const addReaction = useAddReaction();
-  const { userId } = useAuth();
+  const { user } = useAuth();
   const removeReaction = useRemoveReaction();
 
-  if (!userId) {
+  if (!user) {
     return;
   }
 
@@ -54,7 +54,7 @@ export const ReactionBar: FC<ReactionBarProps> = ({ event, reactions }) => {
           count: (acc[reaction.emoji]?.count ?? 0) + 1,
           currentUserReacted:
             acc[reaction.emoji]?.currentUserReacted
-            ?? reaction.user.id === userId,
+            ?? reaction.user.id === user.id,
         };
         return acc;
       },

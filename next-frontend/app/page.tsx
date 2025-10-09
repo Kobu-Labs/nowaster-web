@@ -35,7 +35,7 @@ export default async function LandingPage() {
                 </p>
               </div>
 
-              <Link href="/home/">
+              <Link href="/sign-in">
                 <Button variant="secondary">
                   <p>Sign up now</p>
                 </Button>
@@ -255,10 +255,6 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage
-                      alt="izmi"
-                      src="https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18yd0JBaEdLbThpTzdURkxQdUdZam5FcnBnR3IifQ"
-                    />
                     <AvatarFallback>I</AvatarFallback>
                   </Avatar>
                   <div>
@@ -277,10 +273,6 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage
-                      alt="kobu"
-                      src="https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ3Qm4zMGl0UkJRNTJGRHBBcExwV0c1VGFJSyJ9"
-                    />
                     <AvatarFallback>K</AvatarFallback>
                   </Avatar>
                   <div>
@@ -311,7 +303,7 @@ export default async function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link href="/home/">
+                <Link href="/sign-in">
                   <Button variant="secondary">
                     <p>Start your journey now</p>
                   </Button>

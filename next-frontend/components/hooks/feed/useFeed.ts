@@ -12,7 +12,7 @@ import type {
   RemoveFeedReactionRequest,
 } from "@/api/definitions/requests/feed";
 import { FeedResponse } from "@/api/definitions/responses/feed";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/app/auth-context";
 
 export const FEED_QUERY_KEY = "feed";
 
@@ -37,7 +37,7 @@ export const useFeed = () => {
 
 export const useAddReaction = () => {
   const queryClient = useQueryClient();
-  const { userId } = useAuth();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (params: CreateFeedReactionRequest) => {
@@ -67,7 +67,7 @@ export const useAddReaction = () => {
                         created_at: new Date(),
                         emoji: newTodo.emoji,
                         user: {
-                          id: userId,
+                          id: user?.id ?? "",
                         },
                       },
                       ...event.reactions,
@@ -94,7 +94,7 @@ export const useAddReaction = () => {
 
 export const useRemoveReaction = () => {
   const queryClient = useQueryClient();
-  const { userId } = useAuth();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: (params: RemoveFeedReactionRequest) =>
@@ -120,7 +120,7 @@ export const useRemoveReaction = () => {
                     reactions: event.reactions.filter(
                       (reaction) =>
                         reaction.emoji !== newTodo.emoji
-                        || reaction.user.id !== userId,
+                        || reaction.user.id !== user?.id,
                     ),
                   };
                 }

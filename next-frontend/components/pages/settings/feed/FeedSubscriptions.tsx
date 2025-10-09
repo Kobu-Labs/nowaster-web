@@ -36,7 +36,7 @@ import {
 import { Switch } from "@/components/shadcn/switch";
 import { useToast } from "@/components/shadcn/use-toast";
 import { getInitials } from "@/lib/utils";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/app/auth-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2, Users } from "lucide-react";
 import type { FC } from "react";
@@ -138,7 +138,7 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
   user,
 }) => {
   const queryClient = useQueryClient();
-  const { userId } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const { toast } = useToast();
   const updateSubscriptionMutation = useMutation({
@@ -190,7 +190,7 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h3 className="font-medium">{user.username}</h3>
-            {userId === user.id && <Badge variant="secondary">You</Badge>}
+            {currentUser?.id === user.id && <Badge variant="secondary">You</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">
             Subscribed
