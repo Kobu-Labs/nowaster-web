@@ -9,9 +9,9 @@ use crate::{
     auth::{
         generate_access_token, generate_refresh_token, validate_refresh_token, revoke_refresh_token,
     },
-    config::database::Database,
+    config::database::{Database, DatabaseTrait},
     repository::{
-        oauth_account::{OAuthAccountRepository, OAuthAccountRepositoryTrait},
+        auth::oauth_account::{OAuthAccountRepository, OAuthAccountRepositoryTrait},
         user::UserRepository,
     },
     router::clerk::UserRole,
@@ -50,40 +50,51 @@ impl AuthService {
         user_agent: Option<&str>,
         ip: Option<IpAddr>,
     ) -> Result<(String, String, Uuid)> {
+        println!("🔐 [AUTH] Starting OAuth login for provider: {}", provider);
+        println!("🔐 [AUTH] Profile: email={}, provider_user_id={}", profile.email, profile.provider_user_id);
+
         // 1. Find existing OAuth account or user by email
+        println!("🔐 [AUTH] Looking up existing OAuth account...");
         let existing_oauth = self
             .oauth_repo
             .find_by_provider_and_user_id(provider, &profile.provider_user_id)
             .await?;
 
+        println!("🔐 [AUTH] Existing OAuth account found: {}", existing_oauth.is_some());
+
         let user_id = if let Some(oauth_account) = existing_oauth {
             // User already linked via this OAuth provider
-            tracing::debug!("Found existing OAuth account for user {}", oauth_account.user_id);
+            println!("🔐 [AUTH] Found existing OAuth account for user {}", oauth_account.user_id);
             oauth_account.user_id
         } else {
+            println!("🔐 [AUTH] No existing OAuth account, checking user by email...");
             // Check if user exists by email (for linking multiple OAuth accounts)
             let existing_user = self.user_repo.find_by_email(&profile.email).await?;
 
             let user_id = if let Some(user) = existing_user {
-                tracing::debug!("Found existing user by email: {}", user.id);
+                println!("🔐 [AUTH] Found existing user by email: {}", user.id);
                 user.id
             } else {
                 // Create new user
-                tracing::debug!("Creating new user from OAuth profile");
+                println!("🔐 [AUTH] Creating NEW user from OAuth profile");
                 let display_name = profile
                     .display_name
                     .or(profile.username.clone())
                     .unwrap_or_else(|| profile.email.split('@').next().unwrap().to_string());
+
+                println!("🔐 [AUTH] Display name: {}", display_name);
 
                 let user = self
                     .user_repo
                     .upsert_from_oauth(&profile.email, &display_name, profile.avatar_url.as_deref())
                     .await?;
 
+                println!("🔐 [AUTH] User created with ID: {}", user.id);
                 user.id
             };
 
             // Link OAuth account
+            println!("🔐 [AUTH] Linking OAuth account to user: {}", user_id);
             self.oauth_repo
                 .upsert(
                     &user_id,
@@ -93,30 +104,42 @@ impl AuthService {
                 )
                 .await?;
 
+            println!("🔐 [AUTH] OAuth account linked successfully");
             user_id
         };
 
         // 2. Get user with role for token generation
+        println!("🔐 [AUTH] Fetching actor for user: {}", user_id);
         let actor = self
             .user_repo
             .get_actor_by_id(user_id.clone())
             .await?
             .context("User not found after creation")?;
 
+        println!("🔐 [AUTH] Actor found with role: {:?}", actor.role);
+
         // Parse user_id to UUID (it's stored as string for Clerk compatibility)
         let user_uuid = Uuid::parse_str(&actor.user_id)
             .unwrap_or_else(|_| {
+                println!("🔐 [AUTH] User ID is not a UUID, generating new one");
                 // If not a valid UUID (old Clerk ID), generate a new one
                 // In production, you might want to handle this migration differently
                 Uuid::new_v4()
             });
 
+        println!("🔐 [AUTH] User UUID: {}", user_uuid);
+
         // 3. Generate access token (JWT, 15 minutes)
+        println!("🔐 [AUTH] Generating access token...");
         let access_token = generate_access_token(user_uuid, actor.role)?;
+        println!("🔐 [AUTH] Access token generated (length: {})", access_token.len());
 
         // 4. Generate refresh token (30 days)
+        println!("🔐 [AUTH] Generating refresh token...");
         let refresh_token = generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
+        println!("🔐 [AUTH] Refresh token generated (length: {})", refresh_token.len());
 
+        println!("🔐 [AUTH] ✅ OAuth login completed successfully!");
         Ok((access_token, refresh_token, user_uuid))
     }
 
