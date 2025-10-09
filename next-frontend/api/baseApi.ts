@@ -6,11 +6,15 @@ import { env } from "@/env";
 
 const baseApi = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
-  validateStatus: () => true,
+  withCredentials: true,
 });
+
+// Global promise to prevent concurrent refresh requests (race-condition safe)
+let refreshPromise: Promise<{ accessToken: string; refreshToken: string }> | null = null;
 
 export const setupAxiosInterceptors = (
   getToken: () => Promise<null | string>,
+  setTokens?: (accessToken: string, refreshToken: string) => void,
 ) => {
   baseApi.interceptors.request.use(async (config) => {
     const token = await getToken();
@@ -19,6 +23,57 @@ export const setupAxiosInterceptors = (
     }
     return config;
   });
+
+  baseApi.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    async (error) => {
+      const originalRequest = error.config;
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const currentRefresh = refreshPromise || (refreshPromise = (async () => {
+            try {
+              const refreshResponse = await baseApi.post("/auth/refresh", {}, {
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+
+              const newAccessToken = refreshResponse.data?.data?.access_token;
+              const newRefreshToken = refreshResponse.data?.data?.refresh_token;
+
+              if (!newAccessToken || !newRefreshToken) {
+                throw new Error("Invalid refresh response");
+              }
+
+              if (setTokens) {
+                setTokens(newAccessToken, newRefreshToken);
+              }
+
+              return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+            } finally {
+              refreshPromise = null;
+            }
+          })());
+
+          const tokens = await currentRefresh;
+
+          originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
+          return baseApi(originalRequest);
+        } catch (refreshError) {
+          // Refresh failed, redirect to login
+          window.location.href = "/sign-in";
+          return Promise.reject(refreshError);
+        }
+      }
+
+      return Promise.reject(error);
+    },
+  );
 };
 
 // INFO: this is usefull in react-query usage when dealing with isError prop
