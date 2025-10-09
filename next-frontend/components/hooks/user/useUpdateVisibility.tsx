@@ -1,8 +1,10 @@
 import * as UserApi from "@/api/userApi";
+import { useAuth } from "@/app/auth-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useUpdateVisibility = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (params: {
@@ -11,7 +13,7 @@ export const useUpdateVisibility = () => {
       visible_to_public: boolean;
     }) => await UserApi.updateVisibility(params),
     onSuccess: async (data) => {
-      queryClient.setQueryData(["user", "current"], data);
+      queryClient.setQueryData(["user", "current", user?.id], data);
     },
   });
 };

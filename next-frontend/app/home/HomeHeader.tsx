@@ -1,10 +1,10 @@
-import { NowasterLogo } from "@/components/pages/NowasterLogo";
-import { SidebarTrigger } from "@/components/shadcn/sidebar";
-import { UserButton } from "@clerk/nextjs";
-import type { FC } from "react";
-import { Separator } from "@/components/shadcn/separator";
-import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
+import { ProfileButton } from "@/components/auth/ProfileButton";
 import { NotificationPopover } from "@/components/notifications/NotificationPopover";
+import { NowasterLogo } from "@/components/pages/NowasterLogo";
+import { Separator } from "@/components/shadcn/separator";
+import { SidebarTrigger } from "@/components/shadcn/sidebar";
+import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
+import type { FC } from "react";
 
 export const HomeHeader: FC = () => {
   return (
@@ -18,7 +18,7 @@ export const HomeHeader: FC = () => {
         <div className="grow"></div>
         <SessionTimer />
         <NotificationPopover />
-        <UserButton />
+        <ProfileButton />
       </div>
     </header>
   );

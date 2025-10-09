@@ -1,15 +1,14 @@
-"use server";
-
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import Head from "next/head";
+import { AuthContextProvider } from "@/app/auth-context";
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-export default async function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <Head>
@@ -34,7 +33,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable,
         )}
       >
-        <main>{children}</main>
+        <AuthContextProvider>
+          <main>{children}</main>
+        </AuthContextProvider>
       </body>
     </html>
   );
