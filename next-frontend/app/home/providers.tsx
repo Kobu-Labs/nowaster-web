@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthContextProvider } from "@/app/auth-context";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useTags } from "@/components/hooks/tag/useTags";
 import { useColors } from "@/components/hooks/useColors";
@@ -20,18 +20,18 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <AuthContextProvider>
-      <QueryClientProvider client={queryClient}>
-        <SpeedInsights />
-        <Analytics />
+    <QueryClientProvider client={queryClient}>
+      <SpeedInsights />
+      <Analytics />
+      <AuthGuard>
         <PrefetchQueries />
         <ThemeProvider attribute="class" defaultTheme="dark">
           {children}
         </ThemeProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-        <Toaster />
-      </QueryClientProvider>
-    </AuthContextProvider>
+      </AuthGuard>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <Toaster />
+    </QueryClientProvider>
   );
 }
 
