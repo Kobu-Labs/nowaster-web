@@ -1,6 +1,7 @@
 "use client";
 
 import { setupAxiosInterceptors } from "@/api/baseApi";
+import { useAuth } from "@/app/auth-context";
 import { AuthProvider } from "@/app/clerk-provider";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useTags } from "@/components/hooks/tag/useTags";
@@ -8,7 +9,6 @@ import { useColors } from "@/components/hooks/useColors";
 import { ThemeProvider } from "@/components/pages/theme-provider";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Toaster } from "@/components/shadcn/toaster";
-import { useAuth } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Analytics } from "@vercel/analytics/react";
@@ -41,14 +41,16 @@ export function Providers({ children }: ProvidersProps) {
 }
 
 const AxiosInterceptorWrapper: FC<PropsWithChildren> = ({ children }) => {
-  const auth = useAuth();
+  const { getToken, setTokens, user, isLoaded } = useAuth();
   const [ready, setReady] = useState(false);
 
-  // INFO: wait for clerk to load
+  // INFO: wait for auth to load
   useEffect(() => {
-    setupAxiosInterceptors(auth.getToken);
-    setReady(true);
-  }, [auth.userId]);
+    if (isLoaded) {
+      setupAxiosInterceptors(getToken, setTokens);
+      setReady(true);
+    }
+  }, [isLoaded, user?.id, getToken, setTokens]);
 
   // load initially needed data
   useTags();
