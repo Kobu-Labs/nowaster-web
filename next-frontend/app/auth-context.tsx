@@ -18,6 +18,7 @@ import {
   type FC,
   type PropsWithChildren,
 } from "react";
+import { useRouter } from "next/navigation";
 
 type AuthContextType = {
   user: User | null;
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // Load user from token on mount
@@ -54,9 +56,9 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   const signOut = useCallback(() => {
+    router.push("/");
     clearAuthCookies();
     setUser(null);
-    window.location.href = "/";
   }, []);
 
   return (
