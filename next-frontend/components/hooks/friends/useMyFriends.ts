@@ -3,13 +3,9 @@ import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 import { useQuery } from "@tanstack/react-query";
 
 export const useMyFriends = () => {
-  const { data: user } = useCurrentUser();
+  const user = useCurrentUser();
 
-  if (!user) {
-    return null;
-  }
-
-  const query = useQuery({
+  return useQuery({
     queryFn: async () => {
       const data = await FriendsApi.read();
 
@@ -26,6 +22,4 @@ export const useMyFriends = () => {
     },
     queryKey: ["friends", "my"],
   });
-
-  return query;
 };

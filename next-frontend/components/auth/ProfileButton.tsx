@@ -18,11 +18,7 @@ import type { FC } from "react";
 
 export const ProfileButton: FC = () => {
   const { signOut } = useAuth();
-  const { data: user } = useCurrentUser();
-
-  if (!user) {
-    return null;
-  }
+  const user = useCurrentUser();
 
   const initials = getInitials(user.username);
 

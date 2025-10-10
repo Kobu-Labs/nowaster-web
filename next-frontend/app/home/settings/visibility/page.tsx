@@ -2,24 +2,11 @@
 
 import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 import { VisibilitySettings } from "@/components/pages/settings/visibility/VisibilitySettings";
+import { Suspense } from "react";
 import { Card, CardContent } from "@/components/shadcn/card";
 
-export default function VisibilitySettingsPage() {
-  const { data: user, isLoading } = useCurrentUser();
-
-  if (isLoading || !user) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-8 bg-muted rounded"></div>
-            <div className="h-8 bg-muted rounded"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+function VisibilitySettingsContent() {
+  const user = useCurrentUser();
 
   return (
     <div>
@@ -30,5 +17,27 @@ export default function VisibilitySettingsPage() {
 
       <VisibilitySettings user={user} />
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-3/4"></div>
+          <div className="h-8 bg-muted rounded"></div>
+          <div className="h-8 bg-muted rounded"></div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function VisibilitySettingsPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <VisibilitySettingsContent />
+    </Suspense>
   );
 }
