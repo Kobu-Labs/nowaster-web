@@ -1,12 +1,15 @@
 import { FriendsApi } from "@/api";
-import { useAuth } from "@clerk/nextjs";
+import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 import { useQuery } from "@tanstack/react-query";
 
 export const useMyFriends = () => {
-  const { userId } = useAuth();
+  const { data: user } = useCurrentUser();
+
+  if (!user) {
+    return null;
+  }
 
   const query = useQuery({
-    enabled: !!userId,
     queryFn: async () => {
       const data = await FriendsApi.read();
 
@@ -14,7 +17,7 @@ export const useMyFriends = () => {
         return {
           cratedAt: friendship.created_at,
           friend:
-            friendship.friend1.id === userId
+            friendship.friend1.id === user.id
               ? friendship.friend2
               : friendship.friend1,
           id: friendship.id,

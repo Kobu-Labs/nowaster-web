@@ -3,29 +3,29 @@
 
 import { parseResponseToResult } from "@/api/baseApi";
 import { CategoryResponseSchema } from "@/api/definitions";
-import { auth } from "@clerk/nextjs/server";
+import { env } from "@/env";
 import axios from "axios";
 import type { Metadata } from "next";
-import { env } from "node:process";
+import { cookies } from "next/headers";
 
-interface Props {
-  params: Promise<{ id: string; }>;
-}
+type Props = {
+  params: Promise<{ id: string }>;
+};
 
-interface RootLayoutProps {
+type RootLayoutProps = {
   children: React.ReactNode;
-}
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
-  const clerk = await auth();
-  const token = await clerk.getToken();
+  const token = (await cookies()).get("access_token")?.value;
 
   const { data } = await axios.get(
     `${env.NEXT_PUBLIC_API_URL}/category/${id}`,
     { headers: { Authorization: `Bearer ${token}` } },
   );
+
   const request = await parseResponseToResult(
     data,
     CategoryResponseSchema.readById,
