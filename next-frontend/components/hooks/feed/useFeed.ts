@@ -12,7 +12,7 @@ import type {
   RemoveFeedReactionRequest,
 } from "@/api/definitions/requests/feed";
 import { FeedResponse } from "@/api/definitions/responses/feed";
-import { useAuth } from "@/app/auth-context";
+import { useAuth } from "@/components/hooks/useAuth";
 
 export const FEED_QUERY_KEY = "feed";
 

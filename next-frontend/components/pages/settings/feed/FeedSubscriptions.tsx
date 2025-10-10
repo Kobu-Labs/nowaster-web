@@ -9,6 +9,7 @@ import {
   unsubscribe,
   updateSubscription,
 } from "@/api/feedApi";
+import { useAuth } from "@/components/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +37,6 @@ import {
 import { Switch } from "@/components/shadcn/switch";
 import { useToast } from "@/components/shadcn/use-toast";
 import { getInitials } from "@/lib/utils";
-import { useAuth } from "@/app/auth-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2, Users } from "lucide-react";
 import type { FC } from "react";

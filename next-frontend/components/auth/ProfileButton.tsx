@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/app/auth-context";
+import { useAuth } from "@/components/hooks/useAuth";
 import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
 import { Button } from "@/components/shadcn/button";
