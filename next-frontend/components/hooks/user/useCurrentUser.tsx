@@ -1,5 +1,5 @@
 import { UserApi } from "@/api";
-import { useAuth } from "@/app/auth-context";
+import { useAuth } from "@/components/hooks/useAuth";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 /**

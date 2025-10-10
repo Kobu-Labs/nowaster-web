@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/app/auth-context";
+import { useAuth } from "@/components/hooks/useAuth";
 import type { ButtonProps } from "@/components/shadcn/button";
 import { Button } from "@/components/shadcn/button";
 import Link from "next/link";

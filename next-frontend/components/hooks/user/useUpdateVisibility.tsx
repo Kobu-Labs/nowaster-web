@@ -1,5 +1,5 @@
 import * as UserApi from "@/api/userApi";
-import { useAuth } from "@/app/auth-context";
+import { useAuth } from "@/components/hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useUpdateVisibility = () => {

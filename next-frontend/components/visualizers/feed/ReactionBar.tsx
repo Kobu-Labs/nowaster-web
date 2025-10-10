@@ -16,7 +16,7 @@ import {
   useAddReaction,
   useRemoveReaction,
 } from "@/components/hooks/feed/useFeed";
-import { useAuth } from "@/app/auth-context";
+import { useAuth } from "@/components/hooks/useAuth";
 
 interface ReactionBarProps {
   event: ReadFeedEvent;
