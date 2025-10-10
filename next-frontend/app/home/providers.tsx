@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthProvider } from "@/app/clerk-provider";
+import { AuthContextProvider } from "@/app/auth-context";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useTags } from "@/components/hooks/tag/useTags";
 import { useColors } from "@/components/hooks/useColors";
@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <AuthProvider>
+    <AuthContextProvider>
       <QueryClientProvider client={queryClient}>
         <SpeedInsights />
         <Analytics />
@@ -31,7 +31,7 @@ export function Providers({ children }: ProvidersProps) {
         <ReactQueryDevtools initialIsOpen={false} />
         <Toaster />
       </QueryClientProvider>
-    </AuthProvider>
+    </AuthContextProvider>
   );
 }
 
