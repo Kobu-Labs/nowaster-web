@@ -1,8 +1,8 @@
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import Head from "next/head";
-import { AuthContextProvider } from "@/app/auth-context";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -33,9 +33,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable,
         )}
       >
-        <AuthContextProvider>
+        <AuthProvider>
           <main>{children}</main>
-        </AuthContextProvider>
+        </AuthProvider>
       </body>
     </html>
   );
