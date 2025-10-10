@@ -22,9 +22,8 @@ export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
 
   if (!accessToken) {
-    const signInUrl = new URL("/sign-in", request.url);
-    signInUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(signInUrl);
+    // Redirect to home page for unauthenticated users
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
@@ -32,14 +31,12 @@ export function middleware(request: NextRequest) {
     const now = Date.now() / 1000;
 
     if (claims.exp < now) {
-      const signInUrl = new URL("/sign-in", request.url);
-      signInUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(signInUrl);
+      // Token expired - redirect to home page
+      return NextResponse.redirect(new URL("/", request.url));
     }
   } catch (error) {
-    const signInUrl = new URL("/sign-in", request.url);
-    signInUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(signInUrl);
+    // Invalid token - redirect to home page
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
