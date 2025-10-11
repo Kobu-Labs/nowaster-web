@@ -11,7 +11,10 @@ use crate::{
     },
     config::database::{Database, DatabaseTrait},
     repository::{
-        auth::oauth_account::{OAuthAccountRepository, OAuthAccountRepositoryTrait},
+        auth::{
+            api_tokens::{ApiTokenRecord, ApiTokenRepository},
+            oauth_account::{OAuthAccountRepository, OAuthAccountRepositoryTrait},
+        },
         user::UserRepository,
     },
     router::clerk::UserRole,
@@ -23,6 +26,7 @@ use crate::auth::providers::UserProfile;
 pub struct AuthService {
     user_repo: UserRepository,
     oauth_repo: OAuthAccountRepository,
+    api_token_repo: ApiTokenRepository,
     pool: Arc<PgPool>,
 }
 
@@ -31,6 +35,7 @@ impl AuthService {
         Self {
             user_repo: UserRepository::new(database),
             oauth_repo: OAuthAccountRepository::new(database),
+            api_token_repo: ApiTokenRepository::new(database),
             pool: Arc::new(database.get_pool().clone()),
         }
     }
@@ -185,5 +190,31 @@ impl AuthService {
     #[instrument(err, skip(self, refresh_token))]
     pub async fn get_user_from_refresh_token(&self, refresh_token: &str) -> Result<Uuid> {
         validate_refresh_token(refresh_token, &self.pool).await
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn create_api_token(
+        &self,
+        user_id: &str,
+        name: &str,
+        description: Option<&str>,
+        expires_in_days: Option<i64>,
+    ) -> Result<(String, Uuid)> {
+        self.api_token_repo.generate_api_token(user_id, name, description, expires_in_days).await
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn list_api_tokens(&self, user_id: &str) -> Result<Vec<ApiTokenRecord>> {
+        self.api_token_repo.list_user_tokens(user_id).await
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn revoke_api_token(&self, token_id: Uuid, user_id: &str, reason: &str) -> Result<()> {
+        self.api_token_repo.revoke_token_by_id(token_id, user_id, reason).await
+    }
+
+    #[instrument(err, skip(self, token))]
+    pub async fn validate_api_token(&self, token: &str) -> Result<(String, UserRole)> {
+        self.api_token_repo.validate_api_token(token).await
     }
 }
