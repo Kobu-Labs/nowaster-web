@@ -8,8 +8,8 @@ use axum::{
 };
 use sqlx::Type;
 
-use crate::auth::validate_access_token;
 use super::root::AppState;
+use crate::auth::validate_access_token;
 
 #[derive(Debug, Clone)]
 pub struct Actor {
@@ -53,7 +53,6 @@ impl FromStr for UserRole {
     }
 }
 
-
 impl Actor {
     pub fn is_admin(&self) -> bool {
         matches!(self.role, UserRole::Admin)
@@ -69,25 +68,29 @@ impl FromRequestParts<AppState> for Actor {
 
     async fn from_request_parts(
         parts: &mut Parts,
-        _state: &AppState,
+        state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        // Extract Authorization header
-        let auth_header = parts
+        if let Some(auth_header) = parts
             .headers
             .get("Authorization")
             .and_then(|h| h.to_str().ok())
             .and_then(|h| h.strip_prefix("Bearer "))
-            .ok_or(StatusCode::UNAUTHORIZED)?;
+        {
+            if let Ok(claims) = validate_access_token(auth_header) {
+                let role = UserRole::from_str(&claims.role).unwrap_or(UserRole::User);
+                return Ok(Actor {
+                    user_id: claims.sub,
+                    role,
+                });
+            }
+        }
 
-        // Validate JWT and extract claims
-        let claims = validate_access_token(auth_header)
-            .map_err(|_| StatusCode::UNAUTHORIZED)?;
+        if let Some(api_key) = parts.headers.get("X-API-Key").and_then(|h| h.to_str().ok()) {
+            if let Ok((user_id, role)) = state.auth_service.validate_api_token(api_key).await {
+                return Ok(Actor { user_id, role });
+            }
+        }
 
-        // Parse user_id and role from claims
-        let user_id = claims.sub;
-        let role = UserRole::from_str(&claims.role)
-            .unwrap_or(UserRole::User);
-
-        Ok(Actor { user_id, role })
+        Err(StatusCode::UNAUTHORIZED)
     }
 }
