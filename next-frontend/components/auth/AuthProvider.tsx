@@ -1,6 +1,5 @@
 "use client";
 
-import { setupAxiosInterceptors } from "@/api/baseApi";
 import { AuthContext } from "@/components/hooks/useAuth";
 import {
   clearAuthCookies,
@@ -19,15 +18,14 @@ import {
 } from "react";
 
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
+  // Start with null to avoid hydration mismatch
   const [user, setUser] = useState<User | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
+  // Load user from cookies only on client (after hydration)
   useEffect(() => {
-    // Load user from token on mount
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-    setupAxiosInterceptors(getToken, setTokens);
+    setUser(getCurrentUser());
     setIsLoaded(true);
   }, []);
 

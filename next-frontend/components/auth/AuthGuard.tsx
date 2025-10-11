@@ -8,7 +8,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect unauthenticated users to home page
+    // Redirect unauthenticated users to home page (only after auth is loaded)
     if (isLoaded && !user) {
       router.push("/");
     }
