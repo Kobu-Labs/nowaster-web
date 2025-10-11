@@ -1,6 +1,6 @@
 import { useAuth } from "@/components/hooks/useAuth";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
