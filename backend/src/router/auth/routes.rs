@@ -17,7 +17,7 @@ use crate::{
             discord::DiscordProvider, github::GitHubProvider, google::GoogleProvider, OAuthProvider,
         },
     },
-    router::{clerk::Actor, response::ApiResponse, root::AppState},
+    router::{auth::tokens::api_tokens_router, clerk::Actor, response::ApiResponse, root::AppState},
 };
 
 #[derive(Debug, Deserialize)]
@@ -48,6 +48,7 @@ pub fn auth_router() -> Router<AppState> {
         .route("/refresh", post(refresh_token_handler))
         .route("/logout", post(logout_handler))
         .route("/me", get(get_current_user_handler))
+        .nest("/tokens", api_tokens_router())
 }
 
 /// Initiate OAuth flow - redirect user to provider
