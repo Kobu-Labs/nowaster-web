@@ -79,7 +79,8 @@ export function isAuthenticated(): boolean {
  * Set auth tokens in cookies
  */
 export function setAuthTokens(accessToken: string, refreshToken: string) {
-  // Set access token (15 minutes)
+  // Set access token cookie to expire in 30 days (same as refresh token)
+  // The JWT inside expires in 15 min, but cookie persists so we can read it and detect "expired" vs "missing"
   Cookies.set("access_token", accessToken, {
     expires: 1 / 96, // 15 minutes in days (24 * 60 / 15 = 96)
     path: "/",
@@ -92,6 +93,21 @@ export function setAuthTokens(accessToken: string, refreshToken: string) {
     path: "/",
     sameSite: "lax",
   });
+
+  // Set session flag (readable by JS, persists to indicate user has logged in before)
+  Cookies.set("has_session", "true", {
+    expires: 30,
+    path: "/",
+    sameSite: "lax",
+  });
+}
+
+export function setAccessToken(accessToken: string) {
+  Cookies.set("access_token", accessToken, {
+    expires: 30,
+    path: "/",
+    sameSite: "lax",
+  });
 }
 
 /**
@@ -100,4 +116,9 @@ export function setAuthTokens(accessToken: string, refreshToken: string) {
 export function clearAuthCookies() {
   Cookies.remove("access_token");
   Cookies.remove("refresh_token");
+  Cookies.remove("has_session");
+}
+
+export function hasSession(): boolean {
+  return Cookies.get("has_session") === "true";
 }

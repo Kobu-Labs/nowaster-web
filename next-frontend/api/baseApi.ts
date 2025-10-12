@@ -1,9 +1,9 @@
-import { Result } from "@badrap/result";
 import { ResponseSchema } from "@/api/definitions";
-import axios from "axios";
-import type { ZodType } from "zod";
 import { env } from "@/env";
 import { getAccessToken, setAuthTokens } from "@/lib/auth";
+import { Result } from "@badrap/result";
+import axios from "axios";
+import type { ZodType } from "zod";
 
 const baseApi = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
@@ -15,6 +15,47 @@ let refreshPromise: Promise<{
   accessToken: string;
   refreshToken: string;
 }> | null = null;
+
+export const refreshTokens = async (): Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const refreshResponse = await baseApi.post(
+        "/auth/refresh",
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const newAccessToken = refreshResponse.data?.data?.access_token;
+      const newRefreshToken = refreshResponse.data?.data?.refresh_token;
+
+      if (!newAccessToken || !newRefreshToken) {
+        throw new Error("Invalid refresh response");
+      }
+
+      setAuthTokens(newAccessToken, newRefreshToken);
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
 
 // Request interceptor: add auth token to all requests
 baseApi.interceptors.request.use(async (config) => {
@@ -35,45 +76,10 @@ baseApi.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const currentRefresh =
-          refreshPromise ||
-          (refreshPromise = (async () => {
-            try {
-              const refreshResponse = await baseApi.post(
-                "/auth/refresh",
-                {},
-                {
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                },
-              );
-
-              const newAccessToken = refreshResponse.data?.data?.access_token;
-              const newRefreshToken = refreshResponse.data?.data?.refresh_token;
-
-              if (!newAccessToken || !newRefreshToken) {
-                throw new Error("Invalid refresh response");
-              }
-
-              // Store tokens in cookies
-              setAuthTokens(newAccessToken, newRefreshToken);
-
-              return {
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken,
-              };
-            } finally {
-              refreshPromise = null;
-            }
-          })());
-
-        const tokens = await currentRefresh;
-
+        const tokens = await refreshTokens();
         originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
         return baseApi(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, redirect to login
         window.location.href = "/sign-in";
         return Promise.reject(refreshError);
       }
