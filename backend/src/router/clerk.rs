@@ -70,6 +70,24 @@ impl FromRequestParts<AppState> for Actor {
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
+        if let Some(impersonation_token) = parts
+            .headers
+            .get("X-Impersonation-Token")
+            .and_then(|h| h.to_str().ok())
+        {
+            if let Ok(Some((target_user_id, admin_user_id))) = state
+                .auth_service
+                .validate_impersonation_token(impersonation_token)
+                .await
+            {
+                let role = UserRole::User;
+                return Ok(Actor {
+                    user_id: target_user_id,
+                    role,
+                });
+            }
+        }
+
         if let Some(auth_header) = parts
             .headers
             .get("Authorization")

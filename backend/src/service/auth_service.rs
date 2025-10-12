@@ -13,6 +13,7 @@ use crate::{
     repository::{
         auth::{
             api_tokens::{ApiTokenRecord, ApiTokenRepository},
+            impersonation::ImpersonationRepository,
             oauth_account::{OAuthAccountRepository, OAuthAccountRepositoryTrait},
         },
         user::UserRepository,
@@ -27,6 +28,7 @@ pub struct AuthService {
     user_repo: UserRepository,
     oauth_repo: OAuthAccountRepository,
     api_token_repo: ApiTokenRepository,
+    impersonation_repo: ImpersonationRepository,
     pool: Arc<PgPool>,
 }
 
@@ -36,6 +38,7 @@ impl AuthService {
             user_repo: UserRepository::new(database),
             oauth_repo: OAuthAccountRepository::new(database),
             api_token_repo: ApiTokenRepository::new(database),
+            impersonation_repo: ImpersonationRepository::new(database),
             pool: Arc::new(database.get_pool().clone()),
         }
     }
@@ -216,5 +219,20 @@ impl AuthService {
     #[instrument(err, skip(self, token))]
     pub async fn validate_api_token(&self, token: &str) -> Result<(String, UserRole)> {
         self.api_token_repo.validate_api_token(token).await
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn start_impersonation(&self, admin_user_id: &str, target_user_id: &str) -> Result<String> {
+        self.impersonation_repo.create_impersonation_session(admin_user_id, target_user_id).await
+    }
+
+    #[instrument(err, skip(self, token))]
+    pub async fn validate_impersonation_token(&self, token: &str) -> Result<Option<(String, String)>> {
+        self.impersonation_repo.validate_impersonation_token(token).await
+    }
+
+    #[instrument(err, skip(self, token))]
+    pub async fn stop_impersonation(&self, token: &str) -> Result<()> {
+        self.impersonation_repo.revoke_impersonation_token(token).await
     }
 }

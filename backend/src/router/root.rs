@@ -5,8 +5,6 @@ use axum::{
     routing::IntoMakeService,
     Router,
 };
-use tower::ServiceBuilder;
-use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use uuid::Uuid;
 
 use crate::{
@@ -41,13 +39,13 @@ use crate::{
 };
 
 use super::{
-    auth::auth_router, category::root::category_router, feed::root::feed_router,
-    friend::root::friend_router, notification::root::notification_router,
+    admin::routes::admin_router, auth::auth_router, category::root::category_router,
+    feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
     session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
     user::root::public_user_router,
 };
 
-use tracing::{info_span, Level};
+use tracing::info_span;
 
 #[derive(Clone)]
 pub struct Feed {
@@ -165,8 +163,8 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         .nest(
             "/notifications",
             notification_router().with_state(state.clone()),
-        );
-    // No ClerkLayer needed - Actor extractor does JWT validation
+        )
+        .nest("/admin", admin_router().with_state(state.clone()));
 
     let api_router = Router::new()
         .merge(auth_routes)
@@ -194,13 +192,15 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
             http::header::AUTHORIZATION,
             http::header::ACCEPT,
             http::header::COOKIE,
+            http::HeaderName::from_static("x-api-key"),
+            http::HeaderName::from_static("x-impersonation-token"),
         ])
         .allow_credentials(true);
 
     Router::new()
-    .nest("/api", api_router)
-    .layer(cors)
-    .into_make_service()
+        .nest("/api", api_router)
+        .layer(cors)
+        .into_make_service()
 }
 
 fn make_span_for_request<B>(req: &Request<B>) -> tracing::Span {
