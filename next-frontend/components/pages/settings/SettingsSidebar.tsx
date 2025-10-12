@@ -1,6 +1,6 @@
 "use client";
 
-import { Rss, Settings, Shield, Sliders } from "lucide-react";
+import { Key, Rss, Settings, Shield, Sliders } from "lucide-react";
 
 import {
   Sidebar,
@@ -29,6 +29,15 @@ const settingsNavItems = [
     icon: Shield,
     title: "Privacy",
     url: "/home/settings/visibility",
+  },
+] as const;
+
+const securityNavItems = [
+  {
+    description: "Manage API tokens for programmatic access",
+    icon: Key,
+    title: "API Tokens",
+    url: "/home/settings/tokens",
   },
 ] as const;
 
@@ -63,6 +72,26 @@ export function SettingsSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link className="flex items-start gap-1" href={item.url}>
+                      <div className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="my-2">
+          <SidebarGroupLabel>Security</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {securityNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link className="flex items-start gap-1" href={item.url}>
