@@ -172,23 +172,30 @@ impl UserRepository {
             r#"
                 SELECT id, displayname, avatar_url, visibility_flags
                 FROM "user"
-                WHERE 1=1
+                WHERE
             "#,
         );
+
+        let mut separated = query.separated(" OR ");
 
         if let Some(id) = filter.id {
             match id {
                 IdFilter::Many(ids) => {
-                    query.push(" AND id = ANY(").push_bind(ids).push(")");
+                    separated
+                        .push("id = ANY(")
+                        .push_bind_unseparated(ids)
+                        .push_unseparated(")");
                 }
                 IdFilter::Single(single) => {
-                    query.push(" AND id = ").push_bind(single);
+                    let pattern = format!("%{}%", single);
+                    separated.push("id ILIKE ").push_bind_unseparated(pattern);
                 }
             }
         }
 
         if let Some(name) = filter.name {
-            query.push("AND displayname = ").push_bind(name);
+            let pattern = format!("%{}%", name);
+            separated.push("displayname ILIKE ").push_bind_unseparated(pattern);
         }
 
         let rows = query
