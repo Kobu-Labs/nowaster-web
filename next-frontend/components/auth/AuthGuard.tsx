@@ -1,18 +1,32 @@
 import { useAuth } from "@/components/hooks/useAuth";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import { hasSession } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { refreshTokens } from "@/api/baseApi";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded } = useAuth();
+  const { isLoaded, user, setTokens } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect unauthenticated users to home page (only after auth is loaded)
-    if (isLoaded && !user) {
+    const refreshTokenIfNeeded = async () => {
+      if (isLoaded && !user && hasSession()) {
+        try {
+          const tokens = await refreshTokens();
+          setTokens(tokens.accessToken, tokens.refreshToken);
+        } catch (error) {
+          router.push("/");
+        }
+      }
+    };
+
+    if (isLoaded && !user && !hasSession()) {
       router.push("/");
+    } else {
+      refreshTokenIfNeeded();
     }
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user, router, setTokens]);
 
   // Don't render protected content until auth is loaded and user exists
   if (!isLoaded || !user) {

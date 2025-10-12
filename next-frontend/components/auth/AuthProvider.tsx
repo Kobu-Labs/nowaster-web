@@ -23,7 +23,6 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
-  // Load user from cookies only on client (after hydration)
   useEffect(() => {
     setUser(getCurrentUser());
     setIsLoaded(true);
@@ -35,16 +34,14 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const setTokens = useCallback((accessToken: string, refreshToken: string) => {
     setAuthTokens(accessToken, refreshToken);
-
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    setUser(getCurrentUser());
   }, []);
 
   const signOut = useCallback(() => {
     router.push("/");
     clearAuthCookies();
     setUser(null);
-  }, []);
+  }, [router]);
 
   return (
     <AuthContext.Provider
