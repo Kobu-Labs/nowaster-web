@@ -140,4 +140,22 @@ impl UserService {
             Err(e) => Err(UserError::UnknownError(e.to_string())),
         }
     }
+
+    #[instrument(err, skip(self))]
+    pub async fn search_users(
+        &self,
+        query: &str,
+        limit: i64,
+    ) -> Result<Vec<ReadUserDto>, UserError> {
+        let users = self
+            .repo
+            .filter_users(FilterUsersDto {
+                id: Some(IdFilter::Single(query.to_string())),
+                name: Some(query.to_string()),
+            })
+            .await
+            .map_err(|e| UserError::UnknownError(e.to_string()))?;
+
+        Ok(users.iter().cloned().map(Into::into).collect())
+    }
 }
