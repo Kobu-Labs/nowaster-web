@@ -38,6 +38,7 @@ fn default_limit() -> i64 {
 pub fn admin_router() -> Router<AppState> {
     Router::new()
         .route("/users/search", get(search_users))
+        .route("/users/{user_id}", get(get_user_by_id))
         .route("/impersonate/{user_id}", post(start_impersonation))
         .route("/stop-impersonation", post(stop_impersonation))
 }
@@ -62,6 +63,27 @@ async fn search_users(
         })?;
 
     Ok(Json(ApiResponse::Success { data: users }))
+}
+
+#[instrument(skip(state))]
+async fn get_user_by_id(
+    State(state): State<AppState>,
+    AdminUser(_admin): AdminUser,
+    Path(user_id): Path<String>,
+) -> Result<Json<ApiResponse<ReadUserDto>>, StatusCode> {
+    let user = state
+        .user_service
+        .get_user_by_id(user_id.clone())
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get user {}: {}", user_id, e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    match user {
+        Some(user) => Ok(Json(ApiResponse::Success { data: user })),
+        None => Err(StatusCode::NOT_FOUND),
+    }
 }
 
 #[instrument(skip(state))]
