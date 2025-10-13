@@ -23,3 +23,8 @@ export const stopImpersonation = async (impersonationToken: string) => {
     impersonation_token: impersonationToken,
   });
 };
+
+export const getUserById = async (userId: string) => {
+  const { data } = await baseApi.get(`${BASE_URL}/users/${userId}`);
+  return await parseResponseUnsafe(data, UserSchema);
+};
