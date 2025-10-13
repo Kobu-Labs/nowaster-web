@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, Rss, Settings, Shield, Sliders } from "lucide-react";
+import { Key, Rss, Settings, Shield, Sliders, UserCog } from "lucide-react";
 
 import {
   Sidebar,
@@ -16,6 +16,7 @@ import {
 } from "@/components/shadcn/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/hooks/useAuth";
 
 const settingsNavItems = [
   {
@@ -50,8 +51,18 @@ const preferencesNavItems = [
   },
 ] as const;
 
+const adminNavItems = [
+  {
+    description: "Admin tools and user management",
+    icon: UserCog,
+    title: "Admin Tools",
+    url: "/home/settings/admin",
+  },
+] as const;
+
 export function SettingsSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <Sidebar
@@ -126,6 +137,28 @@ export function SettingsSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {user?.role === "admin" && (
+          <SidebarGroup className="my-2">
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminNavItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url}>
+                      <Link className="flex items-start gap-1" href={item.url}>
+                        <div className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </div>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

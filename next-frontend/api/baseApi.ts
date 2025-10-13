@@ -59,9 +59,18 @@ export const refreshTokens = async (): Promise<{
 
 // Request interceptor: add auth token to all requests
 baseApi.interceptors.request.use(async (config) => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const impersonationToken =
+    typeof window !== "undefined"
+      ? localStorage.getItem("impersonation_token")
+      : null;
+
+  if (impersonationToken) {
+    config.headers["X-Impersonation-Token"] = impersonationToken;
+  } else {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
