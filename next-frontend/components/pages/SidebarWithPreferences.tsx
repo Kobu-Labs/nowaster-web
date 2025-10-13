@@ -2,6 +2,7 @@
 
 import { HomeHeader } from "@/app/home/HomeHeader";
 import { AppSidebar } from "@/components/pages/AppSidebar";
+import { ImpersonationBanner } from "@/components/impersonation/ImpersonationBanner";
 import { SidebarProvider } from "@/components/shadcn/sidebar";
 import { sidebarBehaviorAtom } from "@/state/preferences";
 import { useAtomValue } from "jotai";
@@ -21,6 +22,7 @@ export const SidebarWithPreferences: React.FC<SidebarWithPreferencesProps> = ({
       defaultOpen={false}
     >
       <HomeHeader />
+      <ImpersonationBanner />
       <div className="flex w-full">
         <AppSidebar
           collapsible={sidebarBehavior === "permanent" ? "none" : "offcanvas"}
