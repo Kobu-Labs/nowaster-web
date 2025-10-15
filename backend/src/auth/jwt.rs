@@ -3,7 +3,6 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use uuid::Uuid;
 
 use crate::router::clerk::UserRole;
@@ -20,18 +19,26 @@ pub struct Claims {
 }
 
 // Load RSA keys on application startup
+// Keys must be provided via environment variables (loaded from .env.keys file):
+// - JWT_PRIVATE_KEY: RSA private key in PEM format
+// - JWT_PUBLIC_KEY: RSA public key in PEM format
+//
+// Note: These are in a separate .env.keys file because the envy crate
+// (used for typed config) doesn't support multiline environment variables.
 static ENCODING_KEY: Lazy<EncodingKey> = Lazy::new(|| {
-    let key_path = std::env::var("JWT_PRIVATE_KEY_PATH").unwrap_or_else(|_| "keys/private.pem".to_string());
-    let private_key = fs::read(&key_path)
-        .unwrap_or_else(|e| panic!("Failed to read private key from {}: {}", key_path, e));
+    let private_key = std::env::var("JWT_PRIVATE_KEY")
+        .expect("JWT_PRIVATE_KEY environment variable must be set in .env.keys file")
+        .into_bytes();
+
     EncodingKey::from_rsa_pem(&private_key)
         .unwrap_or_else(|e| panic!("Invalid private key format: {}", e))
 });
 
 static DECODING_KEY: Lazy<DecodingKey> = Lazy::new(|| {
-    let key_path = std::env::var("JWT_PUBLIC_KEY_PATH").unwrap_or_else(|_| "keys/public.pem".to_string());
-    let public_key = fs::read(&key_path)
-        .unwrap_or_else(|e| panic!("Failed to read public key from {}: {}", key_path, e));
+    let public_key = std::env::var("JWT_PUBLIC_KEY")
+        .expect("JWT_PUBLIC_KEY environment variable must be set in .env.keys file")
+        .into_bytes();
+
     DecodingKey::from_rsa_pem(&public_key)
         .unwrap_or_else(|e| panic!("Invalid public key format: {}", e))
 });
