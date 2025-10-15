@@ -1,4 +1,5 @@
 .env
+.env.keys
 target
 dist/
 next-frontend/storybook-static

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use config::database::{Database, DatabaseTrait};
 use router::root::get_router;
@@ -23,6 +23,7 @@ async fn main() {
     };
 
     dotenv::dotenv().ok();
+    dotenv::from_path(Path::new(".env.keys")).ok();
     let config = envy::from_env::<Config>()
         .unwrap_or_else(|e| panic!("Failed to load configuration from environment: {}", e));
 

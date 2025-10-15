@@ -15,14 +15,6 @@ pub struct DatabaseConfig {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct JwtConfig {
-    #[serde(rename = "jwt_private_key_path")]
-    pub private_key_path: String,
-    #[serde(rename = "jwt_public_key_path")]
-    pub public_key_path: String,
-}
-
-#[derive(Deserialize, Debug, Clone)]
 pub struct GoogleOAuthConfig {
     #[serde(rename = "google_client_id")]
     pub client_id: String,
@@ -64,8 +56,6 @@ pub struct Config {
     pub server: ServerConfig,
     #[serde(flatten)]
     pub database: DatabaseConfig,
-    #[serde(flatten)]
-    pub jwt: JwtConfig,
     #[serde(flatten)]
     pub google: GoogleOAuthConfig,
     #[serde(flatten)]
