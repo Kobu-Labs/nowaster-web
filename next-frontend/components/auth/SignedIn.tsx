@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuth } from "@/components/hooks/useAuth";
 import type { FC, PropsWithChildren } from "react";
 
