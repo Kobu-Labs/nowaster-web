@@ -116,9 +116,9 @@ impl AuthService {
             user_id
         };
 
-        // 2. Get user with role for token generation
+        // 2. Get user with role and display name for token generation
         println!("🔐 [AUTH] Fetching actor for user: {}", user_id);
-        let actor = self
+        let (actor, display_name) = self
             .user_repo
             .get_actor_by_id(user_id.clone())
             .await?
@@ -139,7 +139,7 @@ impl AuthService {
 
         // 3. Generate access token (JWT, 15 minutes)
         println!("🔐 [AUTH] Generating access token...");
-        let access_token = generate_access_token(user_uuid, actor.role)?;
+        let access_token = generate_access_token(user_uuid, actor.role, display_name)?;
         println!("🔐 [AUTH] Access token generated (length: {})", access_token.len());
 
         // 4. Generate refresh token (30 days)
@@ -164,15 +164,15 @@ impl AuthService {
         // 1. Validate refresh token and get user_id
         let user_uuid = validate_refresh_token(refresh_token, &self.pool).await?;
 
-        // 2. Get user with role
-        let actor = self
+        // 2. Get user with role and display name
+        let (actor, display_name) = self
             .user_repo
             .get_actor_by_id(user_uuid.to_string())
             .await?
             .context("User not found")?;
 
         // 3. Generate new access token
-        let access_token = generate_access_token(user_uuid, actor.role)?;
+        let access_token = generate_access_token(user_uuid, actor.role, display_name)?;
 
         // 4. Generate new refresh token (rotation)
         let new_refresh_token = generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;

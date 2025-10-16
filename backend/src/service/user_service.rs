@@ -84,7 +84,7 @@ impl UserService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor_id))]
-    pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<Actor>> {
+    pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<(Actor, String)>> {
         // INFO: right now only user can be an actor
         self.repo.get_actor_by_id(actor_id).await
     }

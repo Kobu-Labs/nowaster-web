@@ -123,6 +123,16 @@
                 hsl(var(--purple-primary)) 100%);
     }
 
+    /* Gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg,
+                hsl(var(--pink-subtle)) 0%,
+                hsl(var(--pink-primary)) 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
     /* Gradient text on hover */
     .gradient-text-hover {
         @apply transition-all duration-300;

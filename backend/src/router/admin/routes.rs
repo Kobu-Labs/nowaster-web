@@ -105,7 +105,7 @@ async fn start_impersonation(
             StatusCode::NOT_FOUND
         })?;
 
-    if let Some(actor) = target_actor {
+    if let Some((actor, _)) = target_actor {
         if actor.is_admin() {
             tracing::warn!("Attempted to impersonate admin user: {}", target_user_id);
             return Err(StatusCode::FORBIDDEN);

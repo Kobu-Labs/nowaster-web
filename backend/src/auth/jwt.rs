@@ -12,6 +12,7 @@ use crate::router::clerk::UserRole;
 pub struct Claims {
     pub sub: String,        // Subject (user_id as UUID string)
     pub role: String,       // User role ("user" or "admin")
+    pub name: String,       // User display name
     pub iat: i64,           // Issued at timestamp
     pub exp: i64,           // Expiration timestamp
     pub iss: String,        // Issuer ("nowaster-api")
@@ -48,15 +49,17 @@ static DECODING_KEY: Lazy<DecodingKey> = Lazy::new(|| {
 /// # Arguments
 /// * `user_id` - User's UUID
 /// * `role` - User's role
+/// * `display_name` - User's display name
 ///
 /// # Returns
 /// JWT token string valid for 15 minutes
-pub fn generate_access_token(user_id: Uuid, role: UserRole) -> Result<String> {
+pub fn generate_access_token(user_id: Uuid, role: UserRole, display_name: String) -> Result<String> {
     let now = Utc::now().timestamp();
 
     let claims = Claims {
         sub: user_id.to_string(),
         role: role.to_string(),
+        name: display_name,
         iat: now,
         exp: now + 900, // 15 minutes
         iss: "nowaster-api".to_string(),
