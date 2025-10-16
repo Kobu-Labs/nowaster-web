@@ -9,8 +9,9 @@ Simple application for tracking your time
 ### Backend
 
 1. Copy `backend/.env.example` to `backend/.env` and configure your environment variables
-2. Create `backend/.env.keys` file with JWT keys (see `.env.example` for format)
+2. Create `backend/.env.keys` file with JWT keys (see `.env.keys.example` for format)
    - **Note**: The `.env.keys` file is required because the `envy` crate doesn't support multiline environment variables
+   - JWT keys must be on a single line with `\n` for newlines
    - JWT keys are loaded directly via `std::env::var()` from this separate file
 3. Generate JWT keys if needed:
    ```bash
