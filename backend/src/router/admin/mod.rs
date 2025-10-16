@@ -32,7 +32,7 @@ impl FromRequestParts<AppState> for AdminUser {
                     .await
                     .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-                if let Some(actor) = admin_actor {
+                if let Some((actor, _display_name)) = admin_actor {
                     if actor.is_admin() {
                         return Ok(AdminUser(actor));
                     }

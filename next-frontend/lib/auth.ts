@@ -8,6 +8,7 @@ export type UserRole = "admin" | "user";
 export type JwtClaims = {
   sub: string; // user_id
   role: UserRole;
+  name: string;
   iat: number;
   exp: number;
   iss: string;
@@ -17,6 +18,7 @@ export type JwtClaims = {
 export type User = {
   id: string;
   role: UserRole;
+  username: string;
 };
 
 /**
@@ -65,6 +67,7 @@ export function getCurrentUser(): User | null {
   return {
     id: claims.sub,
     role: claims.role,
+    username: claims.name,
   };
 }
 

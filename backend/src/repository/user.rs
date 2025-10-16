@@ -141,11 +141,12 @@ impl UserRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor_id))]
-    pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<Actor>> {
+    pub async fn get_actor_by_id(&self, actor_id: String) -> Result<Option<(Actor, String)>> {
         let query = sqlx::query!(
             r#"
-                SELECT 
+                SELECT
                     u.id,
+                    u.displayname,
                     u.role AS "role: UserRole"
                 FROM "user" u
                 WHERE
@@ -154,13 +155,15 @@ impl UserRepository {
             actor_id
         )
         .fetch_optional(self.db_conn.get_pool())
-        .await?
-        .ok_or(anyhow!("Not found"))?;
+        .await?;
 
-        Ok(Some(Actor {
-            user_id: query.id,
-            role: query.role,
-        }))
+        Ok(query.map(|q| (
+            Actor {
+                user_id: q.id.clone(),
+                role: q.role,
+            },
+            q.displayname
+        )))
     }
     #[instrument(err, skip(self))]
     pub async fn filter_users(&self, filter: FilterUsersDto) -> Result<Vec<User>> {
