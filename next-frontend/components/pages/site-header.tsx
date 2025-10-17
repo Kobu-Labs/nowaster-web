@@ -1,5 +1,7 @@
+import { SignedIn } from "@/components/auth/SignedIn";
+import { SignedOut } from "@/components/auth/SignedOut";
+import { WelcomeBackButton } from "@/components/auth/WelcomBackButton";
 import { Button } from "@/components/shadcn/button";
-import { ArrowBigRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -20,12 +22,18 @@ export function SiteHeader() {
         <span className="inline-block font-bold hidden xs:block">Nowaster</span>
       </Link>
       <nav aria-label="Main navigation" className="flex-1 flex justify-end">
-        <Link href="/home/">
-          <Button aria-label="Navigate to application">
-            Go to application
-            <ArrowBigRight aria-hidden="true" />
-          </Button>
-        </Link>
+        <SignedIn>
+          <Link href="/home">
+            <WelcomeBackButton />
+          </Link>
+        </SignedIn>
+        <SignedOut>
+          <Link href="/sign-in">
+            <Button variant="secondary">
+              <p>Log in</p>
+            </Button>
+          </Link>
+        </SignedOut>
       </nav>
     </header>
   );

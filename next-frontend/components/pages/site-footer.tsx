@@ -1,4 +1,11 @@
 import { Button } from "@/components/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { Github } from "lucide-react";
 import Link from "next/link";
 
@@ -11,17 +18,27 @@ export const SiteFooter = () => {
             &copy; All rights reserved
           </p>
         </div>
-        <Button className="flex items-center gap-4" variant="link">
-          <Link
-            className="flex items-center gap-1 text-sm font-medium"
-            href="https://github.com/Kobu-Labs/nowaster-web"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <Github className="h-4 w-4" />
-            <span>GitHub</span>
-          </Link>
-        </Button>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button className="flex items-center gap-4" variant="link">
+                <Link
+                  className="flex items-center gap-1 text-sm font-medium"
+                  href="https://github.com/Kobu-Labs/nowaster-web"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Github className="h-4 w-4" />
+                  <span>GitHub</span>
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="flex items-center justify-center gap-1">
+              <InfoCircledIcon />
+              This will open a new tab
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </footer>
   );
