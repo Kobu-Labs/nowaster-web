@@ -2,15 +2,14 @@ use anyhow::Result;
 use tracing::instrument;
 
 use crate::{
-    dto::{
-        feed::AddFeedSource,
-        user::{
-            read_user::ReadUserDto, update_user::UpdateUserDto,
-            update_visibility::UpdateVisibilityDto,
-        },
+    dto::user::{
+        read_user::ReadUserDto, update_user::UpdateUserDto, update_visibility::UpdateVisibilityDto,
     },
     repository::user::{FilterUsersDto, IdFilter, UserRepository},
-    router::{clerk::Actor, user::root::UserError},
+    router::{
+        clerk::{Actor, UserRole},
+        user::root::UserError,
+    },
     service::feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
 };
 
@@ -35,7 +34,14 @@ impl UserService {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn update_user(&self, dto: UpdateUserDto) -> Result<ReadUserDto, UserError> {
+    pub async fn update_user(
+        &self,
+        dto: UpdateUserDto,
+        actor: Actor,
+    ) -> Result<ReadUserDto, UserError> {
+        if actor.role == UserRole::User && actor.user_id != dto.id {
+            return Err(UserError::Unauthorized);
+        }
         let res = self.repo.update(dto).await;
         match res {
             Ok(u) => Ok(ReadUserDto::from(u)),

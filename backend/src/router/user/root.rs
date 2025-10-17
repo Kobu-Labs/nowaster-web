@@ -25,7 +25,7 @@ async fn update_user_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,
 ) -> ApiResponse<ReadUserDto> {
-    let res = state.user_service.update_user(payload).await;
+    let res = state.user_service.update_user(payload, actor).await;
     ApiResponse::from_result(res)
 }
 
