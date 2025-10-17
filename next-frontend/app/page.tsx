@@ -1,3 +1,5 @@
+import { SignedIn } from "@/components/auth/SignedIn";
+import { SignedOut } from "@/components/auth/SignedOut";
 import { SiteFooter } from "@/components/pages/site-footer";
 import { SiteHeader } from "@/components/pages/site-header";
 import {
@@ -6,7 +8,14 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { Button } from "@/components/shadcn/button";
-import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
+import { StopwatchIcon } from "@radix-ui/react-icons";
+import {
+  ArrowRightSquare,
+  BarChart3,
+  ChartArea,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,11 +44,28 @@ export default async function LandingPage() {
                 </p>
               </div>
 
-              <Link href="/sign-in">
-                <Button variant="secondary">
-                  <p>Sign up now</p>
-                </Button>
-              </Link>
+              <SignedIn>
+                <Link href="/home">
+                  <Button
+                    variant="secondary"
+                    className="flex items-center justify-center gap-1 group"
+                  >
+                    <p>Go to application</p>
+                    <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                  </Button>
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <Link href="/sign-in">
+                  <Button
+                    variant="secondary"
+                    className="flex items-center justify-center gap-1 group"
+                  >
+                    <StopwatchIcon className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                    <p>Start tracking now</p>
+                  </Button>
+                </Link>
+              </SignedOut>
               <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
             </div>
             <div className="flex items-center justify-center">
@@ -303,11 +329,24 @@ export default async function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link href="/sign-in">
-                  <Button variant="secondary">
-                    <p>Start your journey now</p>
-                  </Button>
-                </Link>
+                <SignedIn>
+                  <Link href="/home">
+                    <Button
+                      variant="secondary"
+                      className="flex items-center justify-center gap-1 group"
+                    >
+                      <p>Go to application</p>
+                      <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                    </Button>
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <Link href="/sign-in">
+                    <Button variant="secondary">
+                      <p>Start your journey now</p>
+                    </Button>
+                  </Link>
+                </SignedOut>
               </div>
             </div>
           </div>
