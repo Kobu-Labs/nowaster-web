@@ -42,7 +42,6 @@ use super::{
     admin::routes::admin_router, auth::auth_router, category::root::category_router,
     feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
     session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
-    user::root::public_user_router,
 };
 
 use tracing::info_span;
@@ -147,10 +146,6 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         .nest("/auth", auth_router())
         .with_state(state.clone());
 
-    // Public user routes (no authentication)
-    let publicuser_route =
-        Router::new().nest("/user", public_user_router().with_state(state.clone()));
-
     // Protected routes (Actor extractor validates JWT)
     let protected_routes = Router::new()
         .nest("/user", protected_user_router().with_state(state.clone()))
@@ -166,10 +161,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         )
         .nest("/admin", admin_router().with_state(state.clone()));
 
-    let api_router = Router::new()
-        .merge(auth_routes)
-        .merge(publicuser_route)
-        .merge(protected_routes);
+    let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 
     // Configure CORS to allow credentials from frontend
     // Note: When using allow_credentials(true), cannot use wildcards for origin/headers
