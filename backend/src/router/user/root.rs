@@ -4,15 +4,11 @@ use crate::dto::user::update_visibility::{UpdateVisibilityDto, UpdateVisibilityS
 use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
-use crate::{dto::user::create_user::CreateUserDto, router::root::AppState};
+use crate::router::root::AppState;
 use axum::routing::patch;
-use axum::{extract::State, routing::post, Router};
+use axum::{extract::State, Router};
 use thiserror::Error;
 use tracing::instrument;
-
-pub fn public_user_router() -> Router<AppState> {
-    Router::new().route("/", post(crate_user_handler))
-}
 
 pub fn protected_user_router() -> Router<AppState> {
     Router::new()
@@ -24,21 +20,11 @@ pub fn protected_user_router() -> Router<AppState> {
 }
 
 #[instrument(skip(state))]
-async fn crate_user_handler(
-    State(state): State<AppState>,
-    ValidatedRequest(payload): ValidatedRequest<CreateUserDto>,
-) -> ApiResponse<ReadUserDto> {
-    let res = state.user_service.create(payload).await;
-    ApiResponse::from_result(res)
-}
-
-#[instrument(skip(state))]
 async fn update_user_handler(
     State(state): State<AppState>,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,
 ) -> ApiResponse<ReadUserDto> {
-    // TODO: this is insecure, this handler should only be used to 'notify' of a change
-    // and the user should be pulled from clerk database and updated in our db
     let res = state.user_service.update_user(payload).await;
     ApiResponse::from_result(res)
 }

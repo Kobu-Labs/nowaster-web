@@ -5,7 +5,7 @@ use crate::{
     dto::{
         feed::AddFeedSource,
         user::{
-            create_user::CreateUserDto, read_user::ReadUserDto, update_user::UpdateUserDto,
+            read_user::ReadUserDto, update_user::UpdateUserDto,
             update_visibility::UpdateVisibilityDto,
         },
     },
@@ -31,29 +31,6 @@ impl UserService {
             repo,
             visibility_service,
             subscription_service,
-        }
-    }
-
-    #[instrument(err, skip(self))]
-    pub async fn create(&self, dto: CreateUserDto) -> Result<ReadUserDto, UserError> {
-        let res = self.repo.create(dto).await;
-        match res {
-            Ok(u) => {
-                self.subscription_service
-                    .subscribe(AddFeedSource::User(u.id.clone()), u.id.clone())
-                    .await;
-                Ok(ReadUserDto::from(u))
-            }
-            Err(e) => Err(UserError::UnknownError(e.to_string())),
-        }
-    }
-
-    #[instrument(err, skip(self))]
-    pub async fn upsert(&self, dto: CreateUserDto) -> Result<(), UserError> {
-        let res = self.repo.upsert(dto).await;
-        match res {
-            Ok(_) => Ok(()),
-            Err(e) => Err(UserError::UnknownError(e.to_string())),
         }
     }
 
