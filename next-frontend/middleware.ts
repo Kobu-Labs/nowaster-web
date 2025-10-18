@@ -3,7 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const publicRoutes = ["/", "/sign-in", "/sign-up", "/auth"];
+  const publicRoutes = [
+    "/",
+    "/sign-in",
+    "/sign-up",
+    "/auth",
+    "/privacy-policy",
+  ];
 
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route),
