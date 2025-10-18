@@ -20,13 +20,13 @@ import type { QuickOption } from "@/components/ui-providers/date-pickers/QuickOp
 import { cn } from "@/lib/utils";
 import type { Matcher } from "react-day-picker";
 
-interface DatePickerDemoProps {
+type DatePickerDemoProps = {
   disabled?: Matcher;
   label?: string;
   onSelect: (date: Date | undefined) => void;
   quickOptions?: QuickOption[];
   selected: Date | undefined;
-}
+};
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
   const [isHovered, setIsHovered] = useState(false);

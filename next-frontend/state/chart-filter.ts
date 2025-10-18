@@ -12,19 +12,19 @@ export type FilterSettings = NonNullable<OmitValue<SessionFilter>>;
 /*
  * Object that will provide the values for filtering
  */
-export interface FilterValueFiller {
+export type FilterValueFiller = {
   categories?: CategoryWithId[];
   endTimeFrom?: { value: Date; };
   endTimeTo?: { value: Date; };
   tags?: TagDetails[];
-}
+};
 
 export type SessionFilter = ScheduledSessionRequest["readMany"];
 
-export interface SessionFilterPrecursor {
+export type SessionFilterPrecursor = {
   data: FilterValueFiller;
   settings: FilterSettings;
-}
+};
 
 type OmitValue<T> = T extends object
   ? {

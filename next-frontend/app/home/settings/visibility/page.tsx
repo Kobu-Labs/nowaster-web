@@ -5,18 +5,11 @@ import { VisibilitySettings } from "@/components/pages/settings/visibility/Visib
 import { Suspense } from "react";
 import { Card, CardContent } from "@/components/shadcn/card";
 
-function VisibilitySettingsContent() {
-  const user = useCurrentUser();
-
+export default function VisibilitySettingsPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-2">Privacy Settings</h1>
-      <p className="text-muted-foreground mb-6">
-        Control who can see your activity and time tracking sessions.
-      </p>
-
-      <VisibilitySettings user={user} />
-    </div>
+    <Suspense fallback={<LoadingFallback />}>
+      <VisibilitySettingsContent />
+    </Suspense>
   );
 }
 
@@ -34,10 +27,17 @@ function LoadingFallback() {
   );
 }
 
-export default function VisibilitySettingsPage() {
+function VisibilitySettingsContent() {
+  const user = useCurrentUser();
+
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <VisibilitySettingsContent />
-    </Suspense>
+    <div>
+      <h1 className="text-3xl font-bold mb-2">Privacy Settings</h1>
+      <p className="text-muted-foreground mb-6">
+        Control who can see your activity and time tracking sessions.
+      </p>
+
+      <VisibilitySettings user={user} />
+    </div>
   );
 }

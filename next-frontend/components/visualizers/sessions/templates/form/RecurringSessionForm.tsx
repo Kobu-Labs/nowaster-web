@@ -35,12 +35,12 @@ export const recurringSessionPrecursor = z.object({
   tags: z.array(TagWithIdSchema),
 });
 
-export interface RecurringSessionFormProps {
+export type RecurringSessionFormProps = {
   control: Control<TemplateSessionPrecursor>;
   interval: RecurringSessionInterval;
   intervalStart: Date;
   parentFieldIndex: number;
-}
+};
 
 export const RecurringSessionForm: FC<RecurringSessionFormProps> = (props) => {
   return (

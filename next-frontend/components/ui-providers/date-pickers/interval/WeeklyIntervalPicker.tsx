@@ -10,11 +10,11 @@ import { Separator } from "@/components/shadcn/separator";
 import { DailyIntervalPicker } from "@/components/ui-providers/date-pickers/interval/DailyIntervalPicker";
 import { daysOfWeek } from "@/lib/date-utils";
 
-export interface WeeklyIntervalPickerProps {
+export type WeeklyIntervalPickerProps = {
   onSelect: (value: { day: number; hours: number; minutes: number; }) => void;
   orientation?: "horizontal" | "vertical";
   selected?: { day: number; hours: number; minutes: number; };
-}
+};
 
 export const WeeklyIntervalPicker: FC<WeeklyIntervalPickerProps> = (props) => {
   return (

@@ -78,9 +78,9 @@ const calculateClosestSession = (
   };
 };
 
-interface TemplateOverviewProps {
+type TemplateOverviewProps = {
   template: SessionTemplate;
-}
+};
 
 export const TemplateOverview: FC<TemplateOverviewProps> = ({ template }) => {
   // INFO: Calculate session times based on the template and todays date, only future session dates are shown

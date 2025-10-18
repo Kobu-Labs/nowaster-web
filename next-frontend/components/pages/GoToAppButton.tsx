@@ -8,7 +8,7 @@ import { ArrowBigRight } from "lucide-react";
 import Link from "next/link";
 import type { FC } from "react";
 
-export const GoToAppButton: FC<{ label?: string } & ButtonProps> = (props) => {
+export const GoToAppButton: FC<{ label?: string; } & ButtonProps> = (props) => {
   const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {

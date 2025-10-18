@@ -1,6 +1,6 @@
 "use client";
 
-import { PropsWithChildren, type FC } from "react";
+import { type FC } from "react";
 import { useImpersonation } from "@/components/hooks/useImpersonation";
 import { useSearchUsers } from "@/components/hooks/useSearchUsers";
 import { useAuth } from "@/components/hooks/useAuth";
@@ -21,17 +21,12 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { Loader2, Shield } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
+
 import { TogglableTooltip } from "@/components/ui-providers/TogglableTooltip";
 
 export const AdminImpersonation: FC = () => {
-  const { startImpersonation, isStarting } = useImpersonation();
-  const { searchQuery, setSearchQuery, users, isLoading } = useSearchUsers();
+  const { isStarting, startImpersonation } = useImpersonation();
+  const { isLoading, searchQuery, setSearchQuery, users } = useSearchUsers();
   const { user: currentUser } = useAuth();
 
   return (
@@ -47,12 +42,12 @@ export const AdminImpersonation: FC = () => {
           <div className="space-y-2">
             <Label htmlFor="search">Search Users</Label>
             <Input
-              id="search"
-              type="text"
-              placeholder="Search by user ID or username..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
               disabled={isStarting}
+              id="search"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by user ID or username..."
+              type="text"
+              value={searchQuery}
             />
           </div>
 
@@ -71,8 +66,8 @@ export const AdminImpersonation: FC = () => {
 
                 return (
                   <div
-                    key={user.id}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                    key={user.id}
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
@@ -85,12 +80,12 @@ export const AdminImpersonation: FC = () => {
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{user.username}</p>
                           {isCurrentUser && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge className="text-xs" variant="secondary">
                               You
                             </Badge>
                           )}
                           {isAdmin && (
-                            <Badge variant="outline" className="text-xs gap-1">
+                            <Badge className="text-xs gap-1" variant="outline">
                               <Shield className="h-3 w-3" />
                               Admin
                             </Badge>
@@ -112,9 +107,9 @@ export const AdminImpersonation: FC = () => {
                       }
                     >
                       <Button
+                        disabled={cannotImpersonate}
                         onClick={() => startImpersonation(user.id)}
                         size="sm"
-                        disabled={cannotImpersonate}
                       >
                         {isStarting ? "Starting..." : "Impersonate"}
                       </Button>
@@ -127,7 +122,9 @@ export const AdminImpersonation: FC = () => {
 
           {!isLoading && searchQuery && users.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No users found matching &quot;{searchQuery}&quot;
+              No users found matching &quot;
+              {searchQuery}
+              &quot;
             </p>
           )}
         </div>

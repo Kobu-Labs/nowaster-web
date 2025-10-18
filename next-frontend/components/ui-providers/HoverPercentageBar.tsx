@@ -1,9 +1,9 @@
 import type { FC, PropsWithChildren } from "react";
 import { useState } from "react";
 
-interface HoverPercentageBarProps {
+type HoverPercentageBarProps = {
   formatter: (percentage: number) => string;
-}
+};
 
 export const HoverPercentageBar: FC<
   PropsWithChildren<HoverPercentageBarProps>

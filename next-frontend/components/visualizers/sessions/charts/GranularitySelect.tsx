@@ -9,10 +9,10 @@ import { type FC, useState } from "react";
 
 export type Granularity = "days-in-month" | "days-in-week" | "months-in-year";
 
-interface GranularitySelectProps {
+type GranularitySelectProps = {
   defaultValue?: Granularity;
   onSelect: (val: Granularity) => void;
-}
+};
 
 export const GranularityToLabel: Record<Granularity, string> = {
   "days-in-month": "Month",

@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; }>;
 };
 
 type RootLayoutProps = {
@@ -19,7 +19,8 @@ type RootLayoutProps = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
-  const token = (await cookies()).get("access_token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
 
   const { data } = await axios.get(
     `${env.NEXT_PUBLIC_API_URL}/category/${id}`,

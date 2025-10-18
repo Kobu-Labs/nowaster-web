@@ -20,8 +20,8 @@ export const useCurrentUser = () => {
   // This should never happen if AuthGuard is properly protecting the route
   if (!user?.id) {
     throw new Error(
-      "useCurrentUser called without authenticated user. " +
-      "Make sure this component is wrapped in AuthGuard."
+      "useCurrentUser called without authenticated user. "
+      + "Make sure this component is wrapped in AuthGuard.",
     );
   }
 

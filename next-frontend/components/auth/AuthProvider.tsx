@@ -10,16 +10,16 @@ import {
 } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import {
+  type FC,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useState,
-  type FC,
-  type PropsWithChildren,
 } from "react";
 
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   // Start with null to avoid hydration mismatch
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<null | User>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
@@ -46,12 +46,12 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        getToken,
         isLoaded,
         isSignedIn: user !== null,
-        getToken,
         setTokens,
         signOut,
+        user,
       }}
     >
       {children}

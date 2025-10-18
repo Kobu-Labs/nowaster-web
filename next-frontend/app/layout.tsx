@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import Head from "next/head";
 
-interface RootLayoutProps {
+type RootLayoutProps = {
   children: React.ReactNode;
-}
+};
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (

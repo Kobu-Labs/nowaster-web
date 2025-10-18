@@ -27,9 +27,9 @@ import Link from "next/link";
 import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 import { Label } from "@/components/shadcn/label";
 
-interface CreateTagDialogProps {
+type CreateTagDialogProps = {
   onSave: (tag: TagWithId) => void;
-}
+};
 
 export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
   const [newTagName, setNewTagName] = useState("");

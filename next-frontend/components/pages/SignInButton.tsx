@@ -6,7 +6,7 @@ import { Button } from "@/components/shadcn/button";
 import Link from "next/link";
 import type { FC } from "react";
 
-export const SignInButton: FC<{ label?: string } & ButtonProps> = (props) => {
+export const SignInButton: FC<{ label?: string; } & ButtonProps> = (props) => {
   const { isSignedIn } = useAuth();
 
   if (isSignedIn) {

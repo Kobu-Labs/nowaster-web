@@ -47,8 +47,8 @@ export default async function LandingPage() {
               <SignedIn>
                 <Link href="/home">
                   <Button
-                    variant="secondary"
                     className="flex items-center justify-center gap-1 group"
+                    variant="secondary"
                   >
                     <p>Go to application</p>
                     <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
@@ -58,8 +58,8 @@ export default async function LandingPage() {
               <SignedOut>
                 <Link href="/sign-in">
                   <Button
-                    variant="secondary"
                     className="flex items-center justify-center gap-1 group"
+                    variant="secondary"
                   >
                     <StopwatchIcon className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
                     <p>Start tracking now</p>
@@ -332,8 +332,8 @@ export default async function LandingPage() {
                 <SignedIn>
                   <Link href="/home">
                     <Button
-                      variant="secondary"
                       className="flex items-center justify-center gap-1 group"
+                      variant="secondary"
                     >
                       <p>Go to application</p>
                       <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />

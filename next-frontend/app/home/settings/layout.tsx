@@ -3,9 +3,9 @@
 import { SettingsSidebar } from "@/components/pages/settings/SettingsSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
 
-interface SettingsLayoutProps {
+type SettingsLayoutProps = {
   children: React.ReactNode;
-}
+};
 
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (

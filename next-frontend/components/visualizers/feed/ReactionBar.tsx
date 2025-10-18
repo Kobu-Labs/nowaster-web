@@ -18,11 +18,11 @@ import {
 } from "@/components/hooks/feed/useFeed";
 import { useAuth } from "@/components/hooks/useAuth";
 
-interface ReactionBarProps {
+type ReactionBarProps = {
   event: ReadFeedEvent;
   reactions: ReadFeedReaction[];
   userReaction?: null | string;
-}
+};
 
 const COMMON_EMOJIS = [
   "👏",

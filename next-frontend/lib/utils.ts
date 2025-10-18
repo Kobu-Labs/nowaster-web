@@ -162,18 +162,15 @@ export const toggleOrientation = (orientation: "horizontal" | "vertical") => {
   return orientation === "horizontal" ? "vertical" : "horizontal";
 };
 
-export function getInitials(name: string): string;
-export function getInitials(names: string[]): string;
-export function getInitials(input: string | string[]) {
-  const parts =
-    typeof input === "string"
+export function getInitials(input: string | string[]): string {
+  const parts
+    = typeof input === "string"
       ? input.split(" ")
       : input;
 
   return parts
     .filter(Boolean)
-    .map(part => part[0])
+    .map((part) => part[0])
     .join("")
     .toUpperCase();
 }
-

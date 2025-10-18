@@ -21,7 +21,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
 
-export interface CategoryPickerUiProviderProps {
+export type CategoryPickerUiProviderProps = {
   availableCategories: CategoryWithId[];
   categoryDisplayStrategy?: (
     selectedCategories: CategoryWithId[],
@@ -34,7 +34,7 @@ export interface CategoryPickerUiProviderProps {
   modal?: boolean;
   onSelectCategory: (category: CategoryWithId) => void;
   selectedCategories: CategoryWithId[];
-}
+};
 
 export const showSelectedCategoryFirst = (
   selectedCateogries: CategoryWithId[],

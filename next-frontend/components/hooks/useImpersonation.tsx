@@ -1,20 +1,20 @@
 import { useToast } from "@/components/shadcn/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+  getUserById,
   startImpersonation,
   stopImpersonation,
-  getUserById,
 } from "@/api/impersonationApi";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type ImpersonationState = {
-  userId: string;
   token: string;
+  userId: string;
 };
 
 export const useImpersonation = () => {
-  const [impersonationState, setImpersonationToken] =
-    useState<ImpersonationState | null>(null);
+  const [impersonationState, setImpersonationToken]
+    = useState<ImpersonationState | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -22,21 +22,29 @@ export const useImpersonation = () => {
     const userId = localStorage.getItem("impersonation_target_user_id");
     if (token && userId) {
       setImpersonationToken({
-        token: token,
-        userId: userId,
+        token,
+        userId,
       });
     }
   }, []);
 
   const { data: targetUser } = useQuery({
-    queryKey: ["impersonation", "targetUser", impersonationState?.userId],
-    queryFn: () => getUserById(impersonationState?.userId!),
     enabled: !!impersonationState?.userId,
+    queryFn: () => {
+      if (!impersonationState?.userId) {
+        throw new Error("No user ID");
+      }
+      return getUserById(impersonationState.userId);
+    },
+    queryKey: ["impersonation", "targetUser", impersonationState?.userId],
     staleTime: Infinity,
   });
 
   const startMutation = useMutation({
     mutationFn: startImpersonation,
+    onError: () => {
+      toast({ title: "Failed to start impersonation", variant: "destructive" });
+    },
     onSuccess: (data) => {
       localStorage.setItem("impersonation_token", data.impersonationToken);
       localStorage.setItem("impersonation_target_user_id", data.targetUserId);
@@ -48,36 +56,34 @@ export const useImpersonation = () => {
 
       toast({ title: "Impersonation started" });
 
-      window.location.href = "/home";
-    },
-    onError: (e) => {
-      console.error(e);
-      toast({ title: "Failed to start impersonation", variant: "destructive" });
+      globalThis.location.href = "/home";
     },
   });
 
   const stopMutation = useMutation({
     mutationFn: () => {
-      if (!impersonationState) throw new Error("No impersonation token");
+      if (!impersonationState) {
+        throw new Error("No impersonation token");
+      }
       return stopImpersonation(impersonationState.token);
+    },
+    onError: () => {
+      toast({ title: "Failed to stop impersonation", variant: "destructive" });
     },
     onSuccess: () => {
       localStorage.removeItem("impersonation_token");
       localStorage.removeItem("impersonation_target_user_id");
       setImpersonationToken(null);
       toast({ title: "Impersonation stopped" });
-      window.location.href = "/home";
-    },
-    onError: () => {
-      toast({ title: "Failed to stop impersonation", variant: "destructive" });
+      globalThis.location.href = "/home";
     },
   });
 
   return {
-    targetUser,
-    startImpersonation: startMutation.mutate,
-    stopImpersonation: stopMutation.mutate,
     isStarting: startMutation.isPending,
     isStopping: stopMutation.isPending,
+    startImpersonation: startMutation.mutate,
+    stopImpersonation: stopMutation.mutate,
+    targetUser,
   };
 };

@@ -15,17 +15,17 @@ export const useSearchUsers = (initialQuery = "", debounceMs = 300) => {
   }, [searchQuery, debounceMs]);
 
   const query = useQuery({
-    queryKey: ["admin-search-users", debouncedQuery],
-    queryFn: () => searchUsers(debouncedQuery),
     enabled: debouncedQuery.trim().length > 0,
+    queryFn: () => searchUsers(debouncedQuery),
+    queryKey: ["admin-search-users", debouncedQuery],
   });
 
   return {
+    isError: query.isError,
+    // if query strings are the same, a debounce timer is running
+    isLoading: query.isLoading || searchQuery !== debouncedQuery,
     searchQuery,
     setSearchQuery,
     users: query.data ?? [],
-    // if query strings are the same, a debounce timer is running
-    isLoading: query.isLoading || searchQuery !== debouncedQuery,
-    isError: query.isError,
   };
 };

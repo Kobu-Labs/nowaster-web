@@ -23,11 +23,11 @@ import {
 import type { FC } from "react";
 import { useMemo, useRef, useState } from "react";
 
-interface SessionTimelineUiProviderProps {
+type SessionTimelineUiProviderProps = {
   endDate: Date;
   sessions: ScheduledSessionWithId[];
   startDate: Date;
-}
+};
 
 export function SessionTimelineUiProvider({
   endDate,

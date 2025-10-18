@@ -57,10 +57,10 @@ export const SessionTimer: FC = () => {
   return <NoActiveSession />;
 };
 
-interface TimerProps {
+type TimerProps = {
   durationInSeconds: number;
   formatingFunction?: (duration: number) => string;
-}
+};
 
 const Timer: FC<TimerProps> = (props) => {
   let duration = formatTime(props.durationInSeconds / 60);

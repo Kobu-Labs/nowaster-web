@@ -27,9 +27,9 @@ const GoogleIcon = (props: IconProps) => (
 );
 
 export default function SignInPage() {
-  const handleOAuthLogin = (provider: "google" | "github" | "discord") => {
+  const handleOAuthLogin = (provider: "discord" | "github" | "google") => {
     const authUrl = `${env.NEXT_PUBLIC_API_URL}/auth/oauth/${provider}`;
-    window.location.href = authUrl;
+    globalThis.location.href = authUrl;
   };
 
   return (
