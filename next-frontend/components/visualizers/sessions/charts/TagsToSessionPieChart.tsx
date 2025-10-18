@@ -11,11 +11,11 @@ import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { cn, formatTime } from "@/lib/utils";
 import { useIsMobile } from "@/components/shadcn/use-mobile";
 
-interface TagsToSessionPieChartProps {
+type TagsToSessionPieChartProps = {
   filter?: SessionFilterPrecursor;
   legendPosition?: "bottom" | "left" | "right" | "top";
   renderLegend?: boolean;
-}
+};
 
 export const TagsToSessionPieChart: FC<TagsToSessionPieChartProps> = (
   props,

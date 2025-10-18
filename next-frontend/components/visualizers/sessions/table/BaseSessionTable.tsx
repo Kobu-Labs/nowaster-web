@@ -9,10 +9,10 @@ import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/ui-providers/DataTable";
 import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
 
-interface BaseSessionTableProps {
+type BaseSessionTableProps = {
   columns?: ColumnDef<ScheduledSessionWithId>[];
   filter?: SessionFilterPrecursor;
-}
+};
 
 export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
   const { data, isPending } = useQuery({

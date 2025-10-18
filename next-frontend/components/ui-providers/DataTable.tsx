@@ -23,11 +23,11 @@ import {
 } from "@/components/shadcn/table";
 import { Skeleton } from "@/components/shadcn/skeleton";
 
-interface DataTableProps<TData, TValue> {
+type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   loading?: boolean;
-}
+};
 
 export function DataTable<TData, TValue>({
   columns,

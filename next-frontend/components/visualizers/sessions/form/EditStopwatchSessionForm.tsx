@@ -63,11 +63,11 @@ const formatTimeDifference = (seconds: number) => {
   ].join(":");
 };
 
-interface FormComponentProps {
+type FormComponentProps = {
   onDelete?: () => void;
   onSubmit?: () => void;
   session: StopwatchSessionWithId;
-}
+};
 
 export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
   const form = useForm({

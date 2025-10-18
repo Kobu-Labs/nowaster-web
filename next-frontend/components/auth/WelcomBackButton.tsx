@@ -5,12 +5,14 @@ import { Button } from "@/components/shadcn/button";
 import type { FC } from "react";
 
 export const WelcomeBackButton: FC = () => {
-  const { user, isLoaded } = useAuth();
+  const { isLoaded, user } = useAuth();
 
-  if (!isLoaded || !user) return null;
+  if (!isLoaded || !user) {
+    return null;
+  }
 
   return (
-    <Button variant="outline" className="whitespace-pre">
+    <Button className="whitespace-pre" variant="outline">
       <span>Welcome back, </span>
       <span className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
         {user.username}

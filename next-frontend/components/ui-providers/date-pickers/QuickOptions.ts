@@ -6,10 +6,10 @@ import {
   subMinutes,
 } from "date-fns";
 
-export interface QuickOption {
+export type QuickOption = {
   increment: (date: Date) => Date;
   label: string;
-}
+};
 
 export const dateQuickOptions: QuickOption[] = [
   {

@@ -1,10 +1,10 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-export interface UserPreferences {
+export type UserPreferences = {
   closeSidebarOnLinkClick: boolean;
   sidebarBehavior: "floating" | "permanent";
-}
+};
 
 const defaultPreferences: UserPreferences = {
   closeSidebarOnLinkClick: true,

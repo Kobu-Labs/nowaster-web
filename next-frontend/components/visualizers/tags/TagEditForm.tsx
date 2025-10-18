@@ -42,11 +42,11 @@ import { useUpdateTag } from "@/components/hooks/tag/useUpdateTag";
 import { useAtomValue } from "jotai";
 import { Label } from "@/components/shadcn/label";
 
-interface TagEditFormProps {
+type TagEditFormProps = {
   onDelete: () => void;
   onEdit: (tag: TagDetails) => void;
   tag: TagDetails;
-}
+};
 
 export const TagEditForm: FC<TagEditFormProps> = (props) => {
   const [newTagName, setNewTagName] = useState(props.tag.label);

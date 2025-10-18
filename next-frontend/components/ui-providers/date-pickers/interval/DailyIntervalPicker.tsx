@@ -4,11 +4,11 @@ import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { Separator } from "@/components/shadcn/separator";
 import { cn, toggleOrientation, zeroPad } from "@/lib/utils";
 
-export interface DailyIntervalPickerProps {
+export type DailyIntervalPickerProps = {
   onSelect: (value: { day: number; hours: number; minutes: number; }) => void;
   orientation?: "horizontal" | "vertical";
   selected?: { day: number; hours: number; minutes: number; };
-}
+};
 
 export const DailyIntervalPicker: FC<DailyIntervalPickerProps> = (props) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);

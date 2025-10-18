@@ -19,9 +19,7 @@ export const TogglableTooltip: FC<PropsWithChildren<TogglableTooltipProps>> = (
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="inline-flex" tabIndex={0}>
-              {props.children}
-            </span>
+            <span className="inline-flex">{props.children}</span>
           </TooltipTrigger>
           <TooltipContent>{props.tooltipContent}</TooltipContent>
         </Tooltip>

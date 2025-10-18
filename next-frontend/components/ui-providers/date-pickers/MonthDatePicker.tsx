@@ -24,10 +24,10 @@ import {
 import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
 
-interface MonthDatePickerProps {
+type MonthDatePickerProps = {
   initialDate?: Date;
   onSelected?: (date: DeepRequired<DateRange>) => void;
-}
+};
 
 export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
   const [date, setDate] = React.useState<Date>(props.initialDate ?? new Date());

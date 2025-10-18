@@ -11,10 +11,10 @@ const baseApi = axios.create({
 });
 
 // Global promise to prevent concurrent refresh requests (race-condition safe)
-let refreshPromise: Promise<{
+let refreshPromise: null | Promise<{
   accessToken: string;
   refreshToken: string;
-}> | null = null;
+}> = null;
 
 export const refreshTokens = async (): Promise<{
   accessToken: string;
@@ -59,10 +59,10 @@ export const refreshTokens = async (): Promise<{
 
 // Request interceptor: add auth token to all requests
 baseApi.interceptors.request.use(async (config) => {
-  const impersonationToken =
-    typeof window !== "undefined"
-      ? localStorage.getItem("impersonation_token")
-      : null;
+  const impersonationToken
+    = globalThis.window === undefined
+      ? null
+      : localStorage.getItem("impersonation_token");
 
   if (impersonationToken) {
     config.headers["X-Impersonation-Token"] = impersonationToken;
@@ -89,12 +89,12 @@ baseApi.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
         return baseApi(originalRequest);
       } catch (refreshError) {
-        window.location.href = "/sign-in";
+        globalThis.location.href = "/sign-in";
         return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   },
 );
 

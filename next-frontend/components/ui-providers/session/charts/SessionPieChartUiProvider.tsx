@@ -20,11 +20,11 @@ import { formatTime, randomColor } from "@/lib/utils";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 import { useIsMobile } from "@/components/shadcn/use-mobile";
 
-interface SessionPieChartUiProviderProps {
+type SessionPieChartUiProviderProps = {
   activeIndex?: null | number;
   data: AmountByCategory[];
   onActiveIndexChange?: (index: number | undefined) => void;
-}
+};
 
 const renderActiveShape = (props: PieSectorDataItem) => {
   const {

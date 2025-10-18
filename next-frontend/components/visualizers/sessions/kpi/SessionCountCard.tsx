@@ -6,9 +6,9 @@ import { Sigma } from "lucide-react";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
-interface SessionCountCardProps {
+type SessionCountCardProps = {
   filter?: SessionFilterPrecursor;
-}
+};
 
 export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
   const {

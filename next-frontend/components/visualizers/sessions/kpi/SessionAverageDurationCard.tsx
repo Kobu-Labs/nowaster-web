@@ -7,9 +7,9 @@ import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { KpiCardUiProvider } from "@/components/ui-providers/KpiCardUiProvider";
 
-interface SessionAverageDurationProviderProps {
+type SessionAverageDurationProviderProps = {
   filter?: SessionFilterPrecursor;
-}
+};
 
 export const SessionAverageDurationProvider = (
   props: SessionAverageDurationProviderProps,

@@ -15,9 +15,9 @@ import { SessionCard } from "@/components/visualizers/sessions/SessionCard";
 import { addMinutes, format, startOfDay, startOfWeek } from "date-fns";
 import type { FC } from "react";
 
-interface TemplateCardProps {
+type TemplateCardProps = {
   template: SessionTemplate;
-}
+};
 
 export const intervalToStartOf = (
   interval: RecurringSessionInterval,

@@ -11,11 +11,11 @@ import { cn } from "@/lib/utils";
 
 export type AmountByCategory<TMetadata = any> = GroupedDataItem<TMetadata>;
 
-interface GroupedDataItem<TMetadata = any> {
+type GroupedDataItem<TMetadata = any> = {
   key: string;
   metadata?: TMetadata;
   value: number;
-}
+};
 
 type KeyExtractionResult<TMetadata = any>
   = | {
@@ -27,7 +27,7 @@ type KeyExtractionResult<TMetadata = any>
     metadata?: TMetadata;
   }[];
 
-interface SessionPieChartProps<TMetadata = any> {
+type SessionPieChartProps<TMetadata = any> = {
   filter?: SessionFilterPrecursor;
   getKey: (session: ScheduledSession) => KeyExtractionResult<TMetadata>;
   groupingMethod?: (session: ScheduledSession) => number;
@@ -36,7 +36,7 @@ interface SessionPieChartProps<TMetadata = any> {
     data: AmountByCategory<TMetadata>[],
   ) => AmountByCategory<TMetadata>[];
   renderLegend?: FC<{ data: AmountByCategory[]; }>;
-}
+};
 
 export const groupData = <TMetadata = any,>(
   sessions: ScheduledSession[],
@@ -118,10 +118,10 @@ const SessionPieChartInner = <TMetadata = any,>(
   );
 };
 
-interface ActiveIndexContextType {
+type ActiveIndexContextType = {
   index: null | number;
   setIndex: (value: null | number) => void;
-}
+};
 
 export const ActiveIndexContext = createContext<
   ActiveIndexContextType | undefined

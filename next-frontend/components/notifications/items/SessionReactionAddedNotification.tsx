@@ -11,7 +11,7 @@ import { Heart } from "lucide-react";
 import type { FC } from "react";
 import { useMemo } from "react";
 
-interface GroupedReaction {
+type GroupedReaction = {
   count: number;
   emoji: string;
   users: {
@@ -19,16 +19,16 @@ interface GroupedReaction {
     id: string;
     username: string;
   }[];
-}
+};
 
-interface SessionReactionAddedNotificationItemProps {
+type SessionReactionAddedNotificationItemProps = {
   notifications: {
     notification: {
       data: SessionReactionAddedData;
     } & Notification;
   }[];
   sessionId: string;
-}
+};
 
 export const SessionReactionAddedNotificationItem: FC<
   SessionReactionAddedNotificationItemProps

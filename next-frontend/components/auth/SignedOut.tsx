@@ -13,9 +13,11 @@ import type { FC, PropsWithChildren } from "react";
  * </SignedOut>
  */
 export const SignedOut: FC<PropsWithChildren> = ({ children }) => {
-  const { user, isLoaded } = useAuth();
+  const { isLoaded, user } = useAuth();
 
-  if (!isLoaded || user) return null;
+  if (!isLoaded || user) {
+    return null;
+  }
 
   return children;
 };

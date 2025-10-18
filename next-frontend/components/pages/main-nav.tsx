@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 import type { NavItem } from "@/types/nav";
 import type { FC, PropsWithChildren } from "react";
 
-interface NavigationProps {
+type NavigationProps = {
   items?: readonly NavItem[];
-}
+};
 
 export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
   const currentPath = usePathname();

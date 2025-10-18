@@ -11,10 +11,10 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 
-interface UserAvatarProps {
+type UserAvatarProps = {
   avatar_url?: null | string;
   username: string;
-}
+};
 
 export const UserAvatar: FC<UserAvatarProps> = (props) => {
   return (

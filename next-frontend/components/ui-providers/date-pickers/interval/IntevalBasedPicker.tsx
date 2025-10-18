@@ -16,12 +16,12 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { formatIntervalPickerLabel } from "@/lib/date-utils";
 
-interface IntervalBasedPickerProps {
+type IntervalBasedPickerProps = {
   interval: RecurringSessionInterval;
   onSelect: (value: { day: number; hours: number; minutes: number; }) => void;
   orientation?: "horizontal" | "vertical";
   selected?: { day: number; hours: number; minutes: number; };
-}
+};
 
 const intervalToPicker = {
   daily: (props: DailyIntervalPickerProps) => (

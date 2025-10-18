@@ -7,9 +7,9 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 import type { FC } from "react";
 
-interface RelativeDateProps {
+type RelativeDateProps = {
   date: Date;
-}
+};
 export const RelativeDate: FC<RelativeDateProps> = (props) => {
   return (
     <TooltipProvider delayDuration={100}>

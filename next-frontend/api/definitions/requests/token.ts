@@ -1,7 +1,7 @@
 export type TokenRequest = {
   create: {
+    description?: null | string;
+    expiresInDays?: null | number;
     name: string;
-    description?: string | null;
-    expiresInDays?: number | null;
   };
 };

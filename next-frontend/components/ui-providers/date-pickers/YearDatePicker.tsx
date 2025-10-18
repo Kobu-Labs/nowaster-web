@@ -19,10 +19,10 @@ import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
 import { type FC, useState } from "react";
 
-interface YearDatePickerProps {
+type YearDatePickerProps = {
   initialDate?: Date;
   onSelected?: (date: DeepRequired<DateRange>) => void;
-}
+};
 
 export const YearDatePicker: FC<YearDatePickerProps> = (props) => {
   const [date, setDate] = React.useState<Date>(props.initialDate ?? new Date());

@@ -6,10 +6,10 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { SessionBaseAreaChartUiProvider } from "@/components/ui-providers/session/charts/SessionBaseAreaChartUiProvider";
 import type { GroupingOptions } from "@/lib/session-grouping";
 
-interface SessionBaseChartProps {
+type SessionBaseChartProps = {
   filter?: SessionFilterPrecursor;
   groupingOpts: GroupingOptions;
-}
+};
 
 export const SessionBaseAreaChart = (props: SessionBaseChartProps) => {
   const result = useQuery({

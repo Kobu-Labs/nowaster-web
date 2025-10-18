@@ -41,10 +41,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2, Users } from "lucide-react";
 import type { FC } from "react";
 
-interface UserSubscriptionCardProps {
+type UserSubscriptionCardProps = {
   subscription: ReadFeedSubscription;
   user: ReadUserAvatar;
-}
+};
 
 export function FeedSubscriptions() {
   const {

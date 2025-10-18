@@ -10,13 +10,13 @@ import { NewReleaseNotificationItem } from "@/components/notifications/items/New
 import { SessionReactionAddedNotificationItem } from "@/components/notifications/items/SessionReactionAddedNotification";
 import type { FC } from "react";
 
-export interface NotificationItemProps {
+export type NotificationItemProps = {
   notification: Notification;
-}
+};
 
-interface NotificationHandlerProps {
+type NotificationHandlerProps = {
   notifications: Notification[];
-}
+};
 
 export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
   const genericNotifications: Notification[] = [];

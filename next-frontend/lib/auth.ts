@@ -3,16 +3,14 @@
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
-export type UserRole = "admin" | "user";
-
 export type JwtClaims = {
-  sub: string; // user_id
-  role: UserRole;
-  name: string;
-  iat: number;
-  exp: number;
-  iss: string;
   aud: string;
+  exp: number;
+  iat: number;
+  iss: string;
+  name: string;
+  role: UserRole;
+  sub: string; // user_id
 };
 
 export type User = {
@@ -21,18 +19,15 @@ export type User = {
   username: string;
 };
 
-/**
- * Get the access token from cookies
- */
-export function getAccessToken(): string | null {
-  return Cookies.get("access_token") ?? null;
-}
+export type UserRole = "admin" | "user";
 
 /**
- * Get the refresh token from cookies
+ * Clear all auth cookies
  */
-export function getRefreshToken(): string | null {
-  return Cookies.get("refresh_token") ?? null;
+export function clearAuthCookies() {
+  Cookies.remove("access_token");
+  Cookies.remove("refresh_token");
+  Cookies.remove("has_session");
 }
 
 /**
@@ -55,14 +50,25 @@ export function decodeAccessToken(token: string): JwtClaims | null {
 }
 
 /**
+ * Get the access token from cookies
+ */
+export function getAccessToken(): null | string {
+  return Cookies.get("access_token") ?? null;
+}
+
+/**
  * Get the current user from the access token
  */
-export function getCurrentUser(): User | null {
+export function getCurrentUser(): null | User {
   const token = getAccessToken();
-  if (!token) return null;
+  if (!token) {
+    return null;
+  }
 
   const claims = decodeAccessToken(token);
-  if (!claims) return null;
+  if (!claims) {
+    return null;
+  }
 
   return {
     id: claims.sub,
@@ -72,10 +78,29 @@ export function getCurrentUser(): User | null {
 }
 
 /**
+ * Get the refresh token from cookies
+ */
+export function getRefreshToken(): null | string {
+  return Cookies.get("refresh_token") ?? null;
+}
+
+export function hasSession(): boolean {
+  return Cookies.get("has_session") === "true";
+}
+
+/**
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
   return getCurrentUser() !== null;
+}
+
+export function setAccessToken(accessToken: string) {
+  Cookies.set("access_token", accessToken, {
+    expires: 30,
+    path: "/",
+    sameSite: "lax",
+  });
 }
 
 /**
@@ -103,25 +128,4 @@ export function setAuthTokens(accessToken: string, refreshToken: string) {
     path: "/",
     sameSite: "lax",
   });
-}
-
-export function setAccessToken(accessToken: string) {
-  Cookies.set("access_token", accessToken, {
-    expires: 30,
-    path: "/",
-    sameSite: "lax",
-  });
-}
-
-/**
- * Clear all auth cookies
- */
-export function clearAuthCookies() {
-  Cookies.remove("access_token");
-  Cookies.remove("refresh_token");
-  Cookies.remove("has_session");
-}
-
-export function hasSession(): boolean {
-  return Cookies.get("has_session") === "true";
 }

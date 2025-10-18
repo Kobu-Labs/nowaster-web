@@ -10,10 +10,10 @@ const granularityToComponent = {
   "months-in-year": YearDatePicker,
 } satisfies Record<Granularity, FC<any>>;
 
-interface GranularityBasedDatePickerProps<G extends Granularity> {
+type GranularityBasedDatePickerProps<G extends Granularity> = {
   granularity: G;
   props: GranularityToProps[G];
-}
+};
 
 type GranularityToProps = {
   [G in keyof typeof granularityToComponent]: ComponentProps<

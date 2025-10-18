@@ -7,9 +7,9 @@ import { subHours } from "date-fns";
 import type { FC } from "react";
 import { useMemo } from "react";
 
-interface SessionTimelineProps {
+type SessionTimelineProps = {
   filter?: SessionFilterPrecursor;
-}
+};
 
 export const SessionTimeline: FC<SessionTimelineProps> = (props) => {
   const sessions = useQuery({

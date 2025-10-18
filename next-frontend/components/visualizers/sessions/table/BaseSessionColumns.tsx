@@ -32,9 +32,9 @@ import { EditScheduledSession } from "@/components/visualizers/sessions/form/Edi
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
 
-interface DeleteSessionIconProps {
+type DeleteSessionIconProps = {
   sessionId: string;
-}
+};
 
 const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { refreshTokens } from "@/api/baseApi";
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isLoaded, user, setTokens } = useAuth();
+export function AuthGuard({ children }: { children: React.ReactNode; }) {
+  const { isLoaded, setTokens, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         try {
           const tokens = await refreshTokens();
           setTokens(tokens.accessToken, tokens.refreshToken);
-        } catch (error) {
+        } catch {
           router.push("/");
         }
       }
@@ -24,7 +24,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (isLoaded && !user && !hasSession()) {
       router.push("/");
     } else {
-      refreshTokenIfNeeded();
+      void refreshTokenIfNeeded();
     }
   }, [isLoaded, user, router, setTokens]);
 

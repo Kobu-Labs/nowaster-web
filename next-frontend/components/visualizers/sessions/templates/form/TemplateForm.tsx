@@ -66,12 +66,12 @@ const translateTemplateToPrecursor = (
   };
 };
 
-interface TemplateFormProps {
+type TemplateFormProps = {
   defaultValues?: SessionTemplate;
   isLoading?: boolean;
   onError?: () => void;
   onSubmit: (data: TemplateSessionPrecursor) => void;
-}
+};
 
 export const TemplateForm: FC<TemplateFormProps> = (props) => {
   const form = useForm<TemplateSessionPrecursor>({

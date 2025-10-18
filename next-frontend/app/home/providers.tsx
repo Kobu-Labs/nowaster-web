@@ -12,9 +12,9 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { FC } from "react";
 
-interface ProvidersProps {
+type ProvidersProps = {
   children: React.ReactNode;
-}
+};
 
 const queryClient = new QueryClient();
 

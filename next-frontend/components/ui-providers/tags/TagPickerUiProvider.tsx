@@ -21,7 +21,7 @@ import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { fuzzyFindSearch } from "@/lib/searching";
 import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
 
-export interface TagPickerUiProviderProps {
+export type TagPickerUiProviderProps = {
   availableTags: TagDetails[];
   disabled?: boolean;
   forCategory?: Category;
@@ -33,7 +33,7 @@ export interface TagPickerUiProviderProps {
     selectedTags: TagDetails[],
     availableTags: TagDetails[],
   ) => TagDetails[];
-}
+};
 
 const fuzzyFindTag = (tag: TagDetails, searchTerm: string) => {
   return fuzzyFindSearch(tag.label, searchTerm).length !== 0;

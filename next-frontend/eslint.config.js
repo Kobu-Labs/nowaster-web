@@ -43,6 +43,7 @@ export default [
           },
         },
       ],
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
       "unicorn/prefer-ternary": "off",

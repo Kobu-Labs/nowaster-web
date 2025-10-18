@@ -40,12 +40,12 @@ export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
   return <span>{formatted}</span>;
 };
 
-interface ScheduledSessionCreationFormProps {
+type ScheduledSessionCreationFormProps = {
   onClose?: () => void;
   onCreate?: () => void;
   onCreateAndClose?: () => void;
   precursor?: SessionPrecursor;
-}
+};
 
 const createSessionPrecursor = z.object({
   category: CategoryWithIdSchema,

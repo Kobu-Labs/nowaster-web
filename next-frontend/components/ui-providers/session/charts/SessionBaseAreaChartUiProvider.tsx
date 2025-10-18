@@ -21,10 +21,10 @@ import { Card } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { useAtomValue } from "jotai";
 
-interface SessionBaseAreaChartUiProviderProps {
+type SessionBaseAreaChartUiProviderProps = {
   data: ScheduledSession[];
   groupingOpts: GroupingOptions;
-}
+};
 
 export const SessionBaseAreaChartUiProvider: FC<
   SessionBaseAreaChartUiProviderProps

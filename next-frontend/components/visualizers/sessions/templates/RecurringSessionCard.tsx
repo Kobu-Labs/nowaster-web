@@ -15,10 +15,10 @@ import { Clock } from "lucide-react";
 import type { FC } from "react";
 import { useMemo } from "react";
 
-interface SessionCardProps {
+type SessionCardProps = {
   session: RecurringSession;
   template: SessionTemplate;
-}
+};
 
 export const RecurringSessionCard: FC<SessionCardProps> = (props) => {
   const calculatePeriod = useMemo(() => {

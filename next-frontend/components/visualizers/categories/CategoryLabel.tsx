@@ -2,9 +2,9 @@ import type { FC } from "react";
 import Link from "next/link";
 import type { CategoryWithId } from "@/api/definitions";
 
-interface CategoryLabelProps {
+type CategoryLabelProps = {
   category: CategoryWithId;
-}
+};
 
 export const CategoryLabel: FC<CategoryLabelProps> = (props) => {
   return (

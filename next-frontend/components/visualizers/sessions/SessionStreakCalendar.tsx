@@ -21,9 +21,9 @@ export const dayCellVariants = cva(
   },
 );
 
-interface SessionStreakCalendarProps {
+type SessionStreakCalendarProps = {
   sessionsDates: Date[];
-}
+};
 
 export const SessionStreakCalendar = ({
   sessionsDates: sessions,

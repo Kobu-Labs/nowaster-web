@@ -13,10 +13,10 @@ import { Check, X } from "lucide-react";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { getInitials } from "@/lib/utils";
 
-interface FriendRequestProps {
+type FriendRequestProps = {
   direction: "incoming" | "outgoing";
   request: FriendRequestType;
-}
+};
 
 export const FriendRequest: FC<FriendRequestProps> = (props) => {
   const queryClient = useQueryClient();

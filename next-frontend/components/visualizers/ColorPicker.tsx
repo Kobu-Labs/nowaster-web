@@ -13,11 +13,11 @@ import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import { Dices, LucidePipette } from "lucide-react";
 
-interface ColorPickerProps {
+type ColorPickerProps = {
   initialColor?: string;
   onSelect: (color: string) => void;
   value?: string;
-}
+};
 
 export const ColorPicker: FC<ColorPickerProps> = (props) => {
   const [internalColor, setInternalColors] = useState(

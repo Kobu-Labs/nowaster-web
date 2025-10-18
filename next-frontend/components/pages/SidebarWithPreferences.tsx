@@ -7,9 +7,9 @@ import { SidebarProvider } from "@/components/shadcn/sidebar";
 import { sidebarBehaviorAtom } from "@/state/preferences";
 import { useAtomValue } from "jotai";
 
-interface SidebarWithPreferencesProps {
+type SidebarWithPreferencesProps = {
   children: React.ReactNode;
-}
+};
 
 export const SidebarWithPreferences: React.FC<SidebarWithPreferencesProps> = ({
   children,

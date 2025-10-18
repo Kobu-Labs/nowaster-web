@@ -40,12 +40,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigDown } from "lucide-react";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
-interface EditStopwatchSessionProps {
+type EditStopwatchSessionProps = {
   onCancel?: () => void;
   onDelete?: () => void;
   onSave?: () => void;
   session: ScheduledSessionWithId;
-}
+};
 
 export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
   const form = useForm<ScheduledSessionWithId>({

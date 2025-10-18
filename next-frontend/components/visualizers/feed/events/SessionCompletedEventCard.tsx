@@ -21,11 +21,11 @@ import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { getFormattedTimeDifference, getInitials } from "@/lib/utils";
 import type { z } from "zod";
 
-interface SessionFeedCardProps {
+type SessionFeedCardProps = {
   event: ReadFeedEvent;
   event_data: z.infer<typeof SessionCompletedEventSchema>;
   user: ReadUserAvatar;
-}
+};
 
 export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
   event,
