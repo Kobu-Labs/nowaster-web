@@ -35,13 +35,18 @@ function AuthCallbackContent() {
 
     const accessToken = searchParams.get("access_token");
     const refreshToken = searchParams.get("refresh_token");
+    const isFirstTime = searchParams.get("firstTime") === "true";
 
     if (accessToken && refreshToken) {
       processedRef.current = true;
 
       setTokens(accessToken, refreshToken);
 
-      router.push("/home");
+      if (isFirstTime) {
+        router.push("/home?firstTime=true");
+      } else {
+        router.push("/home");
+      }
     } else {
       router.push("/sign-in");
     }
