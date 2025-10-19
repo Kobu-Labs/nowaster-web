@@ -202,7 +202,7 @@ async fn oauth_callback_handler(
     let ip = None; // Could extract from ConnectInfo if needed
 
     println!("🔄 [CALLBACK] Calling handle_oauth_login...");
-    let (access_token, refresh_token, user_id) = state
+    let (access_token, refresh_token, user_id, is_new_user) = state
         .auth_service
         .handle_oauth_login(&provider, profile, user_agent, ip)
         .await
@@ -212,7 +212,7 @@ async fn oauth_callback_handler(
             (StatusCode::INTERNAL_SERVER_ERROR, "Login failed").into_response()
         })?;
 
-    println!("✅ [CALLBACK] Tokens generated for user: {}", user_id);
+    println!("✅ [CALLBACK] Tokens generated for user: {}, New user: {}", user_id, is_new_user);
 
     // 4. Set auth cookies
     // Note: access_token is NOT http_only so JS can read it for Authorization header
@@ -251,11 +251,13 @@ async fn oauth_callback_handler(
     // So we also pass tokens via URL for the frontend to handle
     let frontend_url = &state.config.frontend.url;
     println!("FRONTEND URL: {}", frontend_url);
+    let first_time_param = if is_new_user { "&firstTime=true" } else { "" };
     let redirect_url = format!(
-        "{}/auth/callback?access_token={}&refresh_token={}",
+        "{}/auth/callback?access_token={}&refresh_token={}{}",
         frontend_url,
         urlencoding::encode(&access_token),
-        urlencoding::encode(&refresh_token)
+        urlencoding::encode(&refresh_token),
+        first_time_param
     );
     println!("🔄 [CALLBACK] Redirecting to: {}", redirect_url);
     Ok((jar, Redirect::to(&redirect_url)))

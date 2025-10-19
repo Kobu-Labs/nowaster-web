@@ -57,7 +57,7 @@ impl AuthService {
         profile: UserProfile,
         user_agent: Option<&str>,
         ip: Option<IpAddr>,
-    ) -> Result<(String, String, Uuid)> {
+    ) -> Result<(String, String, Uuid, bool)> {
         println!("🔐 [AUTH] Starting OAuth login for provider: {}", provider);
         println!("🔐 [AUTH] Profile: email={}, provider_user_id={}", profile.email, profile.provider_user_id);
 
@@ -70,6 +70,7 @@ impl AuthService {
 
         println!("🔐 [AUTH] Existing OAuth account found: {}", existing_oauth.is_some());
 
+        let mut is_new_user = false;
         let user_id = if let Some(oauth_account) = existing_oauth {
             // User already linked via this OAuth provider
             println!("🔐 [AUTH] Found existing OAuth account for user {}", oauth_account.user_id);
@@ -85,6 +86,7 @@ impl AuthService {
             } else {
                 // Create new user
                 println!("🔐 [AUTH] Creating NEW user from OAuth profile");
+                is_new_user = true;
                 let display_name = profile
                     .display_name
                     .or(profile.username.clone())
@@ -147,8 +149,8 @@ impl AuthService {
         let refresh_token = generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
         println!("🔐 [AUTH] Refresh token generated (length: {})", refresh_token.len());
 
-        println!("🔐 [AUTH] ✅ OAuth login completed successfully!");
-        Ok((access_token, refresh_token, user_uuid))
+        println!("🔐 [AUTH] ✅ OAuth login completed successfully! New user: {}", is_new_user);
+        Ok((access_token, refresh_token, user_uuid, is_new_user))
     }
 
     /// Refresh access token using refresh token

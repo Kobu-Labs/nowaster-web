@@ -1,14 +1,51 @@
+"use client";
+
 import { Providers } from "@/app/home/providers";
 import { SidebarWithPreferences } from "@/components/pages/SidebarWithPreferences";
+import { UsernameSelectionDialog } from "@/components/auth/UsernameSelectionDialog";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 type RootLayoutProps = {
   children: React.ReactNode;
 };
 
+function LayoutContent({ children }: RootLayoutProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showUsernameDialog, setShowUsernameDialog] = useState(false);
+
+  useEffect(() => {
+    const isFirstTime = searchParams.get("firstTime") === "true";
+    if (isFirstTime) {
+      setShowUsernameDialog(true);
+      // Remove the query param from URL
+      const newUrl = window.location.pathname;
+      router.replace(newUrl);
+    }
+  }, [searchParams, router]);
+
+  const handleUsernameComplete = () => {
+    setShowUsernameDialog(false);
+  };
+
+  return (
+    <>
+      <UsernameSelectionDialog
+        onComplete={handleUsernameComplete}
+        open={showUsernameDialog}
+      />
+      <SidebarWithPreferences>{children}</SidebarWithPreferences>
+    </>
+  );
+}
+
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <Providers>
-      <SidebarWithPreferences>{children}</SidebarWithPreferences>
+      <Suspense fallback={null}>
+        <LayoutContent>{children}</LayoutContent>
+      </Suspense>
     </Providers>
   );
 }
