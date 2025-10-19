@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, Rss, Settings, Shield, Sliders, UserCog } from "lucide-react";
+import { Key, Rss, Settings, Shield, Sliders, UserCircle, UserCog } from "lucide-react";
 
 import {
   Sidebar,
@@ -19,6 +19,12 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/hooks/useAuth";
 
 const settingsNavItems = [
+  {
+    description: "Manage your account information",
+    icon: UserCircle,
+    title: "Account",
+    url: "/home/settings/account",
+  },
   {
     description: "Manage your feed subscriptions",
     icon: Rss,

@@ -13,7 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { getInitials } from "@/lib/utils";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
+import Link from "next/link";
 import type { FC } from "react";
 
 export const ProfileButton: FC = () => {
@@ -41,9 +42,11 @@ export const ProfileButton: FC = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
+        <DropdownMenuItem asChild>
+          <Link href="/home/settings/account">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Account</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut}>
