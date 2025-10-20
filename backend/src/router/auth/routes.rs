@@ -17,7 +17,9 @@ use crate::{
             discord::DiscordProvider, github::GitHubProvider, google::GoogleProvider, OAuthProvider,
         },
     },
-    router::{auth::tokens::api_tokens_router, clerk::Actor, response::ApiResponse, root::AppState},
+    router::{
+        auth::tokens::api_tokens_router, clerk::Actor, response::ApiResponse, root::AppState,
+    },
 };
 
 #[derive(Debug, Deserialize)]
@@ -212,7 +214,10 @@ async fn oauth_callback_handler(
             (StatusCode::INTERNAL_SERVER_ERROR, "Login failed").into_response()
         })?;
 
-    println!("✅ [CALLBACK] Tokens generated for user: {}, New user: {}", user_id, is_new_user);
+    println!(
+        "✅ [CALLBACK] Tokens generated for user: {}, New user: {}",
+        user_id, is_new_user
+    );
 
     // 4. Set auth cookies
     // Note: access_token is NOT http_only so JS can read it for Authorization header

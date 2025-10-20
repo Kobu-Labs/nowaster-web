@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     auth::{
-        generate_access_token, generate_refresh_token, validate_refresh_token, revoke_refresh_token,
+        generate_access_token, generate_refresh_token, revoke_refresh_token, validate_refresh_token,
     },
     config::database::{Database, DatabaseTrait},
     repository::{
@@ -59,7 +59,10 @@ impl AuthService {
         ip: Option<IpAddr>,
     ) -> Result<(String, String, Uuid, bool)> {
         println!("🔐 [AUTH] Starting OAuth login for provider: {}", provider);
-        println!("🔐 [AUTH] Profile: email={}, provider_user_id={}", profile.email, profile.provider_user_id);
+        println!(
+            "🔐 [AUTH] Profile: email={}, provider_user_id={}",
+            profile.email, profile.provider_user_id
+        );
 
         // 1. Find existing OAuth account or user by email
         println!("🔐 [AUTH] Looking up existing OAuth account...");
@@ -68,12 +71,18 @@ impl AuthService {
             .find_by_provider_and_user_id(provider, &profile.provider_user_id)
             .await?;
 
-        println!("🔐 [AUTH] Existing OAuth account found: {}", existing_oauth.is_some());
+        println!(
+            "🔐 [AUTH] Existing OAuth account found: {}",
+            existing_oauth.is_some()
+        );
 
         let mut is_new_user = false;
         let user_id = if let Some(oauth_account) = existing_oauth {
             // User already linked via this OAuth provider
-            println!("🔐 [AUTH] Found existing OAuth account for user {}", oauth_account.user_id);
+            println!(
+                "🔐 [AUTH] Found existing OAuth account for user {}",
+                oauth_account.user_id
+            );
             oauth_account.user_id
         } else {
             println!("🔐 [AUTH] No existing OAuth account, checking user by email...");
@@ -129,27 +138,35 @@ impl AuthService {
         println!("🔐 [AUTH] Actor found with role: {:?}", actor.role);
 
         // Parse user_id to UUID (it's stored as string for Clerk compatibility)
-        let user_uuid = Uuid::parse_str(&actor.user_id)
-            .unwrap_or_else(|_| {
-                println!("🔐 [AUTH] User ID is not a UUID, generating new one");
-                // If not a valid UUID (old Clerk ID), generate a new one
-                // In production, you might want to handle this migration differently
-                Uuid::new_v4()
-            });
+        let user_uuid = Uuid::parse_str(&actor.user_id).unwrap_or_else(|_| {
+            println!("🔐 [AUTH] User ID is not a UUID, generating new one");
+            // If not a valid UUID (old Clerk ID), generate a new one
+            // In production, you might want to handle this migration differently
+            Uuid::new_v4()
+        });
 
         println!("🔐 [AUTH] User UUID: {}", user_uuid);
 
         // 3. Generate access token (JWT, 15 minutes)
         println!("🔐 [AUTH] Generating access token...");
         let access_token = generate_access_token(user_uuid, actor.role, display_name)?;
-        println!("🔐 [AUTH] Access token generated (length: {})", access_token.len());
+        println!(
+            "🔐 [AUTH] Access token generated (length: {})",
+            access_token.len()
+        );
 
         // 4. Generate refresh token (30 days)
         println!("🔐 [AUTH] Generating refresh token...");
         let refresh_token = generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
-        println!("🔐 [AUTH] Refresh token generated (length: {})", refresh_token.len());
+        println!(
+            "🔐 [AUTH] Refresh token generated (length: {})",
+            refresh_token.len()
+        );
 
-        println!("🔐 [AUTH] ✅ OAuth login completed successfully! New user: {}", is_new_user);
+        println!(
+            "🔐 [AUTH] ✅ OAuth login completed successfully! New user: {}",
+            is_new_user
+        );
         Ok((access_token, refresh_token, user_uuid, is_new_user))
     }
 
@@ -177,7 +194,8 @@ impl AuthService {
         let access_token = generate_access_token(user_uuid, actor.role, display_name)?;
 
         // 4. Generate new refresh token (rotation)
-        let new_refresh_token = generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
+        let new_refresh_token =
+            generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
 
         // 5. Revoke old refresh token
         revoke_refresh_token(refresh_token, "rotated", &self.pool).await?;
@@ -205,7 +223,9 @@ impl AuthService {
         description: Option<&str>,
         expires_in_days: Option<i64>,
     ) -> Result<(String, Uuid)> {
-        self.api_token_repo.generate_api_token(user_id, name, description, expires_in_days).await
+        self.api_token_repo
+            .generate_api_token(user_id, name, description, expires_in_days)
+            .await
     }
 
     #[instrument(err, skip(self))]
@@ -214,8 +234,15 @@ impl AuthService {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn revoke_api_token(&self, token_id: Uuid, user_id: &str, reason: &str) -> Result<()> {
-        self.api_token_repo.revoke_token_by_id(token_id, user_id, reason).await
+    pub async fn revoke_api_token(
+        &self,
+        token_id: Uuid,
+        user_id: &str,
+        reason: &str,
+    ) -> Result<()> {
+        self.api_token_repo
+            .revoke_token_by_id(token_id, user_id, reason)
+            .await
     }
 
     #[instrument(err, skip(self, token))]
@@ -224,17 +251,30 @@ impl AuthService {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn start_impersonation(&self, admin_user_id: &str, target_user_id: &str) -> Result<String> {
-        self.impersonation_repo.create_impersonation_session(admin_user_id, target_user_id).await
+    pub async fn start_impersonation(
+        &self,
+        admin_user_id: &str,
+        target_user_id: &str,
+    ) -> Result<String> {
+        self.impersonation_repo
+            .create_impersonation_session(admin_user_id, target_user_id)
+            .await
     }
 
     #[instrument(err, skip(self, token))]
-    pub async fn validate_impersonation_token(&self, token: &str) -> Result<Option<(String, String)>> {
-        self.impersonation_repo.validate_impersonation_token(token).await
+    pub async fn validate_impersonation_token(
+        &self,
+        token: &str,
+    ) -> Result<Option<(String, String)>> {
+        self.impersonation_repo
+            .validate_impersonation_token(token)
+            .await
     }
 
     #[instrument(err, skip(self, token))]
     pub async fn stop_impersonation(&self, token: &str) -> Result<()> {
-        self.impersonation_repo.revoke_impersonation_token(token).await
+        self.impersonation_repo
+            .revoke_impersonation_token(token)
+            .await
     }
 }

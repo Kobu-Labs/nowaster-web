@@ -1,6 +1,6 @@
-pub mod google;
-pub mod github;
 pub mod discord;
+pub mod github;
+pub mod google;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
