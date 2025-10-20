@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE \"user\" u SET\n                    displayname = COALESCE($1, u.displayname),\n                    avatar_url = COALESCE($2, u.avatar_url)\n                WHERE u.id = $3\n                RETURNING u.id, u.displayname, u.avatar_url, u.visibility_flags\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "visibility_flags",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "896873bed0894e8cd316ca74d309a7296595a9f5e7ee7e01a5f835c35808ff46"
+}

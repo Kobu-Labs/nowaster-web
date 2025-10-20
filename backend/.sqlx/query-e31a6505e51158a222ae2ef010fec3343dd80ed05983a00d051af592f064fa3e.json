@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                    INSERT INTO \"user\" (id, displayname, avatar_url, visibility_flags)\n                    VALUES ($1, $2, $3, $4)\n                    RETURNING id, displayname, avatar_url, visibility_flags\n            ",
+  "query": "\n                INSERT INTO \"user\" (id, displayname, email, avatar_url, visibility_flags)\n                VALUES ($1, $2, $3, $4, $5)\n                RETURNING id, displayname, avatar_url, visibility_flags\n            ",
   "describe": {
     "columns": [
       {
@@ -29,6 +29,7 @@
         "Varchar",
         "Varchar",
         "Varchar",
+        "Varchar",
         "Int4"
       ]
     },
@@ -39,5 +40,5 @@
       false
     ]
   },
-  "hash": "96707c92ed3971e30eaf662e40fd7a6bd33db9595c0728bb495a3df8162928e2"
+  "hash": "e31a6505e51158a222ae2ef010fec3343dd80ed05983a00d051af592f064fa3e"
 }
