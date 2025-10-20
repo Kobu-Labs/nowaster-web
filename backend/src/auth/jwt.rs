@@ -10,13 +10,13 @@ use crate::router::clerk::UserRole;
 /// JWT Claims structure
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
-    pub sub: String,        // Subject (user_id as UUID string)
-    pub role: String,       // User role ("user" or "admin")
-    pub name: String,       // User display name
-    pub iat: i64,           // Issued at timestamp
-    pub exp: i64,           // Expiration timestamp
-    pub iss: String,        // Issuer ("nowaster-api")
-    pub aud: String,        // Audience ("nowaster-web")
+    pub sub: String,  // Subject (user_id as UUID string)
+    pub role: String, // User role ("user" or "admin")
+    pub name: String, // User display name
+    pub iat: i64,     // Issued at timestamp
+    pub exp: i64,     // Expiration timestamp
+    pub iss: String,  // Issuer ("nowaster-api")
+    pub aud: String,  // Audience ("nowaster-web")
 }
 
 // Load RSA keys on application startup
@@ -53,7 +53,11 @@ static DECODING_KEY: Lazy<DecodingKey> = Lazy::new(|| {
 ///
 /// # Returns
 /// JWT token string valid for 15 minutes
-pub fn generate_access_token(user_id: Uuid, role: UserRole, display_name: String) -> Result<String> {
+pub fn generate_access_token(
+    user_id: Uuid,
+    role: UserRole,
+    display_name: String,
+) -> Result<String> {
     let now = Utc::now().timestamp();
 
     let claims = Claims {
@@ -67,8 +71,7 @@ pub fn generate_access_token(user_id: Uuid, role: UserRole, display_name: String
     };
 
     let header = Header::new(Algorithm::RS256);
-    encode(&header, &claims, &ENCODING_KEY)
-        .context("Failed to generate access token")
+    encode(&header, &claims, &ENCODING_KEY).context("Failed to generate access token")
 }
 
 /// Validate and decode a JWT access token
@@ -83,8 +86,8 @@ pub fn validate_access_token(token: &str) -> Result<Claims> {
     validation.set_issuer(&["nowaster-api"]);
     validation.set_audience(&["nowaster-web"]);
 
-    let token_data = decode::<Claims>(token, &DECODING_KEY, &validation)
-        .context("Invalid or expired token")?;
+    let token_data =
+        decode::<Claims>(token, &DECODING_KEY, &validation).context("Invalid or expired token")?;
 
     Ok(token_data.claims)
 }

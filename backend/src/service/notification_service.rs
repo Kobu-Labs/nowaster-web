@@ -6,9 +6,9 @@ use uuid::Uuid;
 use crate::{
     config::database::Database,
     dto::notification::{
-            CreateNotificationDto, MarkNotificationsSeenDto, NotificationCountDto,
-            NotificationQueryDto, ReadNotificationDto,
-        },
+        CreateNotificationDto, MarkNotificationsSeenDto, NotificationCountDto,
+        NotificationQueryDto, ReadNotificationDto,
+    },
     entity::notification::{
         FriendRequestAcceptedData, FriendRequestData, NotificationSource, NotificationType,
         SessionReactionData, SystemNotificationData,

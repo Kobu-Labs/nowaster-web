@@ -2,7 +2,10 @@ use anyhow::Result;
 use chrono::{Duration, Utc};
 use std::sync::Arc;
 
-use crate::{auth::crypto::{generate_random_hex, sha256_hash}, config::database::{Database, DatabaseTrait}};
+use crate::{
+    auth::crypto::{generate_random_hex, sha256_hash},
+    config::database::{Database, DatabaseTrait},
+};
 
 #[derive(Clone)]
 pub struct ImpersonationRepository {

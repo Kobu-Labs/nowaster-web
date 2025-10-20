@@ -1,15 +1,11 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use tracing::instrument;
-use validator::Validate;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::user::{
-        update_user::UpdateUserDto,
-        update_visibility::UpdateVisibilityDto,
-    },
+    dto::user::{update_user::UpdateUserDto, update_visibility::UpdateVisibilityDto},
     entity::{user::User, visibility::VisibilityFlags},
     router::clerk::{Actor, UserRole},
 };

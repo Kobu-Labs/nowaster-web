@@ -94,7 +94,12 @@ async fn create_token(
 ) -> Result<Json<ApiResponse<TokenResponse>>, StatusCode> {
     let (token, id) = state
         .auth_service
-        .create_api_token(&actor.user_id, &req.name, req.description.as_deref(), req.expires_in_days)
+        .create_api_token(
+            &actor.user_id,
+            &req.name,
+            req.description.as_deref(),
+            req.expires_in_days,
+        )
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
