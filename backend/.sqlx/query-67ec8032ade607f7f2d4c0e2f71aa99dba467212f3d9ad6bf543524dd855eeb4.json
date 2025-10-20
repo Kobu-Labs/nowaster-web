@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT \n                    u.id,\n                    u.role AS \"role: UserRole\"\n                FROM \"user\" u\n                WHERE\n                    u.id = $1\n            ",
+  "query": "\n                SELECT\n                    u.id,\n                    u.displayname,\n                    u.role AS \"role: UserRole\"\n                FROM \"user\" u\n                WHERE\n                    u.id = $1\n            ",
   "describe": {
     "columns": [
       {
@@ -10,6 +10,11 @@
       },
       {
         "ordinal": 1,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
         "name": "role: UserRole",
         "type_info": {
           "Custom": {
@@ -31,8 +36,9 @@
     },
     "nullable": [
       false,
+      false,
       false
     ]
   },
-  "hash": "c2b3f711e65504f14d6ef079b1240e09e407cd11501d88aa01c510324b4a1600"
+  "hash": "67ec8032ade607f7f2d4c0e2f71aa99dba467212f3d9ad6bf543524dd855eeb4"
 }

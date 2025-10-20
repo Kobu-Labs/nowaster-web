@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            DELETE FROM impersonation_sessions\n            WHERE token_hash = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8a8578f6509ff03671dd798b11c122368bf4d29dcc0e2e44bc0a971930924c5c"
+}
