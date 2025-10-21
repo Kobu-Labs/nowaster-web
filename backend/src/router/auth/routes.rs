@@ -92,12 +92,18 @@ async fn oauth_authorize_handler(
     println!("✅ [AUTHORIZE] Authorization URL: {}", auth_url);
 
     // Store CSRF state in cookie (10 min expiry)
-    let state_cookie = Cookie::build(("oauth_state", csrf_state.clone()))
+    let is_production = state.config.frontend.url.starts_with("https://");
+    let mut state_cookie_builder = Cookie::build(("oauth_state", csrf_state.clone()))
         .path("/")
         .max_age(Duration::minutes(10))
         .http_only(true)
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+
+    if is_production {
+        state_cookie_builder = state_cookie_builder.secure(true);
+    }
+
+    let state_cookie = state_cookie_builder.build();
 
     let jar = jar.add(state_cookie);
 
@@ -223,19 +229,31 @@ async fn oauth_callback_handler(
     // Note: access_token is NOT http_only so JS can read it for Authorization header
     // refresh_token IS http_only for security (only used by backend)
     println!("🔄 [CALLBACK] Setting auth cookies...");
-    let access_cookie = Cookie::build(("access_token", access_token.clone()))
+    let is_production = state.config.frontend.url.starts_with("https://");
+
+    let mut access_cookie_builder = Cookie::build(("access_token", access_token.clone()))
         .path("/")
         .max_age(Duration::minutes(15))
         .http_only(false) // Allow JavaScript to read for Authorization header
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
-    let refresh_cookie = Cookie::build(("refresh_token", refresh_token.clone()))
+    if is_production {
+        access_cookie_builder = access_cookie_builder.secure(true);
+    }
+
+    let access_cookie = access_cookie_builder.build();
+
+    let mut refresh_cookie_builder = Cookie::build(("refresh_token", refresh_token.clone()))
         .path("/")
         .max_age(Duration::days(30))
         .http_only(true) // Keep secure - only backend can read
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+
+    if is_production {
+        refresh_cookie_builder = refresh_cookie_builder.secure(true);
+    }
+
+    let refresh_cookie = refresh_cookie_builder.build();
 
     println!(
         "✅ [CALLBACK] Cookies created: access_token={} chars, refresh_token={} chars",
@@ -297,19 +315,31 @@ async fn refresh_token_handler(
     // Update cookies
     // Note: access_token is NOT http_only so JS can read it
     // refresh_token IS http_only for security
-    let access_cookie = Cookie::build(("access_token", access_token.clone()))
+    let is_production = state.config.frontend.url.starts_with("https://");
+
+    let mut access_cookie_builder = Cookie::build(("access_token", access_token.clone()))
         .path("/")
         .max_age(Duration::seconds(ACCESS_TOKEN_EXPIRE_SECONDS))
         .http_only(false) // Allow JavaScript to read
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
-    let refresh_cookie = Cookie::build(("refresh_token", new_refresh_token.clone()))
+    if is_production {
+        access_cookie_builder = access_cookie_builder.secure(true);
+    }
+
+    let access_cookie = access_cookie_builder.build();
+
+    let mut refresh_cookie_builder = Cookie::build(("refresh_token", new_refresh_token.clone()))
         .path("/")
         .max_age(Duration::days(30))
         .http_only(true) // Keep secure
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+
+    if is_production {
+        refresh_cookie_builder = refresh_cookie_builder.secure(true);
+    }
+
+    let refresh_cookie = refresh_cookie_builder.build();
 
     let jar = jar.add(access_cookie).add(refresh_cookie);
 

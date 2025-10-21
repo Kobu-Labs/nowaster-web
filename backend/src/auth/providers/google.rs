@@ -71,8 +71,15 @@ impl OAuthProvider for GoogleProvider {
             .context("Failed to exchange code for token")?;
 
         if !response.status().is_success() {
+            let status = response.status();
             let error_text = response.text().await.unwrap_or_default();
-            anyhow::bail!("Token exchange failed: {}", error_text);
+            tracing::error!(
+                "Google token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
+                status,
+                error_text,
+                config.redirect_url
+            );
+            anyhow::bail!("Token exchange failed (status {}): {}", status, error_text);
         }
 
         let token_response: GoogleTokenResponse = response
