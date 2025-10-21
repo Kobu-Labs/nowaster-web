@@ -126,7 +126,6 @@ export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
           activeShape={activeIndex !== undefined && renderActiveShape}
           cx="50%"
           cy="50%"
-          // @ts-expect-error  INFO: this is just wrong
           data={props.data}
           dataKey="value"
           innerRadius={60}
