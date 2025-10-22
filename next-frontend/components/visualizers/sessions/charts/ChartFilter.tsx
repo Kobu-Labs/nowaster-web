@@ -1,17 +1,16 @@
-import { FC, useMemo } from "react";
+import type { CategoryWithId, TagDetails } from "@/api/definitions";
 import {
   changeCategoryFilterMode,
   changeTagFilterMode,
-  filterPrecursorAtom,
+  defaultFilter,
   handleSelectCategory,
-  getDefaultFilter,
   overwriteData,
 } from "@/state/chart-filter";
-import { CategoryWithId, TagDetails } from "@/api/definitions";
-import { useAtom } from "jotai";
 import { CircleHelp, Filter, RotateCcw } from "lucide-react";
+import type { FC } from "react";
+import { useMemo } from "react";
 
-import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
+import { useChartFilter } from "@/components/hooks/use-chart-filter";
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
 import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
@@ -30,21 +29,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { MultipleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 
-// TODO: currently the most disgusting component in the codebase
-// refactor it using Forms probably
 export const ChartFilter: FC = () => {
-  const [filter, setChartFilter] = useAtom(filterPrecursorAtom);
+  const { filter, setFilter } = useChartFilter();
 
-  const onSelectTag = (tags: TagDetails[]) =>
-    setChartFilter((state) => overwriteData(state, { tags }));
+  const onSelectTag = (tags: TagDetails[]) => {
+    setFilter((state) => overwriteData(state, { tags }));
+  };
 
-  const onSelectCategory = (category: CategoryWithId) =>
-    setChartFilter((state) => handleSelectCategory(state, category));
+  const onSelectCategory = (category: CategoryWithId) => {
+    setFilter((state) => handleSelectCategory(state, category));
+  };
 
-  const resetFilter = () => setChartFilter(getDefaultFilter());
+  const resetFilter = () => setFilter(defaultFilter);
 
   const appliedFiltersCount = useMemo(
     () => countLeaves(translateFilterPrecursor(filter)),
@@ -54,10 +54,10 @@ export const ChartFilter: FC = () => {
   return (
     <div className="flex flex-col">
       <Sheet modal={false}>
-        <SheetTrigger asChild className="group relative  cursor-pointer">
+        <SheetTrigger asChild className="group relative cursor-pointer">
           <Button
+            className="flex items-center justify-center overflow-visible w-fit"
             variant="outline"
-            className="flex items-center justify-center"
           >
             <Filter className="group-hover:text-pink-300 ">Open</Filter>
             {appliedFiltersCount > 0 && (
@@ -71,7 +71,7 @@ export const ChartFilter: FC = () => {
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent className="flex flex-col">
+        <SheetContent className="flex flex-col p-4">
           <SheetHeader>
             <SheetTitle>Apply filter</SheetTitle>
           </SheetHeader>
@@ -84,14 +84,14 @@ export const ChartFilter: FC = () => {
               selectedTags={filter.data.tags ?? []}
             />
             <RadioGroup
-              onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) => changeTagFilterMode(state, value));
-              }}
-              defaultValue={filter.settings.tags?.label?.mode}
               className="flex flex-col space-y-1"
+              defaultValue={filter.settings.tags?.label?.mode}
+              onValueChange={(value: "all" | "some") => {
+                setFilter((state) => changeTagFilterMode(state, value));
+              }}
             >
               <div className="flex items-center  gap-2">
-                <RadioGroupItem value="all" id="category-exact" />
+                <RadioGroupItem id="category-exact" value="all" />
                 <Label htmlFor="category-exact">Superset matching</Label>
                 <TooltipProvider delayDuration={350}>
                   <Tooltip>
@@ -99,13 +99,13 @@ export const ChartFilter: FC = () => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Filtered sessions will contain all of these tags</p>
+                      <p>Each session will contain all of these tags</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
               <div className="flex items-center  gap-2">
-                <RadioGroupItem value="some" id="category-some" />
+                <RadioGroupItem id="category-some" value="some" />
                 <Label htmlFor="category-some">Subset matching</Label>
                 <TooltipProvider delayDuration={350}>
                   <Tooltip>
@@ -114,7 +114,7 @@ export const ChartFilter: FC = () => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        Filtered sessions will contain a subset of these tags
+                        Each session will contain at least one of these tags
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -125,21 +125,20 @@ export const ChartFilter: FC = () => {
           <Separator />
           <div className="flex flex-col gap-1">
             <SheetDescription>Filter by categories</SheetDescription>
-            <MultipleCategoryPicker
-              selectedCategories={filter.data.categories ?? []}
+            <CategoryPicker
+              mode="multiple"
               onSelectCategory={onSelectCategory}
+              selectedCategories={filter.data.categories ?? []}
             />
             <RadioGroup
-              onValueChange={(value: "some" | "all") => {
-                setChartFilter((state) =>
-                  changeCategoryFilterMode(state, value),
-                );
-              }}
-              defaultValue={filter.settings.categories?.name?.mode}
               className="flex flex-col space-y-1"
+              defaultValue={filter.settings.categories?.name?.mode}
+              onValueChange={(value: "all" | "some") => {
+                setFilter((state) => changeCategoryFilterMode(state, value));
+              }}
             >
               <div className="flex items-center  gap-2">
-                <RadioGroupItem value="all" id="category-exact" />
+                <RadioGroupItem id="category-exact" value="all" />
                 <Label htmlFor="category-exact">Exact match</Label>
                 <TooltipProvider delayDuration={350}>
                   <Tooltip>
@@ -147,13 +146,13 @@ export const ChartFilter: FC = () => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Filtered sessions will have exactly this category</p>
+                      <p>Each session will have this category</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
               <div className="flex items-center gap-2">
-                <RadioGroupItem value="some" id="category-some" />
+                <RadioGroupItem id="category-some" value="some" />
                 <Label htmlFor="category-some">
                   &rdquo;One of&rdquo; match
                 </Label>
@@ -163,7 +162,7 @@ export const ChartFilter: FC = () => {
                       <CircleHelp className="text-muted-foreground size-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Filtered sessions will have one of these categories</p>
+                      <p>Each session will have one of these categories</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -171,7 +170,7 @@ export const ChartFilter: FC = () => {
             </RadioGroup>
             <Separator className="my-2" />
           </div>
-          <Button variant="destructive" className="w-min" onClick={resetFilter}>
+          <Button className="w-min" onClick={resetFilter} variant="destructive">
             <RotateCcw />
           </Button>
         </SheetContent>

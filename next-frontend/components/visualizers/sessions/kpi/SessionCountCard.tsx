@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { FC } from "react";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import { Sigma } from "lucide-react";
 
@@ -17,19 +17,19 @@ export const SessionCountCard: FC<SessionCountCardProps> = (props) => {
     isLoading,
   } = useQuery({
     ...queryKeys.sessions.filtered(props.filter),
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     retry: false,
     select: (data) => data.length,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
   });
 
   return (
     <KpiCardUiProvider
       error={isError}
       loading={isLoading}
-      variant={"big_value"}
+      title="Total sessions"
       value={result}
-      title={"Total sessions"}
+      variant="big_value"
     >
       <Sigma />
     </KpiCardUiProvider>

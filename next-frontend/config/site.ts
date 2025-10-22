@@ -1,24 +1,28 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Nowaster",
   description: "Track your time!",
   mainNav: [
     {
-      title: "History",
       href: "/home/history",
+      title: "History",
     },
     {
-      title: "Plan",
       href: "/home/new",
+      title: "Plan",
     },
     {
-      title: "Tags",
       href: "/home/tags",
+      title: "Tags",
     },
     {
-      title: "Friends",
       href: "/home/friends",
+      title: "Friends",
+    },
+    {
+      href: "/home/templates",
+      title: "Templates",
     },
   ],
+  name: "Nowaster",
 } as const;

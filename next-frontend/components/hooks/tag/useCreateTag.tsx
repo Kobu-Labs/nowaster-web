@@ -1,16 +1,16 @@
 import { TagApi } from "@/api";
-import { TagRequest } from "@/api/definitions";
+import type { TagRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { tagColors } from "@/state/tags";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSetRecoilState } from "recoil";
+import { useSetAtom } from "jotai";
 
 export const useCreateTag = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const setColors = useSetRecoilState(tagColors);
+  const setColors = useSetAtom(tagColors);
 
   const mutation = useMutation({
     mutationFn: async (data: TagRequest["create"]) => {

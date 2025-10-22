@@ -1,27 +1,33 @@
 use anyhow::Result;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
-    dto::session::{
-        filter_session::{DateFilter, FilterSessionDto},
-        fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
-        stopwatch_session::ReadStopwatchSessionDto,
+    dto::{
+        feed::CreateFeedEventDto,
+        session::{
+            filter_session::{DateFilter, FilterSessionDto},
+            fixed_session::{CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto},
+            stopwatch_session::ReadStopwatchSessionDto,
+        },
     },
+    entity::feed::{FeedEventSource, FeedEventType, SessionEventData},
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,
     },
-    router::clerk::ClerkUser,
-    service::category_service::CategoryService,
+    router::clerk::Actor,
+    service::{feed::events::FeedEventService, user_service::UserService},
 };
 
 #[derive(Clone)]
 pub struct FixedSessionService {
     fixed_repo: FixedSessionRepository,
-    category_service: CategoryService,
     stopwatch_repo: StopwatchSessionRepository,
+    event_service: FeedEventService,
+    user_service: UserService,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,54 +40,80 @@ pub enum ActiveSession {
 impl FixedSessionService {
     pub fn new(
         repo: FixedSessionRepository,
-        cat_serv: CategoryService,
         stopwatch_repo: StopwatchSessionRepository,
+        event_service: FeedEventService,
+        user_service: UserService,
     ) -> Self {
         Self {
             fixed_repo: repo,
-            category_service: cat_serv,
             stopwatch_repo,
+            event_service,
+            user_service,
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn create_fixed_session(
         &self,
         dto: CreateFixedSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFixedSessionDto> {
-        let category = self
-            .category_service
-            .upsert_category(dto.category.clone(), actor.clone())
-            .await?;
+        let res = self.fixed_repo.create(dto, actor.clone()).await?;
+        let user = self
+            .user_service
+            .get_user_by_id(res.user_id.clone())
+            .await?
+            .unwrap();
 
-        let res = self
-            .fixed_repo
-            .create(
-                dto.clone(),
-                category.id,
-                dto.tags.iter().map(|t| t.id).collect(),
-                actor.clone(),
-            )
+        self.event_service
+            .publish_event(CreateFeedEventDto {
+                id: None,
+                data: FeedEventType::SessionCompleted(SessionEventData {
+                    session_id: res.id,
+                    category: res.category.clone().into(),
+                    tags: res.tags.iter().cloned().map(Into::into).collect(),
+                    description: res.description.clone(),
+                    start_time: res.start_time,
+                    end_time: res.end_time,
+                }),
+                source: FeedEventSource::User(user),
+            })
             .await?;
 
         Ok(ReadFixedSessionDto::from(res))
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn filter_fixed_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadFixedSessionDto>> {
         let res = self.fixed_repo.filter_sessions(dto, actor).await?;
         Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
     }
 
-    pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
+    pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         self.fixed_repo.delete_session(id, actor).await?;
         Ok(())
     }
 
-    pub async fn get_active_sessions(&self, actor: ClerkUser) -> Result<Vec<ActiveSession>> {
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn delete_sessions_by_filter(
+        &self,
+        dto: FilterSessionDto,
+        actor: Actor,
+    ) -> Result<u64> {
+        let affected_rows = self
+            .fixed_repo
+            .delete_sessions_by_filter(dto, actor)
+            .await?;
+        Ok(affected_rows)
+    }
+
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn get_active_sessions(&self, actor: Actor) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {
             from_end_time: Some(DateFilter {
@@ -115,10 +147,11 @@ impl FixedSessionService {
         Ok(all_sessions)
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, actor_id = %actor))]
     pub async fn update_fixed_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFixedSessionDto> {
         let res = self.fixed_repo.update_session(dto, actor).await?;
 

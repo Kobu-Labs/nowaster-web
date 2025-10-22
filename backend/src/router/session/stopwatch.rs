@@ -3,13 +3,14 @@ use axum::{
     routing::{delete, get},
     Router,
 };
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
     dto::session::stopwatch_session::{
         CreateStopwatchSessionDto, ReadStopwatchSessionDto, UpdateStopwatchSessionDto,
     },
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 pub fn stopwatch_session_router() -> Router<AppState> {
@@ -23,17 +24,19 @@ pub fn stopwatch_session_router() -> Router<AppState> {
         .route("/{session_id}", delete(delete_handler))
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn get_stopwatch_session_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Option<ReadStopwatchSessionDto>> {
     let res = state.stopwatch_service.read_stopwatch_session(actor).await;
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn create_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateStopwatchSessionDto>,
 ) -> ApiResponse<ReadStopwatchSessionDto> {
     let res = state
@@ -43,10 +46,11 @@ async fn create_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor, session_id = %session_id))]
 async fn delete_handler(
     State(state): State<AppState>,
     Path(session_id): Path<Uuid>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<()> {
     let res = state
         .stopwatch_service
@@ -55,9 +59,10 @@ async fn delete_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn update_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateStopwatchSessionDto>,
 ) -> ApiResponse<ReadStopwatchSessionDto> {
     let res = state

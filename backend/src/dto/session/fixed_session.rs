@@ -5,7 +5,7 @@ use validator::Validate;
 
 use crate::{
     dto::{
-        category::{create_category::CreateCategoryDto, read_category::ReadCategoryDto},
+        category::read_category::ReadCategoryDto, session::template::ReadTemplateShallowDto,
         tag::read_tag::ReadTagDto,
     },
     entity::session::{FixedSession, SessionType},
@@ -16,10 +16,38 @@ pub struct AddTagDto {
     pub id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+impl From<CreateFixedSessionDto> for CreateFixedSessionDtoWithId {
+    fn from(dto: CreateFixedSessionDto) -> Self {
+        CreateFixedSessionDtoWithId {
+            id: Uuid::new_v4(),
+            category_id: dto.category_id,
+            tag_ids: dto.tag_ids,
+            description: dto.description,
+            start_time: dto.start_time,
+            end_time: dto.end_time,
+            template_id: dto.template_id,
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
+pub struct CreateFixedSessionDtoWithId {
+    pub id: Uuid,
+    pub category_id: Uuid,
+    pub tag_ids: Vec<Uuid>,
+    pub description: Option<String>,
+    #[serde(rename = "startTime")]
+    pub start_time: DateTime<Local>,
+    #[serde(rename = "endTime")]
+    pub end_time: DateTime<Local>,
+    pub template_id: Option<Uuid>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateFixedSessionDto {
-    pub category: CreateCategoryDto,
-    pub tags: Vec<AddTagDto>,
+    pub category_id: Uuid,
+    pub template_id: Option<Uuid>,
+    pub tag_ids: Vec<Uuid>,
     pub description: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: DateTime<Local>,
@@ -27,7 +55,7 @@ pub struct CreateFixedSessionDto {
     pub end_time: DateTime<Local>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadFixedSessionDto {
     pub id: Uuid,
     pub category: ReadCategoryDto,
@@ -38,9 +66,10 @@ pub struct ReadFixedSessionDto {
     #[serde(rename = "endTime")]
     pub end_time: DateTime<Local>,
     pub description: Option<String>,
+    pub template: Option<ReadTemplateShallowDto>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct UpdateFixedSessionDto {
     pub id: Uuid,
     pub category_id: Option<Uuid>,
@@ -66,6 +95,7 @@ impl ReadFixedSessionDto {
             start_time: entity.start_time,
             end_time: entity.end_time,
             description: entity.description,
+            template: entity.template,
         }
     }
 }

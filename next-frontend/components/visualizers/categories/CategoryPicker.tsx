@@ -1,95 +1,86 @@
-import { FC, useState } from "react";
+import type { FC } from "react";
+import { useState } from "react";
 
-import { CategoryWithId } from "@/api/definitions";
+import type { CategoryWithId } from "@/api/definitions";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Frown } from "lucide-react";
-import {
-  MultipleCategoryPickerUiProviderProps,
-  MultipleCategoryPickerUiProvider,
-  SingleCategoryPickerUiProviderProps,
-  SingleCategoryPickerUiProvider,
-} from "@/components/ui-providers/categories/CategoryPickerUiProvider";
+import { CategoryPickerUiProvider } from "@/components/ui-providers/categories/CategoryPickerUiProvider";
 import { useCategories } from "@/components/hooks/category/useCategory";
+import { arrayFromUndefined } from "@/lib/utils";
 
-type MultipleCategoryPickerProps = Omit<
-  MultipleCategoryPickerUiProviderProps,
-  "availableCategories"
->;
+type CategoryPickerProps = {
+  availableCategories?: CategoryWithId[];
+  categoryDisplayStrategy?: (
+    selectedCategories: CategoryWithId[],
+    availableCategories: CategoryWithId[],
+  ) => CategoryWithId[];
+  categoryMatchStrategy?: (
+    category: CategoryWithId,
+    searchTerm: string,
+  ) => number;
+  onSelectCategory?: (category: CategoryWithId) => void;
+} & (
+  | { mode: "multiple"; selectedCategories?: CategoryWithId[] | null; }
+  | { mode: "single"; selectedCategory?: CategoryWithId | null; }
+);
 
-export const MultipleCategoryPicker: FC<MultipleCategoryPickerProps> = (
-  props,
-) => {
+export const CategoryPicker: FC<CategoryPickerProps> = (props) => {
   const categories = useCategories();
 
-  if (categories.isError) {
+  const [selectedCategories, setSelectedCategories] = useState<
+    CategoryWithId[]
+  >([]);
+
+  // INFO:  the following abstractions allows the following
+  // 1. switch between 'single' and 'multiple' mode
+  // 2. conditionally switch whether the input is controlled or not
+  // 3. pass in availableCategories as a prop
+  const isControlled
+    = props.mode === "single"
+      ? props.selectedCategory !== undefined
+      : props.selectedCategories !== undefined;
+
+  const value = isControlled
+    ? (props.mode === "single"
+        ? arrayFromUndefined(props.selectedCategory)
+        : (props.selectedCategories ?? []))
+    : selectedCategories;
+
+  const onSelectCategory = (category: CategoryWithId) => {
+    if (!isControlled) {
+      if (props.mode === "single") {
+        setSelectedCategories([category]);
+      } else {
+        setSelectedCategories(
+          (prev) =>
+            prev.some((c) => c.id === category.id)
+              ? prev.filter((c) => c.id !== category.id) // remove if already selected
+              : [...prev, category], // add if not selected
+        );
+      }
+    }
+    props.onSelectCategory?.(category);
+  };
+
+  if (!props.availableCategories && categories.isError) {
     return (
       <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
     );
   }
 
-  if (categories.isPending) {
+  if (!props.availableCategories && categories.isPending) {
     return (
       <Skeleton className="flex items-center justify-center w-full grow h-10" />
     );
   }
 
   return (
-    <MultipleCategoryPickerUiProvider
-      modal={props.modal}
-      availableCategories={categories.data}
-      selectedCategories={props.selectedCategories}
-      onSelectCategory={props.onSelectCategory}
-      categoryMatchStrategy={props.categoryMatchStrategy}
+    <CategoryPickerUiProvider
+      availableCategories={props.availableCategories ?? categories.data ?? []}
       categoryDisplayStrategy={props.categoryDisplayStrategy}
-    />
-  );
-};
-
-type SingleCategoryPickerProps = {
-  onSelectedCategoriesChanged: (newCategory: CategoryWithId) => void;
-} & Omit<
-  SingleCategoryPickerUiProviderProps,
-  "availableCategories" | "selectedCategory" | "onSelectCategory"
->;
-
-// TODO: just dynamically allow only one element in selectedCategories[] you dumb ass
-export const SingleCategoryPicker: FC<
-  SingleCategoryPickerProps & { value?: CategoryWithId }
-> = (props) => {
-  const categories = useCategories();
-  const [selectedCategory, setSelectedCategory] = useState<
-    CategoryWithId | undefined
-  >();
-  const isControlled = props.value !== undefined;
-  const value = isControlled ? props.value : selectedCategory;
-
-  if (categories.isError) {
-    return (
-      <Frown className="flex w-full items-center justify-center h-10 grow text-red-500" />
-    );
-  }
-
-  if (categories.isPending) {
-    return (
-      <Skeleton className="flex w-full items-center justify-center h-10 grow" />
-    );
-  }
-
-  const onSelectCategory = (category: CategoryWithId) => {
-    if (!isControlled) {
-      setSelectedCategory(category);
-    }
-    props.onSelectedCategoriesChanged(category);
-  };
-
-  return (
-    <SingleCategoryPickerUiProvider
-      modal={props.modal}
-      availableCategories={categories.data}
-      selectedCategory={value}
+      categoryMatchStrategy={props.categoryMatchStrategy}
       onSelectCategory={onSelectCategory}
-      categoryMatchStrategy={props.categoryMatchStrategy}
-      categoryDisplayStrategy={props.categoryDisplayStrategy}
+      selectedCategories={value}
     />
   );
 };

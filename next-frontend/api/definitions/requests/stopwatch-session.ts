@@ -1,19 +1,19 @@
 import { z } from "zod";
 
 const create = z.object({
-  startTime: z.coerce.date(),
+  startTime: z.coerce.date<Date>(),
 });
 
 const update = z.object({
-  id: z.string().uuid(),
-  startTime: z.coerce.date().nullish(),
-  category_id: z.string().uuid().nullish(),
+  category_id: z.uuid().nullish(),
   description: z.string().nullish(),
-  tag_ids: z.array(z.string().uuid()).nullish(),
+  id: z.uuid(),
+  startTime: z.coerce.date<Date>().nullish(),
+  tag_ids: z.array(z.string()).nullish(),
 });
 
 const remove = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export type StopwatchSessionRequest = {
@@ -23,7 +23,7 @@ export type StopwatchSessionRequest = {
 };
 
 export const StopwatchSessionRequestSchema = {
-  remove,
   create,
+  remove,
   update,
 } as const;

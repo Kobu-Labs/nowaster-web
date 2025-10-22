@@ -1,28 +1,37 @@
 use std::sync::Arc;
 
-use axum::{routing::IntoMakeService, Router};
-use clerk_rs::{
-    clerk::Clerk,
-    validators::{axum::ClerkLayer, jwks::MemoryCacheJwksProvider},
+use axum::{
+    http::{self, Request},
+    routing::IntoMakeService,
+    Router,
 };
-use tower::ServiceBuilder;
-use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use uuid::Uuid;
 
 use crate::{
     config::database::Database,
     repository::{
         category::{CategoryRepository, CategoryRepositoryTrait},
+        feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
+        session_template::RecurringSessionRepository,
         statistics::sessions::StatisticsRepository,
         stopwatch_session::StopwatchSessionRepository,
-        tag::{TagRepository, TagRepositoryTrait},
-        user::{UserRepository, UserRepositoryTrait},
+        tag::TagRepository,
+        user::UserRepository,
     },
+    router::user::root::protected_user_router,
     service::{
+        auth_service::AuthService,
         category_service::CategoryService,
-        friend_service::FriendService,
+        feed::{
+            events::FeedEventService, reactions::FeedReactionService,
+            subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService,
+        },
+        friend_service::{FriendService, FriendServiceTrait},
+        notification_service::NotificationService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
+        session_template::SessionTemplateService,
         statistics_service::StatisticsService,
         tag_service::TagService,
         user_service::UserService,
@@ -30,26 +39,38 @@ use crate::{
 };
 
 use super::{
-    category::root::category_router, friend::root::friend_router, session::root::session_router,
-    statistics::root::statistics_router, tag::root::tag_router, user::root::user_router,
+    admin::routes::admin_router, auth::auth_router, category::root::category_router,
+    feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
+    session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
 };
 
-use tracing::Level;
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use tracing::info_span;
+
+#[derive(Clone)]
+pub struct Feed {
+    pub visibility_service: FeedVisibilityService,
+    pub reaction_service: FeedReactionService,
+    pub event_service: FeedEventService,
+    pub subscription_service: FeedSubscriptionService,
+}
 
 #[derive(Clone)]
 pub struct AppState {
-    pub clerk: Clerk,
+    pub config: Arc<crate::Config>,
+    pub auth_service: AuthService,
     pub session_service: FixedSessionService,
     pub stopwatch_service: StopwatchSessionService,
     pub tag_service: TagService,
     pub category_service: CategoryService,
     pub user_service: UserService,
     pub statistics_service: StatisticsService,
-    pub friend_service: FriendService,
+    pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
+    pub session_template_service: SessionTemplateService,
+    pub notification_service: NotificationService,
+    pub feed: Feed,
 }
 
-pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
+pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
@@ -57,62 +78,129 @@ pub fn get_router(db: Arc<Database>, clerk: Clerk) -> IntoMakeService<Router> {
     let statistics_repo = StatisticsRepository::new(&db);
     let friend_repo = FriendsRepository::new(&db);
     let stopwatch_repo = StopwatchSessionRepository::new(&db);
+    let template_session_repo = RecurringSessionRepository::new(&db);
+    let feed_repo = FeedRepository::new(&db);
 
+    let auth_service = AuthService::new(&db);
     let category_service = CategoryService::new(category_repo.clone());
-    let user_service = UserService::new(user_repo.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
-    let session_service = FixedSessionService::new(
-        session_repo,
-        category_service.clone(),
-        stopwatch_repo.clone(),
-    );
     let statistics_service = StatisticsService::new(statistics_repo);
-    let friend_service = FriendService::new(friend_repo);
+
+    let notification_service = NotificationService::new(&db);
+
+    // feed related services
+    let visibility_service = FeedVisibilityService::new(feed_repo.clone());
+    let event_service = FeedEventService::new(feed_repo.clone());
+    let subscription_service = FeedSubscriptionService::new(feed_repo.clone(), user_repo.clone());
+
+    let user_service = UserService::new(
+        user_repo.clone(),
+        visibility_service.clone(),
+        subscription_service.clone(),
+    );
+
+    let session_service = FixedSessionService::new(
+        session_repo.clone(),
+        stopwatch_repo.clone(),
+        event_service.clone(),
+        user_service.clone(),
+    );
+    let reaction_service = FeedReactionService::new(
+        feed_repo.clone(),
+        notification_service.clone(),
+        session_repo.clone(),
+    );
+    let friend_service = FriendService::new(
+        friend_repo,
+        visibility_service.clone(),
+        subscription_service.clone(),
+        notification_service.clone(),
+    );
     let stopwatch_service =
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
+    let session_template_service =
+        SessionTemplateService::new(template_session_repo, session_repo.clone());
 
     let state = AppState {
-        clerk: clerk.clone(),
-        friend_service,
+        config: config.clone(),
+        auth_service,
+        friend_service: Arc::new(friend_service),
         session_service,
         tag_service,
         category_service,
         user_service,
         statistics_service,
         stopwatch_service,
+        session_template_service,
+        notification_service,
+        feed: Feed {
+            subscription_service,
+            visibility_service,
+            event_service,
+            reaction_service,
+        },
     };
 
-    tracing_subscriber::registry()
-        .with(fmt::layer())
-        .with(EnvFilter::new("info"))
-        .init();
+    // Auth routes (public)
+    let auth_routes = Router::new()
+        .nest("/auth", auth_router())
+        .with_state(state.clone());
 
-    let user_route = Router::new().nest("/user", user_router().with_state(state.clone()));
-
+    // Protected routes (Actor extractor validates JWT)
     let protected_routes = Router::new()
+        .nest("/user", protected_user_router().with_state(state.clone()))
         .nest("/session", session_router().with_state(state.clone()))
         .nest("/tag", tag_router().with_state(state.clone()))
         .nest("/category", category_router().with_state(state.clone()))
         .nest("/statistics", statistics_router().with_state(state.clone()))
         .nest("/friends", friend_router().with_state(state.clone()))
-        .layer(ClerkLayer::new(
-            MemoryCacheJwksProvider::new(clerk),
-            None,
-            false,
-        ));
+        .nest("/feed", feed_router().with_state(state.clone()))
+        .nest(
+            "/notifications",
+            notification_router().with_state(state.clone()),
+        )
+        .nest("/admin", admin_router().with_state(state.clone()));
 
-    let api_router = Router::new().merge(user_route).merge(protected_routes);
+    let api_router = Router::new().merge(auth_routes).merge(protected_routes);
+
+    // Configure CORS to allow credentials from frontend
+    // Note: When using allow_credentials(true), cannot use wildcards for origin/headers
+    let frontend_url = &config.frontend.url;
+
+    println!("🌐 [CORS] Allowing origin: {}", frontend_url);
+
+    let cors = tower_http::cors::CorsLayer::new()
+        .allow_origin(frontend_url.parse::<http::HeaderValue>().unwrap())
+        .allow_methods([
+            http::Method::GET,
+            http::Method::POST,
+            http::Method::PUT,
+            http::Method::DELETE,
+            http::Method::PATCH,
+            http::Method::OPTIONS,
+        ])
+        .allow_headers([
+            http::header::CONTENT_TYPE,
+            http::header::AUTHORIZATION,
+            http::header::ACCEPT,
+            http::header::COOKIE,
+            http::HeaderName::from_static("x-api-key"),
+            http::HeaderName::from_static("x-impersonation-token"),
+        ])
+        .allow_credentials(true);
 
     Router::new()
         .nest("/api", api_router)
-        .layer(tower_http::cors::CorsLayer::permissive())
-        .layer(
-            ServiceBuilder::new().layer(
-                TraceLayer::new_for_http()
-                    .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
-                    .on_request(DefaultOnRequest::new().level(Level::INFO))
-                    .on_response(DefaultOnResponse::new().level(Level::INFO)),
-            ),
-        )
+        .layer(cors)
         .into_make_service()
+}
+
+fn make_span_for_request<B>(req: &Request<B>) -> tracing::Span {
+    let request_id = Uuid::new_v4();
+    info_span!(
+        "http_request",
+        method = %req.method(),
+        uri = %req.uri(),
+        request_id = %request_id
+    )
 }

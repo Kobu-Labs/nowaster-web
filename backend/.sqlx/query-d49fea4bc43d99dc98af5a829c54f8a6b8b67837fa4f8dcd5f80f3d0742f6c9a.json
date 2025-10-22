@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM feed_reaction\n                WHERE feed_event_id = $1 AND user_id = $2 AND emoji = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d49fea4bc43d99dc98af5a829c54f8a6b8b67837fa4f8dcd5f80f3d0742f6c9a"
+}

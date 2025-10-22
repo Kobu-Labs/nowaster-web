@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id)\n                VALUES ($1, $2,$3,$4,$5, $6, $7)\n                RETURNING session.id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9428bb52fc70add61ad86ebc6dcb18a571a5dd025dee72d23feb74ef72ebc9e7"
+}

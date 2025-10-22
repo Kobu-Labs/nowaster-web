@@ -1,10 +1,10 @@
+/* eslint-disable  @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
 // INFO: this is due to the untyped nature of recharts
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 "use client";
 
-import { tagColors } from "@/state/tags";
-import { FC, useState } from "react";
+import type { FC } from "react";
+import { useMemo, useState } from "react";
 import {
   Cell,
   Label,
@@ -12,53 +12,57 @@ import {
   PieChart,
   ResponsiveContainer,
   Sector,
+  Tooltip,
 } from "recharts";
-import { useRecoilValue } from "recoil";
 
+import type { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
 import { formatTime, randomColor } from "@/lib/utils";
-import { AmountByCategory } from "@/components/visualizers/sessions/charts/SessionPieChart";
+import { PieSectorDataItem } from "recharts/types/polar/Pie";
+import { useIsMobile } from "@/components/shadcn/use-mobile";
 
 type SessionPieChartUiProviderProps = {
+  activeIndex?: null | number;
   data: AmountByCategory[];
+  onActiveIndexChange?: (index: number | undefined) => void;
 };
 
-const renderActiveShape = (props: any) => {
+const renderActiveShape = (props: PieSectorDataItem) => {
   const {
     cx,
     cy,
-    innerRadius,
-    outerRadius,
-    startAngle,
     endAngle,
     fill,
+    innerRadius,
+    outerRadius,
     payload,
+    startAngle,
   } = props;
 
   return (
     <g>
-      <text x={cx} y={cy} dy={0} textAnchor="middle" fill={fill}>
+      <text dy={0} fill={fill} textAnchor="middle" x={cx} y={cy}>
         {payload.key}
       </text>
-      <text x={cx} y={cy} dy={19} textAnchor="middle" fill={fill}>
+      <text dy={19} fill={fill} textAnchor="middle" x={cx} y={cy}>
         {formatTime(payload.value)}
       </text>
       <Sector
         cx={cx}
         cy={cy}
+        endAngle={endAngle}
+        fill={fill}
         innerRadius={innerRadius}
         outerRadius={outerRadius}
         startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
       />
       <Sector
         cx={cx}
         cy={cy}
-        startAngle={startAngle}
         endAngle={endAngle}
+        fill={fill}
         innerRadius={outerRadius + 6}
         outerRadius={outerRadius + 10}
-        fill={fill}
+        startAngle={startAngle}
       />
     </g>
   );
@@ -67,43 +71,89 @@ const renderActiveShape = (props: any) => {
 export const SessionPieChartUiProvider: FC<SessionPieChartUiProviderProps> = (
   props,
 ) => {
-  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+  const [internalActiveIndex, setInternalActiveIndex] = useState<
+    number | undefined
+  >(undefined);
+  const isMobile = useIsMobile();
+
+  // Use external activeIndex if provided, otherwise use internal state
+  const activeIndex
+    = props.activeIndex === undefined
+      ? internalActiveIndex
+      : (props.activeIndex ?? undefined);
+
   const [fallbackColor] = useState(randomColor());
-  const colors = useRecoilValue(tagColors);
+
+  // INFO: compability layer because of rechart v3.x changes
+  // see: https://github.com/recharts/recharts/issues/5999,
+  // https://github.com/recharts/recharts/issues/5999
+  const tooltip = useMemo(() => {
+    return (
+      <Tooltip active={true} content={() => ""} defaultIndex={activeIndex} />
+    );
+  }, [activeIndex]);
+
+  const handleActiveIndexChange = (index: number | undefined) => {
+    if (props.onActiveIndexChange) {
+      props.onActiveIndexChange(index);
+    } else {
+      setInternalActiveIndex(index);
+    }
+  };
+
+  if (props.data.length === 0) {
+    return (
+      <ResponsiveContainer
+        height={180}
+        width="100%"
+      >
+        <div className="flex items-center justify-center text-muted-foreground">
+          No sessions
+        </div>
+      </ResponsiveContainer>
+    );
+  }
 
   return (
-    <ResponsiveContainer width={"100%"} height={180}>
-      <PieChart onMouseLeave={() => setActiveIndex(undefined)}>
+    <ResponsiveContainer height={180} width="100%">
+      <PieChart
+        onMouseLeave={() => {
+          handleActiveIndexChange(undefined);
+        }}
+      >
+        {tooltip}
         <Pie
-          data={props.data}
-          dataKey="value"
-          nameKey="key"
+          activeShape={activeIndex !== undefined && renderActiveShape}
           cx="50%"
           cy="50%"
+          data={props.data}
+          dataKey="value"
           innerRadius={60}
+          nameKey="key"
+          onClick={(_, i) =>
+            isMobile
+            && handleActiveIndexChange(i === activeIndex ? undefined : i)}
+          onMouseEnter={(_, i) => handleActiveIndexChange(i)}
           outerRadius={80}
           paddingAngle={5}
-          activeShape={renderActiveShape}
-          onMouseEnter={(_, i) => setActiveIndex(i)}
-          activeIndex={activeIndex}
         >
-          {props.data.map(({ key }, index) => {
+          {props.data.map(({ metadata }, index) => {
             return (
               <Cell
+                fill={metadata.color ?? fallbackColor}
                 fillOpacity={0.4}
-                stroke={colors[key] ?? fallbackColor}
                 key={`cell-${index}`}
-                fill={colors[key] ?? fallbackColor}
+                stroke={metadata.color ?? fallbackColor}
               />
             );
           })}
           {activeIndex === undefined && (
             <Label
+              fill="#fff"
+              position="center"
               value={formatTime(
                 props.data.reduce((acc, curr) => acc + curr.value, 0),
               )}
-              position="center"
-              fill={"#fff"}
             />
           )}
         </Pie>

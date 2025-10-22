@@ -1,14 +1,12 @@
-use crate::{
-    dto::{
-        category::read_category::ReadCategoryDto,
-        session::stopwatch_session::ReadStopwatchSessionDto, tag::read_tag::ReadTagDto,
-        user::read_user::ReadUserDto,
-    },
-    service::friend_service::ReadUserAvatarDto,
+use crate::dto::{
+    category::read_category::ReadCategoryDto,
+    session::{stopwatch_session::ReadStopwatchSessionDto, template::ReadTemplateShallowDto},
+    tag::read_tag::ReadTagDto,
+    user::read_user::ReadUserDto,
 };
 
 use super::{category::Category, tag::Tag, user::User};
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -45,6 +43,8 @@ pub struct FixedSession {
 
     pub description: Option<String>,
     pub user_id: String,
+
+    pub template: Option<ReadTemplateShallowDto>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -72,7 +72,7 @@ impl From<StopwatchSession> for ReadStopwatchSessionDto {
             }),
             description: session.description,
             start_time: session.start_time,
-            user: ReadUserAvatarDto::from(session.user),
+            user: ReadUserDto::from(session.user),
         }
     }
 }

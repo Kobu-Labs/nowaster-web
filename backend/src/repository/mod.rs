@@ -1,6 +1,10 @@
+pub mod auth;
 pub mod category;
+pub mod feed;
 pub mod fixed_session;
 pub mod friends;
+pub mod notification;
+pub mod session_template;
 pub mod statistics;
 pub mod stopwatch_session;
 pub mod tag;

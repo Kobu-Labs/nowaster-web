@@ -14,19 +14,19 @@ import { FriendRequest } from "@/components/visualizers/friends/FriendRequest";
 
 export const FriendRequestsManagement = () => {
   const incomingRequests = useQuery({
-    queryKey: ["friends", "requests", "incoming"],
+    initialData: [],
     queryFn: async () => {
       return await FriendRequestApi.read({ direction: "incoming" });
     },
-    initialData: [],
+    queryKey: ["friends", "requests", "incoming"],
   });
 
   const outgoingRequests = useQuery({
-    queryKey: ["friends", "requests", "outgoing"],
+    initialData: [],
     queryFn: async () => {
       return await FriendRequestApi.read({ direction: "outgoing" });
     },
-    initialData: [],
+    queryKey: ["friends", "requests", "outgoing"],
   });
 
   if (incomingRequests.isError || outgoingRequests.isError) {
@@ -34,13 +34,13 @@ export const FriendRequestsManagement = () => {
   }
 
   return (
-    <Tabs defaultValue="incoming" className="w-full">
+    <Tabs className="w-full" defaultValue="incoming">
       <AddFriend />
       <TabsList className="grid w-full grid-cols-2 mb-6">
         <TabsTrigger value="incoming">
           Incoming
           {incomingRequests.data.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge className="ml-2" variant="secondary">
               {incomingRequests.data.length}
             </Badge>
           )}
@@ -48,47 +48,51 @@ export const FriendRequestsManagement = () => {
         <TabsTrigger value="outgoing">
           Outgoing
           {outgoingRequests.data.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge className="ml-2" variant="secondary">
               {outgoingRequests.data.length}
             </Badge>
           )}
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="incoming" className="space-y-4">
-        {incomingRequests.data.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-muted-foreground">No incoming friend requests</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {incomingRequests.data.map((request) => (
-              <FriendRequest
-                key={request.id}
-                request={request}
-                direction={"incoming"}
-              />
-            ))}
-          </div>
-        )}
+      <TabsContent className="space-y-4" value="incoming">
+        {incomingRequests.data.length === 0
+          ? (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No incoming friend requests</p>
+              </div>
+            )
+          : (
+              <div className="space-y-4">
+                {incomingRequests.data.map((request) => (
+                  <FriendRequest
+                    direction="incoming"
+                    key={request.id}
+                    request={request}
+                  />
+                ))}
+              </div>
+            )}
       </TabsContent>
 
-      <TabsContent value="outgoing" className="space-y-4">
-        {outgoingRequests.data.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-muted-foreground">No outgoing friend requests</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {outgoingRequests.data.map((request) => (
-              <FriendRequest
-                key={request.id}
-                request={request}
-                direction={"outgoing"}
-              />
-            ))}
-          </div>
-        )}
+      <TabsContent className="space-y-4" value="outgoing">
+        {outgoingRequests.data.length === 0
+          ? (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No outgoing friend requests</p>
+              </div>
+            )
+          : (
+              <div className="space-y-4">
+                {outgoingRequests.data.map((request) => (
+                  <FriendRequest
+                    direction="outgoing"
+                    key={request.id}
+                    request={request}
+                  />
+                ))}
+              </div>
+            )}
       </TabsContent>
     </Tabs>
   );

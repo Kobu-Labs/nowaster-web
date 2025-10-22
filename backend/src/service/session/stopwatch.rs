@@ -3,10 +3,11 @@ use crate::{
         CreateStopwatchSessionDto, ReadStopwatchSessionDto, UpdateStopwatchSessionDto,
     },
     repository::stopwatch_session::StopwatchSessionRepository,
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::category_service::CategoryService,
 };
 use anyhow::Result;
+use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -26,10 +27,11 @@ impl StopwatchSessionService {
         }
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn create_stopwatch_session(
         &self,
         dto: CreateStopwatchSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadStopwatchSessionDto> {
         let category = match dto.clone().category {
             Some(cat) => {
@@ -55,23 +57,26 @@ impl StopwatchSessionService {
         Ok(ReadStopwatchSessionDto::from(res))
     }
 
-    pub async fn delete_stopwatch_session(&self, session_id: Uuid, actor: ClerkUser) -> Result<()> {
+    #[instrument(err, skip(self), fields(session_id = %session_id, actor_id = %actor))]
+    pub async fn delete_stopwatch_session(&self, session_id: Uuid, actor: Actor) -> Result<()> {
         self.stopwatch_repo.delete_session(session_id, actor).await
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn read_stopwatch_session(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Option<ReadStopwatchSessionDto>> {
         let res = self.stopwatch_repo.read_stopwatch(actor).await?;
 
         Ok(res.map(ReadStopwatchSessionDto::from))
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, actor_id = %actor))]
     pub async fn update_stopwatch_session(
         &self,
         dto: UpdateStopwatchSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadStopwatchSessionDto> {
         let res = self
             .stopwatch_repo

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -20,6 +21,7 @@ pub struct TagDetails {
     pub usages: i64,
     pub created_by: String,
     pub color: String,
+    pub last_used_at: DateTime<Utc>,
 }
 
 impl From<Tag> for ReadTagDto {

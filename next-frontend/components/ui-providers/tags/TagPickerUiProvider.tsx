@@ -1,8 +1,9 @@
-import { FC, useState } from "react";
-import { Category, TagDetails } from "@/api/definitions";
+import type { Category, TagDetails } from "@/api/definitions";
 import { Check, ChevronsUpDown } from "lucide-react";
+import type { FC } from "react";
+import { useState } from "react";
 
-import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
+import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
 import { Button } from "@/components/shadcn/button";
 import {
   Command,
@@ -17,27 +18,25 @@ import {
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
-import FuzzySearch from "fuzzy-search";
-import { useCreateTag } from "@/components/hooks/tag/useCreateTag";
+import { fuzzyFindSearch } from "@/lib/searching";
+import { cn, randomColor, showSelectedTagsFirst } from "@/lib/utils";
 
 export type TagPickerUiProviderProps = {
   availableTags: TagDetails[];
-  selectedTags?: TagDetails[];
+  disabled?: boolean;
   forCategory?: Category;
+  modal?: boolean;
   onNewTagsSelected?: (tags: TagDetails[]) => void;
+  selectedTags?: TagDetails[];
+  tagMatchStrategy?: (tag: TagDetails, searchTerm: string) => boolean;
   tagsDisplayStrategy?: (
     selectedTags: TagDetails[],
     availableTags: TagDetails[],
   ) => TagDetails[];
-  tagMatchStrategy?: (tag: TagDetails, searchTerm: string) => boolean;
-  modal?: boolean;
-  disabled?: boolean;
 };
 
-const fuzzyFindStrategy = (tags: TagDetails, searchTerm: string): boolean => {
-  const searcher = new FuzzySearch([tags.label], []);
-  const result = searcher.search(searchTerm);
-  return result.length !== 0;
+const fuzzyFindTag = (tag: TagDetails, searchTerm: string) => {
+  return fuzzyFindSearch(tag.label, searchTerm).length !== 0;
 };
 
 const orderCategories = (
@@ -89,7 +88,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     }
   };
 
-  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindStrategy;
+  const matchStrategy = props.tagMatchStrategy ?? fuzzyFindTag;
 
   let tagsToDisplay = props.availableTags;
   tagsToDisplay = tagsToDisplay.filter((tag) => matchStrategy(tag, searchTerm));
@@ -97,8 +96,8 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   // group tags based on their allowed categories
   const categories = new Map<string, TagDetails[]>([["-", []]]);
   tagsToDisplay.forEach((tag) => {
-    const categoryNames =
-      tag.allowedCategories.length > 0
+    const categoryNames
+      = tag.allowedCategories.length > 0
         ? tag.allowedCategories.map((c) => c.name)
         : ["-"];
 
@@ -109,7 +108,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
     });
   });
 
-  let categoriesInOrder = Array.from(categories.entries());
+  let categoriesInOrder = [...categories.entries()];
   if (props.forCategory) {
     categoriesInOrder = orderCategories(props.forCategory, categoriesInOrder);
   }
@@ -118,21 +117,21 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
   return (
     <Popover
       modal={props.modal}
-      open={isOpen}
       onOpenChange={(shouldOpen) => {
         if (!shouldOpen) {
           setSearchTerm("");
         }
         setIsOpen(shouldOpen);
       }}
+      open={isOpen}
     >
       <PopoverTrigger asChild>
         <Button
-          disabled={props.disabled}
-          variant="outline"
-          role="combobox"
           aria-expanded={isOpen}
           className="max-w-full grow justify-start"
+          disabled={props.disabled}
+          role="combobox"
+          variant="outline"
         >
           <ChevronsUpDown className="mx-2 size-4 shrink-0 opacity-50" />
           <ScrollArea className="flex  max-w-full overflow-hidden ">
@@ -140,56 +139,58 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
               {tagsValue.length === 0
                 ? "Select Tags"
                 : tagsValue.map((tag) => (
-                  <TagBadge tag={tag} variant="auto" key={tag.id} />
-                ))}
+                    <TagBadge key={tag.id} tag={tag} variant="auto" />
+                  ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent align="start" className="w-[200px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
             onValueChange={setSearchTerm}
             placeholder="Search tags"
           />
-          {searchTerm &&
-            props.availableTags.every((t) => t.label !== searchTerm) && (
+          {searchTerm
+            && props.availableTags.every((t) => t.label !== searchTerm) && (
             <CommandGroup>
               <CommandItem
                 className="flex"
-                onSelect={() =>
+                onSelect={() => {
                   createTag(
                     {
+                      allowedCategories: [],
                       color: newTagColor,
                       label: searchTerm,
-                      allowedCategories: [],
                     },
                     { onSuccess: handleTagCreate },
-                  )
-                }
+                  );
+                }}
               >
                 <p>Create</p>
                 <div className="grow"></div>
                 <TagBadge
-                  variant="manual"
-                  value={searchTerm}
                   colors={newTagColor}
+                  value={searchTerm}
+                  variant="manual"
                 />
               </CommandItem>
             </CommandGroup>
           )}
           <ScrollArea
-            type="always"
             className="max-h-48 overflow-y-auto rounded-md border-none"
+            type="always"
           >
             {categoriesInOrder.map(([category, tags]) => (
               <CommandGroup heading={category} key={category}>
-                {tagsOrderStrategy(tags, tags).map((tag) => (
+                {tagsOrderStrategy(tagsValue, tags).map((tag) => (
                   <CommandItem
-                    value={tag.label}
                     key={tag.id}
-                    onSelect={() => handleTagSelect(tag)}
+                    onSelect={() => {
+                      handleTagSelect(tag);
+                    }}
+                    value={tag.id}
                   >
                     <Check
                       className={cn(
@@ -199,7 +200,7 @@ export const TagPickerUiProvider: FC<TagPickerUiProviderProps> = (props) => {
                           : "opacity-0",
                       )}
                     />
-                    <TagBadge variant="auto" tag={tag} />
+                    <TagBadge tag={tag} variant="auto" />
                   </CommandItem>
                 ))}
               </CommandGroup>

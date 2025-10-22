@@ -1,9 +1,10 @@
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export const useCategories = () => {
   return useQuery({
     ...queryKeys.categories.all,
+    placeholderData: keepPreviousData,
     staleTime: Infinity,
   });
 };

@@ -4,12 +4,12 @@ import { tagFilter } from "@/api/definitions/filters/tag";
 import { z } from "zod";
 
 export const sessionFilter = z.object({
-  tags: tagFilter,
   categories: categoryFilter,
-  fromStartTime: dateFilter,
-  toStartTime: dateFilter,
   fromEndTime: dateFilter,
+  fromStartTime: dateFilter,
+  tags: tagFilter,
   toEndTime: dateFilter,
+  toStartTime: dateFilter,
 }).partial();
 
-export type SessionFilter = z.infer<typeof sessionFilter>
+export type SessionFilter = z.infer<typeof sessionFilter>;

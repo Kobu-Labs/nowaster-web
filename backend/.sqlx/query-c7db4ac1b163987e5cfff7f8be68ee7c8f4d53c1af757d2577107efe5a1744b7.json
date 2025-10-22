@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE refresh_tokens\n        SET revoked_at = NOW(), revoked_reason = 'token_limit_exceeded'\n        WHERE token_hash IN (\n            SELECT token_hash\n            FROM refresh_tokens\n            WHERE user_id = $1\n              AND revoked_at IS NULL\n              AND expires_at > NOW()\n            ORDER BY created_at ASC\n            LIMIT (\n                SELECT GREATEST(0, COUNT(*) - $2)\n                FROM refresh_tokens\n                WHERE user_id = $1\n                  AND revoked_at IS NULL\n                  AND expires_at > NOW()\n            )\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c7db4ac1b163987e5cfff7f8be68ee7c8f4d53c1af757d2577107efe5a1744b7"
+}

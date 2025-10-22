@@ -1,6 +1,8 @@
+import FuzzySearch from "fuzzy-search";
+
 type PrefixBasedMatchOpts = Partial<{
-  caseInsensitive: boolean
-}>
+  caseInsensitive: boolean;
+}>;
 
 export const prefixBasedMatch = (
   value: string | undefined,
@@ -27,4 +29,14 @@ export const prefixBasedMatch = (
   }
 
   return true;
+};
+
+export const fuzzyFindSearch = (
+  value: string,
+  searchTerm: string,
+): string[] => {
+  const searcher = new FuzzySearch([value], []);
+  const result = searcher.search(searchTerm);
+
+  return result;
 };

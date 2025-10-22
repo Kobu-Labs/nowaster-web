@@ -3,16 +3,16 @@ import { z } from "zod";
 const tagLabelFilter = z.object({
   label: z
     .object({
-      value: z.array(z.string()),
       mode: z.union([z.literal("all"), z.literal("some")]),
+      value: z.array(z.string()),
     }),
 });
 
 const tagIdFilter = z.object({
   id: z
     .object({
-      value: z.array(z.string()),
       mode: z.union([z.literal("all"), z.literal("some")]),
+      value: z.array(z.string()),
     }),
 });
 

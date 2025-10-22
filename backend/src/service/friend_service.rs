@@ -2,36 +2,44 @@ use anyhow::Result;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, prelude::FromRow, Row};
+use tracing::instrument;
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    dto::user::read_user::ReadUserDto,
-    entity::user::User,
+    dto::{
+        feed::{AddFeedSource, RemoveFeedSource},
+        user::read_user::ReadUserDto,
+    },
+    entity::visibility::VisibilityFlags,
     repository::friends::{FriendsRepository, UpdateFriendRequestDto},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
+    service::{
+        feed::{subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService},
+        notification_service::NotificationService,
+    },
 };
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFriendshipAsActorDto {
     pub id: Uuid,
     pub friend: ReadUserDto,
     pub created_at: DateTime<Local>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ProcessFriendRequestDto {
     pub recipient_name: String,
     pub introduction_message: Option<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct CreateFriendRequestDto {
     pub recipient_id: String,
     pub introduction_message: Option<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFriendshipDto {
     pub id: Uuid,
     pub friend1: ReadUserDto,
@@ -39,41 +47,20 @@ pub struct ReadFriendshipDto {
     pub created_at: DateTime<Local>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct ReadFriendshipWithAvatarDto {
-    pub id: Uuid,
-    pub friend1: ReadUserAvatarDto,
-    pub friend2: ReadUserAvatarDto,
-    pub created_at: DateTime<Local>,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct ReadUserAvatarDto {
-    pub id: String,
-    pub username: String,
-    pub avatar_url: Option<String>,
-}
-
-impl From<User> for ReadUserAvatarDto {
-    fn from(user: User) -> Self {
-        Self {
-            id: user.id,
-            username: user.username,
-            avatar_url: None,
-        }
-    }
-}
-
 impl FromRow<'_, PgRow> for ReadFriendRequestDto {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         let requestor = ReadUserDto {
             id: row.try_get("requestor_id")?,
             username: row.try_get("requestor_username")?,
+            avatar_url: row.try_get("requestor_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friend request display
         };
 
         let recipient = ReadUserDto {
             id: row.try_get("recipient_id")?,
             username: row.try_get("recipient_username")?,
+            avatar_url: row.try_get("recipient_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friend request display
         };
 
         let created_at: DateTime<Local> = row.try_get("created_at")?;
@@ -96,11 +83,15 @@ impl FromRow<'_, PgRow> for ReadFriendshipDto {
         let friend1 = ReadUserDto {
             id: row.try_get("friend1_id")?,
             username: row.try_get("friend1_username")?,
+            avatar_url: row.try_get("friend1_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friendship display
         };
 
         let friend2 = ReadUserDto {
             id: row.try_get("friend2_id")?,
             username: row.try_get("friend2_username")?,
+            avatar_url: row.try_get("friend2_avatar_url")?,
+            visibility_flags: VisibilityFlags::default(), // Default for friendship display
         };
 
         let created_at: DateTime<Local> = row.try_get("created_at")?;
@@ -114,27 +105,27 @@ impl FromRow<'_, PgRow> for ReadFriendshipDto {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct AcceptFriendRequestDto {
     pub request_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct RejectFriendRequestDto {
     pub request_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CancelFriendRequestDto {
     pub request_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct RemoveFriendDto {
     pub friendship_id: Uuid,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum FriendRequestDirection {
     Incoming,
@@ -165,12 +156,12 @@ pub enum FriendRequestStatus {
     Cancelled,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadFriendRequestsDto {
     pub direction: FriendRequestDirection,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadFriendRequestDto {
     pub id: Uuid,
     pub status: FriendRequestStatus,
@@ -180,20 +171,58 @@ pub struct ReadFriendRequestDto {
     pub introduction_message: Option<String>,
 }
 
+#[async_trait::async_trait]
+pub trait FriendServiceTrait {
+    async fn create_friend_request(
+        &self,
+        dto: CreateFriendRequestDto,
+        actor: Actor,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn accept_friend_request(
+        &self,
+        dto: AcceptFriendRequestDto,
+        actor: Actor,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn reject_friend_request(
+        &self,
+        dto: RejectFriendRequestDto,
+        actor: Actor,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn cancel_friend_request(
+        &self,
+        dto: CancelFriendRequestDto,
+        actor: Actor,
+    ) -> Result<ReadFriendRequestDto>;
+
+    async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>>;
+
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()>;
+
+    async fn list_friend_requests(
+        &self,
+        actor: Actor,
+        data: ReadFriendRequestsDto,
+    ) -> Result<Vec<ReadFriendRequestDto>>;
+}
+
 #[derive(Clone)]
 pub struct FriendService {
     repo: FriendsRepository,
+    visibility_service: FeedVisibilityService,
+    subscription_service: FeedSubscriptionService,
+    notification_service: NotificationService,
 }
 
-impl FriendService {
-    pub fn new(repo: FriendsRepository) -> Self {
-        Self { repo }
-    }
-
-    pub async fn create_friend_request(
+#[async_trait::async_trait]
+impl FriendServiceTrait for FriendService {
+    #[instrument(err, skip(self), fields(recipient_id = %dto.recipient_id, actor_id = %actor))]
+    async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         if dto.recipient_id == actor.user_id {
             return Err(anyhow::anyhow!(
@@ -202,13 +231,17 @@ impl FriendService {
         }
 
         let result = self.repo.create_friend_request(dto, actor).await?;
+        self.notification_service
+            .notify_friend_request(result.clone())
+            .await;
         Ok(result)
     }
 
-    pub async fn accept_friend_request(
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, actor_id = %actor))]
+    async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -233,13 +266,38 @@ impl FriendService {
         }
 
         let result = self.repo.update_friend_request(dto).await?;
+        self.subscription_service
+            .subscribe(
+                AddFeedSource::User(request.requestor.id.clone()),
+                request.recipient.id.clone(),
+            )
+            .await;
+        self.subscription_service
+            .subscribe(
+                AddFeedSource::User(request.recipient.id.clone()),
+                request.requestor.id.clone(),
+            )
+            .await;
+
+        let _ = self
+            .notification_service
+            .notify_friend_request_accepted(request.clone())
+            .await;
+        let friendship_result = self.repo.get_friendship_by_id(result.id).await;
+        if let Ok(Some(friendship)) = friendship_result {
+            self.visibility_service
+                .recalculate_friendship_visibility(friendship)
+                .await;
+        }
+
         Ok(result)
     }
 
-    pub async fn reject_friend_request(
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, actor_id = %actor))]
+    async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -267,10 +325,11 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn cancel_friend_request(
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, actor_id = %actor))]
+    async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -298,22 +357,55 @@ impl FriendService {
         Ok(result)
     }
 
-    pub async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = self.repo.list_friends(actor.clone()).await?;
         Ok(result)
     }
 
-    pub async fn remove_friend(&self, dto: RemoveFriendDto, actor: ClerkUser) -> Result<()> {
-        self.repo.remove_friendship(dto, actor).await?;
+    #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, actor_id = %actor))]
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()> {
+        let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
+
+        let other_user_id = if friendship.friend1.id == actor.user_id.clone() {
+            friendship.clone().friend2.id
+        } else {
+            friendship.clone().friend1.id
+        };
+
+        self.subscription_service
+            .unsubscribe(RemoveFeedSource::User(other_user_id), actor.user_id.clone())
+            .await;
+        self.visibility_service
+            .recalculate_friendship_visibility(friendship.clone())
+            .await;
+
         Ok(())
     }
 
-    pub async fn list_friend_requests(
+    #[instrument(err, skip(self), fields(actor_id = %actor, direction = %data.direction))]
+    async fn list_friend_requests(
         &self,
-        actor: ClerkUser,
+        actor: Actor,
         data: ReadFriendRequestsDto,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = self.repo.list_friend_requests(data, actor).await?;
         Ok(result)
+    }
+}
+
+impl FriendService {
+    pub fn new(
+        repo: FriendsRepository,
+        visibility_service: FeedVisibilityService,
+        subscription_service: FeedSubscriptionService,
+        notification_service: NotificationService,
+    ) -> Self {
+        FriendService {
+            repo,
+            visibility_service,
+            subscription_service,
+            notification_service,
+        }
     }
 }

@@ -1,8 +1,10 @@
 import { UserSchema } from "@/api/definitions/models/user";
-import { z } from "zod";
+import type { z } from "zod";
 
 const create = UserSchema;
 const update = UserSchema;
+const updateVisibility = UserSchema;
+const getProfile = UserSchema;
 
 export type UserResponse = {
   [Property in keyof typeof UserResponseSchema]: z.infer<
@@ -12,5 +14,7 @@ export type UserResponse = {
 
 export const UserResponseSchema = {
   create,
+  getProfile,
   update,
+  updateVisibility,
 } as const;

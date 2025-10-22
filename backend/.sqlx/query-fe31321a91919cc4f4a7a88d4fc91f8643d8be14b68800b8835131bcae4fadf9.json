@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO feed_reaction (id, feed_event_id, user_id, emoji)\n                VALUES ($1, $2, $3, $4)\n                ON CONFLICT (feed_event_id, user_id, emoji) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fe31321a91919cc4f4a7a88d4fc91f8643d8be14b68800b8835131bcae4fadf9"
+}

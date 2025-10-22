@@ -1,10 +1,10 @@
-// INFO: disabled due to recharts
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
-import { FC, useState } from "react";
+import type { FC } from "react";
+import { useState } from "react";
 import { categoryColors } from "@/state/categories";
-import { ScheduledSession } from "@/api/definitions";
+import type { ScheduledSession } from "@/api/definitions";
 import {
   Area,
   AreaChart,
@@ -13,11 +13,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useRecoilValue } from "recoil";
 
-import { GroupingOptions, groupSessions } from "@/lib/session-grouping";
+import type { GroupingOptions } from "@/lib/session-grouping";
+import { groupSessions } from "@/lib/session-grouping";
 import { formatTime, randomColor } from "@/lib/utils";
 import { Card } from "@/components/shadcn/card";
+import { Separator } from "@/components/shadcn/separator";
+import { useAtomValue } from "jotai";
 
 type SessionBaseAreaChartUiProviderProps = {
   data: ScheduledSession[];
@@ -32,7 +34,7 @@ export const SessionBaseAreaChartUiProvider: FC<
     props.groupingOpts,
   );
   const [fallbackColor] = useState(randomColor());
-  const colors = useRecoilValue(categoryColors);
+  const colors = useAtomValue(categoryColors);
 
   if (props.data.length === 0) {
     return (
@@ -45,20 +47,20 @@ export const SessionBaseAreaChartUiProvider: FC<
   return (
     <ResponsiveContainer>
       <AreaChart data={groupedSessions}>
-        <XAxis includeHidden dataKey="granularity" />
+        <XAxis dataKey="granularity" includeHidden />
         <YAxis tickFormatter={(x: number) => formatTime(x)} />
         <Tooltip content={(data) => customTooltip(data, colors)} />
         {uniqueCategories.map((category) => {
           return (
             <Area
-              key={category}
-              fill={colors[category] ?? fallbackColor}
-              type="monotone"
-              stackId="1"
               dataKey={(v: Record<string, number>) => v[category] ?? 0}
+              fill={colors[category] ?? fallbackColor}
+              fillOpacity={0.4}
+              key={category}
+              stackId="1"
               stroke={colors[category] ?? fallbackColor}
               strokeWidth={4}
-              fillOpacity={0.4}
+              type="monotone"
             />
           );
         })}
@@ -67,7 +69,7 @@ export const SessionBaseAreaChartUiProvider: FC<
   );
 };
 
-const customTooltip = (data: any, colors: { [category: string]: string }) => {
+const customTooltip = (data: any, colors: Record<string, string>) => {
   if (!data.payload) {
     return <></>;
   }
@@ -83,33 +85,41 @@ const customTooltip = (data: any, colors: { [category: string]: string }) => {
   if (filteredValues.length === 0) {
     return <></>;
   }
+  const totalTime = filteredValues.reduce((acc, [_, time]) => {
+    return acc + time;
+  }, 0);
 
   return (
-    <Card className="rounded-sm p-2">
+    <Card className="rounded-sm p-2 gradient-card-solid">
       {filteredValues.map(([category, totalTime], i) => {
         return (
           <div className="flex items-center justify-between gap-2" key={i}>
             <p
-              key={category + "category"}
+              className="text-(--legend-color)"
+              key={`${category}category`}
               style={
                 { "--legend-color": colors[category] } as React.CSSProperties
               }
-              className={"text-[var(--legend-color)]"}
             >
               {category}
             </p>
             <p
-              key={category + "time"}
+              className="text-(--legend-color)"
+              key={`${category}time`}
               style={
                 { "--legend-color": colors[category] } as React.CSSProperties
               }
-              className={"text-[var(--legend-color)]"}
             >
               {formatTime(totalTime)}
             </p>
           </div>
         );
       })}
+      <Separator className="h-0.5" />
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-(--legend-color)">Total Time</p>
+        <p className="text-(--legend-color)">{formatTime(totalTime)}</p>
+      </div>
     </Card>
   );
 };

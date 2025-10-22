@@ -2,13 +2,14 @@ use axum::extract::Path;
 use axum::routing::{delete, get};
 use axum::{extract::State, routing::post, Router};
 use thiserror::Error;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::dto::session::filter_session::FilterSessionDto;
 use crate::dto::session::fixed_session::{
     CreateFixedSessionDto, ReadFixedSessionDto, UpdateFixedSessionDto,
 };
-use crate::router::clerk::ClerkUser;
+use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
@@ -22,9 +23,10 @@ pub fn fixed_session_router() -> Router<AppState> {
         .route("/filter", post(filter_handler))
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn create_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateFixedSessionDto>,
 ) -> ApiResponse<ReadFixedSessionDto> {
     let res = state
@@ -34,17 +36,19 @@ async fn create_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn active_session_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ActiveSession>> {
     let res = state.session_service.get_active_sessions(actor).await;
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor, session_id = %session_id))]
 async fn delete_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     Path(session_id): Path<Uuid>,
 ) -> ApiResponse<()> {
     let res = state
@@ -54,9 +58,10 @@ async fn delete_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn filter_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<FilterSessionDto>,
 ) -> ApiResponse<Vec<ReadFixedSessionDto>> {
     let res = state
@@ -66,9 +71,10 @@ async fn filter_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn update_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateFixedSessionDto>,
 ) -> ApiResponse<ReadFixedSessionDto> {
     let res = state

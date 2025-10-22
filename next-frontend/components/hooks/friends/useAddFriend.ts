@@ -1,7 +1,7 @@
 import { FriendRequestApi } from "@/api";
 import { useToast } from "@/components/shadcn/use-toast";
 import { emptyStringToUndefined } from "@/lib/utils";
-import { AddFriendFormValues } from "@/validation/add-friend";
+import type { AddFriendFormValues } from "@/validation/add-friend";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddFriend = () => {
@@ -11,28 +11,28 @@ export const useAddFriend = () => {
   const mutation = useMutation({
     mutationFn: async (data: AddFriendFormValues) => {
       return await FriendRequestApi.create({
-        recipient_name: data.username,
         introduction_message: emptyStringToUndefined(data.introductionMessage, {
           trim: true,
         }),
+        recipient_name: data.username,
       });
     },
 
+    onError: (error) => {
+      toast({
+        description: error.message,
+        title: "Error",
+        variant: "destructive",
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["friends", "requests"],
       });
       toast({
-        title: "Friend request sent",
         description: "Your friend request has been sent successfully.",
+        title: "Friend request sent",
         variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
       });
     },
   });

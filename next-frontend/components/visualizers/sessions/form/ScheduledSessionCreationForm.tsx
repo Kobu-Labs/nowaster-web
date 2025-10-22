@@ -1,25 +1,14 @@
-import {
-  ScheduledSessionRequest,
-  ScheduledSessionRequestSchema,
-} from "@/api/definitions";
+import type { ScheduledSessionRequest } from "@/api/definitions";
+import { CategoryWithIdSchema } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  addHours,
-  addMinutes,
-  differenceInMinutes,
-  isBefore,
-  isEqual,
-  setMinutes,
-  subHours,
-  subMinutes,
-} from "date-fns";
-import { ArrowBigRight } from "lucide-react";
-import { FC } from "react";
+import { differenceInMinutes, isBefore, isEqual } from "date-fns";
+import { ArrowBigDown } from "lucide-react";
+import type { FC } from "react";
 import { useForm } from "react-hook-form";
 
 import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { Button } from "@/components/shadcn/button";
-import { Card, CardContent } from "@/components/shadcn/card";
+import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import {
   Form,
   FormControl,
@@ -29,43 +18,15 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
-import {
-  DateTimePicker,
-  QuickOption,
-} from "@/components/visualizers/DateTimePicker";
-import { SingleCategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
+import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { formatTime } from "@/lib/utils";
-import { SessionPrecursor } from "@/validation/session/creation";
+import type { SessionPrecursor } from "@/validation/session/creation";
+import { z } from "zod";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
-const creationFormQuickOptions: QuickOption[] = [
-  {
-    label: "now",
-    increment: () => new Date(),
-  },
-  {
-    label: "clamp",
-    increment: (date) => setMinutes(date, 0),
-  },
-  {
-    label: "+ 15m",
-    increment: (date) => addMinutes(date, 15),
-  },
-  {
-    label: "- 15m",
-    increment: (date) => subMinutes(date, 15),
-  },
-  {
-    label: "+ 1h",
-    increment: (date) => addHours(date, 1),
-  },
-  {
-    label: "- 1h",
-    increment: (date) => subHours(date, 1),
-  },
-];
-
-export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
+export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
   if (!props.from || !props.to) {
     return <span>--:--</span>;
   }
@@ -80,24 +41,38 @@ export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
 };
 
 type ScheduledSessionCreationFormProps = {
+  onClose?: () => void;
+  onCreate?: () => void;
+  onCreateAndClose?: () => void;
   precursor?: SessionPrecursor;
-  onSave?: () => void;
 };
+
+const createSessionPrecursor = z.object({
+  category: CategoryWithIdSchema,
+  description: z.string().nullable(),
+  endTime: z.coerce.date<Date>(),
+  startTime: z.coerce.date<Date>(),
+  tags: z.array(
+    z.object({
+      id: z.uuid(),
+    }),
+  ),
+});
 
 export const ScheduledSessionCreationForm: FC<
   ScheduledSessionCreationFormProps
 > = (props) => {
-  const form = useForm<ScheduledSessionRequest["create"]>({
-    resolver: zodResolver(ScheduledSessionRequestSchema.create),
+  const form = useForm<z.infer<typeof createSessionPrecursor>>({
     defaultValues: props.precursor,
+    resolver: zodResolver(createSessionPrecursor),
   });
 
   const createSession = useCreateScheduledSession();
 
-  async function onSubmit(values: ScheduledSessionRequest["create"]) {
+  async function onSubmit(values: z.infer<typeof createSessionPrecursor>) {
     if (
-      isBefore(values.endTime, values.startTime) ||
-      isEqual(values.endTime, values.startTime)
+      isBefore(values.endTime, values.startTime)
+      || isEqual(values.endTime, values.startTime)
     ) {
       form.setError("endTime", {
         message: "End time must be after start time",
@@ -105,20 +80,31 @@ export const ScheduledSessionCreationForm: FC<
       return;
     }
 
-    await createSession.mutateAsync(values, {
+    const data: ScheduledSessionRequest["create"] = {
+      category_id: values.category.id,
+      description: values.description,
+      endTime: values.endTime,
+      startTime: values.startTime,
+      tag_ids: values.tags.map((tag) => tag.id),
+    };
+
+    await createSession.mutateAsync(data, {
       onSuccess: () => {
-        if (props.onSave) {
-          props.onSave();
+        if (props.onCreate) {
+          props.onCreate();
         }
       },
     });
   }
 
   return (
-    <Card>
-      <CardContent className="mt-3 ">
+    <Card className="p-0 m-0">
+      <CardContent className="mt-3 max-w-full overflow-hidden p-2 md:p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            className="space-y-6 md:space-y-8"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="category"
@@ -126,14 +112,16 @@ export const ScheduledSessionCreationForm: FC<
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Category</FormLabel>
                   <FormControl>
-                    <SingleCategoryPicker
-                      onSelectedCategoriesChanged={(category) => {
-                        if (category === undefined) {
+                    <CategoryPicker
+                      mode="single"
+                      onSelectCategory={(cat) => {
+                        if (cat.id === field.value?.id) {
                           form.resetField("category");
                         } else {
-                          field.onChange(category);
+                          field.onChange(cat);
                         }
                       }}
+                      selectedCategory={field.value ?? null}
                     />
                   </FormControl>
                   <FormMessage />
@@ -143,16 +131,16 @@ export const ScheduledSessionCreationForm: FC<
 
             <FormField
               control={form.control}
-              name="description"
               defaultValue={null}
+              name="description"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Input
+                      onChange={field.onChange}
                       placeholder="Insert your description"
                       value={field.value ?? ""}
-                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -160,17 +148,15 @@ export const ScheduledSessionCreationForm: FC<
               )}
             />
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
               <FormField
-                name="startTime"
                 control={form.control}
+                name="startTime"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">Start Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={creationFormQuickOptions}
-                        selected={field.value || undefined}
                         onSelect={(val) => {
                           if (val) {
                             field.onChange(val);
@@ -181,6 +167,8 @@ export const ScheduledSessionCreationForm: FC<
                             form.resetField("startTime");
                           }
                         }}
+                        quickOptions={dateQuickOptions}
+                        selected={field.value || undefined}
                       />
                     </FormControl>
                     <FormMessage />
@@ -188,24 +176,22 @@ export const ScheduledSessionCreationForm: FC<
                 )}
               />
 
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-row items-center justify-center gap-2 py-2 md:flex-col md:gap-0 md:py-0">
                 <DurationLabel
                   from={form.watch("startTime")}
                   to={form.watch("endTime")}
                 />
-                <ArrowBigRight />
+                <ArrowBigDown className="md:-rotate-90" />
               </div>
 
               <FormField
-                name="endTime"
                 control={form.control}
+                name="endTime"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="block">End Time</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        quickOptions={creationFormQuickOptions}
-                        selected={field.value}
                         onSelect={(val) => {
                           if (val) {
                             field.onChange(val);
@@ -213,6 +199,8 @@ export const ScheduledSessionCreationForm: FC<
                             form.resetField("endTime");
                           }
                         }}
+                        quickOptions={dateQuickOptions}
+                        selected={field.value}
                       />
                     </FormControl>
                     <FormMessage />
@@ -222,17 +210,19 @@ export const ScheduledSessionCreationForm: FC<
             </div>
 
             <FormField
+              control={form.control}
               defaultValue={[]}
               name="tags"
-              control={form.control}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel className="block">Tags</FormLabel>
                   <FormControl>
                     <SimpleTagPicker
-                      forCategory={form.watch("category")}
                       disabled={form.getValues("category") === undefined}
-                      onNewTagsSelected={(tags) => field.onChange(tags)}
+                      forCategory={form.watch("category")}
+                      onNewTagsSelected={(tags) => {
+                        field.onChange(tags);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -240,9 +230,32 @@ export const ScheduledSessionCreationForm: FC<
               )}
             />
 
-            <Button type="submit" loading={createSession.isPending}>
-              Submit
-            </Button>
+            <CardFooter className="justify-between p-0">
+              {props.onClose && (
+                <Button
+                  onClick={props.onClose}
+                  type="button"
+                  variant="secondary"
+                >
+                  Close
+                </Button>
+              )}
+              <div className="grow"></div>
+              <div className="flex items-center gap-2">
+                <Button loading={createSession.isPending} type="submit">
+                  Submit
+                </Button>
+                {props.onCreateAndClose && (
+                  <Button
+                    loading={createSession.isPending}
+                    onClick={props.onCreateAndClose}
+                    type="submit"
+                  >
+                    Submit and Close
+                  </Button>
+                )}
+              </div>
+            </CardFooter>
           </form>
         </Form>
       </CardContent>

@@ -1,6 +1,6 @@
-interface RootLayoutProps {
+type RootLayoutProps = {
   children: React.ReactNode;
-}
+};
 
 export const metadata = {
   title: "Tags",

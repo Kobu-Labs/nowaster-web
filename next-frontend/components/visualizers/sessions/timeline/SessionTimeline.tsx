@@ -1,10 +1,11 @@
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { SessionTimelineUiProvider } from "@/components/ui-providers/session/SessionTimelineUiProvider";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { subHours } from "date-fns";
-import { FC, useMemo } from "react";
+import type { FC } from "react";
+import { useMemo } from "react";
 
 type SessionTimelineProps = {
   filter?: SessionFilterPrecursor;
@@ -18,9 +19,9 @@ export const SessionTimeline: FC<SessionTimelineProps> = (props) => {
 
   const data = useMemo(() => {
     const result = {
+      endDate: props.filter?.data.endTimeTo?.value ?? new Date(),
       startDate:
         props.filter?.data.endTimeFrom?.value ?? subHours(new Date(), 48),
-      endDate: props.filter?.data.endTimeTo?.value ?? new Date(),
     };
     return result;
   }, [props.filter]);
@@ -30,14 +31,19 @@ export const SessionTimeline: FC<SessionTimelineProps> = (props) => {
   }
 
   if (sessions.isError) {
-    return <div>Error: {sessions.error.message}</div>;
+    return (
+      <div>
+        Error:
+        {sessions.error.message}
+      </div>
+    );
   }
 
   return (
     <SessionTimelineUiProvider
+      endDate={data.endDate}
       sessions={sessions.data}
       startDate={data.startDate}
-      endDate={data.endDate}
     />
   );
 };

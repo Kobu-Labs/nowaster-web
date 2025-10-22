@@ -4,23 +4,24 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import { FriendRequest as FriendRequestType } from "@/api/definitions/models/friendship";
+import type { FriendRequest as FriendRequestType } from "@/api/definitions/models/friendship";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FC } from "react";
+import type { FC } from "react";
 import { RelativeDate } from "@/components/ui-providers/RelativeDate";
 import { Button } from "@/components/shadcn/button";
 import { Check, X } from "lucide-react";
 import { Card, CardContent } from "@/components/shadcn/card";
+import { getInitials } from "@/lib/utils";
 
 type FriendRequestProps = {
-  request: FriendRequestType;
   direction: "incoming" | "outgoing";
+  request: FriendRequestType;
 };
 
 export const FriendRequest: FC<FriendRequestProps> = (props) => {
   const queryClient = useQueryClient();
-  const subject =
-    props.direction === "incoming"
+  const subject
+    = props.direction === "incoming"
       ? props.request.requestor
       : props.request.recipient;
 
@@ -28,7 +29,7 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
     mutationFn: async ({
       status,
     }: {
-      status: "accepted" | "rejected" | "cancelled";
+      status: "accepted" | "cancelled" | "rejected";
     }) => {
       return await FriendRequestApi.update({
         request_id: props.request.id,
@@ -45,13 +46,8 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
     <Card>
       <CardContent className="p-4 flex items-center gap-2">
         <Avatar>
-          <AvatarImage src={"/placeholder.svg"} alt={subject.username} />
-          <AvatarFallback>
-            {subject.username
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </AvatarFallback>
+          <AvatarImage alt={subject.username} src="/placeholder.svg" />
+          <AvatarFallback>{getInitials(subject.username)}</AvatarFallback>
         </Avatar>
         <div>
           <p className="font-medium">{subject.username}</p>
@@ -69,27 +65,25 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
         {props.direction === "incoming" && (
           <>
             <Button
-              size="sm"
-              variant="outline"
               className="text-green-600 border-green-600 hover:bg-green-50/10 hover:text-green-700"
               onClick={() =>
-                updateFriendRequest.mutate({
-                  status: "accepted",
-                })
-              }
+              { updateFriendRequest.mutate({
+                status: "accepted",
+              }); }}
+              size="sm"
+              variant="outline"
             >
               <Check className="mr-2 h-4 w-4" />
               Accept
             </Button>
             <Button
-              size="sm"
-              variant="outline"
               className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() =>
-                updateFriendRequest.mutate({
-                  status: "rejected",
-                })
-              }
+              { updateFriendRequest.mutate({
+                status: "rejected",
+              }); }}
+              size="sm"
+              variant="outline"
             >
               <X className="mr-2 h-4 w-4" />
               Reject
@@ -98,14 +92,13 @@ export const FriendRequest: FC<FriendRequestProps> = (props) => {
         )}
         {props.direction === "outgoing" && (
           <Button
-            size="sm"
-            variant="outline"
             className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={() =>
-              updateFriendRequest.mutate({
-                status: "cancelled",
-              })
-            }
+            { updateFriendRequest.mutate({
+              status: "cancelled",
+            }); }}
+            size="sm"
+            variant="outline"
           >
             Cancel
           </Button>

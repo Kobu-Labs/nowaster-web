@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use std::sync::Arc;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -14,8 +15,9 @@ use crate::{
         session::{SessionType, StopwatchSession},
         tag::Tag,
         user::User,
+        visibility::VisibilityFlags,
     },
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 
 #[derive(Clone)]
@@ -37,6 +39,7 @@ pub struct StopwatchFullRow {
     category_id: Option<Uuid>,
     category_name: Option<String>,
     category_color: Option<String>,
+    category_last_used_at: Option<DateTime<Utc>>,
 
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
@@ -64,6 +67,8 @@ impl StopwatchSessionRepository {
                 user: User {
                     id: session.user_id.clone(),
                     username: session.user_name.clone(),
+                    avatar_url: None,
+                    visibility_flags: VisibilityFlags::default(), // Default for session display
                 },
                 category: None,
                 tags: None,
@@ -82,15 +87,17 @@ impl StopwatchSessionRepository {
                 });
             }
 
-            if let (Some(id), Some(name), Some(color)) = (
+            if let (Some(id), Some(name), Some(color), Some(last_used_at)) = (
                 session.category_id,
                 session.category_name,
                 session.category_color,
+                session.category_last_used_at,
             ) {
                 entry.category = Some(Category {
                     id,
                     name,
                     color,
+                    last_used_at: last_used_at.into(),
                     created_by: session.user_id.clone(),
                 });
             }
@@ -98,12 +105,13 @@ impl StopwatchSessionRepository {
         Ok(grouped_tags.into_values().collect())
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor, category_id = ?category_id))]
     pub async fn create(
         &self,
         dto: CreateStopwatchSessionDto,
         category_id: Option<Uuid>,
         tag_ids: Option<Vec<Uuid>>,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<StopwatchSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let result = sqlx::query!(
@@ -146,7 +154,8 @@ impl StopwatchSessionRepository {
     }
 
     // INFO: only one stopwatch session can be active at a time
-    pub async fn read_stopwatch(&self, actor: ClerkUser) -> Result<Option<StopwatchSession>> {
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn read_stopwatch(&self, actor: Actor) -> Result<Option<StopwatchSession>> {
         let sessions = sqlx::query_as!(
             StopwatchFullRow,
             r#"SELECT 
@@ -162,6 +171,7 @@ impl StopwatchSessionRepository {
                 s.category_id as "category_id?",
                 c.name as "category_name?",
                 c.color as "category_color?",
+                c.last_used_at as "category_last_used_at?",
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
@@ -186,7 +196,8 @@ impl StopwatchSessionRepository {
         Ok(result.first().cloned())
     }
 
-    pub async fn delete_session(&self, id: Uuid, actor: ClerkUser) -> Result<()> {
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
+    pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM stopwatch_session s
@@ -201,10 +212,11 @@ impl StopwatchSessionRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(session_id = %dto.id, actor_id = %actor))]
     pub async fn update_session(
         &self,
         dto: UpdateStopwatchSessionDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<StopwatchSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         sqlx::query(

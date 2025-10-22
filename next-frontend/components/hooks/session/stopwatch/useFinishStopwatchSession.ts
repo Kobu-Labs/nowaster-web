@@ -1,7 +1,8 @@
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
+import type {
+  StopwatchSessionWithId } from "@/api/definitions";
 import {
-  ScheduledSessionSchema,
-  StopwatchSessionWithId,
+  ScheduledSessionRequestSchema,
 } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
@@ -13,35 +14,40 @@ export const useFinishStopwatchSession = () => {
 
   const mutation = useMutation({
     mutationFn: async (session: StopwatchSessionWithId) => {
-      const parsed = await ScheduledSessionSchema.safeParseAsync({
-        ...session,
-        tags: session.tags ?? [],
-        session_type: "fixed",
+      const parsed = await ScheduledSessionRequestSchema.create.safeParseAsync({
+        category_id: session.category?.id,
+        description: session.description,
         endTime: new Date(),
+        startTime: session.startTime,
+        tag_ids: session.tags?.map((tag) => tag.id) ?? [],
       });
 
       if (!parsed.success) {
-        console.error(parsed.error);
         throw new Error("Fill out start time and category!");
       }
+
       await StopwatchApi.remove({ id: session.id });
       return await ScheduledSessionApi.create(parsed.data);
     },
 
+    onError: (error) => {
+      toast({
+        description: error.message,
+        title: "Error finishing session",
+        variant: "destructive",
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions._def,
       });
-      toast({
-        description: `Session finished successfully!`,
-        variant: "default",
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.categories._def,
       });
-    },
-    onError: (error) => {
       toast({
-        title: "Error finishing session",
-        description: error.message,
-        variant: "destructive",
+        description: "Session finished successfully!",
+        variant: "default",
       });
     },
   });

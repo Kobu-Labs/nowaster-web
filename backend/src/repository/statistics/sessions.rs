@@ -1,6 +1,6 @@
 use crate::{
     config::database::{Database, DatabaseTrait},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
 };
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -24,7 +24,7 @@ impl StatisticsRepository {
         }
     }
 
-    pub async fn get_colors(&self, actor: ClerkUser) -> Result<ReadColorsDto> {
+    pub async fn get_colors(&self, actor: Actor) -> Result<ReadColorsDto> {
         let tag_colors = sqlx::query_as::<_, (String, String)>(
             r#"
                 SELECT tag.color, tag.label
@@ -53,7 +53,7 @@ impl StatisticsRepository {
         })
     }
 
-    pub async fn get_amount_of_sessions(&self, actor: ClerkUser) -> Result<u16> {
+    pub async fn get_amount_of_sessions(&self, actor: Actor) -> Result<u16> {
         let count: i64 = sqlx::query_scalar!(
             r#"
                 SELECT COUNT(*) as "count!"
@@ -68,7 +68,7 @@ impl StatisticsRepository {
         Ok(count as u16)
     }
 
-    pub async fn get_total_session_time(&self, actor: ClerkUser) -> Result<f64> {
+    pub async fn get_total_session_time(&self, actor: Actor) -> Result<f64> {
         let sum: Option<f64> = sqlx::query_scalar!(
             r#"
                 SELECT CAST(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60 AS FLOAT8) as "sum"
@@ -83,7 +83,7 @@ impl StatisticsRepository {
         Ok(sum.unwrap_or(0 as f64))
     }
 
-    pub async fn get_current_streak(&self, actor: ClerkUser) -> Result<u16> {
+    pub async fn get_current_streak(&self, actor: Actor) -> Result<u16> {
         let result = sqlx::query_scalar!(
             r#"
                 WITH RECURSIVE consecutive_days AS (

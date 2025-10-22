@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const remove = z.object({
-  friendship_id: z.string().uuid(),
+  friendship_id: z.uuid(),
 });
 
 const read = z.null();

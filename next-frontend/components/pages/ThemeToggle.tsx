@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { Switch } from "@/components/shadcn/switch";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -19,10 +19,10 @@ export function ThemeToggle() {
         }`}
       />
       <Switch
-        checked={theme === "dark"}
-        onCheckedChange={toggleTheme}
         aria-label="Toggle theme"
+        checked={theme === "dark"}
         className="transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110"
+        onCheckedChange={toggleTheme}
       />
       <Moon
         className={`h-[1.2rem] w-[1.2rem] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
@@ -32,4 +32,3 @@ export function ThemeToggle() {
     </div>
   );
 }
-

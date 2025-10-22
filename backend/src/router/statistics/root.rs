@@ -1,10 +1,11 @@
 use axum::routing::get;
 use axum::{extract::State, Router};
 use tokio::try_join;
+use tracing::instrument;
 
 use crate::dto::statistics::dashboard::DashboardData;
 use crate::repository::statistics::sessions::ReadColorsDto;
-use crate::router::clerk::ClerkUser;
+use crate::router::clerk::Actor;
 use crate::router::response::ApiResponse;
 use crate::router::root::AppState;
 
@@ -14,7 +15,8 @@ pub fn statistics_router() -> Router<AppState> {
         .route("/colors", get(get_colors))
 }
 
-async fn get_colors(State(state): State<AppState>, actor: ClerkUser) -> ApiResponse<ReadColorsDto> {
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn get_colors(State(state): State<AppState>, actor: Actor) -> ApiResponse<ReadColorsDto> {
     let result = state.statistics_service.get_colors(actor.clone()).await;
     match result {
         Ok(colors) => ApiResponse::Success { data: colors },
@@ -24,9 +26,10 @@ async fn get_colors(State(state): State<AppState>, actor: ClerkUser) -> ApiRespo
     }
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn get_dashboard_data(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<DashboardData> {
     let result = try_join!(
         state.statistics_service.get_current_streak(actor.clone()),

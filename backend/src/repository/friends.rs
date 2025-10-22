@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use tracing::instrument;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -8,7 +9,7 @@ use validator::Validate;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    router::clerk::ClerkUser,
+    router::clerk::Actor,
     service::friend_service::{
         CreateFriendRequestDto, FriendRequestStatus, ReadFriendRequestDto, ReadFriendRequestsDto,
         ReadFriendshipDto, RemoveFriendDto,
@@ -20,7 +21,7 @@ pub struct FriendsRepository {
     db: Arc<Database>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct UpdateFriendRequestDto {
     pub request_id: Uuid,
     pub status: FriendRequestStatus,
@@ -32,11 +33,8 @@ impl FriendsRepository {
             db: Arc::clone(db_conn),
         }
     }
-    pub async fn get_friend_request(
-        &self,
-        id: Uuid,
-        actor: ClerkUser,
-    ) -> Result<ReadFriendRequestDto> {
+    #[instrument(err, skip(self), fields(request_id = %id, actor_id = %actor))]
+    pub async fn get_friend_request(&self, id: Uuid, actor: Actor) -> Result<ReadFriendRequestDto> {
         let result = sqlx::query(
             r#"
                 SELECT 
@@ -47,8 +45,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
@@ -65,6 +65,7 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(request_id = %dto.request_id, status = ?dto.status))]
     pub async fn update_friend_request(
         &self,
         dto: UpdateFriendRequestDto,
@@ -95,8 +96,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM updated u
                 JOIN "user" u1 ON u1.id = u.requestor_id
                 JOIN "user" u2 ON u2.id = u.recipient_id
@@ -123,6 +126,7 @@ impl FriendsRepository {
         Ok(request)
     }
 
+    #[instrument(err, skip(self, tx), fields(requestor_id = %requestor_id, recipient_id = %recipient_id))]
     async fn create_friend_relationship(
         &self,
         requestor_id: String,
@@ -142,7 +146,9 @@ impl FriendsRepository {
                     i.friend_2_id AS friend2_id,
                     i.created_at,
                     u1.displayname AS friend1_username,
-                    u2.displayname AS friend2_username
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.displayname AS friend2_username,
+                    u2.avatar_url as friend2_avatar_url
                 FROM inserted i
                 LEFT JOIN "user" u1 ON u1.id = i.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = i.friend_2_id
@@ -158,7 +164,8 @@ impl FriendsRepository {
         Ok(result)
     }
 
-    pub async fn list_friends(&self, actor: ClerkUser) -> Result<Vec<ReadFriendshipDto>> {
+    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    pub async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = sqlx::query(
             r#"
                 SELECT 
@@ -167,7 +174,9 @@ impl FriendsRepository {
                     f.friend_2_id as "friend2_id", 
                     f.created_at,
                     u1.displayname AS friend1_username,
-                    u2.displayname AS friend2_username
+                    u2.displayname AS friend2_username,
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.avatar_url as friend2_avatar_url
                 FROM friend f
                 LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
@@ -186,10 +195,11 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, actor_id = %actor))]
     pub async fn remove_friendship(
         &self,
         dto: RemoveFriendDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendshipDto> {
         let row = sqlx::query(
             r#"
@@ -205,7 +215,9 @@ impl FriendsRepository {
                     d.friend_2_id AS friend2_id,
                     d.created_at,
                     u1.displayname AS friend1_username,
-                    u2.displayname AS friend2_username
+                    u2.displayname AS friend2_username,
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.avatar_url as friend2_avatar_url
                 FROM deleted d
                 LEFT JOIN "user" u1 ON u1.id = d.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = d.friend_2_id
@@ -221,10 +233,11 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(recipient_id = %data.recipient_id, actor_id = %actor))]
     pub async fn create_friend_request(
         &self,
         data: CreateFriendRequestDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<ReadFriendRequestDto> {
         let mut tx = self.db.get_pool().begin().await?;
         let exising_request = sqlx::query!(
@@ -284,8 +297,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM inserted i
                 JOIN "user" u1 ON u1.id = i.requestor_id
                 JOIN "user" u2 ON u2.id = i.recipient_id
@@ -304,10 +319,11 @@ impl FriendsRepository {
         Ok(result)
     }
 
+    #[instrument(err, skip(self), fields(actor_id = %actor, direction = ?data.direction))]
     pub async fn list_friend_requests(
         &self,
         data: ReadFriendRequestsDto,
-        actor: ClerkUser,
+        actor: Actor,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = sqlx::query(
             r#"
@@ -319,8 +335,10 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
+                    u1.avatar_url as requestor_avatar_url,
                     u2.displayname AS recipient_username,
-                    u2.id AS recipient_id
+                    u2.id AS recipient_id,
+                    u2.avatar_url as recipient_avatar_url
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
@@ -340,5 +358,37 @@ impl FriendsRepository {
             .collect::<Result<Vec<ReadFriendRequestDto>>>()?;
 
         Ok(result)
+    }
+
+    #[instrument(err, skip(self), fields(friendship_id = %friendship_id))]
+    pub async fn get_friendship_by_id(
+        &self,
+        friendship_id: Uuid,
+    ) -> Result<Option<ReadFriendshipDto>> {
+        let result = sqlx::query(
+            r#"
+                SELECT 
+                    f.id,
+                    f.friend_1_id AS friend1_id,
+                    f.friend_2_id AS friend2_id,
+                    f.created_at,
+                    u1.displayname AS friend1_username,
+                    u2.displayname AS friend2_username,
+                    u1.avatar_url as friend1_avatar_url,
+                    u2.avatar_url as friend2_avatar_url
+                FROM friend f
+                LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
+                LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
+                WHERE f.id = $1
+            "#,
+        )
+        .bind(friendship_id)
+        .fetch_optional(self.db.get_pool())
+        .await?;
+
+        match result {
+            Some(row) => Ok(Some(ReadFriendshipDto::from_row(&row)?)),
+            None => Ok(None),
+        }
     }
 }

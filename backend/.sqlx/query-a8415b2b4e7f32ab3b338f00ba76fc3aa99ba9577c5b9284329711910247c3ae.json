@@ -1,0 +1,143 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT \n                s.id,\n                s.user_id as \"user_id!\",\n                s.start_time,\n                s.description,\n                s.end_time,\n                s.type as session_type,\n\n                s.category_id,\n                c.name as category,\n                c.color as category_color,\n                c.last_used_at as category_last_used_at,\n\n                t.id as \"tag_id?\",\n                t.label as \"tag_label?\",\n                t.color as \"tag_color?\",\n                t.last_used_at as \"tag_last_used_at?\",\n\n                st.id as \"template_id?\",\n                st.name as \"template_name?\",\n                st.start_date as \"template_start_date?\",\n                st.end_date as \"template_end_date?\",\n                st.interval AS \"template_interval?: RecurringSessionInterval\"\n            FROM session s\n            JOIN category c\n                on c.id = s.category_id\n            LEFT JOIN tag_to_session tts\n                on tts.session_id = s.id\n            LEFT JOIN tag t\n                on tts.tag_id = t.id\n            LEFT JOIN session_template st\n                on st.id = s.template_id\n            WHERE \n                s.id = $1\n                AND type = 'fixed' \n                AND s.user_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "start_time",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "end_time",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "session_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "category_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "category",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "category_color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "category_last_used_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "tag_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "tag_label?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 12,
+        "name": "tag_color?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "tag_last_used_at?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "template_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 15,
+        "name": "template_name?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 16,
+        "name": "template_start_date?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 17,
+        "name": "template_end_date?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 18,
+        "name": "template_interval?: RecurringSessionInterval",
+        "type_info": {
+          "Custom": {
+            "name": "recurring_session_interval",
+            "kind": {
+              "Enum": [
+                "monthly",
+                "weekly",
+                "bi-weekly",
+                "daily"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a8415b2b4e7f32ab3b338f00ba76fc3aa99ba9577c5b9284329711910247c3ae"
+}

@@ -1,5 +1,5 @@
 import { ScheduledSessionApi } from "@/api";
-import { ScheduledSessionRequest } from "@/api/definitions";
+import type { ScheduledSessionRequest } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,20 +12,29 @@ export const useCreateScheduledSession = () => {
     mutationFn: async (data: ScheduledSessionRequest["create"]) => {
       return await ScheduledSessionApi.create(data);
     },
+    onError: (error) => {
+      toast({
+        description: error.message,
+        title: "Error creating session",
+        variant: "destructive",
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.sessions._def,
       });
-      toast({
-        description: `Session created successfully!`,
-        variant: "default",
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.categories._def,
       });
-    },
-    onError: (error) => {
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.tags._def,
+      });
+
       toast({
-        title: "Error creating session",
-        description: error.message,
-        variant: "destructive",
+        description: "Session created successfully!",
+        variant: "default",
       });
     },
   });

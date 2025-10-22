@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                s.id,\n                s.name,\n                s.start_date,\n                s.end_date,\n                s.interval AS \"interval!: RecurringSessionInterval\"\n            FROM session_template s\n            WHERE s.id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "start_date",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "end_date",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "interval!: RecurringSessionInterval",
+        "type_info": {
+          "Custom": {
+            "name": "recurring_session_interval",
+            "kind": {
+              "Enum": [
+                "monthly",
+                "weekly",
+                "bi-weekly",
+                "daily"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e00ab5463719ff9f61d67d8d070cf3924fd2f7403e5a86c690eba5a64205cb91"
+}

@@ -4,7 +4,8 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { addMinutes } from "date-fns";
 import { X } from "lucide-react";
 import { DateTime } from "luxon";
-import { FC, useEffect, useState } from "react";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/shadcn/button";
 import { Calendar } from "@/components/shadcn/calendar";
@@ -14,21 +15,17 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
-import { cn } from "@/lib/utils";
-import { Matcher } from "react-day-picker";
 import { Separator } from "@/components/shadcn/separator";
-
-export type QuickOption = {
-  label: string;
-  increment: (date: Date) => Date;
-};
+import type { QuickOption } from "@/components/ui-providers/date-pickers/QuickOptions";
+import { cn } from "@/lib/utils";
+import type { Matcher } from "react-day-picker";
 
 type DatePickerDemoProps = {
-  selected: Date | undefined;
+  disabled?: Matcher;
+  label?: string;
   onSelect: (date: Date | undefined) => void;
   quickOptions?: QuickOption[];
-  label?: string;
-  disabled?: Matcher;
+  selected: Date | undefined;
 };
 
 export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
@@ -54,9 +51,9 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
     if (props.selected) {
       const newDate = new Date(props.selected);
       if (type === "hour") {
-        newDate.setHours(parseInt(value));
+        newDate.setHours(Number.parseInt(value));
       } else if (type === "minute") {
-        newDate.setMinutes(parseInt(value));
+        newDate.setMinutes(Number.parseInt(value));
       }
       props.onSelect(newDate);
     }
@@ -66,90 +63,111 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          variant="outline"
           className={cn(
             "w-full text-center font-normal gap-2",
             !props.selected && "text-muted-foreground",
           )}
-          onWheel={(e) =>
+          onMouseEnter={() => {
+            setIsHovered(true);
+          }}
+          onMouseLeave={() => {
+            setIsHovered(false);
+          }}
+          onWheel={(e) => {
             props.onSelect(
               addMinutes(props.selected ?? new Date(), e.deltaY > 0 ? -1 : 1),
-            )
-          }
+            );
+          }}
+          variant="outline"
         >
           <CalendarIcon className="size-4" />
-          {props.selected ? (
-            <>
-              <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
-              <div className="grow"></div>
-              <X
-                onClick={() => props.onSelect(undefined)}
-                className="cursor-pointer rounded-md hover:bg-destructive "
-              />
-            </>
-          ) : (
-            <span>{props.label ?? "Pick a date"}</span>
-          )}
+          {props.selected
+            ? (
+                <>
+                  <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
+                  <div className="grow"></div>
+                  <X
+                    className="cursor-pointer rounded-md hover:bg-destructive "
+                    onClick={() => {
+                      props.onSelect(undefined);
+                    }}
+                  />
+                </>
+              )
+            : (
+                <span>{props.label ?? "Pick a date"}</span>
+              )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <div className="sm:flex">
+        <div className="sm:flex bg-purple-muted w-full">
           <Calendar
+            autoFocus
+            className="w-full"
             disabled={props.disabled}
-            weekStartsOn={1}
             mode="single"
-            selected={props.selected}
             onSelect={(v) => v && props.onSelect(v)}
-            initialFocus
+            selected={props.selected}
+            weekStartsOn={1}
           />
           <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
             <ScrollArea className="w-64 sm:w-auto">
-              <div className="flex sm:flex-col p-2 items-center">
-                <p className="text-muted-foreground">HH</p>
-                <Separator />
+              <div className="flex sm:flex-col px-2 items-center">
+                <p className="text-white">HH</p>
+                <Separator className="sm:hidden" orientation="vertical" />
+                <Separator
+                  className="hidden sm:block"
+                  orientation="horizontal"
+                />
                 {hours.map((hour) => (
                   <Button
+                    className="sm:w-full shrink-0 aspect-square"
                     key={hour}
+                    onClick={() => {
+                      handleTimeChange("hour", hour.toString());
+                    }}
                     size="icon"
                     variant={
                       props.selected && props.selected.getHours() === hour
                         ? "default"
                         : "ghost"
                     }
-                    className="sm:w-full shrink-0 aspect-square"
-                    onClick={() => handleTimeChange("hour", hour.toString())}
                   >
                     {hour}
                   </Button>
                 ))}
               </div>
-              <ScrollBar orientation="horizontal" className="sm:hidden" />
+              <ScrollBar className="sm:hidden" orientation="horizontal" />
+              <ScrollBar className="hidden sm:block" orientation="vertical" />
             </ScrollArea>
             <ScrollArea className="w-64 sm:w-auto">
-              <div className="flex sm:flex-col p-2 items-center">
-                <p className="text-muted-foreground">MM</p>
-                <Separator />
+              <div className="flex sm:flex-col px-2 items-center">
+                <p className="text-white">MM</p>
+                <Separator className="sm:hidden" orientation="vertical" />
+                <Separator
+                  className="hidden sm:block"
+                  orientation="horizontal"
+                />
                 {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
                   <Button
+                    className="sm:w-full shrink-0 aspect-square"
                     key={minute}
+                    onClick={() => {
+                      handleTimeChange("minute", minute.toString());
+                    }}
                     size="icon"
                     variant={
                       props.selected && props.selected.getMinutes() === minute
                         ? "default"
                         : "ghost"
                     }
-                    className="sm:w-full shrink-0 aspect-square"
-                    onClick={() =>
-                      handleTimeChange("minute", minute.toString())
-                    }
                   >
                     {minute.toString().padStart(2, "0")}
                   </Button>
                 ))}
               </div>
-              <ScrollBar orientation="horizontal" className="sm:hidden" />
+              <ScrollBar className="sm:hidden" orientation="horizontal" />
+              <ScrollBar className="hidden sm:block" orientation="vertical" />
             </ScrollArea>
           </div>
         </div>
@@ -159,11 +177,11 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
           <Button
             className="block h-min p-1"
             key={val.label}
-            variant={"secondary"}
+            onClick={() => {
+              props.onSelect(val.increment(props.selected ?? new Date()));
+            }}
             type="button"
-            onClick={() =>
-              props.onSelect(val.increment(props.selected ?? new Date()))
-            }
+            variant="secondary"
           >
             {val.label}
           </Button>

@@ -1,30 +1,58 @@
 use crate::dto::user::read_user::ReadUserDto;
 use crate::dto::user::update_user::UpdateUserDto;
+use crate::dto::user::update_visibility::{UpdateVisibilityDto, UpdateVisibilitySettingsDto};
+use crate::router::clerk::Actor;
 use crate::router::request::ValidatedRequest;
 use crate::router::response::ApiResponse;
-use crate::{dto::user::create_user::CreateUserDto, router::root::AppState};
-use axum::{extract::State, routing::post, Router};
+use crate::router::root::AppState;
+use axum::routing::patch;
+use axum::{extract::State, Router};
 use thiserror::Error;
+use tracing::instrument;
 
-pub fn user_router() -> Router<AppState> {
-    Router::new().route("/", post(crate_user_handler).patch(update_user_handler))
+pub fn protected_user_router() -> Router<AppState> {
+    Router::new()
+        .route(
+            "/",
+            patch(update_user_handler).get(get_current_user_handler),
+        )
+        .route("/visibility", patch(update_visibility_handler))
 }
 
-async fn crate_user_handler(
+#[instrument(skip(state))]
+async fn update_user_handler(
     State(state): State<AppState>,
-    ValidatedRequest(payload): ValidatedRequest<CreateUserDto>,
+    actor: Actor,
+    ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,
 ) -> ApiResponse<ReadUserDto> {
-    let res = state.user_service.create(payload).await;
+    let res = state.user_service.update_user(payload, actor).await;
     ApiResponse::from_result(res)
 }
 
-async fn update_user_handler(
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn get_current_user_handler(
     State(state): State<AppState>,
-    ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,
+    actor: Actor,
 ) -> ApiResponse<ReadUserDto> {
-    // TODO: this is insecure, this handler should only be used to 'notify' of a change
-    // and the user should be pulled from clerk database and updated in our db
-    let res = state.user_service.update_user(payload).await;
+    let res = match state.user_service.get_user_by_id(actor.user_id).await {
+        Ok(Some(user)) => Ok(user),
+        Ok(None) => Err(UserError::UserNotFound),
+        Err(e) => Err(e),
+    };
+    ApiResponse::from_result(res)
+}
+
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn update_visibility_handler(
+    State(state): State<AppState>,
+    actor: Actor,
+    ValidatedRequest(payload): ValidatedRequest<UpdateVisibilitySettingsDto>,
+) -> ApiResponse<ReadUserDto> {
+    let visibility_dto: UpdateVisibilityDto = payload.into();
+    let res = state
+        .user_service
+        .update_visibility(actor.user_id, visibility_dto)
+        .await;
     ApiResponse::from_result(res)
 }
 
@@ -32,7 +60,7 @@ async fn update_user_handler(
 pub enum UserError {
     #[error("User not found")]
     UserNotFound,
-    #[error("Something went wrong")]
+    #[error("Something went wrong: {0}")]
     UnknownError(String),
     #[error("Unauthorized")]
     Unauthorized,

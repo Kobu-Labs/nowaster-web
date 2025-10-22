@@ -3,15 +3,15 @@ use axum::{
     routing::{delete, patch},
     Router,
 };
+use tracing::instrument;
 
 use crate::{
     repository::friends::UpdateFriendRequestDto,
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
     service::friend_service::{
         AcceptFriendRequestDto, CancelFriendRequestDto, CreateFriendRequestDto,
         FriendRequestStatus, ProcessFriendRequestDto, ReadFriendRequestDto, ReadFriendRequestsDto,
-        ReadFriendshipDto, ReadFriendshipWithAvatarDto, ReadUserAvatarDto, RejectFriendRequestDto,
-        RemoveFriendDto,
+        ReadFriendshipDto, RejectFriendRequestDto, RemoveFriendDto,
     },
 };
 
@@ -29,9 +29,10 @@ pub fn friend_router() -> Router<AppState> {
         )
 }
 
+#[instrument( skip(state), fields(user_id = %actor, request_id = %payload.request_id))]
 async fn update_friend_request_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateFriendRequestDto>,
 ) -> ApiResponse<ReadFriendRequestDto> {
     let result = match payload.status {
@@ -76,9 +77,10 @@ async fn update_friend_request_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument( skip(state), fields(user_id = %actor, recipient_name = %payload.recipient_name))]
 async fn create_friend_request_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<ProcessFriendRequestDto>,
 ) -> ApiResponse<ReadFriendRequestDto> {
     let recipient = state
@@ -87,7 +89,14 @@ async fn create_friend_request_handler(
         .await;
 
     let recipient = match recipient {
-        Ok(user) => user,
+        Ok(user) => match user {
+            Some(user) => user,
+            None => {
+                return ApiResponse::Error {
+                    message: String::from("User not found"),
+                }
+            }
+        },
         Err(e) => {
             return ApiResponse::Error {
                 message: e.to_string(),
@@ -108,10 +117,11 @@ async fn create_friend_request_handler(
     ApiResponse::from_result(result)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn list_friend_requests_handler(
     State(state): State<AppState>,
     Query(direction): Query<ReadFriendRequestsDto>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadFriendRequestDto>> {
     let result = state
         .friend_service
@@ -133,92 +143,20 @@ fn get_other_friend_id(user_id: String, friendship: ReadFriendshipDto) -> String
     }
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn list_friends_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
-) -> ApiResponse<Vec<ReadFriendshipWithAvatarDto>> {
+    actor: Actor,
+) -> ApiResponse<Vec<ReadFriendshipDto>> {
     let result = state.friend_service.list_friends(actor.clone()).await;
 
-    let Ok(friends) = result else {
-        return ApiResponse::Error {
-            message: "No friends found".to_string(),
-        };
-    };
-
-    let ids = friends
-        .iter()
-        .cloned()
-        .map(|friend| get_other_friend_id(actor.clone().user_id.clone(), friend))
-        .collect::<Vec<String>>();
-
-    if ids.is_empty() {
-        return ApiResponse::Success { data: vec![] };
-    }
-
-    let data = clerk_rs::apis::users_api::User::get_user_list(
-        &state.clerk,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(ids),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )
-    .await;
-    let clerk_users = match data {
-        Ok(users) => users,
-        Err(e) => {
-            return ApiResponse::Error {
-                message: e.to_string(),
-            }
-        }
-    };
-
-    let mut mapped: Vec<ReadFriendshipWithAvatarDto> = Vec::new();
-    for user in clerk_users {
-        let user_id = user.id.unwrap_or("".to_string());
-        let avatar_url = user.image_url;
-        let friendship = friends.iter().find(|friend| {
-            get_other_friend_id(actor.clone().user_id.clone(), friend.to_owned().clone()) == user_id
-        });
-
-        let friendship = match friendship {
-            Some(friendship) => friendship.clone(),
-            None => {
-                return ApiResponse::Error {
-                    message: "Friendship not found".to_string(),
-                };
-            }
-        };
-        let friendship_with_avatar = ReadFriendshipWithAvatarDto {
-            id: friendship.id,
-            created_at: friendship.created_at,
-            friend1: ReadUserAvatarDto {
-                id: friendship.friend1.id,
-                username: friendship.friend1.username,
-                avatar_url: avatar_url.clone(),
-            },
-            friend2: ReadUserAvatarDto {
-                id: friendship.friend2.id,
-                username: friendship.friend2.username,
-                avatar_url: avatar_url.clone(),
-            },
-        };
-
-        mapped.push(friendship_with_avatar);
-    }
-
-    ApiResponse::Success { data: (mapped) }
+    ApiResponse::from_result(result)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn remove_friend_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<RemoveFriendDto>,
 ) -> ApiResponse<()> {
     let result = state.friend_service.remove_friend(payload, actor).await;

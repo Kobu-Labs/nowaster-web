@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    fs.id,\n                    fs.created_at,\n                    fs.source_id,\n                    fs.source_type as \"source_type!: FeedSourceSqlType\",\n                    fs.is_muted,\n                    fs.is_paused,\n                    fs.subscriber_id\n                FROM feed_subscription fs\n                WHERE fs.subscriber_id = $1\n                ORDER BY fs.created_at DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "source_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "source_type!: FeedSourceSqlType",
+        "type_info": {
+          "Custom": {
+            "name": "feed_source_type",
+            "kind": {
+              "Enum": [
+                "group",
+                "user",
+                "system"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_muted",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_paused",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "subscriber_id",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "aa0a88a6f77dab0109598973dab7d023daac418597f73f93b2f28443e755ae07"
+}
