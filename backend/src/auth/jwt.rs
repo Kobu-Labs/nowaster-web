@@ -3,7 +3,6 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::router::clerk::UserRole;
 
@@ -47,14 +46,14 @@ static DECODING_KEY: Lazy<DecodingKey> = Lazy::new(|| {
 /// Generate a JWT access token
 ///
 /// # Arguments
-/// * `user_id` - User's UUID
+/// * `user_id` - User's ID (string, supports both UUID and Clerk IDs)
 /// * `role` - User's role
 /// * `display_name` - User's display name
 ///
 /// # Returns
 /// JWT token string valid for 15 minutes
 pub fn generate_access_token(
-    user_id: Uuid,
+    user_id: &str,
     role: UserRole,
     display_name: String,
 ) -> Result<String> {

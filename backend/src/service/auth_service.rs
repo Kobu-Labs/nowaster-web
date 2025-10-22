@@ -57,7 +57,7 @@ impl AuthService {
         profile: UserProfile,
         user_agent: Option<&str>,
         ip: Option<IpAddr>,
-    ) -> Result<(String, String, Uuid, bool)> {
+    ) -> Result<(String, String, String, bool)> {
         println!("🔐 [AUTH] Starting OAuth login for provider: {}", provider);
         println!(
             "🔐 [AUTH] Profile: email={}, provider_user_id={}",
@@ -137,19 +137,13 @@ impl AuthService {
 
         println!("🔐 [AUTH] Actor found with role: {:?}", actor.role);
 
-        // Parse user_id to UUID (it's stored as string for Clerk compatibility)
-        let user_uuid = Uuid::parse_str(&actor.user_id).unwrap_or_else(|_| {
-            println!("🔐 [AUTH] User ID is not a UUID, generating new one");
-            // If not a valid UUID (old Clerk ID), generate a new one
-            // In production, you might want to handle this migration differently
-            Uuid::new_v4()
-        });
-
-        println!("🔐 [AUTH] User UUID: {}", user_uuid);
+        // Use the actual user_id from the database (supports both UUID and Clerk IDs)
+        let user_id_str = &actor.user_id;
+        println!("🔐 [AUTH] User ID: {}", user_id_str);
 
         // 3. Generate access token (JWT, 15 minutes)
         println!("🔐 [AUTH] Generating access token...");
-        let access_token = generate_access_token(user_uuid, actor.role, display_name)?;
+        let access_token = generate_access_token(user_id_str, actor.role, display_name)?;
         println!(
             "🔐 [AUTH] Access token generated (length: {})",
             access_token.len()
@@ -157,7 +151,7 @@ impl AuthService {
 
         // 4. Generate refresh token (30 days)
         println!("🔐 [AUTH] Generating refresh token...");
-        let refresh_token = generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
+        let refresh_token = generate_refresh_token(user_id_str, user_agent, ip, &self.pool).await?;
         println!(
             "🔐 [AUTH] Refresh token generated (length: {})",
             refresh_token.len()
@@ -167,40 +161,40 @@ impl AuthService {
             "🔐 [AUTH] ✅ OAuth login completed successfully! New user: {}",
             is_new_user
         );
-        Ok((access_token, refresh_token, user_uuid, is_new_user))
+        Ok((access_token, refresh_token, user_id_str.to_string(), is_new_user))
     }
 
     /// Refresh access token using refresh token
     ///
-    /// Returns (new_access_token, new_refresh_token)
+    /// Returns (new_access_token, new_refresh_token, user_id)
     #[instrument(err, skip(self, refresh_token))]
     pub async fn refresh_access_token(
         &self,
         refresh_token: &str,
         user_agent: Option<&str>,
         ip: Option<IpAddr>,
-    ) -> Result<(String, String, Uuid)> {
+    ) -> Result<(String, String, String)> {
         // 1. Validate refresh token and get user_id
-        let user_uuid = validate_refresh_token(refresh_token, &self.pool).await?;
+        let user_id = validate_refresh_token(refresh_token, &self.pool).await?;
 
         // 2. Get user with role and display name
         let (actor, display_name) = self
             .user_repo
-            .get_actor_by_id(user_uuid.to_string())
+            .get_actor_by_id(user_id.clone())
             .await?
             .context("User not found")?;
 
         // 3. Generate new access token
-        let access_token = generate_access_token(user_uuid, actor.role, display_name)?;
+        let access_token = generate_access_token(&user_id, actor.role, display_name)?;
 
         // 4. Generate new refresh token (rotation)
         let new_refresh_token =
-            generate_refresh_token(user_uuid, user_agent, ip, &self.pool).await?;
+            generate_refresh_token(&user_id, user_agent, ip, &self.pool).await?;
 
         // 5. Revoke old refresh token
         revoke_refresh_token(refresh_token, "rotated", &self.pool).await?;
 
-        Ok((access_token, new_refresh_token, user_uuid))
+        Ok((access_token, new_refresh_token, user_id))
     }
 
     /// Logout user by revoking refresh token
@@ -211,7 +205,7 @@ impl AuthService {
 
     /// Get user ID from refresh token (without rotation)
     #[instrument(err, skip(self, refresh_token))]
-    pub async fn get_user_from_refresh_token(&self, refresh_token: &str) -> Result<Uuid> {
+    pub async fn get_user_from_refresh_token(&self, refresh_token: &str) -> Result<String> {
         validate_refresh_token(refresh_token, &self.pool).await
     }
 

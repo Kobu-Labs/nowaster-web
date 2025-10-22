@@ -3,14 +3,13 @@ use chrono::{Duration, Utc};
 use ipnetwork::IpNetwork;
 use sqlx::PgPool;
 use std::net::IpAddr;
-use uuid::Uuid;
 
 use crate::auth::crypto::{generate_random_hex, sha256_hash};
 
 /// Generate a refresh token and store it in the database
 ///
 /// # Arguments
-/// * `user_id` - User's UUID
+/// * `user_id` - User's ID (string, supports both UUID and Clerk IDs)
 /// * `user_agent` - User agent string from request
 /// * `ip` - IP address from request
 /// * `pool` - Database connection pool
@@ -18,7 +17,7 @@ use crate::auth::crypto::{generate_random_hex, sha256_hash};
 /// # Returns
 /// Plaintext refresh token (only time it's returned)
 pub async fn generate_refresh_token(
-    user_id: Uuid,
+    user_id: &str,
     user_agent: Option<&str>,
     ip: Option<IpAddr>,
     pool: &PgPool,
@@ -32,7 +31,7 @@ pub async fn generate_refresh_token(
         INSERT INTO refresh_tokens (user_id, token_hash, expires_at, user_agent, ip_address)
         VALUES ($1, $2, $3, $4, $5)
         "#,
-        user_id.to_string(),
+        user_id,
         token_hash,
         expires_at,
         user_agent,
@@ -52,8 +51,8 @@ pub async fn generate_refresh_token(
 /// * `pool` - Database connection pool
 ///
 /// # Returns
-/// User ID if token is valid and not expired/revoked
-pub async fn validate_refresh_token(token: &str, pool: &PgPool) -> Result<Uuid> {
+/// User ID (string) if token is valid and not expired/revoked
+pub async fn validate_refresh_token(token: &str, pool: &PgPool) -> Result<String> {
     let token_hash = sha256_hash(token);
 
     let record = sqlx::query!(
@@ -86,7 +85,7 @@ pub async fn validate_refresh_token(token: &str, pool: &PgPool) -> Result<Uuid> 
     .await
     .ok();
 
-    Uuid::parse_str(&record.user_id).context("Invalid user_id format")
+    Ok(record.user_id)
 }
 
 /// Revoke a refresh token
@@ -113,10 +112,10 @@ pub async fn revoke_refresh_token(token: &str, reason: &str, pool: &PgPool) -> R
 /// Revoke all refresh tokens for a user
 ///
 /// # Arguments
-/// * `user_id` - User's UUID
+/// * `user_id` - User's ID (string)
 /// * `reason` - Reason for revocation
 /// * `pool` - Database connection pool
-pub async fn revoke_all_user_tokens(user_id: Uuid, reason: &str, pool: &PgPool) -> Result<()> {
+pub async fn revoke_all_user_tokens(user_id: &str, reason: &str, pool: &PgPool) -> Result<()> {
     sqlx::query!(
         r#"
         UPDATE refresh_tokens
@@ -152,10 +151,10 @@ pub async fn cleanup_expired_tokens(pool: &PgPool) -> Result<u64> {
 /// Limit number of active tokens per user (revoke oldest if exceeds limit)
 ///
 /// # Arguments
-/// * `user_id` - User's UUID
+/// * `user_id` - User's ID (string)
 /// * `max_tokens` - Maximum number of active tokens allowed
 /// * `pool` - Database connection pool
-pub async fn limit_user_tokens(user_id: Uuid, max_tokens: i64, pool: &PgPool) -> Result<()> {
+pub async fn limit_user_tokens(user_id: &str, max_tokens: i64, pool: &PgPool) -> Result<()> {
     sqlx::query!(
         r#"
         UPDATE refresh_tokens
