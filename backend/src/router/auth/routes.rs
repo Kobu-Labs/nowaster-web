@@ -100,7 +100,9 @@ async fn oauth_authorize_handler(
         .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
     if is_production {
-        state_cookie_builder = state_cookie_builder.secure(true);
+        state_cookie_builder = state_cookie_builder
+            .secure(true)
+            .domain(".nowaster.app");  // Allow cookies across subdomains
     }
 
     let state_cookie = state_cookie_builder.build();
@@ -238,7 +240,9 @@ async fn oauth_callback_handler(
         .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
     if is_production {
-        access_cookie_builder = access_cookie_builder.secure(true);
+        access_cookie_builder = access_cookie_builder
+            .secure(true)
+            .domain(".nowaster.app");
     }
 
     let access_cookie = access_cookie_builder.build();
@@ -250,7 +254,9 @@ async fn oauth_callback_handler(
         .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
     if is_production {
-        refresh_cookie_builder = refresh_cookie_builder.secure(true);
+        refresh_cookie_builder = refresh_cookie_builder
+            .secure(true)
+            .domain(".nowaster.app");
     }
 
     let refresh_cookie = refresh_cookie_builder.build();
@@ -324,7 +330,9 @@ async fn refresh_token_handler(
         .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
     if is_production {
-        access_cookie_builder = access_cookie_builder.secure(true);
+        access_cookie_builder = access_cookie_builder
+            .secure(true)
+            .domain(".nowaster.app");
     }
 
     let access_cookie = access_cookie_builder.build();
@@ -336,7 +344,9 @@ async fn refresh_token_handler(
         .same_site(axum_extra::extract::cookie::SameSite::Lax);
 
     if is_production {
-        refresh_cookie_builder = refresh_cookie_builder.secure(true);
+        refresh_cookie_builder = refresh_cookie_builder
+            .secure(true)
+            .domain(".nowaster.app");
     }
 
     let refresh_cookie = refresh_cookie_builder.build();
