@@ -1,0 +1,643 @@
+"use client";
+
+import type { CategoryWithId } from "@/api/definitions";
+import { useCategories } from "@/components/hooks/category/useCategory";
+import { useCategoryStats } from "@/components/hooks/category/useCategoryStats";
+import { useCreateCategory } from "@/components/hooks/category/useCreateCategory";
+import { useDeleteCategory } from "@/components/hooks/category/useDeleteCategory";
+import { useUpdateCategory } from "@/components/hooks/category/useUpdateCategory";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/alert-dialog";
+import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/shadcn/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
+import { Input } from "@/components/shadcn/input";
+import { Label } from "@/components/shadcn/label";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
+import { ColorPicker } from "@/components/visualizers/ColorPicker";
+import { formatTime, randomColor } from "@/lib/utils";
+import {
+  Clock,
+  Edit,
+  Eye,
+  Filter,
+  MoreVertical,
+  Plus,
+  Search,
+  SortAsc,
+  SortDesc,
+  Trash2,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+
+type SortDirection = "asc" | "desc";
+type SortOption = "name" | "recent" | "sessions" | "time";
+
+export default function CategoriesPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("sessions");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<CategoryWithId | null>(
+    null,
+  );
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState(randomColor());
+
+  const categoriesQuery = useCategories();
+  const statsQuery = useCategoryStats();
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
+
+  const filteredAndSortedCategories = useMemo(() => {
+    if (!categoriesQuery.data) {
+      return [];
+    }
+
+    const filtered = categoriesQuery.data.filter((category) =>
+      category.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    return filtered.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortBy) {
+        case "name": {
+          comparison = a.name.localeCompare(b.name);
+          break;
+        }
+        case "recent": {
+          // This would require lastUsedAt field
+          comparison = 0; // Placeholder
+          break;
+        }
+        case "sessions": {
+          comparison = a.sessionCount - b.sessionCount;
+          break;
+        }
+        case "time": {
+          // Assuming totalTime exists or calculate from sessionCount
+          comparison = a.sessionCount * 60 - b.sessionCount * 60;
+          break;
+        }
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [categoriesQuery.data, searchQuery, sortBy, sortDirection]);
+
+  const handleCreateCategory = () => {
+    if (newCategoryName.trim()) {
+      createCategory.mutate(
+        {
+          color: newCategoryColor,
+          name: newCategoryName.trim(),
+        },
+        {
+          onSuccess: () => {
+            setNewCategoryName("");
+            setNewCategoryColor(randomColor());
+            setShowCreateDialog(false);
+          },
+        },
+      );
+    }
+  };
+
+  const handleUpdateCategory = () => {
+    if (editingCategory && newCategoryName.trim()) {
+      updateCategory.mutate(
+        {
+          color: newCategoryColor,
+          id: editingCategory.id,
+          name: newCategoryName.trim(),
+        },
+        {
+          onSuccess: () => {
+            setEditingCategory(null);
+            setNewCategoryName("");
+            setNewCategoryColor(randomColor());
+          },
+        },
+      );
+    }
+  };
+
+  const openEditDialog = (category: CategoryWithId) => {
+    setEditingCategory(category);
+    setNewCategoryName(category.name);
+    setNewCategoryColor(category.color);
+  };
+
+  const toggleSort = (option: SortOption) => {
+    if (sortBy === option) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(option);
+      setSortDirection("desc");
+    }
+  };
+
+  if (categoriesQuery.isPending || statsQuery.isPending) {
+    return (
+      <div className="w-full p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <div className="flex gap-4">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton className="h-48" key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (categoriesQuery.isError || statsQuery.isError) {
+    return (
+      <div className="w-full p-6">
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">
+              Error Loading Categories
+            </CardTitle>
+            <CardDescription>
+              There was an error loading your categories or statistics. Please
+              try refreshing the page.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const stats = statsQuery.data;
+  const totalCategories = stats?.total_categories ?? 0;
+  const totalTimeMinutes = stats?.total_time_minutes ?? 0;
+  const mostUsedCategory = stats?.most_used_category;
+  const mostUsedCategoryCount = categoriesQuery.data.find(
+    (cat) => cat.id === mostUsedCategory?.id,
+  );
+
+  return (
+    <div className="p-6 space-y-6 w-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
+          <p className="text-muted-foreground">
+            Manage and analyze your time tracking categories
+          </p>
+        </div>
+
+        <Dialog
+          modal={false}
+          onOpenChange={setShowCreateDialog}
+          open={showCreateDialog}
+        >
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              New Category
+            </Button>
+          </DialogTrigger>
+          <DialogContent
+            onInteractOutside={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Create New Category</DialogTitle>
+              <DialogDescription>
+                Add a new category to organize your time tracking sessions.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  onChange={(e) => {
+                    setNewCategoryName(e.target.value);
+                  }}
+                  placeholder="Category name..."
+                  value={newCategoryName}
+                />
+              </div>
+              <div>
+                <Label className="mr-2" htmlFor="color">
+                  Color
+                </Label>
+                <ColorPicker
+                  initialColor={newCategoryColor}
+                  onSelect={setNewCategoryColor}
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                onClick={() => {
+                  setShowCreateDialog(false);
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={!newCategoryName.trim() || createCategory.isPending}
+                onClick={handleCreateCategory}
+              >
+                {createCategory.isPending ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground  hover:border-pink-primary">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Categories
+            </CardTitle>
+            <Filter className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCategories}</div>
+            <p className="text-xs text-muted-foreground">
+              Active categories in your workspace
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground  hover:border-pink-primary">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Time</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatTime(totalTimeMinutes)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Total time tracked across all categories
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground  hover:border-pink-primary">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Most Used Category
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {mostUsedCategory
+                ? (
+                    <div>
+                      <CategoryBadge
+                        color={mostUsedCategory.color}
+                        name={mostUsedCategory.name}
+                      />
+                      <div className="text-xs flex gap-2">
+                        <p className="text-muted-foreground">
+                          Category with the most sessions, being
+                        </p>
+
+                        <p className="text-foreground">
+                          {mostUsedCategoryCount?.sessionCount}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                : (
+                    "None"
+                  )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Sort Controls */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-10"
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            placeholder="Search categories..."
+            value={searchQuery}
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            className="flex items-center gap-1"
+            onClick={() => {
+              toggleSort("name");
+            }}
+            size="sm"
+            variant={sortBy === "name" ? "default" : "outline"}
+          >
+            Name
+            {sortBy === "name"
+              && (sortDirection === "asc"
+                ? (
+                    <SortAsc className="h-3 w-3" />
+                  )
+                : (
+                    <SortDesc className="h-3 w-3" />
+                  ))}
+          </Button>
+
+          <Button
+            className="flex items-center gap-1"
+            onClick={() => {
+              toggleSort("sessions");
+            }}
+            size="sm"
+            variant={sortBy === "sessions" ? "default" : "outline"}
+          >
+            Sessions
+            {sortBy === "sessions"
+              && (sortDirection === "asc"
+                ? (
+                    <SortAsc className="h-3 w-3" />
+                  )
+                : (
+                    <SortDesc className="h-3 w-3" />
+                  ))}
+          </Button>
+        </div>
+      </div>
+
+      {/* Categories Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {filteredAndSortedCategories.map((category) => (
+          <Card
+            className="group hover:shadow-md transition-shadow"
+            key={category.id}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <CategoryBadge color={category.color} name={category.name} />
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="h-6 w-6 p-0" size="sm" variant="ghost">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        className="flex items-center gap-2 cursor-pointer"
+                        href={`/home/category/${category.id}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Details
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => {
+                        openEditDialog(category);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit Category
+                    </DropdownMenuItem>
+                    <AlertDialog>
+                      {category.sessionCount > 0
+                        ? (
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip delayDuration={0}>
+                                <TooltipTrigger>
+                                  <AlertDialogTrigger disabled>
+                                    <DropdownMenuItem
+                                      asChild
+                                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                                      disabled
+                                    >
+                                      <div>
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete Category
+                                      </div>
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  This category cannot be deleted, as it has
+                                  sessions associated with it
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )
+                        : (
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete Category
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          )}
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>Are you sure you want to delete </span>
+                            <CategoryBadge
+                              color={category.color}
+                              name={category.name}
+                            />
+                            ?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="space-y-0 text-sm text-muted-foreground">
+                            This action cannot be undone and will remove the
+                            category from all associated sessions.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => {
+                              deleteCategory.mutate({ id: category.id });
+                            }}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">Sessions</span>
+                <Badge variant="secondary">{category.sessionCount}</Badge>
+              </div>
+
+              <Link href={`/home/category/${category.id}`}>
+                <Button className="w-full h-8" size="sm" variant="outline">
+                  View Details
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredAndSortedCategories.length === 0 && (
+        <Card className="text-center py-12">
+          <CardContent>
+            <div className="space-y-4">
+              <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                <Search className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">No categories found</h3>
+                <p className="text-muted-foreground">
+                  {searchQuery
+                    ? `No categories match "${searchQuery}". Try adjusting your search.`
+                    : "Create your first category to start organizing your time tracking sessions."}
+                </p>
+              </div>
+              {!searchQuery && (
+                <Button
+                  className="mt-4"
+                  onClick={() => {
+                    setShowCreateDialog(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Category
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Edit Category Dialog */}
+      <Dialog
+        modal={false}
+        onOpenChange={(open) => !open && setEditingCategory(null)}
+        open={!!editingCategory}
+      >
+        <DialogContent
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+            <DialogDescription>
+              Update the category name and color.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                onChange={(e) => {
+                  setNewCategoryName(e.target.value);
+                }}
+                placeholder="Category name..."
+                value={newCategoryName}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-color">Color</Label>
+              <ColorPicker
+                initialColor={newCategoryColor}
+                onSelect={setNewCategoryColor}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setEditingCategory(null);
+              }}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={!newCategoryName.trim() || updateCategory.isPending}
+              onClick={handleUpdateCategory}
+            >
+              {updateCategory.isPending ? "Updating..." : "Update"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

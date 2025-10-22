@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { ScheduledSession } from "@/api/definitions";
-import { VariantProps, cva } from "class-variance-authority";
+import type { ScheduledSession } from "@/api/definitions";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
+import type { FC } from "react";
 
-import { cn, getFormattedTimeDifference } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -10,28 +10,45 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
+import { cn, getFormattedTimeDifference } from "@/lib/utils";
+import { Badge } from "@/components/shadcn/badge";
+import { CalendarSync } from "lucide-react";
 
 type SessionCardProps = {
+  durationElement?: (startDate: Date, endDate: Date) => React.ReactNode;
   session: ScheduledSession;
-} & VariantProps<typeof historyCardVariants> &
-  React.HTMLAttributes<HTMLDivElement>;
+} & React.HTMLAttributes<HTMLDivElement>
+& VariantProps<typeof historyCardVariants>;
 
-const historyCardVariants = cva(
-  "hover:bg-accent hover:text-accent-foreground hover:cursor-pointer",
-  {
-    variants: {
-      variant: {
-        default: "border border-input",
-        borderless: "border-hidden",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
+const historyCardVariants = cva("hover:cursor-pointer", {
+  defaultVariants: {
+    variant: "default",
+  },
+  variants: {
+    variant: {
+      borderless: "border-hidden",
+      default: "border",
     },
   },
-);
+});
 
 export const SessionCard: FC<SessionCardProps> = (props) => {
+  let durationChild: React.ReactNode = (
+    <div className="ml-4 text-xl font-medium">
+      {getFormattedTimeDifference(
+        props.session.startTime,
+        props.session.endTime,
+      )}
+    </div>
+  );
+
+  if (props.durationElement) {
+    durationChild = props.durationElement(
+      props.session.startTime,
+      props.session.endTime,
+    );
+  }
+
   return (
     <Card
       {...props}
@@ -42,8 +59,14 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">
+        <CardTitle className="text-2xl font-bold flex gap-8 items-center">
           {props.session.category.name}
+          {props.session.template && (
+            <Badge className="text-sm flex items-center gap-2">
+              <CalendarSync className="size-4" />
+              {props.session.template.name}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex grow-0">
@@ -51,19 +74,14 @@ export const SessionCard: FC<SessionCardProps> = (props) => {
           <p className="text-sm text-muted-foreground">
             {props.session.description}
           </p>
-          <div className="mt-1 flex">
+          <div className="mt-1 flex gap-1">
             {props.session.tags.map((tag) => (
-              <TagBadge tag={tag} variant="auto" key={tag.id} />
+              <TagBadge key={tag.id} tag={tag} variant="auto" />
             ))}
           </div>
         </div>
         <div className="grow" />
-        <div className="ml-4 text-xl font-medium">
-          {getFormattedTimeDifference(
-            props.session.startTime,
-            props.session.endTime,
-          )}
-        </div>
+        {durationChild}
       </CardContent>
     </Card>
   );

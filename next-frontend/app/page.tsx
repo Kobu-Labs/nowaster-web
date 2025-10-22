@@ -1,72 +1,90 @@
-import { ThemedImage } from "@/components/visualizers/ThemedImage";
-import { UnknownUserNavbar } from "@/app/UnknownUserNavbar";
-import { GoToAppButton } from "@/components/pages/GoToAppButton";
-import { SignInButton } from "@/components/pages/SignInButton";
+import { SignedIn } from "@/components/auth/SignedIn";
+import { SignedOut } from "@/components/auth/SignedOut";
+import { SiteFooter } from "@/components/pages/site-footer";
+import { SiteHeader } from "@/components/pages/site-header";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import { BarChart3, ChartArea, CheckCircle, Clock } from "lucide-react";
-import { Metadata } from "next";
+import { Button } from "@/components/shadcn/button";
+import { StopwatchIcon } from "@radix-ui/react-icons";
+import {
+  ArrowRightSquare,
+  BarChart3,
+  ChartArea,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Nowaster - Time Tracking Made Easy",
   description:
     "Effortlessly track time, manage projects, and analyze productivity with our intuitive time tracking solution.",
+  title: "Nowaster - Time Tracking Made Easy",
 };
 
 export default async function LandingPage() {
   return (
-    <UnknownUserNavbar>
+    <>
+      <SiteHeader />
       <div className="flex flex-col min-h-screen">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-background to-muted">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6  md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px]">
-              <div className="flex flex-col justify-center space-y-4 ">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Track Your Time, Boost Your Productivity
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Effortlessly track time, manage projects, and analyze
-                    productivity with our intuitive time tracking solution.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <SignInButton
-                    asChild
-                    size="lg"
-                    label="Start now"
-                    variant="default"
-                  />
-                  <GoToAppButton
-                    asChild
-                    size="lg"
-                    label="Go to application"
-                    variant="default"
-                  />
-                </div>
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-linear-to-b from-background to-muted">
+          <div className="px-4 md:px-6 grid gap-6 md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px] max-w-7xl mx-auto">
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  Track Your Time, Boost Your Productivity
+                </h1>
+                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  Effortlessly track time, manage projects, and analyze
+                  productivity with our intuitive time tracking solution.
+                </p>
               </div>
-              <div className="flex items-center justify-center">
-                <ThemedImage
-                  lightUrl="/nowaster-landing-1-light.png"
-                  darkUrl="/nowaster-landing-1-dark.jpg"
-                  alt="Time tracking dashboard"
-                  width={1320}
-                  height={990}
-                  priority
-                />
-              </div>
+
+              <SignedIn>
+                <Link href="/home">
+                  <Button
+                    className="flex items-center justify-center gap-1 group"
+                    variant="secondary"
+                  >
+                    <p>Go to application</p>
+                    <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                  </Button>
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <Link href="/sign-in">
+                  <Button
+                    className="flex items-center justify-center gap-1 group"
+                    variant="secondary"
+                  >
+                    <StopwatchIcon className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                    <p>Start tracking now</p>
+                  </Button>
+                </Link>
+              </SignedOut>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
+            </div>
+            <div className="flex items-center justify-center">
+              <Image
+                alt="Time tracking dashboard"
+                height={990}
+                priority
+                src="/nowaster-landing-1-dark.jpg"
+                width={1320}
+              />
             </div>
           </div>
         </section>
 
         <section
-          id="features"
           className="w-full py-12 md:py-24 lg:py-32 bg-background relative"
+          id="features"
         >
-          <div className="container px-10 md:px-6 relative">
+          <div className="px-10 md:px-6 relative">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -80,16 +98,15 @@ export default async function LandingPage() {
             </div>
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:gird-cols[1fr_600px] lg:gap-12">
               <div className="flex items-center justify-center">
-                <ThemedImage
-                  lightUrl="/nowaster-landing-2-light.png"
-                  darkUrl="/nowaster-landing-2-dark.png"
+                <Image
                   alt="Time tracking dashboard"
-                  width={1320}
                   height={990}
                   priority
+                  src="/nowaster-landing-2-dark.png"
+                  width={1320}
                 />
               </div>
-              <div className="flex flex-col justify-center space-y-4 m-10">
+              <div className="flex flex-col justify-center space-y-4 md:m-10">
                 <ul className="grid gap-6">
                   <li className="flex items-start gap-4">
                     <div className="rounded-full bg-primary/10 p-2 text-primary">
@@ -137,7 +154,7 @@ export default async function LandingPage() {
 
         {/* How It Works */}
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -182,10 +199,10 @@ export default async function LandingPage() {
         </section>
 
         <section
-          id="pricing"
           className="w-full py-12 md:py-24 lg:py-32 bg-background "
+          id="pricing"
         >
-          <div className="container px-4 md:px-6">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -225,24 +242,14 @@ export default async function LandingPage() {
                     <span>Basic reporting</span>
                   </li>
                 </ul>
-                <SignInButton
-                  variant="outline"
-                  className="mt-8"
-                  label="Get Started"
-                />
-                <GoToAppButton
-                  className="mt-8"
-                  label="Go to application"
-                  variant="outline"
-                />
               </div>
             </div>
           </div>
         </section>
 
         {/* Testimonials */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted gradient-container">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -258,8 +265,8 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage alt={"d"} />
-                    <AvatarFallback>{"D"}</AvatarFallback>
+                    <AvatarImage alt="d" />
+                    <AvatarFallback>D</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-bold">d3jv</h4>
@@ -274,13 +281,7 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage
-                      src={
-                        "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18yd0JBaEdLbThpTzdURkxQdUdZam5FcnBnR3IifQ"
-                      }
-                      alt={"izmi"}
-                    />
-                    <AvatarFallback>{"I"}</AvatarFallback>
+                    <AvatarFallback>I</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-bold">izmi</h4>
@@ -298,13 +299,7 @@ export default async function LandingPage() {
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage
-                      src={
-                        "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ3Qm4zMGl0UkJRNTJGRHBBcExwV0c1VGFJSyJ9"
-                      }
-                      alt={"kobu"}
-                    />
-                    <AvatarFallback>{"K"}</AvatarFallback>
+                    <AvatarFallback>K</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-bold">Kobu</h4>
@@ -321,8 +316,8 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 gradient-card text-foreground">
+          <div className="px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -334,16 +329,30 @@ export default async function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <SignInButton
-                  variant="secondary"
-                  label="Start your journey now"
-                />
-                <GoToAppButton label="Go to application" variant="secondary" />
+                <SignedIn>
+                  <Link href="/home">
+                    <Button
+                      className="flex items-center justify-center gap-1 group"
+                      variant="secondary"
+                    >
+                      <p>Go to application</p>
+                      <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                    </Button>
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <Link href="/sign-in">
+                    <Button variant="secondary">
+                      <p>Start your journey now</p>
+                    </Button>
+                  </Link>
+                </SignedOut>
               </div>
             </div>
           </div>
         </section>
       </div>
-    </UnknownUserNavbar>
+      <SiteFooter />
+    </>
   );
 }

@@ -1,30 +1,29 @@
-import {
+import type {
   CategoryWithId,
   ScheduledSessionRequest,
   TagDetails,
 } from "@/api/definitions";
-import { atom } from "jotai";
 
 /*
- * Object describing **how** to do filtering, now **what** is the value of the filter
+ * Object describing **how** to do filtering, not **what** is the value of the filter
  */
 export type FilterSettings = NonNullable<OmitValue<SessionFilter>>;
-
-export type SessionFilter = ScheduledSessionRequest["readMany"];
 
 /*
  * Object that will provide the values for filtering
  */
 export type FilterValueFiller = {
-  tags?: TagDetails[];
   categories?: CategoryWithId[];
-  endTimeFrom?: { value: Date };
-  endTimeTo?: { value: Date };
+  endTimeFrom?: { value: Date; };
+  endTimeTo?: { value: Date; };
+  tags?: TagDetails[];
 };
 
+export type SessionFilter = ScheduledSessionRequest["readMany"];
+
 export type SessionFilterPrecursor = {
-  settings: FilterSettings;
   data: FilterValueFiller;
+  settings: FilterSettings;
 };
 
 type OmitValue<T> = T extends object
@@ -34,36 +33,30 @@ type OmitValue<T> = T extends object
   : T;
 
 const defaultFilterSettings: FilterSettings = {
-  tags: {
-    label: {
-      mode: "some",
-    },
-  },
   categories: {
     name: {
       mode: "some",
     },
   },
+  tags: {
+    label: {
+      mode: "some",
+    },
+  },
 };
 const defaultFilterData: FilterValueFiller = {
-  tags: [],
   categories: [],
+  tags: [],
 };
-
-// This state is not global and is provided per-filtered-chart basis
-export const filterPrecursorAtom = atom<SessionFilterPrecursor>({
-  data: defaultFilterData,
-  settings: defaultFilterSettings,
-});
 
 export const changeTagFilterMode = (
   oldState: SessionFilterPrecursor,
-  mode: "some" | "all",
+  mode: "all" | "some",
 ): SessionFilterPrecursor => {
   const {
-    settings: { tags, ...filterRest },
     data,
-  } = oldState ?? {};
+    settings: { tags, ...filterRest },
+  } = oldState || {};
 
   return {
     data,
@@ -72,7 +65,7 @@ export const changeTagFilterMode = (
       tags: {
         ...tags,
         label: {
-          mode: mode,
+          mode,
         },
       },
     },
@@ -84,8 +77,8 @@ export const changeCategoryFilterMode = (
   mode: "all" | "some",
 ): SessionFilterPrecursor => {
   const {
-    settings: { categories, ...filterRest },
     data,
+    settings: { categories, ...filterRest },
   } = oldState ?? {};
 
   return {
@@ -95,7 +88,7 @@ export const changeCategoryFilterMode = (
       categories: {
         ...categories,
         name: {
-          mode: mode,
+          mode,
         },
       },
     },
@@ -106,13 +99,12 @@ export const overwriteData = (
   oldState: SessionFilterPrecursor,
   newData: Partial<FilterValueFiller>,
 ): SessionFilterPrecursor => {
-  const { data, ...rest } = oldState;
   return {
-    ...rest,
     data: {
-      ...data,
+      ...oldState.data,
       ...newData,
     },
+    settings: oldState.settings,
   };
 };
 
@@ -180,17 +172,7 @@ export const handleSelectCategory = (
   };
 };
 
-export const getDefaultFilterSettings = (): FilterSettings => {
-  return defaultFilterSettings;
-};
-
-export const getDefaultFilterData = (): FilterValueFiller => {
-  return defaultFilterData;
-};
-
-export const getDefaultFilter = (): SessionFilterPrecursor => {
-  return {
-    data: defaultFilterData,
-    settings: defaultFilterSettings,
-  };
+export const defaultFilter: SessionFilterPrecursor = {
+  data: defaultFilterData,
+  settings: defaultFilterSettings,
 };

@@ -2,9 +2,9 @@ import { FriendRequestSchema } from "@/api/definitions/models/friendship";
 import { z } from "zod";
 
 export const FriendRequestResponseSchema = {
-  update: FriendRequestSchema,
   create: FriendRequestSchema,
   read: z.array(FriendRequestSchema),
+  update: FriendRequestSchema,
 };
 
 export type FriendRequestResponse = {

@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT \n                    c.id,\n                    c.name,\n                    c.color,\n                    COALESCE(COUNT(s.id),0) as \"session_count!\",\n                    c.last_used_at\n                FROM category c\n                LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1\n                WHERE c.created_by = $1\n                GROUP BY c.id\n                ORDER BY COALESCE(COUNT(s.id),0) DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "session_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_used_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "a2a51a165ffd3a386eb87e9b5a2ff67725b9d927d180b5780ef3f3c48f34382b"
+}

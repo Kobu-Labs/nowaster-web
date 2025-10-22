@@ -1,28 +1,35 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::{
-    dto::category::read_category::ReadCategoryDto,
-    entity::tag::{Tag, TagDetails},
-};
+use crate::{dto::category::read_category::ReadCategoryDto, entity::tag::TagDetails};
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadTagDto {
     pub id: Uuid,
     pub label: String,
     pub color: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate)]
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadTagDetailsDto {
     pub id: Uuid,
     pub label: String,
     #[serde(rename = "allowedCategories")]
     pub allowed_categories: Vec<ReadCategoryDto>,
+    pub last_used_at: DateTime<Utc>,
     pub usages: i64,
     pub created_by: String,
     pub color: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
+pub struct TagStatsDto {
+    pub total_tags: i64,
+    pub total_usages: i64,
+    pub average_usages_per_tag: f64,
+    pub most_used_tag: Option<ReadTagDto>,
 }
 
 impl ReadTagDetailsDto {
@@ -38,6 +45,7 @@ impl ReadTagDetailsDto {
                 .collect(),
             usages: entity.usages,
             color: entity.color,
+            last_used_at: entity.last_used_at,
         }
     }
 }

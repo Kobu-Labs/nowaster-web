@@ -1,8 +1,9 @@
-import { ScheduledSessionWithId } from "@/api/definitions";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ScheduledSessionWithId } from "@/api/definitions";
+import type { ColumnDef } from "@tanstack/react-table";
 import { differenceInMinutes, format } from "date-fns";
-import { Edit, Trash2 } from "lucide-react";
-import { FC, useState } from "react";
+import { DownloadIcon, Edit, Trash2 } from "lucide-react";
+import type { FC } from "react";
+import { useState } from "react";
 
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 import {
@@ -25,7 +26,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/shadcn/dialog";
-import { CategoryLabel } from "@/components/visualizers/categories/CategoryLabel";
+import { Separator } from "@/components/shadcn/separator";
+import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { EditScheduledSession } from "@/components/visualizers/sessions/form/EditScheduledSessionForm";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { formatTime } from "@/lib/utils";
@@ -39,13 +41,13 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   const deleteSession = useDeleteScheduledSession();
 
   return (
-    <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-      <AlertDialogTrigger>
+    <AlertDialog onOpenChange={setIsDeleteAlertOpen} open={isDeleteAlertOpen}>
+      <AlertDialogTrigger asChild>
         <Button
-          className="group cursor-pointer p-0 m-0 aspect-square"
+          className="group cursor-pointer p-0 m-0 aspect-square h-6 w-6 md:h-8 md:w-8"
           variant="ghost"
         >
-          <Trash2 className="group-hover:text-red-500 group-hover:scale-110 group-hover:transition" />
+          <Trash2 className="h-3 w-3 md:h-4 md:w-4 group-hover:text-red-500 group-hover:scale-110 group-hover:transition" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -59,12 +61,13 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={async () =>
               await deleteSession.mutateAsync(props.sessionId, {
-                onSuccess: () => setIsDeleteAlertOpen(false),
-              })
-            }
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onSuccess: () => {
+                  setIsDeleteAlertOpen(false);
+                },
+              })}
           >
             Delete
           </AlertDialogAction>
@@ -74,96 +77,165 @@ const DeleteSessionIcon: FC<DeleteSessionIconProps> = (props) => {
   );
 };
 
-const EditSessionButton: FC<{ session: ScheduledSessionWithId }> = (props) => {
+const EditSessionButton: FC<{ session: ScheduledSessionWithId; }> = (props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <Dialog modal={false} open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger>
+    <Dialog modal={false} onOpenChange={setIsDialogOpen} open={isDialogOpen}>
+      <DialogTrigger asChild>
         <Button
-          className="group cursor-pointer p-0 m-0 aspect-square"
+          className="group cursor-pointer p-0 m-0 aspect-square h-6 w-6 md:h-8 md:w-8"
           variant="ghost"
         >
-          <Edit className="group-hover:scale-110 group-hover:transition" />
+          <Edit className="h-3 w-3 md:h-4 md:w-4 group-hover:scale-110 group-hover:transition" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-[60%]">
-        <DialogHeader>
-          <DialogTitle>Edit Session</DialogTitle>
+      <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
+        <DialogHeader className="px-2">
+          <DialogTitle className="m-1">Edit Session</DialogTitle>
         </DialogHeader>
+        <Separator className="w-full" />
         <EditScheduledSession
-          session={props.session}
           onCancel={() => setIsDialogOpen(false)}
-          onSave={() => setIsDialogOpen(false)}
           onDelete={() => setIsDialogOpen(false)}
+          onSave={() => setIsDialogOpen(false)}
+          session={props.session}
         />
       </DialogContent>
     </Dialog>
   );
 };
 
+const downloadJSON = (data: ScheduledSessionWithId[], filename: string) => {
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
+
 export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
   {
-    accessorKey: "category",
-    header: "Category",
-    cell: (data) => {
-      return <CategoryLabel category={data.row.original.category} />;
-    },
-  },
-  {
-    accessorKey: "tags",
-    header: "Tags",
-    cell: (data) => {
-      const tags = data.row.original.tags;
-
+    accessorKey: "download",
+    header: (data) => {
+      const rows = data.table.getRowModel().rows.map((row) => row.original);
       return (
-        <div className="flex">
-          {tags.map((tag) => (
-            <TagBadge tag={tag} variant="auto" key={tag.id} />
-          ))}
-        </div>
+        <Button
+          className="p-0 m-0 h-6 w-6 md:h-8 md:w-8"
+          onClick={() => downloadJSON(rows, "export.json")}
+          variant="ghost"
+        >
+          <DownloadIcon className="h-3 w-3 md:h-4 md:w-4" />
+        </Button>
       );
     },
   },
+
+  {
+    accessorKey: "category",
+    cell: (data) => {
+      return (
+        <CategoryBadge
+          color={data.row.original.category.color}
+          name={data.row.original.category.name}
+        />
+      );
+    },
+    header: "Category",
+  },
+  {
+    accessorKey: "tags",
+    cell: (data) => {
+      const { tags } = data.row.original;
+
+      return (
+        <div className="flex flex-wrap gap-1 max-w-[120px] md:max-w-none">
+          {tags.slice(0, 2).map((tag) => (
+            <TagBadge key={tag.id} tag={tag} variant="auto" />
+          ))}
+          {tags.length > 2 && (
+            <span className="text-xs text-muted-foreground">
+              +
+              {tags.length - 2}
+            </span>
+          )}
+        </div>
+      );
+    },
+    header: "Tags",
+  },
   {
     accessorKey: "description",
-    header: "Description",
+    cell: (data) => {
+      const desc = data.row.original.description;
+      return (
+        <div
+          className="max-w-[100px] md:max-w-[200px] truncate text-xs md:text-sm"
+          title={desc ?? undefined}
+        >
+          {desc}
+        </div>
+      );
+    },
+    header: "Desc.",
   },
   {
     accessorKey: "startTime",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Start Time" />
+    cell: ({ row: { original } }) => (
+      <div className="text-xs md:text-sm">
+        <div className="md:hidden">{format(original.startTime, "dd/MM")}</div>
+        <div className="md:hidden">{format(original.startTime, "HH:mm")}</div>
+        <div className="hidden md:block">
+          {format(original.startTime, "dd-MM-yyyy HH:mm")}
+        </div>
+      </div>
     ),
-    cell: ({ row: { original } }) =>
-      format(original.startTime, "dd-MM-yyyy HH:mm"),
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Start" />
+    ),
   },
   {
     accessorKey: "endTime",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="End Time" />
+    cell: ({ row: { original } }) => (
+      <div className="text-xs md:text-sm">
+        <div className="md:hidden">{format(original.endTime, "dd/MM")}</div>
+        <div className="md:hidden">{format(original.endTime, "HH:mm")}</div>
+        <div className="hidden md:block">
+          {format(original.endTime, "dd-MM-yyyy HH:mm")}
+        </div>
+      </div>
     ),
-    cell: ({ row: { original } }) =>
-      format(original.endTime, "dd-MM-yyyy HH:mm"),
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="End" />
+    ),
   },
   {
-    id: "duration-column",
     accessorFn: (session) =>
       differenceInMinutes(session.endTime, session.startTime),
+    cell: (test) => {
+      const time = test.cell.getValue<number>();
+      return (
+        <div className="text-xs md:text-sm font-mono">{formatTime(time)}</div>
+      );
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Duration" />
     ),
-    cell: (test) => {
-      const time = test.cell.getValue<number>();
-      return <div>{formatTime(time)}</div>;
-    },
+    id: "duration-column",
   },
   {
-    id: "actions",
     cell: (data) => (
-      <>
+      <div className="flex flex-col sm:gap-1 sm:flex-row">
         <EditSessionButton session={data.row.original} />
         <DeleteSessionIcon sessionId={data.row.original.id} />
-      </>
+      </div>
     ),
+    header: "",
+    id: "actions",
   },
 ];

@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import {
-  format,
   addMonths,
-  subMonths,
-  startOfMonth,
   endOfMonth,
+  format,
+  startOfMonth,
+  subMonths,
 } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -25,8 +25,8 @@ import { type DateRange } from "react-day-picker";
 import { type DeepRequired } from "react-hook-form";
 
 type MonthDatePickerProps = {
-  onSelected?: (date: DeepRequired<DateRange>) => void;
   initialDate?: Date;
+  onSelected?: (date: DeepRequired<DateRange>) => void;
 };
 
 export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
@@ -73,39 +73,33 @@ export const MonthDatePicker: React.FC<MonthDatePickerProps> = (props) => {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant={"outline"}
           className={cn(
             "w-[240px] justify-start text-left font-normal",
             !date && "text-muted-foreground",
           )}
+          variant="outline"
         >
           <CalendarIcon className="mr-2 size-4" />
-          {date ? (
-            format(date, "MMMM yyyy")
-          ) : (
-            <span>Pick a month</span>
-          )}
+          {date ? format(date, "MMMM yyyy") : <span>Pick a month</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent align="start" className="w-auto p-0">
         <div className="flex items-center justify-between p-2">
-          <Button variant="outline" size="icon" onClick={handlePreviousMonth}>
+          <Button onClick={handlePreviousMonth} size="icon" variant="outline">
             <ChevronLeft className="size-4" />
           </Button>
-          <div className="font-semibold">
-            {format(date, "yyyy")}
-          </div>
-          <Button variant="outline" size="icon" onClick={handleNextMonth}>
+          <div className="font-semibold">{format(date, "yyyy")}</div>
+          <Button onClick={handleNextMonth} size="icon" variant="outline">
             <ChevronRight className="size-4" />
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2 p-2">
           {Array.from({ length: 12 }, (_, i) => (
             <Button
-              key={i}
-              variant={date.getMonth() === i ? "default" : "outline"}
               className="text-sm"
-              onClick={() => handleMonthSelect(i)}
+              key={i}
+              onClick={() => { handleMonthSelect(i); }}
+              variant={date.getMonth() === i ? "default" : "outline"}
             >
               {format(new Date(date.getFullYear(), i), "MMM")}
             </Button>

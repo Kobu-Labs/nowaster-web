@@ -1,55 +1,34 @@
-import {
-  SessionFilterPrecursor,
-  filterPrecursorAtom,
-  getDefaultFilter,
-  overwriteData,
-} from "@/state/chart-filter";
-import { Provider, useAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
-import { FC, HTMLAttributes, useState } from "react";
+import { overwriteData } from "@/state/chart-filter";
+import type { FC, HTMLAttributes } from "react";
+import { useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components//shadcn/card";
+import { useChartFilter } from "@/components/hooks/use-chart-filter";
 import { GranularityBasedDatePicker } from "@/components/ui-providers/date-pickers/GranularityBasedDatePicker";
-import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
-import { DeepRequired } from "react-hook-form";
 import { ChartFilter } from "@/components/visualizers/sessions/charts/ChartFilter";
+import type {
+  Granularity } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import {
-  Granularity,
   GranularitySelect,
 } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { SessionBaseAreaChart } from "@/components/visualizers/sessions/charts/SessionBaseAreChart";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
+import type { DeepRequired } from "react-hook-form";
 
 type FilteredSessionAreaChartProps = {
   initialGranularity: Granularity;
-  filter?: SessionFilterPrecursor;
 } & HTMLAttributes<HTMLDivElement>;
 
 export const FilteredSessionAreaChart: FC<FilteredSessionAreaChartProps> = (
   props,
 ) => {
-  return (
-    <Provider>
-      <FilteredSessionAreaChartInner {...props} />
-    </Provider>
-  );
-};
+  const [granularity, setGranularity] = useState(props.initialGranularity);
 
-const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
-  props,
-) => {
-  const [granularity, setGranularity] = useState<Granularity>(
-    props.initialGranularity,
-  );
-
-  useHydrateAtoms(
-    new Map([[filterPrecursorAtom, props.filter ?? getDefaultFilter()]]),
-  );
-
-  const [filterPrecursor, setChartFilter] = useAtom(filterPrecursorAtom);
+  const { filter, setFilter } = useChartFilter();
 
   const updateFilter = (range: DeepRequired<DateRange>) => {
-    setChartFilter((oldState) =>
+    setFilter((oldState) =>
       overwriteData(oldState, {
         endTimeFrom: { value: range.from },
         endTimeTo: { value: range.to },
@@ -58,30 +37,31 @@ const FilteredSessionAreaChartInner: FC<FilteredSessionAreaChartProps> = (
   };
 
   return (
-    <Card className={cn("flex grow flex-col", props.className)}>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <GranularitySelect
-          onSelect={setGranularity}
-          defaultValue={granularity}
-        />
-        <div className="grow"></div>
-        <div className="flex items-center gap-2">
-          <GranularityBasedDatePicker
-            granularity={granularity}
-            props={{
-              onSelected: updateFilter,
-            }}
-          />
-        </div>
+    <Card className={cn("flex flex-col w-full", props.className)}>
+      <CardHeader className="md:hidden self-end p-2">
         <ChartFilter />
       </CardHeader>
-      <CardContent className="grow">
-        <SessionBaseAreaChart
-          groupingOpts={{
-            granularity: granularity,
-            allKeys: true,
+      <CardHeader className="hidden md:flex flex-row items-center gap-2 space-y-0 p-4">
+        <GranularitySelect
+          defaultValue={granularity}
+          onSelect={setGranularity}
+        />
+        <div className="grow"></div>
+        <GranularityBasedDatePicker
+          granularity={granularity}
+          props={{
+            onSelected: updateFilter,
           }}
-          filter={filterPrecursor}
+        />
+        <ChartFilter />
+      </CardHeader>
+      <CardContent className="grow p-0 sm:p-2 md:p-6 pt-0">
+        <SessionBaseAreaChart
+          filter={filter}
+          groupingOpts={{
+            allKeys: true,
+            granularity,
+          }}
         />
       </CardContent>
     </Card>

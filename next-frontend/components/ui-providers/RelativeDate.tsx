@@ -1,11 +1,11 @@
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
   TooltipProvider,
+  TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { format, formatDistanceToNow } from "date-fns";
-import { FC } from "react";
+import type { FC } from "react";
 
 type RelativeDateProps = {
   date: Date;

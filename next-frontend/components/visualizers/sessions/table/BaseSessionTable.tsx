@@ -1,9 +1,9 @@
 "use client";
-import { ScheduledSessionWithId } from "@/api/definitions";
-import { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { ScheduledSessionWithId } from "@/api/definitions";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
-import { FC } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { FC } from "react";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { DataTable } from "@/components/ui-providers/DataTable";
@@ -22,9 +22,9 @@ export const BaseSessionTable: FC<BaseSessionTableProps> = (props) => {
 
   return (
     <DataTable
-      loading={isPending}
       columns={props.columns ?? BaseSessionTableColumns}
       data={data ?? []}
+      loading={isPending}
     />
   );
 };

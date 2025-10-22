@@ -1,24 +1,24 @@
 import { MonthDatePicker } from "@/components/ui-providers/date-pickers/MonthDatePicker";
 import { WeekDatePicker } from "@/components/ui-providers/date-pickers/WeekDatePicker";
 import { YearDatePicker } from "@/components/ui-providers/date-pickers/YearDatePicker";
-import { Granularity } from "@/components/visualizers/sessions/charts/GranularitySelect";
+import type { Granularity } from "@/components/visualizers/sessions/charts/GranularitySelect";
 import { type ComponentProps, type FC } from "react";
 
 const granularityToComponent = {
-  "days-in-week": WeekDatePicker,
   "days-in-month": MonthDatePicker,
+  "days-in-week": WeekDatePicker,
   "months-in-year": YearDatePicker,
-} satisfies { [Key in Granularity]: FC<any> };
+} satisfies Record<Granularity, FC<any>>;
+
+type GranularityBasedDatePickerProps<G extends Granularity> = {
+  granularity: G;
+  props: GranularityToProps[G];
+};
 
 type GranularityToProps = {
   [G in keyof typeof granularityToComponent]: ComponentProps<
     (typeof granularityToComponent)[G]
   >;
-};
-
-type GranularityBasedDatePickerProps<G extends Granularity> = {
-  granularity: G;
-  props: GranularityToProps[G];
 };
 
 export const GranularityBasedDatePicker = <G extends Granularity>({

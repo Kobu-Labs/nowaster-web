@@ -1,28 +1,104 @@
-import { Result } from "@badrap/result";
 import { ResponseSchema } from "@/api/definitions";
-import axios from "axios";
-import { ZodType } from "zod";
 import { env } from "@/env";
+import { getAccessToken, setAuthTokens } from "@/lib/auth";
+import { Result } from "@badrap/result";
+import axios from "axios";
+import type { ZodType } from "zod";
 
 const baseApi = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
-  validateStatus: () => true,
+  withCredentials: true,
 });
 
-export const setupAxiosInterceptors = (
-  getToken: () => Promise<string | null>,
-) => {
-  baseApi.interceptors.request.use(
-    async (config) => {
-      const token = await getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+// Global promise to prevent concurrent refresh requests (race-condition safe)
+let refreshPromise: null | Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> = null;
+
+export const refreshTokens = async (): Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const refreshResponse = await baseApi.post(
+        "/auth/refresh",
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const newAccessToken = refreshResponse.data?.data?.access_token;
+      const newRefreshToken = refreshResponse.data?.data?.refresh_token;
+
+      if (!newAccessToken || !newRefreshToken) {
+        throw new Error("Invalid refresh response");
       }
-      return config;
-    },
-    (error) => Promise.reject(error),
-  );
+
+      setAuthTokens(newAccessToken, newRefreshToken);
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 };
+
+// Request interceptor: add auth token to all requests
+baseApi.interceptors.request.use(async (config) => {
+  const impersonationToken
+    = globalThis.window === undefined
+      ? null
+      : localStorage.getItem("impersonation_token");
+
+  if (impersonationToken) {
+    config.headers["X-Impersonation-Token"] = impersonationToken;
+  } else {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+// Response interceptor: handle 401 errors with token refresh
+baseApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const tokens = await refreshTokens();
+        originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        return await baseApi(originalRequest);
+      } catch (refreshError) {
+        globalThis.location.href = "/sign-in";
+        throw refreshError instanceof Error
+          ? refreshError
+          : new Error(String(refreshError));
+      }
+    }
+
+    throw error;
+  },
+);
 
 // INFO: this is usefull in react-query usage when dealing with isError prop
 export const parseResponseToResult = async <T>(
@@ -31,7 +107,6 @@ export const parseResponseToResult = async <T>(
 ): Promise<Result<T>> => {
   const request = await ResponseSchema.safeParseAsync(data);
   if (!request.success) {
-    console.error(request.error);
     return Result.err(new Error("Response is of unexpected structure!"));
   }
 
@@ -42,7 +117,7 @@ export const parseResponseToResult = async <T>(
   const requestBody = await schema.safeParseAsync(request.data.data);
   if (!requestBody.success) {
     return Result.err(
-      new Error("Parsing data failed!\n" + requestBody.error.message),
+      new Error(`Parsing data failed!\n${requestBody.error.message}`),
     );
   }
 
@@ -56,19 +131,16 @@ export const parseResponseUnsafe = async <T>(
 ): Promise<T> => {
   const request = await ResponseSchema.safeParseAsync(data);
   if (!request.success) {
-    console.error(request.error);
     throw new Error("Response is of unexpected structure!");
   }
 
   if (request.data.status === "fail") {
-    console.error(request.data.message);
     throw new Error(request.data.message);
   }
 
   const requestBody = await schema.safeParseAsync(request.data.data);
   if (!requestBody.success) {
-    console.error(requestBody.error.message);
-    throw new Error("Parsing data failed!\n" + requestBody.error.message);
+    throw new Error(`Parsing data failed!\n${requestBody.error.message}`);
   }
 
   return requestBody.data;

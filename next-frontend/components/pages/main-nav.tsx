@@ -1,21 +1,15 @@
 "use client";
 
-import { SignedIn, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { SignInButton } from "@/components/pages/SignInButton";
-import { ThemeToggle } from "@/components/pages/ThemeToggle";
-import { SessionTimer } from "@/components/visualizers/sessions/StartSession";
-import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
-import { NavItem } from "@/types/nav";
-import Image from "next/image";
-import { FC, PropsWithChildren } from "react";
+import type { NavItem } from "@/types/nav";
+import type { FC, PropsWithChildren } from "react";
 
-interface NavigationProps {
+type NavigationProps = {
   items?: readonly NavItem[];
-}
+};
 
 export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
   const currentPath = usePathname();
@@ -26,12 +20,12 @@ export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
         (item, index) =>
           item.href && (
             <Link
-              key={index}
-              href={item.href}
               className={cn(
                 "flex items-center text-sm font-medium text-muted-foreground hover:text-primary",
                 item.disabled && "cursor-not-allowed opacity-80",
               )}
+              href={item.href}
+              key={index}
             >
               <div className={cn("group rounded transition duration-200")}>
                 {item.title}
@@ -40,7 +34,8 @@ export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
                     "block h-0.5 max-w-0 bg-accent-foreground transition-all duration-200 group-hover:max-w-full",
                     currentPath === item.href && "max-w-full",
                   )}
-                ></span>
+                >
+                </span>
               </div>
             </Link>
           ),
@@ -49,37 +44,3 @@ export const Navigation: FC<PropsWithChildren<NavigationProps>> = (props) => {
     </nav>
   );
 };
-
-export const NowasterLogo: FC<{ href?: string }> = (props) => {
-  return (
-    <Link
-      href={props.href ?? "/"}
-      className="flex items-center space-x-2 hover:scale-110 hover:transition"
-    >
-      <Image
-        src="/logo.png"
-        alt="Logo"
-        className="h-8 w-8"
-        width={80}
-        height={80}
-      />
-      <span className="inline-block font-bold">{siteConfig.name}</span>
-    </Link>
-  );
-};
-
-export function MainNavigation({ items }: NavigationProps) {
-  return (
-    <div className="flex w-full flex-row gap-6">
-      <NowasterLogo href="/home/" />
-      <Navigation items={items} />
-      <div className="grow"></div>
-      <SessionTimer />
-      <ThemeToggle />
-      <SignInButton />
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
-    </div>
-  );
-}

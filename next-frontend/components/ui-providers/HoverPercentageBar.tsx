@@ -1,4 +1,5 @@
-import { FC, PropsWithChildren, useState } from "react";
+import type { FC, PropsWithChildren } from "react";
+import { useState } from "react";
 
 type HoverPercentageBarProps = {
   formatter: (percentage: number) => string;
@@ -7,26 +8,36 @@ type HoverPercentageBarProps = {
 export const HoverPercentageBar: FC<
   PropsWithChildren<HoverPercentageBarProps>
 > = (props) => {
-  const [hoverX, setHoverX] = useState<number | null>(null);
-  const [percentage, setPercentage] = useState<number | null>(null);
+  const [hoverX, setHoverX] = useState<null | number>(null);
+  const [percentage, setPercentage] = useState<null | number>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+  const handlePointerMove = (
+    clientX: number,
+    currentTarget: HTMLDivElement,
+  ) => {
+    const rect = currentTarget.getBoundingClientRect();
+    const x = clientX - rect.left;
     setHoverX(x);
     setPercentage(Math.min(100, Math.max(0, (x / rect.width) * 100)));
   };
 
-  const handleMouseLeave = () => {
+  const handlePointerLeave = () => {
     setHoverX(null);
     setPercentage(null);
   };
 
   return (
     <div
-      className="relative w-full h-full border rounded-2xl overflow-hidden p-4"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      className="relative w-full h-full border rounded-2xl overflow-hidden py-4 bg-transparent/30"
+      onMouseLeave={handlePointerLeave}
+      onMouseMove={(e) => handlePointerMove(e.clientX, e.currentTarget)}
+      onTouchEnd={handlePointerLeave}
+      onTouchMove={(e) => {
+        if (e.touches.length === 1) {
+          e.preventDefault();
+          handlePointerMove(e.touches[0]?.clientX ?? 0, e.currentTarget);
+        }
+      }}
     >
       {hoverX !== null && (
         <>
@@ -36,7 +47,10 @@ export const HoverPercentageBar: FC<
           />
           <div
             className="absolute top-0 bottom-0 text-nowrap"
-            style={{ left: hoverX + 10 }}
+            style={{
+              left: (percentage ?? 0) < 50 ? hoverX + 10 : hoverX - 10,
+              transform: (percentage ?? 0) >= 50 ? "translateX(-100%)" : "none",
+            }}
           >
             {percentage && props.formatter(percentage)}
           </div>

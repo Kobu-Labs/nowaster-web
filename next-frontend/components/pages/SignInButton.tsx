@@ -1,19 +1,27 @@
-import { Button, ButtonProps } from "@/components/shadcn/button";
-import { SignedOut, SignInButton as SignInButtonClerk } from "@clerk/nextjs";
-import { FC } from "react";
+"use client";
 
-export const SignInButton: FC<ButtonProps & { label?: string }> = (props) => {
+import { useAuth } from "@/components/hooks/useAuth";
+import type { ButtonProps } from "@/components/shadcn/button";
+import { Button } from "@/components/shadcn/button";
+import Link from "next/link";
+import type { FC } from "react";
+
+export const SignInButton: FC<{ label?: string; } & ButtonProps> = (props) => {
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    return null;
+  }
+
   return (
-    <SignedOut>
-      <SignInButtonClerk>
-        <Button
-          variant={props.variant ?? "outline"}
-          size={props.size ?? "sm"}
-          className={props.className}
-        >
-          {props.label ?? "Sign in"}
-        </Button>
-      </SignInButtonClerk>
-    </SignedOut>
+    <Link href="/sign-in">
+      <Button
+        className={props.className}
+        size={props.size ?? "sm"}
+        variant={props.variant ?? "outline"}
+      >
+        {props.label ?? "Sign in"}
+      </Button>
+    </Link>
   );
 };

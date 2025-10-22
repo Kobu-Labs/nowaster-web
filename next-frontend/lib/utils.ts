@@ -1,6 +1,6 @@
-import { SessionFilterPrecursor } from "@/state/chart-filter";
-import { SessionFilter, TagDetails } from "@/api/definitions";
-import { clsx, type ClassValue } from "clsx";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
+import type { SessionFilter, TagDetails } from "@/api/definitions";
+import { type ClassValue, clsx } from "clsx";
 import { differenceInMinutes } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
@@ -32,12 +32,9 @@ export const getFormattedTimeDifference = (from: Date, to: Date) => {
 };
 
 export const randomColor = (): string => {
-  return (
-    "#" +
-    Math.floor(Math.random() * 0xffffff)
-      .toString(16)
-      .padStart(6, "0")
-  );
+  return `#${Math.floor(Math.random() * 0xFF_FF_FF)
+    .toString(16)
+    .padStart(6, "0")}`;
 };
 
 export const isHexColor = (str: string) => /^#([0-9A-F]{3}){2}$/i.test(str);
@@ -57,7 +54,7 @@ export const showSelectedTagsFirst = (
     if (selectedTags.some((t) => t.id === tag2.id)) {
       return 1;
     }
-    return 0;
+    return tag2.last_used_at.getTime() - tag1.last_used_at.getTime();
   });
 };
 
@@ -65,7 +62,9 @@ export function countLeaves(obj: any): number {
   const isObject = (val: any): val is object => typeof val === "object";
 
   const isTruthy = (val: any) => {
-    if (Array.isArray(val) && val.length === 0) return false;
+    if (Array.isArray(val) && val.length === 0) {
+      return false;
+    }
     return Boolean(val);
   };
 
@@ -92,7 +91,7 @@ export const translateFilterPrecursor = (
   }
   const {
     data,
-    settings: { tags, categories },
+    settings: { categories, tags },
   } = precursor;
 
   const filter: SessionFilter = {};
@@ -137,8 +136,8 @@ export const translateFilterPrecursor = (
 };
 
 export const emptyStringToUndefined = (
-  value: string | undefined | null,
-  options?: { trim?: boolean },
+  value: null | string | undefined,
+  options?: { trim?: boolean; },
 ): string | undefined => {
   let workingValue = value;
   if (options?.trim) {
@@ -151,3 +150,27 @@ export const emptyStringToUndefined = (
 
   return workingValue;
 };
+
+export const arrayFromUndefined = <T>(value?: null | T) => {
+  if (!value) {
+    return [];
+  }
+  return [value];
+};
+
+export const toggleOrientation = (orientation: "horizontal" | "vertical") => {
+  return orientation === "horizontal" ? "vertical" : "horizontal";
+};
+
+export function getInitials(input: string | string[]): string {
+  const parts
+    = typeof input === "string"
+      ? input.split(" ")
+      : input;
+
+  return parts
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}

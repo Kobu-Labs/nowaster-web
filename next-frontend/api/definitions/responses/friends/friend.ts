@@ -2,8 +2,8 @@ import { FriendshipSchema } from "@/api/definitions/models/friendship";
 import { z } from "zod";
 
 export const FriendResponseSchema = {
-  remove: z.null(),
   read: z.array(FriendshipSchema),
+  remove: z.null(),
 };
 
 export type FriendResponse = {

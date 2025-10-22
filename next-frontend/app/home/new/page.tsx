@@ -11,8 +11,8 @@ const NewSessionPage = () => {
   const filter = useMemo(
     () => ({
       data: {
-        endTimeTo: { value: new Date() },
         endTimeFrom: { value: subHours(new Date(), 48) },
+        endTimeTo: { value: new Date() },
       },
       settings: {},
     }),

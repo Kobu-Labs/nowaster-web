@@ -1,11 +1,12 @@
 import { useTags } from "@/components/hooks/tag/useTags";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import type {
+  TagPickerUiProviderProps } from "@/components/ui-providers/tags/TagPickerUiProvider";
 import {
   TagPickerUiProvider,
-  TagPickerUiProviderProps,
 } from "@/components/ui-providers/tags/TagPickerUiProvider";
 import { Frown } from "lucide-react";
-import { FC } from "react";
+import type { FC } from "react";
 
 type SimpleTagPickerProps = Omit<TagPickerUiProviderProps, "availableTags">;
 
@@ -26,14 +27,14 @@ export const SimpleTagPicker: FC<SimpleTagPickerProps> = (props) => {
 
   return (
     <TagPickerUiProvider
-      disabled={props.disabled}
       availableTags={tags.data}
+      disabled={props.disabled}
       forCategory={props.forCategory}
-      selectedTags={props.selectedTags}
-      onNewTagsSelected={props.onNewTagsSelected}
       modal={props.modal}
-      tagsDisplayStrategy={props.tagsDisplayStrategy}
+      onNewTagsSelected={props.onNewTagsSelected}
+      selectedTags={props.selectedTags}
       tagMatchStrategy={props.tagMatchStrategy}
+      tagsDisplayStrategy={props.tagsDisplayStrategy}
     />
   );
 };

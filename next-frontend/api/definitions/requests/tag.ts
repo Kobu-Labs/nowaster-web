@@ -3,18 +3,18 @@ import { HasID } from "@/api/definitions/utils";
 import { z } from "zod";
 
 const create = z.object({
-  label: z.string().trim().min(1),
   allowedCategories: z.array(CategorySchema),
   color: z.string().trim().min(1),
+  label: z.string().trim().min(1),
 });
 
 const deleteTag = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 const readMany = z.object({
-  limit: z.coerce.number().optional(),
   allowedCategories: z.array(CategorySchema).optional(),
+  limit: z.coerce.number().optional(),
 });
 
 const removeAllowedCategory = z.object({
@@ -31,7 +31,7 @@ const getById = z.object({
   id: z.string(),
 });
 
-const update = TagDetailsSchema.deepPartial().merge(HasID);
+const update = TagDetailsSchema.partial().merge(HasID);
 
 export type TagRequest = {
   [Property in keyof typeof TagRequestSchema]: z.infer<
@@ -40,11 +40,11 @@ export type TagRequest = {
 };
 
 export const TagRequestSchema = {
-  getById,
-  create,
-  readMany,
-  update,
   addAllowedCategory,
-  removeAllowedCategory,
+  create,
   deleteTag,
+  getById,
+  readMany,
+  removeAllowedCategory,
+  update,
 } as const;

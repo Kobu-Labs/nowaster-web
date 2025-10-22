@@ -1,37 +1,37 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { tagColors } from "@/state/tags";
-import { useRecoilState } from "recoil";
 
 import { cn, randomColor } from "@/lib/utils";
 import { Badge } from "@/components/shadcn/badge";
-import { TagWithId } from "@/api/definitions";
+import type { TagWithId } from "@/api/definitions";
+import { useAtom } from "jotai";
 
-type TagBadgeProps =
+type TagBadgeProps
+  = | {
+    colors?: string;
+    value: string;
+    variant: "manual";
+  }
   | {
-      value: string;
-      colors?: string;
-      variant: "manual";
-    }
-  | {
-      variant: "auto";
-      tag: TagWithId;
-    };
+    tag: TagWithId;
+    variant: "auto";
+  };
 
-const TagBadgeInner = (props: { color: string; label: string }) => {
+const TagBadgeInner = (props: { color: string; label: string; }) => {
   return (
     <Badge
-      style={{ "--tag-color": props.color } as React.CSSProperties}
       className={cn(
-        "h-min w-min bg-[var(--tag-color)] text-white hover:scale-110 hover:bg-[var(--tag-color)] hover:transition ",
+        "h-min w-min bg-(--tag-color) text-white hover:scale-110 hover:bg-(--tag-color) hover:transition whitespace-nowrap",
       )}
+      style={{ "--tag-color": props.color } as React.CSSProperties}
     >
       {props.label}
     </Badge>
   );
 };
 
-const TagBadgeAuto = (props: { tag: TagWithId }) => {
-  const [colors, setColors] = useRecoilState(tagColors);
+const TagBadgeAuto = (props: { tag: TagWithId; }) => {
+  const [colors, setColors] = useAtom(tagColors);
 
   const color = colors[props.tag.label] ?? props.tag.color;
   if (colors[props.tag.label] === undefined) {
@@ -41,7 +41,7 @@ const TagBadgeAuto = (props: { tag: TagWithId }) => {
   return <TagBadgeInner color={color} label={props.tag.label} />;
 };
 
-const TagBadgeManual = (props: { value: string; color?: string }) => {
+const TagBadgeManual = (props: { color?: string; value: string; }) => {
   return (
     <TagBadgeInner color={props.color ?? randomColor()} label={props.value} />
   );
@@ -53,7 +53,7 @@ export const TagBadge: FC<TagBadgeProps> = (props) => {
   }
 
   if (props.variant === "manual") {
-    return <TagBadgeManual value={props.value} color={props.colors} />;
+    return <TagBadgeManual color={props.colors} value={props.value} />;
   }
 
   return null;

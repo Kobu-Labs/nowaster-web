@@ -1,7 +1,8 @@
 "use client";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { HexColorPicker } from "react-colorful";
-import { FC, useState } from "react";
+import type { FC } from "react";
+import { useCallback, useRef, useState } from "react";
 import { isHexColor, randomColor } from "@/lib/utils";
 import {
   Popover,
@@ -13,8 +14,8 @@ import { Input } from "@/components/shadcn/input";
 import { Dices, LucidePipette } from "lucide-react";
 
 type ColorPickerProps = {
-  onSelect: (color: string) => void;
   initialColor?: string;
+  onSelect: (color: string) => void;
   value?: string;
 };
 
@@ -27,20 +28,53 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
   const color = isControlled ? props.value : internalColor;
   const [inputColor, setInputColor] = useState(color);
 
-  const handleColorChange = (color: string) => {
-    props.onSelect(color);
-    setInputColor(color);
+  // INFO: the following mechanism allows users to drag the color picker,
+  // without spamming backend with requests
+  const isDragging = useRef(false);
+  const [tempColor, setTempColor] = useState(color);
+  const pendingColorRef = useRef<null | string>(null);
 
-    if (!isControlled) {
-      setInternalColors(color);
+  const handleColorChange = useCallback(
+    (newColor: string) => {
+      setTempColor(newColor);
+      setInputColor(newColor);
+
+      if (isDragging.current) {
+        // Store the pending color to apply when drag ends
+        pendingColorRef.current = newColor;
+      } else {
+        // Not dragging, apply immediately
+        props.onSelect(newColor);
+        if (!isControlled) {
+          setInternalColors(newColor);
+        }
+      }
+    },
+    [props, isControlled],
+  );
+
+  const handleMouseDown = useCallback(() => {
+    isDragging.current = true;
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    if (isDragging.current && pendingColorRef.current) {
+      // Apply the final color when drag ends
+      props.onSelect(pendingColorRef.current);
+      if (!isControlled) {
+        setInternalColors(pendingColorRef.current);
+      }
+      pendingColorRef.current = null;
     }
-  };
+    isDragging.current = false;
+  }, [props, isControlled]);
 
   const handleInputChange = (value: string) => {
     if (isHexColor(value)) {
       if (!isControlled) {
-        setInternalColors(internalColor);
+        setInternalColors(value);
       }
+      setTempColor(value);
       props.onSelect(value);
     }
     setInputColor(value);
@@ -50,30 +84,31 @@ export const ColorPicker: FC<ColorPickerProps> = (props) => {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
           style={{
-            backgroundColor: color + "80",
-            border: "3px solid " + color,
+            backgroundColor: `${tempColor}80`,
+            border: `3px solid ${tempColor}`,
           }}
+          variant="outline"
         >
           <LucidePipette />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-fit p-0 border-none">
         <Card className="w-fit">
-          <CardContent>
+          <CardContent onMouseLeave={handleMouseUp} onMouseUp={handleMouseUp}>
             <HexColorPicker
               className="pt-4"
-              color={color}
+              color={tempColor}
               onChange={handleColorChange}
+              onMouseDown={handleMouseDown}
             />
             <div className="flex items-center justify-center mt-2 gap-2">
               <Input
-                value={inputColor}
-                onChange={(e) => handleInputChange(e.target.value)}
                 className="w-32"
+                onChange={(e) => { handleInputChange(e.target.value); }}
+                value={inputColor}
               />
-              <Button onClick={() => handleColorChange(randomColor())}>
+              <Button onClick={() => { handleColorChange(randomColor()); }}>
                 <Dices />
               </Button>
             </div>

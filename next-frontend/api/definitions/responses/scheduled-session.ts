@@ -16,7 +16,7 @@ export type ScheduledSessionResponse = {
 export const ScheduledSessionResponseSchema = {
   create,
   readById,
-  update,
-  remove,
   readMany,
+  remove,
+  update,
 } as const;

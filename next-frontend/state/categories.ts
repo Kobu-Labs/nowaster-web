@@ -1,6 +1,3 @@
-import { atom } from "recoil";
+import { atom } from "jotai";
 
-export const categoryColors = atom<{ [label: string]: string }>({
-  key: "categories",
-  default: {},
-});
+export const categoryColors = atom<Record<string, string>>({});

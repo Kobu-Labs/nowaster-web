@@ -1,23 +1,16 @@
 import { sessionFilter } from "@/api/definitions/filters";
-import {
-  CategoryWithIdSchema,
-} from "@/api/definitions/models";
 import { z } from "zod";
 
 const create = z.object({
-  category: CategoryWithIdSchema,
+  category_id: z.uuid(),
   description: z.string().nullable(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  tags: z.array(
-    z.object({
-      id: z.string().uuid(),
-    }),
-  ),
+  endTime: z.coerce.date<Date>(),
+  startTime: z.coerce.date<Date>(),
+  tag_ids: z.array(z.uuid()),
 });
 
 const readById = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 const readMany = z
@@ -27,16 +20,16 @@ const readMany = z
   .merge(sessionFilter);
 
 const update = z.object({
-  id: z.string().uuid(),
-  category_id: z.string().uuid().optional(),
+  category_id: z.uuid().optional(),
   description: z.string().nullish(),
-  startTime: z.coerce.date().optional(),
-  endTime: z.coerce.date().optional(),
-  tag_ids: z.array(z.string().uuid()).optional(),
+  endTime: z.coerce.date<Date>().optional(),
+  id: z.uuid(),
+  startTime: z.coerce.date<Date>().optional(),
+  tag_ids: z.array(z.uuid()).optional(),
 });
 
 const remove = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export type ScheduledSessionRequest = {
@@ -46,9 +39,9 @@ export type ScheduledSessionRequest = {
 };
 
 export const ScheduledSessionRequestSchema = {
-  readById,
   create,
+  readById,
   readMany,
-  update,
   remove,
+  update,
 } as const;

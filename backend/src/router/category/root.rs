@@ -4,14 +4,17 @@ use axum::{
     Router,
 };
 use thiserror::Error;
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
     dto::category::{
-        create_category::CreateCategoryDto, filter_category::FilterCategoryDto,
-        read_category::ReadCategoryDto, update_category::UpdateCategoryDto,
+        create_category::CreateCategoryDto,
+        filter_category::FilterCategoryDto,
+        read_category::{CategoryStatsDto, ReadCategoryDto, ReadCategoryWithSessionCountDto},
+        update_category::UpdateCategoryDto,
     },
-    router::{clerk::ClerkUser, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
 
 pub fn category_router() -> Router<AppState> {
@@ -23,20 +26,27 @@ pub fn category_router() -> Router<AppState> {
                 .patch(update_category_handler),
         )
         .route(
+            "/group-sessions",
+            get(get_categories_with_session_count_handler),
+        )
+        .route("/statistics", get(get_category_statistics_handler))
+        .route(
             "/{category_id}",
             delete(delete_category_handler).get(get_category_by_id_handler),
         )
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn create_category_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
     let res = state.category_service.upsert_category(payload, actor).await;
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(category_id = %category_id))]
 async fn delete_category_handler(
     State(state): State<AppState>,
     Path(category_id): Path<Uuid>,
@@ -45,10 +55,11 @@ async fn delete_category_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn filter_categories_handler(
     State(state): State<AppState>,
     Query(payload): Query<FilterCategoryDto>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Vec<ReadCategoryDto>> {
     let res = state
         .category_service
@@ -57,10 +68,11 @@ async fn filter_categories_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor, category_id = %category_id))]
 async fn get_category_by_id_handler(
     State(state): State<AppState>,
     Path(category_id): Path<Uuid>,
-    actor: ClerkUser,
+    actor: Actor,
 ) -> ApiResponse<Option<ReadCategoryDto>> {
     let res = state
         .category_service
@@ -76,12 +88,34 @@ async fn get_category_by_id_handler(
     ApiResponse::from_result(res)
 }
 
+#[instrument( skip(state), fields(user_id = %actor))]
 async fn update_category_handler(
     State(state): State<AppState>,
-    actor: ClerkUser,
+    actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
     let res = state.category_service.update_category(payload, actor).await;
+    ApiResponse::from_result(res)
+}
+
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn get_categories_with_session_count_handler(
+    State(state): State<AppState>,
+    actor: Actor,
+) -> ApiResponse<Vec<ReadCategoryWithSessionCountDto>> {
+    let res = state
+        .category_service
+        .get_categories_with_session_count(actor)
+        .await;
+    ApiResponse::from_result(res)
+}
+
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn get_category_statistics_handler(
+    State(state): State<AppState>,
+    actor: Actor,
+) -> ApiResponse<CategoryStatsDto> {
+    let res = state.category_service.get_category_statistics(actor).await;
     ApiResponse::from_result(res)
 }
 
