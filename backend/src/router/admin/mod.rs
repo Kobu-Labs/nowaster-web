@@ -1,3 +1,4 @@
+pub mod release;
 pub mod routes;
 
 use axum::{
