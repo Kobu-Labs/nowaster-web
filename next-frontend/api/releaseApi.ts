@@ -10,17 +10,26 @@ const ADMIN_BASE_URL = "/admin/releases";
 
 export const listPublicReleases = async () => {
   const { data } = await baseApi.get(BASE_URL);
-  return await parseResponseUnsafe(data, ReleaseResponseSchema.listPublicReleases);
+  return await parseResponseUnsafe(
+    data,
+    ReleaseResponseSchema.listPublicReleases,
+  );
 };
 
 export const getReleaseByVersion = async (version: string) => {
   const { data } = await baseApi.get(`${BASE_URL}/${version}`);
-  return await parseResponseUnsafe(data, ReleaseResponseSchema.getReleaseByVersion);
+  return await parseResponseUnsafe(
+    data,
+    ReleaseResponseSchema.getReleaseByVersion,
+  );
 };
 
 export const getLatestUnseenRelease = async () => {
-  const { data } = await baseApi.get(`${BASE_URL}/latest-unseen`);
-  return await parseResponseUnsafe(data, ReleaseResponseSchema.getLatestUnseenRelease);
+  const { data } = await baseApi.get(`${BASE_URL}/latest`);
+  return await parseResponseUnsafe(
+    data,
+    ReleaseResponseSchema.getLatestUnseenRelease,
+  );
 };
 
 export const listAllReleases = async () => {
@@ -42,7 +51,10 @@ export const updateRelease = async (
   releaseId: string,
   request: UpdateReleaseRequest,
 ) => {
-  const { data } = await baseApi.patch(`${ADMIN_BASE_URL}/${releaseId}`, request);
+  const { data } = await baseApi.patch(
+    `${ADMIN_BASE_URL}/${releaseId}`,
+    request,
+  );
   return await parseResponseUnsafe(data, ReleaseResponseSchema.updateRelease);
 };
 
@@ -57,7 +69,11 @@ export const publishRelease = async (releaseId: string) => {
 };
 
 export const unpublishRelease = async (releaseId: string) => {
-  const { data } = await baseApi.post(`${ADMIN_BASE_URL}/${releaseId}/unpublish`);
-  return await parseResponseUnsafe(data, ReleaseResponseSchema.unpublishRelease);
+  const { data } = await baseApi.post(
+    `${ADMIN_BASE_URL}/${releaseId}/unpublish`,
+  );
+  return await parseResponseUnsafe(
+    data,
+    ReleaseResponseSchema.unpublishRelease,
+  );
 };
-
