@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, UserCog } from "lucide-react";
+import { Megaphone, Settings, UserCog } from "lucide-react";
 
 import {
   Sidebar,
@@ -23,6 +23,12 @@ const adminNavItems = [
     icon: UserCog,
     title: "Impersonation",
     url: "/home/admin/impersonation",
+  },
+  {
+    description: "Manage product releases and announcements",
+    icon: Megaphone,
+    title: "Releases",
+    url: "/home/admin/releases",
   },
 ] as const;
 
