@@ -7,25 +7,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useLatestUnseenRelease = () => {
   return useQuery({
-    queryKey: ["releases", "latest-unseen"],
     queryFn: ReleaseApi.getLatestUnseenRelease,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    queryKey: ["releases", "latest-unseen"],
+    staleTime: Infinity,
   });
 };
 
 export const useAllReleases = () => {
   return useQuery({
-    queryKey: ["releases", "admin", "all"],
     queryFn: ReleaseApi.listAllReleases,
+    queryKey: ["releases", "admin", "all"],
   });
 };
 
 export const useRelease = (releaseId: string) => {
   return useQuery({
-    queryKey: ["releases", "admin", releaseId],
-    queryFn: () => ReleaseApi.getRelease(releaseId),
     enabled: !!releaseId,
+    queryFn: async () => await ReleaseApi.getRelease(releaseId),
+    queryKey: ["releases", "admin", releaseId],
   });
 };
 
@@ -35,9 +34,9 @@ export const useCreateRelease = () => {
   return useMutation({
     mutationFn: (request: CreateReleaseRequest) =>
       ReleaseApi.createRelease(request),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["releases", "admin"] });
-      queryClient.invalidateQueries({ queryKey: ["releases", "public"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["releases", "admin"] });
+      await queryClient.invalidateQueries({ queryKey: ["releases", "public"] });
     },
   });
 };
@@ -53,12 +52,14 @@ export const useUpdateRelease = () => {
       releaseId: string;
       request: UpdateReleaseRequest;
     }) => ReleaseApi.updateRelease(releaseId, request),
-    onSuccess: (_, { releaseId }) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (_, { releaseId }) => {
+      await queryClient.invalidateQueries({
         queryKey: ["releases", "admin", releaseId],
       });
-      queryClient.invalidateQueries({ queryKey: ["releases", "admin", "all"] });
-      queryClient.invalidateQueries({ queryKey: ["releases", "public"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["releases", "admin", "all"],
+      });
+      await queryClient.invalidateQueries({ queryKey: ["releases", "public"] });
     },
   });
 };
@@ -68,9 +69,9 @@ export const useDeleteRelease = () => {
 
   return useMutation({
     mutationFn: (releaseId: string) => ReleaseApi.deleteRelease(releaseId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["releases", "admin"] });
-      queryClient.invalidateQueries({ queryKey: ["releases", "public"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["releases", "admin"] });
+      await queryClient.invalidateQueries({ queryKey: ["releases", "public"] });
     },
   });
 };
@@ -80,8 +81,8 @@ export const usePublishRelease = () => {
 
   return useMutation({
     mutationFn: (releaseId: string) => ReleaseApi.publishRelease(releaseId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["releases"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["releases"] });
     },
   });
 };
@@ -91,8 +92,8 @@ export const useUnpublishRelease = () => {
 
   return useMutation({
     mutationFn: (releaseId: string) => ReleaseApi.unpublishRelease(releaseId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["releases"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["releases"] });
     },
   });
 };
