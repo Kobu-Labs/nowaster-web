@@ -1,6 +1,8 @@
 "use client";
 
 import { useLatestUnseenRelease } from "@/components/hooks/release/useReleases";
+import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
-import { Button } from "@/components/shadcn/button";
-import { Badge } from "@/components/shadcn/badge";
-import Link from "next/link";
-import { useEffect, useState, type FC } from "react";
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
+import { type FC, useEffect, useState } from "react";
 
 export const NewReleaseDialog: FC = () => {
   const { data, isLoading } = useLatestUnseenRelease();
@@ -21,7 +21,7 @@ export const NewReleaseDialog: FC = () => {
 
   useEffect(() => {
     // Show dialog if there's an unseen release
-    if (data && data.unseen) {
+    if (data?.unseen) {
       setOpen(true);
     }
   }, [data]);
@@ -31,19 +31,19 @@ export const NewReleaseDialog: FC = () => {
     setOpen(false);
   };
 
-  if (isLoading || !data || !data.unseen) {
+  if (isLoading || !data?.unseen) {
     return null;
   }
 
   const { release } = data;
 
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => !newOpen && handleClose()}>
+    <Dialog onOpenChange={(newOpen) => !newOpen && handleClose()} open={open}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <DialogTitle className="text-2xl">What's New</DialogTitle>
+            <DialogTitle className="text-2xl">What&apos;s New</DialogTitle>
           </div>
           <DialogDescription className="flex items-center gap-2">
             <span>{release.name}</span>
@@ -60,7 +60,7 @@ export const NewReleaseDialog: FC = () => {
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={handleClose}>
+          <Button onClick={handleClose} variant="outline">
             Dismiss
           </Button>
           <Link href={`/releases/${release.version}`} onClick={handleClose}>
