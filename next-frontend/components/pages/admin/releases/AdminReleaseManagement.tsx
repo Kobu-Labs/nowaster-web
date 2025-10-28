@@ -19,35 +19,73 @@ import { Edit, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { type FC, useState } from "react";
 import { CreateReleaseDialog } from "@/components/release/CreateReleaseDialog";
 import { EditReleaseDialog } from "@/components/release/EditReleaseDialog";
+import { useToast } from "@/components/shadcn/use-toast";
 
 export const AdminReleaseManagement: FC = () => {
   const { data: releases, isLoading } = useAllReleases();
   const publishRelease = usePublishRelease();
   const unpublishRelease = useUnpublishRelease();
   const deleteRelease = useDeleteRelease();
+  const { toast } = useToast();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingReleaseId, setEditingReleaseId] = useState<null | string>(null);
 
-  const handlePublish = async (releaseId: string) => {
+  const handlePublish = async (releaseId: string, releaseName: string) => {
     if (confirm("Are you sure you want to publish this release?")) {
-      await publishRelease.mutateAsync(releaseId);
+      try {
+        await publishRelease.mutateAsync(releaseId);
+        toast({
+          description: `${releaseName} is now live and visible to users.`,
+          title: "Release published",
+        });
+      } catch (error) {
+        toast({
+          description: error instanceof Error ? error.message : "Unknown error",
+          title: "Failed to publish release",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleUnpublish = async (releaseId: string) => {
+  const handleUnpublish = async (releaseId: string, releaseName: string) => {
     if (confirm("Are you sure you want to unpublish this release?")) {
-      await unpublishRelease.mutateAsync(releaseId);
+      try {
+        await unpublishRelease.mutateAsync(releaseId);
+        toast({
+          description: `${releaseName} has been hidden from users.`,
+          title: "Release unpublished",
+        });
+      } catch (error) {
+        toast({
+          description: error instanceof Error ? error.message : "Unknown error",
+          title: "Failed to unpublish release",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleDelete = async (releaseId: string) => {
+  const handleDelete = async (releaseId: string, releaseName: string) => {
     if (
       confirm(
         "Are you sure you want to delete this release? This action cannot be undone.",
       )
     ) {
-      await deleteRelease.mutateAsync(releaseId);
+      try {
+        await deleteRelease.mutateAsync(releaseId);
+        toast({
+          description: `${releaseName} has been permanently deleted.`,
+          title: "Release deleted",
+        });
+      } catch (error) {
+        toast({
+          description: error instanceof Error ? error.message : "Unknown error",
+          title: "Failed to delete release",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -99,7 +137,7 @@ export const AdminReleaseManagement: FC = () => {
                   {release.released
                     ? (
                         <Button
-                          onClick={() => handleUnpublish(release.id)}
+                          onClick={() => handleUnpublish(release.id, release.name)}
                           size="sm"
                           variant="outline"
                         >
@@ -108,7 +146,7 @@ export const AdminReleaseManagement: FC = () => {
                       )
                     : (
                         <Button
-                          onClick={() => handlePublish(release.id)}
+                          onClick={() => handlePublish(release.id, release.name)}
                           size="sm"
                           variant="outline"
                         >
@@ -117,7 +155,7 @@ export const AdminReleaseManagement: FC = () => {
                       )}
                   <Button
                     disabled={release.released}
-                    onClick={() => handleDelete(release.id)}
+                    onClick={() => handleDelete(release.id, release.name)}
                     size="sm"
                     variant="outline"
                   >
