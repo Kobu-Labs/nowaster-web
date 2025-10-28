@@ -6,7 +6,6 @@ import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -20,11 +19,12 @@ export const NewReleaseDialog: FC = () => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Show dialog if there's an unseen release
-    if (data?.unseen) {
+    const timer = setTimeout(() => {
       setOpen(true);
-    }
-  }, [data]);
+    }, 7000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleClose = () => {
     // Release is automatically marked as seen when latest-unseen is fetched
@@ -38,17 +38,21 @@ export const NewReleaseDialog: FC = () => {
   const { release } = data;
 
   return (
-    <Dialog onOpenChange={(newOpen) => !newOpen && handleClose()} open={open}>
+    <Dialog
+      modal={false}
+      onOpenChange={(newOpen) => !newOpen && handleClose()}
+      open={open}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-5 w-5 text-primary" />
             <DialogTitle className="text-2xl">What&apos;s New</DialogTitle>
           </div>
-          <DialogDescription className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{release.name}</span>
             <Badge variant="secondary">{release.version}</Badge>
-          </DialogDescription>
+          </div>
         </DialogHeader>
 
         <div className="py-4">
