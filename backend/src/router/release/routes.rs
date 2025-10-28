@@ -7,14 +7,14 @@ use axum::{
 use tracing::instrument;
 
 use crate::{
-    dto::release::ReadPublicReleaseDto,
+    dto::release::{LatestUnseenReleaseDto, ReadPublicReleaseDto},
     router::{clerk::OptionalActor, response::ApiResponse, root::AppState},
 };
 
 pub fn release_router() -> Router<AppState> {
     Router::new()
         .route("/", get(list_public_releases))
-        .route("/latest", get(get_latest_release))
+        .route("/latest", get(get_latest_release_unseen))
         .route("/{version}", get(get_release_by_version))
 }
 
@@ -56,21 +56,42 @@ async fn get_release_by_version(
 }
 
 #[instrument(skip(state))]
-async fn get_latest_release(
+async fn get_latest_release_unseen(
     State(state): State<AppState>,
     OptionalActor(actor): OptionalActor,
-) -> Result<Json<ApiResponse<ReadPublicReleaseDto>>, StatusCode> {
-    let latest = state
-        .release_service
-        .get_latest_released(actor.map(|a| a.user_id))
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to get latest release: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+) -> Result<Json<ApiResponse<LatestUnseenReleaseDto>>, StatusCode> {
+    let result = match actor {
+        Some(a) => {
+            // Authenticated user - check if unseen and mark as seen
+            state
+                .release_service
+                .get_latest_unseen_for_user(a.user_id)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to get latest unseen release: {}", e);
+                    StatusCode::INTERNAL_SERVER_ERROR
+                })?
+        }
+        None => {
+            // Unauthenticated user - just return latest release with unseen=false
+            let latest = state
+                .release_service
+                .get_latest_released(None)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to get latest release: {}", e);
+                    StatusCode::INTERNAL_SERVER_ERROR
+                })?;
 
-    match latest {
-        Some(r) => Ok(Json(ApiResponse::Success { data: r })),
+            latest.map(|release| LatestUnseenReleaseDto {
+                release,
+                unseen: false,
+            })
+        }
+    };
+
+    match result {
+        Some(dto) => Ok(Json(ApiResponse::Success { data: dto })),
         None => Err(StatusCode::NOT_FOUND),
     }
 }
