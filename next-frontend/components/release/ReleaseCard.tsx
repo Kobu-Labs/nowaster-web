@@ -2,14 +2,15 @@ import { ListPublicReleasesResponse } from "@/api/definitions/responses/release"
 import { Badge } from "@/components/shadcn/badge";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "@/components/shadcn/card";
 import { UserAvatar } from "@/components/visualizers/user/UserAvatar";
-import { Link, Calendar, Tag } from "lucide-react";
+import { Calendar, Tag } from "lucide-react";
+import Link from "next/link";
 import { FC } from "react";
 
 type ReleaseCardProps = {
@@ -25,7 +26,7 @@ export const ReleaseCard: FC<ReleaseCardProps> = ({ release }) => {
             <CardTitle className="text-2xl group-hover:text-primary transition-colors">
               {release.name}
             </CardTitle>
-            <Badge variant="outline" className="shrink-0">
+            <Badge className="shrink-0" variant="outline">
               {release.version}
             </Badge>
           </div>
@@ -35,17 +36,17 @@ export const ReleaseCard: FC<ReleaseCardProps> = ({ release }) => {
               <CardDescription className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
                 {new Date(release.released_at).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
                   day: "numeric",
+                  month: "long",
+                  year: "numeric",
                 })}
               </CardDescription>
 
               {release.released_by && (
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <UserAvatar
-                    username={release.released_by.username}
                     avatar_url={release.released_by.avatar_url}
+                    username={release.released_by.username}
                   />
                   <span className="text-sm">
                     {release.released_by.username}
@@ -68,7 +69,7 @@ export const ReleaseCard: FC<ReleaseCardProps> = ({ release }) => {
           <CardFooter>
             <div className="flex flex-wrap gap-2">
               {release.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
+                <Badge className="text-xs" key={tag} variant="secondary">
                   <Tag className="h-3 w-3 mr-1" />
                   {tag}
                 </Badge>
