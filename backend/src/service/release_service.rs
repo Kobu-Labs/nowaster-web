@@ -6,8 +6,8 @@ use uuid::Uuid;
 use crate::{
     config::database::Database,
     dto::release::{
-        CreateReleaseDto, ReadPublicReleaseDto, ReadReleaseDto, ReleaseListQueryDto,
-        UpdateReleaseDto,
+        CreateReleaseDto, LatestUnseenReleaseDto, ReadPublicReleaseDto, ReadReleaseDto,
+        ReleaseListQueryDto, UpdateReleaseDto,
     },
     repository::release::ReleaseRepository,
 };
@@ -100,6 +100,36 @@ impl ReleaseService {
                 }
 
                 Ok(Some(ReadPublicReleaseDto::from(r)))
+            }
+            None => Ok(None),
+        }
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn get_latest_unseen_for_user(
+        &self,
+        user_id: String,
+    ) -> Result<Option<LatestUnseenReleaseDto>> {
+        let latest = self.repository.get_latest_released().await?;
+
+        match latest {
+            Some(release) => {
+                let seen = self
+                    .repository
+                    .has_user_seen_release(release.id, user_id.clone())
+                    .await?;
+
+                let dto = LatestUnseenReleaseDto {
+                    release: ReadPublicReleaseDto::from(release.clone()),
+                    unseen: !seen,
+                };
+
+                // Mark as seen after checking (so dialog shows once, then never again)
+                if !seen {
+                    let _ = self.mark_release_seen(release.id, user_id).await;
+                }
+
+                Ok(Some(dto))
             }
             None => Ok(None),
         }

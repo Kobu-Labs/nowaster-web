@@ -328,6 +328,24 @@ impl ReleaseRepository {
     }
 
     #[instrument(err, skip(self))]
+    pub async fn has_user_seen_release(&self, release_id: Uuid, user_id: String) -> Result<bool> {
+        let result = sqlx::query!(
+            r#"
+                SELECT EXISTS(
+                    SELECT 1 FROM seen_release
+                    WHERE release_id = $1 AND user_id = $2
+                ) as "exists!"
+            "#,
+            release_id,
+            user_id
+        )
+        .fetch_one(self.db.get_pool())
+        .await?;
+
+        Ok(result.exists)
+    }
+
+    #[instrument(err, skip(self))]
     pub async fn mark_older_releases_seen(&self, release_id: Uuid, user_id: String) -> Result<u64> {
         // Mark all older released releases as seen
         let result = sqlx::query!(
