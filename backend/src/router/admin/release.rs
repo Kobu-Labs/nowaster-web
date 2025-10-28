@@ -106,7 +106,7 @@ async fn delete_release(
     State(state): State<AppState>,
     AdminUser(_admin): AdminUser,
     Path(release_id): Path<Uuid>,
-) -> Result<StatusCode, StatusCode> {
+) -> Result<Json<ApiResponse<()>>, StatusCode> {
     state
         .release_service
         .delete_release(release_id)
@@ -116,7 +116,7 @@ async fn delete_release(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(Json(ApiResponse::Success { data: () }))
 }
 
 #[instrument(skip(state))]
@@ -124,7 +124,7 @@ async fn publish_release(
     State(state): State<AppState>,
     AdminUser(admin): AdminUser,
     Path(release_id): Path<Uuid>,
-) -> Result<StatusCode, StatusCode> {
+) -> Result<Json<ApiResponse<()>>, StatusCode> {
     state
         .release_service
         .publish_release(release_id, admin.user_id)
@@ -134,7 +134,7 @@ async fn publish_release(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(Json(ApiResponse::Success { data: () }))
 }
 
 #[instrument(skip(state))]
@@ -142,7 +142,7 @@ async fn unpublish_release(
     State(state): State<AppState>,
     AdminUser(_admin): AdminUser,
     Path(release_id): Path<Uuid>,
-) -> Result<StatusCode, StatusCode> {
+) -> Result<Json<ApiResponse<()>>, StatusCode> {
     state
         .release_service
         .unpublish_release(release_id)
@@ -152,5 +152,5 @@ async fn unpublish_release(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(Json(ApiResponse::Success { data: () }))
 }

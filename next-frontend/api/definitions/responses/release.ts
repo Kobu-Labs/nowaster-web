@@ -15,7 +15,7 @@ export const ReleaseResponseSchema = {
   getReleaseByVersion: PublicReleaseSchema,
   listAllReleases: z.array(ReleaseSchema),
   listPublicReleases: z.array(PublicReleaseSchema),
-  markReleaseSeen: z.null(),
+  markReleaseSeen: z.undefined(),
   notifyUsersAboutRelease: z.array(z.string()),
   publishRelease: z.null(),
   unpublishRelease: z.null(),
