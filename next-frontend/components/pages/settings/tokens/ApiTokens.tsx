@@ -258,6 +258,10 @@ export const ApiTokens: FC = () => {
                             {formatDate(token.createdAt)}
                           </div>
                           <div>
+                            Usages:
+                            {token.usage_count}
+                          </div>
+                          <div>
                             Last used:
                             {formatDate(token.lastUsedAt)}
                           </div>
