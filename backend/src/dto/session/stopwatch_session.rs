@@ -21,6 +21,10 @@ pub struct CreateStopwatchSessionDto {
     pub description: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: DateTime<Local>,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Uuid>,
+    #[serde(rename = "taskId")]
+    pub task_id: Option<Uuid>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -33,6 +37,10 @@ pub struct ReadStopwatchSessionDto {
     #[serde(rename = "startTime")]
     pub start_time: DateTime<Local>,
     pub user: ReadUserDto,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Uuid>,
+    #[serde(rename = "taskId")]
+    pub task_id: Option<Uuid>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -43,4 +51,8 @@ pub struct UpdateStopwatchSessionDto {
     pub description: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: Option<DateTime<Local>>,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Option<Uuid>>,
+    #[serde(rename = "taskId")]
+    pub task_id: Option<Option<Uuid>>,
 }
