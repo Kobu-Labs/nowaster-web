@@ -45,6 +45,8 @@ pub struct FixedSession {
     pub user_id: String,
 
     pub template: Option<ReadTemplateShallowDto>,
+    pub project_id: Option<Uuid>,
+    pub task_id: Option<Uuid>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -57,6 +59,8 @@ pub struct StopwatchSession {
 
     pub start_time: DateTime<Local>,
     pub description: Option<String>,
+    pub project_id: Option<Uuid>,
+    pub task_id: Option<Uuid>,
 }
 
 impl From<StopwatchSession> for ReadStopwatchSessionDto {
@@ -73,6 +77,8 @@ impl From<StopwatchSession> for ReadStopwatchSessionDto {
             description: session.description,
             start_time: session.start_time,
             user: ReadUserDto::from(session.user),
+            project_id: session.project_id,
+            task_id: session.task_id,
         }
     }
 }
