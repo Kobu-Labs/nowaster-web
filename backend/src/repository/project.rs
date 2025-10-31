@@ -11,7 +11,7 @@ use crate::{
     dto::project::{
         create_project::CreateProjectDto,
         filter_project::FilterProjectDto,
-        read_project::{ProjectStatsDto, ReadProjectWithTaskCountDto},
+        read_project::{ProjectStatsDto, ReadProjectDetailsDto},
         update_project::UpdateProjectDto,
     },
     entity::project::Project,
@@ -43,10 +43,10 @@ pub trait ProjectRepositoryTrait {
     async fn delete_project(&self, id: Uuid, actor: Actor) -> Result<()>;
     async fn filter_projects(&self, filter: FilterProjectDto, actor: Actor)
         -> Result<Vec<Project>>;
-    async fn get_projects_with_task_count(
+    async fn get_projects_details(
         &self,
         actor: Actor,
-    ) -> Result<Vec<ReadProjectWithTaskCountDto>>;
+    ) -> Result<Vec<ReadProjectDetailsDto>>;
     async fn get_project_statistics(&self, actor: Actor) -> Result<ProjectStatsDto>;
     fn new(db: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadProjectRow) -> Project;
@@ -222,12 +222,12 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_projects_with_task_count(
+    async fn get_projects_details(
         &self,
         actor: Actor,
-    ) -> Result<Vec<ReadProjectWithTaskCountDto>> {
+    ) -> Result<Vec<ReadProjectDetailsDto>> {
         let rows = sqlx::query_as!(
-            ReadProjectWithTaskCountDto,
+            ReadProjectDetailsDto,
             r#"
                 SELECT
                     p.id,
