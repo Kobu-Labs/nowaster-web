@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const create = z.object({
   startTime: z.coerce.date<Date>(),
+  project_id: z.uuid().nullish(),
+  task_id: z.uuid().nullish(),
 });
 
 const update = z.object({
@@ -10,6 +12,8 @@ const update = z.object({
   id: z.uuid(),
   startTime: z.coerce.date<Date>().nullish(),
   tag_ids: z.array(z.string()).nullish(),
+  project_id: z.uuid().nullish(),
+  task_id: z.uuid().nullish(),
 });
 
 const remove = z.object({
