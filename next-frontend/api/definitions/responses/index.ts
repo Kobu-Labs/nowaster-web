@@ -5,3 +5,5 @@ export * from "@/api/definitions/responses/category";
 export * from "@/api/definitions/responses/scheduled-session";
 export * from "@/api/definitions/responses/statistics";
 export * from "@/api/definitions/responses/tag";
+export * from "@/api/definitions/responses/project";
+export * from "@/api/definitions/responses/task";
