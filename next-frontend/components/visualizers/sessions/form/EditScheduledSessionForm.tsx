@@ -19,26 +19,33 @@ import {
 } from "@/components/shadcn/form";
 import { isBefore } from "date-fns";
 import type { FC } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import type {
+  ProjectWithId,
   ScheduledSessionRequest,
   ScheduledSessionWithId,
+  TaskWithId,
 } from "@/api/definitions";
 import { ScheduledSessionWithIdSchema } from "@/api/definitions";
+import { useProjects } from "@/components/hooks/project/useProjects";
+import { useTasksByProject } from "@/components/hooks/project/useTasksByProject";
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
+import { Select, SelectTrigger, SelectValue } from "@/components/shadcn/select";
 import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
+import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
+import { ProjectPicker } from "@/components/visualizers/projects/ProjectPicker";
 import { DurationLabel } from "@/components/visualizers/sessions/form/ScheduledSessionCreationForm";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigDown } from "lucide-react";
-import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 
 type EditStopwatchSessionProps = {
   onCancel?: () => void;
@@ -48,6 +55,12 @@ type EditStopwatchSessionProps = {
 };
 
 export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
+  const [project, setProject] = useState<ProjectWithId | null>(null);
+  const [task, setTask] = useState<TaskWithId | null>(null);
+
+  const projects = useProjects();
+  const tasks = useTasksByProject(props.session.project_id ?? "");
+
   const form = useForm<ScheduledSessionWithId>({
     defaultValues: { ...props.session },
     resolver: zodResolver(ScheduledSessionWithIdSchema),
@@ -56,6 +69,26 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
   const updateSession = useUpdateSession("scheduled");
   const deleteSession = useDeleteScheduledSession();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+
+  useEffect(() => {
+    if (props.session.project_id && projects.data) {
+      const proj = projects.data.find((p) => p.id === props.session.project_id);
+      if (proj) {
+        setProject(proj);
+      }
+    }
+    if (props.session.task_id && tasks.data) {
+      const t = tasks.data.find((task) => task.id === props.session.task_id);
+      if (t) {
+        setTask(t);
+      }
+    }
+  }, [
+    props.session.project_id,
+    props.session.task_id,
+    projects.data,
+    tasks.data,
+  ]);
 
   async function onSubmit(values: ScheduledSessionWithId) {
     if (isBefore(values.endTime, values.startTime)) {
@@ -72,6 +105,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
       id: values.id,
       startTime: values.startTime,
       tag_ids: values.tags.map((tag) => tag.id),
+      project_id: project?.id,
+      task_id: task?.id,
     };
 
     await updateSession.mutateAsync(data, {
@@ -104,6 +139,44 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                 </FormItem>
               )}
             />
+
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Project (Optional)</FormLabel>
+              <FormControl>
+                <ProjectPicker
+                  onSelectProject={(proj: ProjectWithId | null) => {
+                    setProject(proj);
+                    if (!proj) {
+                      setTask(null);
+                    }
+                  }}
+                  selectedProject={project}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Task (Optional)</FormLabel>
+              <FormControl>
+                {!!project?.id ? (
+                  <TaskPicker
+                    onSelectTask={(t: TaskWithId | null) => {
+                      setTask(t);
+                    }}
+                    projectId={project.id }
+                    selectedTask={task}
+                  />
+                ) : (
+                  <Select disabled>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </Select>
+                )}
+              </FormControl>
+              <FormMessage />
+            </FormItem>
 
             <FormField
               control={form.control}
@@ -259,7 +332,8 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
                     setIsDeleteAlertOpen(false);
                   },
-                })}
+                })
+              }
             >
               Remove
             </AlertDialogAction>

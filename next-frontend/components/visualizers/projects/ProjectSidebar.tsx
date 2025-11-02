@@ -15,12 +15,9 @@ import {
 import { usePathname } from "next/navigation";
 import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
 import { Badge } from "@/components/shadcn/badge";
-import { Card } from "@/components/shadcn/card";
-import { ScrollArea } from "@/components/shadcn/scroll-area";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { cn } from "@/lib/utils";
 import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
 import { createContext, useContext, useState, type FC } from "react";
 import { useTasksByProject } from "@/components/hooks/project";
 import { Button } from "@/components/shadcn/button";
