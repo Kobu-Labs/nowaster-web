@@ -34,7 +34,7 @@ const deleteTask = z.object({
   id: z.string().uuid(),
 });
 
-const withSessionCount = z.object({
+const details = z.object({
   project_id: z.string().uuid().optional(),
 });
 
@@ -44,5 +44,5 @@ export const TaskRequestSchema = {
   readById,
   readMany,
   update,
-  withSessionCount,
+  details,
 };
