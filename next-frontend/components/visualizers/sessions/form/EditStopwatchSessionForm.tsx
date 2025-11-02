@@ -15,6 +15,7 @@ import {
   ScheduledSessionRequestSchema,
   TagWithIdSchema,
 } from "@/api/definitions";
+import type { ProjectWithId, TaskWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
@@ -34,6 +35,8 @@ import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOp
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { ProjectPicker } from "@/components/visualizers/projects/ProjectPicker";
+import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { differenceInSeconds, isAfter, isBefore } from "date-fns";
@@ -48,6 +51,8 @@ const updateSessionPrecursor = z.object({
   id: z.uuid(),
   startTime: z.coerce.date<Date>().nullish(),
   tags: z.array(TagWithIdSchema).nullish(),
+  project: z.object({ id: z.uuid() }).nullish(),
+  task: z.object({ id: z.uuid() }).nullish(),
 });
 
 const formatTimeDifference = (seconds: number) => {
@@ -77,6 +82,8 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       id: props.session.id,
       startTime: props.session.startTime,
       tags: props.session.tags ?? [],
+      project: props.session.projectId ? { id: props.session.projectId } : null,
+      task: props.session.taskId ? { id: props.session.taskId } : null,
     },
     resolver: zodResolver(updateSessionPrecursor),
   });
@@ -88,6 +95,8 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
     endTime,
     startTime: form.watch("startTime"),
     tag_ids: form.watch("tags")?.map((tag) => tag.id),
+    project_id: form.watch("project.id"),
+    task_id: form.watch("task.id"),
   }).data;
 
   const createSession = useCreateScheduledSession();
@@ -104,6 +113,8 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       id: values.id,
       startTime: values.startTime,
       tag_ids: values.tags?.map((tag) => tag.id),
+      project_id: values.project?.id,
+      task_id: values.task?.id,
     };
 
     if (props.onSubmit) {
@@ -132,6 +143,48 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                       mode="single"
                       onSelectCategory={field.onChange}
                       selectedCategory={field.value ?? null}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="project"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Project (Optional)</FormLabel>
+                  <FormControl>
+                    <ProjectPicker
+                      onSelectProject={(project: ProjectWithId | null) => {
+                        field.onChange(project);
+                        if (!project) {
+                          form.setValue("task", null);
+                        }
+                      }}
+                      selectedProject={field.value as ProjectWithId | null}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="task"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Task (Optional)</FormLabel>
+                  <FormControl>
+                    <TaskPicker
+                      onSelectTask={(task: TaskWithId | null) => {
+                        field.onChange(task);
+                      }}
+                      projectId={form.watch("project")?.id ?? null}
+                      selectedTask={field.value as TaskWithId | null}
                     />
                   </FormControl>
                   <FormMessage />
