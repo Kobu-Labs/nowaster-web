@@ -1,4 +1,4 @@
-import { CategoryApi, ScheduledSessionApi, StatisticsApi, TagApi, ProjectsApi, TasksApi } from "@/api";
+import { CategoryApi, ProjectsApi, ScheduledSessionApi, StatisticsApi, TagApi, TasksApi } from "@/api";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   createQueryKeys,
@@ -67,9 +67,9 @@ const projectKeys = createQueryKeys("projects", {
     queryFn: async () => await ProjectsApi.getProjectStatistics(),
     queryKey: ["stats"],
   },
-  tasksByProject: (project_id: string) => ({
-    queryFn: async () => await ProjectsApi.getTasksByProject({ project_id }),
-    queryKey: [project_id, "tasks"],
+  tasksByProject: (projectId: string) => ({
+    queryFn: async () => await ProjectsApi.getTasksByProject({ project_id: projectId }),
+    queryKey: ["tasksByProject", projectId],
   }),
 });
 
@@ -86,9 +86,9 @@ const taskKeys = createQueryKeys("tasks", {
     queryFn: async () => await TasksApi.getTasksWithSessionCount(),
     queryKey: ["withSessionCount"],
   },
-  withSessionCountByProject: (project_id: string) => ({
-    queryFn: async () => await TasksApi.getTasksWithSessionCount({ project_id }),
-    queryKey: ["withSessionCount", project_id],
+  withSessionCountByProject: (projectId: string) => ({
+    queryFn: async () => await TasksApi.getTasksWithSessionCount({ project_id: projectId }),
+    queryKey: ["withSessionCount", projectId],
   }),
   stats: {
     queryFn: async () => await TasksApi.getTaskStatistics(),

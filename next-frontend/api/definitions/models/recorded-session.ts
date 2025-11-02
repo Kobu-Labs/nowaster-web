@@ -10,7 +10,7 @@ export const StopwatchSessionSchema = z.object({
   startTime: z.coerce.date<Date>(),
   tags: z.array(TagWithIdSchema).nullable(),
   project_id: z.string().uuid().nullable().optional(),
-  task_id: z.string().uuid().nullable().optional(),
+  task_id: z.string().uuid().nullish(),
 });
 export const StopwatchSessionWithIdSchema = StopwatchSessionSchema.merge(HasID);
 

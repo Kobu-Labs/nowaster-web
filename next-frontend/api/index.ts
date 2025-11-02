@@ -5,7 +5,7 @@ export * as ScheduledSessionApi from "./scheduledSessionApi";
 export * as StatisticsApi from "./statisticsApi";
 export * as StopwatchApi from "./stopwatchApi";
 export * as TagApi from "./tagApi";
+export * as TasksApi from "./tasksApi";
 export * as SessionTemplateApi from "./templateApi";
 export * as UserApi from "./userApi";
 export * as ProjectsApi from "./projectsApi";
-export * as TasksApi from "./tasksApi";

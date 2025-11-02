@@ -22,7 +22,7 @@ use crate::{
         task::{TaskRepository, TaskRepositoryTrait},
         user::UserRepository,
     },
-    router::{project::root::project_router, task::root::task_router, user::root::protected_user_router},
+    router::user::root::protected_user_router,
     service::{
         auth_service::AuthService,
         category_service::CategoryService,
@@ -46,8 +46,8 @@ use crate::{
 use super::{
     admin::routes::admin_router, auth::auth_router, category::root::category_router,
     feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
-    release::routes::release_router, session::root::session_router,
-    statistics::root::statistics_router, tag::root::tag_router,
+    project::root::project_router, release::routes::release_router, session::root::session_router,
+    statistics::root::statistics_router, tag::root::tag_router, task::root::task_router,
 };
 
 use tracing::info_span;
@@ -99,6 +99,8 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
 
     let notification_service = NotificationService::new(&db);
     let release_service = ReleaseService::new(&db);
+    let project_service = ProjectService::new(project_repo);
+    let task_service = TaskService::new(task_repo);
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
@@ -132,8 +134,6 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         StopwatchSessionService::new(category_service.clone(), stopwatch_repo.clone());
     let session_template_service =
         SessionTemplateService::new(template_session_repo, session_repo.clone());
-    let project_service = ProjectService::new(project_repo);
-    let task_service = TaskService::new(task_repo);
 
     let state = AppState {
         config: config.clone(),

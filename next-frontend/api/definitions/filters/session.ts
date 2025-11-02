@@ -10,6 +10,8 @@ export const sessionFilter = z.object({
   tags: tagFilter,
   toEndTime: dateFilter,
   toStartTime: dateFilter,
+  project_id: z.string().uuid().nullish(),
+  task_id: z.string().uuid().nullish(),
 }).partial();
 
 export type SessionFilter = z.infer<typeof sessionFilter>;
