@@ -41,12 +41,13 @@ pub struct StopwatchFullRow {
     category_color: Option<String>,
     category_last_used_at: Option<DateTime<Utc>>,
 
+    pub task_id: Option<Uuid>,
+
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
     tag_color: Option<String>,
 
     project_id: Option<Uuid>,
-    task_id: Option<Uuid>,
 }
 
 impl StopwatchSessionRepository {
