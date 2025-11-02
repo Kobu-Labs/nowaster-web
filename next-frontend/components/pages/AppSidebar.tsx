@@ -3,6 +3,7 @@
 import {
   ChartPie,
   BookTemplate as FileTemplate,
+  Folders,
   History,
   Home,
   Plus,
@@ -69,6 +70,11 @@ const navItems = [
     icon: Rss,
     title: "Feed",
     url: "/home/feed",
+  },
+  {
+    icon: Folders,
+    title: "Projects",
+    url: "/home/projects",
   },
   {
     icon: FileTemplate,
