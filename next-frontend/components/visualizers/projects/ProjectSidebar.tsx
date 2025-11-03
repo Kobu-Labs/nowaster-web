@@ -18,7 +18,7 @@ import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
 import { Badge } from "@/components/shadcn/badge";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Search } from "lucide-react";
+import { CheckCircle2, Folders, Search } from "lucide-react";
 import { createContext, useContext, useMemo, useState, type FC } from "react";
 import { useTasksByProject } from "@/components/hooks/project";
 import { Button } from "@/components/shadcn/button";
@@ -134,13 +134,22 @@ const ProjectsSidebarContent: FC<
 
   return (
     <>
-      <SidebarHeader className="p-4">
-        <h2 className="font-semibold text-lg">All Projects</h2>
-        <p className="text-xs text-muted-foreground">{projects.length} total</p>
-      </SidebarHeader>
-
       <SidebarContent>
-        <SidebarGroup className="my-2">
+        <SidebarGroup>
+          <Link href={"/home/projects"} className="w-full">
+            <Button
+              asChild
+              variant="secondary"
+              className="w-full flex items-center justify-start gap-2 py-1 m-0"
+            >
+              <div>
+                <Folders className="size-4" />
+                Project Dashboard
+              </div>
+            </Button>
+          </Link>
+        </SidebarGroup>
+        <SidebarGroup>
           <SidebarGroupLabel>Projets</SidebarGroupLabel>
 
           <div className="relative">
