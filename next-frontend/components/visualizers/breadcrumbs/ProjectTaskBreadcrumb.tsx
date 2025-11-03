@@ -24,6 +24,8 @@ import { usePathname, useRouter } from "next/navigation";
 import type { FC } from "react";
 import { useMemo } from "react";
 import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
+import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
+import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 
 export const ProjectTaskBreadcrumb: FC = () => {
   const router = useRouter();
@@ -65,6 +67,11 @@ export const ProjectTaskBreadcrumb: FC = () => {
   const shortenTaskName = (name: string, maxLength = 25) => {
     if (name.length <= maxLength) return name;
     return name.substring(0, maxLength) + "...";
+  };
+
+  const prefetch = (projectId: string) => {
+    prefetchProjectTasks(projectId);
+    prefetchProjectDetails(projectId);
   };
 
   return (
@@ -109,6 +116,7 @@ export const ProjectTaskBreadcrumb: FC = () => {
                     {projectsQuery.data?.map((project) => (
                       <DropdownMenuItem
                         key={project.id}
+                        onMouseEnter={() => prefetch(project.id)}
                         onClick={() => handleProjectSelect(project)}
                         className="flex items-center gap-2"
                       >
