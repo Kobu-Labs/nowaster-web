@@ -39,7 +39,6 @@ pub trait TaskRepositoryTrait {
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Task>;
     async fn delete_task(&self, id: Uuid, actor: Actor) -> Result<()>;
     async fn filter_tasks(&self, filter: FilterTaskDto, actor: Actor) -> Result<Vec<Task>>;
-    async fn get_tasks_by_project(&self, project_id: Uuid, actor: Actor) -> Result<Vec<Task>>;
     async fn get_task_statistics(&self, actor: Actor) -> Result<TaskStatsDto>;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadTaskRow) -> Task;
@@ -136,20 +135,6 @@ impl TaskRepositoryTrait for TaskRepository {
             .await?;
 
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())
-    }
-
-    #[instrument(err, skip(self), fields(project_id = %project_id, actor_id = %actor))]
-    async fn get_tasks_by_project(&self, project_id: Uuid, actor: Actor) -> Result<Vec<Task>> {
-        self.filter_tasks(
-            FilterTaskDto {
-                id: None,
-                project_id: Some(project_id),
-                name: None,
-                completed: None,
-            },
-            actor,
-        )
-        .await
     }
 
     #[instrument(err, skip(self), fields(task_id = %id, actor_id = %actor))]
