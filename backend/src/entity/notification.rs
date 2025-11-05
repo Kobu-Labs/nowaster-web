@@ -26,6 +26,14 @@ pub enum NotificationTypeSql {
     #[sqlx(rename = "system:new_release")]
     #[serde(rename = "system:new_release")]
     SystemNewRelease,
+
+    #[sqlx(rename = "task:completed")]
+    #[serde(rename = "task:completed")]
+    TaskCompleted,
+
+    #[sqlx(rename = "project:completed")]
+    #[serde(rename = "project:completed")]
+    ProjectCompleted,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
@@ -69,6 +77,22 @@ pub struct SystemReleaseData {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TaskCompletedData {
+    pub task_id: Uuid,
+    pub task_name: String,
+    pub project_name: String,
+    pub total_hours: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ProjectCompletedData {
+    pub project_id: Uuid,
+    pub project_name: String,
+    pub total_tasks: i64,
+    pub total_hours: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(tag = "notification_type", content = "data", rename_all = "kebab-case")]
 pub enum NotificationType {
     #[serde(rename = "friend:new_request")]
@@ -82,6 +106,12 @@ pub enum NotificationType {
 
     #[serde(rename = "system:new_release")]
     SystemNewRelease(SystemReleaseData),
+
+    #[serde(rename = "task:completed")]
+    TaskCompleted(TaskCompletedData),
+
+    #[serde(rename = "project:completed")]
+    ProjectCompleted(ProjectCompletedData),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
