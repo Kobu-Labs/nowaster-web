@@ -1,10 +1,8 @@
 "use client";
 
 import type { ProjectWithId } from "@/api/definitions/models/project";
-import {
-  useProjectsWithTaskCount,
-  useProjectStats,
-} from "@/components/hooks/project";
+import { useProjectStats } from "@/components/hooks/project/useProjectStats";
+import { useProjectsWithTaskCount } from "@/components/hooks/project/useProjectsWithTaskCount";
 import {
   Card,
   CardContent,
@@ -14,12 +12,10 @@ import {
 } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import {
-  CreateProjectDialog,
-  EditProjectDialog,
-  ProjectCard,
-  ProjectStatsCards,
-} from "@/components/visualizers/projects";
+import { CreateProjectDialog } from "@/components/visualizers/projects/CreateProjectDialog";
+import { EditProjectDialog } from "@/components/visualizers/projects/EditProjectDialog";
+import { ProjectCard } from "@/components/visualizers/projects/ProjectCard";
+import { ProjectStatsCards } from "@/components/visualizers/projects/ProjectStatsCards";
 import { Search } from "lucide-react";
 import type { FC } from "react";
 import { useMemo, useState } from "react";
@@ -40,7 +36,7 @@ const ProjectsPage: FC = () => {
 
     const filtered = projectsQuery.data.filter((project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase())
-        || project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+      || project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     return filtered.sort((a, b) => {

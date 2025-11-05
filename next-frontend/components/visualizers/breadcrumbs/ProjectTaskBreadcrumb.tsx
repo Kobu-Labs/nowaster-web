@@ -1,5 +1,8 @@
 "use client";
 
+import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
+import { useProjectsWithTaskCount } from "@/components/hooks/project/useProjectsWithTaskCount";
+import { useTasksWithSessionCountByProject } from "@/components/hooks/task/useTasksWithSessionCountByProject";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,17 +18,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
-import { useProjectsWithTaskCount } from "@/components/hooks/project";
-import { useTasksWithSessionCountByProject } from "@/components/hooks/task";
+import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
+import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
+import { cn } from "@/lib/utils";
 import { CheckCircle2, ChevronDown, Circle, Folders } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import type { FC } from "react";
 import { useMemo } from "react";
-import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
-import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
-import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 
 export const ProjectTaskBreadcrumb: FC = () => {
   const router = useRouter();
@@ -41,17 +41,17 @@ export const ProjectTaskBreadcrumb: FC = () => {
 
     const projectsIndex = pathParts.indexOf("projects");
     if (projectsIndex === -1)
-      return { projectId: undefined, taskId: undefined };
+    { return { projectId: undefined, taskId: undefined }; }
 
     const projectId = pathParts[projectsIndex + 1];
     const tasksIndex = pathParts.indexOf("tasks");
-    const taskId = tasksIndex !== -1 ? pathParts[tasksIndex + 1] : undefined;
+    const taskId = tasksIndex === -1 ? undefined : pathParts[tasksIndex + 1];
 
     return { projectId, taskId };
   }, [pathname]);
 
   const projectsQuery = useProjectsWithTaskCount();
-  const tasksQuery = useTasksWithSessionCountByProject(projectId ?? "");
+  const tasksQuery = useTasksWithSessionCountByProject(projectId ?? null);
 
   const currentProject = projectsQuery.data?.find((p) => p.id === projectId);
   const currentTask = tasksQuery.data?.find((t) => t.id === taskId);
@@ -65,8 +65,8 @@ export const ProjectTaskBreadcrumb: FC = () => {
   };
 
   const shortenTaskName = (name: string, maxLength = 25) => {
-    if (name.length <= maxLength) return name;
-    return name.substring(0, maxLength) + "...";
+    if (name.length <= maxLength) { return name; }
+    return `${name.slice(0, Math.max(0, maxLength))}...`;
   };
 
   const prefetch = (projectId: string) => {
@@ -79,7 +79,7 @@ export const ProjectTaskBreadcrumb: FC = () => {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/home/projects" className="flex items-center gap-1.5">
+            <Link className="flex items-center gap-1.5" href="/home/projects">
               <Folders className="h-4 w-4" />
               Projects
             </Link>
@@ -90,66 +90,68 @@ export const ProjectTaskBreadcrumb: FC = () => {
           <>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              {currentProject ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                    <ProjectAvatar
-                      color={currentProject.color}
-                      imageUrl={currentProject.image_url}
-                      name={currentProject.name}
-                      size={16}
-                    />
-                    <span
-                      className={cn(
-                        currentProject.completed &&
-                          "line-through text-muted-foreground",
-                      )}
-                    >
-                      {currentProject.name}
-                    </span>
-                    {currentProject.completed && (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                    )}
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    {projectsQuery.data?.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onMouseEnter={() => prefetch(project.id)}
-                        onClick={() => handleProjectSelect(project)}
-                        className="flex items-center gap-2"
-                      >
+              {currentProject
+                ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                         <ProjectAvatar
-                          color={project.color}
-                          imageUrl={project.image_url}
-                          name={project.name}
-                          size={20}
+                          color={currentProject.color}
+                          imageUrl={currentProject.image_url}
+                          name={currentProject.name}
+                          size={16}
                         />
                         <span
                           className={cn(
-                            "flex-1",
-                            project.completed &&
-                              "line-through text-muted-foreground",
+                            currentProject.completed
+                            && "line-through text-muted-foreground",
                           )}
                         >
-                          {project.name}
+                          {currentProject.name}
                         </span>
-                        {project.completed && (
+                        {currentProject.completed && (
                           <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
                         )}
-                        {project.id === projectId && !project.completed && (
-                          <span className="text-xs text-muted-foreground">
-                            Current
-                          </span>
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <BreadcrumbPage>Loading...</BreadcrumbPage>
-              )}
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        {projectsQuery.data?.map((project) => (
+                          <DropdownMenuItem
+                            className="flex items-center gap-2"
+                            key={project.id}
+                            onClick={() => handleProjectSelect(project)}
+                            onMouseEnter={() => prefetch(project.id)}
+                          >
+                            <ProjectAvatar
+                              color={project.color}
+                              imageUrl={project.image_url}
+                              name={project.name}
+                              size={20}
+                            />
+                            <span
+                              className={cn(
+                                "flex-1",
+                                project.completed
+                                && "line-through text-muted-foreground",
+                              )}
+                            >
+                              {project.name}
+                            </span>
+                            {project.completed && (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                            )}
+                            {project.id === projectId && !project.completed && (
+                              <span className="text-xs text-muted-foreground">
+                                Current
+                              </span>
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )
+                : (
+                    <BreadcrumbPage>Loading...</BreadcrumbPage>
+                  )}
             </BreadcrumbItem>
           </>
         )}
@@ -160,15 +162,17 @@ export const ProjectTaskBreadcrumb: FC = () => {
             <BreadcrumbItem>
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                  {currentTask.completed ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                  ) : (
-                    <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                  )}
+                  {currentTask.completed
+                    ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                      )
+                    : (
+                        <Circle className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
                   <span
                     className={cn(
-                      currentTask.completed &&
-                        "line-through text-muted-foreground",
+                      currentTask.completed
+                      && "line-through text-muted-foreground",
                     )}
                   >
                     {shortenTaskName(currentTask.name)}
@@ -178,20 +182,22 @@ export const ProjectTaskBreadcrumb: FC = () => {
                 <DropdownMenuContent align="start">
                   {tasksQuery.data?.map((task) => (
                     <DropdownMenuItem
+                      className="flex items-center gap-2"
                       key={task.id}
                       onClick={() => handleTaskSelect(task.id)}
-                      className="flex items-center gap-2"
                     >
-                      {task.completed ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      ) : (
-                        <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                      )}
+                      {task.completed
+                        ? (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                          )
+                        : (
+                            <Circle className="h-3.5 w-3.5 text-muted-foreground" />
+                          )}
                       <span
                         className={cn(
                           "flex-1",
-                          task.completed &&
-                            "line-through text-muted-foreground",
+                          task.completed
+                          && "line-through text-muted-foreground",
                         )}
                       >
                         {task.name}

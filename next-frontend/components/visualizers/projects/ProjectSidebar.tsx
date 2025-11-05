@@ -1,5 +1,10 @@
 "use client";
 
+import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
+import { useTasksByProject } from "@/components/hooks/project/useTasksByProject";
+import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
+import { Input } from "@/components/shadcn/input";
 import {
   Sidebar,
   SidebarContent,
@@ -13,30 +18,25 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/shadcn/sidebar";
-import { usePathname } from "next/navigation";
-import type { ProjectWithTaskCount } from "@/api/definitions/models/project";
-import { Badge } from "@/components/shadcn/badge";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
+import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
+import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Folders, Search } from "lucide-react";
-import { createContext, useContext, useMemo, useState, type FC } from "react";
-import { useTasksByProject } from "@/components/hooks/project";
-import { Button } from "@/components/shadcn/button";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { Input } from "@/components/shadcn/input";
+import { usePathname } from "next/navigation";
+import { createContext, type FC, useContext, useMemo, useState } from "react";
 
 type ProjectSidebarProps = {
   projects: ProjectWithTaskCount[];
 };
 
 type SidebarContextType = {
-  project: ProjectWithTaskCount | null;
-  setProject: (val: ProjectWithTaskCount | null) => void;
+  project: null | ProjectWithTaskCount;
+  setProject: (val: null | ProjectWithTaskCount) => void;
 };
 
-export const SidebarContext = createContext<SidebarContextType | null>(null);
+export const SidebarContext = createContext<null | SidebarContextType>(null);
 
 export function useSidebarContext() {
   const context = useContext(SidebarContext);
@@ -47,14 +47,14 @@ export function useSidebarContext() {
 }
 
 export const ProjectSidebar: FC<ProjectSidebarProps> = ({ projects }) => {
-  const [selectedProject, setSelectedProject] =
-    useState<null | ProjectWithTaskCount>(null);
+  const [selectedProject, setSelectedProject]
+    = useState<null | ProjectWithTaskCount>(null);
 
   return (
     <SidebarContext.Provider
       value={{
-        setProject: setSelectedProject,
         project: selectedProject,
+        setProject: setSelectedProject,
       }}
     >
       <ProjectSidebarInner projects={projects} />
@@ -82,8 +82,8 @@ export const ProjectSidebarInner: FC<ProjectSidebarProps> = ({ projects }) => {
         >
           <div className="w-1/2 h-full shrink-0 flex flex-col">
             <ProjectsSidebarContent
-              projects={projects}
               onSelectProject={context.setProject}
+              projects={projects}
             />
           </div>
 
@@ -99,25 +99,10 @@ export const ProjectSidebarInner: FC<ProjectSidebarProps> = ({ projects }) => {
 };
 
 const ProjectsSidebarContent: FC<
-  ProjectSidebarProps & { onSelectProject: (val: ProjectWithTaskCount) => void }
-> = ({ projects, onSelectProject }) => {
+  { onSelectProject: (val: ProjectWithTaskCount) => void; } & ProjectSidebarProps
+> = ({ onSelectProject, projects }) => {
   const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const queryClient = useQueryClient();
-
-  const prefetchProjectTasks = (projectId: string) => {
-    queryClient.prefetchQuery({
-      ...queryKeys.tasks.byProject(projectId),
-      staleTime: 20_000,
-    });
-  };
-  const prefetchProjectDetails = (projectId: string) => {
-    queryClient.prefetchQuery({
-      ...queryKeys.projects.byId(projectId),
-      staleTime: 20_000,
-    });
-  };
 
   const prefetch = (projectId: string) => {
     prefetchProjectTasks(projectId);
@@ -136,11 +121,11 @@ const ProjectsSidebarContent: FC<
     <>
       <SidebarContent>
         <SidebarGroup>
-          <Link href={"/home/projects"} className="w-full">
+          <Link className="w-full" href="/home/projects">
             <Button
               asChild
-              variant="secondary"
               className="w-full flex items-center justify-start gap-2 py-1 m-0"
+              variant="secondary"
             >
               <div>
                 <Folders className="size-4" />
@@ -156,9 +141,9 @@ const ProjectsSidebarContent: FC<
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               className="pl-10"
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search projects..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
@@ -173,10 +158,10 @@ const ProjectsSidebarContent: FC<
                 >
                   <SidebarMenuItem>
                     <Button
-                      variant="secondary"
-                      className="w-full flex items-center justify-start  h-14"
                       asChild
+                      className="w-full flex items-center justify-start  h-14"
                       onClick={() => onSelectProject(project)}
+                      variant="secondary"
                     >
                       <div
                         className={cn(
@@ -201,7 +186,9 @@ const ProjectsSidebarContent: FC<
                           </div>
                           <div className="flex items-center gap-2 my-1">
                             <Badge className="text-xs" variant="outline">
-                              {project.taskCount} tasks
+                              {project.taskCount}
+                              {" "}
+                              tasks
                             </Badge>
                           </div>
                         </div>
@@ -219,7 +206,7 @@ const ProjectsSidebarContent: FC<
   );
 };
 
-const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
+const TasksSidebarContent: FC<{ projectId: string; }> = (props) => {
   const project = useTasksByProject(props.projectId);
   const context = useSidebarContext();
   if (!project.data || project.isPending) {
@@ -258,7 +245,8 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
                             <Badge
                               className="text-xs"
                               variant="outline"
-                            ></Badge>
+                            >
+                            </Badge>
                           </div>
                         </div>
                       </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useProjectById } from "@/components/hooks/project";
-import { useTaskById } from "@/components/hooks/task";
+import { useProjectById } from "@/components/hooks/project/useProjectById";
+import { useTaskById } from "@/components/hooks/task/useTaskById";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { useIsMobile } from "@/components/shadcn/use-mobile";
 import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
@@ -17,7 +17,6 @@ import { TaskDetailKpiCards } from "@/components/visualizers/tasks/TaskDetailKpi
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -25,7 +24,7 @@ import {
 import { use } from "react";
 
 export default function TaskDetailPage(props: {
-  params: Promise<{ id: string; taskId: string }>;
+  params: Promise<{ id: string; taskId: string; }>;
 }) {
   const { id: projectId, taskId } = use(props.params);
   const taskQuery = useTaskById(taskId);
@@ -96,7 +95,7 @@ export default function TaskDetailPage(props: {
 
   return (
     <div className="flex grow flex-col p-4 md:p-8 gap-4 md:gap-8">
-      <TaskDetailHeader task={taskQuery.data} project={projectQuery.data} />
+      <TaskDetailHeader project={projectQuery.data} task={taskQuery.data} />
 
       <TaskDetailKpiCards task={taskQuery.data} />
 
