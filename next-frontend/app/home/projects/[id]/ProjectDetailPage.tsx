@@ -1,8 +1,8 @@
 "use client";
 
 import type { TaskWithSessionCount } from "@/api/definitions/models/task";
-import { useProjectById } from "@/components/hooks/project";
-import { useTasksWithSessionCountByProject } from "@/components/hooks/task";
+import { useProjectById } from "@/components/hooks/project/useProjectById";
+import { useTasksWithSessionCountByProject } from "@/components/hooks/task/useTasksWithSessionCountByProject";
 import {
   Card,
   CardContent,
@@ -11,19 +11,18 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import {
-  EditProjectDialog,
-  ProjectDetailHeader,
-  ProjectDetailStatsCards,
-} from "@/components/visualizers/projects";
-import {
-  CreateTaskDialog,
-  EditTaskDialog,
-  TaskList,
-} from "@/components/visualizers/tasks";
+import { EditProjectDialog } from "@/components/visualizers/projects/EditProjectDialog";
+import { ProjectDetailHeader } from "@/components/visualizers/projects/ProjectDetailHeader";
+import { ProjectTasksKpiCard } from "@/components/visualizers/sessions/kpi/project/ProjectTasksKpiCard";
+import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
+import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
+import { CreateTaskDialog } from "@/components/visualizers/tasks/CreateTaskDialog";
+import { EditTaskDialog } from "@/components/visualizers/tasks/EditTaskDialog";
+import { TaskList } from "@/components/visualizers/tasks/TaskList";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { ListTodo } from "lucide-react";
 import type { FC } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type ProjectDetailPageProps = {
   projectId: string;
@@ -31,10 +30,29 @@ type ProjectDetailPageProps = {
 
 const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
   const [editingProject, setEditingProject] = useState(false);
-  const [editingTask, setEditingTask] = useState<null | TaskWithSessionCount>(null);
+  const [editingTask, setEditingTask] = useState<null | TaskWithSessionCount>(
+    null,
+  );
 
   const projectQuery = useProjectById(projectId);
   const tasksQuery = useTasksWithSessionCountByProject(projectId);
+
+  // Create filter for sessions associated with this project (via tasks)
+  const sessionFilter: SessionFilterPrecursor = useMemo(
+    () => ({
+      data: {
+        tasks: tasksQuery.data,
+      },
+      settings: {
+        tasks: {
+          id: {
+            mode: "all",
+          },
+        },
+      },
+    }),
+    [tasksQuery.data],
+  );
 
   if (projectQuery.isPending || tasksQuery.isPending) {
     return (
@@ -70,7 +88,6 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
   }
 
   if (tasksQuery.isError) {
-        console.log(tasksQuery.error)
     return (
       <div className="w-full p-6">
         <Card className="border-destructive">
@@ -88,15 +105,16 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
     );
   }
 
-  const project = projectQuery.data;
-  const tasks = tasksQuery.data || [];
-
   return (
     <div className="flex gap-6 w-full p-6">
       <div className="flex-1 space-y-6 min-w-0">
-        <ProjectDetailHeader project={project} />
+        <ProjectDetailHeader project={projectQuery.data} />
 
-        <ProjectDetailStatsCards tasks={tasks} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ProjectTasksKpiCard projectId={projectId} />
+          <TotalSessionTimeCard filter={sessionFilter} />
+          <SessionCountCard filter={sessionFilter} />
+        </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -109,7 +127,7 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
             <CreateTaskDialog projectId={projectId} />
           </div>
 
-          {tasks.length === 0 ? (
+          {tasksQuery.data.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
                 <div className="space-y-4">
@@ -119,7 +137,8 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
                   <div>
                     <h3 className="text-lg font-semibold">No tasks yet</h3>
                     <p className="text-muted-foreground">
-                      Create your first task to start tracking work on this project.
+                      Create your first task to start tracking work on this
+                      project.
                     </p>
                   </div>
                   <CreateTaskDialog projectId={projectId} />
@@ -129,8 +148,8 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
           ) : (
             <TaskList
               onEditTask={setEditingTask}
-              projectColor={project.color}
-              tasks={tasks}
+              projectColor={projectQuery.data.color}
+              tasks={tasksQuery.data}
             />
           )}
         </div>
@@ -138,7 +157,7 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
         <EditProjectDialog
           onOpenChange={(open) => !open && setEditingProject(false)}
           open={editingProject}
-          project={project}
+          project={projectQuery.data}
         />
 
         <EditTaskDialog
