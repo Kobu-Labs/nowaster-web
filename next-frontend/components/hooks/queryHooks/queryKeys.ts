@@ -67,9 +67,10 @@ const projectKeys = createQueryKeys("projects", {
     queryFn: async () => await ProjectsApi.getProjectStatistics(),
     queryKey: ["stats"],
   },
-  tasksByProject: (projectId: string) => ({
-    queryFn: async () => await ProjectsApi.getTasksByProject({ project_id: projectId }),
-    queryKey: ["tasksByProject", projectId],
+  tasks: (projectId: string) => ({
+    queryFn: async () =>
+      await ProjectsApi.getTasksByProject({ project_id: projectId }),
+    queryKey: [projectId, "tasks"],
   }),
 });
 
@@ -81,14 +82,6 @@ const taskKeys = createQueryKeys("tasks", {
   byId: (id: string) => ({
     queryFn: async () => await TasksApi.getTaskById({ id }),
     queryKey: [id],
-  }),
-  withSessionCount: {
-    queryFn: async () => await TasksApi.getTasksWithSessionCount(),
-    queryKey: ["withSessionCount"],
-  },
-  withSessionCountByProject: (projectId: string) => ({
-    queryFn: async () => await TasksApi.getTasksWithSessionCount({ project_id: projectId }),
-    queryKey: ["withSessionCount", projectId],
   }),
   stats: {
     queryFn: async () => await TasksApi.getTaskStatistics(),
