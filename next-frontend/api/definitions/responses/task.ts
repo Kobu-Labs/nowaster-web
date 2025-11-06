@@ -1,18 +1,17 @@
 import {
   TaskStatsSchema,
   TaskWithIdSchema,
-  TaskDetailsSchema,
 } from "@/api/definitions/models/task";
 import { z } from "zod";
 
 export const TaskResponseSchema = {
   create: TaskWithIdSchema,
   delete: z.null(),
+  details: z.array(TaskWithIdSchema),
   readById: TaskWithIdSchema,
   readMany: z.array(TaskWithIdSchema),
   statistics: TaskStatsSchema,
   update: TaskWithIdSchema,
-  details: z.array(TaskDetailsSchema),
 };
 
 export type TaskResponse = {
