@@ -7,19 +7,19 @@ export type ProjectRequest = {
 };
 
 const create = z.object({
-  name: z.string().trim().min(1),
+  color: z.string().trim().min(1),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
-  color: z.string().trim().min(1),
+  name: z.string().trim().min(1),
 });
 
 const update = z.object({
-  id: z.string().uuid(),
-  name: z.string().trim().min(1).optional(),
-  description: z.string().optional(),
-  imageUrl: z.string().optional(),
   color: z.string().trim().min(1).optional(),
   completed: z.boolean().optional(),
+  description: z.string().optional(),
+  id: z.string().uuid(),
+  imageUrl: z.string().optional(),
+  name: z.string().trim().min(1).optional(),
 });
 
 const readById = z.object({
@@ -27,9 +27,9 @@ const readById = z.object({
 });
 
 const readMany = z.object({
+  completed: z.boolean().optional(),
   id: z.string().uuid().optional(),
   name: z.string().optional(),
-  completed: z.boolean().optional(),
 });
 
 const deleteProject = z.object({

@@ -7,11 +7,11 @@ export const sessionFilter = z.object({
   categories: categoryFilter,
   fromEndTime: dateFilter,
   fromStartTime: dateFilter,
+  project_id: z.string().uuid().nullish(),
   tags: tagFilter,
+  task_id: z.string().uuid().nullish(),
   toEndTime: dateFilter,
   toStartTime: dateFilter,
-  project_id: z.string().uuid().nullish(),
-  task_id: z.string().uuid().nullish(),
 }).partial();
 
 export type SessionFilter = z.infer<typeof sessionFilter>;
