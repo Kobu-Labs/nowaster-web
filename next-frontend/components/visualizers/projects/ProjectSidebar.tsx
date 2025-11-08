@@ -25,47 +25,15 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, Folders, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, type FC, useContext, useMemo, useState } from "react";
+import { type FC, useMemo, useState } from "react";
 
 type ProjectSidebarProps = {
   projects: ProjectWithTaskCount[];
 };
 
-type SidebarContextType = {
-  project: null | ProjectWithTaskCount;
-  setProject: (val: null | ProjectWithTaskCount) => void;
-};
-
-export const SidebarContext = createContext<null | SidebarContextType>(null);
-
-export function useSidebarContext() {
-  const context = useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthContextProvider");
-  }
-  return context;
-}
-
 export const ProjectSidebar: FC<ProjectSidebarProps> = ({ projects }) => {
-  const [selectedProject, setSelectedProject]
-    = useState<null | ProjectWithTaskCount>(null);
-
-  return (
-    <SidebarContext.Provider
-      value={{
-        project: selectedProject,
-        setProject: setSelectedProject,
-      }}
-    >
-      <ProjectSidebarInner projects={projects} />
-    </SidebarContext.Provider>
-  );
-};
-
-export const ProjectSidebarInner: FC<ProjectSidebarProps> = ({ projects }) => {
-  const context = useSidebarContext();
-
-  const showingTasks = context.project !== null;
+  const [selectedProject, setSelectedProject] =
+    useState<null | ProjectWithTaskCount>(null);
 
   return (
     <Sidebar
