@@ -69,7 +69,7 @@ export const ProjectSidebarInner: FC<ProjectSidebarProps> = ({ projects }) => {
 
   return (
     <Sidebar
-      className="w-64 border-r bg-transparent overflow-hidden h-full"
+      className="w-64 border-r bg-transparent h-screen overflow-auto"
       collapsible="none"
       variant="sidebar"
     >
