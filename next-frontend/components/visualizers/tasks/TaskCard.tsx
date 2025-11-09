@@ -65,9 +65,9 @@ export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
       >
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="flex flex-col">
-                <h3 className="font-semibold text-lg">{task.name}</h3>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex flex-col min-w-0 flex-1">
+                <h3 className="font-semibold text-lg truncate">{task.name}</h3>
                 {task.completed && (
                   <Badge className="w-fit mt-1" variant="secondary">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
