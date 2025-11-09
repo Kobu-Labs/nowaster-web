@@ -42,6 +42,11 @@ pub struct CategoryFilter {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct TaskFilter {
+    pub id: Option<IdFilter>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct DateFilter {
     pub value: DateTime<Utc>,
 }
@@ -50,6 +55,7 @@ pub struct DateFilter {
 pub struct FilterSessionDto {
     pub tags: Option<TagFilter>,
     pub categories: Option<CategoryFilter>,
+    pub tasks: Option<TaskFilter>,
     #[serde(rename = "fromStartTime")]
     pub from_start_time: Option<DateFilter>,
     #[serde(rename = "toStartTime")]
@@ -60,17 +66,21 @@ pub struct FilterSessionDto {
     pub to_end_time: Option<DateFilter>,
     #[serde(rename = "templateId")]
     pub template_id: Option<Uuid>,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Uuid>,
 }
 
 impl FilterSessionDto {
     pub fn has_filters(&self) -> bool {
         self.tags.is_some()
             || self.categories.is_some()
+            || self.tasks.is_some()
             || self.from_start_time.is_some()
             || self.to_start_time.is_some()
             || self.from_end_time.is_some()
             || self.to_end_time.is_some()
             || self.template_id.is_some()
+            || self.project_id.is_some()
     }
 
     pub fn is_empty(&self) -> bool {

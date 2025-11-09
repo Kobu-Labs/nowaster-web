@@ -457,6 +457,35 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 }
             }
         }
+
+        if let Some(task_filter) = dto.tasks {
+            if let Some(id_filter) = task_filter.id {
+                match id_filter.mode {
+                    Mode::All => {
+                        sessions.retain(|session| {
+                            session.task_id.is_some()
+                                && id_filter.value.contains(&session.task_id.unwrap())
+                        });
+                    }
+                    Mode::Some => {
+                        sessions.retain(|session| {
+                            session.task_id.is_some()
+                                && id_filter
+                                    .value
+                                    .iter()
+                                    .any(|id| session.task_id.unwrap().eq(id))
+                        });
+                    }
+                }
+            }
+        }
+
+        if let Some(project_id) = dto.project_id {
+            sessions.retain(|session| {
+                session.project_id.is_some() && session.project_id.unwrap().eq(&project_id)
+            });
+        }
+
         Ok(sessions)
     }
 
