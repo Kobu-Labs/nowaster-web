@@ -13,7 +13,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/shadcn/sidebar";
@@ -21,7 +20,13 @@ import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, ChevronLeft, Folders, Search } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  Circle,
+  Folders,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type FC, useMemo, useState } from "react";
@@ -188,29 +193,40 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
           <SidebarMenu>
             {tasks.data.map((task) => (
               <SidebarMenuItem key={task.name}>
-                <SidebarMenuButton asChild>
-                  <div key={task.id}>
+                <Button
+                  asChild
+                  className="w-full flex items-center justify-start "
+                  variant="outline"
+                >
+                  <div key={task.id} className="min-w-0 w-full">
                     <div
                       className={cn(
-                        "flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer",
+                        "flex items-center gap-2 py-3 rounded-lg hover:bg-accent transition-colors cursor-pointer min-w-0 w-full",
                       )}
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium truncate">
-                            {task.name}
-                          </p>
-                          {task.completed && (
-                            <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className="text-xs" variant="outline"></Badge>
-                        </div>
-                      </div>
+                      {task.completed ? (
+                        <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <Circle className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      )}
+                      <span
+                        className={cn(
+                          "text-sm font-medium truncate min-w-0 flex-1",
+                          task.completed &&
+                            "line-through text-muted-foreground",
+                        )}
+                      >
+                        {task.name}
+                      </span>
+                      <Badge
+                        className="text-xs flex-shrink-0"
+                        variant="outline"
+                      >
+                        {task.sessionCount}
+                      </Badge>
                     </div>
                   </div>
-                </SidebarMenuButton>
+                </Button>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
