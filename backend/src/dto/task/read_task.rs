@@ -14,6 +14,7 @@ pub struct ReadTaskDetailsDto {
     pub created_at: DateTime<Local>,
     pub updated_at: DateTime<Local>,
 
+    #[serde(rename = "sessionCount")]
     pub session_count: i64,
 }
 
