@@ -82,9 +82,9 @@ const NoActiveSession: FC = () => {
             loading={createSession.isPending}
             onClick={() => {
               createSession.mutate({
+                projectId: undefined,
                 startTime: new Date(),
-                project_id: undefined,
-                task_id: undefined,
+                taskId: undefined,
               });
             }}
             size="sm"
