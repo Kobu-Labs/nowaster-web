@@ -4,6 +4,18 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::entity::task::Task;
+#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
+pub struct ReadTaskDetailsDto {
+    pub id: Uuid,
+    pub project_id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub completed: bool,
+    pub created_at: DateTime<Local>,
+    pub updated_at: DateTime<Local>,
+
+    pub session_count: i64,
+}
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
 pub struct ReadTaskDto {

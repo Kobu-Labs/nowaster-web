@@ -9,7 +9,9 @@ use uuid::Uuid;
 use crate::{
     config::database::{Database, DatabaseTrait},
     dto::task::{
-        create_task::CreateTaskDto, filter_task::FilterTaskDto, read_task::TaskStatsDto,
+        create_task::CreateTaskDto,
+        filter_task::FilterTaskDto,
+        read_task::{ReadTaskDetailsDto, TaskStatsDto},
         update_task::UpdateTaskDto,
     },
     entity::task::Task,
@@ -40,6 +42,11 @@ pub trait TaskRepositoryTrait {
     async fn delete_task(&self, id: Uuid, actor: Actor) -> Result<()>;
     async fn filter_tasks(&self, filter: FilterTaskDto, actor: Actor) -> Result<Vec<Task>>;
     async fn get_task_statistics(&self, actor: Actor) -> Result<TaskStatsDto>;
+    async fn get_tasks_details_by_ids(
+        &self,
+        task_ids: Vec<Uuid>,
+        actor: Actor,
+    ) -> Result<Vec<ReadTaskDetailsDto>>;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadTaskRow) -> Task;
 }
@@ -229,5 +236,42 @@ impl TaskRepositoryTrait for TaskRepository {
         .await?;
 
         Ok(stats)
+    }
+
+    #[instrument(err, skip(self, task_ids), fields(actor_id = %actor, task_count = task_ids.len()))]
+    async fn get_tasks_details_by_ids(
+        &self,
+        task_ids: Vec<Uuid>,
+        actor: Actor,
+    ) -> Result<Vec<ReadTaskDetailsDto>> {
+        if task_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let rows = sqlx::query_as!(
+            ReadTaskDetailsDto,
+            r#"
+                SELECT
+                    t.id,
+                    t.project_id,
+                    t.name,
+                    t.description,
+                    t.completed,
+                    t.created_at,
+                    t.updated_at,
+                    COUNT(s.id) as "session_count!"
+                FROM task t
+                LEFT JOIN session s ON s.task_id = t.id
+                WHERE t.id = ANY($1) AND t.user_id = $2
+                GROUP BY t.id, t.project_id, t.name, t.description, t.completed, t.user_id, t.created_at, t.updated_at
+                ORDER BY t.completed ASC, t.updated_at DESC
+            "#,
+            &task_ids,
+            actor.user_id
+        )
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        Ok(rows)
     }
 }

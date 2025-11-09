@@ -6,7 +6,7 @@ use crate::{
     dto::task::{
         create_task::CreateTaskDto,
         filter_task::FilterTaskDto,
-        read_task::{ReadTaskDto, TaskStatsDto},
+        read_task::{ReadTaskDetailsDto, ReadTaskDto, TaskStatsDto},
         update_task::UpdateTaskDto,
     },
     entity::task::Task,
@@ -51,8 +51,8 @@ impl TaskService {
         &self,
         project_id: Uuid,
         actor: Actor,
-    ) -> Result<Vec<ReadTaskDto>> {
-        let res = self
+    ) -> Result<Vec<ReadTaskDetailsDto>> {
+        let project_tasks = self
             .repo
             .filter_tasks(
                 FilterTaskDto {
@@ -61,15 +61,36 @@ impl TaskService {
                     name: None,
                     completed: None,
                 },
-                actor,
+                actor.clone(),
             )
             .await?;
-        Ok(res.into_iter().map(ReadTaskDto::from).collect())
+
+        let task_ids: Vec<Uuid> = project_tasks.iter().map(|task| task.id).collect();
+        self.repo
+            .get_tasks_details_by_ids(task_ids, actor.clone())
+            .await
     }
 
     #[instrument(err, skip(self), fields(task_id = %task_id, actor = %actor))]
     pub async fn get_by_id(&self, task_id: Uuid, actor: Actor) -> Result<Task> {
-        self.repo.find_by_id(task_id, actor).await
+        let result = self
+            .repo
+            .filter_tasks(
+                FilterTaskDto {
+                    id: Some(task_id),
+                    project_id: None,
+                    name: None,
+                    completed: None,
+                },
+                actor,
+            )
+            .await?;
+
+        if let Some(task) = result.first() {
+            return Ok(task.clone());
+        }
+
+        Err(anyhow::anyhow!("Task not found"))
     }
 
     #[instrument(err, skip(self), fields(task_id = %dto.id, actor = %actor))]
@@ -86,7 +107,7 @@ impl TaskService {
         let res = self.repo.update(dto, actor.clone()).await?;
 
         // If task was just completed, trigger notification
-        // TODO: send notification
+        // TODO: these are ment to be feed events
         if !was_completed && is_now_completed {
             // This will be implemented when we add notification service integration
             // For now, we'll just log it
