@@ -8,11 +8,14 @@ use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
-    dto::project::{
-        create_project::CreateProjectDto,
-        filter_project::FilterProjectDto,
-        read_project::{ProjectStatsDto, ReadProjectDetailsDto, ReadProjectDto},
-        update_project::UpdateProjectDto,
+    dto::{
+        project::{
+            create_project::CreateProjectDto,
+            filter_project::FilterProjectDto,
+            read_project::{ProjectStatsDto, ReadProjectDetailsDto, ReadProjectDto},
+            update_project::UpdateProjectDto,
+        },
+        task::read_task::ReadTaskDetailsDto,
     },
     router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
@@ -114,7 +117,7 @@ async fn get_tasks_by_project_handler(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     actor: Actor,
-) -> ApiResponse<Vec<crate::dto::task::read_task::ReadTaskDto>> {
+) -> ApiResponse<Vec<ReadTaskDetailsDto>> {
     let res = state
         .task_service
         .get_tasks_by_project(project_id, actor)
