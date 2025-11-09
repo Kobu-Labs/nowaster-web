@@ -132,6 +132,14 @@ export const translateFilterPrecursor = (
     };
   }
 
+  if (data.tasks && data.tasks.length > 0) {
+    filter.tasks = filter.tasks ?? {};
+    filter.tasks.id = {
+      mode: precursor.settings.tasks?.id?.mode ?? "all",
+      value: data.tasks.map((task) => task.id),
+    };
+  }
+
   return filter;
 };
 
