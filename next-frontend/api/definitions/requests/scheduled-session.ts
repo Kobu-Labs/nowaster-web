@@ -5,10 +5,10 @@ const create = z.object({
   category_id: z.uuid(),
   description: z.string().nullable(),
   endTime: z.coerce.date<Date>(),
-  project_id: z.uuid().nullish(),
+  projectId: z.uuid().nullish(),
   startTime: z.coerce.date<Date>(),
   tag_ids: z.array(z.uuid()),
-  task_id: z.uuid().nullish(),
+  taskId: z.uuid().nullish(),
 });
 
 const readById = z.object({
@@ -26,10 +26,10 @@ const update = z.object({
   description: z.string().nullish(),
   endTime: z.coerce.date<Date>().optional(),
   id: z.uuid(),
-  project_id: z.uuid().nullish(),
+  projectId: z.uuid().nullish(),
   startTime: z.coerce.date<Date>().optional(),
   tag_ids: z.array(z.uuid()).optional(),
-  task_id: z.uuid().nullish(),
+  taskId: z.uuid().nullish(),
 });
 
 const remove = z.object({
