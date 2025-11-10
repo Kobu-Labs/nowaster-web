@@ -231,7 +231,7 @@ export const ChartFilter: FC = () => {
               </Label>
               <ProjectPicker
                 onSelectProject={onSelectProject}
-                selectedProject={filter.data.project ?? null}
+                selectedProjectId={filter.data.project?.id ?? null}
               />
             </div>
 
