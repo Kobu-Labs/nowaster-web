@@ -13,10 +13,12 @@ export type ProjectPickerUiProviderProps = {
   availableProjects: ProjectWithId[];
   onSelectProject: (project: null | ProjectWithId) => void;
   placeholder?: string;
-  selectedProject: null | ProjectWithId;
+  selectedProjectId: string | null;
 };
 
-export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (props) => {
+export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (
+  props,
+) => {
   const onValueChange = (val: string) => {
     if (val === "none") {
       props.onSelectProject(null);
@@ -29,7 +31,7 @@ export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (props)
   return (
     <Select
       onValueChange={onValueChange}
-      value={props.selectedProject?.id ?? "none"}
+      value={props.selectedProjectId ?? "none"}
     >
       <SelectTrigger>
         <SelectValue placeholder={props.placeholder ?? "Select a project"} />
