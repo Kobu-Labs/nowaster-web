@@ -5,7 +5,9 @@ use validator::Validate;
 
 use crate::{
     dto::{
-        category::read_category::ReadCategoryDto, session::template::ReadTemplateShallowDto,
+        category::read_category::ReadCategoryDto,
+        serde_utils::deserialize_optional_field,
+        session::template::ReadTemplateShallowDto,
         tag::read_tag::ReadTagDto,
     },
     entity::session::{FixedSession, SessionType},
@@ -93,9 +95,17 @@ pub struct UpdateFixedSessionDto {
     pub start_time: Option<DateTime<Local>>,
     #[serde(rename = "endTime")]
     pub end_time: Option<DateTime<Local>>,
-    #[serde(rename = "projectId")]
+    #[serde(
+        rename = "projectId",
+        default,
+        deserialize_with = "deserialize_optional_field"
+    )]
     pub project_id: Option<Option<Uuid>>,
-    #[serde(rename = "taskId")]
+    #[serde(
+        rename = "taskId",
+        default,
+        deserialize_with = "deserialize_optional_field"
+    )]
     pub task_id: Option<Option<Uuid>>,
 }
 

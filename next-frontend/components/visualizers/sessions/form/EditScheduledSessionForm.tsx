@@ -1,4 +1,5 @@
 "use client";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,24 +20,19 @@ import {
 } from "@/components/shadcn/form";
 import { isBefore } from "date-fns";
 import type { FC } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import type {
-  ProjectWithId,
   ScheduledSessionRequest,
   ScheduledSessionWithId,
-  TaskWithId,
 } from "@/api/definitions";
-import { ScheduledSessionWithIdSchema } from "@/api/definitions";
-import { useProjects } from "@/components/hooks/project/useProjects";
-import { useTasksByProject } from "@/components/hooks/project/useTasksByProject";
+import { CategoryWithIdSchema } from "@/api/definitions";
 import { useDeleteScheduledSession } from "@/components/hooks/session/fixed/useDeleteSession";
 import { useUpdateSession } from "@/components/hooks/session/useUpdateSession";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
-import { Select, SelectTrigger, SelectValue } from "@/components/shadcn/select";
 import { dateQuickOptions } from "@/components/ui-providers/date-pickers/QuickOptions";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { DateTimePicker } from "@/components/visualizers/DateTimePicker";
@@ -46,6 +42,7 @@ import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigDown } from "lucide-react";
+import z from "zod";
 
 type EditStopwatchSessionProps = {
   onCancel?: () => void;
@@ -54,43 +51,34 @@ type EditStopwatchSessionProps = {
   session: ScheduledSessionWithId;
 };
 
+const editSessionPrecursor = z.object({
+  id: z.string(),
+  category: CategoryWithIdSchema,
+  description: z.string().nullable(),
+  endTime: z.coerce.date<Date>(),
+  projectId: z.string().nullish(),
+  startTime: z.coerce.date<Date>(),
+  tags: z.array(
+    z.object({
+      id: z.uuid(),
+    }),
+  ),
+  taskId: z.string().nullish(),
+});
+
+type EditSessionPrecursor = z.infer<typeof editSessionPrecursor>;
+
 export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
-  const [project, setProject] = useState<ProjectWithId | null>(null);
-  const [task, setTask] = useState<TaskWithId | null>(null);
-
-  const projects = useProjects();
-  const tasks = useTasksByProject(props.session.project_id ?? "");
-
-  const form = useForm<ScheduledSessionWithId>({
+  const form = useForm<EditSessionPrecursor>({
     defaultValues: { ...props.session },
-    resolver: zodResolver(ScheduledSessionWithIdSchema),
+    resolver: zodResolver(editSessionPrecursor),
   });
 
   const updateSession = useUpdateSession("scheduled");
   const deleteSession = useDeleteScheduledSession();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
-  useEffect(() => {
-    if (props.session.project_id && projects.data) {
-      const proj = projects.data.find((p) => p.id === props.session.project_id);
-      if (proj) {
-        setProject(proj);
-      }
-    }
-    if (props.session.task_id && tasks.data) {
-      const t = tasks.data.find((task) => task.id === props.session.task_id);
-      if (t) {
-        setTask(t);
-      }
-    }
-  }, [
-    props.session.project_id,
-    props.session.task_id,
-    projects.data,
-    tasks.data,
-  ]);
-
-  async function onSubmit(values: ScheduledSessionWithId) {
+  async function onSubmit(values: EditSessionPrecursor) {
     if (isBefore(values.endTime, values.startTime)) {
       form.setError("startTime", {
         message: "Start time must be before end time",
@@ -103,10 +91,10 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
       description: values.description,
       endTime: values.endTime,
       id: values.id,
+      projectId: values.projectId,
       startTime: values.startTime,
       tag_ids: values.tags.map((tag) => tag.id),
-      project_id: project?.id,
-      task_id: task?.id,
+      taskId: values.taskId,
     };
 
     await updateSession.mutateAsync(data, {
@@ -131,7 +119,13 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                   <FormControl>
                     <CategoryPicker
                       mode="single"
-                      onSelectCategory={field.onChange}
+                      onSelectCategory={(cat) => {
+                        if (cat.id === field.value?.id) {
+                          form.resetField("category");
+                        } else {
+                          field.onChange(cat);
+                        }
+                      }}
                       selectedCategory={field.value ?? null}
                     />
                   </FormControl>
@@ -140,43 +134,60 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
               )}
             />
 
-            <FormItem className="flex flex-col gap-2">
-              <FormLabel>Project (Optional)</FormLabel>
-              <FormControl>
-                <ProjectPicker
-                  onSelectProject={(proj: ProjectWithId | null) => {
-                    setProject(proj);
-                    if (!proj) {
-                      setTask(null);
-                    }
-                  }}
-                  selectedProject={project}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-
-            <FormItem className="flex flex-col gap-2">
-              <FormLabel>Task (Optional)</FormLabel>
-              <FormControl>
-                {!!project?.id ? (
-                  <TaskPicker
-                    onSelectTask={(t: TaskWithId | null) => {
-                      setTask(t);
-                    }}
-                    projectId={project.id }
-                    selectedTask={task}
-                  />
-                ) : (
-                  <Select disabled>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </Select>
+            <div className="flex flex-col gap-4 md:flex-row md:items-start">
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2 flex-1">
+                    <FormLabel>Project (Optional)</FormLabel>
+                    <FormControl>
+                      <ProjectPicker
+                        onSelectProject={(project) => {
+                          field.onChange(project?.id);
+                          // deselected project or switched to a different one
+                          if (!project || project.id !== field.value) {
+                            form.setValue("taskId", null);
+                          }
+                        }}
+                        selectedProjectId={field.value ?? null}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              />
+              {form.watch("projectId") ? (
+                <FormField
+                  control={form.control}
+                  name="taskId"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2 flex-1">
+                      <FormLabel>Task (Optional)</FormLabel>
+                      <FormControl>
+                        <TaskPicker
+                          onSelectTask={(task) => {
+                            field.onChange(task?.id);
+                          }}
+                          projectId={form.watch("projectId") ?? null}
+                          selectedTaskId={field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormItem className="flex flex-col gap-2 flex-1">
+                  <FormLabel>Task (Optional)</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
+                      Select a project first
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            </div>
 
             <FormField
               control={form.control}
@@ -270,14 +281,6 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                       onNewTagsSelected={(tags) => {
                         field.onChange(tags);
                       }}
-                      selectedTags={
-                        field.value?.map((t) => ({
-                          ...t,
-                          allowedCategories: [],
-                          last_used_at: new Date(),
-                          usages: 0,
-                        })) ?? []
-                      }
                     />
                   </FormControl>
                   <FormMessage />

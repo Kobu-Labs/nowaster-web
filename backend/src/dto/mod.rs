@@ -3,6 +3,7 @@ pub mod feed;
 pub mod notification;
 pub mod project;
 pub mod release;
+pub mod serde_utils;
 pub mod session;
 pub mod statistics;
 pub mod tag;
