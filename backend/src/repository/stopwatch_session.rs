@@ -236,15 +236,19 @@ impl StopwatchSessionRepository {
                     description = COALESCE($1, s.description),
                     start_time = COALESCE($2, s.start_time),
                     category_id = COALESCE($3, s.category_id),
-                    project_id = COALESCE($4, s.project_id),
-                    task_id = COALESCE($5, s.task_id)
-                WHERE s.id = $6
+                    project_id = CASE WHEN $4 THEN $5 ELSE s.project_id END,
+                    task_id = CASE WHEN $6 THEN $7 ELSE s.task_id END
+                WHERE s.id = $8
             "#,
         )
         .bind(dto.description)
         .bind(dto.start_time)
         .bind(dto.category_id)
+        // following is to distinguish if the field should not be updated,
+        // or be set to NULL, hence the 'CASE WHEN...' above
+        .bind(dto.project_id.is_some())
         .bind(dto.project_id.flatten())
+        .bind(dto.task_id.is_some())
         .bind(dto.task_id.flatten())
         .bind(dto.id)
         .execute(tx.as_mut())

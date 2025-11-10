@@ -561,6 +561,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         actor: Actor,
     ) -> Result<Self::SessionType> {
         let mut tx = self.db_conn.get_pool().begin().await?;
+        dbg!(&dto.project_id);
         sqlx::query(
             r#"
                 UPDATE "session" s SET
@@ -568,16 +569,20 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                     start_time = COALESCE($2, s.start_time),
                     end_time = COALESCE($3, s.start_time),
                     category_id = COALESCE($4, s.category_id),
-                    project_id = COALESCE($5, s.project_id),
-                    task_id = COALESCE($6, s.task_id)
-                WHERE s.id = $7
+                    project_id = CASE WHEN $5 THEN $6 ELSE s.project_id END,
+                    task_id = CASE WHEN $7 THEN $8 ELSE s.task_id END
+                WHERE s.id = $9
             "#,
         )
         .bind(dto.description)
         .bind(dto.start_time)
         .bind(dto.end_time)
         .bind(dto.category_id)
+        // following is to distinguish if the field should not be updated,
+        // or be set to NULL, hence the 'CASE WHEN...' above
+        .bind(dto.project_id.is_some())
         .bind(dto.project_id.flatten())
+        .bind(dto.task_id.is_some())
         .bind(dto.task_id.flatten())
         .bind(dto.id)
         .execute(tx.as_mut())
