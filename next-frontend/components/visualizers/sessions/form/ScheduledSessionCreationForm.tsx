@@ -1,6 +1,7 @@
+"use client";
+
 import type { ScheduledSessionRequest } from "@/api/definitions";
 import { CategoryWithIdSchema } from "@/api/definitions";
-import type { ProjectWithId, TaskWithId } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInMinutes, isBefore, isEqual } from "date-fns";
 import { ArrowBigDown } from "lucide-react";
@@ -89,10 +90,10 @@ export const ScheduledSessionCreationForm: FC<
       category_id: values.category.id,
       description: values.description,
       endTime: values.endTime,
-      project_id: values.project?.id,
+      projectId: values.project?.id,
       startTime: values.startTime,
       tag_ids: values.tags.map((tag) => tag.id),
-      task_id: values.task?.id,
+      taskId: values.task?.id,
     };
 
     await createSession.mutateAsync(data, {
@@ -145,13 +146,14 @@ export const ScheduledSessionCreationForm: FC<
                     <FormLabel>Project (Optional)</FormLabel>
                     <FormControl>
                       <ProjectPicker
-                        onSelectProject={(project: null | ProjectWithId) => {
+                        onSelectProject={(project) => {
                           field.onChange(project);
-                          if (!project) {
+                          // deselected project or switched to a different one
+                          if (!project || project.id !== field.value?.id) {
                             form.setValue("task", null);
                           }
                         }}
-                        selectedProject={field.value as null | ProjectWithId}
+                        selectedProjectId={field.value?.id ?? null}
                       />
                     </FormControl>
                     <FormMessage />
@@ -168,11 +170,11 @@ export const ScheduledSessionCreationForm: FC<
                       <FormLabel>Task (Optional)</FormLabel>
                       <FormControl>
                         <TaskPicker
-                          onSelectTask={(task: null | TaskWithId) => {
+                          onSelectTask={(task) => {
                             field.onChange(task);
                           }}
                           projectId={form.watch("project")?.id ?? null}
-                          selectedTask={field.value as null | TaskWithId}
+                          selectedTaskId={field.value?.id}
                         />
                       </FormControl>
                       <FormMessage />

@@ -9,13 +9,13 @@ import {
 import { StopwatchApi } from "@/api";
 import type {
   StopwatchSessionRequest,
-  StopwatchSessionWithId } from "@/api/definitions";
+  StopwatchSessionWithId,
+} from "@/api/definitions";
 import {
   CategoryWithIdSchema,
   ScheduledSessionRequestSchema,
   TagWithIdSchema,
 } from "@/api/definitions";
-import type { ProjectWithId, TaskWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useCreateScheduledSession } from "@/components/hooks/session/fixed/useCreateSession";
 import { useDeleteStopwatchSession } from "@/components/hooks/session/stopwatch/useDeleteStopwatchSession";
@@ -44,6 +44,7 @@ import type { FC } from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import type { ProjectWithId, TaskWithId } from "@/api/definitions";
 
 const updateSessionPrecursor = z.object({
   category: CategoryWithIdSchema.nullish(),
@@ -51,8 +52,8 @@ const updateSessionPrecursor = z.object({
   id: z.uuid(),
   startTime: z.coerce.date<Date>().nullish(),
   tags: z.array(TagWithIdSchema).nullish(),
-  project: z.object({ id: z.uuid() }).nullish(),
-  task: z.object({ id: z.uuid() }).nullish(),
+  projectId: z.string().nullish(),
+  taskId: z.string().nullish(),
 });
 
 const formatTimeDifference = (seconds: number) => {
@@ -80,10 +81,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       category: props.session.category,
       description: props.session.description,
       id: props.session.id,
+      projectId: props.session.projectId,
       startTime: props.session.startTime,
       tags: props.session.tags ?? [],
-      project: props.session.projectId ? { id: props.session.projectId } : null,
-      task: props.session.taskId ? { id: props.session.taskId } : null,
+      taskId: props.session.taskId,
     },
     resolver: zodResolver(updateSessionPrecursor),
   });
@@ -93,10 +94,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
     category_id: form.watch("category.id"),
     description: form.watch("description"),
     endTime,
+    projectId: form.watch("projectId"),
     startTime: form.watch("startTime"),
     tag_ids: form.watch("tags")?.map((tag) => tag.id),
-    project_id: form.watch("project.id"),
-    task_id: form.watch("task.id"),
+    taskId: form.watch("taskId"),
   }).data;
 
   const createSession = useCreateScheduledSession();
@@ -111,10 +112,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       category_id: values.category?.id,
       description: values.description,
       id: values.id,
+      project_id: values.projectId,
       startTime: values.startTime,
       tag_ids: values.tags?.map((tag) => tag.id),
-      project_id: values.project?.id,
-      task_id: values.task?.id,
+      task_id: values.taskId,
     };
 
     if (props.onSubmit) {
@@ -150,47 +151,61 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="project"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Project (Optional)</FormLabel>
-                  <FormControl>
-                    <ProjectPicker
-                      onSelectProject={(project: ProjectWithId | null) => {
-                        field.onChange(project);
-                        if (!project) {
-                          form.setValue("task", null);
-                        }
-                      }}
-                      selectedProject={field.value as ProjectWithId | null}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-col gap-4 md:flex-row md:items-start">
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel>Project (Optional)</FormLabel>
+                    <FormControl>
+                      <ProjectPicker
+                        onSelectProject={(project) => {
+                          field.onChange(project?.id ?? null);
+                          // deselected project or switched to a different one
+                          if (!project || project.id !== field.value) {
+                            form.setValue("taskId", null);
+                          }
+                        }}
+                        selectedProjectId={field.value ?? null}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="task"
-              render={({ field }) => (
+              {form.watch("projectId") ? (
+                <FormField
+                  control={form.control}
+                  name="taskId"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      <FormLabel>Task (Optional)</FormLabel>
+                      <FormControl>
+                        <TaskPicker
+                          onSelectTask={(task) => {
+                            field.onChange(task?.id);
+                          }}
+                          projectId={form.watch("projectId") ?? null}
+                          selectedTaskId={field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>Task (Optional)</FormLabel>
                   <FormControl>
-                    <TaskPicker
-                      onSelectTask={(task: TaskWithId | null) => {
-                        field.onChange(task);
-                      }}
-                      projectId={form.watch("project")?.id ?? null}
-                      selectedTask={field.value as TaskWithId | null}
-                    />
+                    <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
+                      Select a project first
+                    </div>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
-            />
+            </div>
 
             <FormField
               control={form.control}
@@ -221,17 +236,16 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                     <FormItem className="flex flex-col gap-2">
                       <FormLabel className="flex items-center gap-2">
                         Start Time
-                        {value
-                          && isAfter(new Date(), value)
-                          && ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
+                        {value &&
+                          isAfter(new Date(), value) &&
+                          ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
                       </FormLabel>
                       <FormControl>
                         <DateTimePicker
                           onSelect={(val) => {
                             if (val && val && isBefore(new Date(), val)) {
                               form.setError("startTime", {
-                                message:
-                                    "Cannot set start time in the future",
+                                message: "Cannot set start time in the future",
                               });
                               return;
                             }
@@ -271,7 +285,9 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                     <SimpleTagPicker
                       disabled={form.getValues("category") === undefined}
                       forCategory={form.watch("category") ?? undefined}
-                      onNewTagsSelected={(tags) => { field.onChange(tags); }}
+                      onNewTagsSelected={(tags) => {
+                        field.onChange(tags);
+                      }}
                       selectedTags={
                         field.value?.map((t) => ({
                           ...t,
@@ -290,11 +306,12 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
               <div className="flex gap-2 items-center">
                 <Button
                   loading={deleteSessionMutation.isPending}
-                  onClick={() =>
-                  { deleteSessionMutation.mutate(
-                    { id: props.session.id },
-                    { onSuccess: props.onDelete },
-                  ); }}
+                  onClick={() => {
+                    deleteSessionMutation.mutate(
+                      { id: props.session.id },
+                      { onSuccess: props.onDelete },
+                    );
+                  }}
                   type="button"
                   variant="destructive"
                 >
@@ -329,7 +346,6 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                           await StopwatchApi.remove({ id: props.session.id });
 
                           await createSession.mutateAsync(convertedSession, {
-
                             onSuccess: async () => {
                               await queryClient.invalidateQueries({
                                 queryKey: queryKeys.sessions.active._def,
