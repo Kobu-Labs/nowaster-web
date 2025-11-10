@@ -144,7 +144,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                     <FormControl>
                       <ProjectPicker
                         onSelectProject={(project) => {
-                          field.onChange(project?.id);
+                          field.onChange(project?.id ?? null);
                           // deselected project or switched to a different one
                           if (!project || project.id !== field.value) {
                             form.setValue("taskId", null);
