@@ -1,4 +1,11 @@
-import { CategoryApi, ProjectsApi, ScheduledSessionApi, StatisticsApi, TagApi, TasksApi } from "@/api";
+import {
+  CategoryApi,
+  ProjectsApi,
+  ScheduledSessionApi,
+  StatisticsApi,
+  TagApi,
+  TasksApi,
+} from "@/api";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   createQueryKeys,
@@ -59,9 +66,9 @@ const projectKeys = createQueryKeys("projects", {
     queryFn: async () => await ProjectsApi.getProjectById({ id }),
     queryKey: [id],
   }),
-  withTaskCount: {
+  details: {
     queryFn: async () => await ProjectsApi.getProjectsDetails(),
-    queryKey: ["withTaskCount"],
+    queryKey: ["details"],
   },
   stats: {
     queryFn: async () => await ProjectsApi.getProjectStatistics(),
