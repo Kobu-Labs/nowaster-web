@@ -10,23 +10,21 @@ import { Frown } from "lucide-react";
 type ProjectPickerProps = {
   onSelectProject?: (project: null | ProjectWithId) => void;
   placeholder?: string;
-  selectedProject?: null | ProjectWithId;
+  selectedProjectId?: string | null
 };
 
 export const ProjectPicker: FC<ProjectPickerProps> = (props) => {
   const projects = useProjects();
-  const [selectedProject, setSelectedProject] = useState<null | ProjectWithId>(
-    null,
-  );
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
 
-  const isControlled = props.selectedProject !== undefined;
+  const isControlled = props.selectedProjectId !== undefined;
   const value = isControlled
-    ? (props.selectedProject ?? null)
+    ? (props.selectedProjectId ?? null)
     : selectedProject;
 
   const onSelectProject = (project: null | ProjectWithId) => {
     if (!isControlled) {
-      setSelectedProject(project);
+      setSelectedProject(project?.id ?? null);
     }
     props.onSelectProject?.(project);
   };
@@ -48,7 +46,7 @@ export const ProjectPicker: FC<ProjectPickerProps> = (props) => {
       availableProjects={projects.data}
       onSelectProject={onSelectProject}
       placeholder={props.placeholder}
-      selectedProject={value}
+      selectedProjectId={value}
     />
   );
 };
