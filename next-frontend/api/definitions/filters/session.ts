@@ -9,7 +9,7 @@ export const sessionFilter = z
     categories: categoryFilter,
     fromEndTime: dateFilter,
     fromStartTime: dateFilter,
-    project_id: z.string().uuid().nullish(),
+    projectId: z.string().uuid().nullish(),
     tags: tagFilter,
     tasks: taskFilter,
     toEndTime: dateFilter,
