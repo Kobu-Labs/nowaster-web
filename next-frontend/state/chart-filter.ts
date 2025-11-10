@@ -1,5 +1,6 @@
 import type {
   CategoryWithId,
+  ProjectWithId,
   ScheduledSessionRequest,
   TagDetails,
   TaskWithId,
@@ -15,8 +16,9 @@ export type FilterSettings = NonNullable<OmitValue<SessionFilter>>;
  */
 export type FilterValueFiller = {
   categories?: CategoryWithId[];
-  endTimeFrom?: { value: Date };
-  endTimeTo?: { value: Date };
+  endTimeFrom?: { value: Date; };
+  endTimeTo?: { value: Date; };
+  project?: null | ProjectWithId;
   tags?: TagDetails[];
   tasks?: TaskWithId[];
 };
@@ -42,6 +44,11 @@ const defaultFilterSettings: FilterSettings = {
   },
   tags: {
     label: {
+      mode: "some",
+    },
+  },
+  tasks: {
+    id: {
       mode: "some",
     },
   },
@@ -92,6 +99,29 @@ export const changeCategoryFilterMode = (
       categories: {
         ...categories,
         name: {
+          mode,
+        },
+      },
+    },
+  };
+};
+
+export const changeTaskFilterMode = (
+  oldState: SessionFilterPrecursor,
+  mode: "all" | "some",
+): SessionFilterPrecursor => {
+  const {
+    data,
+    settings: { tasks, ...filterRest },
+  } = oldState ?? {};
+
+  return {
+    data,
+    settings: {
+      ...filterRest,
+      tasks: {
+        ...tasks,
+        id: {
           mode,
         },
       },
