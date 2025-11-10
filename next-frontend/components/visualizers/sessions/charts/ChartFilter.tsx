@@ -244,7 +244,7 @@ export const ChartFilter: FC = () => {
                 <TaskPicker
                   onSelectTask={onSelectTask}
                   projectId={filter.data.project.id}
-                  selectedTask={null}
+                  selectedTaskId={null}
                 />
               </div>
             )}
