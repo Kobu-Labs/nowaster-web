@@ -11,19 +11,19 @@ type TaskPickerProps = {
   onSelectTask?: (task: null | TaskWithId) => void;
   placeholder?: string;
   projectId: null | string;
-  selectedTask?: null | TaskWithId;
+  selectedTaskId?: null | string;
 };
 
 export const TaskPicker: FC<TaskPickerProps> = (props) => {
   const tasks = useTasksByProject(props.projectId);
-  const [selectedTask, setSelectedTask] = useState<null | TaskWithId>(null);
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
 
-  const isControlled = props.selectedTask !== undefined;
-  const value = isControlled ? (props.selectedTask ?? null) : selectedTask;
+  const isControlled = props.selectedTaskId !== undefined;
+  const value = isControlled ? (props.selectedTaskId ?? null) : selectedTask;
 
   const onSelectTask = (task: null | TaskWithId) => {
     if (!isControlled) {
-      setSelectedTask(task);
+      setSelectedTask(task?.id ?? null);
     }
     props.onSelectTask?.(task);
   };
@@ -45,7 +45,7 @@ export const TaskPicker: FC<TaskPickerProps> = (props) => {
       availableTasks={tasks.data}
       onSelectTask={onSelectTask}
       placeholder={props.placeholder}
-      selectedTask={value}
+      selectedTaskId={value}
     />
   );
 };

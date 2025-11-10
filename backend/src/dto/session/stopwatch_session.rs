@@ -6,6 +6,7 @@ use validator::Validate;
 use crate::{
     dto::{
         category::{create_category::CreateCategoryDto, read_category::ReadCategoryDto},
+        serde_utils::deserialize_optional_field,
         tag::read_tag::ReadTagDto,
         user::read_user::ReadUserDto,
     },
@@ -51,8 +52,16 @@ pub struct UpdateStopwatchSessionDto {
     pub description: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: Option<DateTime<Local>>,
-    #[serde(rename = "projectId")]
+    #[serde(
+        rename = "projectId",
+        default,
+        deserialize_with = "deserialize_optional_field"
+    )]
     pub project_id: Option<Option<Uuid>>,
-    #[serde(rename = "taskId")]
+    #[serde(
+        rename = "taskId",
+        default,
+        deserialize_with = "deserialize_optional_field"
+    )]
     pub task_id: Option<Option<Uuid>>,
 }

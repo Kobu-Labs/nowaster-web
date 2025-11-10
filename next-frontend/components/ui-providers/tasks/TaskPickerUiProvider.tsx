@@ -14,7 +14,7 @@ export type TaskPickerUiProviderProps = {
   availableTasks: TaskWithId[];
   onSelectTask: (task: null | TaskWithId) => void;
   placeholder?: string;
-  selectedTask: null | TaskWithId;
+  selectedTaskId: null | string;
 };
 
 export const TaskPickerUiProvider: FC<TaskPickerUiProviderProps> = (props) => {
@@ -30,7 +30,7 @@ export const TaskPickerUiProvider: FC<TaskPickerUiProviderProps> = (props) => {
   return (
     <Select
       onValueChange={onValueChange}
-      value={props.selectedTask?.id ?? "none"}
+      value={props.selectedTaskId ?? "none"}
     >
       <SelectTrigger>
         <SelectValue placeholder={props.placeholder ?? "Select a task"} />
