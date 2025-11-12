@@ -31,7 +31,7 @@ type EditProjectDialogProps = {
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
   open: boolean;
-  project: null | ProjectWithId;
+  project: ProjectWithId;
 };
 
 const editProjectSchema = z.object({
@@ -65,7 +65,7 @@ export const EditProjectDialog: FC<EditProjectDialogProps> = ({
         {
           color: values.color,
           completed: project.completed,
-          description: values.description?.trim() || undefined,
+          description: values.description?.trim() ? values.description.trim() : undefined,
           id: project.id,
           name: values.name,
         },
@@ -82,10 +82,10 @@ export const EditProjectDialog: FC<EditProjectDialogProps> = ({
   return (
     <Dialog modal={false} onOpenChange={onOpenChange} open={open}>
       <DialogContent
-        onOpenAutoFocus={(e) => e.preventDefault()}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle>Edit Project</DialogTitle>

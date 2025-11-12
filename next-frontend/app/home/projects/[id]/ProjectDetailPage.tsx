@@ -223,7 +223,7 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
           )}
         </div>
 
-        {editingProject && (
+        {project && (
           <EditProjectDialog
             onOpenChange={(open) => !open && setEditingProject(false)}
             open={editingProject}
