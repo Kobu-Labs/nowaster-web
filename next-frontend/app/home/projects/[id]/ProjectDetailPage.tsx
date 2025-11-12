@@ -231,11 +231,13 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
           />
         )}
 
-        <EditTaskDialog
-          onOpenChange={(open) => !open && setEditingTask(null)}
-          open={!!editingTask}
-          task={editingTask}
-        />
+        {editingTask && (
+          <EditTaskDialog
+            onOpenChange={(open) => !open && setEditingTask(null)}
+            open={!!editingTask}
+            task={editingTask}
+          />
+        )}
       </div>
     </div>
   );
