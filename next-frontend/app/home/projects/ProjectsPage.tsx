@@ -15,10 +15,14 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { CreateProjectDialog } from "@/components/visualizers/projects/CreateProjectDialog";
 import { EditProjectDialog } from "@/components/visualizers/projects/EditProjectDialog";
 import { ProjectCard } from "@/components/visualizers/projects/ProjectCard";
-import { ProjectStatsCards } from "@/components/visualizers/projects/ProjectStatsCards";
-import { Search } from "lucide-react";
-import type { FC } from "react";
-import { useMemo, useState } from "react";
+import {
+  CheckCircle2,
+  Clock,
+  FolderKanban,
+  ListChecks,
+  Search,
+} from "lucide-react";
+import { useMemo, useState, type FC } from "react";
 
 const ProjectsPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,9 +38,10 @@ const ProjectsPage: FC = () => {
       return [];
     }
 
-    const filtered = projectsQuery.data.filter((project) =>
-      project.name.toLowerCase().includes(searchQuery.toLowerCase())
-      || project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+    const filtered = projectsQuery.data.filter(
+      (project) =>
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     return filtered.sort((a, b) => {
@@ -97,7 +102,6 @@ const ProjectsPage: FC = () => {
 
   return (
     <div className="flex gap-6 w-full p-6">
-
       <div className="flex-1 space-y-6 min-w-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -109,7 +113,67 @@ const ProjectsPage: FC = () => {
           <CreateProjectDialog />
         </div>
 
-        <ProjectStatsCards stats={stats} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground hover:border-pink-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Projects
+              </CardTitle>
+              <FolderKanban className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total_projects}</div>
+              <p className="text-xs text-muted-foreground">
+                All projects in your workspace
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground hover:border-pink-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Projects
+              </CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.active_projects}</div>
+              <p className="text-xs text-muted-foreground">
+                Projects currently in progress
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground hover:border-pink-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Completed Projects
+              </CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {stats.completed_projects}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Projects marked as complete
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group flex grow flex-col hover:gradient-card hover:transition-all duration-300 ease-in-out hover:text-accent-foreground hover:border-pink-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+              <ListChecks className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total_tasks}</div>
+              <p className="text-xs text-muted-foreground">
+                Tasks across all projects
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -150,9 +214,7 @@ const ProjectsPage: FC = () => {
                       : "Create your first project to start organizing your tasks."}
                   </p>
                 </div>
-                {!searchQuery && (
-                  <CreateProjectDialog />
-                )}
+                {!searchQuery && <CreateProjectDialog />}
               </div>
             </CardContent>
           </Card>
