@@ -193,11 +193,13 @@ export default function TaskDetailPage(props: {
         </div>
       </div>
 
-      <EditTaskDialog
-        onOpenChange={setEditingTask}
-        open={editingTask}
-        task={task}
-      />
+      {task && (
+        <EditTaskDialog
+          onOpenChange={setEditingTask}
+          open={editingTask}
+          task={task}
+        />
+      )}
 
       <LogSessionDialog
         onOpenChange={setLogSessionOpen}
