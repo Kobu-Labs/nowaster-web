@@ -2,7 +2,10 @@
 
 import type { TaskWithSessionCount } from "@/api/definitions/models/task";
 import { useProjectById } from "@/components/hooks/project/useProjectById";
+import { useUpdateProject } from "@/components/hooks/project/useUpdateProject";
 import { useTasksWithSessionCountByProject } from "@/components/hooks/task/useTasksWithSessionCountByProject";
+import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
 import {
   Card,
   CardContent,
@@ -12,15 +15,17 @@ import {
 } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { EditProjectDialog } from "@/components/visualizers/projects/EditProjectDialog";
-import { ProjectDetailHeader } from "@/components/visualizers/projects/ProjectDetailHeader";
+import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { ProjectTasksKpiCard } from "@/components/visualizers/sessions/kpi/project/ProjectTasksKpiCard";
 import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
 import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
+import { LogSessionDialog } from "@/components/visualizers/sessions/LogSessionDialog";
 import { CreateTaskDialog } from "@/components/visualizers/tasks/CreateTaskDialog";
 import { EditTaskDialog } from "@/components/visualizers/tasks/EditTaskDialog";
 import { TaskList } from "@/components/visualizers/tasks/TaskList";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
-import { ListTodo } from "lucide-react";
+import { Checkbox } from "@radix-ui/react-checkbox";
+import { CheckCircle2, ListTodo, Plus } from "lucide-react";
 import type { FC } from "react";
 import { useMemo, useState } from "react";
 
@@ -33,6 +38,15 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
   const [editingTask, setEditingTask] = useState<null | TaskWithSessionCount>(
     null,
   );
+  const updateProject = useUpdateProject();
+  const [logSessionOpen, setLogSessionOpen] = useState(false);
+
+  const handleToggleComplete = (completed: boolean) => {
+    updateProject.mutate({
+      completed,
+      id: projectId,
+    });
+  };
 
   const projectQuery = useProjectById(projectId);
   const tasksQuery = useTasksWithSessionCountByProject(projectId);
@@ -105,10 +119,65 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
     );
   }
 
+  const project = projectQuery.data;
+
   return (
     <div className="flex gap-6 w-full p-6">
       <div className="flex-1 space-y-6 min-w-0">
-        <ProjectDetailHeader project={projectQuery.data} />
+        <div
+          className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg rounded-lg p-6"
+          style={{ borderLeft: `4px solid ${project.color}` }}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <ProjectAvatar
+                color={project.color}
+                imageUrl={project.image_url}
+                name={project.name}
+                size={64}
+              />
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold">{project.name}</h1>
+                  {project.completed && (
+                    <Badge variant="secondary">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Completed
+                    </Badge>
+                  )}
+                </div>
+                {project.description && (
+                  <p className="text-muted-foreground mt-2">
+                    {project.description}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button onClick={() => setLogSessionOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Log Session
+              </Button>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={project.completed}
+                  onCheckedChange={handleToggleComplete}
+                />
+                <span className="text-sm">Mark as completed</span>
+              </div>
+            </div>
+          </div>
+
+          <LogSessionDialog
+            onOpenChange={setLogSessionOpen}
+            open={logSessionOpen}
+            precursor={{
+              project: { id: project.id },
+              task: null,
+            }}
+            title={`Log Session for ${project.name}`}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ProjectTasksKpiCard projectId={projectId} />
