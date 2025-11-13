@@ -22,7 +22,7 @@ import {
   ListChecks,
   Search,
 } from "lucide-react";
-import { useMemo, useState, type FC } from "react";
+import { type FC, useMemo, useState } from "react";
 
 const ProjectsPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,8 +40,8 @@ const ProjectsPage: FC = () => {
 
     const filtered = projectsQuery.data.filter(
       (project) =>
-        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+        project.name.toLowerCase().includes(searchQuery.toLowerCase())
+        || project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     return filtered.sort((a, b) => {
@@ -220,11 +220,13 @@ const ProjectsPage: FC = () => {
           </Card>
         )}
 
-        <EditProjectDialog
-          onOpenChange={(open) => !open && setEditingProject(null)}
-          open={!!editingProject}
-          project={editingProject}
-        />
+        {editingProject && (
+          <EditProjectDialog
+            onOpenChange={(open) => !open && setEditingProject(null)}
+            open={!!editingProject}
+            project={editingProject}
+          />
+        )}
       </div>
     </div>
   );
