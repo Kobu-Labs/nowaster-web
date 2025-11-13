@@ -44,7 +44,6 @@ import type { FC } from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { ProjectWithId, TaskWithId } from "@/api/definitions";
 
 const updateSessionPrecursor = z.object({
   category: CategoryWithIdSchema.nullish(),
@@ -112,10 +111,10 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
       category_id: values.category?.id,
       description: values.description,
       id: values.id,
-      project_id: values.projectId,
+      projectId: values.projectId,
       startTime: values.startTime,
       tag_ids: values.tags?.map((tag) => tag.id),
-      task_id: values.taskId,
+      taskId: values.taskId,
     };
 
     if (props.onSubmit) {
