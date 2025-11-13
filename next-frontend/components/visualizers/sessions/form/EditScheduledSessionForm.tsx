@@ -52,12 +52,12 @@ type EditStopwatchSessionProps = {
 };
 
 const editSessionPrecursor = z.object({
-  id: z.string(),
   category: CategoryWithIdSchema,
   description: z.string().nullable(),
-  endTime: z.coerce.date<Date>(),
+  endTime: z.coerce.date<Date>("Please select an end time"),
+  id: z.string(),
   projectId: z.string().nullish(),
-  startTime: z.coerce.date<Date>(),
+  startTime: z.coerce.date<Date>("Please select a start time"),
   tags: z.array(
     z.object({
       id: z.uuid(),
@@ -157,36 +157,38 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                   </FormItem>
                 )}
               />
-              {form.watch("projectId") ? (
-                <FormField
-                  control={form.control}
-                  name="taskId"
-                  render={({ field }) => (
+              {form.watch("projectId")
+                ? (
+                    <FormField
+                      control={form.control}
+                      name="taskId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2 flex-1">
+                          <FormLabel>Task (Optional)</FormLabel>
+                          <FormControl>
+                            <TaskPicker
+                              onSelectTask={(task) => {
+                                field.onChange(task?.id);
+                              }}
+                              projectId={form.watch("projectId") ?? null}
+                              selectedTaskId={field.value}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )
+                : (
                     <FormItem className="flex flex-col gap-2 flex-1">
                       <FormLabel>Task (Optional)</FormLabel>
                       <FormControl>
-                        <TaskPicker
-                          onSelectTask={(task) => {
-                            field.onChange(task?.id);
-                          }}
-                          projectId={form.watch("projectId") ?? null}
-                          selectedTaskId={field.value}
-                        />
+                        <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
+                          Select a project first
+                        </div>
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
-                />
-              ) : (
-                <FormItem className="flex flex-col gap-2 flex-1">
-                  <FormLabel>Task (Optional)</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
-                      Select a project first
-                    </div>
-                  </FormControl>
-                </FormItem>
-              )}
             </div>
 
             <FormField
@@ -335,8 +337,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
 
                     setIsDeleteAlertOpen(false);
                   },
-                })
-              }
+                })}
             >
               Remove
             </AlertDialogAction>
