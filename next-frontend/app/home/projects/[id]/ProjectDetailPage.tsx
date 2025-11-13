@@ -24,8 +24,7 @@ import { CreateTaskDialog } from "@/components/visualizers/tasks/CreateTaskDialo
 import { EditTaskDialog } from "@/components/visualizers/tasks/EditTaskDialog";
 import { TaskList } from "@/components/visualizers/tasks/TaskList";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
-import { Checkbox } from "@radix-ui/react-checkbox";
-import { CheckCircle2, ListTodo, Plus } from "lucide-react";
+import { CheckCircle2, Circle, ListTodo, Plus } from "lucide-react";
 import type { FC } from "react";
 import { useMemo, useState } from "react";
 
@@ -158,13 +157,17 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
                 <Plus className="h-4 w-4 mr-2" />
                 Log Session
               </Button>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={project.completed}
-                  onCheckedChange={handleToggleComplete}
-                />
-                <span className="text-sm">Mark as completed</span>
-              </div>
+              <Button
+                onClick={() => handleToggleComplete(!project.completed)}
+                variant="outline"
+              >
+                {project.completed ? (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                ) : (
+                  <Circle className="h-4 w-4 mr-2" />
+                )}
+                {project.completed ? "Mark as incomplete" : "Mark as completed"}
+              </Button>
             </div>
           </div>
 

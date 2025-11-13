@@ -14,7 +14,6 @@ import {
 } from "@/components/shadcn/alert-dialog";
 import { Badge } from "@/components/shadcn/badge";
 import { Card, CardContent } from "@/components/shadcn/card";
-import { Checkbox } from "@/components/shadcn/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +24,7 @@ import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
+  Circle,
   Edit,
   Eye,
   MoreVertical,
@@ -161,14 +161,22 @@ export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
           </div>
 
           <div
-            className="flex items-center gap-2 pt-3 border-t"
+            className="pt-3 border-t"
             onClick={(e) => e.preventDefault()}
           >
-            <Checkbox
-              checked={task.completed}
-              onCheckedChange={handleToggleComplete}
-            />
-            <span className="text-sm">Mark as completed</span>
+            <Button
+              className="w-full"
+              onClick={() => handleToggleComplete(!task.completed)}
+              size="sm"
+              variant="outline"
+            >
+              {task.completed ? (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              ) : (
+                <Circle className="h-4 w-4 mr-2" />
+              )}
+              {task.completed ? "Mark as incomplete" : "Mark as completed"}
+            </Button>
           </div>
         </CardContent>
       </Card>

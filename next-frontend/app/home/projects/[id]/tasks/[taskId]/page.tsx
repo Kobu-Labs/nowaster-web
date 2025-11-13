@@ -2,6 +2,7 @@
 
 import { useProjectById } from "@/components/hooks/project/useProjectById";
 import { useTaskById } from "@/components/hooks/task/useTaskById";
+import { useUpdateTask } from "@/components/hooks/task/useUpdateTask";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
 import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
@@ -33,8 +34,16 @@ export default function TaskDetailPage(props: {
   const { id: projectId, taskId } = use(props.params);
   const taskQuery = useTaskById(taskId);
   const projectQuery = useProjectById(projectId);
+  const updateTask = useUpdateTask();
   const [editingTask, setEditingTask] = useState(false);
   const [logSessionOpen, setLogSessionOpen] = useState(false);
+
+  const handleToggleComplete = (completed: boolean) => {
+    updateTask.mutate({
+      completed,
+      id: taskId,
+    });
+  };
 
   if (taskQuery.isPending || projectQuery.isPending) {
     return (
@@ -159,6 +168,18 @@ export default function TaskDetailPage(props: {
                 <Button onClick={() => setLogSessionOpen(true)} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Log Session
+                </Button>
+                <Button
+                  onClick={() => handleToggleComplete(!task.completed)}
+                  size="sm"
+                  variant="outline"
+                >
+                  {task.completed ? (
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Circle className="h-4 w-4 mr-2" />
+                  )}
+                  {task.completed ? "Mark as incomplete" : "Mark as completed"}
                 </Button>
                 <Button
                   onClick={() => setEditingTask(true)}
