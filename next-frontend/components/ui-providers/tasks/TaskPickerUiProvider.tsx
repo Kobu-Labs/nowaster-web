@@ -32,7 +32,7 @@ export const TaskPickerUiProvider: FC<TaskPickerUiProviderProps> = (props) => {
       onValueChange={onValueChange}
       value={props.selectedTaskId ?? "none"}
     >
-      <SelectTrigger>
+      <SelectTrigger className="w-full">
         <SelectValue placeholder={props.placeholder ?? "Select a task"} />
       </SelectTrigger>
       <SelectContent>
