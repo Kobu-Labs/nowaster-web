@@ -19,6 +19,7 @@ import {
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
+import { prefetchTask } from "@/lib/prefetch/prefetchTask";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
@@ -183,7 +184,6 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
     // TODO: show spinners
     return null;
   }
-  // TODO: prefetch task details on hover
 
   return (
     <SidebarContent className="overflow-y-auto flex-1">
@@ -192,42 +192,48 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
         <SidebarGroupContent>
           <SidebarMenu>
             {tasks.data.map((task) => (
-              <SidebarMenuItem key={task.name}>
-                <Button
-                  asChild
-                  className="w-full flex items-center justify-start "
-                  variant="outline"
-                >
-                  <div key={task.id} className="min-w-0 w-full">
-                    <div
-                      className={cn(
-                        "flex items-center gap-2 py-3 rounded-lg hover:bg-accent transition-colors cursor-pointer min-w-0 w-full",
-                      )}
-                    >
-                      {task.completed ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <Circle className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <span
+              <Link
+                href={`/home/projects/${props.projectId}/tasks/${task.id}`}
+                key={task.name}
+                onMouseEnter={() => prefetchTask(task.id)}
+              >
+                <SidebarMenuItem>
+                  <Button
+                    asChild
+                    className="w-full flex items-center justify-start "
+                    variant="outline"
+                  >
+                    <div key={task.id} className="min-w-0 w-full">
+                      <div
                         className={cn(
-                          "text-sm font-medium truncate min-w-0 flex-1",
-                          task.completed &&
-                            "line-through text-muted-foreground",
+                          "flex items-center gap-2 py-3 rounded-lg hover:bg-accent transition-colors cursor-pointer min-w-0 w-full",
                         )}
                       >
-                        {task.name}
-                      </span>
-                      <Badge
-                        className="text-xs flex-shrink-0"
-                        variant="outline"
-                      >
-                        {task.sessionCount}
-                      </Badge>
+                        {task.completed ? (
+                          <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <Circle className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <span
+                          className={cn(
+                            "text-sm font-medium truncate min-w-0 flex-1",
+                            task.completed &&
+                              "line-through text-muted-foreground",
+                          )}
+                        >
+                          {task.name}
+                        </span>
+                        <Badge
+                          className="text-xs flex-shrink-0"
+                          variant="outline"
+                        >
+                          {task.sessionCount}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                </Button>
-              </SidebarMenuItem>
+                  </Button>
+                </SidebarMenuItem>
+              </Link>
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
