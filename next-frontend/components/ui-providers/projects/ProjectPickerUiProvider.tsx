@@ -33,7 +33,7 @@ export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (
       onValueChange={onValueChange}
       value={props.selectedProjectId ?? "none"}
     >
-      <SelectTrigger>
+      <SelectTrigger className="w-full">
         <SelectValue placeholder={props.placeholder ?? "Select a project"} />
       </SelectTrigger>
       <SelectContent>
