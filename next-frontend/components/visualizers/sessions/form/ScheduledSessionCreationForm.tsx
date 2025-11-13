@@ -30,7 +30,7 @@ import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
 import { formatTime } from "@/lib/utils";
 import type { SessionPrecursor } from "@/validation/session/creation";
 
-export const DurationLabel: FC<{ from?: Date; to?: Date }> = (props) => {
+export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
   if (!props.from || !props.to) {
     return <span>--:--</span>;
   }
@@ -54,9 +54,9 @@ type ScheduledSessionCreationFormProps = {
 const createSessionPrecursor = z.object({
   category: CategoryWithIdSchema,
   description: z.string().nullable(),
-  endTime: z.coerce.date<Date>(),
+  endTime: z.coerce.date<Date>("Please select an end time"),
   project: z.object({ id: z.uuid() }).nullish(),
-  startTime: z.coerce.date<Date>(),
+  startTime: z.coerce.date<Date>("Please select a start time"),
   tags: z.array(
     z.object({
       id: z.uuid(),
@@ -77,8 +77,8 @@ export const ScheduledSessionCreationForm: FC<
 
   async function onSubmit(values: z.infer<typeof createSessionPrecursor>) {
     if (
-      isBefore(values.endTime, values.startTime) ||
-      isEqual(values.endTime, values.startTime)
+      isBefore(values.endTime, values.startTime)
+      || isEqual(values.endTime, values.startTime)
     ) {
       form.setError("endTime", {
         message: "End time must be after start time",
@@ -161,36 +161,38 @@ export const ScheduledSessionCreationForm: FC<
                 )}
               />
 
-              {form.watch("project") ? (
-                <FormField
-                  control={form.control}
-                  name="task"
-                  render={({ field }) => (
+              {form.watch("project")
+                ? (
+                    <FormField
+                      control={form.control}
+                      name="task"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2 flex-1">
+                          <FormLabel>Task (Optional)</FormLabel>
+                          <FormControl>
+                            <TaskPicker
+                              onSelectTask={(task) => {
+                                field.onChange(task);
+                              }}
+                              projectId={form.watch("project")?.id ?? null}
+                              selectedTaskId={field.value?.id}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )
+                : (
                     <FormItem className="flex flex-col gap-2 flex-1">
                       <FormLabel>Task (Optional)</FormLabel>
                       <FormControl>
-                        <TaskPicker
-                          onSelectTask={(task) => {
-                            field.onChange(task);
-                          }}
-                          projectId={form.watch("project")?.id ?? null}
-                          selectedTaskId={field.value?.id}
-                        />
+                        <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
+                          Select a project first
+                        </div>
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
-                />
-              ) : (
-                <FormItem className="flex flex-col gap-2 flex-1">
-                  <FormLabel>Task (Optional)</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
-                      Select a project first
-                    </div>
-                  </FormControl>
-                </FormItem>
-              )}
             </div>
 
             <FormField
