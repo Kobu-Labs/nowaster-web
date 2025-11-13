@@ -3,7 +3,7 @@ import { env } from "@/env";
 import { getAccessToken, setAuthTokens } from "@/lib/auth";
 import { Result } from "@badrap/result";
 import axios from "axios";
-import type { ZodType } from "zod";
+import { z, type ZodType } from "zod";
 
 const baseApi = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
@@ -131,6 +131,7 @@ export const parseResponseUnsafe = async <T>(
 ): Promise<T> => {
   const request = await ResponseSchema.safeParseAsync(data);
   if (!request.success) {
+    console.error(z.prettifyError(request.error));
     throw new Error("Response is of unexpected structure!");
   }
 
@@ -140,7 +141,8 @@ export const parseResponseUnsafe = async <T>(
 
   const requestBody = await schema.safeParseAsync(request.data.data);
   if (!requestBody.success) {
-    throw new Error(`Parsing data failed!\n${requestBody.error.message}`);
+    console.error(z.prettifyError(requestBody.error));
+    throw new Error("Parsing data failed!");
   }
 
   return requestBody.data;
