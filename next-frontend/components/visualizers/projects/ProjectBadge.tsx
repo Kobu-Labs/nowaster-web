@@ -15,7 +15,7 @@ export const ProjectBadge: FC<ProjectBadgeProps> = ({
 }) => {
   return (
     <Badge
-      className="font-bold flex items-center gap-1 px-2 py-0.5"
+      className="font-bold flex items-center gap-1 px-2 py-0.5 w-fit"
       style={{
         backgroundColor: `${color}20`,
         color: color,
