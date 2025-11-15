@@ -2,7 +2,12 @@ import { CategoryWithIdSchema } from "@/api/definitions/models/category";
 import { TagWithIdSchema } from "@/api/definitions/models/tag";
 import { z } from "zod";
 
-export const EventTypeSchema = z.enum(["session_completed", "session_started"]);
+export const EventTypeSchema = z.enum([
+  "session_completed",
+  "session_started",
+  "task_completed",
+  "project_completed",
+]);
 
 export const ReadUserAvatarSchema = z.object({
   avatar_url: z.string().nullable(),
@@ -26,6 +31,36 @@ export const SessionCompletedEventSchema = z.object({
   tags: z.array(TagWithIdSchema),
 });
 
+export const FeedProjectSchema = z.object({
+  color: z.string(),
+  id: z.string().uuid(),
+  image_url: z.string().nullable(),
+  name: z.string(),
+});
+
+export const TaskCompletedEventSchema = z.object({
+  hours_of_work: z.number(),
+  project: FeedProjectSchema,
+  task_description: z.string().nullable(),
+  task_id: z.string().uuid(),
+  task_name: z.string(),
+});
+
+export const TaskTimeBreakdownSchema = z.object({
+  hours: z.number(),
+  task_id: z.string().uuid(),
+  task_name: z.string(),
+});
+
+export const ProjectCompletedEventSchema = z.object({
+  project_color: z.string(),
+  project_description: z.string().nullable(),
+  project_id: z.string().uuid(),
+  project_image_url: z.string().nullable(),
+  project_name: z.string(),
+  tasks_time_breakdown: z.array(TaskTimeBreakdownSchema),
+});
+
 export const SourceTypeMappingSchema = z.discriminatedUnion("source_type", [
   z.object({
     source_data: ReadUserAvatarSchema,
@@ -43,8 +78,12 @@ export const EventTypeMappingSchema = z.discriminatedUnion("event_type", [
     event_type: z.literal("session_completed"),
   }),
   z.object({
-    event_data: z.number(),
-    event_type: z.literal("session_updated"),
+    event_data: TaskCompletedEventSchema,
+    event_type: z.literal("task_completed"),
+  }),
+  z.object({
+    event_data: ProjectCompletedEventSchema,
+    event_type: z.literal("project_completed"),
   }),
 ]);
 
