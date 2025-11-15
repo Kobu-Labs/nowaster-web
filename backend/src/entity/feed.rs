@@ -10,6 +10,8 @@ use crate::entity::tag::Tag;
 #[serde(tag = "event_type", content = "event_data", rename_all = "snake_case")]
 pub enum FeedEventType {
     SessionCompleted(SessionEventData),
+    TaskCompleted(TaskEventData),
+    ProjectCompleted(ProjectEventData),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -44,6 +46,32 @@ pub struct SessionEventData {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TaskEventData {
+    pub task_id: Uuid,
+    pub task_name: String,
+    pub task_description: Option<String>,
+    pub hours_of_work: f64,
+    pub project: FeedProject,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ProjectEventData {
+    pub project_id: Uuid,
+    pub project_name: String,
+    pub project_description: Option<String>,
+    pub project_color: String,
+    pub project_image_url: Option<String>,
+    pub tasks_time_breakdown: Vec<TaskTimeBreakdown>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TaskTimeBreakdown {
+    pub task_id: Uuid,
+    pub task_name: String,
+    pub hours: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FeedReaction {
     pub id: Uuid,
     pub feed_event_id: Uuid,
@@ -66,6 +94,14 @@ pub struct FeedSessionTag {
     pub id: Uuid,
     pub label: String,
     pub color: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedProject {
+    pub id: Uuid,
+    pub name: String,
+    pub color: String,
+    pub image_url: Option<String>,
 }
 
 impl From<Tag> for FeedSessionTag {

@@ -259,7 +259,8 @@ impl TaskRepositoryTrait for TaskRepository {
                     t.completed,
                     t.created_at,
                     t.updated_at,
-                    COUNT(s.id) as "session_count!"
+                    COUNT(s.id) as "session_count!",
+                    CAST(COALESCE(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60), 0.0) AS DOUBLE PRECISION) as "total_time_minutes!"
                 FROM task t
                 LEFT JOIN session s ON s.task_id = t.id
                 WHERE t.id = ANY($1) AND t.user_id = $2
