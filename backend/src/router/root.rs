@@ -99,8 +99,6 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
 
     let notification_service = NotificationService::new(&db);
     let release_service = ReleaseService::new(&db);
-    let project_service = ProjectService::new(project_repo);
-    let task_service = TaskService::new(task_repo);
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
@@ -118,6 +116,20 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         stopwatch_repo.clone(),
         event_service.clone(),
         user_service.clone(),
+    );
+
+    let task_service = TaskService::new(
+        task_repo.clone(),
+        project_repo.clone(),
+        event_service.clone(),
+        user_service.clone(),
+    );
+
+    let project_service = ProjectService::new(
+        project_repo,
+        event_service.clone(),
+        user_service.clone(),
+        task_service.clone(),
     );
     let reaction_service = FeedReactionService::new(
         feed_repo.clone(),

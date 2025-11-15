@@ -16,6 +16,9 @@ pub struct ReadTaskDetailsDto {
 
     #[serde(rename = "sessionCount")]
     pub session_count: i64,
+
+    #[serde(rename = "totalTimeMinutes")]
+    pub total_time_minutes: f64,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
