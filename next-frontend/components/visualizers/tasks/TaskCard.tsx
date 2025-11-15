@@ -78,7 +78,7 @@ export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
             </div>
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                <Button className="h-6 w-6 p-0" size="sm" variant="ghost">
+                <Button className="h-6 w-6 p-0" size="sm" variant="outline">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
