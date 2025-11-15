@@ -23,9 +23,9 @@ export const ProjectBadge: FC<ProjectBadgeProps> = ({
       variant="secondary"
     >
       {completed ? (
-        <FolderCheck className="size-3.5" />
+        <FolderCheck className="size-4" />
       ) : (
-        <Folder className="size-3.5" />
+        <Folder className="size-4" />
       )}
       {name}
     </Badge>
