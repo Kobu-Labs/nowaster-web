@@ -35,6 +35,10 @@ pub struct FeedRepository {
 enum FeedEventSqlType {
     #[sqlx(rename = "session_completed")]
     SessionCompleted,
+    #[sqlx(rename = "task_completed")]
+    TaskCompleted,
+    #[sqlx(rename = "project_completed")]
+    ProjectCompleted,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, FromRow)]
@@ -137,6 +141,12 @@ impl FeedEventMapper {
             FeedEventSqlType::SessionCompleted => Ok(FeedEventType::SessionCompleted(
                 serde_json::from_value(event_data)?,
             )),
+            FeedEventSqlType::TaskCompleted => Ok(FeedEventType::TaskCompleted(
+                serde_json::from_value(event_data)?,
+            )),
+            FeedEventSqlType::ProjectCompleted => Ok(FeedEventType::ProjectCompleted(
+                serde_json::from_value(event_data)?,
+            )),
         }
     }
 
@@ -145,6 +155,14 @@ impl FeedEventMapper {
             FeedEventType::SessionCompleted(session_data) => Ok((
                 FeedEventSqlType::SessionCompleted,
                 serde_json::to_value(session_data)?,
+            )),
+            FeedEventType::TaskCompleted(task_data) => Ok((
+                FeedEventSqlType::TaskCompleted,
+                serde_json::to_value(task_data)?,
+            )),
+            FeedEventType::ProjectCompleted(project_data) => Ok((
+                FeedEventSqlType::ProjectCompleted,
+                serde_json::to_value(project_data)?,
             )),
         }
     }
