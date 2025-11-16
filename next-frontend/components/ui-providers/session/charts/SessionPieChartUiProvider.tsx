@@ -26,7 +26,7 @@ type SessionPieChartUiProviderProps = {
   onActiveIndexChange?: (index: number | undefined) => void;
 };
 
-const renderActiveShape = (props: PieSectorDataItem) => {
+export const renderActiveShape = (props: PieSectorDataItem) => {
   const {
     cx,
     cy,

@@ -47,12 +47,20 @@ export const TaskCompletedEventSchema = z.object({
 });
 
 export const TaskTimeBreakdownSchema = z.object({
-  hours: z.number(),
+  minutes: z.number(),
   task_id: z.string().uuid(),
   task_name: z.string(),
 });
 
+export const CategoryTimeBreakdownSchema = z.object({
+  category_color: z.string(),
+  category_id: z.string().uuid(),
+  category_name: z.string(),
+  minutes: z.number(),
+});
+
 export const ProjectCompletedEventSchema = z.object({
+  categories_time_breakdown: z.array(CategoryTimeBreakdownSchema),
   project_color: z.string(),
   project_description: z.string().nullable(),
   project_id: z.string().uuid(),
