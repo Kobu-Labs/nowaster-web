@@ -130,6 +130,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         event_service.clone(),
         user_service.clone(),
         task_service.clone(),
+        session_service.clone(),
     );
     let reaction_service = FeedReactionService::new(
         feed_repo.clone(),

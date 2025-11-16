@@ -62,13 +62,22 @@ pub struct ProjectEventData {
     pub project_color: String,
     pub project_image_url: Option<String>,
     pub tasks_time_breakdown: Vec<TaskTimeBreakdown>,
+    pub categories_time_breakdown: Vec<CategoryTimeBreakdown>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct TaskTimeBreakdown {
     pub task_id: Uuid,
     pub task_name: String,
-    pub hours: f64,
+    pub minutes: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CategoryTimeBreakdown {
+    pub category_id: Uuid,
+    pub category_name: String,
+    pub category_color: String,
+    pub minutes: f64,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
