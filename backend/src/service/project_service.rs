@@ -11,14 +11,18 @@ use crate::{
             read_project::{ProjectStatsDto, ReadProjectDto, ReadProjectDetailsDto},
             update_project::UpdateProjectDto,
         },
+        session::filter_session::FilterSessionDto,
     },
     entity::{
-        feed::{FeedEventSource, FeedEventType, ProjectEventData, TaskTimeBreakdown},
+        feed::{CategoryTimeBreakdown, FeedEventSource, FeedEventType, ProjectEventData, TaskTimeBreakdown},
         project::Project,
     },
-    repository::project::{ProjectRepository, ProjectRepositoryTrait},
+    repository::{
+        fixed_session::SessionRepositoryTrait,
+        project::{ProjectRepository, ProjectRepositoryTrait},
+    },
     router::clerk::Actor,
-    service::{feed::events::FeedEventService, task_service::TaskService, user_service::UserService},
+    service::{feed::events::FeedEventService, session::fixed::FixedSessionService, task_service::TaskService, user_service::UserService},
 };
 
 #[derive(Clone)]
@@ -27,6 +31,7 @@ pub struct ProjectService {
     event_service: FeedEventService,
     user_service: UserService,
     task_service: TaskService,
+    session_service: FixedSessionService,
 }
 
 impl ProjectService {
@@ -35,12 +40,14 @@ impl ProjectService {
         event_service: FeedEventService,
         user_service: UserService,
         task_service: TaskService,
+        session_service: FixedSessionService,
     ) -> Self {
         Self {
             repo,
             event_service,
             user_service,
             task_service,
+            session_service,
         }
     }
 
@@ -108,7 +115,46 @@ impl ProjectService {
                 .map(|task| TaskTimeBreakdown {
                     task_id: task.id,
                     task_name: task.name.clone(),
-                    hours: task.total_time_minutes as f64 / 60.0,
+                    minutes: task.total_time_minutes,
+                })
+                .collect();
+
+            // Get sessions for this project to calculate category breakdown
+            let sessions = self
+                .session_service
+                .filter_fixed_sessions(
+                    FilterSessionDto {
+                        project_id: Some(res.id),
+                        ..Default::default()
+                    },
+                    actor.clone(),
+                )
+                .await?;
+
+            // Calculate time per category
+            let mut category_map: std::collections::HashMap<Uuid, (String, String, f64)> =
+                std::collections::HashMap::new();
+
+            for session in sessions {
+                let duration_minutes =
+                    (session.end_time - session.start_time).num_minutes() as f64;
+                category_map
+                    .entry(session.category.id)
+                    .and_modify(|(_, _, minutes)| *minutes += duration_minutes)
+                    .or_insert((
+                        session.category.name.clone(),
+                        session.category.color.clone(),
+                        duration_minutes,
+                    ));
+            }
+
+            let categories_time_breakdown: Vec<CategoryTimeBreakdown> = category_map
+                .into_iter()
+                .map(|(id, (name, color, minutes))| CategoryTimeBreakdown {
+                    category_id: id,
+                    category_name: name,
+                    category_color: color,
+                    minutes,
                 })
                 .collect();
 
@@ -129,6 +175,7 @@ impl ProjectService {
                         project_color: res.color.clone(),
                         project_image_url: res.image_url.clone(),
                         tasks_time_breakdown,
+                        categories_time_breakdown,
                     }),
                     source: FeedEventSource::User(user),
                 })
