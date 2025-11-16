@@ -17,17 +17,13 @@ import {
   SidebarSeparator,
 } from "@/components/shadcn/sidebar";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
+import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
+import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
 import { prefetchTask } from "@/lib/prefetch/prefetchTask";
 import { cn } from "@/lib/utils";
-import {
-  CheckCircle2,
-  ChevronLeft,
-  Circle,
-  Folders,
-  Search,
-} from "lucide-react";
+import { ChevronLeft, Folders, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type FC, useMemo, useState } from "react";
@@ -144,23 +140,20 @@ const ProjectsSidebarContent: FC<
                         pathname === project.id && "bg-accent",
                       )}
                     >
-                      <ProjectAvatar
-                        color={project.color}
-                        imageUrl={project.image_url}
-                        name={project.name}
-                        size={32}
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium truncate">
-                            {project.name}
-                          </p>
-                          {project.completed && (
-                            <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 my-1">
-                          <Badge className="text-xs" variant="outline">
+                      <div className="flex items-center gap-2">
+                        <ProjectAvatar
+                          color={project.color}
+                          name={project.name}
+                          imageUrl={project.image_url}
+                          size={35}
+                        />
+                        <div className="flex flex-col gap-1">
+                          <ProjectBadge
+                            color={project.color}
+                            name={project.name}
+                            completed={project.completed}
+                          />
+                          <Badge className="text-xs w-fit" variant="outline">
                             {project.taskCount} tasks
                           </Badge>
                         </div>
@@ -209,22 +202,12 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
                           "flex items-center gap-2 py-3 rounded-lg hover:bg-accent transition-colors cursor-pointer min-w-0 w-full",
                         )}
                       >
-                        {task.completed ? (
-                          <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
-                        ) : (
-                          <Circle className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                        )}
-                        <span
-                          className={cn(
-                            "text-sm font-medium truncate min-w-0 flex-1",
-                            task.completed &&
-                              "line-through text-muted-foreground",
-                          )}
-                        >
-                          {task.name}
-                        </span>
+                        <TaskBadge
+                          name={task.name}
+                          completed={task.completed}
+                        />
                         <Badge
-                          className="text-xs flex-shrink-0"
+                          className="text-xs flex-shrink-0 ml-auto"
                           variant="outline"
                         >
                           {task.sessionCount}

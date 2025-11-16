@@ -17,11 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
+import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
+import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
-import { cn } from "@/lib/utils";
-import { CheckCircle2, ChevronDown, Circle, Folders } from "lucide-react";
+import { ChevronDown, Folders } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { FC } from "react";
@@ -65,13 +65,15 @@ export const ProjectTaskBreadcrumb: FC = () => {
   };
 
   const shortenTaskName = (name: string, maxLength = 25) => {
-    if (name.length <= maxLength) { return name; }
+    if (name.length <= maxLength) {
+      return name;
+    }
     return `${name.slice(0, Math.max(0, maxLength))}...`;
   };
 
   const prefetch = (projectId: string) => {
-    prefetchProjectTasks(projectId);
-    prefetchProjectDetails(projectId);
+    void prefetchProjectTasks(projectId);
+    void prefetchProjectDetails(projectId);
   };
 
   return (
@@ -94,23 +96,11 @@ export const ProjectTaskBreadcrumb: FC = () => {
                 ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                        <ProjectAvatar
+                        <ProjectBadge
                           color={currentProject.color}
-                          imageUrl={currentProject.image_url}
+                          completed={currentProject.completed}
                           name={currentProject.name}
-                          size={16}
                         />
-                        <span
-                          className={cn(
-                            currentProject.completed
-                            && "line-through text-muted-foreground",
-                          )}
-                        >
-                          {currentProject.name}
-                        </span>
-                        {currentProject.completed && (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                        )}
                         <ChevronDown className="h-3.5 w-3.5" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -121,26 +111,13 @@ export const ProjectTaskBreadcrumb: FC = () => {
                             onClick={() => handleProjectSelect(project)}
                             onMouseEnter={() => prefetch(project.id)}
                           >
-                            <ProjectAvatar
+                            <ProjectBadge
                               color={project.color}
-                              imageUrl={project.image_url}
+                              completed={project.completed}
                               name={project.name}
-                              size={20}
                             />
-                            <span
-                              className={cn(
-                                "flex-1",
-                                project.completed
-                                && "line-through text-muted-foreground",
-                              )}
-                            >
-                              {project.name}
-                            </span>
-                            {project.completed && (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                            )}
                             {project.id === projectId && !project.completed && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-muted-foreground ml-auto">
                                 Current
                               </span>
                             )}
@@ -162,21 +139,10 @@ export const ProjectTaskBreadcrumb: FC = () => {
             <BreadcrumbItem>
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                  {currentTask.completed
-                    ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      )
-                    : (
-                        <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                      )}
-                  <span
-                    className={cn(
-                      currentTask.completed
-                      && "line-through text-muted-foreground",
-                    )}
-                  >
-                    {shortenTaskName(currentTask.name)}
-                  </span>
+                  <TaskBadge
+                    completed={currentTask.completed}
+                    name={shortenTaskName(currentTask.name)}
+                  />
                   <ChevronDown className="h-3.5 w-3.5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
@@ -186,24 +152,12 @@ export const ProjectTaskBreadcrumb: FC = () => {
                       key={task.id}
                       onClick={() => handleTaskSelect(task.id)}
                     >
-                      {task.completed
-                        ? (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                          )
-                        : (
-                            <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                          )}
-                      <span
-                        className={cn(
-                          "flex-1",
-                          task.completed
-                          && "line-through text-muted-foreground",
-                        )}
-                      >
-                        {task.name}
-                      </span>
+                      <TaskBadge
+                        completed={task.completed}
+                        name={task.name}
+                      />
                       {task.id === taskId && !task.completed && (
-                        <span className="text-xs text-muted-foreground ml-2">
+                        <span className="text-xs text-muted-foreground ml-auto">
                           Current
                         </span>
                       )}

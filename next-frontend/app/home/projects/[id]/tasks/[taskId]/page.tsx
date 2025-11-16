@@ -20,7 +20,7 @@ import {
 } from "@/components/shadcn/card";
 import { use, useState } from "react";
 import { TagsToSessionPieChart } from "@/components/visualizers/sessions/charts/TagsToSessionPieChart";
-import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
+import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
 import { LogSessionDialog } from "@/components/visualizers/sessions/LogSessionDialog";
 import { EditTaskDialog } from "@/components/visualizers/tasks/EditTaskDialog";
 import { CheckCircle2, Circle, Plus, Edit2 } from "lucide-react";
@@ -122,16 +122,14 @@ export default function TaskDetailPage(props: {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex-1 space-y-4">
                 <Link
-                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
                   href={`/home/projects/${project.id}`}
                 >
-                  <ProjectAvatar
+                  <ProjectBadge
                     color={project.color}
-                    imageUrl={project.image_url}
                     name={project.name}
-                    size={20}
+                    completed={project.completed}
                   />
-                  <span>{project.name}</span>
                 </Link>
 
                 <div className="flex items-start gap-3">
