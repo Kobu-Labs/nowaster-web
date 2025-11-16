@@ -20,6 +20,7 @@ import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
 import { getInitials } from "@/lib/utils";
 import type { z } from "zod";
+import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 
 type TaskCompletedFeedCardProps = {
   event: ReadFeedEvent;
@@ -51,7 +52,17 @@ export const TaskCompletedFeedCard: FC<TaskCompletedFeedCardProps> = ({
               <span className="font-medium text-sm">{user.username}</span>
               <SquareCheckBig className="h-4 w-4 text-green-500" />
               <span className="text-sm text-muted-foreground">
-                Completed a task
+                Completed a task in the
+                {" "}
+                <span
+                  style={{
+                    color: event_data.project.color,
+                  }}
+                >
+                  {event_data.project.name}
+                </span>
+                {" "}
+                project
               </span>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
@@ -79,10 +90,7 @@ export const TaskCompletedFeedCard: FC<TaskCompletedFeedCardProps> = ({
                   name={event_data.project.name}
                 />
                 <span className="text-muted-foreground">/</span>
-                <SquareCheckBig className="h-4 w-4 text-green-600" />
-                <h4 className="font-semibold text-sm">
-                  {event_data.task_name}
-                </h4>
+                <TaskBadge completed name={event_data.task_name} />
               </div>
               {event_data.task_description && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -92,7 +100,8 @@ export const TaskCompletedFeedCard: FC<TaskCompletedFeedCardProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-sm font-medium flex-shrink-0">
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              {event_data.hours_of_work.toFixed(1)}h
+              {event_data.hours_of_work.toFixed(1)}
+              h
             </div>
           </div>
         </div>
