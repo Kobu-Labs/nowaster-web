@@ -6,8 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle } from "lucide-react";
+import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import type { FC } from "react";
 
 export type TaskPickerUiProviderProps = {
@@ -41,21 +40,7 @@ export const TaskPickerUiProvider: FC<TaskPickerUiProviderProps> = (props) => {
         </SelectItem>
         {props.availableTasks.map((task) => (
           <SelectItem key={task.id} value={task.id}>
-            <div className="flex flex-row items-center gap-2">
-              {task.completed ? (
-                <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-              ) : (
-                <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-              )}
-              <span
-                className={cn(
-                  "flex-1",
-                  task.completed && "line-through text-muted-foreground",
-                )}
-              >
-                {task.name}
-              </span>
-            </div>
+            <TaskBadge name={task.name} completed={task.completed} />
           </SelectItem>
         ))}
       </SelectContent>

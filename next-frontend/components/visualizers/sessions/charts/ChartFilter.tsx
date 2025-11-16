@@ -36,11 +36,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { Badge } from "@/components/shadcn/badge";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { ProjectPicker } from "@/components/visualizers/projects/ProjectPicker";
 import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
+import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 
 export const ChartFilter: FC = () => {
@@ -209,17 +209,13 @@ export const ChartFilter: FC = () => {
             {filter.data.tasks && filter.data.tasks.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {filter.data.tasks.map((task) => (
-                  <Badge
-                    key={task.id}
-                    className="flex items-center gap-1"
-                    variant="secondary"
-                  >
-                    <span className="truncate max-w-[150px]">{task.name}</span>
+                  <div key={task.id} className="flex items-center gap-1">
+                    <TaskBadge name={task.name} completed={task.completed} />
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-destructive"
                       onClick={() => onRemoveTask(task.id)}
                     />
-                  </Badge>
+                  </div>
                 ))}
               </div>
             )}

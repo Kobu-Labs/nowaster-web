@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-import { CheckCircle2 } from "lucide-react";
+import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
 import type { FC } from "react";
 
 export type ProjectPickerUiProviderProps = {
@@ -42,16 +42,11 @@ export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (
         </SelectItem>
         {props.availableProjects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: project.color }}
-              />
-              <span className="flex-1">{project.name}</span>
-              {project.completed && (
-                <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
-              )}
-            </div>
+            <ProjectBadge
+              color={project.color}
+              name={project.name}
+              completed={project.completed}
+            />
           </SelectItem>
         ))}
       </SelectContent>
