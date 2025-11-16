@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { useFeed } from "@/components/hooks/feed/useFeed";
 import { Loader2 } from "lucide-react";
 import { SessionCompletedFeedCard } from "@/components/visualizers/feed/events/SessionCompletedEventCard";
+import { TaskCompletedFeedCard } from "@/components/visualizers/feed/events/TaskCompletedEventCard";
+import { ProjectCompletedFeedCard } from "@/components/visualizers/feed/events/ProjectCompletedEventCard";
 import type { ReadFeedEvent } from "@/api/definitions/models/feed";
 
 export const Feed: FC = () => {
@@ -90,8 +92,37 @@ export const Feed: FC = () => {
           }
         }
       }
-      case "session_updated": {
-        return null;
+      case "task_completed": {
+        switch (event.source_type) {
+          case "placeholder": {
+            return null;
+          }
+          case "user": {
+            return (
+              <TaskCompletedFeedCard
+                event={event}
+                event_data={event.event_data}
+                user={event.source_data}
+              />
+            );
+          }
+        }
+      }
+      case "project_completed": {
+        switch (event.source_type) {
+          case "placeholder": {
+            return null;
+          }
+          case "user": {
+            return (
+              <ProjectCompletedFeedCard
+                event={event}
+                event_data={event.event_data}
+                user={event.source_data}
+              />
+            );
+          }
+        }
       }
     }
   };
