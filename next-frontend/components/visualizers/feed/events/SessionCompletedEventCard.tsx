@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle, Clock } from "lucide-react";
+import { Clock, ClockCheck } from "lucide-react";
 import type { FC } from "react";
 
 import type {
@@ -49,7 +49,7 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-medium text-sm">{user.username}</span>
-              <CheckCircle className="h-4 w-4 text-blue-500" />
+              <ClockCheck className="h-4 w-4 text-green-500" />
               <span className="text-sm text-muted-foreground">
                 Completed a session
               </span>
