@@ -10,7 +10,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/shadcn/alert-dialog";
 import { Badge } from "@/components/shadcn/badge";
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -33,6 +32,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { FC } from "react";
+import { useState } from "react";
 import { useUpdateTask } from "@/components/hooks/task/useUpdateTask";
 import { useDeleteTask } from "@/components/hooks/task/useDeleteTask";
 
@@ -45,6 +45,7 @@ type TaskCardProps = {
 export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleToggleComplete = (completed: boolean) => {
     updateTask.mutate({
@@ -76,74 +77,86 @@ export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
                 )}
               </div>
             </div>
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                <Button className="h-6 w-6 p-0" size="sm" variant="outline">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link
-                    className="flex items-center gap-2 cursor-pointer"
-                    href={`/home/projects/${task.project_id}/tasks/${task.id}`}
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Details
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="flex items-center gap-2 cursor-pointer"
+            <>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger
+                  asChild
                   onClick={(e) => {
                     e.preventDefault();
-                    onEdit();
+                    e.stopPropagation();
                   }}
                 >
-                  <Edit className="h-4 w-4" />
-                  Edit Task
-                </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      asChild
-                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                      onSelect={(e) => {
+                  <Button className="h-6 w-6 p-0" size="sm" variant="outline">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      className="flex items-center gap-2 cursor-pointer"
+                      href={`/home/projects/${task.project_id}/tasks/${task.id}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Details
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onEdit();
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit Task
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Task
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you sure you want to delete "{task.name}
+                      "?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone and will remove the task and
+                      all its sessions ({task.sessionCount} sessions).
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={(e) => {
                         e.preventDefault();
+                        deleteTask.mutate({ id: task.id });
+                        setDeleteDialogOpen(false);
                       }}
                     >
-                      <div>
-                        <Trash2 className="h-4 w-4" />
-                        Delete Task
-                      </div>
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you sure you want to delete "{task.name}
-                        "?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone and will remove the task
-                        and all its sessions ({task.sessionCount} sessions).
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          deleteTask.mutate({ id: task.id });
-                        }}
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
           </div>
 
           {task.description && (
@@ -162,11 +175,17 @@ export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
 
           <div
             className="pt-3 border-t"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <Button
               className="w-full"
-              onClick={() => handleToggleComplete(!task.completed)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleComplete(!task.completed);
+              }}
               size="sm"
               variant="outline"
             >

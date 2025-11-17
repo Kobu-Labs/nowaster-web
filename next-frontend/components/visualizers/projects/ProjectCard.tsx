@@ -12,7 +12,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/shadcn/alert-dialog";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
@@ -36,6 +35,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { FC } from "react";
+import { useState } from "react";
 
 type ProjectCardProps = {
   onEdit: () => void;
@@ -45,6 +45,7 @@ type ProjectCardProps = {
 export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleToggleComplete = (completed: boolean) => {
     updateProject.mutate({
@@ -84,74 +85,86 @@ export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
                 )}
               </div>
             </div>
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                <Button className="h-6 w-6 p-0" size="sm" variant="outline">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link
-                    className="flex items-center gap-2 cursor-pointer"
-                    href={`/home/projects/${project.id}`}
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Details
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="flex items-center gap-2 cursor-pointer"
+            <>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger
+                  asChild
                   onClick={(e) => {
                     e.preventDefault();
-                    onEdit();
+                    e.stopPropagation();
                   }}
                 >
-                  <Edit className="h-4 w-4" />
-                  Edit Project
-                </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      asChild
-                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                      onSelect={(e) => {
+                  <Button className="h-6 w-6 p-0" size="sm" variant="outline">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      className="flex items-center gap-2 cursor-pointer"
+                      href={`/home/projects/${project.id}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Details
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onEdit();
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit Project
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Project
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you sure you want to delete "{project.name}
+                      "?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone and will remove the project
+                      and all its tasks ({project.taskCount} tasks).
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={(e) => {
                         e.preventDefault();
+                        deleteProject.mutate({ id: project.id });
+                        setDeleteDialogOpen(false);
                       }}
                     >
-                      <div>
-                        <Trash2 className="h-4 w-4" />
-                        Delete Project
-                      </div>
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you sure you want to delete "{project.name}
-                        "?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone and will remove the project
-                        and all its tasks ({project.taskCount} tasks).
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          deleteProject.mutate({ id: project.id });
-                        }}
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
           </div>
 
           {project.description && (
@@ -189,11 +202,15 @@ export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
 
           <div
             className="flex items-center gap-2 pt-3 border-t"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <Checkbox
               checked={project.completed}
               onCheckedChange={handleToggleComplete}
+              onClick={(e) => e.stopPropagation()}
             />
             <span className="text-sm">Mark as completed</span>
           </div>
