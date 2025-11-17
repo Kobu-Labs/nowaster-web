@@ -161,11 +161,13 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
                 onClick={() => handleToggleComplete(!project.completed)}
                 variant="outline"
               >
-                {project.completed ? (
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                ) : (
-                  <Circle className="h-4 w-4 mr-2" />
-                )}
+                {project.completed
+                  ? (
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                    )
+                  : (
+                      <Circle className="h-4 w-4 mr-2" />
+                    )}
                 {project.completed ? "Mark as incomplete" : "Mark as completed"}
               </Button>
             </div>
@@ -199,31 +201,32 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
             <CreateTaskDialog projectId={projectId} />
           </div>
 
-          {tasksQuery.data.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                    <ListTodo className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">No tasks yet</h3>
-                    <p className="text-muted-foreground">
-                      Create your first task to start tracking work on this
-                      project.
-                    </p>
-                  </div>
-                  <CreateTaskDialog projectId={projectId} />
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <TaskList
-              onEditTask={setEditingTask}
-              projectColor={projectQuery.data.color}
-              tasks={tasksQuery.data}
-            />
-          )}
+          {tasksQuery.data.length === 0
+            ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                        <ListTodo className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">No tasks yet</h3>
+                        <p className="text-muted-foreground">
+                          Create your first task to start tracking work on this
+                          project.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            : (
+                <TaskList
+                  onEditTask={setEditingTask}
+                  projectColor={projectQuery.data.color}
+                  tasks={tasksQuery.data}
+                />
+              )}
         </div>
 
         {project && (
