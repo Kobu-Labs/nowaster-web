@@ -49,9 +49,9 @@ const updateSessionPrecursor = z.object({
   category: CategoryWithIdSchema.nullish(),
   description: z.string().nullish(),
   id: z.uuid(),
+  projectId: z.string().nullish(),
   startTime: z.coerce.date<Date>().nullish(),
   tags: z.array(TagWithIdSchema).nullish(),
-  projectId: z.string().nullish(),
   taskId: z.string().nullish(),
 });
 
@@ -155,7 +155,7 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 control={form.control}
                 name="projectId"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col gap-2">
+                  <FormItem className="flex flex-col gap-2 flex-1">
                     <FormLabel>Project (Optional)</FormLabel>
                     <FormControl>
                       <ProjectPicker
@@ -174,36 +174,38 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                 )}
               />
 
-              {form.watch("projectId") ? (
-                <FormField
-                  control={form.control}
-                  name="taskId"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col gap-2">
+              {form.watch("projectId")
+                ? (
+                    <FormField
+                      control={form.control}
+                      name="taskId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2 flex-1">
+                          <FormLabel>Task (Optional)</FormLabel>
+                          <FormControl>
+                            <TaskPicker
+                              onSelectTask={(task) => {
+                                field.onChange(task?.id);
+                              }}
+                              projectId={form.watch("projectId") ?? null}
+                              selectedTaskId={field.value}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )
+                : (
+                    <FormItem className="flex flex-col gap-2 flex-1">
                       <FormLabel>Task (Optional)</FormLabel>
                       <FormControl>
-                        <TaskPicker
-                          onSelectTask={(task) => {
-                            field.onChange(task?.id);
-                          }}
-                          projectId={form.watch("projectId") ?? null}
-                          selectedTaskId={field.value}
-                        />
+                        <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
+                          Select a project first
+                        </div>
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
-                />
-              ) : (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Task (Optional)</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center justify-center h-10 px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground">
-                      Select a project first
-                    </div>
-                  </FormControl>
-                </FormItem>
-              )}
             </div>
 
             <FormField
@@ -235,9 +237,9 @@ export const EditStopwatchSession: FC<FormComponentProps> = (props) => {
                     <FormItem className="flex flex-col gap-2">
                       <FormLabel className="flex items-center gap-2">
                         Start Time
-                        {value &&
-                          isAfter(new Date(), value) &&
-                          ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
+                        {value
+                          && isAfter(new Date(), value)
+                          && ` (${formatTimeDifference(differenceInSeconds(new Date(), value))} ago)`}
                       </FormLabel>
                       <FormControl>
                         <DateTimePicker
