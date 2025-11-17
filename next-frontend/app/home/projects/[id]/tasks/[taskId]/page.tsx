@@ -3,14 +3,7 @@
 import { useProjectById } from "@/components/hooks/project/useProjectById";
 import { useTaskById } from "@/components/hooks/task/useTaskById";
 import { useUpdateTask } from "@/components/hooks/task/useUpdateTask";
-import { Skeleton } from "@/components/shadcn/skeleton";
-import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
-import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
-import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
-import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
-import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
-import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
-import type { SessionFilterPrecursor } from "@/state/chart-filter";
+import { Button } from "@/components/shadcn/button";
 import {
   Card,
   CardContent,
@@ -18,18 +11,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/card";
-import { use, useState } from "react";
-import { TagsToSessionPieChart } from "@/components/visualizers/sessions/charts/TagsToSessionPieChart";
+import { Skeleton } from "@/components/shadcn/skeleton";
 import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
+import { FilteredSessionAreaChart } from "@/components/visualizers/sessions/charts/FilteredSessionAreaChart";
+import { TagsToSessionPieChart } from "@/components/visualizers/sessions/charts/TagsToSessionPieChart";
+import { SessionCountCard } from "@/components/visualizers/sessions/kpi/SessionCountCard";
+import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
 import { LogSessionDialog } from "@/components/visualizers/sessions/LogSessionDialog";
+import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
+import { BaseSessionTableColumns } from "@/components/visualizers/sessions/table/BaseSessionColumns";
+import { BaseSessionTable } from "@/components/visualizers/sessions/table/BaseSessionTable";
 import { EditTaskDialog } from "@/components/visualizers/tasks/EditTaskDialog";
-import { CheckCircle2, Circle, Plus, Edit2 } from "lucide-react";
-import { Badge } from "@/components/shadcn/badge";
-import { Button } from "@/components/shadcn/button";
+import { cn } from "@/lib/utils";
+import type { SessionFilterPrecursor } from "@/state/chart-filter";
+import {
+  CheckCircle2,
+  Circle,
+  Edit2,
+  Plus,
+  Square,
+  SquareCheckBig,
+} from "lucide-react";
 import Link from "next/link";
+import { use, useState } from "react";
 
 export default function TaskDetailPage(props: {
-  params: Promise<{ id: string; taskId: string }>;
+  params: Promise<{ id: string; taskId: string; }>;
 }) {
   const { id: projectId, taskId } = use(props.params);
   const taskQuery = useTaskById(taskId);
@@ -118,76 +125,72 @@ export default function TaskDetailPage(props: {
     <>
       <div className="flex grow flex-col p-4 md:p-8 gap-4 md:gap-8">
         <Card className="group hover:gradient-card hover:transition-all duration-300 ease-in-out hover:border-pink-primary">
-          <CardContent className="p-6">
+          <CardHeader className="flex flex-row justify-between">
+            <Link
+              className="inline-flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
+              href={`/home/projects/${project.id}`}
+            >
+              <ProjectBadge
+                color={project.color}
+                completed={project.completed}
+                name={project.name}
+              />
+            </Link>
+            <div className="flex gap-2">
+              <Button onClick={() => setLogSessionOpen(true)} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Log Session
+              </Button>
+              <Button
+                onClick={() => handleToggleComplete(!task.completed)}
+                size="sm"
+                variant="outline"
+              >
+                {task.completed
+                  ? (
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                    )
+                  : (
+                      <Circle className="h-4 w-4 mr-2" />
+                    )}
+                {task.completed ? "Mark as incomplete" : "Mark as completed"}
+              </Button>
+              <Button
+                onClick={() => setEditingTask(true)}
+                size="sm"
+                variant="outline"
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Task
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex-1 space-y-4">
-                <Link
-                  className="inline-flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
-                  href={`/home/projects/${project.id}`}
-                >
-                  <ProjectBadge
-                    color={project.color}
-                    name={project.name}
-                    completed={project.completed}
-                  />
-                </Link>
-
-                <div className="flex items-start gap-3">
-                  {task.completed ? (
-                    <CheckCircle2 className="h-8 w-8 text-green-600 flex-shrink-0 mt-1" />
-                  ) : (
-                    <Circle className="h-8 w-8 text-muted-foreground flex-shrink-0 mt-1" />
-                  )}
-                  <div className="flex-1">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                      {task.name}
-                    </h1>
-                    {task.description && (
-                      <p className="text-muted-foreground mt-2">
-                        {task.description}
-                      </p>
+                <div className="flex items-center justify-start gap-3">
+                  {task.completed
+                    ? (
+                        <SquareCheckBig className="size-8 text-green-600" />
+                      )
+                    : (
+                        <Square className="h-4 w-4 text-green-600" />
+                      )}
+                  <h1
+                    className={cn(
+                      "text-3xl font-bold tracking-tight",
+                      task.completed && "line-through",
                     )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Badge
-                    className={
-                      task.completed ? "bg-green-600 hover:bg-green-700" : ""
-                    }
-                    variant={task.completed ? "default" : "secondary"}
                   >
-                    {task.completed ? "Completed" : "In Progress"}
-                  </Badge>
+                    {task.name}
+                  </h1>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <Button onClick={() => setLogSessionOpen(true)} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Log Session
-                </Button>
-                <Button
-                  onClick={() => handleToggleComplete(!task.completed)}
-                  size="sm"
-                  variant="outline"
-                >
-                  {task.completed ? (
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                  ) : (
-                    <Circle className="h-4 w-4 mr-2" />
-                  )}
-                  {task.completed ? "Mark as incomplete" : "Mark as completed"}
-                </Button>
-                <Button
-                  onClick={() => setEditingTask(true)}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Task
-                </Button>
-              </div>
+            </div>
+            <div className="flex-1">
+              {task.description && (
+                <p className="text-muted-foreground mt-2">{task.description}</p>
+              )}
             </div>
           </CardContent>
         </Card>
