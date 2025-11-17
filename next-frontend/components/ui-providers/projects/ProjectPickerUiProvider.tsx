@@ -13,7 +13,10 @@ export type ProjectPickerUiProviderProps = {
   availableProjects: ProjectWithId[];
   onSelectProject: (project: null | ProjectWithId) => void;
   placeholder?: string;
-  selectedProjectId: string | null;
+  selectedProjectId: null | string;
+  // INFO: this prop can be used to render the badge without the line-through class
+  // can be used in filter pickers, feed events etc
+  skipStrikethrough?: boolean;
 };
 
 export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (
@@ -44,8 +47,9 @@ export const ProjectPickerUiProvider: FC<ProjectPickerUiProviderProps> = (
           <SelectItem key={project.id} value={project.id}>
             <ProjectBadge
               color={project.color}
-              name={project.name}
               completed={project.completed}
+              name={project.name}
+              skipStrikethrough={props.skipStrikethrough}
             />
           </SelectItem>
         ))}

@@ -55,10 +55,10 @@ export const ChartFilter: FC = () => {
   };
 
   const onSelectProject = (project: null | ProjectWithId) => {
-    setFilter((state) => overwriteData(state, { project: project }));
+    setFilter((state) => overwriteData(state, { project }));
   };
 
-  const onSelectTask = (task: TaskWithId | null) => {
+  const onSelectTask = (task: null | TaskWithId) => {
     if (task) {
       setFilter((state) => handleSelectTask(state, task));
     }
@@ -209,8 +209,13 @@ export const ChartFilter: FC = () => {
             {filter.data.tasks && filter.data.tasks.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {filter.data.tasks.map((task) => (
-                  <div key={task.id} className="flex items-center gap-1">
-                    <TaskBadge name={task.name} completed={task.completed} />
+                  <div className="flex items-center gap-1" key={task.id}>
+                    <TaskBadge
+                      completed={task.completed}
+                      name={task.name}
+                      skipStrikethrough
+                    />
+
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-destructive"
                       onClick={() => onRemoveTask(task.id)}
@@ -228,6 +233,7 @@ export const ChartFilter: FC = () => {
               <ProjectPicker
                 onSelectProject={onSelectProject}
                 selectedProjectId={filter.data.project?.id ?? null}
+                skipStrikethrough
               />
             </div>
 
@@ -241,6 +247,7 @@ export const ChartFilter: FC = () => {
                   onSelectTask={onSelectTask}
                   projectId={filter.data.project.id}
                   selectedTaskId={null}
+                  skipStrikethrough
                 />
               </div>
             )}

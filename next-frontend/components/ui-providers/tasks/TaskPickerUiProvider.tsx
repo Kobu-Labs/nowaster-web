@@ -14,6 +14,9 @@ export type TaskPickerUiProviderProps = {
   onSelectTask: (task: null | TaskWithId) => void;
   placeholder?: string;
   selectedTaskId: null | string;
+  // INFO: this prop can be used to render the badge without the line-through class
+  // can be used in filter pickers, feed events etc
+  skipStrikethrough?: boolean;
 };
 
 export const TaskPickerUiProvider: FC<TaskPickerUiProviderProps> = (props) => {
@@ -40,7 +43,11 @@ export const TaskPickerUiProvider: FC<TaskPickerUiProviderProps> = (props) => {
         </SelectItem>
         {props.availableTasks.map((task) => (
           <SelectItem key={task.id} value={task.id}>
-            <TaskBadge name={task.name} completed={task.completed} />
+            <TaskBadge
+              completed={task.completed}
+              name={task.name}
+              skipStrikethrough={props.skipStrikethrough}
+            />
           </SelectItem>
         ))}
       </SelectContent>
