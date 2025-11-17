@@ -27,7 +27,7 @@ backend/src/
 **Key Technologies:**
 - Axum for HTTP server
 - SQLx for database access
-- Clerk for authentication
+- Custom JWT-based authentication (RS256) with OAuth providers (GitHub, Google, Discord)
 - Serde for JSON serialization
 
 ### Frontend Architecture (Next.js)
@@ -49,7 +49,7 @@ next-frontend/
 - Next.js 14 with App Router
 - React Query (TanStack Query) for server state
 - Jotai for client state management
-- Clerk for authentication
+- Custom JWT authentication with OAuth (GitHub, Google, Discord)
 - ShadCN + Tailwind CSS for styling
 - Zod for validation
 
@@ -115,7 +115,21 @@ Frontend tests use the Storybook ecosystem. Backend uses Rust's built-in test fr
 
 ## Authentication
 
-Both frontend and backend use Clerk for authentication. The backend validates JWT tokens from Clerk, while the frontend uses Clerk's React components.
+Custom JWT-based authentication system:
+
+**Backend (`backend/src/auth/`):**
+- JWT generation/validation using RS256 algorithm
+- Access tokens (15 minute expiry) and refresh tokens
+- OAuth providers: GitHub, Google, Discord
+- Token repository for refresh token management
+- Custom middleware for route protection
+
+**Frontend (`next-frontend/components/auth/`):**
+- Custom `AuthProvider` managing authentication state
+- Token storage via HTTP-only cookies
+- OAuth flow handling via `/auth/callback` route
+- Auth hooks: `useAuth()` for accessing auth context
+- Auth guards: `<SignedIn>`, `<SignedOut>` components for conditional rendering
 
 ## Database
 
