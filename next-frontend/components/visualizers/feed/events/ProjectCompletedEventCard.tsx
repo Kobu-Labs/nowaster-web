@@ -38,9 +38,9 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
   user,
 }) => {
   const chartData = event_data.tasks_time_breakdown.map((task) => ({
+    color: randomColor(),
     name: task.task_name,
     value: task.minutes,
-    color: randomColor(),
   }));
 
   const totalMinutes = event_data.tasks_time_breakdown.reduce(
@@ -90,8 +90,9 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
               <div className="flex-1">
                 <ProjectBadge
                   color={event_data.project_color}
-                  name={event_data.project_name}
                   completed
+                  name={event_data.project_name}
+                  skipStrikethrough
                 />
                 {event_data.project_description && (
                   <p className="text-sm text-muted-foreground">
@@ -139,7 +140,7 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
                   <h5 className="font-semibold text-xs mb-1">Tasks</h5>
                   {event_data.tasks_time_breakdown.map((val, index) => {
                     return (
-                      <div key={index} className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" key={index}>
                         <div
                           className="w-3 h-3 rounded-sm flex-shrink-0"
                           style={{ backgroundColor: chartData[index]?.color }}
@@ -152,7 +153,9 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
                     );
                   })}
                   <div className="font-bold pt-1 border-t text-xs">
-                    Total: {formatTime(totalMinutes)}
+                    Total:
+                    {" "}
+                    {formatTime(totalMinutes)}
                   </div>
                 </div>
               </div>
@@ -164,12 +167,12 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
                 <div className="w-[180px] h-[180px] flex-shrink-0">
                   <SessionPieChartUiProvider
                     data={event_data.categories_time_breakdown.map((value) => ({
-                      value: value.minutes,
                       key: value.category_name,
                       metadata: {
                         color: value.category_color,
                         name: value.category_name,
                       },
+                      value: value.minutes,
                     }))}
                   />
                 </div>

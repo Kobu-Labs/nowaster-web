@@ -10,12 +10,15 @@ import { Frown } from "lucide-react";
 type ProjectPickerProps = {
   onSelectProject?: (project: null | ProjectWithId) => void;
   placeholder?: string;
-  selectedProjectId?: string | null
+  selectedProjectId?: null | string;
+  // INFO: this prop can be used to render the badge without the line-through class
+  // can be used in filter pickers, feed events etc
+  skipStrikethrough?: boolean;
 };
 
 export const ProjectPicker: FC<ProjectPickerProps> = (props) => {
   const projects = useProjects();
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<null | string>(null);
 
   const isControlled = props.selectedProjectId !== undefined;
   const value = isControlled
@@ -47,6 +50,7 @@ export const ProjectPicker: FC<ProjectPickerProps> = (props) => {
       onSelectProject={onSelectProject}
       placeholder={props.placeholder}
       selectedProjectId={value}
+      skipStrikethrough={props.skipStrikethrough}
     />
   );
 };
