@@ -16,25 +16,28 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/shadcn/sidebar";
+import { CreateProjectDialog } from "@/components/visualizers/projects/CreateProjectDialog";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
+import { CreateTaskDialog } from "@/components/visualizers/tasks/CreateTaskDialog";
 import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import { prefetchProjectDetails } from "@/lib/prefetch/prefetchProjectDetails";
 import { prefetchProjectTasks } from "@/lib/prefetch/prefetchProjectTasks";
 import { prefetchTask } from "@/lib/prefetch/prefetchTask";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, Folders, Search } from "lucide-react";
+import { Calendar, ChevronLeft, Clock, Folders, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type FC, useMemo, useState } from "react";
+import { format, formatDistanceToNow } from "date-fns";
 
 type ProjectSidebarProps = {
   projects: ProjectWithTaskCount[];
 };
 
 export const ProjectSidebar: FC<ProjectSidebarProps> = ({ projects }) => {
-  const [selectedProject, setSelectedProject] =
-    useState<null | ProjectWithTaskCount>(null);
+  const [selectedProject, setSelectedProject]
+    = useState<null | ProjectWithTaskCount>(null);
 
   return (
     <Sidebar
@@ -43,19 +46,21 @@ export const ProjectSidebar: FC<ProjectSidebarProps> = ({ projects }) => {
       variant="sidebar"
     >
       <div className="relative h-full w-full overflow-hidden">
-        <SidebarHeader>
+        <SidebarHeader className="space-y-2">
           <Button
             asChild
             className="w-full flex items-center justify-start gap-2 py-1 m-0"
-            variant="secondary"
             onClick={() => setSelectedProject(null)}
+            variant="secondary"
           >
             <div>
-              {selectedProject ? (
-                <ChevronLeft className="size-4" />
-              ) : (
-                <Folders className="size-4" />
-              )}
+              {selectedProject
+                ? (
+                    <ChevronLeft className="size-4" />
+                  )
+                : (
+                    <Folders className="size-4" />
+                  )}
               Project Dashboard
             </div>
           </Button>
@@ -75,7 +80,7 @@ export const ProjectSidebar: FC<ProjectSidebarProps> = ({ projects }) => {
 
           <div className="w-1/2 h-full shrink-0 flex flex-col">
             {selectedProject && (
-              <TasksSidebarContent projectId={selectedProject.id} />
+              <TasksSidebarContent project={selectedProject} />
             )}
           </div>
         </div>
@@ -85,14 +90,14 @@ export const ProjectSidebar: FC<ProjectSidebarProps> = ({ projects }) => {
 };
 
 const ProjectsSidebarContent: FC<
-  { onSelectProject: (val: ProjectWithTaskCount) => void } & ProjectSidebarProps
+  { onSelectProject: (val: ProjectWithTaskCount) => void; } & ProjectSidebarProps
 > = ({ onSelectProject, projects }) => {
   const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const prefetch = (projectId: string) => {
-    prefetchProjectTasks(projectId);
-    prefetchProjectDetails(projectId);
+    void prefetchProjectTasks(projectId);
+    void prefetchProjectDetails(projectId);
   };
 
   const filteredProjects = useMemo(
@@ -105,6 +110,7 @@ const ProjectsSidebarContent: FC<
 
   return (
     <SidebarContent>
+      <CreateProjectDialog />
       <SidebarGroup>
         <SidebarGroupLabel>Projets</SidebarGroupLabel>
 
@@ -143,18 +149,20 @@ const ProjectsSidebarContent: FC<
                       <div className="flex items-center gap-2">
                         <ProjectAvatar
                           color={project.color}
-                          name={project.name}
                           imageUrl={project.image_url}
+                          name={project.name}
                           size={35}
                         />
                         <div className="flex flex-col gap-1">
                           <ProjectBadge
                             color={project.color}
-                            name={project.name}
                             completed={project.completed}
+                            name={project.name}
                           />
                           <Badge className="text-xs w-fit" variant="outline">
-                            {project.taskCount} tasks
+                            {project.taskCount}
+                            {" "}
+                            tasks
                           </Badge>
                         </div>
                       </div>
@@ -170,8 +178,10 @@ const ProjectsSidebarContent: FC<
   );
 };
 
-const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
-  const tasks = useTasksByProject(props.projectId);
+const TasksSidebarContent: FC<{ project: ProjectWithTaskCount; }> = ({
+  project,
+}) => {
+  const tasks = useTasksByProject(project.id);
 
   if (!tasks.data || tasks.isPending) {
     // TODO: show spinners
@@ -180,13 +190,49 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
 
   return (
     <SidebarContent className="overflow-y-auto flex-1">
-      <SidebarGroup className="my-2">
+      <div className="flex flex-col items-start gap-3 my-6 px-4">
+        <div className="flex items-center gap-2">
+          <ProjectAvatar
+            color={project.color}
+            imageUrl={project.image_url}
+            name={project.name}
+          />
+          <ProjectBadge
+            color={project.color}
+            completed={project.completed}
+            name={project.name}
+            size="lg"
+            skipStrikethrough
+          />
+        </div>
+        <div className="flex flex-col gap-1.5 w-full text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-3 w-3" />
+            <span>
+              Created
+              {" "}
+              {format(project.created_at, "MMM d, yyyy 'at' h:mm a")}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3" />
+            <span>
+              Updated
+              {" "}
+              {formatDistanceToNow(project.updated_at, { addSuffix: true })}
+            </span>
+          </div>
+        </div>
+      </div>
+      <SidebarSeparator />
+      <SidebarGroup>
         <SidebarGroupLabel>Tasks</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
+            <CreateTaskDialog projectId={project.id} />
             {tasks.data.map((task) => (
               <Link
-                href={`/home/projects/${props.projectId}/tasks/${task.id}`}
+                href={`/home/projects/${project.id}/tasks/${task.id}`}
                 key={task.name}
                 onMouseEnter={() => prefetchTask(task.id)}
               >
@@ -196,15 +242,15 @@ const TasksSidebarContent: FC<{ projectId: string }> = (props) => {
                     className="w-full flex items-center justify-start "
                     variant="outline"
                   >
-                    <div key={task.id} className="min-w-0 w-full">
+                    <div className="min-w-0 w-full" key={task.id}>
                       <div
                         className={cn(
                           "flex items-center gap-2 py-3 rounded-lg hover:bg-accent transition-colors cursor-pointer min-w-0 w-full",
                         )}
                       >
                         <TaskBadge
-                          name={task.name}
                           completed={task.completed}
+                          name={task.name}
                         />
                         <Badge
                           className="text-xs flex-shrink-0 ml-auto"
