@@ -1,4 +1,5 @@
 import { Badge } from "@/components/shadcn/badge";
+import { cn } from "@/lib/utils";
 import { Folder, FolderCheck } from "lucide-react";
 import type { FC } from "react";
 
@@ -6,12 +7,16 @@ type ProjectBadgeProps = {
   color: string;
   name: string;
   completed?: boolean;
+  // INFO: this prop can be used to render the badge without the line-through class
+  // can be used in filter pickers, feed events etc
+  skipStrikethrough?: boolean;
 };
 
 export const ProjectBadge: FC<ProjectBadgeProps> = ({
   color,
   name,
   completed,
+  skipStrikethrough,
 }) => {
   return (
     <Badge
@@ -27,7 +32,9 @@ export const ProjectBadge: FC<ProjectBadgeProps> = ({
       ) : (
         <Folder className="size-4" />
       )}
-      {name}
+      <span className={cn(completed && !skipStrikethrough && "line-through")}>
+        {name}
+      </span>
     </Badge>
   );
 };

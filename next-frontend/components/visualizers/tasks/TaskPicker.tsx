@@ -12,11 +12,14 @@ type TaskPickerProps = {
   placeholder?: string;
   projectId: null | string;
   selectedTaskId?: null | string;
+  // INFO: this prop can be used to render the badge without the line-through class
+  // can be used in filter pickers, feed events etc
+  skipStrikethrough?: boolean;
 };
 
 export const TaskPicker: FC<TaskPickerProps> = (props) => {
   const tasks = useTasksByProject(props.projectId);
-  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<null | string>(null);
 
   const isControlled = props.selectedTaskId !== undefined;
   const value = isControlled ? (props.selectedTaskId ?? null) : selectedTask;
@@ -46,6 +49,7 @@ export const TaskPicker: FC<TaskPickerProps> = (props) => {
       onSelectTask={onSelectTask}
       placeholder={props.placeholder}
       selectedTaskId={value}
+      skipStrikethrough={props.skipStrikethrough}
     />
   );
 };
