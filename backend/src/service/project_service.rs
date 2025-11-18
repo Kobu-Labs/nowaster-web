@@ -132,6 +132,7 @@ impl ProjectService {
                 .await?;
 
             // Calculate time per category
+            let total_sessions = sessions.len() as i64;
             let mut category_map: std::collections::HashMap<Uuid, (String, String, f64)> =
                 std::collections::HashMap::new();
 
@@ -171,9 +172,10 @@ impl ProjectService {
                     data: FeedEventType::ProjectCompleted(ProjectEventData {
                         project_id: res.id,
                         project_name: res.name.clone(),
-                        project_description: res.description.clone(),
                         project_color: res.color.clone(),
                         project_image_url: res.image_url.clone(),
+                        created_at: res.created_at,
+                        total_sessions,
                         tasks_time_breakdown,
                         categories_time_breakdown,
                     }),

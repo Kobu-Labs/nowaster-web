@@ -60,9 +60,10 @@ pub struct TaskEventData {
 pub struct ProjectEventData {
     pub project_id: Uuid,
     pub project_name: String,
-    pub project_description: Option<String>,
     pub project_color: String,
     pub project_image_url: Option<String>,
+    pub created_at: DateTime<Local>,
+    pub total_sessions: i64,
     pub tasks_time_breakdown: Vec<TaskTimeBreakdown>,
     pub categories_time_breakdown: Vec<CategoryTimeBreakdown>,
 }
