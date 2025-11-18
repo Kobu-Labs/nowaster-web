@@ -158,7 +158,7 @@ impl TaskService {
                             task_id: res.id,
                             task_name: res.name.clone(),
                             task_description: res.description.clone(),
-                            hours_of_work: task_detail.total_time_minutes as f64 / 60.0,
+                            hours_of_work: task_detail.total_time_minutes / 60.0,
                             project: FeedProject {
                                 id: project.id,
                                 name: project.name.clone(),

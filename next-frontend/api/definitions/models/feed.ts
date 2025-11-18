@@ -22,13 +22,26 @@ export const ReadFeedReactionSchema = z.object({
   user: ReadUserAvatarSchema,
 });
 
+export const FeedSessionProjectSchema = z.object({
+  color: z.string(),
+  id: z.string().uuid(),
+  name: z.string(),
+});
+
+export const FeedSessionTaskSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+});
+
 export const SessionCompletedEventSchema = z.object({
   category: CategoryWithIdSchema.omit({ last_used_at: true }),
   description: z.string().nullish(),
   end_time: z.coerce.date<Date>(),
+  project: FeedSessionProjectSchema.nullable().optional(),
   session_id: z.string(),
   start_time: z.coerce.date<Date>(),
   tags: z.array(TagWithIdSchema),
+  task: FeedSessionTaskSchema.nullable().optional(),
 });
 
 export const FeedProjectSchema = z.object({

@@ -116,6 +116,8 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         stopwatch_repo.clone(),
         event_service.clone(),
         user_service.clone(),
+        project_repo.clone(),
+        task_repo.clone(),
     );
 
     let task_service = TaskService::new(
