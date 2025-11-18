@@ -1,9 +1,5 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
-import { FolderCheck } from "lucide-react";
-import type { FC } from "react";
-import { Cell, Label, Pie, PieChart, ResponsiveContainer } from "recharts";
 import type {
   ProjectCompletedEventSchema,
   ReadFeedEvent,
@@ -20,10 +16,15 @@ import {
   SessionPieChartUiProvider,
 } from "@/components/ui-providers/session/charts/SessionPieChartUiProvider";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
+import { AnimatedTotal } from "@/components/visualizers/feed/AnimatedTotal";
 import { ReactionBar } from "@/components/visualizers/feed/ReactionBar";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
 import { formatTime, getInitials, randomColor } from "@/lib/utils";
+import { format, formatDistanceToNow } from "date-fns";
+import { FolderCheck } from "lucide-react";
+import type { FC } from "react";
+import { Cell, Label, Pie, PieChart, ResponsiveContainer } from "recharts";
 import type { z } from "zod";
 
 type ProjectCompletedFeedCardProps = {
@@ -94,11 +95,22 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
                   name={event_data.project_name}
                   skipStrikethrough
                 />
-                {event_data.project_description && (
-                  <p className="text-sm text-muted-foreground">
-                    {event_data.project_description}
-                  </p>
-                )}
+                <div className="flex flex-col gap-0.5 mt-1 text-xs text-muted-foreground">
+                  <span>
+                    Created At:
+                    {" "}
+                    {format(event_data.created_at, "MMM d, yyyy")}
+                  </span>
+                  <span>
+                    Total Sessions:
+                    {event_data.total_sessions}
+                  </span>
+                  <span className="font-bold text-xs flex items-center gap-1">
+                    Total:
+                    {" "}
+                    <AnimatedTotal minutes={totalMinutes} />
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -137,12 +149,12 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
                   </ResponsiveContainer>
                 </div>
                 <div className="flex flex-col gap-1 text-sm flex-1">
-                  <h5 className="font-semibold text-xs mb-1">Tasks</h5>
+                  <h5 className="font-semibold text-xs ">Tasks</h5>
                   {event_data.tasks_time_breakdown.map((val, index) => {
                     return (
                       <div className="flex items-center gap-2" key={index}>
                         <div
-                          className="w-3 h-3 rounded-sm flex-shrink-0"
+                          className="w-3 h-3 rounded-sm flex-shrink-0 "
                           style={{ backgroundColor: chartData[index]?.color }}
                         />
                         <span className="truncate">{val.task_name}</span>
@@ -152,16 +164,10 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
                       </div>
                     );
                   })}
-                  <div className="font-bold pt-1 border-t text-xs">
-                    Total:
-                    {" "}
-                    {formatTime(totalMinutes)}
-                  </div>
                 </div>
               </div>
             )}
 
-            {/* Category breakdown pie chart */}
             {event_data.categories_time_breakdown.length > 0 && (
               <div className="flex items-center gap-2 flex-1 min-w-[300px]">
                 <div className="w-[180px] h-[180px] flex-shrink-0">

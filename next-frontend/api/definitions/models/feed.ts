@@ -74,12 +74,13 @@ export const CategoryTimeBreakdownSchema = z.object({
 
 export const ProjectCompletedEventSchema = z.object({
   categories_time_breakdown: z.array(CategoryTimeBreakdownSchema),
+  created_at: z.coerce.date(),
   project_color: z.string(),
-  project_description: z.string().nullable(),
   project_id: z.string().uuid(),
   project_image_url: z.string().nullable(),
   project_name: z.string(),
   tasks_time_breakdown: z.array(TaskTimeBreakdownSchema),
+  total_sessions: z.number(),
 });
 
 export const SourceTypeMappingSchema = z.discriminatedUnion("source_type", [
