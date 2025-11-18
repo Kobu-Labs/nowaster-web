@@ -214,7 +214,6 @@ const ProjectsPage: FC = () => {
                       : "Create your first project to start organizing your tasks."}
                   </p>
                 </div>
-                {!searchQuery && <CreateProjectDialog />}
               </div>
             </CardContent>
           </Card>
