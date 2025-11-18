@@ -43,6 +43,8 @@ pub struct SessionEventData {
     pub description: Option<String>,
     pub start_time: DateTime<Local>,
     pub end_time: DateTime<Local>,
+    pub project: Option<FeedSessionProject>,
+    pub task: Option<FeedSessionTask>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -103,6 +105,19 @@ pub struct FeedSessionTag {
     pub id: Uuid,
     pub label: String,
     pub color: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedSessionProject {
+    pub id: Uuid,
+    pub name: String,
+    pub color: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedSessionTask {
+    pub id: Uuid,
+    pub name: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
