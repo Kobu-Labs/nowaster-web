@@ -54,8 +54,8 @@ export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
     });
   };
 
-  const completionPercentage =
-    project.taskCount > 0
+  const completionPercentage
+    = project.taskCount > 0
       ? Math.round((project.completedTaskCount / project.taskCount) * 100)
       : 0;
 
@@ -63,145 +63,155 @@ export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
     <Link href={`/home/projects/${project.id}`}>
       <Card
         className={cn(
-          "group backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer",
+          "group backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer h-full flex flex-col",
         )}
         style={{ borderLeft: `4px solid ${project.color}` }}
       >
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <ProjectAvatar
-                color={project.color}
-                imageUrl={project.image_url}
-                name={project.name}
-              />
-              <div className="flex flex-col">
-                <h3 className="font-semibold text-lg">{project.name}</h3>
-                {project.completed && (
-                  <Badge className="w-fit" variant="secondary">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Completed
-                  </Badge>
-                )}
+        <CardContent className="p-6 flex flex-col flex-1">
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <ProjectAvatar
+                  color={project.color}
+                  imageUrl={project.image_url}
+                  name={project.name}
+                />
+                <div className="flex flex-col">
+                  <h3 className="font-semibold text-lg">{project.name}</h3>
+                  {project.completed && (
+                    <Badge className="w-fit" variant="secondary">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Completed
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
-            <>
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger
-                  asChild
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  <Button className="h-6 w-6 p-0" size="sm" variant="outline">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link
+              <>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger
+                    asChild
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Button className="h-6 w-6 p-0" size="sm" variant="outline">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        className="flex items-center gap-2 cursor-pointer"
+                        href={`/home/projects/${project.id}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Details
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       className="flex items-center gap-2 cursor-pointer"
-                      href={`/home/projects/${project.id}`}
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Details
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="flex items-center gap-2 cursor-pointer"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onEdit();
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit Project
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete Project
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <AlertDialog
-                open={deleteDialogOpen}
-                onOpenChange={setDeleteDialogOpen}
-              >
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you sure you want to delete "{project.name}
-                      "?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone and will remove the project
-                      and all its tasks ({project.taskCount} tasks).
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       onClick={(e) => {
                         e.preventDefault();
-                        deleteProject.mutate({ id: project.id });
-                        setDeleteDialogOpen(false);
+                        e.stopPropagation();
+                        onEdit();
                       }}
                     >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </>
-          </div>
-
-          {project.description && (
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {project.description}
-            </p>
-          )}
-
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <ListTodo className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Tasks</span>
+                      <Edit className="h-4 w-4" />
+                      Edit Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Project
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialog
+                  onOpenChange={setDeleteDialogOpen}
+                  open={deleteDialogOpen}
+                >
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you sure you want to delete &quot;
+                        {project.name}
+                        &quot;?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone and will remove the project
+                        and all its tasks (
+                        {project.taskCount}
+                        {" "}
+                        tasks).
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          deleteProject.mutate({ id: project.id });
+                          setDeleteDialogOpen(false);
+                        }}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
             </div>
-            <Badge variant="outline">
-              {project.completedTaskCount} /{project.taskCount}
-            </Badge>
-          </div>
 
-          {project.taskCount > 0 && (
-            <div className="mb-4">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="h-2 rounded-full transition-all duration-300"
-                  style={{
-                    backgroundColor: project.color,
-                    width: `${completionPercentage}%`,
-                  }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1 text-right">
-                {completionPercentage}% complete
+            {project.description && (
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                {project.description}
               </p>
+            )}
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ListTodo className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Tasks</span>
+              </div>
+              <Badge variant="outline">
+                {project.completedTaskCount}
+                {" "}
+                /
+                {project.taskCount}
+              </Badge>
             </div>
-          )}
+
+            {project.taskCount > 0 && (
+              <div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      backgroundColor: project.color,
+                      width: `${completionPercentage}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 text-right">
+                  {completionPercentage}
+                  % complete
+                </p>
+              </div>
+            )}
+          </div>
 
           <div
-            className="flex items-center gap-2 pt-3 border-t"
+            className="flex items-center gap-2 pt-3 border-t mt-3"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
