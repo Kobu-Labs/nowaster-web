@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Textarea } from "@/components/shadcn/textarea";
 import { ColorPicker } from "@/components/visualizers/ColorPicker";
+import { randomColor } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import type { FC } from "react";
@@ -50,7 +51,7 @@ export const CreateProjectDialog: FC<CreateProjectDialogProps> = ({
 
   const form = useForm<CreateProjectForm>({
     defaultValues: {
-      color: "#EC4899",
+      color: randomColor(),
       description: "",
       imageUrl: "",
       name: "",
@@ -62,8 +63,8 @@ export const CreateProjectDialog: FC<CreateProjectDialogProps> = ({
     createProject.mutate(
       {
         color: values.color,
-        description: values.description?.trim() || undefined,
-        imageUrl: values.imageUrl?.trim() || undefined,
+        description: values.description?.trim() ? values.description.trim() : undefined,
+        imageUrl: values.imageUrl?.trim() ? values.imageUrl.trim() : undefined,
         name: values.name,
       },
       {
@@ -79,7 +80,7 @@ export const CreateProjectDialog: FC<CreateProjectDialogProps> = ({
   return (
     <Dialog modal={false} onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2 mx-2">
           <Plus className="h-4 w-4" />
           New Project
         </Button>
