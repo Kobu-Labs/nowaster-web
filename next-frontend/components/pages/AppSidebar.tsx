@@ -258,7 +258,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Categories</SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="space-y-2 px-2">
+            <div className="px-2">
               {sortedCategories
                 .slice(0, SHOW_CATEGORY_AMOUNT)
                 .map((category) => (
@@ -307,7 +307,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Tags</SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="space-y-2 px-2">
+            <div className="px-2">
               {sortedTags.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
                 <Link
                   className={cn(
