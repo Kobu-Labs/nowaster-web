@@ -2,7 +2,6 @@
 
 import type { CategoryWithId } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
-import { NewReleaseDialog } from "@/components/release/NewReleaseDialog";
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
 import { useIsMobile } from "@/components/shadcn/use-mobile";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
@@ -132,150 +131,145 @@ export default function DashboardPage() {
   }, [todayMinutes, yesterdayMinutes]);
 
   return (
-    <>
-      <NewReleaseDialog />
-      <div className="flex grow flex-col p-4 md:p-8 gap-4 md:gap-8">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <TotalSessionTimeCard
-            description={percentageChange ?? "Loading..."}
-            filter={todayFilter}
-            title="Time tracked today"
-            variant="default"
+    <div className="flex grow flex-col p-4 md:p-8 gap-4 md:gap-8">
+      <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <TotalSessionTimeCard
+          description={percentageChange ?? "Loading..."}
+          filter={todayFilter}
+          title="Time tracked today"
+          variant="default"
+        />
+        <TotalSessionsKpiCard />
+        <TotalSessionTimeKpiCard />
+        <CurrentStreakKpiCard />
+        <FilterContextProvider>
+          <FilteredSessionAreaChart
+            className="col-span-full h-[400px]"
+            initialGranularity="days-in-month"
           />
-          <TotalSessionsKpiCard />
-          <TotalSessionTimeKpiCard />
-          <CurrentStreakKpiCard />
-          <FilterContextProvider>
-            <FilteredSessionAreaChart
-              className="col-span-full h-[400px]"
-              initialGranularity="days-in-month"
-            />
-          </FilterContextProvider>
-          <FilterContextProvider initialFilter={timelineFilter}>
-            <div className="col-span-full">
-              <FilteredSessionTimeline />
-            </div>
-          </FilterContextProvider>
-          <Card className="col-span-full md:col-span-2 flex flex-col">
-            <CardHeader className="p-0 pt-4 pl-4">
-              <h2 className="text-xl font-bold tracking-tight">
-                Today&apos;s categories
-              </h2>
-            </CardHeader>
-            <CardContent className="p-2 flex flex-col justify-center grow">
-              <SessionPieChart
-                filter={todayFilter}
-                getKey={(session) => ({
-                  key: session.category.name,
-                  metadata: {
-                    category: session.category,
-                    color: session.category.color,
-                  },
-                })}
-                renderLegend={(props: {
-                  data: AmountByCategory<{
-                    category: CategoryWithId;
-                  }>[];
-                }) => {
-                  const context = use(ActiveIndexContext);
-
-                  return (
-                    <div className="flex flex-col items-center grow w-full gap-1">
-                      {props.data.map((val, i) => (
-                        <div
-                          className={cn(
-                            "hover:bg-pink-muted flex items-center justify-between w-full rounded px-2",
-                            context?.index === i && "bg-pink-muted",
-                          )}
-                          key={val.key}
-                          onClick={() =>
-                            isMobile
-                            && context?.setIndex(i === context.index ? null : i)}
-                          onMouseEnter={() => context?.setIndex(i)}
-                          onMouseLeave={() => context?.setIndex(null)}
-                        >
-                          {val.metadata && (
-                            <CategoryBadge
-                              color={val.metadata.category.color}
-                              name={val.metadata.category.name}
-                            />
-                          )}
-                          <p>{formatTime(val.value)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                }}
-              />
-            </CardContent>
-          </Card>
-          <Card className="col-span-full md:col-span-2 flex flex-col">
-            <CardHeader className="p-0 pt-4 pl-4">
-              <h2 className="text-xl font-bold tracking-tight">
-                Today&apos;s tags
-              </h2>
-            </CardHeader>
-            <CardContent className="p-2 flex flex-col justify-center grow">
-              <SessionPieChart
-                filter={todayFilter}
-                getKey={(session) =>
-                  session.tags.length
-                    ? session.tags.map((tag) => ({
-                        key: tag.label,
-                        metadata: { color: tag.color, name: tag.label },
-                      }))
-                    : {
-                        key: "-",
-                        metadata: { color: "#f129c1", name: "-" },
-                      }}
-                renderLegend={(props: {
-                  data: AmountByCategory<{
-                    color: string;
-                    name: string;
-                  }>[];
-                }) => {
-                  const context = use(ActiveIndexContext);
-
-                  return (
-                    <div className="flex flex-col items-center grow w-full gap-1">
-                      {props.data.map((val, i) => (
-                        <div
-                          className={cn(
-                            "flex items-center justify-between w-full rounded px-2 hover:bg-pink-muted",
-                            context?.index === i && "bg-pink-muted",
-                          )}
-                          key={val.key}
-                          onClick={() =>
-                            isMobile
-                            && context?.setIndex(i === context.index ? null : i)}
-                          onMouseEnter={() => context?.setIndex(i)}
-                          onMouseLeave={() => context?.setIndex(null)}
-                        >
-                          {val.metadata && (
-                            <TagBadge
-                              colors={val.metadata.color}
-                              value={val.metadata.name}
-                              variant="manual"
-                            />
-                          )}
-                          <p>{formatTime(val.value)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                }}
-              />
-            </CardContent>
-          </Card>
+        </FilterContextProvider>
+        <FilterContextProvider initialFilter={timelineFilter}>
           <div className="col-span-full">
-            <h2 className="text-xl my-4 font-bold">
-              See what others are doing
-            </h2>
-            <Feed />
+            <FilteredSessionTimeline />
           </div>
+        </FilterContextProvider>
+        <Card className="col-span-full md:col-span-2 flex flex-col">
+          <CardHeader className="p-0 pt-4 pl-4">
+            <h2 className="text-xl font-bold tracking-tight">
+              Today&apos;s categories
+            </h2>
+          </CardHeader>
+          <CardContent className="p-2 flex flex-col justify-center grow">
+            <SessionPieChart
+              filter={todayFilter}
+              getKey={(session) => ({
+                key: session.category.name,
+                metadata: {
+                  category: session.category,
+                  color: session.category.color,
+                },
+              })}
+              renderLegend={(props: {
+                data: AmountByCategory<{
+                  category: CategoryWithId;
+                }>[];
+              }) => {
+                const context = use(ActiveIndexContext);
+
+                return (
+                  <div className="flex flex-col items-center grow w-full gap-1">
+                    {props.data.map((val, i) => (
+                      <div
+                        className={cn(
+                          "hover:bg-pink-muted flex items-center justify-between w-full rounded px-2",
+                          context?.index === i && "bg-pink-muted",
+                        )}
+                        key={val.key}
+                        onClick={() =>
+                          isMobile
+                          && context?.setIndex(i === context.index ? null : i)}
+                        onMouseEnter={() => context?.setIndex(i)}
+                        onMouseLeave={() => context?.setIndex(null)}
+                      >
+                        {val.metadata && (
+                          <CategoryBadge
+                            color={val.metadata.category.color}
+                            name={val.metadata.category.name}
+                          />
+                        )}
+                        <p>{formatTime(val.value)}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }}
+            />
+          </CardContent>
+        </Card>
+        <Card className="col-span-full md:col-span-2 flex flex-col">
+          <CardHeader className="p-0 pt-4 pl-4">
+            <h2 className="text-xl font-bold tracking-tight">
+              Today&apos;s tags
+            </h2>
+          </CardHeader>
+          <CardContent className="p-2 flex flex-col justify-center grow">
+            <SessionPieChart
+              filter={todayFilter}
+              getKey={(session) =>
+                session.tags.length
+                  ? session.tags.map((tag) => ({
+                      key: tag.label,
+                      metadata: { color: tag.color, name: tag.label },
+                    }))
+                  : {
+                      key: "-",
+                      metadata: { color: "#f129c1", name: "-" },
+                    }}
+              renderLegend={(props: {
+                data: AmountByCategory<{
+                  color: string;
+                  name: string;
+                }>[];
+              }) => {
+                const context = use(ActiveIndexContext);
+
+                return (
+                  <div className="flex flex-col items-center grow w-full gap-1">
+                    {props.data.map((val, i) => (
+                      <div
+                        className={cn(
+                          "flex items-center justify-between w-full rounded px-2 hover:bg-pink-muted",
+                          context?.index === i && "bg-pink-muted",
+                        )}
+                        key={val.key}
+                        onClick={() =>
+                          isMobile
+                          && context?.setIndex(i === context.index ? null : i)}
+                        onMouseEnter={() => context?.setIndex(i)}
+                        onMouseLeave={() => context?.setIndex(null)}
+                      >
+                        {val.metadata && (
+                          <TagBadge
+                            colors={val.metadata.color}
+                            value={val.metadata.name}
+                            variant="manual"
+                          />
+                        )}
+                        <p>{formatTime(val.value)}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }}
+            />
+          </CardContent>
+        </Card>
+        <div className="col-span-full">
+          <h2 className="text-xl my-4 font-bold">See what others are doing</h2>
+          <Feed />
         </div>
       </div>
-    </>
+    </div>
   );
 }
