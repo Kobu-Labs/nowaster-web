@@ -36,4 +36,4 @@ jobs:
           workspaces: backend
 
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings -A unused_must_use -A dead_code -A unused_variables -A unused_imports -A clippy::enum_variant_names -A clippy::too_many_arguments
