@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id)\n                VALUES ($1, $2,$3,$4,$5, $6, $7)\n                RETURNING session.id\n            ",
+  "query": "\n                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id, project_id, task_id)\n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n                RETURNING session.id\n            ",
   "describe": {
     "columns": [
       {
@@ -17,6 +17,8 @@
         "Timestamptz",
         "Text",
         "Varchar",
+        "Uuid",
+        "Uuid",
         "Uuid"
       ]
     },
@@ -24,5 +26,5 @@
       false
     ]
   },
-  "hash": "9428bb52fc70add61ad86ebc6dcb18a571a5dd025dee72d23feb74ef72ebc9e7"
+  "hash": "f564a184815100827a987eae90b37c2271ad50f2ba8d8c514b674a4496c725f0"
 }

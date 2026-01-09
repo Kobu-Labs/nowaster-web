@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n                s.id,\n                s.user_id as \"user_id!\",\n                s.start_time,\n                s.description,\n                s.end_time,\n                s.type as session_type,\n\n                s.category_id,\n                c.name as category,\n                c.color as category_color,\n                c.last_used_at as category_last_used_at,\n\n                t.id as \"tag_id?\",\n                t.label as \"tag_label?\",\n                t.color as \"tag_color?\",\n                t.last_used_at as \"tag_last_used_at?\",\n\n                st.id as \"template_id?\",\n                st.name as \"template_name?\",\n                st.start_date as \"template_start_date?\",\n                st.end_date as \"template_end_date?\",\n                st.interval AS \"template_interval?: RecurringSessionInterval\"\n            FROM session s\n            JOIN category c\n                on c.id = s.category_id\n            LEFT JOIN tag_to_session tts\n                on tts.session_id = s.id\n            LEFT JOIN tag t\n                on tts.tag_id = t.id\n            LEFT JOIN session_template st\n                on st.id = s.template_id\n            WHERE \n                s.id = $1\n                AND type = 'fixed' \n                ",
+  "query": "SELECT\n                s.id,\n                s.user_id as \"user_id!\",\n                s.start_time,\n                s.description,\n                s.end_time,\n                s.type as session_type,\n\n                s.category_id,\n                c.name as category,\n                c.color as category_color,\n                c.last_used_at as category_last_used_at,\n\n                t.id as \"tag_id?\",\n                t.label as \"tag_label?\",\n                t.color as \"tag_color?\",\n                t.last_used_at as \"tag_last_used_at?\",\n\n                st.id as \"template_id?\",\n                st.name as \"template_name?\",\n                st.start_date as \"template_start_date?\",\n                st.end_date as \"template_end_date?\",\n                st.interval AS \"template_interval?: RecurringSessionInterval\",\n\n                s.project_id as \"project_id?\",\n                s.task_id as \"task_id?\"\n            FROM session s\n            JOIN category c\n                on c.id = s.category_id\n            LEFT JOIN tag_to_session tts\n                on tts.session_id = s.id\n            LEFT JOIN tag t\n                on tts.tag_id = t.id\n            LEFT JOIN session_template st\n                on st.id = s.template_id\n            WHERE\n                s.id = $1\n                AND type = 'fixed'\n                ",
   "describe": {
     "columns": [
       {
@@ -109,6 +109,16 @@
             }
           }
         }
+      },
+      {
+        "ordinal": 19,
+        "name": "project_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 20,
+        "name": "task_id?",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -135,8 +145,10 @@
       false,
       false,
       false,
-      false
+      false,
+      true,
+      true
     ]
   },
-  "hash": "a4df9957793dbcafc8505041404b2a4465578eccb562f3a9574774fcc2511834"
+  "hash": "048a3288f8e1fe26348405e7ca67c647d682e532d63c948a0cae80e76803b1af"
 }

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE release\n                SET released = false,\n                    released_at = NULL,\n                    released_by = NULL\n                WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9c09edb2e96141d724e03c6b8f032351833a5cb524950e70b87407189f64e524"
+}

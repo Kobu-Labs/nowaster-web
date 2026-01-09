@@ -15,7 +15,9 @@
                 "friend:new_request",
                 "friend:request_accepted",
                 "session:reaction_added",
-                "system:new_release"
+                "system:new_release",
+                "task:completed",
+                "project:completed"
               ]
             }
           }
