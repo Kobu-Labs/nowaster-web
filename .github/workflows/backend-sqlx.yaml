@@ -2,6 +2,9 @@ name: Backend SQLx Check
 
 on:
   push:
+    branches:
+      - main
+      - production
     paths:
       - 'backend/**'
       - '.github/workflows/backend-sqlx.yaml'

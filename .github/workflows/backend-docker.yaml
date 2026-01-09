@@ -2,6 +2,9 @@ name: Backend Docker Build
 
 on:
   push:
+    branches:
+      - main
+      - production
     paths:
       - 'backend/**'
       - '.github/workflows/backend-docker.yaml'

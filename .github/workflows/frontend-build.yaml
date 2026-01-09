@@ -2,6 +2,9 @@ name: Frontend Build
 
 on:
   push:
+    branches:
+      - main
+      - production
     paths:
       - 'next-frontend/**'
       - '.github/workflows/frontend-build.yaml'

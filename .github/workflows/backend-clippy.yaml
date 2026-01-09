@@ -2,6 +2,9 @@ name: Backend Clippy
 
 on:
   push:
+    branches:
+      - main
+      - production
     paths:
       - 'backend/**'
       - '.github/workflows/backend-clippy.yaml'
