@@ -1,20 +1,20 @@
-name: Frontend Build
+name: Frontend ESLint
 
 on:
   push:
     paths:
       - 'next-frontend/**'
-      - '.github/workflows/frontend-build.yaml'
+      - '.github/workflows/frontend-eslint.yaml'
   pull_request:
     paths:
       - 'next-frontend/**'
-      - '.github/workflows/frontend-build.yaml'
+      - '.github/workflows/frontend-eslint.yaml'
 
 env:
   SKIP_ENV_VALIDATION: true
 
 jobs:
-  build:
+  eslint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,5 +34,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with Next.js
-        run: npx next build --experimental-build-mode compile
+      - name: Run ESLint
+        run: npx eslint .

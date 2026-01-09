@@ -1,17 +1,17 @@
-name: Backend Build
+name: Backend Clippy
 
 on:
   push:
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-build.yaml'
+      - '.github/workflows/backend-clippy.yaml'
   pull_request:
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-build.yaml'
+      - '.github/workflows/backend-clippy.yaml'
 
 jobs:
-  build:
+  clippy:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,11 +25,12 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+          components: clippy
 
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: backend
 
-      - name: Build project
-        run: cargo build --release
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
