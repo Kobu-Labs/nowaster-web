@@ -48,7 +48,13 @@ export const NewReleaseDialog: FC = () => {
 
   return (
     <Dialog onOpenChange={(newOpen) => !newOpen && handleClose()} open={open}>
-      <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] flex flex-col">
+      <DialogContent
+        className="max-w-6xl w-[90vw] max-h-[90vh] flex flex-col"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-5 w-5 text-primary" />
