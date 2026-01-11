@@ -17,7 +17,7 @@ async-trait = "0.1.86"
 serde_json= { version = "1.0.139", features = ["raw_value"] }
 jsonwebtoken = "9.3.1"
 thiserror = "2.0.11"
-sqlx = {version="0.8.3", features=["postgres", "runtime-tokio-rustls", "uuid", "chrono", "ipnetwork"]}
+sqlx = {version="0.8.3", features=["postgres", "runtime-tokio-rustls", "uuid", "chrono", "ipnetwork", "bigdecimal"]}
 sqlx-cli = "0.8.3"
 uuid = { version = "1.14.0",  features = [ "v4", "fast-rng", "macro-diagnostics", "serde"] }
 dotenv = "0.15.0"

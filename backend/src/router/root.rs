@@ -76,6 +76,7 @@ pub struct AppState {
     pub release_service: ReleaseService,
     pub project_service: ProjectService,
     pub task_service: TaskService,
+    pub db_backup_repo: crate::repository::db_backup::DbBackupRepository,
     pub feed: Feed,
 }
 
@@ -91,6 +92,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
     let feed_repo = FeedRepository::new(&db);
     let project_repo = ProjectRepository::new(&db);
     let task_repo = TaskRepository::new(&db);
+    let db_backup_repo = crate::repository::db_backup::DbBackupRepository::new(&db);
 
     let auth_service = AuthService::new(&db);
     let category_service = CategoryService::new(category_repo.clone());
@@ -165,6 +167,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         release_service,
         project_service,
         task_service,
+        db_backup_repo,
         feed: Feed {
             subscription_service,
             visibility_service,

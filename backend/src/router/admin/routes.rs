@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
 use crate::{
-    dto::user::read_user::ReadUserDto,
+    dto::{db_backup::ReadDbBackupDto, user::read_user::ReadUserDto},
     router::{admin::{AdminUser, release::admin_release_router}, response::ApiResponse, root::AppState},
 };
 
@@ -41,6 +41,7 @@ pub fn admin_router() -> Router<AppState> {
         .route("/users/{user_id}", get(get_user_by_id))
         .route("/impersonate/{user_id}", post(start_impersonation))
         .route("/stop-impersonation", post(stop_impersonation))
+        .route("/backups", get(get_backups))
         .nest("/releases", admin_release_router())
 }
 
@@ -148,4 +149,23 @@ async fn stop_impersonation(
         })?;
 
     Ok(StatusCode::NO_CONTENT)
+}
+
+#[instrument(skip(state))]
+async fn get_backups(
+    State(state): State<AppState>,
+    AdminUser(_admin): AdminUser,
+) -> Result<Json<ApiResponse<Vec<ReadDbBackupDto>>>, StatusCode> {
+    let backups = state
+        .db_backup_repo
+        .get_all()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get backups: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    let backups_dto: Vec<ReadDbBackupDto> = backups.into_iter().map(ReadDbBackupDto::from).collect();
+
+    Ok(Json(ApiResponse::Success { data: backups_dto }))
 }
