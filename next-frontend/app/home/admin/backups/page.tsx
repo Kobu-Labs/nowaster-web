@@ -1,0 +1,204 @@
+"use client";
+
+import { AdminApi } from "@/api";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
+import { Badge } from "@/components/shadcn/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn/table";
+import { CheckCircle2, Clock, Database, XCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { formatDistance } from "date-fns";
+import { DbBackup } from "@/api/adminApi";
+
+const BackupsPage: React.FC = () => {
+  const {
+    data: backups,
+    error,
+    isLoading,
+  } = useQuery({
+    queryFn: AdminApi.getBackups,
+    queryKey: ["admin", "backups"],
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "failed": {
+        return (
+          <Badge variant="destructive">
+            <XCircle className="mr-1 h-3 w-3" />
+            Failed
+          </Badge>
+        );
+      }
+      case "pending": {
+        return (
+          <Badge variant="secondary">
+            <Clock className="mr-1 h-3 w-3" />
+            Pending
+          </Badge>
+        );
+      }
+      case "success": {
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600" variant="default">
+            <CheckCircle2 className="mr-1 h-3 w-3" />
+            Success
+          </Badge>
+        );
+      }
+      default: {
+        return <Badge variant="outline">{status}</Badge>;
+      }
+    }
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) {
+      return "N/A";
+    }
+    return formatDistance(date, new Date(), { addSuffix: true });
+  };
+
+  const formatSize = (sizeStr: null | string) => {
+    if (!sizeStr) {
+      return "N/A";
+    }
+    const size = Number.parseFloat(sizeStr);
+    return `${size.toFixed(2)} GB`;
+  };
+
+  const formatDuration = (seconds: null | number) => {
+    if (!seconds) {
+      return "N/A";
+    }
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="mb-2 text-3xl font-bold">Database Backups</h1>
+        <p className="text-muted-foreground">
+          View and monitor database backup status and history.
+        </p>
+      </div>
+
+      {error && (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">
+              Error Loading Backups
+            </CardTitle>
+            <CardDescription>
+              {error instanceof Error
+                ? error.message
+                : "Failed to load backup data"}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            <CardTitle>Backup History</CardTitle>
+          </div>
+          <CardDescription>
+            List of all database backups with their current status.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading
+            ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-muted-foreground">Loading backups...</div>
+                </div>
+              )
+            : !backups || backups.length === 0
+                ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <Database className="mb-2 h-12 w-12 text-muted-foreground" />
+                      <p className="text-muted-foreground">No backups found</p>
+                    </div>
+                  )
+                : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>ID</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Started</TableHead>
+                            <TableHead>Finished</TableHead>
+                            <TableHead>Duration</TableHead>
+                            <TableHead>Size</TableHead>
+                            <TableHead>Trigger</TableHead>
+                            <TableHead>Backup File</TableHead>
+                            <TableHead>Error</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {backups.map((backup: DbBackup) => (
+                            <TableRow key={backup.id}>
+                              <TableCell className="font-medium">{backup.id}</TableCell>
+                              <TableCell>{getStatusBadge(backup.status)}</TableCell>
+                              <TableCell className="text-sm">
+                                {formatDate(backup.startedAt)}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {formatDate(backup.finishedAt)}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {formatDuration(backup.durationSeconds)}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {formatSize(backup.backupSizeGb)}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                <div>
+                                  <div className="font-medium">{backup.triggerBy}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {backup.triggerType}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell
+                                className="max-w-xs truncate text-sm"
+                                title={backup.backupFile}
+                              >
+                                {backup.backupFile}
+                              </TableCell>
+                              <TableCell className="text-sm text-destructive">
+                                {backup.errorMessage ?? "—"}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default BackupsPage;

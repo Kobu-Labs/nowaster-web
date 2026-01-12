@@ -1,3 +1,4 @@
+export * as AdminApi from "./adminApi";
 export * as CategoryApi from "./categoryApi";
 export * as FriendRequestApi from "./friend-request";
 export * as FriendsApi from "./friends";
