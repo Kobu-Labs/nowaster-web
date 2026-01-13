@@ -26,14 +26,14 @@ impl DbBackupRepository {
                 db.trigger_by,
                 db.trigger_type,
                 db.backup_file,
-                db.backup_size_gb,
+                db.backup_size_bytes,
                 db.status,
                 db.error_message,
                 db.started_at,
                 db.finished_at,
                 db.duration_seconds,
-                u.displayname as user_username,
-                u.avatar_url as user_avatar_url
+                u.displayname as "user_username?",
+                u.avatar_url as "user_avatar_url?"
             FROM db_backups db
             LEFT JOIN "user" u ON db.trigger_type = 'user' AND db.trigger_by = u.id
             ORDER BY db.started_at DESC
@@ -55,14 +55,14 @@ impl DbBackupRepository {
                 db.trigger_by,
                 db.trigger_type,
                 db.backup_file,
-                db.backup_size_gb,
+                db.backup_size_bytes,
                 db.status,
                 db.error_message,
                 db.started_at,
                 db.finished_at,
                 db.duration_seconds,
-                u.displayname as user_username,
-                u.avatar_url as user_avatar_url
+                u.displayname as "user_username?",
+                u.avatar_url as "user_avatar_url?"
             FROM db_backups db
             LEFT JOIN "user" u ON db.trigger_type = 'user' AND db.trigger_by = u.id
             WHERE db.id = $1

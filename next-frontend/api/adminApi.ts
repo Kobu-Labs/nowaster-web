@@ -5,7 +5,7 @@ const BASE_URL = "/admin";
 
 export const dbBackupSchema = z.object({
   backupFile: z.string(),
-  backupSizeGb: z.string().nullable(),
+  backupSizeBytes: z.number().nullable(),
   durationSeconds: z.number().nullable(),
   errorMessage: z.string().nullable(),
   finishedAt: z.coerce.date().nullable(),
@@ -14,8 +14,8 @@ export const dbBackupSchema = z.object({
   status: z.string(),
   triggerBy: z.string(),
   triggerType: z.string(),
-  userUsername: z.string().nullable(),
   userAvatarUrl: z.string().nullable(),
+  userUsername: z.string().nullable(),
 });
 
 export type DbBackup = z.infer<typeof dbBackupSchema>;
