@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { DbBackup } from "@/api/adminApi";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn/avatar";
+import { formatSizeValue } from "@/lib/utils";
 
 const BackupsPage: React.FC = () => {
   const {
@@ -72,12 +73,11 @@ const BackupsPage: React.FC = () => {
     return formatDistance(date, new Date(), { addSuffix: true });
   };
 
-  const formatSize = (sizeStr: null | string) => {
-    if (!sizeStr) {
+  const formatSize = (sizeBytes: null | number) => {
+    if (!sizeBytes) {
       return "N/A";
     }
-    const size = Number.parseFloat(sizeStr);
-    return `${size.toFixed(2)} GB`;
+    return formatSizeValue(sizeBytes)
   };
 
   const formatDuration = (seconds: null | number) => {
@@ -202,7 +202,7 @@ const BackupsPage: React.FC = () => {
                                 {formatDuration(backup.durationSeconds)}
                               </TableCell>
                               <TableCell className="text-sm">
-                                {formatSize(backup.backupSizeGb)}
+                                {formatSize(backup.backupSizeBytes)}
                               </TableCell>
                               <TableCell className="text-sm">
                                 {getTriggerDisplay(backup)}
