@@ -21,7 +21,11 @@ import { CheckCircle2, Clock, Database, User, XCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { DbBackup } from "@/api/adminApi";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn/avatar";
 import { formatSizeValue } from "@/lib/utils";
 
 const BackupsPage: React.FC = () => {
@@ -77,11 +81,11 @@ const BackupsPage: React.FC = () => {
     if (!sizeBytes) {
       return "N/A";
     }
-    return formatSizeValue(sizeBytes)
+    return formatSizeValue(sizeBytes);
   };
 
   const formatDuration = (seconds: null | number) => {
-    if (!seconds) {
+    if (seconds === null) {
       return "N/A";
     }
     if (seconds < 60) {
@@ -114,9 +118,9 @@ const BackupsPage: React.FC = () => {
       <div className="flex items-center gap-2">
         <User className="h-4 w-4 text-muted-foreground" />
         <div>
-          <div className="font-medium">{backup.triggerBy}</div>
+          <div className="font-medium">{backup.triggerType}</div>
           <div className="text-xs text-muted-foreground">
-            {backup.triggerType}
+            {backup.triggerBy}
           </div>
         </div>
       </div>
