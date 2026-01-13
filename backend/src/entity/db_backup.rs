@@ -13,4 +13,7 @@ pub struct DbBackup {
     pub started_at: Option<DateTime<Utc>>,
     pub finished_at: Option<DateTime<Utc>>,
     pub duration_seconds: Option<i32>,
+    // User information (when trigger_type = 'user')
+    pub user_username: Option<String>,
+    pub user_avatar_url: Option<String>,
 }
