@@ -17,10 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn/table";
-import { CheckCircle2, Clock, Database, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Database, User, XCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { DbBackup } from "@/api/adminApi";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn/avatar";
 
 const BackupsPage: React.FC = () => {
   const {
@@ -89,6 +90,37 @@ const BackupsPage: React.FC = () => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  const getTriggerDisplay = (backup: DbBackup) => {
+    if (backup.triggerType === "user" && backup.userUsername) {
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={backup.userAvatarUrl ?? undefined} />
+            <AvatarFallback className="text-xs">
+              {backup.userUsername.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{backup.userUsername}</div>
+            <div className="text-xs text-muted-foreground">user</div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <User className="h-4 w-4 text-muted-foreground" />
+        <div>
+          <div className="font-medium">{backup.triggerBy}</div>
+          <div className="text-xs text-muted-foreground">
+            {backup.triggerType}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -173,12 +205,7 @@ const BackupsPage: React.FC = () => {
                                 {formatSize(backup.backupSizeGb)}
                               </TableCell>
                               <TableCell className="text-sm">
-                                <div>
-                                  <div className="font-medium">{backup.triggerBy}</div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {backup.triggerType}
-                                  </div>
-                                </div>
+                                {getTriggerDisplay(backup)}
                               </TableCell>
                               <TableCell
                                 className="max-w-xs truncate text-sm"

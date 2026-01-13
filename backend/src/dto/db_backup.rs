@@ -16,6 +16,8 @@ pub struct ReadDbBackupDto {
     pub started_at: Option<DateTime<Utc>>,
     pub finished_at: Option<DateTime<Utc>>,
     pub duration_seconds: Option<i32>,
+    pub user_username: Option<String>,
+    pub user_avatar_url: Option<String>,
 }
 
 impl From<DbBackup> for ReadDbBackupDto {
@@ -31,6 +33,8 @@ impl From<DbBackup> for ReadDbBackupDto {
             started_at: backup.started_at,
             finished_at: backup.finished_at,
             duration_seconds: backup.duration_seconds,
+            user_username: backup.user_username,
+            user_avatar_url: backup.user_avatar_url,
         }
     }
 }

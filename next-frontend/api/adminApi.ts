@@ -14,6 +14,8 @@ export const dbBackupSchema = z.object({
   status: z.string(),
   triggerBy: z.string(),
   triggerType: z.string(),
+  userUsername: z.string().nullable(),
+  userAvatarUrl: z.string().nullable(),
 });
 
 export type DbBackup = z.infer<typeof dbBackupSchema>;

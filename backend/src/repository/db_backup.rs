@@ -22,18 +22,21 @@ impl DbBackupRepository {
             DbBackup,
             r#"
             SELECT
-                id,
-                trigger_by,
-                trigger_type,
-                backup_file,
-                backup_size_gb,
-                status,
-                error_message,
-                started_at,
-                finished_at,
-                duration_seconds
-            FROM db_backups
-            ORDER BY started_at DESC
+                db.id,
+                db.trigger_by,
+                db.trigger_type,
+                db.backup_file,
+                db.backup_size_gb,
+                db.status,
+                db.error_message,
+                db.started_at,
+                db.finished_at,
+                db.duration_seconds,
+                u.displayname as user_username,
+                u.avatar_url as user_avatar_url
+            FROM db_backups db
+            LEFT JOIN "user" u ON db.trigger_type = 'user' AND db.trigger_by = u.id
+            ORDER BY db.started_at DESC
             "#
         )
         .fetch_all(self.db_conn.get_pool())
@@ -48,18 +51,21 @@ impl DbBackupRepository {
             DbBackup,
             r#"
             SELECT
-                id,
-                trigger_by,
-                trigger_type,
-                backup_file,
-                backup_size_gb,
-                status,
-                error_message,
-                started_at,
-                finished_at,
-                duration_seconds
-            FROM db_backups
-            WHERE id = $1
+                db.id,
+                db.trigger_by,
+                db.trigger_type,
+                db.backup_file,
+                db.backup_size_gb,
+                db.status,
+                db.error_message,
+                db.started_at,
+                db.finished_at,
+                db.duration_seconds,
+                u.displayname as user_username,
+                u.avatar_url as user_avatar_url
+            FROM db_backups db
+            LEFT JOIN "user" u ON db.trigger_type = 'user' AND db.trigger_by = u.id
+            WHERE db.id = $1
             "#,
             id
         )
