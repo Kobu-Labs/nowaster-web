@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                db.id,\n                db.trigger_by,\n                db.trigger_type,\n                db.backup_file,\n                db.backup_size_bytes,\n                db.status,\n                db.error_message,\n                db.started_at,\n                db.finished_at,\n                db.duration_seconds,\n                u.displayname as \"user_username?\",\n                u.avatar_url as \"user_avatar_url?\"\n            FROM db_backups db\n            LEFT JOIN \"user\" u ON db.trigger_type = 'user' AND db.trigger_by = u.id\n            WHERE db.id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "trigger_by",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "trigger_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "backup_file",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "backup_size_bytes",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "error_message",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "started_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "finished_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "duration_seconds",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "user_username?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "user_avatar_url?",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "dcc01bdad7fd035ce1715244a0579ee4015d28fc00579d012276c08071d7e97d"
+}
