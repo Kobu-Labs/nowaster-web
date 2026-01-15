@@ -17,7 +17,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn/table";
-import { CheckCircle2, Clock, Database, User, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Database,
+  Download,
+  User,
+  XCircle,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { DbBackup } from "@/api/adminApi";
@@ -27,6 +34,19 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { formatSizeValue } from "@/lib/utils";
+import { Button } from "@/components/shadcn/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/alert-dialog";
+import baseApi from "@/api/baseApi";
 
 const BackupsPage: React.FC = () => {
   const {
@@ -127,6 +147,38 @@ const BackupsPage: React.FC = () => {
     );
   };
 
+  const handleDownload = async (backupId: number) => {
+    try {
+      const response = await baseApi.get(
+        `/admin/backups/${backupId}/download`,
+        {
+          responseType: "blob",
+        },
+      );
+
+      const blob = new Blob([response.data as BlobPart]);
+      const url = globalThis.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Extract filename from Content-Disposition header or use default
+      const contentDisposition = response.headers["content-disposition"] as
+        | string
+        | undefined;
+      const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
+      const filename = filenameMatch?.[1] ?? `backup-${backupId}.dump`;
+
+      link.setAttribute("download", filename);
+      document.body.append(link);
+      link.click();
+      link.remove();
+      globalThis.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download backup:", error);
+      alert("Failed to download backup. Please try again.");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -189,6 +241,7 @@ const BackupsPage: React.FC = () => {
                             <TableHead>Trigger</TableHead>
                             <TableHead>Backup File</TableHead>
                             <TableHead>Error</TableHead>
+                            <TableHead>Download</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -219,6 +272,52 @@ const BackupsPage: React.FC = () => {
                               </TableCell>
                               <TableCell className="text-sm text-destructive">
                                 {backup.errorMessage ?? "—"}
+                              </TableCell>
+                              <TableCell>
+                                {backup.status === "success" && (
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button size="sm" variant="outline">
+                                        <Download className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                          Download Backup File?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription
+                                          asChild
+                                          className="space-y-2"
+                                        >
+                                          <div>
+                                            <p>
+                                              You are about to download a database
+                                              backup file.
+                                            </p>
+                                            <p className="font-semibold">
+                                              Size:
+                                              {" "}
+                                              {formatSize(backup.backupSizeBytes)}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                              This may take some time depending on your
+                                              connection speed and the file size.
+                                            </p>
+                                          </div>
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => handleDownload(backup.id)}
+                                        >
+                                          Download
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                )}
                               </TableCell>
                             </TableRow>
                           ))}

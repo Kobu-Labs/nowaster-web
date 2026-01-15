@@ -51,6 +51,20 @@ pub struct FrontendConfig {
 }
 
 #[derive(Deserialize, Debug, Clone)]
+pub struct S3Config {
+    #[serde(rename = "aws_s3_bucket_name")]
+    pub bucket_name: String,
+    #[serde(rename = "aws_default_region")]
+    pub region: String,
+    #[serde(rename = "aws_endpoint_url")]
+    pub endpoint_url: String,
+    #[serde(rename = "aws_access_key_id")]
+    pub access_key_id: String,
+    #[serde(rename = "aws_secret_access_key")]
+    pub secret_access_key: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     #[serde(flatten)]
     pub server: ServerConfig,
@@ -64,4 +78,6 @@ pub struct Config {
     pub discord: DiscordOAuthConfig,
     #[serde(flatten)]
     pub frontend: FrontendConfig,
+    #[serde(flatten)]
+    pub s3: S3Config,
 }

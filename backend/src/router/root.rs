@@ -77,10 +77,11 @@ pub struct AppState {
     pub project_service: ProjectService,
     pub task_service: TaskService,
     pub db_backup_repo: crate::repository::db_backup::DbBackupRepository,
+    pub s3_client: aws_sdk_s3::Client,
     pub feed: Feed,
 }
 
-pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
+pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
@@ -93,6 +94,22 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
     let project_repo = ProjectRepository::new(&db);
     let task_repo = TaskRepository::new(&db);
     let db_backup_repo = crate::repository::db_backup::DbBackupRepository::new(&db);
+
+    // Initialize S3 client
+    use aws_config::BehaviorVersion;
+    use aws_sdk_s3::config::Builder as S3ConfigBuilder;
+
+    let aws_config = aws_config::defaults(BehaviorVersion::latest())
+        .region(aws_config::Region::new(config.s3.region.clone()))
+        .endpoint_url(&config.s3.endpoint_url)
+        .load()
+        .await;
+
+    let s3_config = S3ConfigBuilder::from(&aws_config)
+        .force_path_style(true)
+        .build();
+
+    let s3_client = aws_sdk_s3::Client::from_conf(s3_config);
 
     let auth_service = AuthService::new(&db);
     let category_service = CategoryService::new(category_repo.clone());
@@ -168,6 +185,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         project_service,
         task_service,
         db_backup_repo,
+        s3_client,
         feed: Feed {
             subscription_service,
             visibility_service,
