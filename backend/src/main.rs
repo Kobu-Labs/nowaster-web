@@ -39,7 +39,7 @@ async fn main() {
         .await
         .unwrap_or_else(|e| panic!("Database error: {}", e));
 
-    let router = get_router(Arc::new(db), Arc::new(config.clone()));
+    let router = get_router(Arc::new(db), Arc::new(config.clone())).await;
     let addr = format!("{}:{}", config.server.address, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 

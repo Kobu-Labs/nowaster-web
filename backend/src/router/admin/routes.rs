@@ -1,6 +1,8 @@
 use axum::{
+    body::Body,
     extract::{Path, Query, State},
-    http::StatusCode,
+    http::{header, StatusCode},
+    response::Response,
     routing::{get, post},
     Json, Router,
 };
@@ -42,6 +44,7 @@ pub fn admin_router() -> Router<AppState> {
         .route("/impersonate/{user_id}", post(start_impersonation))
         .route("/stop-impersonation", post(stop_impersonation))
         .route("/backups", get(get_backups))
+        .route("/backups/{backup_id}/download", get(download_backup))
         .nest("/releases", admin_release_router())
 }
 
@@ -168,4 +171,62 @@ async fn get_backups(
     let backups_dto: Vec<ReadDbBackupDto> = backups.into_iter().map(ReadDbBackupDto::from).collect();
 
     Ok(Json(ApiResponse::Success { data: backups_dto }))
+}
+
+#[instrument(skip(state))]
+async fn download_backup(
+    State(state): State<AppState>,
+    AdminUser(_admin): AdminUser,
+    Path(backup_id): Path<i32>,
+) -> Result<Response, StatusCode> {
+    // Get backup record
+    let backup = state
+        .db_backup_repo
+        .get_by_id(backup_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get backup {}: {}", backup_id, e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    let backup = backup.ok_or(StatusCode::NOT_FOUND)?;
+
+    // Get file from S3
+    let bucket = &state.config.s3.bucket_name;
+    let key = &backup.backup_file;
+
+    let object = state
+        .s3_client
+        .get_object()
+        .bucket(bucket)
+        .key(key)
+        .send()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get backup file from S3: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    // Convert ByteStream to bytes
+    let bytes = object
+        .body
+        .collect()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to read backup file bytes: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .into_bytes();
+
+    let filename = key.split('/').next_back().unwrap_or("backup.dump");
+
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, "application/octet-stream")
+        .header(
+            header::CONTENT_DISPOSITION,
+            format!("attachment; filename=\"{}\"", filename),
+        )
+        .body(Body::from(bytes))
+        .unwrap())
 }
