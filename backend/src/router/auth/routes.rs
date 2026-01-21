@@ -92,17 +92,38 @@ async fn oauth_authorize_handler(
     println!("✅ [AUTHORIZE] Authorization URL: {}", auth_url);
 
     // Store CSRF state in cookie (10 min expiry)
-    let is_production = state.config.frontend.url.starts_with("https://");
+    // Configure cookie based on environment
     let mut state_cookie_builder = Cookie::build(("oauth_state", csrf_state.clone()))
         .path("/")
         .max_age(Duration::minutes(10))
-        .http_only(true)
-        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        .http_only(true);
 
-    if is_production {
-        state_cookie_builder = state_cookie_builder
-            .secure(true)
-            .domain(".nowaster.app");  // Allow cookies across subdomains
+    match state.config.server.app_env {
+        crate::config::env::AppEnvironment::NowasterProduction => {
+            state_cookie_builder = state_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        }
+        crate::config::env::AppEnvironment::NowasterStaging => {
+            // Staging needs SameSite=None for OAuth redirects to work
+            state_cookie_builder = state_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+        }
+        crate::config::env::AppEnvironment::NowasterSandbox => {
+            state_cookie_builder = state_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+        }
+        crate::config::env::AppEnvironment::NowasterLocal => {
+            // Local development - least strict
+            state_cookie_builder = state_cookie_builder
+                .secure(false)
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        }
     }
 
     let state_cookie = state_cookie_builder.build();
@@ -231,34 +252,61 @@ async fn oauth_callback_handler(
     // Note: access_token is NOT http_only so JS can read it for Authorization header
     // refresh_token IS http_only for security (only used by backend)
     println!("🔄 [CALLBACK] Setting auth cookies...");
-    let is_production = state.config.frontend.url.starts_with("https://");
 
     let mut access_cookie_builder = Cookie::build(("access_token", access_token.clone()))
         .path("/")
         .max_age(Duration::minutes(15))
-        .http_only(false) // Allow JavaScript to read for Authorization header
-        .same_site(axum_extra::extract::cookie::SameSite::Lax);
-
-    if is_production {
-        access_cookie_builder = access_cookie_builder
-            .secure(true)
-            .domain(".nowaster.app");
-    }
-
-    let access_cookie = access_cookie_builder.build();
+        .http_only(false); // Allow JavaScript to read for Authorization header
 
     let mut refresh_cookie_builder = Cookie::build(("refresh_token", refresh_token.clone()))
         .path("/")
         .max_age(Duration::days(30))
-        .http_only(true) // Keep secure - only backend can read
-        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        .http_only(true); // Keep secure - only backend can read
 
-    if is_production {
-        refresh_cookie_builder = refresh_cookie_builder
-            .secure(true)
-            .domain(".nowaster.app");
+    match state.config.server.app_env {
+        crate::config::env::AppEnvironment::NowasterProduction => {
+            access_cookie_builder = access_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        }
+        crate::config::env::AppEnvironment::NowasterStaging => {
+            // Staging needs SameSite=None for OAuth redirects to work
+            access_cookie_builder = access_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+        }
+        crate::config::env::AppEnvironment::NowasterSandbox => {
+            access_cookie_builder = access_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+        }
+        crate::config::env::AppEnvironment::NowasterLocal => {
+            // Local development - least strict
+            access_cookie_builder = access_cookie_builder
+                .secure(false)
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(false)
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        }
     }
 
+    let access_cookie = access_cookie_builder.build();
     let refresh_cookie = refresh_cookie_builder.build();
 
     println!(
@@ -321,34 +369,60 @@ async fn refresh_token_handler(
     // Update cookies
     // Note: access_token is NOT http_only so JS can read it
     // refresh_token IS http_only for security
-    let is_production = state.config.frontend.url.starts_with("https://");
-
     let mut access_cookie_builder = Cookie::build(("access_token", access_token.clone()))
         .path("/")
         .max_age(Duration::seconds(ACCESS_TOKEN_EXPIRE_SECONDS))
-        .http_only(false) // Allow JavaScript to read
-        .same_site(axum_extra::extract::cookie::SameSite::Lax);
-
-    if is_production {
-        access_cookie_builder = access_cookie_builder
-            .secure(true)
-            .domain(".nowaster.app");
-    }
-
-    let access_cookie = access_cookie_builder.build();
+        .http_only(false); // Allow JavaScript to read
 
     let mut refresh_cookie_builder = Cookie::build(("refresh_token", new_refresh_token.clone()))
         .path("/")
         .max_age(Duration::days(30))
-        .http_only(true) // Keep secure
-        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        .http_only(true); // Keep secure
 
-    if is_production {
-        refresh_cookie_builder = refresh_cookie_builder
-            .secure(true)
-            .domain(".nowaster.app");
+    match state.config.server.app_env {
+        crate::config::env::AppEnvironment::NowasterProduction => {
+            access_cookie_builder = access_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        }
+        crate::config::env::AppEnvironment::NowasterStaging => {
+            // Staging needs SameSite=None for OAuth redirects to work
+            access_cookie_builder = access_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+        }
+        crate::config::env::AppEnvironment::NowasterSandbox => {
+            access_cookie_builder = access_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(true)
+                .domain(".nowaster.app")
+                .same_site(axum_extra::extract::cookie::SameSite::None);
+        }
+        crate::config::env::AppEnvironment::NowasterLocal => {
+            // Local development - least strict
+            access_cookie_builder = access_cookie_builder
+                .secure(false)
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+            refresh_cookie_builder = refresh_cookie_builder
+                .secure(false)
+                .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        }
     }
 
+    let access_cookie = access_cookie_builder.build();
     let refresh_cookie = refresh_cookie_builder.build();
 
     let jar = jar.add(access_cookie).add(refresh_cookie);
