@@ -9,7 +9,7 @@ use crate::{
     auth::{
         generate_access_token, generate_refresh_token, revoke_refresh_token, validate_refresh_token,
     },
-    config::database::{Database, DatabaseTrait},
+    config::{database::{Database, DatabaseTrait}, env::AppEnvironment},
     repository::{
         auth::{
             api_tokens::{ApiTokenRecord, ApiTokenRepository},
@@ -30,16 +30,18 @@ pub struct AuthService {
     api_token_repo: ApiTokenRepository,
     impersonation_repo: ImpersonationRepository,
     pool: Arc<PgPool>,
+    app_env: AppEnvironment,
 }
 
 impl AuthService {
-    pub fn new(database: &Arc<Database>) -> Self {
+    pub fn new(database: &Arc<Database>, app_env: AppEnvironment) -> Self {
         Self {
             user_repo: UserRepository::new(database),
             oauth_repo: OAuthAccountRepository::new(database),
             api_token_repo: ApiTokenRepository::new(database),
             impersonation_repo: ImpersonationRepository::new(database),
             pool: Arc::new(database.get_pool().clone()),
+            app_env,
         }
     }
 
@@ -143,7 +145,12 @@ impl AuthService {
 
         // 3. Generate access token (JWT, 15 minutes)
         println!("🔐 [AUTH] Generating access token...");
-        let access_token = generate_access_token(user_id_str, actor.role, display_name)?;
+        let access_token = generate_access_token(
+            user_id_str,
+            actor.role,
+            display_name,
+            self.app_env.as_str().to_string(),
+        )?;
         println!(
             "🔐 [AUTH] Access token generated (length: {})",
             access_token.len()
@@ -185,7 +192,12 @@ impl AuthService {
             .context("User not found")?;
 
         // 3. Generate new access token
-        let access_token = generate_access_token(&user_id, actor.role, display_name)?;
+        let access_token = generate_access_token(
+            &user_id,
+            actor.role,
+            display_name,
+            self.app_env.as_str().to_string(),
+        )?;
 
         // 4. Generate new refresh token (rotation)
         let new_refresh_token =
