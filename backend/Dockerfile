@@ -22,7 +22,8 @@ RUN SQLX_OFFLINE=true cargo build --release
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Final runtime image
-FROM ubuntu:22.04
+FROM ubuntu:24.04
+
 WORKDIR /app
 
 COPY --from=builder /app/target/release/axum-test /app/axum-test
