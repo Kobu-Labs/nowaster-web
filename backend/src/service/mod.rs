@@ -5,6 +5,7 @@ pub mod friend_service;
 pub mod notification_service;
 pub mod project_service;
 pub mod release_service;
+pub mod sandbox_service;
 pub mod session;
 pub mod session_template;
 pub mod statistics_service;
