@@ -7,6 +7,8 @@ use axum::{
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use serde::{Deserialize, Serialize};
+use std::collections::VecDeque;
+use std::sync::Mutex;
 use time::Duration;
 use tracing::instrument;
 
@@ -21,6 +23,59 @@ use crate::{
         auth::tokens::api_tokens_router, clerk::Actor, response::ApiResponse, root::AppState,
     },
 };
+
+use once_cell::sync::Lazy;
+
+static GUEST_POOL: Lazy<Mutex<VecDeque<String>>> = Lazy::new(|| Mutex::new(VecDeque::new()));
+
+/// Initialize guest pool by loading existing guest users from database
+async fn init_guest_pool(pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+    let guest_ids: Vec<String> =
+        sqlx::query_scalar("SELECT id FROM \"user\" WHERE id LIKE 'guest_%' ORDER BY id")
+            .fetch_all(pool)
+            .await?;
+
+    let mut guest_pool = GUEST_POOL.lock().unwrap();
+    guest_pool.clear();
+    for id in guest_ids {
+        guest_pool.push_back(id);
+    }
+
+    tracing::info!("Initialized guest pool with {} users", guest_pool.len());
+    Ok(())
+}
+
+/// Replenish guest pool if below threshold by creating new guest users
+async fn replenish_guest_pool_if_needed(pool: &sqlx::PgPool) {
+    const REPLENISH_THRESHOLD: usize = 50;
+    const REPLENISH_BATCH_SIZE: usize = 100;
+
+    let current_size = {
+        let pool = GUEST_POOL.lock().unwrap();
+        pool.len()
+    };
+
+    if current_size < REPLENISH_THRESHOLD {
+        tracing::info!(
+            "Guest pool below threshold ({} < {}), replenishing...",
+            current_size,
+            REPLENISH_THRESHOLD
+        );
+
+        match crate::sandbox::create_guest_user_pool(pool, REPLENISH_BATCH_SIZE).await {
+            Ok(created) => {
+                tracing::info!("✅ Created {} new guest users", created);
+
+                if let Err(e) = init_guest_pool(pool).await {
+                    tracing::error!("Failed to reload guest pool after replenishment: {}", e);
+                }
+            }
+            Err(e) => {
+                tracing::error!("Failed to create guest users: {}", e);
+            }
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 pub struct CallbackParams {
@@ -50,6 +105,7 @@ pub fn auth_router() -> Router<AppState> {
         .route("/refresh", post(refresh_token_handler))
         .route("/logout", post(logout_handler))
         .route("/me", get(get_current_user_handler))
+        .route("/guest", post(assign_guest_handler))
         .nest("/tokens", api_tokens_router())
 }
 
@@ -487,4 +543,113 @@ async fn get_current_user_handler(
     });
 
     Ok(Json(ApiResponse::Success { data: response }))
+}
+
+async fn assign_guest_handler(
+    State(state): State<AppState>,
+    jar: CookieJar,
+) -> Result<(CookieJar, Json<ApiResponse<TokenResponse>>), axum::http::StatusCode> {
+    if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
+        tracing::warn!("Guest endpoint called in non-sandbox environment");
+        return Err(axum::http::StatusCode::FORBIDDEN);
+    }
+
+    let needs_init = {
+        let pool = GUEST_POOL.lock().unwrap();
+        pool.is_empty()
+    };
+
+    if needs_init {
+        if let Err(e) = init_guest_pool(&state.pool).await {
+            tracing::error!("Failed to initialize guest pool: {}", e);
+            return Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    let guest_id = if let Some(cookie) = jar.get("sandbox_guest_id") {
+        let existing_guest = cookie.value().to_string();
+        tracing::info!("Reusing existing guest from cookie: {}", existing_guest);
+        existing_guest
+    } else {
+        let guest_id = {
+            let mut pool = GUEST_POOL.lock().unwrap();
+            match pool.pop_front() {
+                Some(id) => id,
+                None => {
+                    tracing::error!("Guest pool exhausted!");
+                    return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
+                }
+            }
+        };
+
+        tracing::info!("Assigned new guest from pool: {}", guest_id);
+
+        let pool_clone = state.pool.clone();
+        tokio::spawn(async move {
+            replenish_guest_pool_if_needed(&pool_clone).await;
+        });
+
+        guest_id
+    };
+
+    let guest_num = guest_id.strip_prefix("guest_").unwrap_or("0");
+    let display_name = format!("Guest #{}", guest_num.trim_start_matches('0'));
+
+    let access_token = match crate::auth::generate_access_token(
+        &guest_id,
+        crate::router::clerk::UserRole::User,
+        display_name,
+        state.config.server.app_env.as_str().to_string(),
+    ) {
+        Ok(token) => token,
+        Err(e) => {
+            tracing::error!("Failed to generate access token: {}", e);
+            return Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+
+    let refresh_token = format!("{}_refresh", guest_id);
+
+    let mut access_cookie_builder = Cookie::build(("access_token", access_token.clone()))
+        .path("/")
+        .max_age(Duration::hours(12))
+        .http_only(false);
+
+    let mut refresh_cookie_builder = Cookie::build(("refresh_token", refresh_token.clone()))
+        .path("/")
+        .max_age(Duration::hours(12))
+        .http_only(true);
+
+    let mut guest_id_cookie_builder = Cookie::build(("sandbox_guest_id", guest_id.clone()))
+        .path("/")
+        .max_age(Duration::hours(12))
+        .http_only(true);
+
+    access_cookie_builder = access_cookie_builder
+        .secure(true)
+        .domain(".nowaster.app")
+        .same_site(axum_extra::extract::cookie::SameSite::None);
+
+    refresh_cookie_builder = refresh_cookie_builder
+        .secure(true)
+        .domain(".nowaster.app")
+        .same_site(axum_extra::extract::cookie::SameSite::None);
+
+    guest_id_cookie_builder = guest_id_cookie_builder
+        .secure(true)
+        .domain(".nowaster.app")
+        .same_site(axum_extra::extract::cookie::SameSite::None);
+
+    let jar = jar
+        .add(access_cookie_builder.build())
+        .add(refresh_cookie_builder.build())
+        .add(guest_id_cookie_builder.build());
+
+    let response = TokenResponse {
+        access_token,
+        refresh_token,
+        expires_in: 43200,
+    };
+
+    Ok((jar, Json(ApiResponse::Success { data: response })))
 }
