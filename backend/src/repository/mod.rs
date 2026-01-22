@@ -7,6 +7,7 @@ pub mod friends;
 pub mod notification;
 pub mod project;
 pub mod release;
+pub mod sandbox_lifecycle;
 pub mod session_template;
 pub mod statistics;
 pub mod stopwatch_session;
