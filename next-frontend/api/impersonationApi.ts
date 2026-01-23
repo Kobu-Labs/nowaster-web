@@ -21,7 +21,7 @@ export const startImpersonation = async (userId: string) => {
 };
 
 export const stopImpersonation = async (impersonationToken: string) => {
-  await baseApi.post(`${BASE_URL}/stop-impersonation`, {
+  await baseApi.post(`${BASE_URL}/impersonate/stop`, {
     impersonation_token: impersonationToken,
   });
 };
