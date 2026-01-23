@@ -12,7 +12,6 @@ mod dto;
 mod entity;
 mod repository;
 mod router;
-mod sandbox;
 mod service;
 
 #[tokio::main]
@@ -39,10 +38,6 @@ async fn main() {
     let db = Database::init(config.database.connection_url.clone())
         .await
         .unwrap_or_else(|e| panic!("Database error: {}", e));
-
-    // Initialize sandbox environment if needed
-    let db_pool = db.get_pool();
-    sandbox::initialize_sandbox(db_pool, &config.server.app_env).await;
 
     let router = get_router(Arc::new(db), Arc::new(config.clone())).await;
     let addr = format!("{}:{}", config.server.address, config.server.port);
