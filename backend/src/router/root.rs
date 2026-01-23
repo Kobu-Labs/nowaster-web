@@ -34,6 +34,7 @@ use crate::{
         notification_service::NotificationService,
         project_service::ProjectService,
         release_service::ReleaseService,
+        sandbox_service::SandboxService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
         statistics_service::StatisticsService,
@@ -77,6 +78,7 @@ pub struct AppState {
     pub release_service: ReleaseService,
     pub project_service: ProjectService,
     pub task_service: TaskService,
+    pub sandbox_service: SandboxService,
     pub db_backup_repo: crate::repository::db_backup::DbBackupRepository,
     pub s3_client: aws_sdk_s3::Client,
     pub feed: Feed,
@@ -120,6 +122,10 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let notification_service = NotificationService::new(&db);
     let release_service = ReleaseService::new(&db);
+    let sandbox_service = SandboxService::new(&db);
+
+    // Initialize sandbox environment if needed
+    sandbox_service.initialize_sandbox(&config.server.app_env).await;
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
@@ -187,6 +193,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         release_service,
         project_service,
         task_service,
+        sandbox_service,
         db_backup_repo,
         s3_client,
         feed: Feed {

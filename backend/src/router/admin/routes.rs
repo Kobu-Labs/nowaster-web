@@ -6,6 +6,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
@@ -45,6 +46,8 @@ pub fn admin_router() -> Router<AppState> {
         .route("/stop-impersonation", post(stop_impersonation))
         .route("/backups", get(get_backups))
         .route("/backups/{backup_id}/download", get(download_backup))
+        .route("/sandbox/lifecycles", get(get_sandbox_lifecycles))
+        .route("/sandbox/reset", post(reset_sandbox_handler))
         .nest("/releases", admin_release_router())
 }
 
@@ -229,4 +232,127 @@ async fn download_backup(
         )
         .body(Body::from(bytes))
         .unwrap())
+}
+
+#[derive(Debug, Deserialize)]
+struct ResetSandboxRequest {
+    secret: String,
+}
+
+#[instrument(skip(state))]
+async fn reset_sandbox_handler(
+    State(state): State<AppState>,
+    Json(req): Json<ResetSandboxRequest>,
+) -> Result<Json<ApiResponse<String>>, StatusCode> {
+    if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
+        tracing::warn!("Sandbox reset called in non-sandbox environment");
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    let expected_secret = std::env::var("SANDBOX_RESET_SECRET")
+        .unwrap_or_else(|_| "change-me-in-production".to_string());
+
+    if req.secret != expected_secret {
+        tracing::warn!("Sandbox reset attempted with invalid secret");
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
+    state
+        .sandbox_service
+        .teardown_active_lifecycle("recycled", "system", "automatic")
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to teardown lifecycle: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    state
+        .sandbox_service
+        .reset_sandbox()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to reset sandbox: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    state
+        .sandbox_service
+        .create_lifecycle("system", "automatic")
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to create lifecycle: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    state
+        .sandbox_service
+        .reinitialize_guest_pool()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to reinitialize guest pool: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    // Reload guest pool in memory
+    state
+        .sandbox_service
+        .init_pool()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to reload guest pool: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    tracing::info!("✅ Sandbox reset complete");
+
+    Ok(Json(ApiResponse::Success {
+        data: "Sandbox reset successful".to_string(),
+    }))
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SandboxLifecycleResponse {
+    id: i32,
+    status: String,
+    created_by: String,
+    created_type: String,
+    torndown_by: Option<String>,
+    torndown_type: Option<String>,
+    unique_users: i32,
+    started_at: DateTime<Utc>,
+    ended_at: Option<DateTime<Utc>>,
+    duration_hours: Option<f64>,
+}
+
+#[instrument(skip(state, _admin))]
+async fn get_sandbox_lifecycles(
+    State(state): State<AppState>,
+    _admin: AdminUser,
+) -> Result<Json<ApiResponse<Vec<SandboxLifecycleResponse>>>, StatusCode> {
+    let lifecycles = state.sandbox_service.get_all_lifecycles(100).await.map_err(|e| {
+        tracing::error!("Failed to get sandbox lifecycles: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let response: Vec<SandboxLifecycleResponse> = lifecycles
+        .into_iter()
+        .map(|l| {
+            let duration = l.duration_hours();
+            SandboxLifecycleResponse {
+                id: l.id,
+                status: l.status,
+                created_by: l.created_by,
+                created_type: l.created_type,
+                torndown_by: l.torndown_by,
+                torndown_type: l.torndown_type,
+                unique_users: l.unique_users,
+                started_at: l.started_at,
+                ended_at: l.ended_at,
+                duration_hours: duration,
+            }
+        })
+        .collect();
+
+    Ok(Json(ApiResponse::Success { data: response }))
 }

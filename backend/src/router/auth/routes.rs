@@ -7,8 +7,6 @@ use axum::{
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use serde::{Deserialize, Serialize};
-use std::collections::VecDeque;
-use std::sync::Mutex;
 use time::Duration;
 use tracing::instrument;
 
@@ -23,59 +21,6 @@ use crate::{
         auth::tokens::api_tokens_router, clerk::Actor, response::ApiResponse, root::AppState,
     },
 };
-
-use once_cell::sync::Lazy;
-
-static GUEST_POOL: Lazy<Mutex<VecDeque<String>>> = Lazy::new(|| Mutex::new(VecDeque::new()));
-
-/// Initialize guest pool by loading existing guest users from database
-async fn init_guest_pool(pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
-    let guest_ids: Vec<String> =
-        sqlx::query_scalar("SELECT id FROM \"user\" WHERE id LIKE 'guest_%' ORDER BY id")
-            .fetch_all(pool)
-            .await?;
-
-    let mut guest_pool = GUEST_POOL.lock().unwrap();
-    guest_pool.clear();
-    for id in guest_ids {
-        guest_pool.push_back(id);
-    }
-
-    tracing::info!("Initialized guest pool with {} users", guest_pool.len());
-    Ok(())
-}
-
-/// Replenish guest pool if below threshold by creating new guest users
-async fn replenish_guest_pool_if_needed(pool: &sqlx::PgPool) {
-    const REPLENISH_THRESHOLD: usize = 50;
-    const REPLENISH_BATCH_SIZE: usize = 100;
-
-    let current_size = {
-        let pool = GUEST_POOL.lock().unwrap();
-        pool.len()
-    };
-
-    if current_size < REPLENISH_THRESHOLD {
-        tracing::info!(
-            "Guest pool below threshold ({} < {}), replenishing...",
-            current_size,
-            REPLENISH_THRESHOLD
-        );
-
-        match crate::sandbox::create_guest_user_pool(pool, REPLENISH_BATCH_SIZE).await {
-            Ok(created) => {
-                tracing::info!("✅ Created {} new guest users", created);
-
-                if let Err(e) = init_guest_pool(pool).await {
-                    tracing::error!("Failed to reload guest pool after replenishment: {}", e);
-                }
-            }
-            Err(e) => {
-                tracing::error!("Failed to create guest users: {}", e);
-            }
-        }
-    }
-}
 
 #[derive(Debug, Deserialize)]
 pub struct CallbackParams {
@@ -554,13 +499,8 @@ async fn assign_guest_handler(
         return Err(axum::http::StatusCode::FORBIDDEN);
     }
 
-    let needs_init = {
-        let pool = GUEST_POOL.lock().unwrap();
-        pool.is_empty()
-    };
-
-    if needs_init {
-        if let Err(e) = init_guest_pool(&state.pool).await {
+    if state.sandbox_service.is_pool_empty() {
+        if let Err(e) = state.sandbox_service.init_pool().await {
             tracing::error!("Failed to initialize guest pool: {}", e);
             return Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR);
         }
@@ -571,22 +511,23 @@ async fn assign_guest_handler(
         tracing::info!("Reusing existing guest from cookie: {}", existing_guest);
         existing_guest
     } else {
-        let guest_id = {
-            let mut pool = GUEST_POOL.lock().unwrap();
-            match pool.pop_front() {
-                Some(id) => id,
-                None => {
-                    tracing::error!("Guest pool exhausted!");
-                    return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
-                }
+        let guest_id = match state.sandbox_service.pop_guest_from_pool() {
+            Some(id) => id,
+            None => {
+                tracing::error!("Guest pool exhausted!");
+                return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
             }
         };
 
         tracing::info!("Assigned new guest from pool: {}", guest_id);
 
-        let pool_clone = state.pool.clone();
+        // Increment unique users counter for active lifecycle
+        let _ = state.sandbox_service.increment_unique_users().await;
+
+        // Replenish pool in background
+        let sandbox_service = state.sandbox_service.clone();
         tokio::spawn(async move {
-            replenish_guest_pool_if_needed(&pool_clone).await;
+            let _ = sandbox_service.replenish_pool_if_needed().await;
         });
 
         guest_id
