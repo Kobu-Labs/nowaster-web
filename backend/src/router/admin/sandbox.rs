@@ -8,14 +8,13 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
-use crate::{
-    entity::sandbox_lifecycle::SandboxStatus,
-    router::{admin::AdminUser, response::ApiResponse, root::AppState},
-};
+use crate::router::{admin::AdminUser, response::ApiResponse, root::AppState};
 
 #[derive(Debug, Deserialize)]
 struct ResetSandboxRequest {
-    secret: String,
+    secret: Option<String>,
+    triggered_by: String,
+    triggered_type: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -35,7 +34,7 @@ struct SandboxLifecycleResponse {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SandboxResetResponse {
-    old: SandboxLifecycleResponse,
+    old: Option<SandboxLifecycleResponse>,
     new: SandboxLifecycleResponse,
 }
 
@@ -45,88 +44,93 @@ pub fn admin_sandbox_router() -> Router<AppState> {
         .route("/reset", post(reset_sandbox_handler))
 }
 
+// 1. tears down the current sandbox
+// 2. creates a clean slate
+// 3. seeds the new data
 #[instrument(skip(state))]
 async fn reset_sandbox_handler(
     State(state): State<AppState>,
+    admin_user: Option<AdminUser>,
     Json(req): Json<ResetSandboxRequest>,
-) -> Result<Json<ApiResponse<SandboxResetResponse>>, StatusCode> {
+) -> ApiResponse<SandboxResetResponse> {
     if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
-        tracing::warn!("Sandbox reset called in non-sandbox environment");
-        return Err(StatusCode::FORBIDDEN);
+        return ApiResponse::Error {
+            message: "Sandbox reset called in non-sandbox environment".to_string(),
+        };
     }
 
-    let expected_secret = std::env::var("SANDBOX_RESET_SECRET")
-        .unwrap_or_else(|_| "change-me-in-production".to_string());
+    let is_admin = admin_user.is_some();
+    let has_valid_secret = req.secret.as_ref().map_or(false, |secret| {
+        let expected_secret =
+            std::env::var("SANDBOX_RESET_SECRET").unwrap_or_else(|_| "placeholder".to_string());
+        secret == &expected_secret
+    });
 
-    if req.secret != expected_secret {
-        tracing::warn!("Sandbox reset attempted with invalid secret");
-        return Err(StatusCode::UNAUTHORIZED);
+    if !is_admin && !has_valid_secret {
+        return ApiResponse::Error {
+            message: "Sandbox reset attempted without valid authentication".to_string(),
+        };
     }
 
-    let old_lifecycle = state
-        .sandbox_service
-        .get_active_lifecycle()
-        .await
-        .map_err(|e| {
+    let old_lifecycle_data = match state.sandbox_service.get_active_lifecycle().await {
+        Ok(data) => data,
+        Err(e) => {
             tracing::error!("Failed to get active lifecycle: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?
-        .ok_or_else(|| {
-            tracing::error!("No active lifecycle found");
-            StatusCode::NOT_FOUND
-        })?;
+            return ApiResponse::Error {
+                message: "Failed to get active lifecycle".to_string(),
+            };
+        }
+    };
 
-    state
-        .sandbox_service
-        .teardown_active_lifecycle(SandboxStatus::Recycled, "system", "automatic")
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to teardown lifecycle: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
-
-    state.sandbox_service.reset_sandbox().await.map_err(|e| {
+    if let Err(e) = state.sandbox_service.reset_sandbox().await {
         tracing::error!("Failed to reset sandbox: {}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+        return ApiResponse::Error {
+            message: "Failed to reset sandbox".to_string(),
+        };
+    }
 
-    let new_lifecycle = state
+    let new_lifecycle = match state
         .sandbox_service
-        .create_lifecycle("system", "automatic")
+        .create_lifecycle(&req.triggered_by, &req.triggered_type)
         .await
-        .map_err(|e| {
+    {
+        Ok(lifecycle) => lifecycle,
+        Err(e) => {
             tracing::error!("Failed to create lifecycle: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+            return ApiResponse::Error {
+                message: "Failed to create lifecycle".to_string(),
+            };
+        }
+    };
 
-    state
-        .sandbox_service
-        .reinitialize_guest_pool()
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to reinitialize guest pool: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    if let Err(e) = state.sandbox_service.reinitialize_guest_pool().await {
+        tracing::error!("Failed to reinitialize guest pool: {}", e);
+        return ApiResponse::Error {
+            message: "Failed to reinitialize guest pool".to_string(),
+        };
+    }
 
-    state.sandbox_service.init_pool().await.map_err(|e| {
+    if let Err(e) = state.sandbox_service.init_pool().await {
         tracing::error!("Failed to reload guest pool: {}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+        return ApiResponse::Error {
+            message: "Failed to reload guest pool".to_string(),
+        };
+    }
 
     tracing::info!("✅ Sandbox reset complete");
 
     let response = SandboxResetResponse {
-        old: SandboxLifecycleResponse {
-            sandbox_lifecycle_id: old_lifecycle.id,
-            status: old_lifecycle.status,
-            created_by: old_lifecycle.created_by,
-            created_type: old_lifecycle.created_type,
-            torndown_by: old_lifecycle.torndown_by,
-            torndown_type: old_lifecycle.torndown_type,
-            unique_users: old_lifecycle.unique_users,
-            started_at: old_lifecycle.started_at,
-            ended_at: old_lifecycle.ended_at,
-        },
+        old: old_lifecycle_data.map(|v| SandboxLifecycleResponse {
+            sandbox_lifecycle_id: v.id,
+            status: v.status,
+            created_by: v.created_by,
+            created_type: v.created_type,
+            torndown_by: v.torndown_by,
+            torndown_type: v.torndown_type,
+            unique_users: v.unique_users,
+            started_at: v.started_at,
+            ended_at: v.ended_at,
+        }),
         new: SandboxLifecycleResponse {
             sandbox_lifecycle_id: new_lifecycle.id,
             status: new_lifecycle.status,
@@ -140,14 +144,14 @@ async fn reset_sandbox_handler(
         },
     };
 
-    Ok(Json(ApiResponse::Success { data: response }))
+    ApiResponse::Success { data: response }
 }
 
 #[instrument(skip(state, _admin))]
 async fn get_sandbox_lifecycles(
     State(state): State<AppState>,
-    _admin: AdminUser,
-) -> Result<Json<ApiResponse<Vec<SandboxLifecycleResponse>>>, StatusCode> {
+    AdminUser(_admin): AdminUser,
+) -> ApiResponse<Vec<SandboxLifecycleResponse>> {
     let lifecycles = state
         .sandbox_service
         .get_all_lifecycles(100)
@@ -155,22 +159,23 @@ async fn get_sandbox_lifecycles(
         .map_err(|e| {
             tracing::error!("Failed to get sandbox lifecycles: {}", e);
             StatusCode::INTERNAL_SERVER_ERROR
-        })?;
-
-    let response: Vec<SandboxLifecycleResponse> = lifecycles
-        .into_iter()
-        .map(|l| SandboxLifecycleResponse {
-            sandbox_lifecycle_id: l.id,
-            status: l.status,
-            created_by: l.created_by,
-            created_type: l.created_type,
-            torndown_by: l.torndown_by,
-            torndown_type: l.torndown_type,
-            unique_users: l.unique_users,
-            started_at: l.started_at,
-            ended_at: l.ended_at,
         })
-        .collect();
+        .map(|lifecycles| {
+            lifecycles
+                .into_iter()
+                .map(|l| SandboxLifecycleResponse {
+                    sandbox_lifecycle_id: l.id,
+                    status: l.status,
+                    created_by: l.created_by,
+                    created_type: l.created_type,
+                    torndown_by: l.torndown_by,
+                    torndown_type: l.torndown_type,
+                    unique_users: l.unique_users,
+                    started_at: l.started_at,
+                    ended_at: l.ended_at,
+                })
+                .collect::<Vec<SandboxLifecycleResponse>>()
+        });
 
-    Ok(Json(ApiResponse::Success { data: response }))
+    ApiResponse::from_result(lifecycles)
 }

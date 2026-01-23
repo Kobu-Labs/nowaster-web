@@ -79,29 +79,29 @@ impl SandboxLifecycleRepository {
     pub async fn teardown(
         &self,
         id: i32,
-        status: SandboxStatus,
         torndown_by: &str,
         torndown_type: &str,
-    ) -> Result<(), sqlx::Error> {
-        let status_str: String = status.into();
-        sqlx::query!(
+    ) -> Result<SandboxLifecycle, sqlx::Error> {
+        let result = sqlx::query_as!(
+            SandboxLifecycle,
             r#"
             UPDATE sandbox_lifecycle
-            SET status = $2,
-                torndown_by = $3,
-                torndown_type = $4,
+            SET torndown_by = $2,
+                torndown_type = $3,
+                status = 'recycled',
                 ended_at = NOW()
             WHERE id = $1
+            RETURNING id, status, created_by, created_type, torndown_by, torndown_type,
+                   unique_users,  started_at, ended_at
             "#,
             id,
-            status_str,
             torndown_by,
             torndown_type,
         )
-        .execute(self.db_conn.get_pool())
+        .fetch_one(self.db_conn.get_pool())
         .await?;
 
-        Ok(())
+        Ok(result)
     }
 
     pub async fn get_all(&self, limit: i64) -> Result<Vec<SandboxLifecycle>, sqlx::Error> {
