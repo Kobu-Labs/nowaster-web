@@ -7,7 +7,7 @@ use tracing::{info, warn};
 
 use crate::{
     config::{database::Database, env::AppEnvironment},
-    entity::sandbox_lifecycle::{SandboxLifecycle, SandboxStatus},
+    entity::sandbox_lifecycle::SandboxLifecycle,
     repository::sandbox_lifecycle::SandboxLifecycleRepository,
 };
 
@@ -48,13 +48,12 @@ impl SandboxService {
 
     pub async fn teardown_active_lifecycle(
         &self,
-        status: SandboxStatus,
         torndown_by: &str,
         torndown_type: &str,
     ) -> Result<(), sqlx::Error> {
         if let Some(active) = self.lifecycle_repo.get_active().await? {
             self.lifecycle_repo
-                .teardown(active.id, status, torndown_by, torndown_type)
+                .teardown(active.id, torndown_by, torndown_type)
                 .await?;
         }
         Ok(())
@@ -153,7 +152,10 @@ impl SandboxService {
                 current_size, REPLENISH_THRESHOLD
             );
 
-            let created = self.lifecycle_repo.create_guest_user_pool(REPLENISH_BATCH_SIZE).await?;
+            let created = self
+                .lifecycle_repo
+                .create_guest_user_pool(REPLENISH_BATCH_SIZE)
+                .await?;
             info!("✅ Created {} new guest users", created);
 
             self.init_pool().await?;
