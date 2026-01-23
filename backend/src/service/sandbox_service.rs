@@ -7,7 +7,7 @@ use tracing::{info, warn};
 
 use crate::{
     config::{database::Database, env::AppEnvironment},
-    entity::sandbox_lifecycle::SandboxLifecycle,
+    entity::sandbox_lifecycle::{SandboxLifecycle, SandboxStatus},
     repository::sandbox_lifecycle::SandboxLifecycleRepository,
 };
 
@@ -48,7 +48,7 @@ impl SandboxService {
 
     pub async fn teardown_active_lifecycle(
         &self,
-        status: &str,
+        status: SandboxStatus,
         torndown_by: &str,
         torndown_type: &str,
     ) -> Result<(), sqlx::Error> {

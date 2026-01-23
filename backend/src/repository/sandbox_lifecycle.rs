@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    entity::sandbox_lifecycle::SandboxLifecycle,
+    entity::sandbox_lifecycle::{SandboxLifecycle, SandboxStatus},
 };
 
 #[derive(Clone)]
@@ -22,16 +22,18 @@ impl SandboxLifecycleRepository {
         created_by: &str,
         created_type: &str,
     ) -> Result<SandboxLifecycle, sqlx::Error> {
+        let status: String = SandboxStatus::Bare.into();
         let record = sqlx::query_as!(
             SandboxLifecycle,
             r#"
             INSERT INTO sandbox_lifecycle (created_by, created_type, status)
-            VALUES ($1, $2, 'active')
+            VALUES ($1, $2, $3)
             RETURNING id, status, created_by, created_type, torndown_by, torndown_type,
                       unique_users, started_at, ended_at
             "#,
             created_by,
-            created_type
+            created_type,
+            status
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -40,16 +42,18 @@ impl SandboxLifecycleRepository {
     }
 
     pub async fn get_active(&self) -> Result<Option<SandboxLifecycle>, sqlx::Error> {
+        let status: String = SandboxStatus::Active.into();
         let record = sqlx::query_as!(
             SandboxLifecycle,
             r#"
             SELECT id, status, created_by, created_type, torndown_by, torndown_type,
                    unique_users,  started_at, ended_at
             FROM sandbox_lifecycle
-            WHERE status = 'active'
+            WHERE status = $1
             ORDER BY started_at DESC
             LIMIT 1
-            "#
+            "#,
+            status
         )
         .fetch_optional(self.db_conn.get_pool())
         .await?;
@@ -75,10 +79,11 @@ impl SandboxLifecycleRepository {
     pub async fn teardown(
         &self,
         id: i32,
-        status: &str,
+        status: SandboxStatus,
         torndown_by: &str,
         torndown_type: &str,
     ) -> Result<(), sqlx::Error> {
+        let status_str: String = status.into();
         sqlx::query!(
             r#"
             UPDATE sandbox_lifecycle
@@ -89,7 +94,7 @@ impl SandboxLifecycleRepository {
             WHERE id = $1
             "#,
             id,
-            status,
+            status_str,
             torndown_by,
             torndown_type,
         )
