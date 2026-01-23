@@ -131,6 +131,7 @@ impl SandboxLifecycleRepository {
 
         Ok(result)
     }
+
     pub async fn reset_sandbox(&self) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
@@ -138,7 +139,12 @@ impl SandboxLifecycleRepository {
             DECLARE
                 r RECORD;
             BEGIN
-                FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public')
+                FOR r IN (
+                    SELECT tablename
+                    FROM pg_tables
+                    WHERE schemaname = 'public'
+                    AND tablename != '_sqlx_migrations'
+                )
                 LOOP
                     EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';
                 END LOOP;
