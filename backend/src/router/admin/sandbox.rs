@@ -41,37 +41,15 @@ struct SandboxResetResponse {
 pub fn admin_sandbox_router() -> Router<AppState> {
     Router::new()
         .route("/lifecycles", get(get_sandbox_lifecycles))
-        .route("/reset", post(reset_sandbox_handler))
+        .route("/reset/service", post(reset_sandbox_service_handler))
+        .route("/reset/manual", post(reset_sandbox_manual_handler))
 }
 
-// 1. tears down the current sandbox
-// 2. creates a clean slate
-// 3. seeds the new data
 #[instrument(skip(state))]
-async fn reset_sandbox_handler(
-    State(state): State<AppState>,
-    admin_user: Option<AdminUser>,
-    Json(req): Json<ResetSandboxRequest>,
+async fn execute_reset(
+    state: AppState,
+    req: ResetSandboxRequest,
 ) -> ApiResponse<SandboxResetResponse> {
-    if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
-        return ApiResponse::Error {
-            message: "Sandbox reset called in non-sandbox environment".to_string(),
-        };
-    }
-
-    let is_admin = admin_user.is_some();
-    let has_valid_secret = req.secret.as_ref().map_or(false, |secret| {
-        let expected_secret =
-            std::env::var("SANDBOX_RESET_SECRET").unwrap_or_else(|_| "placeholder".to_string());
-        secret == &expected_secret
-    });
-
-    if !is_admin && !has_valid_secret {
-        return ApiResponse::Error {
-            message: "Sandbox reset attempted without valid authentication".to_string(),
-        };
-    }
-
     let old_lifecycle_data = match state.sandbox_service.get_active_lifecycle().await {
         Ok(data) => data,
         Err(e) => {
@@ -145,6 +123,51 @@ async fn reset_sandbox_handler(
     };
 
     ApiResponse::Success { data: response }
+}
+
+// 1. tears down the current sandbox
+// 2. creates a clean slate
+// 3. seeds the new data
+#[instrument(skip(state))]
+async fn reset_sandbox_manual_handler(
+    State(state): State<AppState>,
+    AdminUser(user): AdminUser,
+    Json(req): Json<ResetSandboxRequest>,
+) -> ApiResponse<SandboxResetResponse> {
+    if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
+        return ApiResponse::Error {
+            message: "Sandbox reset called in non-sandbox environment".to_string(),
+        };
+    }
+
+    execute_reset(state, req).await
+}
+
+// 1. tears down the current sandbox
+// 2. creates a clean slate
+// 3. seeds the new data
+#[instrument(skip(state))]
+async fn reset_sandbox_service_handler(
+    State(state): State<AppState>,
+    Json(req): Json<ResetSandboxRequest>,
+) -> ApiResponse<SandboxResetResponse> {
+    if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
+        return ApiResponse::Error {
+            message: "Sandbox reset called in non-sandbox environment".to_string(),
+        };
+    }
+
+    let expected_secret = std::env::var("SANDBOX_RESET_SECRET").unwrap_or("placeholder".into());
+
+    let has_valid_secret = req.secret.as_deref() == Some(expected_secret.as_str());
+
+    if !has_valid_secret {
+        return ApiResponse::Error {
+            message: "Sandbox reset attempted without valid authentication".to_string(),
+        };
+    }
+
+    execute_reset(state, req).await
 }
 
 #[instrument(skip(state, _admin))]
