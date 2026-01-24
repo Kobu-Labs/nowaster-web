@@ -1,0 +1,72 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE sandbox_lifecycle\n            SET torndown_by = $2,\n                torndown_type = $3,\n                status = 'recycled',\n                ended_at = NOW()\n            WHERE id = $1\n            RETURNING id, status, created_by, created_type, torndown_by, torndown_type,\n                   unique_users,  started_at, ended_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_by",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "torndown_by",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "torndown_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "unique_users",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "started_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "ended_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "138235f735a5c9e36f5ce2e06b7ba0a4ddc9ec07c4a741ea9d6308af4a625bc7"
+}
