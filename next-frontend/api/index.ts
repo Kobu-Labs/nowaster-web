@@ -3,6 +3,7 @@ export * as CategoryApi from "./categoryApi";
 export * as FriendRequestApi from "./friend-request";
 export * as FriendsApi from "./friends";
 export * as ProjectsApi from "./projectsApi";
+export * as SandboxApi from "./sandboxApi";
 export * as ScheduledSessionApi from "./scheduledSessionApi";
 export * as StatisticsApi from "./statisticsApi";
 export * as StopwatchApi from "./stopwatchApi";

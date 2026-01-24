@@ -14,6 +14,7 @@ import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -50,6 +51,16 @@ const shouldDisplayProvider = (provider: OAuthProvider) => {
 };
 
 export default function SignInPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  if (
+    pathname === "/sign-in"
+    && env.NEXT_PUBLIC_APP_ENV === "nowaster-sandbox"
+  ) {
+    router.push("/home");
+  }
+
   const handleOAuthLogin = (provider: OAuthProvider) => {
     const authUrl = `${env.NEXT_PUBLIC_API_URL}/auth/oauth/${provider}`;
     globalThis.location.href = authUrl;
