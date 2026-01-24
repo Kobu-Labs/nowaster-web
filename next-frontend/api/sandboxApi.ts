@@ -1,7 +1,13 @@
+import axios from "axios";
 import baseApi, { parseResponseUnsafe } from "@/api/baseApi";
 import { z } from "zod";
 
 const BASE_URL = "/admin/sandbox";
+
+const sandboxApi = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_SANDBOX_API_URL ?? "http://localhost:8081",
+  withCredentials: false,
+});
 
 export const sandboxLifecycleSchema = z.object({
   createdBy: z.string(),
@@ -39,6 +45,6 @@ export type ResetSandboxParams = {
 };
 
 export const resetSandbox = async (params: ResetSandboxParams) => {
-  const { data } = await baseApi.post(`${BASE_URL}/reset`, params);
+  const { data } = await sandboxApi.post(`${BASE_URL}/reset`, params);
   return await parseResponseUnsafe(data, sandboxResetResponseSchema);
 };

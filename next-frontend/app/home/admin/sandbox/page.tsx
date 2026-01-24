@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
 import {
   Table,
   TableBody,
@@ -25,15 +26,20 @@ import {
   Clock,
   PlayCircle,
   RefreshCw,
+  RotateCcw,
   User,
   Users,
   XCircle,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { SandboxLifecycle } from "@/api/sandboxApi";
+import { useState } from "react";
 
 const SandboxPage: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [resetStatus, setResetStatus] = useState<null | string>(null);
+
   const {
     data: lifecycles,
     error,
@@ -41,6 +47,26 @@ const SandboxPage: React.FC = () => {
   } = useQuery({
     queryFn: SandboxApi.getLifecycles,
     queryKey: ["admin", "sandbox", "lifecycles"],
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: () =>
+      SandboxApi.resetSandbox({
+        secret: "dev_reset_secret_abc123",
+        triggeredBy: "admin-ui",
+        triggeredType: "manual",
+      }),
+    onError: (error: Error) => {
+      setResetStatus(`Reset failed: ${error.message}`);
+    },
+    onSuccess: async (data) => {
+      setResetStatus(
+        `Reset successful! Old lifecycle: ${data.old?.sandboxLifecycleId ?? "none"}, New lifecycle: ${data.new.sandboxLifecycleId}`,
+      );
+      await queryClient.invalidateQueries({
+        queryKey: ["admin", "sandbox", "lifecycles"],
+      });
+    },
   });
 
   const getStatusBadge = (status: string) => {
@@ -126,12 +152,45 @@ const SandboxPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="mb-2 text-3xl font-bold">Sandbox Management</h1>
-        <p className="text-muted-foreground">
-          Monitor sandbox environment lifecycles and metrics.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="mb-2 text-3xl font-bold">Sandbox Management</h1>
+          <p className="text-muted-foreground">
+            Monitor sandbox environment lifecycles and metrics.
+          </p>
+        </div>
+        <Button
+          className="gap-2"
+          disabled={resetMutation.isPending}
+          onClick={() => resetMutation.mutate()}
+          variant="destructive"
+        >
+          <RotateCcw className="h-4 w-4" />
+          {resetMutation.isPending ? "Resetting..." : "Reset Sandbox"}
+        </Button>
       </div>
+
+      {resetStatus && (
+        <Card
+          className={
+            resetStatus.includes("failed")
+              ? "border-destructive"
+              : "border-green-500"
+          }
+        >
+          <CardContent className="pt-6">
+            <p
+              className={
+                resetStatus.includes("failed")
+                  ? "text-destructive"
+                  : "text-green-600"
+              }
+            >
+              {resetStatus}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {error && (
         <Card className="border-destructive">
@@ -191,12 +250,11 @@ const SandboxPage: React.FC = () => {
                         </TableHeader>
                         <TableBody>
                           {lifecycles.map((lifecycle: SandboxLifecycle) => {
-                            const durationHours =
-                              lifecycle.endedAt
-                                ? (lifecycle.endedAt.getTime() -
-                                  lifecycle.startedAt.getTime()) /
-                                  (1000 * 60 * 60)
-                                : null;
+                            const durationHours = lifecycle.endedAt
+                              ? (lifecycle.endedAt.getTime()
+                                - lifecycle.startedAt.getTime())
+                              / (1000 * 60 * 60)
+                              : null;
 
                             return (
                               <TableRow key={lifecycle.sandboxLifecycleId}>
