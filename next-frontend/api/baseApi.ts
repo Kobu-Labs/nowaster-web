@@ -1,6 +1,6 @@
 import { ResponseSchema } from "@/api/definitions";
 import { env } from "@/env";
-import { getAccessToken, setAuthTokens } from "@/lib/auth";
+import { setUserFromToken } from "@/lib/auth";
 import { Result } from "@badrap/result";
 import axios from "axios";
 import { z, type ZodType } from "zod";
@@ -10,16 +10,9 @@ const baseApi = axios.create({
   withCredentials: true,
 });
 
-// Global promise to prevent concurrent refresh requests (race-condition safe)
-let refreshPromise: null | Promise<{
-  accessToken: string;
-  refreshToken: string;
-}> = null;
+let refreshPromise: null | Promise<string> = null;
 
-export const refreshTokens = async (): Promise<{
-  accessToken: string;
-  refreshToken: string;
-}> => {
+export const refreshTokens = async (): Promise<string> => {
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -36,19 +29,14 @@ export const refreshTokens = async (): Promise<{
         },
       );
 
-      const newAccessToken = refreshResponse.data?.data?.access_token;
-      const newRefreshToken = refreshResponse.data?.data?.refresh_token;
+      const newAccessToken = refreshResponse.data?.data?.access_token as string | undefined;
 
-      if (!newAccessToken || !newRefreshToken) {
+      if (!newAccessToken) {
         throw new Error("Invalid refresh response");
       }
 
-      setAuthTokens(newAccessToken, newRefreshToken);
-
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      };
+      setUserFromToken(newAccessToken);
+      return newAccessToken;
     } finally {
       refreshPromise = null;
     }
@@ -57,8 +45,7 @@ export const refreshTokens = async (): Promise<{
   return refreshPromise;
 };
 
-// Request interceptor: add auth token to all requests
-baseApi.interceptors.request.use(async (config) => {
+baseApi.interceptors.request.use((config) => {
   const impersonationToken
     = globalThis.window === undefined
       ? null
@@ -66,16 +53,11 @@ baseApi.interceptors.request.use(async (config) => {
 
   if (impersonationToken) {
     config.headers["X-Impersonation-Token"] = impersonationToken;
-  } else {
-    const token = getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
   }
+
   return config;
 });
 
-// Response interceptor: handle 401 errors with token refresh
 baseApi.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -85,8 +67,7 @@ baseApi.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const tokens = await refreshTokens();
-        originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        await refreshTokens();
         return await baseApi(originalRequest);
       } catch (refreshError) {
         globalThis.location.href = "/sign-in";

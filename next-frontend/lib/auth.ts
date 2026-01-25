@@ -10,7 +10,7 @@ export type JwtClaims = {
   iss: string;
   name: string;
   role: UserRole;
-  sub: string; // user_id
+  sub: string;
 };
 
 export type User = {
@@ -21,109 +21,51 @@ export type User = {
 
 export type UserRole = "admin" | "user";
 
-/**
- * Clear all auth cookies
- */
 export function clearAuthCookies() {
-  Cookies.remove("access_token");
-  Cookies.remove("refresh_token");
-  Cookies.remove("has_session");
+  Cookies.remove("user_hint");
 }
 
-/**
- * Decode and validate the access token
- */
 export function decodeAccessToken(token: string): JwtClaims | null {
   try {
     const claims = jwtDecode<JwtClaims>(token);
-
-    // Check if token is expired
     const now = Date.now() / 1000;
     if (claims.exp < now) {
       return null;
     }
-
     return claims;
   } catch {
     return null;
   }
 }
 
-/**
- * Get the access token from cookies
- */
-export function getAccessToken(): null | string {
-  return Cookies.get("access_token") ?? null;
-}
-
-/**
- * Get the current user from the access token
- */
 export function getCurrentUser(): null | User {
-  const token = getAccessToken();
-  if (!token) {
+  const userHint = Cookies.get("user_hint");
+  if (!userHint) {
     return null;
   }
 
-  const claims = decodeAccessToken(token);
-  if (!claims) {
+  try {
+    return JSON.parse(userHint) as User;
+  } catch {
     return null;
   }
-
-  return {
-    id: claims.sub,
-    role: claims.role,
-    username: claims.name,
-  };
 }
 
-/**
- * Get the refresh token from cookies
- */
-export function getRefreshToken(): null | string {
-  return Cookies.get("refresh_token") ?? null;
-}
-
-export function hasSession(): boolean {
-  return Cookies.get("has_session") === "true";
-}
-
-/**
- * Check if user is authenticated
- */
 export function isAuthenticated(): boolean {
   return getCurrentUser() !== null;
 }
 
-export function setAccessToken(accessToken: string) {
-  Cookies.set("access_token", accessToken, {
-    expires: 30,
-    path: "/",
-    sameSite: "lax",
-  });
-}
+export function setUserFromToken(accessToken: string) {
+  const claims = decodeAccessToken(accessToken);
+  if (!claims) {
+    return;
+  }
 
-/**
- * Set auth tokens in cookies
- */
-export function setAuthTokens(accessToken: string, refreshToken: string) {
-  // Set access token cookie to expire in 30 days (same as refresh token)
-  // The JWT inside expires in 15 min, but cookie persists so we can read it and detect "expired" vs "missing"
-  Cookies.set("access_token", accessToken, {
-    expires: 1 / 96, // 15 minutes in days (24 * 60 / 15 = 96)
-    path: "/",
-    sameSite: "lax",
-  });
-
-  // Set refresh token (30 days)
-  Cookies.set("refresh_token", refreshToken, {
-    expires: 30,
-    path: "/",
-    sameSite: "lax",
-  });
-
-  // Set session flag (readable by JS, persists to indicate user has logged in before)
-  Cookies.set("has_session", "true", {
+  Cookies.set("user_hint", JSON.stringify({
+    id: claims.sub,
+    role: claims.role,
+    username: claims.name,
+  } satisfies User), {
     expires: 30,
     path: "/",
     sameSite: "lax",

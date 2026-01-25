@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const hasSession = request.cookies.get("has_session")?.value === "true";
+  const hasSession = !!request.cookies.get("user_hint")?.value;
 
   if (!hasSession) {
     return NextResponse.redirect(new URL("/", request.url));
