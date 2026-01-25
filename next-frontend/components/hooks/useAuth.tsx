@@ -2,10 +2,9 @@ import { User } from "@/lib/auth";
 import { createContext, useContext } from "react";
 
 type AuthContextType = {
-  getToken: () => Promise<null | string>;
   isLoaded: boolean;
   isSignedIn: boolean;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  setTokens: (accessToken: string) => void;
   signOut: () => void;
   user: null | User;
 };
