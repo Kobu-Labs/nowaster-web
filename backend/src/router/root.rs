@@ -229,14 +229,23 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 
-    // Configure CORS to allow credentials from frontend
-    // Note: When using allow_credentials(true), cannot use wildcards for origin/headers
-    let frontend_url = &config.frontend.url;
+    let is_sandbox = config.server.app_env == crate::config::env::AppEnvironment::NowasterSandbox;
 
-    println!("🌐 [CORS] Allowing origin: {}", frontend_url);
+    let allow_origin = if is_sandbox {
+        tower_http::cors::AllowOrigin::predicate(|origin, _| {
+            origin
+                .to_str()
+                .map(|o| o.ends_with(".nowaster.app") || o == "https://nowaster.app")
+                .unwrap_or(false)
+        })
+    } else {
+        let frontend_url = &config.frontend.url;
+        println!("🌐 [CORS] Allowing origin: {}", frontend_url);
+        tower_http::cors::AllowOrigin::exact(frontend_url.parse::<http::HeaderValue>().unwrap())
+    };
 
     let cors = tower_http::cors::CorsLayer::new()
-        .allow_origin(frontend_url.parse::<http::HeaderValue>().unwrap())
+        .allow_origin(allow_origin)
         .allow_methods([
             http::Method::GET,
             http::Method::POST,
