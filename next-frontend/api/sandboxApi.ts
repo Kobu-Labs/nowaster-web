@@ -39,12 +39,11 @@ const sandboxResetResponseSchema = z.object({
 });
 
 export type ResetSandboxParams = {
-  secret?: string;
   triggeredBy: string;
   triggeredType: string;
 };
 
 export const resetSandbox = async (params: ResetSandboxParams) => {
-  const { data } = await sandboxApi.post(`${BASE_URL}/reset`, params);
+  const { data } = await sandboxApi.post(`${BASE_URL}/reset/manual`, params);
   return await parseResponseUnsafe(data, sandboxResetResponseSchema);
 };
