@@ -6,6 +6,10 @@ import { UsernameSelectionDialog } from "@/components/auth/UsernameSelectionDial
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { NewReleaseDialog } from "@/components/release/NewReleaseDialog";
+import { HomeHeader } from "@/app/home/HomeHeader";
+import { ImpersonationBanner } from "@/components/impersonation/ImpersonationBanner";
+import { EnvironmentBanner } from "@/components/environment/EnvironmentBanner";
+import { SidebarProvider } from "@/components/shadcn/sidebar";
 
 type RootLayoutProps = {
   children: React.ReactNode;
@@ -41,13 +45,19 @@ function LayoutContent({ children }: RootLayoutProps) {
   };
 
   return (
-    <>
+    <SidebarProvider
+      className="flex flex-col [--header-height:3.5rem] p-0"
+      defaultOpen={false}
+    >
       <UsernameSelectionDialog
         onComplete={handleUsernameComplete}
         open={showUsernameDialog}
       />
       <NewReleaseDialog />
+      <HomeHeader />
+      <ImpersonationBanner />
+      <EnvironmentBanner />
       <SidebarWithPreferences>{children}</SidebarWithPreferences>
-    </>
+    </SidebarProvider>
   );
 }
