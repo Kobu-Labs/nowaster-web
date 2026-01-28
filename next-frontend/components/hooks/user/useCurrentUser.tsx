@@ -1,6 +1,6 @@
 import { UserApi } from "@/api";
 import { useAuth } from "@/components/hooks/useAuth";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Hook to get the current authenticated user's full profile data.
@@ -8,16 +8,13 @@ import { useSuspenseQuery } from "@tanstack/react-query";
  * IMPORTANT: This hook MUST be used within a route protected by AuthGuard.
  * It assumes the user is authenticated and will throw an error if not.
  *
- * Returns the user data directly (non-nullable) without loading states.
- * Uses Suspense for loading - wrap the component using this hook in a Suspense boundary.
- *
- * @throws Error if user is not authenticated (should never happen with AuthGuard)
- * @returns User profile data (non-nullable)
+ * Immediately returns basic user data (id, username, role) from auth state,
+ * then silently upgrades to the full profile (including avatarUrl, visibilityFlags)
+ * once the background fetch completes. No loading states or Suspense needed.
  */
 export const useCurrentUser = () => {
   const { user } = useAuth();
 
-  // This should never happen if AuthGuard is properly protecting the route
   if (!user?.id) {
     throw new Error(
       "useCurrentUser called without authenticated user. "
@@ -25,7 +22,9 @@ export const useCurrentUser = () => {
     );
   }
 
-  const { data } = useSuspenseQuery({
+  const { data } = useQuery({
+    initialData: { id: user.id, role: user.role, username: user.username },
+    initialDataUpdatedAt: 0,
     queryFn: async () => await UserApi.getCurrentUser(),
     queryKey: ["user", "current", user.id],
     staleTime: Infinity,
