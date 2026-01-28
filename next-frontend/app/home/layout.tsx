@@ -4,7 +4,7 @@ import { Providers } from "@/app/home/providers";
 import { SidebarWithPreferences } from "@/components/pages/SidebarWithPreferences";
 import { UsernameSelectionDialog } from "@/components/auth/UsernameSelectionDialog";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NewReleaseDialog } from "@/components/release/NewReleaseDialog";
 import { HomeHeader } from "@/app/home/HomeHeader";
 import { ImpersonationBanner } from "@/components/impersonation/ImpersonationBanner";
@@ -16,16 +16,6 @@ type RootLayoutProps = {
 };
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  return (
-    <Providers>
-      <Suspense fallback={null}>
-        <LayoutContent>{children}</LayoutContent>
-      </Suspense>
-    </Providers>
-  );
-}
-
-function LayoutContent({ children }: RootLayoutProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showUsernameDialog, setShowUsernameDialog] = useState(false);
@@ -43,21 +33,22 @@ function LayoutContent({ children }: RootLayoutProps) {
   const handleUsernameComplete = () => {
     setShowUsernameDialog(false);
   };
-
   return (
-    <SidebarProvider
-      className="flex flex-col [--header-height:3.5rem] p-0"
-      defaultOpen={false}
-    >
-      <UsernameSelectionDialog
-        onComplete={handleUsernameComplete}
-        open={showUsernameDialog}
-      />
-      <NewReleaseDialog />
-      <HomeHeader />
-      <ImpersonationBanner />
-      <EnvironmentBanner />
-      <SidebarWithPreferences>{children}</SidebarWithPreferences>
-    </SidebarProvider>
+    <Providers>
+      <SidebarProvider
+        className="flex flex-col [--header-height:3.5rem] p-0"
+        defaultOpen={false}
+      >
+        <UsernameSelectionDialog
+          onComplete={handleUsernameComplete}
+          open={showUsernameDialog}
+        />
+        <NewReleaseDialog />
+        <HomeHeader />
+        <ImpersonationBanner />
+        <EnvironmentBanner />
+        <SidebarWithPreferences>{children}</SidebarWithPreferences>
+      </SidebarProvider>
+    </Providers>
   );
 }
