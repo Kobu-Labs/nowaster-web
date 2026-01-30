@@ -44,6 +44,6 @@ export type ResetSandboxParams = {
 };
 
 export const resetSandbox = async (params: ResetSandboxParams) => {
-  const { data } = await sandboxApi.post(`${BASE_URL}/reset/manual`, params);
+  const { data } = await sandboxApi.post(`${BASE_URL}/reset`, params);
   return await parseResponseUnsafe(data, sandboxResetResponseSchema);
 };
