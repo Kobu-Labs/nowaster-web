@@ -30,12 +30,6 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     async function initAuth() {
       const currentUser = getCurrentUser();
 
-      if (currentUser) {
-        setUser(currentUser);
-        setIsLoaded(true);
-        return;
-      }
-
       if (isSandboxEnv && !guestLoginAttempted.current) {
         guestLoginAttempted.current = true;
 
@@ -59,6 +53,13 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         } catch (err) {
           console.error("Sandbox auto-login error:", err);
         }
+
+        setIsLoaded(true);
+        return;
+      }
+
+      if (currentUser) {
+        setUser(currentUser);
       }
 
       setIsLoaded(true);
