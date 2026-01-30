@@ -35,11 +35,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { SandboxLifecycle } from "@/api/sandboxApi";
 import { useState } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
+import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 
 const SandboxPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const [resetStatus, setResetStatus] = useState<null | string>(null);
 
   const {
@@ -54,7 +54,7 @@ const SandboxPage: React.FC = () => {
   const resetMutation = useMutation({
     mutationFn: () =>
       SandboxApi.resetSandbox({
-        triggeredBy: user?.username ?? "unknown",
+        triggeredBy: user.id,
         triggeredType: "user",
       }),
     onError: (error: Error) => {
