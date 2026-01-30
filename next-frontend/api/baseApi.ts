@@ -1,6 +1,6 @@
 import { ResponseSchema } from "@/api/definitions";
 import { env } from "@/env";
-import { setUserFromToken } from "@/lib/auth";
+import { clearAuthCookies, setUserFromToken } from "@/lib/auth";
 import { Result } from "@badrap/result";
 import axios from "axios";
 import { z, type ZodType } from "zod";
@@ -70,6 +70,7 @@ baseApi.interceptors.response.use(
         await refreshTokens();
         return await baseApi(originalRequest);
       } catch (refreshError) {
+        clearAuthCookies();
         globalThis.location.href = "/sign-in";
         throw refreshError instanceof Error
           ? refreshError
