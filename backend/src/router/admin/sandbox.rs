@@ -13,7 +13,9 @@ use crate::router::{admin::AdminUser, response::ApiResponse, root::AppState};
 #[derive(Debug, Deserialize)]
 struct ResetSandboxRequest {
     secret: Option<String>,
+    #[serde(rename = "triggeredBy")]
     triggered_by: String,
+    #[serde(rename = "triggeredType")]
     triggered_type: String,
 }
 
