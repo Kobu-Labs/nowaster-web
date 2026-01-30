@@ -443,8 +443,35 @@ async fn assign_guest_handler(
 
     let guest_id = if let Some(cookie) = jar.get("sandbox_guest_id") {
         let existing_guest = cookie.value().to_string();
-        tracing::info!("Reusing existing guest from cookie: {}", existing_guest);
-        existing_guest
+        let still_exists = state
+            .user_service
+            .get_user_by_id(existing_guest.clone())
+            .await
+            .unwrap_or(None)
+            .is_some();
+
+        if still_exists {
+            tracing::info!("Reusing existing guest from cookie: {}", existing_guest);
+            existing_guest
+        } else {
+            tracing::info!(
+                "Cookie guest {} no longer exists (post-reset), assigning new guest",
+                existing_guest
+            );
+            let guest_id = match state.sandbox_service.pop_guest_from_pool() {
+                Some(id) => id,
+                None => {
+                    tracing::error!("Guest pool exhausted!");
+                    return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
+                }
+            };
+            let _ = state.sandbox_service.increment_unique_users().await;
+            let sandbox_service = state.sandbox_service.clone();
+            tokio::spawn(async move {
+                let _ = sandbox_service.replenish_pool_if_needed().await;
+            });
+            guest_id
+        }
     } else {
         let guest_id = match state.sandbox_service.pop_guest_from_pool() {
             Some(id) => id,
