@@ -26,7 +26,7 @@ impl From<SandboxStatus> for String {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SandboxLifecycle {
-    pub id: i32,
+    pub id: uuid::Uuid,
     pub status: String,
     pub created_by: String,
     pub created_type: String,

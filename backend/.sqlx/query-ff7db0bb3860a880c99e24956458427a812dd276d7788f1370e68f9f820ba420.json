@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO sandbox_lifecycle\n                (id, status, created_by, created_type, torndown_by, torndown_type,\n                 unique_users, started_at, ended_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n            ON CONFLICT (id) DO UPDATE SET\n                status       = EXCLUDED.status,\n                torndown_by  = EXCLUDED.torndown_by,\n                torndown_type = EXCLUDED.torndown_type,\n                unique_users = EXCLUDED.unique_users,\n                ended_at     = EXCLUDED.ended_at\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ff7db0bb3860a880c99e24956458427a812dd276d7788f1370e68f9f820ba420"
+}

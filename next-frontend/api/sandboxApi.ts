@@ -7,7 +7,7 @@ export const sandboxLifecycleSchema = z.object({
   createdBy: z.string(),
   createdType: z.string(),
   endedAt: z.coerce.date().nullable(),
-  sandboxLifecycleId: z.number(),
+  sandboxLifecycleId: z.string().uuid(),
   startedAt: z.coerce.date(),
   status: z.string(),
   torndownBy: z.string().nullable(),
