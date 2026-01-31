@@ -11,6 +11,14 @@ use tracing::instrument;
 use crate::router::{admin::AdminUser, response::ApiResponse, root::AppState};
 
 #[derive(Debug, Deserialize)]
+struct ProxyResetRequest {
+    #[serde(rename = "triggeredBy")]
+    triggered_by: String,
+    #[serde(rename = "triggeredType")]
+    triggered_type: String,
+}
+
+#[derive(Debug, Deserialize)]
 struct ResetSandboxRequest {
     secret: Option<String>,
     #[serde(rename = "triggeredBy")]
@@ -19,7 +27,7 @@ struct ResetSandboxRequest {
     triggered_type: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SandboxLifecycleResponse {
     sandbox_lifecycle_id: i32,
@@ -33,7 +41,7 @@ struct SandboxLifecycleResponse {
     ended_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SandboxResetResponse {
     old: Option<SandboxLifecycleResponse>,
@@ -44,6 +52,7 @@ pub fn admin_sandbox_router() -> Router<AppState> {
     Router::new()
         .route("/lifecycles", get(get_sandbox_lifecycles))
         .route("/reset", post(reset_sandbox_handler))
+        .route("/proxy-reset", post(proxy_reset_sandbox_handler))
 }
 
 // 1. tears down the current sandbox
@@ -176,4 +185,47 @@ async fn get_sandbox_lifecycles(
         });
 
     ApiResponse::from_result(lifecycles)
+}
+
+#[instrument(skip(state))]
+async fn proxy_reset_sandbox_handler(
+    State(state): State<AppState>,
+    AdminUser(_admin): AdminUser,
+    Json(req): Json<ProxyResetRequest>,
+) -> Result<Json<ApiResponse<SandboxResetResponse>>, StatusCode> {
+    if state.config.server.app_env == crate::config::env::AppEnvironment::NowasterSandbox {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    let sandbox_url = std::env::var("SANDBOX_API_URL").map_err(|_| {
+        tracing::error!("SANDBOX_API_URL not configured");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let secret = std::env::var("SANDBOX_RESET_SECRET").map_err(|_| {
+        tracing::error!("SANDBOX_RESET_SECRET not configured");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post(format!("{}/admin/sandbox/reset", sandbox_url))
+        .json(&serde_json::json!({
+            "secret": secret,
+            "triggeredBy": req.triggered_by,
+            "triggeredType": req.triggered_type,
+        }))
+        .send()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to reach sandbox API: {}", e);
+            StatusCode::BAD_GATEWAY
+        })?;
+
+    let body: ApiResponse<SandboxResetResponse> = response.json().await.map_err(|e| {
+        tracing::error!("Failed to parse sandbox reset response: {}", e);
+        StatusCode::BAD_GATEWAY
+    })?;
+
+    Ok(Json(body))
 }
