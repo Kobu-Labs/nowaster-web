@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use uuid::Uuid;
+
 use crate::{
     config::database::{Database, DatabaseTrait},
     entity::sandbox_lifecycle::{SandboxLifecycle, SandboxStatus},
@@ -162,37 +164,30 @@ impl SandboxLifecycleRepository {
         Ok(())
     }
 
-    pub async fn get_all_guest_ids(&self) -> Result<Vec<String>, sqlx::Error> {
-        let guest_ids: Vec<String> =
-            sqlx::query_scalar("SELECT id FROM \"user\" WHERE id LIKE 'guest_%' ORDER BY id")
-                .fetch_all(self.db_conn.get_pool())
-                .await?;
+    pub async fn get_guest_pool_entries(&self) -> Result<Vec<(String, String)>, sqlx::Error> {
+        let rows = sqlx::query!(
+            r#"SELECT id, displayname FROM "user" WHERE id LIKE 'guest_%'"#
+        )
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
 
-        Ok(guest_ids)
+        Ok(rows.into_iter().map(|r| (r.id, r.displayname)).collect())
     }
 
     pub async fn create_guest_user_pool(&self, count: usize) -> Result<i64, sqlx::Error> {
-        // Find highest existing guest number
-        let max_guest_num: Option<i32> = sqlx::query_scalar(
-            r#"
-            SELECT CAST(SUBSTRING(id FROM 7) AS INTEGER) as guest_num
-            FROM "user"
-            WHERE id LIKE 'guest_%'
-            ORDER BY guest_num DESC
-            LIMIT 1
-            "#,
+        let current_count: i64 = sqlx::query_scalar!(
+            r#"SELECT COUNT(*) FROM "user" WHERE id LIKE 'guest_%'"#,
         )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
-
-        let start_num = max_guest_num.unwrap_or(0) + 1;
+        .fetch_one(self.db_conn.get_pool())
+        .await?
+        .unwrap_or(0);
 
         let mut created_count = 0i64;
 
         for i in 0..count {
-            let guest_num = start_num + i as i32;
-            let guest_id = format!("guest_{:03}", guest_num);
-            let display_name = format!("Guest #{}", guest_num);
+            let guest_id = format!("guest_{}", Uuid::new_v4().simple());
+            let display_num = current_count + i as i64 + 1;
+            let display_name = format!("Guest #{}", display_num);
             let email = format!("{}@sandbox.nowaster.app", guest_id);
 
             let result = sqlx::query!(
