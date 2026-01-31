@@ -11,7 +11,8 @@ use crate::{
     repository::sandbox_lifecycle::SandboxLifecycleRepository,
 };
 
-static GUEST_POOL: Lazy<Mutex<VecDeque<String>>> = Lazy::new(|| Mutex::new(VecDeque::new()));
+static GUEST_POOL: Lazy<Mutex<VecDeque<(String, String)>>> =
+    Lazy::new(|| Mutex::new(VecDeque::new()));
 
 #[derive(Clone)]
 pub struct SandboxService {
@@ -119,18 +120,18 @@ impl SandboxService {
         pool.is_empty()
     }
 
-    pub fn pop_guest_from_pool(&self) -> Option<String> {
+    pub fn pop_guest_from_pool(&self) -> Option<(String, String)> {
         let mut pool = GUEST_POOL.lock().unwrap();
         pool.pop_front()
     }
 
     pub async fn init_pool(&self) -> Result<(), sqlx::Error> {
-        let guest_ids = self.lifecycle_repo.get_all_guest_ids().await?;
+        let entries = self.lifecycle_repo.get_guest_pool_entries().await?;
 
         let mut guest_pool = GUEST_POOL.lock().unwrap();
         guest_pool.clear();
-        for id in guest_ids {
-            guest_pool.push_back(id);
+        for entry in entries {
+            guest_pool.push_back(entry);
         }
 
         info!("Initialized guest pool with {} users", guest_pool.len());

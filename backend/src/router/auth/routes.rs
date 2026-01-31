@@ -441,25 +441,24 @@ async fn assign_guest_handler(
         }
     }
 
-    let guest_id = if let Some(cookie) = jar.get("sandbox_guest_id") {
+    let (guest_id, display_name) = if let Some(cookie) = jar.get("sandbox_guest_id") {
         let existing_guest = cookie.value().to_string();
-        let still_exists = state
+        let existing_user = state
             .user_service
             .get_user_by_id(existing_guest.clone())
             .await
-            .unwrap_or(None)
-            .is_some();
+            .unwrap_or(None);
 
-        if still_exists {
+        if let Some(user) = existing_user {
             tracing::info!("Reusing existing guest from cookie: {}", existing_guest);
-            existing_guest
+            (existing_guest, user.username)
         } else {
             tracing::info!(
                 "Cookie guest {} no longer exists (post-reset), assigning new guest",
                 existing_guest
             );
-            let guest_id = match state.sandbox_service.pop_guest_from_pool() {
-                Some(id) => id,
+            let (id, name) = match state.sandbox_service.pop_guest_from_pool() {
+                Some(entry) => entry,
                 None => {
                     tracing::error!("Guest pool exhausted!");
                     return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
@@ -470,33 +469,28 @@ async fn assign_guest_handler(
             tokio::spawn(async move {
                 let _ = sandbox_service.replenish_pool_if_needed().await;
             });
-            guest_id
+            (id, name)
         }
     } else {
-        let guest_id = match state.sandbox_service.pop_guest_from_pool() {
-            Some(id) => id,
+        let (id, name) = match state.sandbox_service.pop_guest_from_pool() {
+            Some(entry) => entry,
             None => {
                 tracing::error!("Guest pool exhausted!");
                 return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
             }
         };
 
-        tracing::info!("Assigned new guest from pool: {}", guest_id);
+        tracing::info!("Assigned new guest from pool: {}", id);
 
-        // Increment unique users counter for active lifecycle
         let _ = state.sandbox_service.increment_unique_users().await;
 
-        // Replenish pool in background
         let sandbox_service = state.sandbox_service.clone();
         tokio::spawn(async move {
             let _ = sandbox_service.replenish_pool_if_needed().await;
         });
 
-        guest_id
+        (id, name)
     };
-
-    let guest_num = guest_id.strip_prefix("guest_").unwrap_or("0");
-    let display_name = format!("Guest #{}", guest_num.trim_start_matches('0'));
 
     let access_token = match crate::auth::generate_access_token(
         &guest_id,
