@@ -229,7 +229,8 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 
     let allow_origin = match config.server.app_env {
-        crate::config::env::AppEnvironment::NowasterLocal => {
+        crate::config::env::AppEnvironment::NowasterLocal
+        | crate::config::env::AppEnvironment::NowasterSandbox => {
             let frontend_url = &config.frontend.url;
             println!("🌐 [CORS] Allowing origin: {}", frontend_url);
             tower_http::cors::AllowOrigin::exact(frontend_url.parse::<http::HeaderValue>().unwrap())
