@@ -60,6 +60,33 @@ impl SandboxService {
         Ok(())
     }
 
+    pub async fn upsert_lifecycle(
+        &self,
+        id: uuid::Uuid,
+        status: &str,
+        created_by: &str,
+        created_type: &str,
+        torndown_by: Option<&str>,
+        torndown_type: Option<&str>,
+        unique_users: i32,
+        started_at: chrono::DateTime<chrono::Utc>,
+        ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> Result<(), sqlx::Error> {
+        self.lifecycle_repo
+            .upsert_lifecycle(
+                id,
+                status,
+                created_by,
+                created_type,
+                torndown_by,
+                torndown_type,
+                unique_users,
+                started_at,
+                ended_at,
+            )
+            .await
+    }
+
     pub async fn get_all_lifecycles(
         &self,
         limit: i64,

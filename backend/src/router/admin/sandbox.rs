@@ -30,7 +30,7 @@ struct ResetSandboxRequest {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SandboxLifecycleResponse {
-    sandbox_lifecycle_id: i32,
+    sandbox_lifecycle_id: uuid::Uuid,
     status: String,
     created_by: String,
     created_type: String,
@@ -226,6 +226,39 @@ async fn proxy_reset_sandbox_handler(
         tracing::error!("Failed to parse sandbox reset response: {}", e);
         StatusCode::BAD_GATEWAY
     })?;
+
+    if let ApiResponse::Success { data } = &body {
+        if let Some(ref old) = data.old {
+            let _ = state
+                .sandbox_service
+                .upsert_lifecycle(
+                    old.sandbox_lifecycle_id,
+                    "recycled",
+                    &old.created_by,
+                    &old.created_type,
+                    Some(req.triggered_by.as_str()),
+                    Some(req.triggered_type.as_str()),
+                    old.unique_users,
+                    old.started_at,
+                    Some(data.new.started_at),
+                )
+                .await;
+        }
+        let _ = state
+            .sandbox_service
+            .upsert_lifecycle(
+                data.new.sandbox_lifecycle_id,
+                &data.new.status,
+                &data.new.created_by,
+                &data.new.created_type,
+                data.new.torndown_by.as_deref(),
+                data.new.torndown_type.as_deref(),
+                data.new.unique_users,
+                data.new.started_at,
+                data.new.ended_at,
+            )
+            .await;
+    }
 
     Ok(Json(body))
 }
