@@ -63,7 +63,7 @@ impl SandboxLifecycleRepository {
         Ok(record)
     }
 
-    pub async fn increment_unique_users(&self, id: i32) -> Result<(), sqlx::Error> {
+    pub async fn increment_unique_users(&self, id: Uuid) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
             UPDATE sandbox_lifecycle
@@ -80,7 +80,7 @@ impl SandboxLifecycleRepository {
 
     pub async fn teardown(
         &self,
-        id: i32,
+        id: Uuid,
         torndown_by: &str,
         torndown_type: &str,
     ) -> Result<SandboxLifecycle, sqlx::Error> {
@@ -172,6 +172,47 @@ impl SandboxLifecycleRepository {
         .await?;
 
         Ok(rows.into_iter().map(|r| (r.id, r.displayname)).collect())
+    }
+
+    pub async fn upsert_lifecycle(
+        &self,
+        id: Uuid,
+        status: &str,
+        created_by: &str,
+        created_type: &str,
+        torndown_by: Option<&str>,
+        torndown_type: Option<&str>,
+        unique_users: i32,
+        started_at: chrono::DateTime<chrono::Utc>,
+        ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+            INSERT INTO sandbox_lifecycle
+                (id, status, created_by, created_type, torndown_by, torndown_type,
+                 unique_users, started_at, ended_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ON CONFLICT (id) DO UPDATE SET
+                status       = EXCLUDED.status,
+                torndown_by  = EXCLUDED.torndown_by,
+                torndown_type = EXCLUDED.torndown_type,
+                unique_users = EXCLUDED.unique_users,
+                ended_at     = EXCLUDED.ended_at
+            "#,
+            id,
+            status,
+            created_by,
+            created_type,
+            torndown_by,
+            torndown_type,
+            unique_users,
+            started_at,
+            ended_at,
+        )
+        .execute(self.db_conn.get_pool())
+        .await?;
+
+        Ok(())
     }
 
     pub async fn create_guest_user_pool(&self, count: usize) -> Result<i64, sqlx::Error> {
