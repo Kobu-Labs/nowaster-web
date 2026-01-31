@@ -64,7 +64,6 @@ pub struct Feed {
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<crate::Config>,
-    pub pool: sqlx::PgPool,
     pub auth_service: AuthService,
     pub session_service: FixedSessionService,
     pub stopwatch_service: StopwatchSessionService,
@@ -85,7 +84,6 @@ pub struct AppState {
 }
 
 pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
-    use crate::config::database::DatabaseTrait;
     let category_repo = CategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
@@ -181,7 +179,6 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let state = AppState {
         config: config.clone(),
-        pool: db.get_pool().clone(),
         auth_service,
         friend_service: Arc::new(friend_service),
         session_service,
