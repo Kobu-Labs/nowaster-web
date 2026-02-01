@@ -5,7 +5,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use axum_extra::extract::cookie::{Cookie, CookieJar};
+use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use serde::{Deserialize, Serialize};
 use time::Duration;
 use tracing::instrument;
@@ -21,6 +21,11 @@ use crate::{
         auth::tokens::api_tokens_router, clerk::Actor, response::ApiResponse, root::AppState,
     },
 };
+
+#[derive(Debug, Deserialize)]
+struct GuestQueryParams {
+    force_new: Option<bool>,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct CallbackParams {
@@ -391,10 +396,19 @@ async fn logout_handler(
             })?;
     }
 
-    // Clear auth cookies
+    let make_removal = |name: &'static str| {
+        Cookie::build((name, ""))
+            .path("/")
+            .max_age(Duration::ZERO)
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::None)
+            .build()
+    };
+
     let jar = jar
-        .remove(Cookie::from("access_token"))
-        .remove(Cookie::from("refresh_token"));
+        .add(make_removal("access_token"))
+        .add(make_removal("refresh_token"));
 
     Ok((jar, StatusCode::NO_CONTENT))
 }
@@ -428,6 +442,7 @@ async fn get_current_user_handler(
 async fn assign_guest_handler(
     State(state): State<AppState>,
     jar: CookieJar,
+    Query(params): Query<GuestQueryParams>,
 ) -> Result<(CookieJar, Json<ApiResponse<TokenResponse>>), axum::http::StatusCode> {
     if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
         tracing::warn!("Guest endpoint called in non-sandbox environment");
@@ -441,36 +456,35 @@ async fn assign_guest_handler(
         }
     }
 
-    let (guest_id, display_name) = if let Some(cookie) = jar.get("sandbox_guest_id") {
-        let existing_guest = cookie.value().to_string();
-        let existing_user = state
-            .user_service
-            .get_user_by_id(existing_guest.clone())
-            .await
-            .unwrap_or(None);
+    let force_new = params.force_new.unwrap_or(false);
 
-        if let Some(user) = existing_user {
-            tracing::info!("Reusing existing guest from cookie: {}", existing_guest);
-            (existing_guest, user.username)
+    let reuse: Option<(String, String)> = if !force_new {
+        if let Some(cookie) = jar.get("sandbox_guest_id") {
+            let existing_id = cookie.value().to_string();
+            let existing_user = state
+                .user_service
+                .get_user_by_id(existing_id.clone())
+                .await
+                .unwrap_or(None);
+            if let Some(user) = existing_user {
+                tracing::info!("Reusing existing guest from cookie: {}", existing_id);
+                Some((existing_id, user.username))
+            } else {
+                tracing::info!(
+                    "Cookie guest {} no longer exists (post-reset), assigning new guest",
+                    existing_id
+                );
+                None
+            }
         } else {
-            tracing::info!(
-                "Cookie guest {} no longer exists (post-reset), assigning new guest",
-                existing_guest
-            );
-            let (id, name) = match state.sandbox_service.pop_guest_from_pool() {
-                Some(entry) => entry,
-                None => {
-                    tracing::error!("Guest pool exhausted!");
-                    return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
-                }
-            };
-            let _ = state.sandbox_service.increment_unique_users().await;
-            let sandbox_service = state.sandbox_service.clone();
-            tokio::spawn(async move {
-                let _ = sandbox_service.replenish_pool_if_needed().await;
-            });
-            (id, name)
+            None
         }
+    } else {
+        None
+    };
+
+    let (guest_id, display_name) = if let Some(existing) = reuse {
+        existing
     } else {
         let (id, name) = match state.sandbox_service.pop_guest_from_pool() {
             Some(entry) => entry,
@@ -479,16 +493,12 @@ async fn assign_guest_handler(
                 return Err(axum::http::StatusCode::SERVICE_UNAVAILABLE);
             }
         };
-
         tracing::info!("Assigned new guest from pool: {}", id);
-
         let _ = state.sandbox_service.increment_unique_users().await;
-
         let sandbox_service = state.sandbox_service.clone();
         tokio::spawn(async move {
             let _ = sandbox_service.replenish_pool_if_needed().await;
         });
-
         (id, name)
     };
 
