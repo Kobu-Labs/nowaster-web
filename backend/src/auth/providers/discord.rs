@@ -59,19 +59,38 @@ impl OAuthProvider for DiscordProvider {
             ("redirect_uri", config.redirect_url.as_str()),
         ];
 
+        println!("🔄 [DISCORD] Exchanging code for token...");
+        println!("🔄 [DISCORD] Token URL: {}", config.token_url);
+        println!("🔄 [DISCORD] Client ID: {}", config.client_id);
+        println!("🔄 [DISCORD] Redirect URI: {}", config.redirect_url);
+        println!("🔄 [DISCORD] Code: {}...", &code.chars().take(20).collect::<String>());
+
         let response = client
             .post(&config.token_url)
             .header("Content-Type", "application/x-www-form-urlencoded")
             .form(&params)
             .send()
             .await
-            .context("Failed to exchange code for token")?;
+            .map_err(|e| {
+                println!("❌ [DISCORD] Request failed: {}", e);
+                println!("❌ [DISCORD] Error details: {:?}", e);
+                if e.is_connect() {
+                    println!("❌ [DISCORD] Connection error - check network/firewall");
+                } else if e.is_timeout() {
+                    println!("❌ [DISCORD] Request timeout");
+                } else if e.is_request() {
+                    println!("❌ [DISCORD] Request building error");
+                }
+                anyhow::anyhow!("Failed to exchange code for token: {}", e)
+            })?;
+
+        println!("✅ [DISCORD] Got response with status: {}", response.status());
 
         if !response.status().is_success() {
             let status = response.status();
             let error_text = response.text().await.unwrap_or_default();
-            tracing::error!(
-                "Discord token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
+            println!(
+                "❌ [DISCORD] Token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
                 status,
                 error_text,
                 config.redirect_url

@@ -64,19 +64,38 @@ impl OAuthProvider for GitHubProvider {
             ("redirect_uri", config.redirect_url.as_str()),
         ];
 
+        println!("🔄 [GITHUB] Exchanging code for token...");
+        println!("🔄 [GITHUB] Token URL: {}", config.token_url);
+        println!("🔄 [GITHUB] Client ID: {}", config.client_id);
+        println!("🔄 [GITHUB] Redirect URI: {}", config.redirect_url);
+        println!("🔄 [GITHUB] Code: {}...", &code.chars().take(20).collect::<String>());
+
         let response = client
             .post(&config.token_url)
             .header("Accept", "application/json")
             .form(&params)
             .send()
             .await
-            .context("Failed to exchange code for token")?;
+            .map_err(|e| {
+                println!("❌ [GITHUB] Request failed: {}", e);
+                println!("❌ [GITHUB] Error details: {:?}", e);
+                if e.is_connect() {
+                    println!("❌ [GITHUB] Connection error - check network/firewall");
+                } else if e.is_timeout() {
+                    println!("❌ [GITHUB] Request timeout");
+                } else if e.is_request() {
+                    println!("❌ [GITHUB] Request building error");
+                }
+                anyhow::anyhow!("Failed to exchange code for token: {}", e)
+            })?;
+
+        println!("✅ [GITHUB] Got response with status: {}", response.status());
 
         if !response.status().is_success() {
             let status = response.status();
             let error_text = response.text().await.unwrap_or_default();
-            tracing::error!(
-                "GitHub token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
+            println!(
+                "❌ [GITHUB] Token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
                 status,
                 error_text,
                 config.redirect_url

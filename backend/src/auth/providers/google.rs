@@ -63,18 +63,37 @@ impl OAuthProvider for GoogleProvider {
             ("redirect_uri", config.redirect_url.as_str()),
         ];
 
+        println!("🔄 [GOOGLE] Exchanging code for token...");
+        println!("🔄 [GOOGLE] Token URL: {}", config.token_url);
+        println!("🔄 [GOOGLE] Client ID: {}", config.client_id);
+        println!("🔄 [GOOGLE] Redirect URI: {}", config.redirect_url);
+        println!("🔄 [GOOGLE] Code: {}...", &code.chars().take(20).collect::<String>());
+
         let response = client
             .post(&config.token_url)
             .form(&params)
             .send()
             .await
-            .context("Failed to exchange code for token")?;
+            .map_err(|e| {
+                println!("❌ [GOOGLE] Request failed: {}", e);
+                println!("❌ [GOOGLE] Error details: {:?}", e);
+                if e.is_connect() {
+                    println!("❌ [GOOGLE] Connection error - check network/firewall");
+                } else if e.is_timeout() {
+                    println!("❌ [GOOGLE] Request timeout");
+                } else if e.is_request() {
+                    println!("❌ [GOOGLE] Request building error");
+                }
+                anyhow::anyhow!("Failed to exchange code for token: {}", e)
+            })?;
+
+        println!("✅ [GOOGLE] Got response with status: {}", response.status());
 
         if !response.status().is_success() {
             let status = response.status();
             let error_text = response.text().await.unwrap_or_default();
-            tracing::error!(
-                "Google token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
+            println!(
+                "❌ [GOOGLE] Token exchange failed - Status: {}, Response: {}, Redirect URI: {}",
                 status,
                 error_text,
                 config.redirect_url
