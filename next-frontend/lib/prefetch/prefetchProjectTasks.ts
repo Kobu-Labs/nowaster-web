@@ -1,4 +1,4 @@
-import { queryClient } from "@/app/home/providers";
+import { queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 
 export const prefetchProjectTasks = (projectId: string) => {

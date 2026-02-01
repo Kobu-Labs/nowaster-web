@@ -1,6 +1,6 @@
 import { useAuth } from "@/components/hooks/useAuth";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { getCurrentUser } from "@/lib/auth";
+import { clearAuthCookies, getCurrentUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { refreshTokens } from "@/api/baseApi";
@@ -16,7 +16,8 @@ export function AuthGuard({ children }: { children: React.ReactNode; }) {
           const newToken = await refreshTokens();
           setTokens(newToken);
         } catch {
-          router.push("/");
+          clearAuthCookies();
+          router.push("/sign-in");
         }
       }
     };
