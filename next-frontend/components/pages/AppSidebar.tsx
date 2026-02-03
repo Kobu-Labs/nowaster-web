@@ -212,8 +212,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       className={cn(
                         "flex items-center gap-2",
                         currentLink === item.url && "bg-accent",
-                        currentLink !== item.url &&
-                          "hover:bg-sidebar-accent/50",
+                        currentLink !== item.url
+                        && "hover:bg-sidebar-accent/50",
                       )}
                       href={item.url}
                     >
@@ -234,8 +234,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       className={cn(
                         "flex items-center gap-2",
                         currentLink === "/home/admin" && "bg-accent",
-                        currentLink !== "/home/admin" &&
-                          "hover:bg-sidebar-accent/50",
+                        currentLink !== "/home/admin"
+                        && "hover:bg-sidebar-accent/50",
                       )}
                       href="/home/admin"
                     >
@@ -259,10 +259,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link
                     className={cn(
                       "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
-                      currentLink === `/home/category/${category.id}` &&
-                        "bg-accent",
-                      currentLink !== `/home/category/${category.id}` &&
-                        "hover:bg-sidebar-accent/50",
+                      currentLink === `/home/category/${category.id}`
+                      && "bg-accent",
+                      currentLink !== `/home/category/${category.id}`
+                      && "hover:bg-sidebar-accent/50",
                     )}
                     href={`/home/category/${category.id}`}
                     key={category.id}
@@ -307,8 +307,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
                     currentLink === `/home/tags/${tag.id}` && "bg-accent",
-                    currentLink !== `/home/tags/${tag.id}` &&
-                      "hover:bg-sidebar-accent/50",
+                    currentLink !== `/home/tags/${tag.id}`
+                    && "hover:bg-sidebar-accent/50",
                   )}
                   href={`/home/tags/${tag.id}`}
                   key={tag.id}
