@@ -8,6 +8,7 @@ import {
   Plus,
   Rss,
   Settings,
+  Shield,
   Tag,
   Users,
   X,
@@ -53,6 +54,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Separator } from "@/components/shadcn/separator";
+import { useIsAdmin } from "@/components/hooks/useIsAdmin";
 
 const SHOW_CATEGORY_AMOUNT = 5;
 const SHOW_TAG_AMOUNT = 7;
@@ -106,6 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showQuickLog, setShowQuickLog] = useState(false);
   const pref = useAtomValue(sidebarBehaviorAtom);
 
+  const isAdmin = useIsAdmin();
   const categories = useCategories();
   const tags = useTags();
   const pathname = usePathname();
@@ -209,8 +212,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       className={cn(
                         "flex items-center gap-2",
                         currentLink === item.url && "bg-accent",
-                        currentLink !== item.url
-                        && "hover:bg-sidebar-accent/50",
+                        currentLink !== item.url &&
+                          "hover:bg-sidebar-accent/50",
                       )}
                       href={item.url}
                     >
@@ -220,6 +223,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isAdmin && (
+                <SidebarMenuItem
+                  onClick={() => {
+                    handleLinkClick("/home/admin");
+                  }}
+                >
+                  <SidebarMenuButton asChild>
+                    <Link
+                      className={cn(
+                        "flex items-center gap-2",
+                        currentLink === "/home/admin" && "bg-accent",
+                        currentLink !== "/home/admin" &&
+                          "hover:bg-sidebar-accent/50",
+                      )}
+                      href="/home/admin"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -234,10 +259,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link
                     className={cn(
                       "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
-                      currentLink === `/home/category/${category.id}`
-                      && "bg-accent",
-                      currentLink !== `/home/category/${category.id}`
-                      && "hover:bg-sidebar-accent/50",
+                      currentLink === `/home/category/${category.id}` &&
+                        "bg-accent",
+                      currentLink !== `/home/category/${category.id}` &&
+                        "hover:bg-sidebar-accent/50",
                     )}
                     href={`/home/category/${category.id}`}
                     key={category.id}
@@ -282,8 +307,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-md justify-between cursor-pointer",
                     currentLink === `/home/tags/${tag.id}` && "bg-accent",
-                    currentLink !== `/home/tags/${tag.id}`
-                    && "hover:bg-sidebar-accent/50",
+                    currentLink !== `/home/tags/${tag.id}` &&
+                      "hover:bg-sidebar-accent/50",
                   )}
                   href={`/home/tags/${tag.id}`}
                   key={tag.id}

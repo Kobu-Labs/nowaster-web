@@ -59,10 +59,10 @@ const preferencesNavItems = [
 
 const adminNavItems = [
   {
-    description: "Admin tools and user management",
+    description: "Admin portal and user management",
     icon: UserCog,
-    title: "Admin Tools",
-    url: "/home/settings/admin",
+    title: "Admin Portal",
+    url: "/home/admin",
   },
 ] as const;
 
