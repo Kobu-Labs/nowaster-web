@@ -9,7 +9,7 @@ use tracing::instrument;
 
 use crate::{
     dto::user::read_user::ReadUserDto,
-    router::{admin::AdminUser, response::ApiResponse, root::AppState},
+    router::{admin::{AdminUser, release::admin_release_router}, response::ApiResponse, root::AppState},
 };
 
 #[derive(Debug, Serialize)]
@@ -41,6 +41,7 @@ pub fn admin_router() -> Router<AppState> {
         .route("/users/{user_id}", get(get_user_by_id))
         .route("/impersonate/{user_id}", post(start_impersonation))
         .route("/stop-impersonation", post(stop_impersonation))
+        .nest("/releases", admin_release_router())
 }
 
 #[instrument(skip(state))]

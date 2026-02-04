@@ -30,6 +30,7 @@ use crate::{
         },
         friend_service::{FriendService, FriendServiceTrait},
         notification_service::NotificationService,
+        release_service::ReleaseService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
         statistics_service::StatisticsService,
@@ -41,7 +42,7 @@ use crate::{
 use super::{
     admin::routes::admin_router, auth::auth_router, category::root::category_router,
     feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
-    session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
+    release::routes::release_router, session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
 };
 
 use tracing::info_span;
@@ -67,6 +68,7 @@ pub struct AppState {
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
     pub session_template_service: SessionTemplateService,
     pub notification_service: NotificationService,
+    pub release_service: ReleaseService,
     pub feed: Feed,
 }
 
@@ -87,6 +89,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
     let statistics_service = StatisticsService::new(statistics_repo);
 
     let notification_service = NotificationService::new(&db);
+    let release_service = ReleaseService::new(&db);
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
@@ -133,6 +136,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         stopwatch_service,
         session_template_service,
         notification_service,
+        release_service,
         feed: Feed {
             subscription_service,
             visibility_service,
@@ -159,6 +163,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
             "/notifications",
             notification_router().with_state(state.clone()),
         )
+        .nest("/releases", release_router().with_state(state.clone()))
         .nest("/admin", admin_router().with_state(state.clone()));
 
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);

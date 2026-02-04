@@ -8,6 +8,7 @@ import {
   Plus,
   Rss,
   Settings,
+  Shield,
   Tag,
   Users,
   X,
@@ -53,6 +54,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Separator } from "@/components/shadcn/separator";
+import { useIsAdmin } from "@/components/hooks/useIsAdmin";
 
 const SHOW_CATEGORY_AMOUNT = 5;
 const SHOW_TAG_AMOUNT = 7;
@@ -106,6 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showQuickLog, setShowQuickLog] = useState(false);
   const pref = useAtomValue(sidebarBehaviorAtom);
 
+  const isAdmin = useIsAdmin();
   const categories = useCategories();
   const tags = useTags();
   const pathname = usePathname();
@@ -220,6 +223,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isAdmin && (
+                <SidebarMenuItem
+                  onClick={() => {
+                    handleLinkClick("/home/admin");
+                  }}
+                >
+                  <SidebarMenuButton asChild>
+                    <Link
+                      className={cn(
+                        "flex items-center gap-2",
+                        currentLink === "/home/admin" && "bg-accent",
+                        currentLink !== "/home/admin"
+                        && "hover:bg-sidebar-accent/50",
+                      )}
+                      href="/home/admin"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
