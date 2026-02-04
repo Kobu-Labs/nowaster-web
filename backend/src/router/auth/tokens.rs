@@ -34,6 +34,7 @@ pub struct TokenResponse {
 pub struct ListTokenResponse {
     pub id: Uuid,
     pub name: String,
+    pub usage_count: i32,
     pub description: Option<String>,
     #[serde(rename = "createdAt")]
     pub created_at: String,
@@ -73,6 +74,7 @@ async fn list_tokens(
         .map(|t| ListTokenResponse {
             id: t.id,
             name: t.name,
+            usage_count: t.usage_count,
             description: t.description,
             created_at: t.created_at.to_rfc3339(),
             expires_at: t.expires_at.map(|dt| dt.to_rfc3339()),

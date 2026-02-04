@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { ApiTokenSchema } from "../models/token";
 
-const list = z.array(ApiTokenSchema);
+const list = z.array(
+  ApiTokenSchema.merge(z.object({ usage_count: z.number() })),
+);
 
 const create = z.object({
   createdAt: z.string(),

@@ -12,6 +12,7 @@ pub struct ApiTokenRecord {
     pub id: Uuid,
     pub name: String,
     pub description: Option<String>,
+    pub usage_count: i32,
     pub created_at: chrono::DateTime<Utc>,
     pub expires_at: Option<chrono::DateTime<Utc>>,
     pub last_used_at: Option<chrono::DateTime<Utc>>,
@@ -88,7 +89,11 @@ impl ApiTokenRepository {
         }
 
         sqlx::query!(
-            "UPDATE api_tokens SET last_used_at = NOW() WHERE token_hash = $1",
+            r#"
+            UPDATE api_tokens 
+            SET last_used_at = NOW(),
+                usage_count = usage_count + 1
+            WHERE token_hash = $1"#,
             token_hash
         )
         .execute(self.db_conn.get_pool())
@@ -101,7 +106,7 @@ impl ApiTokenRepository {
     pub async fn list_user_tokens(&self, user_id: &str) -> Result<Vec<ApiTokenRecord>> {
         let records = sqlx::query!(
             r#"
-            SELECT id, name, description, created_at, expires_at, last_used_at, revoked_at
+            SELECT id, name, description, created_at, expires_at, last_used_at, revoked_at, usage_count
             FROM api_tokens
             WHERE user_id = $1
             ORDER BY created_at DESC
@@ -117,6 +122,7 @@ impl ApiTokenRepository {
             .map(|r| ApiTokenRecord {
                 id: r.id,
                 name: r.name,
+                usage_count: r.usage_count,
                 description: r.description,
                 created_at: r.created_at,
                 expires_at: r.expires_at,
