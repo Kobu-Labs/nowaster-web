@@ -7,6 +7,8 @@ const create = z.object({
   endTime: z.coerce.date<Date>(),
   startTime: z.coerce.date<Date>(),
   tag_ids: z.array(z.uuid()),
+  project_id: z.uuid().nullish(),
+  task_id: z.uuid().nullish(),
 });
 
 const readById = z.object({
@@ -26,6 +28,8 @@ const update = z.object({
   id: z.uuid(),
   startTime: z.coerce.date<Date>().optional(),
   tag_ids: z.array(z.uuid()).optional(),
+  project_id: z.uuid().nullish(),
+  task_id: z.uuid().nullish(),
 });
 
 const remove = z.object({

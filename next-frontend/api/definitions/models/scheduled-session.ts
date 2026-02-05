@@ -12,6 +12,8 @@ export const ScheduledSessionSchema = z.object({
   startTime: z.coerce.date<Date>(),
   tags: z.array(TagWithIdSchema),
   template: z.nullable(SessionTemplateShallowSchema),
+  project_id: z.string().uuid().nullable().optional(),
+  task_id: z.string().uuid().nullable().optional(),
 });
 export const ScheduledSessionWithIdSchema = ScheduledSessionSchema.merge(HasID);
 
