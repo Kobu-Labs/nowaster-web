@@ -1,5 +1,6 @@
 import type { ScheduledSessionRequest } from "@/api/definitions";
 import { CategoryWithIdSchema } from "@/api/definitions";
+import type { ProjectWithId, TaskWithId } from "@/api/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInMinutes, isBefore, isEqual } from "date-fns";
 import { ArrowBigDown } from "lucide-react";
@@ -25,6 +26,8 @@ import { formatTime } from "@/lib/utils";
 import type { SessionPrecursor } from "@/validation/session/creation";
 import { z } from "zod";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
+import { ProjectPicker } from "@/components/visualizers/projects/ProjectPicker";
+import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
 
 export const DurationLabel: FC<{ from?: Date; to?: Date; }> = (props) => {
   if (!props.from || !props.to) {
@@ -57,6 +60,8 @@ const createSessionPrecursor = z.object({
       id: z.uuid(),
     }),
   ),
+  project: z.object({ id: z.uuid() }).nullish(),
+  task: z.object({ id: z.uuid() }).nullish(),
 });
 
 export const ScheduledSessionCreationForm: FC<
@@ -86,6 +91,8 @@ export const ScheduledSessionCreationForm: FC<
       endTime: values.endTime,
       startTime: values.startTime,
       tag_ids: values.tags.map((tag) => tag.id),
+      project_id: values.project?.id,
+      task_id: values.task?.id,
     };
 
     await createSession.mutateAsync(data, {
@@ -122,6 +129,48 @@ export const ScheduledSessionCreationForm: FC<
                         }
                       }}
                       selectedCategory={field.value ?? null}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="project"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Project (Optional)</FormLabel>
+                  <FormControl>
+                    <ProjectPicker
+                      onSelectProject={(project: ProjectWithId | null) => {
+                        field.onChange(project);
+                        if (!project) {
+                          form.setValue("task", null);
+                        }
+                      }}
+                      selectedProject={field.value as ProjectWithId | null}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="task"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Task (Optional)</FormLabel>
+                  <FormControl>
+                    <TaskPicker
+                      onSelectTask={(task: TaskWithId | null) => {
+                        field.onChange(task);
+                      }}
+                      projectId={form.watch("project")?.id ?? null}
+                      selectedTask={field.value as TaskWithId | null}
                     />
                   </FormControl>
                   <FormMessage />

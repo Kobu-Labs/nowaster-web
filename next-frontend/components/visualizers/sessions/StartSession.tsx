@@ -81,7 +81,11 @@ const NoActiveSession: FC = () => {
             className="group/start justify-start gap-2 bg-transparent"
             loading={createSession.isPending}
             onClick={() => {
-              createSession.mutate({ startTime: new Date() });
+              createSession.mutate({
+                startTime: new Date(),
+                project_id: undefined,
+                task_id: undefined,
+              });
             }}
             size="sm"
             variant="outline"
