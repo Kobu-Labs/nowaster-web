@@ -70,13 +70,14 @@ pub struct GenericFullRowSession {
     tag_last_used_at: Option<DateTime<Utc>>,
 
     template_id: Option<Uuid>,
+
     template_name: Option<String>,
     template_start_date: Option<DateTime<Utc>>,
     template_end_date: Option<DateTime<Utc>>,
     template_interval: Option<RecurringSessionInterval>,
 
     project_id: Option<Uuid>,
-    task_id: Option<Uuid>,
+    pub task_id: Option<Uuid>,
 }
 
 impl SessionRepositoryTrait for FixedSessionRepository {
