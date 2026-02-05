@@ -52,7 +52,18 @@ impl TaskService {
         project_id: Uuid,
         actor: Actor,
     ) -> Result<Vec<ReadTaskDto>> {
-        let res = self.repo.get_tasks_by_project(project_id, actor).await?;
+        let res = self
+            .repo
+            .filter_tasks(
+                FilterTaskDto {
+                    id: None,
+                    project_id: Some(project_id),
+                    name: None,
+                    completed: None,
+                },
+                actor,
+            )
+            .await?;
         Ok(res.into_iter().map(ReadTaskDto::from).collect())
     }
 
