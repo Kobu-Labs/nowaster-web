@@ -63,6 +63,25 @@ impl Actor {
     }
 }
 
+/// Optional Actor extractor - returns None if authentication fails instead of rejecting the request
+#[derive(Debug, Clone)]
+pub struct OptionalActor(pub Option<Actor>);
+
+impl FromRequestParts<AppState> for OptionalActor {
+    type Rejection = StatusCode;
+
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
+        // Try to extract Actor, but return None instead of rejecting
+        match Actor::from_request_parts(parts, state).await {
+            Ok(actor) => Ok(OptionalActor(Some(actor))),
+            Err(_) => Ok(OptionalActor(None)),
+        }
+    }
+}
+
 impl FromRequestParts<AppState> for Actor {
     type Rejection = StatusCode;
 

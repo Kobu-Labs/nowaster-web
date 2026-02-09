@@ -10,6 +10,8 @@ use crate::entity::tag::Tag;
 #[serde(tag = "event_type", content = "event_data", rename_all = "snake_case")]
 pub enum FeedEventType {
     SessionCompleted(SessionEventData),
+    TaskCompleted(TaskEventData),
+    ProjectCompleted(ProjectEventData),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -41,6 +43,44 @@ pub struct SessionEventData {
     pub description: Option<String>,
     pub start_time: DateTime<Local>,
     pub end_time: DateTime<Local>,
+    pub project: Option<FeedSessionProject>,
+    pub task: Option<FeedSessionTask>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TaskEventData {
+    pub task_id: Uuid,
+    pub task_name: String,
+    pub task_description: Option<String>,
+    pub hours_of_work: f64,
+    pub project: FeedProject,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ProjectEventData {
+    pub project_id: Uuid,
+    pub project_name: String,
+    pub project_color: String,
+    pub project_image_url: Option<String>,
+    pub created_at: DateTime<Local>,
+    pub total_sessions: i64,
+    pub tasks_time_breakdown: Vec<TaskTimeBreakdown>,
+    pub categories_time_breakdown: Vec<CategoryTimeBreakdown>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TaskTimeBreakdown {
+    pub task_id: Uuid,
+    pub task_name: String,
+    pub minutes: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CategoryTimeBreakdown {
+    pub category_id: Uuid,
+    pub category_name: String,
+    pub category_color: String,
+    pub minutes: f64,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -66,6 +106,27 @@ pub struct FeedSessionTag {
     pub id: Uuid,
     pub label: String,
     pub color: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedSessionProject {
+    pub id: Uuid,
+    pub name: String,
+    pub color: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedSessionTask {
+    pub id: Uuid,
+    pub name: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FeedProject {
+    pub id: Uuid,
+    pub name: String,
+    pub color: String,
+    pub image_url: Option<String>,
 }
 
 impl From<Tag> for FeedSessionTag {

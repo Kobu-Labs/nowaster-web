@@ -66,6 +66,8 @@ impl SessionTemplateService {
                     start_time: current_date,
                     end_time: end_date,
                     template_id: Some(template_id),
+                    project_id: None,
+                    task_id: None,
                 };
                 sessions.push(new_session);
 

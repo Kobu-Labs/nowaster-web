@@ -14,10 +14,12 @@ use crate::{
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
+        project::{ProjectRepository, ProjectRepositoryTrait},
         session_template::RecurringSessionRepository,
         statistics::sessions::StatisticsRepository,
         stopwatch_session::StopwatchSessionRepository,
         tag::TagRepository,
+        task::{TaskRepository, TaskRepositoryTrait},
         user::UserRepository,
     },
     router::user::root::protected_user_router,
@@ -30,10 +32,13 @@ use crate::{
         },
         friend_service::{FriendService, FriendServiceTrait},
         notification_service::NotificationService,
+        project_service::ProjectService,
+        release_service::ReleaseService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
         statistics_service::StatisticsService,
         tag_service::TagService,
+        task_service::TaskService,
         user_service::UserService,
     },
 };
@@ -41,7 +46,8 @@ use crate::{
 use super::{
     admin::routes::admin_router, auth::auth_router, category::root::category_router,
     feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
-    session::root::session_router, statistics::root::statistics_router, tag::root::tag_router,
+    project::root::project_router, release::routes::release_router, session::root::session_router,
+    statistics::root::statistics_router, tag::root::tag_router, task::root::task_router,
 };
 
 use tracing::info_span;
@@ -67,6 +73,9 @@ pub struct AppState {
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
     pub session_template_service: SessionTemplateService,
     pub notification_service: NotificationService,
+    pub release_service: ReleaseService,
+    pub project_service: ProjectService,
+    pub task_service: TaskService,
     pub feed: Feed,
 }
 
@@ -80,6 +89,8 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
     let stopwatch_repo = StopwatchSessionRepository::new(&db);
     let template_session_repo = RecurringSessionRepository::new(&db);
     let feed_repo = FeedRepository::new(&db);
+    let project_repo = ProjectRepository::new(&db);
+    let task_repo = TaskRepository::new(&db);
 
     let auth_service = AuthService::new(&db);
     let category_service = CategoryService::new(category_repo.clone());
@@ -87,6 +98,7 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
     let statistics_service = StatisticsService::new(statistics_repo);
 
     let notification_service = NotificationService::new(&db);
+    let release_service = ReleaseService::new(&db);
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
@@ -104,6 +116,23 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         stopwatch_repo.clone(),
         event_service.clone(),
         user_service.clone(),
+        project_repo.clone(),
+        task_repo.clone(),
+    );
+
+    let task_service = TaskService::new(
+        task_repo.clone(),
+        project_repo.clone(),
+        event_service.clone(),
+        user_service.clone(),
+    );
+
+    let project_service = ProjectService::new(
+        project_repo,
+        event_service.clone(),
+        user_service.clone(),
+        task_service.clone(),
+        session_service.clone(),
     );
     let reaction_service = FeedReactionService::new(
         feed_repo.clone(),
@@ -133,6 +162,9 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
         stopwatch_service,
         session_template_service,
         notification_service,
+        release_service,
+        project_service,
+        task_service,
         feed: Feed {
             subscription_service,
             visibility_service,
@@ -159,7 +191,10 @@ pub fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeServ
             "/notifications",
             notification_router().with_state(state.clone()),
         )
-        .nest("/admin", admin_router().with_state(state.clone()));
+        .nest("/releases", release_router().with_state(state.clone()))
+        .nest("/admin", admin_router().with_state(state.clone()))
+        .nest("/task", task_router().with_state(state.clone()))
+        .nest("/project", project_router().with_state(state.clone()));
 
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 

@@ -70,10 +70,14 @@ pub struct GenericFullRowSession {
     tag_last_used_at: Option<DateTime<Utc>>,
 
     template_id: Option<Uuid>,
+
     template_name: Option<String>,
     template_start_date: Option<DateTime<Utc>>,
     template_end_date: Option<DateTime<Utc>>,
     template_interval: Option<RecurringSessionInterval>,
+
+    project_id: Option<Uuid>,
+    pub task_id: Option<Uuid>,
 }
 
 impl SessionRepositoryTrait for FixedSessionRepository {
@@ -107,6 +111,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 end_time: DateTime::from(session.end_time.unwrap()), // INFO: fixed sessions cannot have nullable end_time
                 description: session.description,
                 template: None,
+                project_id: session.project_id,
+                task_id: session.task_id,
             });
 
             if let (
@@ -148,7 +154,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
-            r#"SELECT 
+            r#"SELECT
                 s.id,
                 s.user_id as "user_id!",
                 s.start_time,
@@ -170,7 +176,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 st.name as "template_name?",
                 st.start_date as "template_start_date?",
                 st.end_date as "template_end_date?",
-                st.interval AS "template_interval?: RecurringSessionInterval"
+                st.interval AS "template_interval?: RecurringSessionInterval",
+
+                s.project_id as "project_id?",
+                s.task_id as "task_id?"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -180,9 +189,9 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.tag_id = t.id
             LEFT JOIN session_template st
                 on st.id = s.template_id
-            WHERE 
+            WHERE
                 s.id = $1
-                AND type = 'fixed' 
+                AND type = 'fixed'
                 AND s.user_id = $2"#,
             id,
             actor.user_id
@@ -205,7 +214,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let mut query_builder: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
-                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, id, template_id)
+                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, id, template_id, project_id, task_id)
                 "#,
         );
 
@@ -217,7 +226,9 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 .push_bind(session.description.clone())
                 .push_bind(actor.user_id.clone())
                 .push_bind(session.id)
-                .push_bind(session.template_id);
+                .push_bind(session.template_id)
+                .push_bind(session.project_id)
+                .push_bind(session.task_id);
         });
 
         query_builder.build().execute(tx.as_mut()).await?;
@@ -249,8 +260,8 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
-                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id)
-                VALUES ($1, $2,$3,$4,$5, $6, $7)
+                INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id, project_id, task_id)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING session.id
             "#,
             dto.category_id,
@@ -259,7 +270,9 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             dto.end_time,
             dto.description,
             actor.user_id,
-            dto.template_id
+            dto.template_id,
+            dto.project_id,
+            dto.task_id
         )
         .fetch_one(self.db_conn.get_pool())
         .await?;
@@ -293,7 +306,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         actor: Actor,
     ) -> Result<Vec<Self::SessionType>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
-            r#"SELECT 
+            r#"SELECT
                 s.id,
                 s.user_id,
                 s.start_time,
@@ -315,7 +328,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 st.name as template_name,
                 st.start_date as "template_start_date",
                 st.end_date as "template_end_date",
-                st.interval AS "template_interval"
+                st.interval AS "template_interval",
+
+                s.project_id,
+                s.task_id
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -325,7 +341,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.tag_id = t.id
             LEFT JOIN session_template st
                 on st.id = s.template_id
-            WHERE 
+            WHERE
                 s.user_id = "#,
         );
         query.push_bind(actor.user_id);
@@ -441,6 +457,35 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 }
             }
         }
+
+        if let Some(task_filter) = dto.tasks {
+            if let Some(id_filter) = task_filter.id {
+                match id_filter.mode {
+                    Mode::All => {
+                        sessions.retain(|session| {
+                            session.task_id.is_some()
+                                && id_filter.value.contains(&session.task_id.unwrap())
+                        });
+                    }
+                    Mode::Some => {
+                        sessions.retain(|session| {
+                            session.task_id.is_some()
+                                && id_filter
+                                    .value
+                                    .iter()
+                                    .any(|id| session.task_id.unwrap().eq(id))
+                        });
+                    }
+                }
+            }
+        }
+
+        if let Some(project_id) = dto.project_id {
+            sessions.retain(|session| {
+                session.project_id.is_some() && session.project_id.unwrap().eq(&project_id)
+            });
+        }
+
         Ok(sessions)
     }
 
@@ -516,20 +561,29 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         actor: Actor,
     ) -> Result<Self::SessionType> {
         let mut tx = self.db_conn.get_pool().begin().await?;
+        dbg!(&dto.project_id);
         sqlx::query(
             r#"
                 UPDATE "session" s SET
                     description = COALESCE($1, s.description),
                     start_time = COALESCE($2, s.start_time),
                     end_time = COALESCE($3, s.start_time),
-                    category_id = COALESCE($4, s.category_id)
-                WHERE s.id = $5
+                    category_id = COALESCE($4, s.category_id),
+                    project_id = CASE WHEN $5 THEN $6 ELSE s.project_id END,
+                    task_id = CASE WHEN $7 THEN $8 ELSE s.task_id END
+                WHERE s.id = $9
             "#,
         )
         .bind(dto.description)
         .bind(dto.start_time)
         .bind(dto.end_time)
         .bind(dto.category_id)
+        // following is to distinguish if the field should not be updated,
+        // or be set to NULL, hence the 'CASE WHEN...' above
+        .bind(dto.project_id.is_some())
+        .bind(dto.project_id.flatten())
+        .bind(dto.task_id.is_some())
+        .bind(dto.task_id.flatten())
         .bind(dto.id)
         .execute(tx.as_mut())
         .await?;
@@ -569,7 +623,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
-            r#"SELECT 
+            r#"SELECT
                 s.id,
                 s.user_id as "user_id!",
                 s.start_time,
@@ -591,7 +645,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 st.name as "template_name?",
                 st.start_date as "template_start_date?",
                 st.end_date as "template_end_date?",
-                st.interval AS "template_interval?: RecurringSessionInterval"
+                st.interval AS "template_interval?: RecurringSessionInterval",
+
+                s.project_id as "project_id?",
+                s.task_id as "task_id?"
             FROM session s
             JOIN category c
                 on c.id = s.category_id
@@ -601,9 +658,9 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 on tts.tag_id = t.id
             LEFT JOIN session_template st
                 on st.id = s.template_id
-            WHERE 
+            WHERE
                 s.id = $1
-                AND type = 'fixed' 
+                AND type = 'fixed'
                 "#,
             id,
         )

@@ -5,7 +5,9 @@ use validator::Validate;
 
 use crate::{
     dto::{
-        category::read_category::ReadCategoryDto, session::template::ReadTemplateShallowDto,
+        category::read_category::ReadCategoryDto,
+        serde_utils::deserialize_optional_field,
+        session::template::ReadTemplateShallowDto,
         tag::read_tag::ReadTagDto,
     },
     entity::session::{FixedSession, SessionType},
@@ -26,6 +28,8 @@ impl From<CreateFixedSessionDto> for CreateFixedSessionDtoWithId {
             start_time: dto.start_time,
             end_time: dto.end_time,
             template_id: dto.template_id,
+            project_id: dto.project_id,
+            task_id: dto.task_id,
         }
     }
 }
@@ -41,6 +45,10 @@ pub struct CreateFixedSessionDtoWithId {
     #[serde(rename = "endTime")]
     pub end_time: DateTime<Local>,
     pub template_id: Option<Uuid>,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Uuid>,
+    #[serde(rename = "taskId")]
+    pub task_id: Option<Uuid>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -53,6 +61,10 @@ pub struct CreateFixedSessionDto {
     pub start_time: DateTime<Local>,
     #[serde(rename = "endTime")]
     pub end_time: DateTime<Local>,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Uuid>,
+    #[serde(rename = "taskId")]
+    pub task_id: Option<Uuid>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -67,6 +79,10 @@ pub struct ReadFixedSessionDto {
     pub end_time: DateTime<Local>,
     pub description: Option<String>,
     pub template: Option<ReadTemplateShallowDto>,
+    #[serde(rename = "projectId")]
+    pub project_id: Option<Uuid>,
+    #[serde(rename = "taskId")]
+    pub task_id: Option<Uuid>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Validate, Debug)]
@@ -79,6 +95,18 @@ pub struct UpdateFixedSessionDto {
     pub start_time: Option<DateTime<Local>>,
     #[serde(rename = "endTime")]
     pub end_time: Option<DateTime<Local>>,
+    #[serde(
+        rename = "projectId",
+        default,
+        deserialize_with = "deserialize_optional_field"
+    )]
+    pub project_id: Option<Option<Uuid>>,
+    #[serde(
+        rename = "taskId",
+        default,
+        deserialize_with = "deserialize_optional_field"
+    )]
+    pub task_id: Option<Option<Uuid>>,
 }
 
 impl ReadFixedSessionDto {
@@ -96,6 +124,8 @@ impl ReadFixedSessionDto {
             end_time: entity.end_time,
             description: entity.description,
             template: entity.template,
+            project_id: entity.project_id,
+            task_id: entity.task_id,
         }
     }
 }

@@ -138,11 +138,20 @@ module.exports = {
             boxShadow: "0 0 0 1px hsl(var(--destructive) / 0.3)",
           },
         },
+        gradient: {
+          "0%, 100%": {
+            backgroundPosition: "0% 50%",
+          },
+          "50%": {
+            backgroundPosition: "100% 50%",
+          },
+        },
       },
       animation: {
         blink: "blink 1s infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        gradient: "gradient 3s ease infinite",
       },
     },
   },

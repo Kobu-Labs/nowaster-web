@@ -13,10 +13,12 @@ use crate::{
             stopwatch_session::ReadStopwatchSessionDto,
         },
     },
-    entity::feed::{FeedEventSource, FeedEventType, SessionEventData},
+    entity::feed::{FeedEventSource, FeedEventType, FeedSessionProject, FeedSessionTask, SessionEventData},
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
+        project::{ProjectRepository, ProjectRepositoryTrait},
         stopwatch_session::StopwatchSessionRepository,
+        task::{TaskRepository, TaskRepositoryTrait},
     },
     router::clerk::Actor,
     service::{feed::events::FeedEventService, user_service::UserService},
@@ -28,6 +30,8 @@ pub struct FixedSessionService {
     stopwatch_repo: StopwatchSessionRepository,
     event_service: FeedEventService,
     user_service: UserService,
+    project_repo: ProjectRepository,
+    task_repo: TaskRepository,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -43,12 +47,16 @@ impl FixedSessionService {
         stopwatch_repo: StopwatchSessionRepository,
         event_service: FeedEventService,
         user_service: UserService,
+        project_repo: ProjectRepository,
+        task_repo: TaskRepository,
     ) -> Self {
         Self {
             fixed_repo: repo,
             stopwatch_repo,
             event_service,
             user_service,
+            project_repo,
+            task_repo,
         }
     }
 
@@ -65,6 +73,34 @@ impl FixedSessionService {
             .await?
             .unwrap();
 
+        // Fetch project and task data if available
+        let project = if let Some(project_id) = res.project_id {
+            self.project_repo
+                .find_by_id(project_id, actor.clone())
+                .await
+                .ok()
+                .map(|p| FeedSessionProject {
+                    id: p.id,
+                    name: p.name,
+                    color: p.color,
+                })
+        } else {
+            None
+        };
+
+        let task = if let Some(task_id) = res.task_id {
+            self.task_repo
+                .find_by_id(task_id, actor.clone())
+                .await
+                .ok()
+                .map(|t| FeedSessionTask {
+                    id: t.id,
+                    name: t.name,
+                })
+        } else {
+            None
+        };
+
         self.event_service
             .publish_event(CreateFeedEventDto {
                 id: None,
@@ -75,6 +111,8 @@ impl FixedSessionService {
                     description: res.description.clone(),
                     start_time: res.start_time,
                     end_time: res.end_time,
+                    project,
+                    task,
                 }),
                 source: FeedEventSource::User(user),
             })

@@ -1,12 +1,19 @@
-import type { CategoryWithId, TagDetails } from "@/api/definitions";
+import type {
+  CategoryWithId,
+  ProjectWithId,
+  TagDetails,
+  TaskWithId,
+} from "@/api/definitions";
 import {
   changeCategoryFilterMode,
   changeTagFilterMode,
+  changeTaskFilterMode,
   defaultFilter,
   handleSelectCategory,
+  handleSelectTask,
   overwriteData,
 } from "@/state/chart-filter";
-import { CircleHelp, Filter, RotateCcw } from "lucide-react";
+import { CircleHelp, Filter, RotateCcw, X } from "lucide-react";
 import type { FC } from "react";
 import { useMemo } from "react";
 
@@ -31,6 +38,9 @@ import {
 } from "@/components/shadcn/tooltip";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
+import { ProjectPicker } from "@/components/visualizers/projects/ProjectPicker";
+import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
+import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
 
 export const ChartFilter: FC = () => {
@@ -44,7 +54,29 @@ export const ChartFilter: FC = () => {
     setFilter((state) => handleSelectCategory(state, category));
   };
 
-  const resetFilter = () => setFilter(defaultFilter);
+  const onSelectProject = (project: null | ProjectWithId) => {
+    setFilter((state) => overwriteData(state, { project }));
+  };
+
+  const onSelectTask = (task: null | TaskWithId) => {
+    if (task) {
+      setFilter((state) => handleSelectTask(state, task));
+    }
+  };
+
+  const onRemoveTask = (taskId: string) => {
+    setFilter((state) => ({
+      ...state,
+      data: {
+        ...state.data,
+        tasks: state.data.tasks?.filter((t) => t.id !== taskId),
+      },
+    }));
+  };
+
+  const resetFilter = () => {
+    setFilter(defaultFilter);
+  };
 
   const appliedFiltersCount = useMemo(
     () => countLeaves(translateFilterPrecursor(filter)),
@@ -163,6 +195,97 @@ export const ChartFilter: FC = () => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Each session will have one of these categories</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </RadioGroup>
+          </div>
+          <Separator />
+          <div className="flex flex-col gap-2">
+            <SheetDescription>Filter by tasks</SheetDescription>
+
+            {/* Selected tasks */}
+            {filter.data.tasks && filter.data.tasks.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {filter.data.tasks.map((task) => (
+                  <div className="flex items-center gap-1" key={task.id}>
+                    <TaskBadge
+                      completed={task.completed}
+                      name={task.name}
+                      skipStrikethrough
+                    />
+
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                      onClick={() => onRemoveTask(task.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Project selector */}
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">
+                Select Project
+              </Label>
+              <ProjectPicker
+                onSelectProject={onSelectProject}
+                selectedProjectId={filter.data.project?.id ?? null}
+                skipStrikethrough
+              />
+            </div>
+
+            {/* Task selector */}
+            {filter.data.project && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs text-muted-foreground">
+                  Add Task
+                </Label>
+                <TaskPicker
+                  onSelectTask={onSelectTask}
+                  projectId={filter.data.project.id}
+                  selectedTaskId={null}
+                  skipStrikethrough
+                />
+              </div>
+            )}
+
+            <RadioGroup
+              className="flex flex-col space-y-1"
+              defaultValue={filter.settings.tasks?.id?.mode}
+              onValueChange={(value: "all" | "some") => {
+                setFilter((state) => changeTaskFilterMode(state, value));
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <RadioGroupItem id="task-all" value="all" />
+                <Label htmlFor="task-all">All tasks</Label>
+                <TooltipProvider delayDuration={350}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Sessions must be associated with all selected tasks</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem id="task-some" value="some" />
+                <Label htmlFor="task-some">Any task</Label>
+                <TooltipProvider delayDuration={350}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleHelp className="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Sessions must be associated with at least one selected
+                        task
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

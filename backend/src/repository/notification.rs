@@ -136,6 +136,12 @@ impl NotificationMapper {
             NotificationTypeSql::SystemNewRelease => Ok(NotificationType::SystemNewRelease(
                 serde_json::from_value(content)?,
             )),
+            NotificationTypeSql::TaskCompleted => Ok(NotificationType::TaskCompleted(
+                serde_json::from_value(content)?,
+            )),
+            NotificationTypeSql::ProjectCompleted => Ok(NotificationType::ProjectCompleted(
+                serde_json::from_value(content)?,
+            )),
         }
     }
 
@@ -157,6 +163,14 @@ impl NotificationMapper {
             )),
             NotificationType::SystemNewRelease(data) => Ok((
                 NotificationTypeSql::SystemNewRelease,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::TaskCompleted(data) => Ok((
+                NotificationTypeSql::TaskCompleted,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::ProjectCompleted(data) => Ok((
+                NotificationTypeSql::ProjectCompleted,
                 serde_json::to_value(data)?,
             )),
         }
