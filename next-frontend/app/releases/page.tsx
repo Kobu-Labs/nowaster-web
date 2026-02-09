@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
-import { env } from "@/env";
 import { parseResponseUnsafe } from "@/api/baseApi";
 import { ReleaseResponseSchema } from "@/api/definitions/responses/release";
 import { ReleasesList } from "@/components/release/ReleaseList";
+import { env } from "@/env";
+import type { Metadata } from "next";
 
 export const dynamic = "force-static";
 

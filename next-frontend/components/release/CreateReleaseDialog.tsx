@@ -154,7 +154,11 @@ export const CreateReleaseDialog: FC<Props> = ({ onOpenChange, open }) => {
                       {readyVersions.map((version) => (
                         <SelectItem key={version} value={version}>
                           <div className="flex items-center gap-2">
-                            <span>[{version}]</span>
+                            <span>
+                              [
+                              {version}
+                              ]
+                            </span>
                             <Badge
                               className="ml-2 bg-green-500/10 text-green-500"
                               variant="outline"
@@ -167,13 +171,17 @@ export const CreateReleaseDialog: FC<Props> = ({ onOpenChange, open }) => {
 
                       {pendingReleases.map((release) => (
                         <SelectItem
+                          disabled
                           key={release.version}
                           value={release.version}
-                          disabled
                         >
                           <div className="flex items-center gap-2">
                             <span>
-                              [{release.version}]: {release.name}
+                              [
+                              {release.version}
+                              ]:
+                              {" "}
+                              {release.name}
                             </span>
                             <Badge
                               className="ml-2 bg-yellow-500/10 text-yellow-600"
@@ -187,13 +195,17 @@ export const CreateReleaseDialog: FC<Props> = ({ onOpenChange, open }) => {
 
                       {releasedVersions.map((release) => (
                         <SelectItem
+                          disabled
                           key={release.version}
                           value={release.version}
-                          disabled
                         >
                           <div className="flex items-center gap-2">
                             <span>
-                              [{release.version}]: {release.name}
+                              [
+                              {release.version}
+                              ]:
+                              {" "}
+                              {release.name}
                             </span>
                             <Badge
                               className="ml-2 bg-blue-500/10 text-blue-600"
