@@ -1,6 +1,9 @@
 "use client";
 
-import { useCreateRelease } from "@/components/hooks/release/useReleases";
+import {
+  useAllReleases,
+  useCreateRelease,
+} from "@/components/hooks/release/useReleases";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +23,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select";
+import { Badge } from "@/components/shadcn/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { CreateReleaseRequest } from "@/api/definitions/requests/release";
 import { useToast } from "@/components/shadcn/use-toast";
 import type { FC } from "react";
 import { z } from "zod";
+import { getAvailableReleaseVersions } from "@/lib/releaseRegistry";
 
 type Props = {
   onOpenChange: (open: boolean) => void;
@@ -46,7 +58,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 export const CreateReleaseDialog: FC<Props> = ({ onOpenChange, open }) => {
   const createRelease = useCreateRelease();
+  const { data: existingReleases } = useAllReleases();
   const { toast } = useToast();
+
+  const availableVersions = getAvailableReleaseVersions();
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -95,6 +110,21 @@ export const CreateReleaseDialog: FC<Props> = ({ onOpenChange, open }) => {
       });
     }
   };
+  if (!existingReleases) {
+    return null;
+  }
+
+  const readyVersions = availableVersions.filter((version) => {
+    return !existingReleases.find((rel) => rel.version === version);
+  });
+
+  const pendingReleases = existingReleases.filter((rel) => {
+    return availableVersions.includes(rel.version) && !rel.released;
+  });
+
+  const releasedVersions = existingReleases.filter((rel) => {
+    return availableVersions.includes(rel.version) && rel.released;
+  });
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
@@ -114,9 +144,68 @@ export const CreateReleaseDialog: FC<Props> = ({ onOpenChange, open }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Version*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="v1.0.0" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a version" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {readyVersions.map((version) => (
+                        <SelectItem key={version} value={version}>
+                          <div className="flex items-center gap-2">
+                            <span>[{version}]</span>
+                            <Badge
+                              className="ml-2 bg-green-500/10 text-green-500"
+                              variant="outline"
+                            >
+                              Ready
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+
+                      {pendingReleases.map((release) => (
+                        <SelectItem
+                          key={release.version}
+                          value={release.version}
+                          disabled
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>
+                              [{release.version}]: {release.name}
+                            </span>
+                            <Badge
+                              className="ml-2 bg-yellow-500/10 text-yellow-600"
+                              variant="outline"
+                            >
+                              Pending
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+
+                      {releasedVersions.map((release) => (
+                        <SelectItem
+                          key={release.version}
+                          value={release.version}
+                          disabled
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>
+                              [{release.version}]: {release.name}
+                            </span>
+                            <Badge
+                              className="ml-2 bg-blue-500/10 text-blue-600"
+                              variant="outline"
+                            >
+                              Released
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
