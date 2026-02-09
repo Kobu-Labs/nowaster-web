@@ -1,7 +1,9 @@
 import type {
   CategoryWithId,
+  ProjectWithId,
   ScheduledSessionRequest,
   TagDetails,
+  TaskWithId,
 } from "@/api/definitions";
 
 /*
@@ -16,7 +18,9 @@ export type FilterValueFiller = {
   categories?: CategoryWithId[];
   endTimeFrom?: { value: Date; };
   endTimeTo?: { value: Date; };
+  project?: null | ProjectWithId;
   tags?: TagDetails[];
+  tasks?: TaskWithId[];
 };
 
 export type SessionFilter = ScheduledSessionRequest["readMany"];
@@ -43,10 +47,17 @@ const defaultFilterSettings: FilterSettings = {
       mode: "some",
     },
   },
+  tasks: {
+    id: {
+      mode: "some",
+    },
+  },
 };
+
 const defaultFilterData: FilterValueFiller = {
   categories: [],
   tags: [],
+  tasks: [],
 };
 
 export const changeTagFilterMode = (
@@ -88,6 +99,29 @@ export const changeCategoryFilterMode = (
       categories: {
         ...categories,
         name: {
+          mode,
+        },
+      },
+    },
+  };
+};
+
+export const changeTaskFilterMode = (
+  oldState: SessionFilterPrecursor,
+  mode: "all" | "some",
+): SessionFilterPrecursor => {
+  const {
+    data,
+    settings: { tasks, ...filterRest },
+  } = oldState ?? {};
+
+  return {
+    data,
+    settings: {
+      ...filterRest,
+      tasks: {
+        ...tasks,
+        id: {
           mode,
         },
       },
@@ -168,6 +202,31 @@ export const handleSelectCategory = (
     data: {
       ...data,
       categories: newCategories,
+    },
+  };
+};
+
+export const handleSelectTask = (
+  oldState: SessionFilterPrecursor,
+  task: TaskWithId,
+): SessionFilterPrecursor => {
+  const {
+    data: { tasks = [], ...data },
+    ...rest
+  } = oldState;
+
+  let newTasks;
+  if (tasks.find((t) => t.id === task.id)) {
+    newTasks = tasks.filter((t) => t.id !== task.id);
+  } else {
+    newTasks = [task, ...tasks];
+  }
+
+  return {
+    ...rest,
+    data: {
+      ...data,
+      tasks: newTasks,
     },
   };
 };

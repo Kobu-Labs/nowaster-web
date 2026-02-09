@@ -41,9 +41,13 @@ pub struct StopwatchFullRow {
     category_color: Option<String>,
     category_last_used_at: Option<DateTime<Utc>>,
 
+    pub task_id: Option<Uuid>,
+
     tag_id: Option<Uuid>,
     tag_label: Option<String>,
     tag_color: Option<String>,
+
+    project_id: Option<Uuid>,
 }
 
 impl StopwatchSessionRepository {
@@ -74,6 +78,8 @@ impl StopwatchSessionRepository {
                 tags: None,
                 start_time: DateTime::from(session.start_time),
                 description: session.description,
+                project_id: session.project_id,
+                task_id: session.task_id,
             });
 
             if let (Some(id), Some(label), Some(tag_color)) =
@@ -116,14 +122,16 @@ impl StopwatchSessionRepository {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let result = sqlx::query!(
             r#"
-                INSERT INTO stopwatch_session (category_id, start_time, description, user_id)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO stopwatch_session (category_id, start_time, description, user_id, project_id, task_id)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING stopwatch_session.id
             "#,
             category_id,
             dto.start_time,
             dto.description,
-            actor.user_id
+            actor.user_id,
+            dto.project_id,
+            dto.task_id
         )
         .fetch_one(tx.as_mut())
         .await?;
@@ -158,7 +166,7 @@ impl StopwatchSessionRepository {
     pub async fn read_stopwatch(&self, actor: Actor) -> Result<Option<StopwatchSession>> {
         let sessions = sqlx::query_as!(
             StopwatchFullRow,
-            r#"SELECT 
+            r#"SELECT
                 s.id,
 
                 s.user_id,
@@ -175,7 +183,10 @@ impl StopwatchSessionRepository {
 
                 t.id as "tag_id?",
                 t.label as "tag_label?",
-                t.color as "tag_color?"
+                t.color as "tag_color?",
+
+                s.project_id as "project_id?",
+                s.task_id as "task_id?"
             FROM stopwatch_session s
             INNER JOIN "user" u
                 on u.id = s.user_id
@@ -185,7 +196,7 @@ impl StopwatchSessionRepository {
                 on tts.session_id = s.id
             LEFT JOIN tag t
                 on tts.tag_id = t.id
-            WHERE 
+            WHERE
                 s.user_id = $1"#,
             actor.user_id
         )
@@ -224,13 +235,21 @@ impl StopwatchSessionRepository {
                 UPDATE "stopwatch_session" s SET
                     description = COALESCE($1, s.description),
                     start_time = COALESCE($2, s.start_time),
-                    category_id = COALESCE($3, s.category_id)
-                WHERE s.id = $4
+                    category_id = COALESCE($3, s.category_id),
+                    project_id = CASE WHEN $4 THEN $5 ELSE s.project_id END,
+                    task_id = CASE WHEN $6 THEN $7 ELSE s.task_id END
+                WHERE s.id = $8
             "#,
         )
         .bind(dto.description)
         .bind(dto.start_time)
         .bind(dto.category_id)
+        // following is to distinguish if the field should not be updated,
+        // or be set to NULL, hence the 'CASE WHEN...' above
+        .bind(dto.project_id.is_some())
+        .bind(dto.project_id.flatten())
+        .bind(dto.task_id.is_some())
+        .bind(dto.task_id.flatten())
         .bind(dto.id)
         .execute(tx.as_mut())
         .await?;

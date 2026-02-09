@@ -3,11 +3,13 @@
 import {
   ChartPie,
   BookTemplate as FileTemplate,
+  Folders,
   History,
   Home,
   Plus,
   Rss,
   Settings,
+  Shield,
   Tag,
   Users,
   X,
@@ -53,6 +55,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Separator } from "@/components/shadcn/separator";
+import { useIsAdmin } from "@/components/hooks/useIsAdmin";
 
 const SHOW_CATEGORY_AMOUNT = 5;
 const SHOW_TAG_AMOUNT = 7;
@@ -67,6 +70,11 @@ const navItems = [
     icon: Rss,
     title: "Feed",
     url: "/home/feed",
+  },
+  {
+    icon: Folders,
+    title: "Projects",
+    url: "/home/projects",
   },
   {
     icon: FileTemplate,
@@ -106,6 +114,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showQuickLog, setShowQuickLog] = useState(false);
   const pref = useAtomValue(sidebarBehaviorAtom);
 
+  const isAdmin = useIsAdmin();
   const categories = useCategories();
   const tags = useTags();
   const pathname = usePathname();
@@ -220,6 +229,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isAdmin && (
+                <SidebarMenuItem
+                  onClick={() => {
+                    handleLinkClick("/home/admin");
+                  }}
+                >
+                  <SidebarMenuButton asChild>
+                    <Link
+                      className={cn(
+                        "flex items-center gap-2",
+                        currentLink === "/home/admin" && "bg-accent",
+                        currentLink !== "/home/admin"
+                        && "hover:bg-sidebar-accent/50",
+                      )}
+                      href="/home/admin"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -227,7 +258,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Categories</SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="space-y-2 px-2">
+            <div className="px-2">
               {sortedCategories
                 .slice(0, SHOW_CATEGORY_AMOUNT)
                 .map((category) => (
@@ -276,7 +307,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Tags</SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="space-y-2 px-2">
+            <div className="px-2">
               {sortedTags.slice(0, SHOW_TAG_AMOUNT).map((tag) => (
                 <Link
                   className={cn(

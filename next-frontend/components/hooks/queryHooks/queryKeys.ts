@@ -1,4 +1,11 @@
-import { CategoryApi, ScheduledSessionApi, StatisticsApi, TagApi } from "@/api";
+import {
+  CategoryApi,
+  ProjectsApi,
+  ScheduledSessionApi,
+  StatisticsApi,
+  TagApi,
+  TasksApi,
+} from "@/api";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   createQueryKeys,
@@ -50,9 +57,50 @@ const categoryKeys = createQueryKeys("categories", {
   }),
 });
 
+const projectKeys = createQueryKeys("projects", {
+  all: {
+    queryFn: async () => await ProjectsApi.getProjects(),
+    queryKey: null,
+  },
+  byId: (id: string) => ({
+    queryFn: async () => await ProjectsApi.getProjectById({ id }),
+    queryKey: [id],
+  }),
+  details: {
+    queryFn: async () => await ProjectsApi.getProjectsDetails(),
+    queryKey: ["details"],
+  },
+  stats: {
+    queryFn: async () => await ProjectsApi.getProjectStatistics(),
+    queryKey: ["stats"],
+  },
+  tasks: (projectId: string) => ({
+    queryFn: async () =>
+      await ProjectsApi.getTasksByProject({ project_id: projectId }),
+    queryKey: [projectId, "tasks"],
+  }),
+});
+
+const taskKeys = createQueryKeys("tasks", {
+  all: {
+    queryFn: async () => await TasksApi.getTasks(),
+    queryKey: null,
+  },
+  byId: (id: string) => ({
+    queryFn: async () => await TasksApi.getTaskById({ id }),
+    queryKey: [id],
+  }),
+  stats: {
+    queryFn: async () => await TasksApi.getTaskStatistics(),
+    queryKey: ["stats"],
+  },
+});
+
 export const queryKeys = mergeQueryKeys(
   sessionkeys,
   tagKeys,
   statisticsKeys,
   categoryKeys,
+  projectKeys,
+  taskKeys,
 );

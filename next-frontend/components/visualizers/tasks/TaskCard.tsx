@@ -1,0 +1,214 @@
+"use client";
+
+import type { TaskWithSessionCount } from "@/api/definitions/models/task";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/shadcn/alert-dialog";
+import { Badge } from "@/components/shadcn/badge";
+import { Card, CardContent } from "@/components/shadcn/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
+import { Button } from "@/components/shadcn/button";
+import { cn } from "@/lib/utils";
+import {
+  CheckCircle2,
+  Circle,
+  Edit,
+  Eye,
+  MoreVertical,
+  Timer,
+  Trash2,
+} from "lucide-react";
+import Link from "next/link";
+import type { FC } from "react";
+import { useState } from "react";
+import { useUpdateTask } from "@/components/hooks/task/useUpdateTask";
+import { useDeleteTask } from "@/components/hooks/task/useDeleteTask";
+
+type TaskCardProps = {
+  onEdit: () => void;
+  projectColor?: string;
+  task: TaskWithSessionCount;
+};
+
+export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleToggleComplete = (completed: boolean) => {
+    updateTask.mutate({
+      completed,
+      id: task.id,
+    });
+  };
+
+  return (
+    <Link href={`/home/projects/${task.project_id}/tasks/${task.id}`}>
+      <Card
+        className={cn(
+          "group backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer h-full flex flex-col",
+        )}
+        style={{
+          borderLeft: projectColor ? `4px solid ${projectColor}` : undefined,
+        }}
+      >
+        <CardContent className="p-6 flex flex-col flex-1">
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h3 className="font-semibold text-lg truncate">
+                    {task.name}
+                  </h3>
+                  {task.completed && (
+                    <Badge className="w-fit mt-1" variant="secondary">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Completed
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger
+                    asChild
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Button className="h-6 w-6 p-0" size="sm" variant="outline">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        className="flex items-center gap-2 cursor-pointer"
+                        href={`/home/projects/${task.project_id}/tasks/${task.id}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Details
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onEdit();
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit Task
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Task
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialog
+                  onOpenChange={setDeleteDialogOpen}
+                  open={deleteDialogOpen}
+                >
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you sure you want to delete &quot;
+                        {task.name}
+                        &quot;?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone and will remove the task
+                        and all its sessions (
+                        {task.sessionCount}
+                        {" "}
+                        sessions).
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          deleteTask.mutate({ id: task.id });
+                          setDeleteDialogOpen(false);
+                        }}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            </div>
+
+            {task.description && (
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                {task.description}
+              </p>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Timer className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Sessions</span>
+              </div>
+              <Badge variant="outline">{task.sessionCount}</Badge>
+            </div>
+          </div>
+
+          <div
+            className="pt-3 border-t mt-3"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <Button
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleComplete(!task.completed);
+              }}
+              size="sm"
+              variant="outline"
+            >
+              {task.completed
+                ? (
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                  )
+                : (
+                    <Circle className="h-4 w-4 mr-2" />
+                  )}
+              {task.completed ? "Mark as incomplete" : "Mark as completed"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+};
