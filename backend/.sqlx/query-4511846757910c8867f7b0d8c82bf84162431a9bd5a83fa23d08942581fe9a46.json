@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO seen_release (release_id, user_id)\n                SELECT r.id, $2::VARCHAR\n                FROM release r\n                WHERE r.released = true\n                  AND r.id != $1\n                  AND r.released_at < (SELECT released_at FROM release WHERE id = $1)\n                ON CONFLICT (release_id, user_id) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4511846757910c8867f7b0d8c82bf84162431a9bd5a83fa23d08942581fe9a46"
+}

@@ -1,0 +1,112 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT r.id, r.version, r.name, r.short_description, r.released, r.released_at,\n                       r.released_by, r.tags, r.seo_title, r.seo_description, r.seo_keywords,\n                       r.created_at, r.updated_at,\n                       u.id as \"user_id?\", u.displayname as \"user_username?\", u.avatar_url as \"user_avatar_url?\"\n                FROM release r\n                LEFT JOIN \"user\" u ON r.released_by = u.id\n                WHERE r.version = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "short_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "released",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "released_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "released_by",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "tags",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "seo_title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "seo_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "seo_keywords",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "user_id?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "user_username?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "user_avatar_url?",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "3b213a99efc488e57460f6db96acbeb02bb1cccdd8deb5159745614ec9aaba4c"
+}

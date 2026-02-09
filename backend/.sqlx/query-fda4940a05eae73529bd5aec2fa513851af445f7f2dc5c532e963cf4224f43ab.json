@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    COUNT(t.id) as \"total_tasks!\",\n                    COUNT(CASE WHEN t.completed = false THEN 1 END) as \"active_tasks!\",\n                    COUNT(CASE WHEN t.completed = true THEN 1 END) as \"completed_tasks!\",\n                    COUNT(DISTINCT s.id) as \"total_sessions!\",\n                    CAST(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time)) / 60.0) AS DOUBLE PRECISION) as \"total_time_minutes\"\n                FROM task t\n                LEFT JOIN session s ON s.task_id = t.id\n                WHERE t.user_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_tasks!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "active_tasks!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "completed_tasks!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_sessions!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "total_time_minutes",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "fda4940a05eae73529bd5aec2fa513851af445f7f2dc5c532e963cf4224f43ab"
+}

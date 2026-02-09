@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO seen_release (release_id, user_id)\n                VALUES ($1, $2)\n                ON CONFLICT (release_id, user_id) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "632d0a092407e5083e9b25f8178aa05cd3b974b80f35a64b499aadf9fb7cf66d"
+}

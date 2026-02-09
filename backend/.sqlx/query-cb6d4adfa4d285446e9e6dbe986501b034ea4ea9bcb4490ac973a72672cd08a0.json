@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE task t\n                SET\n                    name = COALESCE($2, t.name),\n                    description = COALESCE($3, t.description),\n                    completed = COALESCE($4, t.completed)\n                WHERE\n                    t.id = $1\n                    AND t.user_id = $5\n                RETURNING \n                    t.id, \n                    t.project_id, \n                    t.name, \n                    t.description, \n                    t.completed, \n                    t.user_id, \n                    t.created_at, \n                    t.updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "project_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "completed",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Text",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "cb6d4adfa4d285446e9e6dbe986501b034ea4ea9bcb4490ac973a72672cd08a0"
+}

@@ -12,7 +12,9 @@
             "kind": {
               "Enum": [
                 "session_completed",
-                "session_started"
+                "session_started",
+                "task_completed",
+                "project_completed"
               ]
             }
           }

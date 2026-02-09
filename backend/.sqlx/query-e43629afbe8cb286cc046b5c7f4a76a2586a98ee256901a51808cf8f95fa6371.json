@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE project p\n                SET\n                    name = COALESCE($2, name),\n                    description = COALESCE($3, description),\n                    image_url = COALESCE($4, image_url),\n                    color = COALESCE($5, color),\n                    completed = COALESCE($6, completed)\n                WHERE id = $1\n                    AND user_id = $7\n                RETURNING \n                    id, \n                    name,\n                    description, \n                    image_url, \n                    color, \n                    completed, \n                    user_id, \n                    created_at, \n                    updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "completed",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Text",
+        "Text",
+        "Varchar",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e43629afbe8cb286cc046b5c7f4a76a2586a98ee256901a51808cf8f95fa6371"
+}
