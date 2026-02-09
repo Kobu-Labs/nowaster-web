@@ -32,3 +32,4 @@ Simple application for tracking your time
 ## License
 
 Licensed under the [MIT license](https://github.com/shadcn/ui/blob/main/LICENSE.md).
+
