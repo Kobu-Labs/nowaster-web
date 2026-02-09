@@ -2,7 +2,7 @@ import { ReleaseHeader } from "@/components/release/ReleaseHeader";
 import { getReleaseComponent } from "@/lib/releaseRegistry";
 import { getReleaseOrRedirect } from "@/lib/releases";
 
-const RELEASE_VERSION = "v1.1.1";
+const RELEASE_VERSION = "v1.2.0";
 
 export default async function ReleasePage() {
   const ReleaseComponent = getReleaseComponent(RELEASE_VERSION);

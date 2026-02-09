@@ -16,11 +16,7 @@ mod service;
 
 #[tokio::main]
 async fn main() {
-    let log_level = if cfg!(debug_assertions) {
-        "info"
-    } else {
-        "info"
-    };
+    let log_level = "info";
 
     dotenv::dotenv().ok();
     dotenv::from_path(Path::new(".env.keys")).ok();
