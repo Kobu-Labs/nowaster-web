@@ -1,4 +1,4 @@
-name: Backend Build
+name: Backend SQLx Check
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
       - production
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-build.yaml'
+      - '.github/workflows/backend-sqlx.yaml'
   pull_request:
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-build.yaml'
+      - '.github/workflows/backend-sqlx.yaml'
 
 jobs:
-  build:
+  sqlx-check:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,5 +34,8 @@ jobs:
         with:
           workspaces: backend
 
-      - name: Build project
-        run: cargo build --release
+      - name: Install SQLx CLI
+        run: cargo install sqlx-cli --no-default-features --features postgres
+
+      - name: Run SQLx prepare check
+        run: cargo sqlx prepare --check

@@ -94,7 +94,7 @@ impl FromRequestParts<AppState> for Actor {
             .get("X-Impersonation-Token")
             .and_then(|h| h.to_str().ok())
         {
-            if let Ok(Some((target_user_id, admin_user_id))) = state
+            if let Ok(Some((target_user_id, _admin_user_id))) = state
                 .auth_service
                 .validate_impersonation_token(impersonation_token)
                 .await
