@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE api_tokens \n            SET last_used_at = NOW(),\n                usage_count = usage_count + 1\n            WHERE token_hash = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "72df61946e030760599ad0276250e631caf00df1a2ce6e9b4c09609763419abb"
+}

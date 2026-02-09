@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE release\n                SET version = COALESCE($2, version),\n                    name = COALESCE($3, name),\n                    short_description = COALESCE($4, short_description),\n                    tags = COALESCE($5, tags),\n                    seo_title = COALESCE($6, seo_title),\n                    seo_description = COALESCE($7, seo_description),\n                    seo_keywords = COALESCE($8, seo_keywords)\n                WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Jsonb",
+        "Varchar",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "822c95bc7bfc4c64a2917e4180daa27b41fb015ec0b5f2871c91ac174c7e3c6f"
+}
