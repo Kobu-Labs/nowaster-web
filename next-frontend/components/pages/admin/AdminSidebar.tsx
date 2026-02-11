@@ -1,6 +1,6 @@
 "use client";
 
-import { Megaphone, Settings, UserCog } from "lucide-react";
+import { Database, Megaphone, Settings, UserCog } from "lucide-react";
 
 import {
   Sidebar,
@@ -29,6 +29,12 @@ const adminNavItems = [
     icon: Megaphone,
     title: "Releases",
     url: "/home/admin/releases",
+  },
+  {
+    description: "View database backup status and history",
+    icon: Database,
+    title: "Backups",
+    url: "/home/admin/backups",
   },
 ] as const;
 

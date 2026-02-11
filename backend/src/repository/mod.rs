@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod category;
+pub mod db_backup;
 pub mod feed;
 pub mod fixed_session;
 pub mod friends;
