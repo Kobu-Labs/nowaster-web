@@ -5,6 +5,7 @@ import { SidebarWithPreferences } from "@/components/pages/SidebarWithPreference
 import { UsernameSelectionDialog } from "@/components/auth/UsernameSelectionDialog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { NewReleaseDialog } from "@/components/release/NewReleaseDialog";
 
 type RootLayoutProps = {
   children: React.ReactNode;
@@ -45,6 +46,7 @@ function LayoutContent({ children }: RootLayoutProps) {
         onComplete={handleUsernameComplete}
         open={showUsernameDialog}
       />
+      <NewReleaseDialog />
       <SidebarWithPreferences>{children}</SidebarWithPreferences>
     </>
   );

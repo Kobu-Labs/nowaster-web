@@ -19,27 +19,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { data } = await axios.get(
-    `${env.NEXT_PUBLIC_API_URL}/project/${id}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-
-  const request = await parseResponseToResult(
-    data,
-    ProjectResponseSchema.readById,
-  );
-
-  if (request.isErr) {
+  if (!token) {
     return {
-      title: "Project not found",
+      description: "View project details and tasks",
+      title: "Project",
     };
   }
 
-  return {
-    description: "View project details and tasks",
-    title: `Projects | ${request.value.name}`,
-  };
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { data } = await axios.get(
+      `${env.NEXT_PUBLIC_API_URL}/project/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    const request = await parseResponseToResult(
+      data,
+      ProjectResponseSchema.readById,
+    );
+
+    if (request.isErr) {
+      return {
+        title: "Project not found",
+      };
+    }
+
+    return {
+      description: "View project details and tasks",
+      title: `Projects | ${request.value.name}`,
+    };
+  } catch {
+    return {
+      description: "View project details and tasks",
+      title: "Project",
+    };
+  }
 }
 
 export default function ProjectLayout({ children }: LayoutProps) {

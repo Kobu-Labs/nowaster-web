@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// INFO: disabled because of axios call
-
 import { parseResponseToResult } from "@/api/baseApi";
 import { CategoryResponseSchema } from "@/api/definitions";
 import { env } from "@/env";
@@ -22,25 +19,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
 
-  const { data } = await axios.get(
-    `${env.NEXT_PUBLIC_API_URL}/category/${id}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-
-  const request = await parseResponseToResult(
-    data,
-    CategoryResponseSchema.readById,
-  );
-
-  if (request.isErr) {
+  if (!token) {
     return {
-      title: "Category not found",
+      title: "Category",
     };
   }
 
-  return {
-    title: `[${request.value.name}]`,
-  };
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { data } = await axios.get(
+      `${env.NEXT_PUBLIC_API_URL}/category/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    const request = await parseResponseToResult(
+      data,
+      CategoryResponseSchema.readById,
+    );
+
+    if (request.isErr) {
+      return {
+        title: "Category not found",
+      };
+    }
+
+    return {
+      title: `[${request.value.name}]`,
+    };
+  } catch {
+    return {
+      title: "Category",
+    };
+  }
 }
 
 export default function PageLayout({ children }: RootLayoutProps) {
