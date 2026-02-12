@@ -111,7 +111,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let s3_client = aws_sdk_s3::Client::from_conf(s3_config);
 
-    let auth_service = AuthService::new(&db);
+    let auth_service = AuthService::new(&db, config.server.app_env.clone());
     let category_service = CategoryService::new(category_repo.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);

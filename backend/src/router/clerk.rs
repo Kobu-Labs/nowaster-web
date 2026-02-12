@@ -113,7 +113,8 @@ impl FromRequestParts<AppState> for Actor {
             .and_then(|h| h.to_str().ok())
             .and_then(|h| h.strip_prefix("Bearer "))
         {
-            if let Ok(claims) = validate_access_token(auth_header) {
+            // Validate JWT with environment check
+            if let Ok(claims) = validate_access_token(auth_header, state.config.server.app_env.as_str()) {
                 let role = UserRole::from_str(&claims.role).unwrap_or(UserRole::User);
                 return Ok(Actor {
                     user_id: claims.sub,
