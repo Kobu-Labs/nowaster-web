@@ -1,11 +1,33 @@
 use serde::Deserialize;
 
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub enum AppEnvironment {
+    NowasterProduction,
+    NowasterStaging,
+    NowasterSandbox,
+    NowasterLocal,
+}
+
+impl AppEnvironment {
+    pub fn as_str(&self) -> &str {
+        match self {
+            AppEnvironment::NowasterProduction => "nowaster-production",
+            AppEnvironment::NowasterStaging => "nowaster-staging",
+            AppEnvironment::NowasterSandbox => "nowaster-sandbox",
+            AppEnvironment::NowasterLocal => "nowaster-local",
+        }
+    }
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct ServerConfig {
     #[serde(rename = "backend_port")]
     pub port: String,
     #[serde(rename = "backend_address")]
     pub address: String,
+    #[serde(rename = "app_env")]
+    pub app_env: AppEnvironment,
 }
 
 #[derive(Deserialize, Debug, Clone)]

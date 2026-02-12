@@ -9,6 +9,12 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_API_URL: z.string(),
+    NEXT_PUBLIC_APP_ENV: z.enum([
+      "nowaster-staging",
+      "nowaster-production",
+      "nowaster-sandbox",
+      "nowaster-local",
+    ]),
   },
 
   /**
@@ -23,6 +29,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app

@@ -26,8 +26,31 @@ const GoogleIcon = (props: IconProps) => (
   </svg>
 );
 
+type OAuthProvider = "discord" | "github" | "google";
+
+const shouldDisplayProvider = (provider: OAuthProvider) => {
+  switch (env.NEXT_PUBLIC_APP_ENV) {
+    case "nowaster-local": {
+      // display only google
+      return provider === "google";
+    }
+    case "nowaster-production": {
+      // display all
+      return true;
+    }
+    case "nowaster-sandbox": {
+      // display none
+      return false;
+    }
+    case "nowaster-staging": {
+      // display only google
+      return provider === "google";
+    }
+  }
+};
+
 export default function SignInPage() {
-  const handleOAuthLogin = (provider: "discord" | "github" | "google") => {
+  const handleOAuthLogin = (provider: OAuthProvider) => {
     const authUrl = `${env.NEXT_PUBLIC_API_URL}/auth/oauth/${provider}`;
     globalThis.location.href = authUrl;
   };
@@ -85,35 +108,41 @@ export default function SignInPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-3">
-                    <Button
-                      className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
-                      onClick={() => handleOAuthLogin("github")}
-                      type="button"
-                      variant="outline"
-                    >
-                      <Github className="mr-2 size-4" />
-                      Continue with GitHub
-                    </Button>
+                    {shouldDisplayProvider("github") && (
+                      <Button
+                        className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                        onClick={() => handleOAuthLogin("github")}
+                        type="button"
+                        variant="outline"
+                      >
+                        <Github className="mr-2 size-4" />
+                        Continue with GitHub
+                      </Button>
+                    )}
 
-                    <Button
-                      className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
-                      onClick={() => handleOAuthLogin("discord")}
-                      type="button"
-                      variant="outline"
-                    >
-                      <DiscordLogoIcon className="mr-2 size-4" />
-                      Continue with Discord
-                    </Button>
+                    {shouldDisplayProvider("discord") && (
+                      <Button
+                        className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                        onClick={() => handleOAuthLogin("discord")}
+                        type="button"
+                        variant="outline"
+                      >
+                        <DiscordLogoIcon className="mr-2 size-4" />
+                        Continue with Discord
+                      </Button>
+                    )}
 
-                    <Button
-                      className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
-                      onClick={() => handleOAuthLogin("google")}
-                      type="button"
-                      variant="outline"
-                    >
-                      <GoogleIcon className="mr-2 size-4" />
-                      Continue with Google
-                    </Button>
+                    {shouldDisplayProvider("google") && (
+                      <Button
+                        className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                        onClick={() => handleOAuthLogin("google")}
+                        type="button"
+                        variant="outline"
+                      >
+                        <GoogleIcon className="mr-2 size-4" />
+                        Continue with Google
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter className="pt-6">

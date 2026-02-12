@@ -16,6 +16,7 @@ pub struct Claims {
     pub exp: i64,     // Expiration timestamp
     pub iss: String,  // Issuer ("nowaster-api")
     pub aud: String,  // Audience ("nowaster-web")
+    pub env: String,  // Environment
 }
 
 // Load RSA keys on application startup
@@ -49,6 +50,7 @@ static DECODING_KEY: Lazy<DecodingKey> = Lazy::new(|| {
 /// * `user_id` - User's ID (string, supports both UUID and Clerk IDs)
 /// * `role` - User's role
 /// * `display_name` - User's display name
+/// * `environment` - Environment identifier
 ///
 /// # Returns
 /// JWT token string valid for 15 minutes
@@ -56,6 +58,7 @@ pub fn generate_access_token(
     user_id: &str,
     role: UserRole,
     display_name: String,
+    environment: String,
 ) -> Result<String> {
     let now = Utc::now().timestamp();
 
@@ -67,6 +70,7 @@ pub fn generate_access_token(
         exp: now + 900, // 15 minutes
         iss: "nowaster-api".to_string(),
         aud: "nowaster-web".to_string(),
+        env: environment,
     };
 
     let header = Header::new(Algorithm::RS256);
@@ -77,16 +81,26 @@ pub fn generate_access_token(
 ///
 /// # Arguments
 /// * `token` - JWT token string
+/// * `expected_env` - Expected environment. Validates the env claim matches.
 ///
 /// # Returns
 /// Decoded Claims if token is valid
-pub fn validate_access_token(token: &str) -> Result<Claims> {
+pub fn validate_access_token(token: &str, expected_env: &str) -> Result<Claims> {
     let mut validation = Validation::new(Algorithm::RS256);
     validation.set_issuer(&["nowaster-api"]);
     validation.set_audience(&["nowaster-web"]);
 
     let token_data =
         decode::<Claims>(token, &DECODING_KEY, &validation).context("Invalid or expired token")?;
+
+    // Validate environment matches
+    if token_data.claims.env != expected_env {
+        anyhow::bail!(
+            "Token environment mismatch: expected '{}', got '{}'",
+            expected_env,
+            token_data.claims.env
+        );
+    }
 
     Ok(token_data.claims)
 }
