@@ -9,7 +9,7 @@ use crate::{
     config::{database::Database, env::AppEnvironment},
     entity::sandbox_lifecycle::SandboxLifecycle,
     repository::sandbox_lifecycle::SandboxLifecycleRepository,
-    seeding::SandboxSeeder,
+    seeding::{config::SandboxConfig, SandboxSeeder},
 };
 
 static GUEST_POOL: Lazy<Mutex<VecDeque<(String, String)>>> =
@@ -98,7 +98,7 @@ impl SandboxService {
     }
 
     pub async fn seed_npc_users(&self) -> Result<Vec<String>, sqlx::Error> {
-        self.seeder.seed_npc_users(10).await
+        self.seeder.seed_npc_users(SandboxConfig::NPC_COUNT).await
     }
 
     pub async fn initialize_sandbox(&self, app_env: &AppEnvironment) {
@@ -126,7 +126,7 @@ impl SandboxService {
 
         let npc_ids = match self.lifecycle_repo.get_npc_ids().await {
             Ok(ids) if ids.is_empty() => {
-                match self.seeder.seed_npc_users(10).await {
+                match self.seeder.seed_npc_users(SandboxConfig::NPC_COUNT).await {
                     Ok(ids) => {
                         info!("✅ Created {} NPC users", ids.len());
                         ids
@@ -147,7 +147,7 @@ impl SandboxService {
             }
         };
 
-        match self.lifecycle_repo.create_guest_user_pool(100).await {
+        match self.lifecycle_repo.create_guest_user_pool(SandboxConfig::GUEST_POOL_INITIAL_SIZE).await {
             Ok(guest_ids) => {
                 if !guest_ids.is_empty() {
                     info!("✅ Created {} guest users, seeding data...", guest_ids.len());
@@ -179,7 +179,7 @@ impl SandboxService {
     }
 
     pub async fn reinitialize_guest_pool(&self) -> Result<usize, sqlx::Error> {
-        let guest_ids = self.lifecycle_repo.create_guest_user_pool(100).await?;
+        let guest_ids = self.lifecycle_repo.create_guest_user_pool(SandboxConfig::GUEST_POOL_INITIAL_SIZE).await?;
         let count = guest_ids.len();
 
         if !guest_ids.is_empty() {
@@ -218,23 +218,21 @@ impl SandboxService {
     }
 
     pub async fn replenish_pool_if_needed(&self) -> Result<(), sqlx::Error> {
-        const REPLENISH_THRESHOLD: usize = 50;
-        const REPLENISH_BATCH_SIZE: usize = 100;
-
         let current_size = {
             let pool = GUEST_POOL.lock().unwrap();
             pool.len()
         };
 
-        if current_size < REPLENISH_THRESHOLD {
+        if current_size < SandboxConfig::GUEST_POOL_REPLENISH_THRESHOLD {
             info!(
                 "Guest pool below threshold ({} < {}), replenishing...",
-                current_size, REPLENISH_THRESHOLD
+                current_size,
+                SandboxConfig::GUEST_POOL_REPLENISH_THRESHOLD
             );
 
             let guest_ids = self
                 .lifecycle_repo
-                .create_guest_user_pool(REPLENISH_BATCH_SIZE)
+                .create_guest_user_pool(SandboxConfig::GUEST_POOL_REPLENISH_BATCH_SIZE)
                 .await?;
 
             if !guest_ids.is_empty() {

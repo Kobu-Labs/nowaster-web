@@ -3,7 +3,7 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use sqlx::{PgPool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
-use crate::seeding::data::{COLORS, NPC_NAMES, PROFILES};
+use crate::seeding::{config::SandboxConfig, data::{COLORS, NPC_NAMES, PROFILES}};
 
 pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, sqlx::Error> {
     let mut rng = StdRng::from_entropy();
@@ -74,13 +74,13 @@ pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, 
         let mut tag_links: Vec<(Uuid, Uuid)> = Vec::new();
 
         if !categories.is_empty() {
-            for week in 0u32..13 {
+            for week in 0u32..SandboxConfig::NPC_SESSION_HISTORY_WEEKS {
                 let base = now - Duration::weeks(week as i64);
-                let week_count = rng.gen_range(2usize..=4);
+                let week_count = rng.gen_range(SandboxConfig::NPC_SESSIONS_PER_WEEK_MIN..=SandboxConfig::NPC_SESSIONS_PER_WEEK_MAX);
                 for _ in 0..week_count {
                     let day_offset = rng.gen_range(0i64..7);
-                    let hour_start = rng.gen_range(7i64..21);
-                    let duration_min = rng.gen_range(30i64..240);
+                    let hour_start = rng.gen_range(SandboxConfig::SESSION_START_HOUR_MIN..SandboxConfig::SESSION_START_HOUR_MAX);
+                    let duration_min = rng.gen_range(SandboxConfig::SESSION_DURATION_MIN_MINS..SandboxConfig::SESSION_DURATION_MAX_MINS);
                     let start =
                         base - Duration::days(day_offset) + Duration::hours(hour_start);
                     let end = start + Duration::minutes(duration_min);
@@ -88,8 +88,8 @@ pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, 
                     let sid = Uuid::new_v4();
 
                     let mut applied_tags: Vec<(Uuid, String, String)> = Vec::new();
-                    if rng.gen_bool(0.5) && !tags.is_empty() {
-                        let tag_count = rng.gen_range(1..=tags.len().min(2));
+                    if rng.gen_bool(SandboxConfig::SESSION_TAG_CHANCE) && !tags.is_empty() {
+                        let tag_count = rng.gen_range(1..=tags.len().min(SandboxConfig::SESSION_TAGS_MAX));
                         let mut indices: Vec<usize> = (0..tags.len()).collect();
                         for i in 0..indices.len() {
                             let j = rng.gen_range(i..indices.len());
@@ -140,8 +140,8 @@ pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, 
         )
         .await?;
 
-        if rng.gen_bool(0.5) && !profile.projects.is_empty() {
-            let proj_count = rng.gen_range(1..=profile.projects.len().min(2));
+        if rng.gen_bool(SandboxConfig::NPC_PROJECT_CHANCE) && !profile.projects.is_empty() {
+            let proj_count = rng.gen_range(1..=profile.projects.len().min(SandboxConfig::NPC_PROJECTS_MAX));
             for pi in 0..proj_count {
                 let proj_seed = &profile.projects[pi];
                 let color = COLORS[rng.gen_range(0..COLORS.len())];
@@ -167,7 +167,7 @@ pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, 
                     .await?;
                     tasks.push((task_id, task_name.to_string()));
 
-                    let hours: f64 = rng.gen_range(3.0..20.0);
+                    let hours: f64 = rng.gen_range(SandboxConfig::NPC_TASK_HOURS_MIN..SandboxConfig::NPC_TASK_HOURS_MAX);
                     let event_data = serde_json::json!({
                         "task_id": task_id,
                         "task_name": task_name,
@@ -197,7 +197,7 @@ pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, 
                         serde_json::json!({
                             "task_id": tid,
                             "task_name": tname,
-                            "minutes": rng.gen_range(60.0f64..400.0)
+                            "minutes": rng.gen_range(SandboxConfig::NPC_TASK_MINUTES_MIN..SandboxConfig::NPC_TASK_MINUTES_MAX)
                         })
                     })
                     .collect();
@@ -208,7 +208,7 @@ pub async fn seed_npc_users(pool: &PgPool, count: usize) -> Result<Vec<String>, 
                     "project_color": color,
                     "project_image_url": null,
                     "created_at": Utc::now().with_timezone(&Local).to_rfc3339(),
-                    "total_sessions": rng.gen_range(10i64..50),
+                    "total_sessions": rng.gen_range(SandboxConfig::NPC_TOTAL_SESSIONS_MIN..SandboxConfig::NPC_TOTAL_SESSIONS_MAX),
                     "tasks_time_breakdown": tasks_breakdown,
                     "categories_time_breakdown": []
                 });
