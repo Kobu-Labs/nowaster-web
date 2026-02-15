@@ -11,7 +11,8 @@ import {
 } from "@/components/shadcn/card";
 import { env } from "@/env";
 import { useAuth } from "@/components/hooks/useAuth";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, nextSandboxResetTime } from "@/lib/auth";
+import Cookies from "js-cookie";
 import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import { Github } from "lucide-react";
 import Image from "next/image";
@@ -63,7 +64,7 @@ const SandboxSignIn: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setPreviousUsername(localStorage.getItem(SANDBOX_LAST_USER_KEY));
+    setPreviousUsername(Cookies.get(SANDBOX_LAST_USER_KEY) ?? null);
   }, []);
 
   const loginAsGuest = async (forceNew: boolean) => {
@@ -79,7 +80,11 @@ const SandboxSignIn: FC = () => {
           setTokens(data.data.access_token);
           const user = getCurrentUser();
           if (user) {
-            localStorage.setItem(SANDBOX_LAST_USER_KEY, user.username);
+            Cookies.set(SANDBOX_LAST_USER_KEY, user.username, {
+              expires: nextSandboxResetTime(),
+              path: "/",
+              sameSite: "lax",
+            });
           }
         }
       }
@@ -96,7 +101,7 @@ const SandboxSignIn: FC = () => {
           Try the sandbox
         </CardTitle>
         <CardDescription className="text-center text-gray-600 dark:text-gray-300">
-          No account needed
+          No registration needed
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -119,7 +124,7 @@ const SandboxSignIn: FC = () => {
           type="button"
           variant={previousUsername ? "outline" : "default"}
         >
-          Try new account
+          Try new a guest account
         </Button>
       </CardContent>
     </Card>
