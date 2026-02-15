@@ -57,12 +57,14 @@ export default async function LandingPage() {
               </SignedIn>
               <SignedOut>
                 <Link href="/sign-in">
-                  <Button
-                    className="flex items-center justify-center gap-1 group"
-                    variant="secondary"
-                  >
-                    <StopwatchIcon className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
+                  <Button className="flex items-center justify-center gap-1 group">
+                    <StopwatchIcon className="group-hover:scale-110" />
                     <p>Start tracking now</p>
+                  </Button>
+                </Link>
+                <Link href="https://www.sandbox.nowaster.app/sign-in" target="_blank">
+                  <Button variant="outline">
+                    No account? Try the sandbox as a guest →
                   </Button>
                 </Link>
               </SignedOut>
@@ -342,8 +344,13 @@ export default async function LandingPage() {
                 </SignedIn>
                 <SignedOut>
                   <Link href="/sign-in">
-                    <Button variant="secondary">
+                    <Button>
                       <p>Start your journey now</p>
+                    </Button>
+                  </Link>
+                  <Link href="https://www.sandbox.nowaster.app/sign-in" target="_blank">
+                    <Button variant="outline">
+                      No account? Try the sandbox as a guest →
                     </Button>
                   </Link>
                 </SignedOut>
