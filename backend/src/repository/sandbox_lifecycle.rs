@@ -215,7 +215,7 @@ impl SandboxLifecycleRepository {
         Ok(())
     }
 
-    pub async fn create_guest_user_pool(&self, count: usize) -> Result<i64, sqlx::Error> {
+    pub async fn create_guest_user_pool(&self, count: usize) -> Result<Vec<String>, sqlx::Error> {
         let current_count: i64 = sqlx::query_scalar!(
             r#"SELECT COUNT(*) FROM "user" WHERE id LIKE 'guest_%'"#,
         )
@@ -223,7 +223,7 @@ impl SandboxLifecycleRepository {
         .await?
         .unwrap_or(0);
 
-        let mut created_count = 0i64;
+        let mut created_ids: Vec<String> = Vec::new();
 
         for i in 0..count {
             let guest_id = format!("guest_{}", Uuid::new_v4().simple());
@@ -244,10 +244,16 @@ impl SandboxLifecycleRepository {
             .await?;
 
             if result.rows_affected() > 0 {
-                created_count += 1;
+                created_ids.push(guest_id);
             }
         }
 
-        Ok(created_count)
+        Ok(created_ids)
+    }
+
+    pub async fn get_npc_ids(&self) -> Result<Vec<String>, sqlx::Error> {
+        sqlx::query_scalar::<_, String>(r#"SELECT id FROM "user" WHERE id LIKE 'npc_%'"#)
+            .fetch_all(self.db_conn.get_pool())
+            .await
     }
 }

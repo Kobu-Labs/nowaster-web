@@ -9,6 +9,7 @@ use crate::{
     config::{database::Database, env::AppEnvironment},
     entity::sandbox_lifecycle::SandboxLifecycle,
     repository::sandbox_lifecycle::SandboxLifecycleRepository,
+    seeding::SandboxSeeder,
 };
 
 static GUEST_POOL: Lazy<Mutex<VecDeque<(String, String)>>> =
@@ -17,12 +18,14 @@ static GUEST_POOL: Lazy<Mutex<VecDeque<(String, String)>>> =
 #[derive(Clone)]
 pub struct SandboxService {
     lifecycle_repo: SandboxLifecycleRepository,
+    seeder: SandboxSeeder,
 }
 
 impl SandboxService {
     pub fn new(database: &Arc<Database>) -> Self {
         Self {
             lifecycle_repo: SandboxLifecycleRepository::new(database),
+            seeder: SandboxSeeder::new(database),
         }
     }
 
@@ -94,6 +97,10 @@ impl SandboxService {
         self.lifecycle_repo.get_all(limit).await
     }
 
+    pub async fn seed_npc_users(&self) -> Result<Vec<String>, sqlx::Error> {
+        self.seeder.seed_npc_users(10).await
+    }
+
     pub async fn initialize_sandbox(&self, app_env: &AppEnvironment) {
         if *app_env != AppEnvironment::NowasterSandbox {
             return;
@@ -117,10 +124,39 @@ impl SandboxService {
             }
         }
 
+        let npc_ids = match self.lifecycle_repo.get_npc_ids().await {
+            Ok(ids) if ids.is_empty() => {
+                match self.seeder.seed_npc_users(10).await {
+                    Ok(ids) => {
+                        info!("✅ Created {} NPC users", ids.len());
+                        ids
+                    }
+                    Err(e) => {
+                        warn!("⚠️  Failed to seed NPC users: {}", e);
+                        vec![]
+                    }
+                }
+            }
+            Ok(ids) => {
+                info!("✅ {} NPC users already exist", ids.len());
+                ids
+            }
+            Err(e) => {
+                warn!("⚠️  Failed to check NPC users: {}", e);
+                vec![]
+            }
+        };
+
         match self.lifecycle_repo.create_guest_user_pool(100).await {
-            Ok(created) => {
-                if created > 0 {
-                    info!("✅ Created {} guest users", created);
+            Ok(guest_ids) => {
+                if !guest_ids.is_empty() {
+                    info!("✅ Created {} guest users, seeding data...", guest_ids.len());
+                    for guest_id in &guest_ids {
+                        if let Err(e) = self.seeder.seed_guest_user(guest_id, &npc_ids).await {
+                            warn!("⚠️  Failed to seed guest {}: {}", guest_id, e);
+                        }
+                    }
+                    info!("✅ Guest seeding complete");
                 } else {
                     info!("✅ Guest user pool already exists");
                 }
@@ -128,6 +164,10 @@ impl SandboxService {
             Err(e) => {
                 warn!("⚠️  Failed to create guest user pool: {}", e);
             }
+        }
+
+        if let Err(e) = self.init_pool().await {
+            warn!("⚠️  Failed to initialize guest pool cache: {}", e);
         }
     }
 
@@ -138,8 +178,20 @@ impl SandboxService {
         Ok(())
     }
 
-    pub async fn reinitialize_guest_pool(&self) -> Result<i64, sqlx::Error> {
-        self.lifecycle_repo.create_guest_user_pool(100).await
+    pub async fn reinitialize_guest_pool(&self) -> Result<usize, sqlx::Error> {
+        let guest_ids = self.lifecycle_repo.create_guest_user_pool(100).await?;
+        let count = guest_ids.len();
+
+        if !guest_ids.is_empty() {
+            let npc_ids = self.lifecycle_repo.get_npc_ids().await.unwrap_or_default();
+            for guest_id in &guest_ids {
+                if let Err(e) = self.seeder.seed_guest_user(guest_id, &npc_ids).await {
+                    warn!("⚠️  Failed to seed guest {}: {}", guest_id, e);
+                }
+            }
+        }
+
+        Ok(count)
     }
 
     pub fn is_pool_empty(&self) -> bool {
@@ -180,11 +232,20 @@ impl SandboxService {
                 current_size, REPLENISH_THRESHOLD
             );
 
-            let created = self
+            let guest_ids = self
                 .lifecycle_repo
                 .create_guest_user_pool(REPLENISH_BATCH_SIZE)
                 .await?;
-            info!("✅ Created {} new guest users", created);
+
+            if !guest_ids.is_empty() {
+                let npc_ids = self.lifecycle_repo.get_npc_ids().await.unwrap_or_default();
+                for guest_id in &guest_ids {
+                    if let Err(e) = self.seeder.seed_guest_user(guest_id, &npc_ids).await {
+                        warn!("⚠️  Failed to seed replenished guest {}: {}", guest_id, e);
+                    }
+                }
+                info!("✅ Created and seeded {} new guest users", guest_ids.len());
+            }
 
             self.init_pool().await?;
         }

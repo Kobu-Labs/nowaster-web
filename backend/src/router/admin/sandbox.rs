@@ -110,6 +110,13 @@ async fn reset_sandbox_handler(
         }
     };
 
+    if let Err(e) = state.sandbox_service.seed_npc_users().await {
+        tracing::error!("Failed to seed NPC users: {}", e);
+        return ApiResponse::Error {
+            message: "Failed to seed NPC users".to_string(),
+        };
+    }
+
     if let Err(e) = state.sandbox_service.reinitialize_guest_pool().await {
         tracing::error!("Failed to reinitialize guest pool: {}", e);
         return ApiResponse::Error {
