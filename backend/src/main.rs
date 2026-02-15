@@ -12,6 +12,7 @@ mod dto;
 mod entity;
 mod repository;
 mod router;
+mod seeding;
 mod service;
 
 #[tokio::main]
