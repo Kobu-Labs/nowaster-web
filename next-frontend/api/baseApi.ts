@@ -29,7 +29,9 @@ export const refreshTokens = async (): Promise<string> => {
         },
       );
 
-      const newAccessToken = refreshResponse.data?.data?.access_token as string | undefined;
+      const newAccessToken = refreshResponse.data?.data?.access_token as
+        | string
+        | undefined;
 
       if (!newAccessToken) {
         throw new Error("Invalid refresh response");
