@@ -31,8 +31,22 @@ export const nextSandboxResetTime = () => {
   return next;
 };
 
+/**
+ * Clear all auth cookies.
+ * Also removes legacy wildcard-domain variants (.nowaster.app) that were set
+ * by an older version of the backend — without matching the original domain,
+ * js-cookie's remove() won't touch them and they linger until natural expiry.
+ */
 export function clearAuthCookies() {
+  Cookies.remove("access_token");
+  Cookies.remove("refresh_token");
   Cookies.remove("user_hint");
+
+  // Legacy cleanup: old backend set cookies with domain=".nowaster.app"
+  const legacyDomain = ".nowaster.app";
+  Cookies.remove("access_token", { domain: legacyDomain });
+  Cookies.remove("refresh_token", { domain: legacyDomain });
+  Cookies.remove("has_session", { domain: legacyDomain });
 }
 
 export function decodeAccessToken(token: string): JwtClaims | null {
