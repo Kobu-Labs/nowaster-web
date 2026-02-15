@@ -3,7 +3,7 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use sqlx::{PgPool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
-use crate::seeding::data::{UsecaseProfile, COLORS, PROFILES};
+use crate::seeding::{config::SandboxConfig, data::{UsecaseProfile, COLORS, PROFILES}};
 
 struct InsertedCategory {
     id: Uuid,
@@ -50,7 +50,7 @@ pub async fn seed_guest_user(
 ) -> Result<(), sqlx::Error> {
     let mut rng = StdRng::from_entropy();
 
-    let profile_count = rng.gen_range(2usize..=4);
+    let profile_count = rng.gen_range(SandboxConfig::GUEST_PROFILES_MIN..=SandboxConfig::GUEST_PROFILES_MAX);
     let mut all_indices: Vec<usize> = (0..PROFILES.len()).collect();
     for i in 0..all_indices.len() {
         let j = rng.gen_range(i..all_indices.len());
@@ -129,7 +129,7 @@ async fn insert_profile_data(
 
         let mut tasks = Vec::new();
         for &task_name in proj_seed.tasks {
-            let completed = rng.gen_bool(0.3);
+            let completed = rng.gen_bool(SandboxConfig::TASK_INITIAL_COMPLETION_CHANCE);
             let task_id: Uuid = sqlx::query_scalar(
                 r#"INSERT INTO task (project_id, name, user_id, completed) VALUES ($1, $2, $3, $4) RETURNING id"#,
             )
@@ -174,9 +174,9 @@ async fn generate_and_insert_sessions(
     let mut sessions: Vec<SessionRow> = Vec::new();
     let mut tag_links: Vec<(Uuid, Uuid)> = Vec::new();
 
-    for week in 0u32..156 {
+    for week in 0u32..SandboxConfig::GUEST_SESSION_HISTORY_WEEKS {
         let base = now - Duration::weeks(week as i64);
-        let count = rng.gen_range(3usize..=6);
+        let count = rng.gen_range(SandboxConfig::GUEST_SESSIONS_PER_WEEK_MIN..=SandboxConfig::GUEST_SESSIONS_PER_WEEK_MAX);
         let pd = &profiles_data[rng.gen_range(0..profiles_data.len())];
 
         if pd.categories.is_empty() {
@@ -185,14 +185,14 @@ async fn generate_and_insert_sessions(
 
         for _ in 0..count {
             let day_offset = rng.gen_range(0i64..7);
-            let hour_start = rng.gen_range(7i64..21);
-            let duration_min = rng.gen_range(30i64..240);
+            let hour_start = rng.gen_range(SandboxConfig::SESSION_START_HOUR_MIN..SandboxConfig::SESSION_START_HOUR_MAX);
+            let duration_min = rng.gen_range(SandboxConfig::SESSION_DURATION_MIN_MINS..SandboxConfig::SESSION_DURATION_MAX_MINS);
             let start = base - Duration::days(day_offset) + Duration::hours(hour_start);
             let end = start + Duration::minutes(duration_min);
             let cat = &pd.categories[rng.gen_range(0..pd.categories.len())];
 
             let roll: f64 = rng.gen();
-            let (project_id, task_id) = if roll < 0.6 && !pd.projects.is_empty() {
+            let (project_id, task_id) = if roll < SandboxConfig::SESSION_TASK_PROJECT_WEIGHT && !pd.projects.is_empty() {
                 let proj = &pd.projects[rng.gen_range(0..pd.projects.len())];
                 if !proj.tasks.is_empty() {
                     let task = &proj.tasks[rng.gen_range(0..proj.tasks.len())];
@@ -200,7 +200,7 @@ async fn generate_and_insert_sessions(
                 } else {
                     (Some(proj.id), None)
                 }
-            } else if roll < 0.8 && !pd.projects.is_empty() {
+            } else if roll < SandboxConfig::SESSION_PROJECT_WEIGHT && !pd.projects.is_empty() {
                 let proj = &pd.projects[rng.gen_range(0..pd.projects.len())];
                 (Some(proj.id), None)
             } else {
@@ -208,8 +208,8 @@ async fn generate_and_insert_sessions(
             };
 
             let sid = Uuid::new_v4();
-            if rng.gen_bool(0.5) && !pd.tag_ids.is_empty() {
-                let tag_count = rng.gen_range(1..=pd.tag_ids.len().min(2));
+            if rng.gen_bool(SandboxConfig::SESSION_TAG_CHANCE) && !pd.tag_ids.is_empty() {
+                let tag_count = rng.gen_range(1..=pd.tag_ids.len().min(SandboxConfig::SESSION_TAGS_MAX));
                 let mut indices: Vec<usize> = (0..pd.tag_ids.len()).collect();
                 for i in 0..indices.len() {
                     let j = rng.gen_range(i..indices.len());
@@ -245,7 +245,7 @@ async fn bulk_insert_sessions(
     if sessions.is_empty() {
         return Ok(());
     }
-    for chunk in sessions.chunks(500) {
+    for chunk in sessions.chunks(SandboxConfig::BULK_SESSION_CHUNK_SIZE) {
         let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
             "INSERT INTO session (id, category_id, type, start_time, end_time, user_id, project_id, task_id, template_id) ",
         );
@@ -269,7 +269,7 @@ async fn bulk_insert_tag_links(pool: &PgPool, links: &[(Uuid, Uuid)]) -> Result<
     if links.is_empty() {
         return Ok(());
     }
-    for chunk in links.chunks(1000) {
+    for chunk in links.chunks(SandboxConfig::BULK_TAG_LINK_CHUNK_SIZE) {
         let mut qb: QueryBuilder<Postgres> =
             QueryBuilder::new("INSERT INTO tag_to_session (session_id, tag_id) ");
         qb.push_values(chunk.iter(), |mut b, (sid, tid)| {
@@ -307,7 +307,7 @@ async fn complete_one_project(
             .execute(pool)
             .await?;
 
-        let hours: f64 = rng.gen_range(5.0..25.0);
+        let hours: f64 = rng.gen_range(SandboxConfig::TASK_COMPLETION_HOURS_MIN..SandboxConfig::TASK_COMPLETION_HOURS_MAX);
         let event_data = serde_json::json!({
             "task_id": task.id,
             "task_name": task.name,
@@ -344,7 +344,7 @@ async fn complete_one_project(
             serde_json::json!({
                 "task_id": t.id,
                 "task_name": t.name,
-                "minutes": rng.gen_range(60.0f64..600.0)
+                "minutes": rng.gen_range(SandboxConfig::PROJECT_TASK_MINUTES_MIN..SandboxConfig::PROJECT_TASK_MINUTES_MAX)
             })
         })
         .collect();
@@ -355,7 +355,7 @@ async fn complete_one_project(
         "project_color": project.color,
         "project_image_url": null,
         "created_at": now.with_timezone(&Local).to_rfc3339(),
-        "total_sessions": rng.gen_range(20i64..80),
+        "total_sessions": rng.gen_range(SandboxConfig::PROJECT_TOTAL_SESSIONS_MIN..SandboxConfig::PROJECT_TOTAL_SESSIONS_MAX),
         "tasks_time_breakdown": tasks_breakdown,
         "categories_time_breakdown": []
     });
@@ -384,8 +384,8 @@ async fn create_session_template(
     };
 
     let now = Utc::now();
-    let start_date = now - Duration::weeks(156);
-    let end_date = now + Duration::weeks(52);
+    let start_date = now - Duration::weeks(SandboxConfig::TEMPLATE_HISTORY_WEEKS);
+    let end_date = now + Duration::weeks(SandboxConfig::TEMPLATE_FUTURE_WEEKS);
 
     let template_id: Uuid = sqlx::query_scalar(
         r#"INSERT INTO session_template (name, user_id, interval, start_date, end_date)
@@ -405,7 +405,7 @@ async fn create_session_template(
         (6360.0, 6480.0),  // Fri 10:00–12:00
         (1560.0, 1680.0),  // Tue 02:00–04:00
     ];
-    let recurring_count = rng.gen_range(3usize..=4);
+    let recurring_count = rng.gen_range(SandboxConfig::TEMPLATE_RECURRING_MIN..=SandboxConfig::TEMPLATE_RECURRING_MAX);
 
     for &(start_off, end_off) in offsets.iter().take(recurring_count) {
         let cat = &pd.categories[rng.gen_range(0..pd.categories.len())];
@@ -423,7 +423,7 @@ async fn create_session_template(
     }
 
     let mut template_sessions: Vec<SessionRow> = Vec::new();
-    for week in 1u32..=4 {
+    for week in 1u32..=SandboxConfig::TEMPLATE_FILL_PAST_WEEKS {
         let base = now - Duration::weeks(week as i64);
         for &(start_off, end_off) in offsets.iter().take(recurring_count) {
             let start = base + Duration::minutes(start_off as i64);
