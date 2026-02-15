@@ -38,6 +38,14 @@ pub enum NotificationTypeSql {
     #[sqlx(rename = "admin:sandbox:failed-deploy")]
     #[serde(rename = "admin:sandbox:failed-deploy")]
     AdminSandboxFailedDeploy,
+
+    #[sqlx(rename = "admin:backup:completed")]
+    #[serde(rename = "admin:backup:completed")]
+    AdminBackupCompleted,
+
+    #[sqlx(rename = "admin:backup:failed")]
+    #[serde(rename = "admin:backup:failed")]
+    AdminBackupFailed,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
@@ -119,11 +127,33 @@ pub enum NotificationType {
 
     #[serde(rename = "admin:sandbox:failed-deploy")]
     AdminSandboxFailedDeploy(SandboxFailedDeployData),
+
+    #[serde(rename = "admin:backup:completed")]
+    AdminBackupCompleted(BackupCompletedData),
+
+    #[serde(rename = "admin:backup:failed")]
+    AdminBackupFailed(BackupFailedData),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SandboxFailedDeployData {
     pub sandbox_lifecycle_id: Uuid,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct BackupCompletedData {
+    pub backup_id: i32,
+    pub backup_size_bytes: Option<i64>,
+    pub duration_seconds: Option<i32>,
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct BackupFailedData {
+    pub backup_id: i32,
+    pub error_message: Option<String>,
+    pub duration_seconds: Option<i32>,
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

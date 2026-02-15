@@ -18,7 +18,9 @@
                 "system:new_release",
                 "task:completed",
                 "project:completed",
-                "admin:sandbox:failed-deploy"
+                "admin:sandbox:failed-deploy",
+                "admin:backup:completed",
+                "admin:backup:failed"
               ]
             }
           }

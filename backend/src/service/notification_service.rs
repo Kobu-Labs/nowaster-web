@@ -10,8 +10,9 @@ use crate::{
         NotificationQueryDto, ReadNotificationDto,
     },
     entity::notification::{
-        FriendRequestAcceptedData, FriendRequestData, NotificationSource, NotificationType,
-        SandboxFailedDeployData, SessionReactionData, SystemNotificationData,
+        BackupCompletedData, BackupFailedData, FriendRequestAcceptedData, FriendRequestData,
+        NotificationSource, NotificationType, SandboxFailedDeployData, SessionReactionData,
+        SystemNotificationData,
     },
     repository::{notification::NotificationRepository, user::UserRepository},
     router::clerk::Actor,
@@ -217,6 +218,72 @@ impl NotificationService {
                 notification_type: NotificationType::AdminSandboxFailedDeploy(
                     SandboxFailedDeployData { sandbox_lifecycle_id },
                 ),
+            };
+
+            let id = self.create_notification(dto).await?;
+            notification_ids.push(id);
+        }
+
+        Ok(notification_ids)
+    }
+
+    #[instrument(err, skip(self), fields(backup_id = %backup_id))]
+    pub async fn notify_admins_backup_completed(
+        &self,
+        backup_id: i32,
+        backup_size_bytes: Option<i64>,
+        duration_seconds: Option<i32>,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> Result<Vec<Uuid>> {
+        let admin_ids = self.user_repo.get_admin_ids().await?;
+        let mut notification_ids = Vec::new();
+
+        for user_id in admin_ids {
+            let dto = CreateNotificationDto {
+                user_id,
+                source: NotificationSource::System(SystemNotificationData {
+                    system_id: "nowaster-system".to_string(),
+                    system_name: "Nowaster".to_string(),
+                }),
+                notification_type: NotificationType::AdminBackupCompleted(BackupCompletedData {
+                    backup_id,
+                    backup_size_bytes,
+                    duration_seconds,
+                    started_at,
+                }),
+            };
+
+            let id = self.create_notification(dto).await?;
+            notification_ids.push(id);
+        }
+
+        Ok(notification_ids)
+    }
+
+    #[instrument(err, skip(self), fields(backup_id = %backup_id))]
+    pub async fn notify_admins_backup_failed(
+        &self,
+        backup_id: i32,
+        error_message: Option<String>,
+        duration_seconds: Option<i32>,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> Result<Vec<Uuid>> {
+        let admin_ids = self.user_repo.get_admin_ids().await?;
+        let mut notification_ids = Vec::new();
+
+        for user_id in admin_ids {
+            let dto = CreateNotificationDto {
+                user_id,
+                source: NotificationSource::System(SystemNotificationData {
+                    system_id: "nowaster-system".to_string(),
+                    system_name: "Nowaster".to_string(),
+                }),
+                notification_type: NotificationType::AdminBackupFailed(BackupFailedData {
+                    backup_id,
+                    error_message: error_message.clone(),
+                    duration_seconds,
+                    started_at,
+                }),
             };
 
             let id = self.create_notification(dto).await?;
