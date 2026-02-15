@@ -124,7 +124,7 @@ const SandboxSignIn: FC = () => {
           type="button"
           variant={previousUsername ? "outline" : "default"}
         >
-          Try new a guest account
+          Try a new guest account
         </Button>
       </CardContent>
     </Card>
