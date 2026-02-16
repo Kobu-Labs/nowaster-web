@@ -1,11 +1,12 @@
 "use client";
 
 import { AuthContext } from "@/components/hooks/useAuth";
+import { env } from "@/env";
+import { queryClient } from "@/lib/queryClient";
 import {
   clearAuthCookies,
-  getAccessToken,
   getCurrentUser,
-  setAuthTokens,
+  setUserFromToken,
   type User,
 } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -18,35 +19,42 @@ import {
 } from "react";
 
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-  // Start with null to avoid hydration mismatch
   const [user, setUser] = useState<null | User>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    setUser(getCurrentUser());
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+    }
     setIsLoaded(true);
   }, []);
 
-  const getToken = useCallback(async () => {
-    return getAccessToken();
-  }, []);
-
-  const setTokens = useCallback((accessToken: string, refreshToken: string) => {
-    setAuthTokens(accessToken, refreshToken);
+  const setTokens = useCallback((accessToken: string) => {
+    queryClient.clear();
+    setUserFromToken(accessToken);
     setUser(getCurrentUser());
   }, []);
 
-  const signOut = useCallback(() => {
-    router.push("/");
+  const signOut = useCallback(async () => {
+    try {
+      await fetch(`${env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+        credentials: "include",
+        method: "POST",
+      });
+    } catch {
+      // best-effort — proceed with client-side cleanup regardless
+    }
     clearAuthCookies();
+    queryClient.clear();
     setUser(null);
+    router.push("/");
   }, [router]);
 
   return (
     <AuthContext.Provider
       value={{
-        getToken,
         isLoaded,
         isSignedIn: user !== null,
         setTokens,

@@ -4,9 +4,12 @@ import type {
   Notification,
   SessionReactionAddedData,
 } from "@/api/definitions/models/notification";
+import { BackupCompletedNotificationItem } from "@/components/notifications/items/BackupCompletedNotification";
+import { BackupFailedNotificationItem } from "@/components/notifications/items/BackupFailedNotification";
 import { FriendRequestAcceptedNotificationItem } from "@/components/notifications/items/FriendRequestAcceptedNotification";
 import { NewFriendRequestNotificationItem } from "@/components/notifications/items/NewFriendRequestNotification";
 import { NewReleaseNotificationItem } from "@/components/notifications/items/NewReleaseNotification";
+import { SandboxFailedDeployNotificationItem } from "@/components/notifications/items/SandboxFailedDeployNotification";
 import { SessionReactionAddedNotificationItem } from "@/components/notifications/items/SessionReactionAddedNotification";
 import type { FC } from "react";
 
@@ -67,6 +70,30 @@ export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
 
 const NotificationsRegistry: FC<NotificationItemProps> = (props) => {
   switch (props.notification.notification_type) {
+    case "admin:backup:completed": {
+      return (
+        <BackupCompletedNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "admin:backup:failed": {
+      return (
+        <BackupFailedNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "admin:sandbox:failed-deploy": {
+      return (
+        <SandboxFailedDeployNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
     case "friend:new_request": {
       return (
         <NewFriendRequestNotificationItem

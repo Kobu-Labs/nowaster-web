@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sandbox_lifecycle SET unique_users = unique_users + 1 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f941f8794c81e205d454a754c0b7e6f863b85bfa199fe24ab95a152b5db8c2f7"
+}

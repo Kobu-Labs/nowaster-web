@@ -6,6 +6,7 @@ use axum::{
     extract::FromRequestParts,
     http::{request::Parts, StatusCode},
 };
+use axum_extra::extract::cookie::CookieJar;
 use sqlx::Type;
 
 use super::root::AppState;
@@ -107,25 +108,22 @@ impl FromRequestParts<AppState> for Actor {
             }
         }
 
-        if let Some(auth_header) = parts
-            .headers
-            .get("Authorization")
-            .and_then(|h| h.to_str().ok())
-            .and_then(|h| h.strip_prefix("Bearer "))
-        {
-            // Validate JWT with environment check
-            if let Ok(claims) = validate_access_token(auth_header, state.config.server.app_env.as_str()) {
+        if let Some(api_key) = parts.headers.get("X-API-Key").and_then(|h| h.to_str().ok()) {
+            if let Ok((user_id, role)) = state.auth_service.validate_api_token(api_key).await {
+                return Ok(Actor { user_id, role });
+            }
+        }
+
+        let Ok(jar) = CookieJar::from_request_parts(parts, state).await;
+        if let Some(cookie) = jar.get("access_token") {
+            if let Ok(claims) =
+                validate_access_token(cookie.value(), state.config.server.app_env.as_str())
+            {
                 let role = UserRole::from_str(&claims.role).unwrap_or(UserRole::User);
                 return Ok(Actor {
                     user_id: claims.sub,
                     role,
                 });
-            }
-        }
-
-        if let Some(api_key) = parts.headers.get("X-API-Key").and_then(|h| h.to_str().ok()) {
-            if let Ok((user_id, role)) = state.auth_service.validate_api_token(api_key).await {
-                return Ok(Actor { user_id, role });
             }
         }
 

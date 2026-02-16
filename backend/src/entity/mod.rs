@@ -4,6 +4,7 @@ pub mod feed;
 pub mod notification;
 pub mod project;
 pub mod release;
+pub mod sandbox_lifecycle;
 pub mod session;
 pub mod session_template;
 pub mod tag;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, Megaphone, Settings, UserCog } from "lucide-react";
+import { Database, Megaphone, Settings, TestTube, UserCog } from "lucide-react";
 
 import {
   Sidebar,
@@ -35,6 +35,12 @@ const adminNavItems = [
     icon: Database,
     title: "Backups",
     url: "/home/admin/backups",
+  },
+  {
+    description: "Monitor sandbox environment lifecycles",
+    icon: TestTube,
+    title: "Sandbox",
+    url: "/home/admin/sandbox",
   },
 ] as const;
 

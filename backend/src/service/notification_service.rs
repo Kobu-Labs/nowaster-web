@@ -10,10 +10,11 @@ use crate::{
         NotificationQueryDto, ReadNotificationDto,
     },
     entity::notification::{
-        FriendRequestAcceptedData, FriendRequestData, NotificationSource, NotificationType,
-        SessionReactionData, SystemNotificationData,
+        BackupCompletedData, BackupFailedData, FriendRequestAcceptedData, FriendRequestData,
+        NotificationSource, NotificationType, SandboxFailedDeployData, SessionReactionData,
+        SystemNotificationData,
     },
-    repository::notification::NotificationRepository,
+    repository::{notification::NotificationRepository, user::UserRepository},
     router::clerk::Actor,
     service::friend_service::ReadFriendRequestDto,
 };
@@ -21,12 +22,14 @@ use crate::{
 #[derive(Clone)]
 pub struct NotificationService {
     repository: NotificationRepository,
+    user_repo: UserRepository,
 }
 
 impl NotificationService {
     pub fn new(db: &Arc<Database>) -> Self {
         Self {
             repository: NotificationRepository::new(db),
+            user_repo: UserRepository::new(db),
         }
     }
 
@@ -195,5 +198,98 @@ impl NotificationService {
         self.repository
             .cleanup_old_notifications(user_id, cutoff_date)
             .await
+    }
+
+    #[instrument(err, skip(self), fields(sandbox_lifecycle_id = %sandbox_lifecycle_id))]
+    pub async fn notify_admins_sandbox_failed_deploy(
+        &self,
+        sandbox_lifecycle_id: Uuid,
+    ) -> Result<Vec<Uuid>> {
+        let admin_ids = self.user_repo.get_admin_ids().await?;
+        let mut notification_ids = Vec::new();
+
+        for user_id in admin_ids {
+            let dto = CreateNotificationDto {
+                user_id,
+                source: NotificationSource::System(SystemNotificationData {
+                    system_id: "nowaster-sandbox".to_string(),
+                    system_name: "Nowaster Sandbox".to_string(),
+                }),
+                notification_type: NotificationType::AdminSandboxFailedDeploy(
+                    SandboxFailedDeployData { sandbox_lifecycle_id },
+                ),
+            };
+
+            let id = self.create_notification(dto).await?;
+            notification_ids.push(id);
+        }
+
+        Ok(notification_ids)
+    }
+
+    #[instrument(err, skip(self), fields(backup_id = %backup_id))]
+    pub async fn notify_admins_backup_completed(
+        &self,
+        backup_id: i32,
+        backup_size_bytes: Option<i64>,
+        duration_seconds: Option<i32>,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> Result<Vec<Uuid>> {
+        let admin_ids = self.user_repo.get_admin_ids().await?;
+        let mut notification_ids = Vec::new();
+
+        for user_id in admin_ids {
+            let dto = CreateNotificationDto {
+                user_id,
+                source: NotificationSource::System(SystemNotificationData {
+                    system_id: "nowaster-system".to_string(),
+                    system_name: "Nowaster".to_string(),
+                }),
+                notification_type: NotificationType::AdminBackupCompleted(BackupCompletedData {
+                    backup_id,
+                    backup_size_bytes,
+                    duration_seconds,
+                    started_at,
+                }),
+            };
+
+            let id = self.create_notification(dto).await?;
+            notification_ids.push(id);
+        }
+
+        Ok(notification_ids)
+    }
+
+    #[instrument(err, skip(self), fields(backup_id = %backup_id))]
+    pub async fn notify_admins_backup_failed(
+        &self,
+        backup_id: i32,
+        error_message: Option<String>,
+        duration_seconds: Option<i32>,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> Result<Vec<Uuid>> {
+        let admin_ids = self.user_repo.get_admin_ids().await?;
+        let mut notification_ids = Vec::new();
+
+        for user_id in admin_ids {
+            let dto = CreateNotificationDto {
+                user_id,
+                source: NotificationSource::System(SystemNotificationData {
+                    system_id: "nowaster-system".to_string(),
+                    system_name: "Nowaster".to_string(),
+                }),
+                notification_type: NotificationType::AdminBackupFailed(BackupFailedData {
+                    backup_id,
+                    error_message: error_message.clone(),
+                    duration_seconds,
+                    started_at,
+                }),
+            };
+
+            let id = self.create_notification(dto).await?;
+            notification_ids.push(id);
+        }
+
+        Ok(notification_ids)
     }
 }

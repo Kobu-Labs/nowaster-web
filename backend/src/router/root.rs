@@ -34,6 +34,7 @@ use crate::{
         notification_service::NotificationService,
         project_service::ProjectService,
         release_service::ReleaseService,
+        sandbox_service::SandboxService,
         session::{fixed::FixedSessionService, stopwatch::StopwatchSessionService},
         session_template::SessionTemplateService,
         statistics_service::StatisticsService,
@@ -76,6 +77,7 @@ pub struct AppState {
     pub release_service: ReleaseService,
     pub project_service: ProjectService,
     pub task_service: TaskService,
+    pub sandbox_service: SandboxService,
     pub db_backup_repo: crate::repository::db_backup::DbBackupRepository,
     pub s3_client: aws_sdk_s3::Client,
     pub feed: Feed,
@@ -118,6 +120,12 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let notification_service = NotificationService::new(&db);
     let release_service = ReleaseService::new(&db);
+    let sandbox_service = SandboxService::new(&db);
+
+    // Initialize sandbox environment if needed
+    sandbox_service
+        .initialize_sandbox(&config.server.app_env)
+        .await;
 
     // feed related services
     let visibility_service = FeedVisibilityService::new(feed_repo.clone());
@@ -184,6 +192,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         release_service,
         project_service,
         task_service,
+        sandbox_service,
         db_backup_repo,
         s3_client,
         feed: Feed {
@@ -219,14 +228,23 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 
-    // Configure CORS to allow credentials from frontend
-    // Note: When using allow_credentials(true), cannot use wildcards for origin/headers
-    let frontend_url = &config.frontend.url;
-
-    println!("🌐 [CORS] Allowing origin: {}", frontend_url);
+    let allow_origin = match config.server.app_env {
+        crate::config::env::AppEnvironment::NowasterLocal
+        | crate::config::env::AppEnvironment::NowasterSandbox => {
+            let frontend_url = &config.frontend.url;
+            println!("🌐 [CORS] Allowing origin: {}", frontend_url);
+            tower_http::cors::AllowOrigin::exact(frontend_url.parse::<http::HeaderValue>().unwrap())
+        }
+        _ => tower_http::cors::AllowOrigin::predicate(|origin, _| {
+            origin
+                .to_str()
+                .map(|o| o.ends_with(".nowaster.app") || o == "https://nowaster.app")
+                .unwrap_or(false)
+        }),
+    };
 
     let cors = tower_http::cors::CorsLayer::new()
-        .allow_origin(frontend_url.parse::<http::HeaderValue>().unwrap())
+        .allow_origin(allow_origin)
         .allow_methods([
             http::Method::GET,
             http::Method::POST,

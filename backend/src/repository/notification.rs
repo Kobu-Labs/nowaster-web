@@ -142,6 +142,15 @@ impl NotificationMapper {
             NotificationTypeSql::ProjectCompleted => Ok(NotificationType::ProjectCompleted(
                 serde_json::from_value(content)?,
             )),
+            NotificationTypeSql::AdminSandboxFailedDeploy => Ok(
+                NotificationType::AdminSandboxFailedDeploy(serde_json::from_value(content)?),
+            ),
+            NotificationTypeSql::AdminBackupCompleted => Ok(
+                NotificationType::AdminBackupCompleted(serde_json::from_value(content)?),
+            ),
+            NotificationTypeSql::AdminBackupFailed => Ok(
+                NotificationType::AdminBackupFailed(serde_json::from_value(content)?),
+            ),
         }
     }
 
@@ -171,6 +180,18 @@ impl NotificationMapper {
             )),
             NotificationType::ProjectCompleted(data) => Ok((
                 NotificationTypeSql::ProjectCompleted,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::AdminSandboxFailedDeploy(data) => Ok((
+                NotificationTypeSql::AdminSandboxFailedDeploy,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::AdminBackupCompleted(data) => Ok((
+                NotificationTypeSql::AdminBackupCompleted,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::AdminBackupFailed(data) => Ok((
+                NotificationTypeSql::AdminBackupFailed,
                 serde_json::to_value(data)?,
             )),
         }
