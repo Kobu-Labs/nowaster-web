@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            DO $$\n            DECLARE\n                r RECORD;\n            BEGIN\n                FOR r IN (\n                    SELECT tablename\n                    FROM pg_tables\n                    WHERE schemaname = 'public'\n                    AND tablename != '_sqlx_migrations'\n                    AND tablename != 'sandbox_lifecycle'\n                )\n                LOOP\n                    EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';\n                END LOOP;\n            END $$;\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "d1a439d554a724e3c4a83cfd60fdf684e37a6b6db32e61ed8eb49107bc728c14"
+}

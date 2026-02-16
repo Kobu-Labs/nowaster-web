@@ -449,13 +449,6 @@ async fn assign_guest_handler(
         return Err(axum::http::StatusCode::FORBIDDEN);
     }
 
-    if state.sandbox_service.is_pool_empty() {
-        if let Err(e) = state.sandbox_service.init_pool().await {
-            tracing::error!("Failed to initialize guest pool: {}", e);
-            return Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    }
-
     let force_new = params.force_new.unwrap_or(false);
 
     let reuse: Option<(String, String)> = if !force_new {
