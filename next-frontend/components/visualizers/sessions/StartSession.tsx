@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import type { FC } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { StopwatchSessionWithId } from "@/api/definitions";
 import { useCreateStopwatchSession } from "@/components/hooks/session/stopwatch/useCreateStopwatchSession";
@@ -115,6 +115,7 @@ const StopwatchSessionActive: FC<{
     differenceInSeconds(new Date(), session.startTime),
   );
   const [open, setOpen] = useState(false);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
   const finishSession = useFinishStopwatchSession();
   const deleteSessionMutation = useDeleteStopwatchSession();
 
@@ -132,7 +133,16 @@ const StopwatchSessionActive: FC<{
   return (
     <TooltipProvider delayDuration={50}>
       <Dialog modal={false} onOpenChange={setOpen} open={open}>
-        <DialogContent className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg">
+        <DialogContent
+          className="w-[90vw] px-0 pb-0 max-w-[90vw] overflow-y-auto md:w-fit md:max-w-fit md:h-auto md:max-h-none md:overflow-visible md:p-6 gradient-card-solid rounded-lg"
+          onInteractOutside={(e) => {
+            if (editButtonRef.current?.contains(e.target as Node)) {
+              e.preventDefault();
+              return;
+            }
+            setOpen(false);
+          }}
+        >
           <DialogHeader className="px-2">
             <DialogTitle className="m-1">Edit session data</DialogTitle>
           </DialogHeader>
@@ -159,9 +169,8 @@ const StopwatchSessionActive: FC<{
             <TooltipTrigger asChild>
               <Button
                 className={cn("flex gap-2 items-center")}
-                onClick={() => {
-                  setOpen(true);
-                }}
+                onClick={() => setOpen((prev) => !prev)}
+                ref={editButtonRef}
                 variant="ghost"
               >
                 <Edit className="size-4" />

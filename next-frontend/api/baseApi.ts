@@ -62,14 +62,14 @@ baseApi.interceptors.request.use((config) => {
 
 baseApi.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  async (error: { config: { _retry?: boolean; url?: string; }; response?: { status: number; }; }) => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (originalRequest.url?.includes("/auth/refresh")) {
         clearAuthCookies();
         globalThis.location.href = "/sign-in";
-        throw error;
+        throw new Error("Refresh token rejected");
       }
 
       originalRequest._retry = true;
@@ -86,7 +86,7 @@ baseApi.interceptors.response.use(
       }
     }
 
-    throw error;
+    throw error instanceof Error ? error : new Error(`Request failed with status ${error.response?.status ?? "unknown"}`);
   },
 );
 
