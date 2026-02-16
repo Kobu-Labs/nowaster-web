@@ -1,14 +1,21 @@
 use axum::{
-    extract::State,
+    extract::{Query, State},
     http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use uuid::Uuid;
 use tracing::instrument;
 
 use crate::router::{admin::AdminUser, response::ApiResponse, root::AppState};
+
+#[derive(Debug, Deserialize)]
+struct InternalLifecycleParams {
+    secret: String,
+}
 
 #[derive(Debug, Deserialize)]
 struct ProxyResetRequest {
@@ -30,7 +37,7 @@ struct ResetSandboxRequest {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SandboxLifecycleResponse {
-    sandbox_lifecycle_id: uuid::Uuid,
+    sandbox_lifecycle_id: Uuid,
     status: String,
     created_by: String,
     created_type: String,
@@ -39,30 +46,30 @@ struct SandboxLifecycleResponse {
     unique_users: i32,
     started_at: DateTime<Utc>,
     ended_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    created_by_display_name: Option<String>,
+    #[serde(default)]
+    created_by_avatar_url: Option<String>,
+    #[serde(default)]
+    torndown_by_display_name: Option<String>,
+    #[serde(default)]
+    torndown_by_avatar_url: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct SandboxResetResponse {
-    old: Option<SandboxLifecycleResponse>,
-    new: SandboxLifecycleResponse,
-}
 
 pub fn admin_sandbox_router() -> Router<AppState> {
     Router::new()
         .route("/lifecycles", get(get_sandbox_lifecycles))
+        .route("/proxy-lifecycles", get(proxy_get_sandbox_lifecycles))
         .route("/reset", post(reset_sandbox_handler))
         .route("/proxy-reset", post(proxy_reset_sandbox_handler))
 }
 
-// 1. tears down the current sandbox
-// 2. creates a clean slate
-// 3. seeds the new data
 #[instrument(skip(state))]
 async fn reset_sandbox_handler(
     State(state): State<AppState>,
     Json(req): Json<ResetSandboxRequest>,
-) -> ApiResponse<SandboxResetResponse> {
+) -> ApiResponse<()> {
     if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
         return ApiResponse::Error {
             message: "Sandbox reset called in non-sandbox environment".to_string(),
@@ -79,93 +86,40 @@ async fn reset_sandbox_handler(
         };
     }
 
-    let old_lifecycle_data = match state.sandbox_service.get_active_lifecycle().await {
-        Ok(data) => data,
-        Err(e) => {
-            tracing::error!("Failed to get active lifecycle: {}", e);
-            return ApiResponse::Error {
-                message: "Failed to get active lifecycle".to_string(),
-            };
-        }
-    };
-
-    if let Err(e) = state.sandbox_service.reset_sandbox().await {
-        tracing::error!("Failed to reset sandbox: {}", e);
-        return ApiResponse::Error {
-            message: "Failed to reset sandbox".to_string(),
-        };
-    }
-
-    let new_lifecycle = match state
+    if let Err(e) = state
         .sandbox_service
-        .create_lifecycle(&req.triggered_by, &req.triggered_type)
+        .perform_reset(&req.triggered_by, &req.triggered_type)
         .await
     {
-        Ok(lifecycle) => lifecycle,
-        Err(e) => {
-            tracing::error!("Failed to create lifecycle: {}", e);
-            return ApiResponse::Error {
-                message: "Failed to create lifecycle".to_string(),
-            };
-        }
-    };
-
-    if let Err(e) = state.sandbox_service.seed_npc_users().await {
-        tracing::error!("Failed to seed NPC users: {}", e);
+        tracing::error!("Sandbox reset failed: {}", e);
         return ApiResponse::Error {
-            message: "Failed to seed NPC users".to_string(),
-        };
-    }
-
-    if let Err(e) = state.sandbox_service.reinitialize_guest_pool().await {
-        tracing::error!("Failed to reinitialize guest pool: {}", e);
-        return ApiResponse::Error {
-            message: "Failed to reinitialize guest pool".to_string(),
-        };
-    }
-
-    if let Err(e) = state.sandbox_service.init_pool().await {
-        tracing::error!("Failed to reload guest pool: {}", e);
-        return ApiResponse::Error {
-            message: "Failed to reload guest pool".to_string(),
+            message: "Sandbox reset failed".to_string(),
         };
     }
 
     tracing::info!("✅ Sandbox reset complete");
 
-    let response = SandboxResetResponse {
-        old: old_lifecycle_data.map(|v| SandboxLifecycleResponse {
-            sandbox_lifecycle_id: v.id,
-            status: v.status,
-            created_by: v.created_by,
-            created_type: v.created_type,
-            torndown_by: v.torndown_by,
-            torndown_type: v.torndown_type,
-            unique_users: v.unique_users,
-            started_at: v.started_at,
-            ended_at: v.ended_at,
-        }),
-        new: SandboxLifecycleResponse {
-            sandbox_lifecycle_id: new_lifecycle.id,
-            status: new_lifecycle.status,
-            created_by: new_lifecycle.created_by,
-            created_type: new_lifecycle.created_type,
-            torndown_by: new_lifecycle.torndown_by,
-            torndown_type: new_lifecycle.torndown_type,
-            unique_users: new_lifecycle.unique_users,
-            started_at: new_lifecycle.started_at,
-            ended_at: new_lifecycle.ended_at,
-        },
-    };
-
-    ApiResponse::Success { data: response }
+    ApiResponse::Success { data: () }
 }
 
-#[instrument(skip(state, _admin))]
+#[instrument(skip(state))]
 async fn get_sandbox_lifecycles(
     State(state): State<AppState>,
-    AdminUser(_admin): AdminUser,
+    Query(params): Query<InternalLifecycleParams>,
 ) -> ApiResponse<Vec<SandboxLifecycleResponse>> {
+    if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
+        return ApiResponse::Error {
+            message: "Not available in non-sandbox environment".to_string(),
+        };
+    }
+
+    let expected_secret = std::env::var("SANDBOX_RESET_SECRET").unwrap_or("placeholder".into());
+    if params.secret != expected_secret {
+        return ApiResponse::Error {
+            message: "Invalid secret".to_string(),
+        };
+    }
+
     let lifecycles = state
         .sandbox_service
         .get_all_lifecycles(100)
@@ -187,6 +141,10 @@ async fn get_sandbox_lifecycles(
                     unique_users: l.unique_users,
                     started_at: l.started_at,
                     ended_at: l.ended_at,
+                    created_by_display_name: None,
+                    created_by_avatar_url: None,
+                    torndown_by_display_name: None,
+                    torndown_by_avatar_url: None,
                 })
                 .collect::<Vec<SandboxLifecycleResponse>>()
         });
@@ -194,12 +152,103 @@ async fn get_sandbox_lifecycles(
     ApiResponse::from_result(lifecycles)
 }
 
+#[instrument(skip(state, _admin))]
+async fn proxy_get_sandbox_lifecycles(
+    State(state): State<AppState>,
+    AdminUser(_admin): AdminUser,
+) -> Result<Json<ApiResponse<Vec<SandboxLifecycleResponse>>>, StatusCode> {
+    if state.config.server.app_env == crate::config::env::AppEnvironment::NowasterSandbox {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    let sandbox_url = std::env::var("SANDBOX_API_URL").map_err(|_| {
+        tracing::error!("SANDBOX_API_URL not configured");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let secret = std::env::var("SANDBOX_RESET_SECRET").map_err(|_| {
+        tracing::error!("SANDBOX_RESET_SECRET not configured");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(format!("{}/admin/sandbox/lifecycles", sandbox_url))
+        .query(&[("secret", &secret)])
+        .send()
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to reach sandbox API: {}", e);
+            StatusCode::BAD_GATEWAY
+        })?;
+
+    let body: ApiResponse<Vec<SandboxLifecycleResponse>> = response.json().await.map_err(|e| {
+        tracing::error!("Failed to parse sandbox lifecycles response: {}", e);
+        StatusCode::BAD_GATEWAY
+    })?;
+
+    let lifecycles = match body {
+        ApiResponse::Success { data } => data,
+        err @ ApiResponse::Error { .. } => return Ok(Json(err)),
+    };
+
+    let user_ids: Vec<String> = lifecycles
+        .iter()
+        .flat_map(|l| {
+            let mut ids = vec![];
+            if l.created_type == "user" {
+                ids.push(l.created_by.clone());
+            }
+            if l.torndown_type.as_deref() == Some("user") {
+                if let Some(id) = &l.torndown_by {
+                    ids.push(id.clone());
+                }
+            }
+            ids
+        })
+        .collect::<std::collections::HashSet<_>>()
+        .into_iter()
+        .collect();
+
+    let user_map: HashMap<String, (String, Option<String>)> = state
+        .user_service
+        .get_users_by_ids(user_ids)
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .map(|u| (u.id, (u.username, u.avatar_url)))
+        .collect();
+
+    let enriched = lifecycles
+        .into_iter()
+        .map(|mut l| {
+            if l.created_type == "user" {
+                if let Some((name, avatar)) = user_map.get(&l.created_by) {
+                    l.created_by_display_name = Some(name.clone());
+                    l.created_by_avatar_url = avatar.clone();
+                }
+            }
+            if l.torndown_type.as_deref() == Some("user") {
+                if let Some(id) = l.torndown_by.clone() {
+                    if let Some((name, avatar)) = user_map.get(&id) {
+                        l.torndown_by_display_name = Some(name.clone());
+                        l.torndown_by_avatar_url = avatar.clone();
+                    }
+                }
+            }
+            l
+        })
+        .collect();
+
+    Ok(Json(ApiResponse::Success { data: enriched }))
+}
+
 #[instrument(skip(state))]
 async fn proxy_reset_sandbox_handler(
     State(state): State<AppState>,
     AdminUser(_admin): AdminUser,
     Json(req): Json<ProxyResetRequest>,
-) -> Result<Json<ApiResponse<SandboxResetResponse>>, StatusCode> {
+) -> Result<Json<ApiResponse<()>>, StatusCode> {
     if state.config.server.app_env == crate::config::env::AppEnvironment::NowasterSandbox {
         return Err(StatusCode::FORBIDDEN);
     }
@@ -229,43 +278,10 @@ async fn proxy_reset_sandbox_handler(
             StatusCode::BAD_GATEWAY
         })?;
 
-    let body: ApiResponse<SandboxResetResponse> = response.json().await.map_err(|e| {
+    let body: ApiResponse<()> = response.json().await.map_err(|e| {
         tracing::error!("Failed to parse sandbox reset response: {}", e);
         StatusCode::BAD_GATEWAY
     })?;
-
-    if let ApiResponse::Success { data } = &body {
-        if let Some(ref old) = data.old {
-            let _ = state
-                .sandbox_service
-                .upsert_lifecycle(
-                    old.sandbox_lifecycle_id,
-                    "recycled",
-                    &old.created_by,
-                    &old.created_type,
-                    Some(req.triggered_by.as_str()),
-                    Some(req.triggered_type.as_str()),
-                    old.unique_users,
-                    old.started_at,
-                    Some(data.new.started_at),
-                )
-                .await;
-        }
-        let _ = state
-            .sandbox_service
-            .upsert_lifecycle(
-                data.new.sandbox_lifecycle_id,
-                &data.new.status,
-                &data.new.created_by,
-                &data.new.created_type,
-                data.new.torndown_by.as_deref(),
-                data.new.torndown_type.as_deref(),
-                data.new.unique_users,
-                data.new.started_at,
-                data.new.ended_at,
-            )
-            .await;
-    }
 
     Ok(Json(body))
 }

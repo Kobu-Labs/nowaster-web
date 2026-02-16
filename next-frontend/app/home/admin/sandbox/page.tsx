@@ -60,10 +60,8 @@ const SandboxPage: React.FC = () => {
     onError: (error: Error) => {
       setResetStatus(`Reset failed: ${error.message}`);
     },
-    onSuccess: async (data) => {
-      setResetStatus(
-        `Reset successful! Old lifecycle: ${data.old?.sandboxLifecycleId ?? "none"}, New lifecycle: ${data.new.sandboxLifecycleId}`,
-      );
+    onSuccess: async () => {
+      setResetStatus("Reset successful!");
       await queryClient.invalidateQueries({
         queryKey: ["admin", "sandbox", "lifecycles"],
       });
@@ -122,18 +120,24 @@ const SandboxPage: React.FC = () => {
     return minutes > 0 ? `${wholeHours}h ${minutes}m` : `${wholeHours}h`;
   };
 
-  const getTriggerDisplay = (by: string, type: string) => {
+  const getTriggerDisplay = (
+    by: string,
+    type: string,
+    displayName?: null | string,
+    avatarUrl?: null | string,
+  ) => {
     if (type === "user") {
+      const label = displayName ?? by;
       return (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={undefined} />
+            <AvatarImage src={avatarUrl ?? undefined} />
             <AvatarFallback className="text-xs">
-              {by.slice(0, 2).toUpperCase()}
+              {label.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{by}</div>
+            <div className="font-medium">{label}</div>
             <div className="text-xs text-muted-foreground">user</div>
           </div>
         </div>
@@ -269,6 +273,8 @@ const SandboxPage: React.FC = () => {
                                   {getTriggerDisplay(
                                     lifecycle.createdBy,
                                     lifecycle.createdType,
+                                    lifecycle.createdByDisplayName,
+                                    lifecycle.createdByAvatarUrl,
                                   )}
                                 </TableCell>
                                 <TableCell className="text-sm">
@@ -276,6 +282,8 @@ const SandboxPage: React.FC = () => {
                                     ? getTriggerDisplay(
                                         lifecycle.torndownBy,
                                         lifecycle.torndownType ?? "—",
+                                        lifecycle.torndownByDisplayName,
+                                        lifecycle.torndownByAvatarUrl,
                                       )
                                     : "—"}
                                 </TableCell>

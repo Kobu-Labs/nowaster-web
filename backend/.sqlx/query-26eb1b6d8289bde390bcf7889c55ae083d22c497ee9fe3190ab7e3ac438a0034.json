@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            UPDATE sandbox_lifecycle\n            SET torndown_by = $2,\n                torndown_type = $3,\n                status = 'recycled',\n                ended_at = NOW()\n            WHERE id = $1\n            RETURNING id, status, created_by, created_type, torndown_by, torndown_type,\n                   unique_users,  started_at, ended_at\n            ",
+  "query": "\n            SELECT id, status, created_by, created_type, torndown_by, torndown_type,\n                   unique_users, started_at, ended_at\n            FROM sandbox_lifecycle\n            WHERE status IN ('bare', 'active')\n            ORDER BY started_at DESC\n            LIMIT 1\n            ",
   "describe": {
     "columns": [
       {
@@ -50,11 +50,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid",
-        "Text",
-        "Text"
-      ]
+      "Left": []
     },
     "nullable": [
       false,
@@ -68,5 +64,5 @@
       true
     ]
   },
-  "hash": "138235f735a5c9e36f5ce2e06b7ba0a4ddc9ec07c4a741ea9d6308af4a625bc7"
+  "hash": "26eb1b6d8289bde390bcf7889c55ae083d22c497ee9fe3190ab7e3ac438a0034"
 }

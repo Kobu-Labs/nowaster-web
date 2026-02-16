@@ -25,7 +25,7 @@ impl SandboxLifecycleRepository {
         created_type: &str,
     ) -> Result<SandboxLifecycle, sqlx::Error> {
         let status: String = SandboxStatus::Bare.into();
-        let record = sqlx::query_as!(
+        sqlx::query_as!(
             SandboxLifecycle,
             r#"
             INSERT INTO sandbox_lifecycle (created_by, created_type, status)
@@ -38,108 +38,71 @@ impl SandboxLifecycleRepository {
             status
         )
         .fetch_one(self.db_conn.get_pool())
-        .await?;
-
-        Ok(record)
+        .await
     }
 
     pub async fn get_active(&self) -> Result<Option<SandboxLifecycle>, sqlx::Error> {
-        let status: String = SandboxStatus::Active.into();
-        let record = sqlx::query_as!(
-            SandboxLifecycle,
-            r#"
-            SELECT id, status, created_by, created_type, torndown_by, torndown_type,
-                   unique_users,  started_at, ended_at
-            FROM sandbox_lifecycle
-            WHERE status = $1
-            ORDER BY started_at DESC
-            LIMIT 1
-            "#,
-            status
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
-
-        Ok(record)
-    }
-
-    pub async fn increment_unique_users(&self, id: Uuid) -> Result<(), sqlx::Error> {
-        sqlx::query!(
-            r#"
-            UPDATE sandbox_lifecycle
-            SET unique_users = unique_users + 1
-            WHERE id = $1
-            "#,
-            id
-        )
-        .execute(self.db_conn.get_pool())
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn teardown(
-        &self,
-        id: Uuid,
-        torndown_by: &str,
-        torndown_type: &str,
-    ) -> Result<SandboxLifecycle, sqlx::Error> {
-        let result = sqlx::query_as!(
-            SandboxLifecycle,
-            r#"
-            UPDATE sandbox_lifecycle
-            SET torndown_by = $2,
-                torndown_type = $3,
-                status = 'recycled',
-                ended_at = NOW()
-            WHERE id = $1
-            RETURNING id, status, created_by, created_type, torndown_by, torndown_type,
-                   unique_users,  started_at, ended_at
-            "#,
-            id,
-            torndown_by,
-            torndown_type,
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
-
-        Ok(result)
-    }
-
-    pub async fn get_all(&self, limit: i64) -> Result<Vec<SandboxLifecycle>, sqlx::Error> {
-        let records = sqlx::query_as!(
+        sqlx::query_as!(
             SandboxLifecycle,
             r#"
             SELECT id, status, created_by, created_type, torndown_by, torndown_type,
                    unique_users, started_at, ended_at
             FROM sandbox_lifecycle
+            WHERE status IN ('bare', 'active')
             ORDER BY started_at DESC
-            LIMIT $1
-            "#,
-            limit
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
-
-        Ok(records)
-    }
-
-    pub async fn calculate_total_session_hours(&self) -> Result<Option<f64>, sqlx::Error> {
-        let result: Option<f64> = sqlx::query_scalar(
-            r#"
-            SELECT SUM(EXTRACT(EPOCH FROM (end_time - start_time)) / 3600)
-            FROM session
-            WHERE user_id LIKE 'guest_%'
-              AND end_time IS NOT NULL
+            LIMIT 1
             "#,
         )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
-
-        Ok(result)
+        .fetch_optional(self.db_conn.get_pool())
+        .await
     }
 
-    pub async fn reset_sandbox(&self) -> Result<(), sqlx::Error> {
+    pub async fn activate(&self, id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE sandbox_lifecycle SET status = 'active' WHERE id = $1",
+            id,
+        )
+        .execute(self.db_conn.get_pool())
+        .await?;
+        Ok(())
+    }
+
+    pub async fn mark_failed(&self, id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE sandbox_lifecycle SET status = 'failed' WHERE id = $1",
+            id,
+        )
+        .execute(self.db_conn.get_pool())
+        .await?;
+        Ok(())
+    }
+
+    pub async fn teardown_and_reset(
+        &self,
+        current_id: Option<Uuid>,
+        torndown_by: &str,
+        torndown_type: &str,
+    ) -> Result<(), sqlx::Error> {
+        let mut tx = self.db_conn.get_pool().begin().await?;
+
+        if let Some(id) = current_id {
+            sqlx::query!(
+                r#"
+                UPDATE sandbox_lifecycle
+                SET torndown_by = $2,
+                    torndown_type = $3,
+                    status = 'recycled',
+                    ended_at = NOW()
+                WHERE id = $1
+                "#,
+                id,
+                torndown_by,
+                torndown_type,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+
         sqlx::query!(
             r#"
             DO $$
@@ -151,6 +114,7 @@ impl SandboxLifecycleRepository {
                     FROM pg_tables
                     WHERE schemaname = 'public'
                     AND tablename != '_sqlx_migrations'
+                    AND tablename != 'sandbox_lifecycle'
                 )
                 LOOP
                     EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';
@@ -158,64 +122,40 @@ impl SandboxLifecycleRepository {
             END $$;
             "#
         )
-        .execute(self.db_conn.get_pool())
+        .execute(&mut *tx)
         .await?;
 
+        tx.commit().await?;
         Ok(())
     }
 
-    pub async fn get_guest_pool_entries(&self) -> Result<Vec<(String, String)>, sqlx::Error> {
-        let rows = sqlx::query!(
-            r#"SELECT id, displayname FROM "user" WHERE id LIKE 'guest_%'"#
+    pub async fn increment_unique_users(&self, id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE sandbox_lifecycle SET unique_users = unique_users + 1 WHERE id = $1",
+            id
+        )
+        .execute(self.db_conn.get_pool())
+        .await?;
+        Ok(())
+    }
+
+    pub async fn get_all(&self, limit: i64) -> Result<Vec<SandboxLifecycle>, sqlx::Error> {
+        sqlx::query_as!(
+            SandboxLifecycle,
+            r#"
+            SELECT id, status, created_by, created_type, torndown_by, torndown_type,
+                   unique_users, started_at, ended_at
+            FROM sandbox_lifecycle
+            ORDER BY started_at DESC
+            LIMIT $1
+            "#,
+            limit
         )
         .fetch_all(self.db_conn.get_pool())
-        .await?;
-
-        Ok(rows.into_iter().map(|r| (r.id, r.displayname)).collect())
+        .await
     }
 
-    pub async fn upsert_lifecycle(
-        &self,
-        id: Uuid,
-        status: &str,
-        created_by: &str,
-        created_type: &str,
-        torndown_by: Option<&str>,
-        torndown_type: Option<&str>,
-        unique_users: i32,
-        started_at: chrono::DateTime<chrono::Utc>,
-        ended_at: Option<chrono::DateTime<chrono::Utc>>,
-    ) -> Result<(), sqlx::Error> {
-        sqlx::query!(
-            r#"
-            INSERT INTO sandbox_lifecycle
-                (id, status, created_by, created_type, torndown_by, torndown_type,
-                 unique_users, started_at, ended_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            ON CONFLICT (id) DO UPDATE SET
-                status       = EXCLUDED.status,
-                torndown_by  = EXCLUDED.torndown_by,
-                torndown_type = EXCLUDED.torndown_type,
-                unique_users = EXCLUDED.unique_users,
-                ended_at     = EXCLUDED.ended_at
-            "#,
-            id,
-            status,
-            created_by,
-            created_type,
-            torndown_by,
-            torndown_type,
-            unique_users,
-            started_at,
-            ended_at,
-        )
-        .execute(self.db_conn.get_pool())
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn create_guest_user_pool(&self, count: usize) -> Result<Vec<String>, sqlx::Error> {
+    pub async fn create_guest_user_pool(&self, count: usize) -> Result<Vec<(String, String)>, sqlx::Error> {
         let current_count: i64 = sqlx::query_scalar!(
             r#"SELECT COUNT(*) FROM "user" WHERE id LIKE 'guest_%'"#,
         )
@@ -223,12 +163,11 @@ impl SandboxLifecycleRepository {
         .await?
         .unwrap_or(0);
 
-        let mut created_ids: Vec<String> = Vec::new();
+        let mut created: Vec<(String, String)> = Vec::new();
 
         for i in 0..count {
             let guest_id = format!("guest_{}", Uuid::new_v4().simple());
-            let display_num = current_count + i as i64 + 1;
-            let display_name = format!("Guest #{}", display_num);
+            let display_name = format!("Guest #{}", current_count + i as i64 + 1);
             let email = format!("{}@sandbox.nowaster.app", guest_id);
 
             let result = sqlx::query!(
@@ -244,11 +183,11 @@ impl SandboxLifecycleRepository {
             .await?;
 
             if result.rows_affected() > 0 {
-                created_ids.push(guest_id);
+                created.push((guest_id, display_name));
             }
         }
 
-        Ok(created_ids)
+        Ok(created)
     }
 
     pub async fn get_npc_ids(&self) -> Result<Vec<String>, sqlx::Error> {
