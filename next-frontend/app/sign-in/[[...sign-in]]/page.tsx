@@ -95,12 +95,12 @@ const SandboxSignIn: FC = () => {
   };
 
   return (
-    <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
+    <Card className="border-0 shadow-xl bg-gray-800/80 backdrop-blur-sm">
       <CardHeader className="space-y-1 pb-6">
-        <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+        <CardTitle className="text-2xl font-bold text-center text-white">
           Try the sandbox
         </CardTitle>
-        <CardDescription className="text-center text-gray-600 dark:text-gray-300">
+        <CardDescription className="text-center text-gray-300">
           No registration needed
         </CardDescription>
       </CardHeader>
@@ -152,14 +152,14 @@ export default function SignInPage() {
                   width={48}
                 />
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+              <h1 className="text-4xl font-bold tracking-tight text-white">
                 Welcome Back
               </h1>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+              <p className="mt-4 text-lg text-gray-300">
                 Track your time efficiently with
                 <span className="font-semibold text-accent"> Nowaster</span>
               </p>
-              <div className="mt-8 space-y-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="mt-8 space-y-4 text-sm text-gray-400">
                 <div className="flex items-center justify-center space-x-2">
                   <div className="h-2 w-2 rounded-full bg-green-500"></div>
                   <span>Simple time tracking</span>
@@ -182,12 +182,12 @@ export default function SignInPage() {
                 <SandboxSignIn />
               </EnvironmentGuard>
               <EnvironmentGuard reject={["nowaster-sandbox"]}>
-                <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
+                <Card className="border-0 shadow-xl bg-gray-800/80 backdrop-blur-sm">
                   <CardHeader className="space-y-1 pb-6">
-                    <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+                    <CardTitle className="text-2xl font-bold text-center text-white">
                       Sign in to your account
                     </CardTitle>
-                    <CardDescription className="text-center text-gray-600 dark:text-gray-300">
+                    <CardDescription className="text-center text-gray-300">
                       Choose your preferred sign-in method
                     </CardDescription>
                   </CardHeader>
@@ -195,7 +195,7 @@ export default function SignInPage() {
                     <div className="grid gap-3">
                       {shouldDisplayProvider("github") && (
                         <Button
-                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-600"
                           onClick={() => handleOAuthLogin("github")}
                           type="button"
                           variant="outline"
@@ -207,7 +207,7 @@ export default function SignInPage() {
 
                       {shouldDisplayProvider("discord") && (
                         <Button
-                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-600"
                           onClick={() => handleOAuthLogin("discord")}
                           type="button"
                           variant="outline"
@@ -219,7 +219,7 @@ export default function SignInPage() {
 
                       {shouldDisplayProvider("google") && (
                         <Button
-                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-600"
                           onClick={() => handleOAuthLogin("google")}
                           type="button"
                           variant="outline"
@@ -232,10 +232,10 @@ export default function SignInPage() {
                   </CardContent>
                   <CardFooter className="pt-6">
                     <div className="w-full text-center">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-400">
                         Don&apos;t have an account?
                         <Link
-                          className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 ml-1"
+                          className="font-medium text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1"
                           href="/"
                         >
                           Sign up for free

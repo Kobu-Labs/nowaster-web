@@ -52,7 +52,7 @@ export const TemplateDashboard: FC = () => {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <Card className="border-dashed border-2 border-pink-200/30 bg-linear-to-br from-pink-50/30 via-purple-50/20 to-pink-50/10 dark:from-pink-950/20 dark:via-purple-950/10 dark:to-pink-950/5">
+          <Card className="border-dashed border-2 border-pink-800/30 bg-linear-to-br from-pink-950/20 via-purple-950/10 to-pink-950/5">
             <CardContent className="flex flex-col items-center justify-center py-16 px-6">
               <div className="relative mb-8">
                 <div className="absolute inset-0 bg-linear-to-r from-pink-500/20 to-purple-500/20 rounded-full blur-xl animate-pulse" />
@@ -76,7 +76,7 @@ export const TemplateDashboard: FC = () => {
           </Card>
 
           <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <Card className="text-center border-pink-100/50 bg-linear-to-br from-pink-50/50 to-purple-50/30 dark:border-pink-900/20 dark:from-pink-950/30 dark:to-purple-950/20">
+            <Card className="text-center border-pink-900/20 bg-linear-to-br from-pink-950/30 to-purple-950/20">
               <CardContent className="pt-6 pb-8">
                 <div className="w-12 h-12 bg-linear-to-br from-pink-500/10 to-purple-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-pink-500" />
@@ -89,7 +89,7 @@ export const TemplateDashboard: FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center border-pink-100/50 bg-linear-to-br from-purple-50/50 to-pink-50/30 dark:border-purple-900/20 dark:from-purple-950/30 dark:to-pink-950/20">
+            <Card className="text-center border-purple-900/20 bg-linear-to-br from-purple-950/30 to-pink-950/20">
               <CardContent className="pt-6 pb-8">
                 <div className="w-12 h-12 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Calendar className="w-6 h-6 text-purple-500" />
@@ -102,7 +102,7 @@ export const TemplateDashboard: FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center border-purple-100/50 bg-linear-to-br from-pink-50/30 to-purple-50/50 dark:border-pink-900/20 dark:from-pink-950/20 dark:to-purple-950/30">
+            <Card className="text-center border-pink-900/20 bg-linear-to-br from-pink-950/20 to-purple-950/30">
               <CardContent className="pt-6 pb-8">
                 <div className="w-12 h-12 bg-linear-to-br from-pink-500/10 to-purple-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Plus className="w-6 h-6 text-purple-500" />

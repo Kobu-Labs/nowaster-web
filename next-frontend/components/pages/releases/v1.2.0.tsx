@@ -102,7 +102,7 @@ export const Release_v1_2_0: FC = () => {
               </div>
 
               <div className="mb-4">
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
                     className="h-2 rounded-full transition-all duration-300"
                     style={{ backgroundColor: "#3b82f6", width: "50%" }}
