@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Query, State},
+    extract::State,
     http::StatusCode,
     routing::{get, post},
     Json, Router,
@@ -13,7 +13,7 @@ use tracing::instrument;
 use crate::router::{admin::AdminUser, response::ApiResponse, root::AppState};
 
 #[derive(Debug, Deserialize)]
-struct InternalLifecycleParams {
+struct GetLifecyclesRequest {
     secret: String,
 }
 
@@ -59,7 +59,7 @@ struct SandboxLifecycleResponse {
 
 pub fn admin_sandbox_router() -> Router<AppState> {
     Router::new()
-        .route("/lifecycles", get(get_sandbox_lifecycles))
+        .route("/lifecycles", post(get_sandbox_lifecycles))
         .route("/proxy-lifecycles", get(proxy_get_sandbox_lifecycles))
         .route("/reset", post(reset_sandbox_handler))
         .route("/proxy-reset", post(proxy_reset_sandbox_handler))
@@ -105,7 +105,7 @@ async fn reset_sandbox_handler(
 #[instrument(skip(state))]
 async fn get_sandbox_lifecycles(
     State(state): State<AppState>,
-    Query(params): Query<InternalLifecycleParams>,
+    Json(req): Json<GetLifecyclesRequest>,
 ) -> ApiResponse<Vec<SandboxLifecycleResponse>> {
     if state.config.server.app_env != crate::config::env::AppEnvironment::NowasterSandbox {
         return ApiResponse::Error {
@@ -114,7 +114,7 @@ async fn get_sandbox_lifecycles(
     }
 
     let expected_secret = std::env::var("SANDBOX_RESET_SECRET").unwrap_or("placeholder".into());
-    if params.secret != expected_secret {
+    if req.secret != expected_secret {
         return ApiResponse::Error {
             message: "Invalid secret".to_string(),
         };
@@ -173,8 +173,8 @@ async fn proxy_get_sandbox_lifecycles(
 
     let client = reqwest::Client::new();
     let response = client
-        .get(format!("{}/admin/sandbox/lifecycles", sandbox_url))
-        .query(&[("secret", &secret)])
+        .post(format!("{}/admin/sandbox/lifecycles", sandbox_url))
+        .json(&serde_json::json!({ "secret": secret }))
         .send()
         .await
         .map_err(|e| {
