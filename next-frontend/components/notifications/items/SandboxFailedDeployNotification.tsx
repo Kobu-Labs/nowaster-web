@@ -19,7 +19,7 @@ export const SandboxFailedDeployNotificationItem: FC<
           <p className="font-semibold text-sm text-destructive">
             Sandbox deploy failed
           </p>
-          <p className="text-xs text-muted-foreground mt-1 font-mono truncate">
+          <p className="text-xs text-muted-foreground mt-1 truncate">
             {props.data.sandbox_lifecycle_id}
           </p>
           <p className="text-xs mt-2">
