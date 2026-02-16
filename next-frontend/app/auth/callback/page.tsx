@@ -28,27 +28,24 @@ function AuthCallbackContent() {
   const processedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent processing tokens multiple times
     if (processedRef.current) {
       return;
     }
 
     const accessToken = searchParams.get("access_token");
-    const refreshToken = searchParams.get("refresh_token");
     const isFirstTime = searchParams.get("firstTime") === "true";
 
-    if (accessToken && refreshToken) {
-      processedRef.current = true;
+    if (!accessToken) {
+      return;
+    }
 
-      setTokens(accessToken, refreshToken);
+    processedRef.current = true;
+    setTokens(accessToken);
 
-      if (isFirstTime) {
-        router.push("/home?firstTime=true");
-      } else {
-        router.push("/home");
-      }
+    if (isFirstTime) {
+      router.push("/home?firstTime=true");
     } else {
-      router.push("/sign-in");
+      router.push("/home");
     }
   }, [searchParams, router, setTokens]);
 

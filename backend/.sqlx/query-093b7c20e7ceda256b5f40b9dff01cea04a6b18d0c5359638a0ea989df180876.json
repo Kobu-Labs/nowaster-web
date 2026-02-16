@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE sandbox_lifecycle\n                SET torndown_by = $2,\n                    torndown_type = $3,\n                    status = 'recycled',\n                    ended_at = NOW()\n                WHERE id = $1\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "093b7c20e7ceda256b5f40b9dff01cea04a6b18d0c5359638a0ea989df180876"
+}

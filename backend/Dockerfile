@@ -1,5 +1,5 @@
 # Use Rust official image
-FROM rust:latest as builder
+FROM rust:1.93 as builder
 
 WORKDIR /app
 
@@ -23,6 +23,8 @@ ENV DATABASE_URL=${DATABASE_URL}
 
 # Final runtime image
 FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

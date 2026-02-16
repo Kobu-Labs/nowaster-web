@@ -10,10 +10,16 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 import { env } from "@/env";
+import { useAuth } from "@/components/hooks/useAuth";
+import { getCurrentUser, nextSandboxResetTime } from "@/lib/auth";
+import Cookies from "js-cookie";
 import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { type FC, useEffect, useState } from "react";
+import { EnvironmentGuard } from "@/components/auth/EnvironmentGuard";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -49,6 +55,82 @@ const shouldDisplayProvider = (provider: OAuthProvider) => {
   }
 };
 
+const SANDBOX_LAST_USER_KEY = "sandbox_last_username";
+
+const SandboxSignIn: FC = () => {
+  const router = useRouter();
+  const { setTokens } = useAuth();
+  const [previousUsername, setPreviousUsername] = useState<null | string>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setPreviousUsername(Cookies.get(SANDBOX_LAST_USER_KEY) ?? null);
+  }, []);
+
+  const loginAsGuest = async (forceNew: boolean) => {
+    setIsLoading(true);
+    try {
+      const url = forceNew
+        ? `${env.NEXT_PUBLIC_API_URL}/auth/guest?force_new=true`
+        : `${env.NEXT_PUBLIC_API_URL}/auth/guest`;
+      const res = await fetch(url, { credentials: "include", method: "POST" });
+      if (res.ok) {
+        const data = (await res.json()) as { data?: { access_token: string; }; };
+        if (data.data) {
+          setTokens(data.data.access_token);
+          const user = getCurrentUser();
+          if (user) {
+            Cookies.set(SANDBOX_LAST_USER_KEY, user.username, {
+              expires: nextSandboxResetTime(),
+              path: "/",
+              sameSite: "lax",
+            });
+          }
+        }
+      }
+    } catch {
+      // proceed regardless
+    }
+    router.push("/home");
+  };
+
+  return (
+    <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
+      <CardHeader className="space-y-1 pb-6">
+        <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Try the sandbox
+        </CardTitle>
+        <CardDescription className="text-center text-gray-600 dark:text-gray-300">
+          No registration needed
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {previousUsername && (
+          <Button
+            className="w-full"
+            disabled={isLoading}
+            onClick={() => loginAsGuest(false)}
+            type="button"
+          >
+            Continue as
+            {" "}
+            {previousUsername}
+          </Button>
+        )}
+        <Button
+          className="w-full"
+          disabled={isLoading}
+          onClick={() => loginAsGuest(true)}
+          type="button"
+          variant={previousUsername ? "outline" : "default"}
+        >
+          Try a new guest account
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function SignInPage() {
   const handleOAuthLogin = (provider: OAuthProvider) => {
     const authUrl = `${env.NEXT_PUBLIC_API_URL}/auth/oauth/${provider}`;
@@ -58,7 +140,6 @@ export default function SignInPage() {
   return (
     <div className="min-h-screen">
       <div className="flex flex-col md:flex-row min-h-screen items-center justify-center">
-        {/* Left side - Branding */}
         <div className="flex flex-col justify-center lg:px-8 xl:px-12 items-center">
           <div className="w-full max-w-sm">
             <div className="text-center">
@@ -97,68 +178,73 @@ export default function SignInPage() {
 
           <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
             <div className="mx-auto w-full max-w-sm lg:w-96">
-              <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
-                <CardHeader className="space-y-1 pb-6">
-                  <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-                    Sign in to your account
-                  </CardTitle>
-                  <CardDescription className="text-center text-gray-600 dark:text-gray-300">
-                    Choose your preferred sign-in method
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-3">
-                    {shouldDisplayProvider("github") && (
-                      <Button
-                        className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
-                        onClick={() => handleOAuthLogin("github")}
-                        type="button"
-                        variant="outline"
-                      >
-                        <Github className="mr-2 size-4" />
-                        Continue with GitHub
-                      </Button>
-                    )}
+              <EnvironmentGuard allow={["nowaster-sandbox"]}>
+                <SandboxSignIn />
+              </EnvironmentGuard>
+              <EnvironmentGuard reject={["nowaster-sandbox"]}>
+                <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
+                  <CardHeader className="space-y-1 pb-6">
+                    <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+                      Sign in to your account
+                    </CardTitle>
+                    <CardDescription className="text-center text-gray-600 dark:text-gray-300">
+                      Choose your preferred sign-in method
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-3">
+                      {shouldDisplayProvider("github") && (
+                        <Button
+                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                          onClick={() => handleOAuthLogin("github")}
+                          type="button"
+                          variant="outline"
+                        >
+                          <Github className="mr-2 size-4" />
+                          Continue with GitHub
+                        </Button>
+                      )}
 
-                    {shouldDisplayProvider("discord") && (
-                      <Button
-                        className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
-                        onClick={() => handleOAuthLogin("discord")}
-                        type="button"
-                        variant="outline"
-                      >
-                        <DiscordLogoIcon className="mr-2 size-4" />
-                        Continue with Discord
-                      </Button>
-                    )}
+                      {shouldDisplayProvider("discord") && (
+                        <Button
+                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                          onClick={() => handleOAuthLogin("discord")}
+                          type="button"
+                          variant="outline"
+                        >
+                          <DiscordLogoIcon className="mr-2 size-4" />
+                          Continue with Discord
+                        </Button>
+                      )}
 
-                    {shouldDisplayProvider("google") && (
-                      <Button
-                        className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
-                        onClick={() => handleOAuthLogin("google")}
-                        type="button"
-                        variant="outline"
-                      >
-                        <GoogleIcon className="mr-2 size-4" />
-                        Continue with Google
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-6">
-                  <div className="w-full text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Don&apos;t have an account?
-                      <Link
-                        className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 ml-1"
-                        href="/"
-                      >
-                        Sign up for free
-                      </Link>
-                    </p>
-                  </div>
-                </CardFooter>
-              </Card>
+                      {shouldDisplayProvider("google") && (
+                        <Button
+                          className="w-full justify-center py-3 text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-300 dark:border-gray-600"
+                          onClick={() => handleOAuthLogin("google")}
+                          type="button"
+                          variant="outline"
+                        >
+                          <GoogleIcon className="mr-2 size-4" />
+                          Continue with Google
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="pt-6">
+                    <div className="w-full text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Don&apos;t have an account?
+                        <Link
+                          className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 ml-1"
+                          href="/"
+                        >
+                          Sign up for free
+                        </Link>
+                      </p>
+                    </div>
+                  </CardFooter>
+                </Card>
+              </EnvironmentGuard>
             </div>
           </div>
         </div>

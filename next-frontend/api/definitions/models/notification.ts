@@ -13,6 +13,9 @@ export const NotificationTypeSchema = z.enum([
   "friend:request_accepted",
   "session:reaction_added",
   "system:new_release",
+  "admin:sandbox:failed-deploy",
+  "admin:backup:completed",
+  "admin:backup:failed",
 ]);
 
 export const FriendRequestDataSchema = z.object({
@@ -46,6 +49,24 @@ export const SystemNotificationDataSchema = z.object({
   system_name: z.string(),
 });
 
+export const SandboxFailedDeployDataSchema = z.object({
+  sandbox_lifecycle_id: z.string().uuid(),
+});
+
+export const BackupCompletedDataSchema = z.object({
+  backup_id: z.number(),
+  backup_size_bytes: z.number().nullable(),
+  duration_seconds: z.number().nullable(),
+  started_at: z.coerce.date().nullable(),
+});
+
+export const BackupFailedDataSchema = z.object({
+  backup_id: z.number(),
+  duration_seconds: z.number().nullable(),
+  error_message: z.string().nullable(),
+  started_at: z.coerce.date().nullable(),
+});
+
 export const NotificationSourceSchema = z.discriminatedUnion("source_type", [
   z.object({
     source_data: UserSchema,
@@ -76,6 +97,18 @@ export const NotificationDataSchema = z.discriminatedUnion(
       data: SystemReleaseDataSchema,
       notification_type: z.literal("system:new_release"),
     }),
+    z.object({
+      data: SandboxFailedDeployDataSchema,
+      notification_type: z.literal("admin:sandbox:failed-deploy"),
+    }),
+    z.object({
+      data: BackupCompletedDataSchema,
+      notification_type: z.literal("admin:backup:completed"),
+    }),
+    z.object({
+      data: BackupFailedDataSchema,
+      notification_type: z.literal("admin:backup:failed"),
+    }),
   ],
 );
 
@@ -89,19 +122,24 @@ export const NotificationSchema = z
   .and(NotificationSourceSchema)
   .and(NotificationDataSchema);
 
+export type BackupCompletedData = z.infer<typeof BackupCompletedDataSchema>;
+export type BackupFailedData = z.infer<typeof BackupFailedDataSchema>;
 export type FriendRequestAcceptedData = z.infer<
   typeof FriendRequestAcceptedDataSchema
 >;
 export type NewFriendRequestData = z.infer<typeof FriendRequestDataSchema>;
 export type NewReleaseData = z.infer<typeof SystemReleaseDataSchema>;
+
 export type Notification = z.infer<typeof NotificationSchema>;
 export type NotificationData = z.infer<typeof NotificationDataSchema>;
-
 export type NotificationSource = z.infer<typeof NotificationSourceSchema>;
 export type NotificationSourceType = z.infer<
   typeof NotificationSourceTypeSchema
 >;
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
+export type SandboxFailedDeployData = z.infer<
+  typeof SandboxFailedDeployDataSchema
+>;
 export type SessionReactionAddedData = z.infer<
   typeof SessionReactionDataSchema
 >;

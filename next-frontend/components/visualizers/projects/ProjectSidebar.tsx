@@ -234,7 +234,7 @@ const TasksSidebarContent: FC<{ project: ProjectWithTaskCount; }> = ({
               <Link
                 href={`/home/projects/${project.id}/tasks/${task.id}`}
                 key={task.name}
-                onMouseEnter={() => prefetchTask(task.id)}
+                onMouseEnter={() => { void prefetchTask(task.id); }}
               >
                 <SidebarMenuItem>
                   <Button

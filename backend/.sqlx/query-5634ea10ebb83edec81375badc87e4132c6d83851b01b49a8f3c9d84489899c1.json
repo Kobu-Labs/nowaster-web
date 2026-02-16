@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, status, created_by, created_type, torndown_by, torndown_type,\n                   unique_users, started_at, ended_at\n            FROM sandbox_lifecycle\n            ORDER BY started_at DESC\n            LIMIT $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_by",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "torndown_by",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "torndown_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "unique_users",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "started_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "ended_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "5634ea10ebb83edec81375badc87e4132c6d83851b01b49a8f3c9d84489899c1"
+}

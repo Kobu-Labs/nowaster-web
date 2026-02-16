@@ -40,7 +40,7 @@ ipnetwork = "0.20"
 envy = "0.4.2"
 
 # S3 for backup downloads
-aws-config = "1.1"
-aws-sdk-s3 = "1.10"
+aws-config = { version = "1.1.7",  features = ["behavior-version-latest"] }
+aws-sdk-s3 = "1.122.0"
 
 

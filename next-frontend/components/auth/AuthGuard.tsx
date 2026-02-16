@@ -1,6 +1,6 @@
 import { useAuth } from "@/components/hooks/useAuth";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { hasSession } from "@/lib/auth";
+import { clearAuthCookies, getCurrentUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { refreshTokens } from "@/api/baseApi";
@@ -11,17 +11,18 @@ export function AuthGuard({ children }: { children: React.ReactNode; }) {
 
   useEffect(() => {
     const refreshTokenIfNeeded = async () => {
-      if (isLoaded && !user && hasSession()) {
+      if (isLoaded && !user && getCurrentUser()) {
         try {
-          const tokens = await refreshTokens();
-          setTokens(tokens.accessToken, tokens.refreshToken);
+          const newToken = await refreshTokens();
+          setTokens(newToken);
         } catch {
-          router.push("/");
+          clearAuthCookies();
+          router.push("/sign-in");
         }
       }
     };
 
-    if (isLoaded && !user && !hasSession()) {
+    if (isLoaded && !user && !getCurrentUser()) {
       router.push("/");
     } else {
       void refreshTokenIfNeeded();
