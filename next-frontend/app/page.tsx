@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import landing1 from "@/public/nowaster-landing-1-dark.jpg";
+import landing2 from "@/public/nowaster-landing-2-dark.png";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -73,10 +75,10 @@ export default async function LandingPage() {
             <div className="flex items-center justify-center">
               <Image
                 alt="Time tracking dashboard"
-                height={990}
+                placeholder="blur"
                 priority
-                src="/nowaster-landing-1-dark.jpg"
-                width={1320}
+                sizes="(max-width: 1024px) 100vw, 800px"
+                src={landing1}
               />
             </div>
           </div>
@@ -102,10 +104,9 @@ export default async function LandingPage() {
               <div className="flex items-center justify-center">
                 <Image
                   alt="Time tracking dashboard"
-                  height={990}
-                  priority
-                  src="/nowaster-landing-2-dark.png"
-                  width={1320}
+                  placeholder="blur"
+                  sizes="(max-width: 1024px) 100vw, 800px"
+                  src={landing2}
                 />
               </div>
               <div className="flex flex-col justify-center space-y-4 md:m-10">
