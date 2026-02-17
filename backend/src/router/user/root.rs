@@ -25,7 +25,7 @@ async fn update_user_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateUserDto>,
 ) -> ApiResponse<ReadUserDto> {
-    let res = state.user_service.update_user(payload, actor).await;
+    let res = state.user_service.update_user(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -34,7 +34,7 @@ async fn get_current_user_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<ReadUserDto> {
-    let res = match state.user_service.get_user_by_id(actor.user_id).await {
+    let res = match state.user_service.get_user_by_id(&actor.user_id).await {
         Ok(Some(user)) => Ok(user),
         Ok(None) => Err(UserError::UserNotFound),
         Err(e) => Err(e),

@@ -22,7 +22,7 @@ pub struct FeedReactionService {
 
 impl FeedReactionService {
     #[instrument(err, skip(self))]
-    pub async fn add_reaction(&self, dto: CreateFeedReactionDto, actor: Actor) -> Result<()> {
+    pub async fn add_reaction(&self, dto: CreateFeedReactionDto, actor: &Actor) -> Result<()> {
         let reaction = self
             .feed_repository
             .create_reaction(dto.clone(), actor)
@@ -70,7 +70,7 @@ impl FeedReactionService {
         &self,
         feed_event_id: Uuid,
         emoji: String,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         self.feed_repository
             .remove_reaction(feed_event_id, emoji, actor)

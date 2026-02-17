@@ -29,7 +29,7 @@ async fn get_stopwatch_session_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<Option<ReadStopwatchSessionDto>> {
-    let res = state.stopwatch_service.read_stopwatch_session(actor).await;
+    let res = state.stopwatch_service.read_stopwatch_session(&actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -41,7 +41,7 @@ async fn create_handler(
 ) -> ApiResponse<ReadStopwatchSessionDto> {
     let res = state
         .stopwatch_service
-        .create_stopwatch_session(payload, actor)
+        .create_stopwatch_session(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -54,7 +54,7 @@ async fn delete_handler(
 ) -> ApiResponse<()> {
     let res = state
         .stopwatch_service
-        .delete_stopwatch_session(session_id, actor)
+        .delete_stopwatch_session(session_id, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -67,7 +67,7 @@ async fn update_handler(
 ) -> ApiResponse<ReadStopwatchSessionDto> {
     let res = state
         .stopwatch_service
-        .update_stopwatch_session(payload, actor)
+        .update_stopwatch_session(payload, &actor)
         .await;
 
     ApiResponse::from_result(res)

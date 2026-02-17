@@ -59,7 +59,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
+    pub async fn create(&self, dto: CreateTagDto, actor: &Actor) -> Result<TagDetails> {
         let row = sqlx::query_as!(
             ReadTagRow,
             r#"
@@ -133,7 +133,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
-    pub async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_tag(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM tag
@@ -149,7 +149,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
-    pub async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
+    pub async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<TagDetails> {
         let result = self
             .filter_tags(
                 TagFilterDto {
@@ -167,7 +167,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>> {
+    pub async fn filter_tags(&self, filter: TagFilterDto, actor: &Actor) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 SELECT 
@@ -194,7 +194,7 @@ impl TagRepository {
                 WHERE tag.created_by = 
             "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(id) = filter.id {
             query.push(" and tag.id = ").push_bind(id);
@@ -280,7 +280,7 @@ impl TagRepository {
         &self,
         id: Uuid,
         dto: UpdateTagDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<TagDetails> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -347,11 +347,11 @@ impl TagRepository {
                 .await?;
         }
 
-        self.find_by_id(id, actor.clone()).await
+        self.find_by_id(id, actor).await
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
+    pub async fn get_tag_statistics(&self, actor: &Actor) -> Result<TagStatsDto> {
         // Get total tags count
         let total_tags = sqlx::query_scalar!(
             "SELECT COUNT(DISTINCT id) FROM tag WHERE created_by = $1",

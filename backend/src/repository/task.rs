@@ -36,16 +36,16 @@ pub struct ReadTaskRow {
 }
 
 pub trait TaskRepositoryTrait {
-    async fn create(&self, dto: CreateTaskDto, actor: Actor) -> Result<Task>;
-    async fn update(&self, dto: UpdateTaskDto, actor: Actor) -> Result<Task>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Task>;
-    async fn delete_task(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn filter_tasks(&self, filter: FilterTaskDto, actor: Actor) -> Result<Vec<Task>>;
-    async fn get_task_statistics(&self, actor: Actor) -> Result<TaskStatsDto>;
+    async fn create(&self, dto: CreateTaskDto, actor: &Actor) -> Result<Task>;
+    async fn update(&self, dto: UpdateTaskDto, actor: &Actor) -> Result<Task>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Task>;
+    async fn delete_task(&self, id: Uuid, actor: &Actor) -> Result<()>;
+    async fn filter_tasks(&self, filter: FilterTaskDto, actor: &Actor) -> Result<Vec<Task>>;
+    async fn get_task_statistics(&self, actor: &Actor) -> Result<TaskStatsDto>;
     async fn get_tasks_details_by_ids(
         &self,
         task_ids: Vec<Uuid>,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadTaskDetailsDto>>;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadTaskRow) -> Task;
@@ -59,7 +59,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor, task_name = %dto.name))]
-    async fn create(&self, dto: CreateTaskDto, actor: Actor) -> Result<Task> {
+    async fn create(&self, dto: CreateTaskDto, actor: &Actor) -> Result<Task> {
         let row = sqlx::query_as!(
             ReadTaskRow,
             r#"
@@ -100,7 +100,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn filter_tasks(&self, filter: FilterTaskDto, actor: Actor) -> Result<Vec<Task>> {
+    async fn filter_tasks(&self, filter: FilterTaskDto, actor: &Actor) -> Result<Vec<Task>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
                 SELECT
@@ -116,7 +116,7 @@ impl TaskRepositoryTrait for TaskRepository {
                 WHERE task.user_id =
             ",
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(name) = filter.name {
             query.push(" AND task.name = ").push_bind(name);
@@ -145,7 +145,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(task_id = %id, actor_id = %actor))]
-    async fn delete_task(&self, id: Uuid, actor: Actor) -> Result<()> {
+    async fn delete_task(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM task
@@ -161,7 +161,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(task_id = %id, actor_id = %actor))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Task> {
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Task> {
         let result = self
             .filter_tasks(
                 FilterTaskDto {
@@ -181,7 +181,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(task_id = %dto.id, actor_id = %actor))]
-    async fn update(&self, dto: UpdateTaskDto, actor: Actor) -> Result<Task> {
+    async fn update(&self, dto: UpdateTaskDto, actor: &Actor) -> Result<Task> {
         let row = sqlx::query_as!(
             ReadTaskRow,
             r#"
@@ -216,7 +216,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_task_statistics(&self, actor: Actor) -> Result<TaskStatsDto> {
+    async fn get_task_statistics(&self, actor: &Actor) -> Result<TaskStatsDto> {
         let stats = sqlx::query_as!(
             TaskStatsDto,
             r#"
@@ -242,7 +242,7 @@ impl TaskRepositoryTrait for TaskRepository {
     async fn get_tasks_details_by_ids(
         &self,
         task_ids: Vec<Uuid>,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadTaskDetailsDto>> {
         if task_ids.is_empty() {
             return Ok(Vec::new());

@@ -31,13 +31,13 @@ impl StopwatchSessionService {
     pub async fn create_stopwatch_session(
         &self,
         dto: CreateStopwatchSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadStopwatchSessionDto> {
         let category = match dto.clone().category {
             Some(cat) => {
                 let a = self
                     .category_service
-                    .upsert_category(cat, actor.clone())
+                    .upsert_category(cat, actor)
                     .await?;
                 Some(a)
             }
@@ -58,14 +58,14 @@ impl StopwatchSessionService {
     }
 
     #[instrument(err, skip(self), fields(session_id = %session_id, actor_id = %actor))]
-    pub async fn delete_stopwatch_session(&self, session_id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_stopwatch_session(&self, session_id: Uuid, actor: &Actor) -> Result<()> {
         self.stopwatch_repo.delete_session(session_id, actor).await
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn read_stopwatch_session(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Option<ReadStopwatchSessionDto>> {
         let res = self.stopwatch_repo.read_stopwatch(actor).await?;
 
@@ -76,7 +76,7 @@ impl StopwatchSessionService {
     pub async fn update_stopwatch_session(
         &self,
         dto: UpdateStopwatchSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadStopwatchSessionDto> {
         let res = self
             .stopwatch_repo

@@ -34,7 +34,7 @@ async fn get_templates(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<Vec<ReadSesionTemplateRow>> {
-    let res = state.session_template_service.get_templates(actor).await;
+    let res = state.session_template_service.get_templates(&actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -46,7 +46,7 @@ async fn create_handler(
 ) -> ApiResponse<()> {
     let res = state
         .session_template_service
-        .create_template(payload, actor)
+        .create_template(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -59,7 +59,7 @@ async fn update_session_template(
 ) -> ApiResponse<()> {
     let res = state
         .session_template_service
-        .update_session_template(payload, actor)
+        .update_session_template(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -72,7 +72,7 @@ async fn delete_recurring_session(
 ) -> ApiResponse<()> {
     let res = state
         .session_template_service
-        .delete_recurring_session(id, actor)
+        .delete_recurring_session(id, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -85,7 +85,7 @@ async fn delete_session_template(
 ) -> ApiResponse<()> {
     let res = state
         .session_template_service
-        .delete_session_template(id, action, actor)
+        .delete_session_template(id, action, &actor)
         .await;
     ApiResponse::from_result(res)
 }

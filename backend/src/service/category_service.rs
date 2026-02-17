@@ -28,7 +28,7 @@ impl CategoryService {
     pub async fn upsert_category(
         &self,
         dto: CreateCategoryDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadCategoryDto> {
         let res = self.repo.upsert(dto, actor).await?;
         Ok(ReadCategoryDto::from(res))
@@ -44,14 +44,14 @@ impl CategoryService {
     pub async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadCategoryDto>> {
         let res = self.repo.filter_categories(filter, actor).await?;
         Ok(res.into_iter().map(ReadCategoryDto::from).collect())
     }
 
     #[instrument(err, skip(self), fields(category_id = %category_id, actor = %actor))]
-    pub async fn get_by_id(&self, category_id: Uuid, actor: Actor) -> Result<Category> {
+    pub async fn get_by_id(&self, category_id: Uuid, actor: &Actor) -> Result<Category> {
         self.repo.find_by_id(category_id, actor).await
     }
 
@@ -59,9 +59,9 @@ impl CategoryService {
     pub async fn update_category(
         &self,
         dto: UpdateCategoryDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadCategoryDto> {
-        let category = self.repo.find_by_id(dto.id, actor.clone()).await?;
+        let category = self.repo.find_by_id(dto.id, actor).await?;
         if category.created_by != actor.user_id {
             return Err(anyhow::anyhow!(
                 "You are not allowed to update this category"
@@ -74,13 +74,13 @@ impl CategoryService {
     #[instrument(err, skip(self), fields(actor = %actor))]
     pub async fn get_categories_with_session_count(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
         self.repo.get_categories_with_session_count(actor).await
     }
 
     #[instrument(err, skip(self), fields(actor = %actor))]
-    pub async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
+    pub async fn get_category_statistics(&self, actor: &Actor) -> Result<CategoryStatsDto> {
         self.repo.get_category_statistics(actor).await
     }
 }

@@ -28,7 +28,7 @@ impl TagService {
     }
 
     #[instrument(err, skip(self), fields(actor = %actor))]
-    pub async fn create_tag(&self, dto: CreateTagDto, actor: Actor) -> Result<ReadTagDetailsDto> {
+    pub async fn create_tag(&self, dto: CreateTagDto, actor: &Actor) -> Result<ReadTagDetailsDto> {
         let res = self.repo.create(dto, actor).await?;
         Ok(ReadTagDetailsDto::from(res))
     }
@@ -38,7 +38,7 @@ impl TagService {
         &self,
         tag: &TagDetails,
         category: &Category,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         if tag.created_by != actor.user_id {
             return Err(anyhow::anyhow!("Operation not allowed"));
@@ -56,7 +56,7 @@ impl TagService {
         &self,
         tag: &TagDetails,
         category: &Category,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         if tag.created_by != actor.user_id {
             return Err(anyhow::anyhow!("Operation not allowed"));
@@ -76,19 +76,19 @@ impl TagService {
     pub async fn filter_tags(
         &self,
         filter: TagFilterDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadTagDetailsDto>> {
         let res = self.repo.filter_tags(filter, actor).await?;
         Ok(res.into_iter().map(ReadTagDetailsDto::from).collect())
     }
 
     #[instrument(err, skip(self), fields(tag_id = %id, actor = %actor))]
-    pub async fn get_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
+    pub async fn get_by_id(&self, id: Uuid, actor: &Actor) -> Result<TagDetails> {
         self.repo.find_by_id(id, actor).await
     }
 
     #[instrument(err, skip(self), fields(tag_id = %id, actor = %actor))]
-    pub async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_tag(&self, id: Uuid, actor: &Actor) -> Result<()> {
         self.repo.delete_tag(id, actor).await?;
         Ok(())
     }
@@ -98,14 +98,14 @@ impl TagService {
         &self,
         id: Uuid,
         dto: UpdateTagDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadTagDetailsDto> {
         let res = self.repo.update_tag(id, dto, actor).await?;
         Ok(ReadTagDetailsDto::from(res))
     }
 
     #[instrument(err, skip(self), fields(actor = %actor))]
-    pub async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
+    pub async fn get_tag_statistics(&self, actor: &Actor) -> Result<TagStatsDto> {
         self.repo.get_tag_statistics(actor).await
     }
 }

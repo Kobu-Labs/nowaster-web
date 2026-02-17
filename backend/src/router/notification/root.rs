@@ -81,7 +81,7 @@ async fn mark_notifications_seen(
 ) -> ApiResponse<()> {
     let updated_count = state
         .notification_service
-        .mark_notifications_seen(dto, user)
+        .mark_notifications_seen(dto, &user)
         .await;
 
     ApiResponse::Success { data: () }
@@ -95,7 +95,7 @@ async fn delete_notification(
 ) -> ApiResponse<()> {
     let deleted = state
         .notification_service
-        .delete_notification(notification_id, user)
+        .delete_notification(notification_id, &user)
         .await;
 
     ApiResponse::Success { data: () }

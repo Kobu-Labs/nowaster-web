@@ -57,7 +57,7 @@ async fn get_feed_handler(
         limit: query.limit,
     };
 
-    let result = state.feed.event_service.get_feed(dto, actor).await;
+    let result = state.feed.event_service.get_feed(dto, &actor).await;
     ApiResponse::from_result(result)
 }
 
@@ -70,7 +70,7 @@ async fn add_reaction_handler(
     let result = state
         .feed
         .reaction_service
-        .add_reaction(payload, actor)
+        .add_reaction(payload, &actor)
         .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
@@ -89,7 +89,7 @@ async fn remove_reaction_handler(
     let result = state
         .feed
         .reaction_service
-        .remove_reaction(payload.feed_event_id, payload.emoji, actor)
+        .remove_reaction(payload.feed_event_id, payload.emoji, &actor)
         .await;
 
     match result {
@@ -108,7 +108,7 @@ async fn get_subscriptions_handler(
     let result = state
         .feed
         .subscription_service
-        .get_user_subscriptions(actor)
+        .get_user_subscriptions(&actor)
         .await;
     ApiResponse::from_result(result)
 }
@@ -122,7 +122,7 @@ async fn update_subscription_handler(
     let result = state
         .feed
         .subscription_service
-        .update_subscription(payload, actor)
+        .update_subscription(payload, &actor)
         .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
@@ -145,7 +145,7 @@ async fn unsubscribe_handler(
     let result = state
         .feed
         .subscription_service
-        .unsubscribe(source, actor.user_id)
+        .unsubscribe(source, &actor.user_id)
         .await;
     match result {
         Ok(_) => ApiResponse::Success { data: () },
