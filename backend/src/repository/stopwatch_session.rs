@@ -137,16 +137,13 @@ impl StopwatchSessionRepository {
         .await?;
 
         if let Some(tags) = tag_ids {
-            // TODO: insert many at once
-            for tag_id in tags {
-                sqlx::query!(
-                    r#"
-                        INSERT INTO tag_to_stopwatch_session (tag_id, session_id)
-                        VALUES ($1, $2)
-                    "#,
-                    result.id,
-                    tag_id,
+            if !tags.is_empty() {
+                sqlx::query(
+                    "INSERT INTO tag_to_stopwatch_session (session_id, tag_id)
+                     SELECT $1, tag_id FROM UNNEST($2::uuid[]) AS tag_id",
                 )
+                .bind(result.id)
+                .bind(&tags)
                 .execute(tx.as_mut())
                 .await?;
             }
