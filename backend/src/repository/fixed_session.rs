@@ -277,17 +277,13 @@ impl SessionRepositoryTrait for FixedSessionRepository {
         .fetch_one(self.db_conn.get_pool())
         .await?;
 
-        // INFO: pair tags with created session
-        for tag_id in dto.tag_ids {
-            // TODO: this should be done with either UNNEST or bulk insert
-            sqlx::query!(
-                r#"
-                    INSERT INTO tag_to_session (tag_id, session_id)
-                    VALUES ($1, $2)
-                "#,
-                tag_id,
-                result.id
+        if !dto.tag_ids.is_empty() {
+            sqlx::query(
+                "INSERT INTO tag_to_session (session_id, tag_id)
+                 SELECT $1, tag_id FROM UNNEST($2::uuid[]) AS tag_id",
             )
+            .bind(result.id)
+            .bind(&dto.tag_ids)
             .execute(self.db_conn.get_pool())
             .await?;
         }
