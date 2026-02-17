@@ -5,9 +5,9 @@ import { Button } from "@/components/shadcn/button";
 import type { FC } from "react";
 
 export const WelcomeBackButton: FC = () => {
-  const { isLoaded, user } = useAuth();
+  const { user } = useAuth();
 
-  if (!isLoaded || !user) {
+  if (!user) {
     return null;
   }
 

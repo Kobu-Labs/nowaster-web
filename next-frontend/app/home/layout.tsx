@@ -1,59 +1,46 @@
-"use client";
-
 import { Providers } from "@/app/home/providers";
+import { HomeHeader } from "@/app/home/HomeHeader";
+import { EnvironmentBanner } from "@/components/environment/EnvironmentBanner";
+import { ImpersonationBanner } from "@/components/impersonation/ImpersonationBanner";
+import { NewReleaseDialog } from "@/components/release/NewReleaseDialog";
 import { SidebarWithPreferences } from "@/components/pages/SidebarWithPreferences";
 import { UsernameSelectionDialog } from "@/components/auth/UsernameSelectionDialog";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-import { NewReleaseDialog } from "@/components/release/NewReleaseDialog";
-import { HomeHeader } from "@/app/home/HomeHeader";
-import { ImpersonationBanner } from "@/components/impersonation/ImpersonationBanner";
-import { EnvironmentBanner } from "@/components/environment/EnvironmentBanner";
 import { SidebarProvider } from "@/components/shadcn/sidebar";
+import type { User } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { Suspense } from "react";
 
 type RootLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function RootLayout({ children }: RootLayoutProps) {
-  return (
-    <Providers>
-      <Suspense fallback={null}>
-        <LayoutContent>{children}</LayoutContent>
-      </Suspense>
-    </Providers>
-  );
-}
-
-function LayoutContent({ children }: RootLayoutProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [showUsernameDialog, setShowUsernameDialog] = useState(false);
-
-  useEffect(() => {
-    const isFirstTime = searchParams.get("firstTime") === "true";
-    if (isFirstTime) {
-      setShowUsernameDialog(true);
-      // Remove the query param from URL
-      const newUrl = globalThis.location.pathname;
-      router.replace(newUrl);
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const cookieStore = await cookies();
+  const userHint = cookieStore.get("user_hint")?.value;
+  let initialUser: null | User = null;
+  if (userHint) {
+    try {
+      initialUser = JSON.parse(userHint) as User;
+    } catch {
+      // invalid cookie value — treat as unauthenticated
     }
-  }, [searchParams, router]);
+  }
 
   return (
-    <SidebarProvider
-      className="flex flex-col [--header-height:3.5rem] p-0"
-      defaultOpen={false}
-    >
-      <UsernameSelectionDialog
-        onComplete={() => setShowUsernameDialog(false)}
-        open={showUsernameDialog}
-      />
-      <NewReleaseDialog />
-      <HomeHeader />
-      <ImpersonationBanner />
-      <EnvironmentBanner />
-      <SidebarWithPreferences>{children}</SidebarWithPreferences>
-    </SidebarProvider>
+    <Providers initialUser={initialUser}>
+      <SidebarProvider
+        className="flex flex-col [--header-height:3.5rem] p-0"
+        defaultOpen={false}
+      >
+        <Suspense fallback={null}>
+          <UsernameSelectionDialog />
+        </Suspense>
+        <NewReleaseDialog />
+        <HomeHeader />
+        <ImpersonationBanner />
+        <EnvironmentBanner />
+        <SidebarWithPreferences>{children}</SidebarWithPreferences>
+      </SidebarProvider>
+    </Providers>
   );
 }

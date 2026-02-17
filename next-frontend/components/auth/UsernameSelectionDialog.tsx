@@ -14,18 +14,21 @@ import { Label } from "@/components/shadcn/label";
 import { useToast } from "@/components/shadcn/use-toast";
 import { cn } from "@/lib/utils";
 import { Check, Loader2, X } from "lucide-react";
-import { type FC, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type FC, useEffect, useState } from "react";
 
-type UsernameSelectionDialogProps = {
-  onComplete: () => void;
-  open: boolean;
-};
-
-export const UsernameSelectionDialog: FC<UsernameSelectionDialogProps> = ({
-  onComplete,
-  open,
-}) => {
+export const UsernameSelectionDialog: FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("firstTime") === "true") {
+      setOpen(true);
+      router.replace(globalThis.location.pathname);
+    }
+  }, [searchParams, router]);
   const updateUser = useUpdateUser();
   const { toast } = useToast();
 
@@ -45,7 +48,7 @@ export const UsernameSelectionDialog: FC<UsernameSelectionDialogProps> = ({
         description: "Your username has been set successfully",
         title: "Welcome!",
       });
-      onComplete();
+      setOpen(false);
     } catch {
       toast({
         description: "Failed to set username. Please try again.",

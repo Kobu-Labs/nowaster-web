@@ -1,8 +1,9 @@
 "use client";
 
+import { setUserFromToken } from "@/lib/auth";
+import { queryClient } from "@/lib/queryClient";
 import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/components/hooks/useAuth";
 
 export default function AuthCallbackPage() {
   return (
@@ -24,7 +25,6 @@ export default function AuthCallbackPage() {
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setTokens } = useAuth();
   const processedRef = useRef(false);
 
   useEffect(() => {
@@ -40,14 +40,15 @@ function AuthCallbackContent() {
     }
 
     processedRef.current = true;
-    setTokens(accessToken);
+    setUserFromToken(accessToken);
+    queryClient.clear();
 
     if (isFirstTime) {
       router.push("/home?firstTime=true");
     } else {
       router.push("/home");
     }
-  }, [searchParams, router, setTokens]);
+  }, [searchParams, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
