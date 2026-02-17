@@ -107,7 +107,7 @@ export const TagEditForm: FC<TagEditFormProps> = (props) => {
     <Card className="h-fit">
       <CardContent>
         <CardHeader>
-          <CardTitle className="font-mono flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             Edit
             <TagBadge
               colors={newColor}
