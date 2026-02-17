@@ -17,7 +17,8 @@
                 "session:reaction_added",
                 "system:new_release",
                 "task:completed",
-                "project:completed"
+                "project:completed",
+                "admin:sandbox:failed-deploy"
               ]
             }
           }
