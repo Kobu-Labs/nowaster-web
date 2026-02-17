@@ -4,13 +4,13 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tracing::{info, warn};
-use uuid::Uuid;
 
 use crate::{
     config::{database::Database, env::AppEnvironment},
     entity::sandbox_lifecycle::SandboxLifecycle,
     repository::sandbox_lifecycle::SandboxLifecycleRepository,
     seeding::{config::SandboxConfig, SandboxSeeder},
+    service::notification_service::NotificationService,
 };
 
 static GUEST_POOL: Lazy<Mutex<VecDeque<(String, String)>>> =
@@ -20,6 +20,7 @@ static GUEST_POOL: Lazy<Mutex<VecDeque<(String, String)>>> =
 pub struct SandboxService {
     lifecycle_repo: SandboxLifecycleRepository,
     seeder: SandboxSeeder,
+    notification_service: NotificationService,
 }
 
 impl SandboxService {
@@ -27,6 +28,7 @@ impl SandboxService {
         Self {
             lifecycle_repo: SandboxLifecycleRepository::new(database),
             seeder: SandboxSeeder::new(database),
+            notification_service: NotificationService::new(database),
         }
     }
 
@@ -39,7 +41,9 @@ impl SandboxService {
 
     pub async fn increment_unique_users(&self) -> Result<(), sqlx::Error> {
         if let Some(active) = self.lifecycle_repo.get_active().await? {
-            self.lifecycle_repo.increment_unique_users(active.id).await?;
+            self.lifecycle_repo
+                .increment_unique_users(active.id)
+                .await?;
         }
         Ok(())
     }
@@ -114,9 +118,14 @@ impl SandboxService {
 
     async fn cycle(&self, triggered_by: &str, triggered_type: &str) -> Result<(), sqlx::Error> {
         let current_id = self.lifecycle_repo.get_active().await?.map(|l| l.id);
-        self.lifecycle_repo.teardown_and_reset(current_id, triggered_by, triggered_type).await?;
+        self.lifecycle_repo
+            .teardown_and_reset(current_id, triggered_by, triggered_type)
+            .await?;
 
-        let new_lifecycle = self.lifecycle_repo.create(triggered_by, triggered_type).await?;
+        let new_lifecycle = self
+            .lifecycle_repo
+            .create(triggered_by, triggered_type)
+            .await?;
 
         let seed_result: Result<(), sqlx::Error> = async {
             let npc_ids = self.seeder.seed_npc_users(SandboxConfig::NPC_COUNT).await?;
@@ -141,6 +150,10 @@ impl SandboxService {
         if let Err(ref e) = seed_result {
             warn!("⚠️  Seeding failed, marking lifecycle as failed: {}", e);
             let _ = self.lifecycle_repo.mark_failed(new_lifecycle.id).await;
+            let _ = self
+                .notification_service
+                .notify_admins_sandbox_failed_deploy(new_lifecycle.id)
+                .await;
         }
 
         seed_result

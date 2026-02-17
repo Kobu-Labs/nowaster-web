@@ -142,6 +142,9 @@ impl NotificationMapper {
             NotificationTypeSql::ProjectCompleted => Ok(NotificationType::ProjectCompleted(
                 serde_json::from_value(content)?,
             )),
+            NotificationTypeSql::AdminSandboxFailedDeploy => Ok(
+                NotificationType::AdminSandboxFailedDeploy(serde_json::from_value(content)?),
+            ),
         }
     }
 
@@ -171,6 +174,10 @@ impl NotificationMapper {
             )),
             NotificationType::ProjectCompleted(data) => Ok((
                 NotificationTypeSql::ProjectCompleted,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::AdminSandboxFailedDeploy(data) => Ok((
+                NotificationTypeSql::AdminSandboxFailedDeploy,
                 serde_json::to_value(data)?,
             )),
         }
