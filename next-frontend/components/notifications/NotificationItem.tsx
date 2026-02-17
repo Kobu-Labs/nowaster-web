@@ -7,6 +7,7 @@ import type {
 import { FriendRequestAcceptedNotificationItem } from "@/components/notifications/items/FriendRequestAcceptedNotification";
 import { NewFriendRequestNotificationItem } from "@/components/notifications/items/NewFriendRequestNotification";
 import { NewReleaseNotificationItem } from "@/components/notifications/items/NewReleaseNotification";
+import { SandboxFailedDeployNotificationItem } from "@/components/notifications/items/SandboxFailedDeployNotification";
 import { SessionReactionAddedNotificationItem } from "@/components/notifications/items/SessionReactionAddedNotification";
 import type { FC } from "react";
 
@@ -67,6 +68,14 @@ export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
 
 const NotificationsRegistry: FC<NotificationItemProps> = (props) => {
   switch (props.notification.notification_type) {
+    case "admin:sandbox:failed-deploy": {
+      return (
+        <SandboxFailedDeployNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
     case "friend:new_request": {
       return (
         <NewFriendRequestNotificationItem

@@ -13,6 +13,7 @@ export const NotificationTypeSchema = z.enum([
   "friend:request_accepted",
   "session:reaction_added",
   "system:new_release",
+  "admin:sandbox:failed-deploy",
 ]);
 
 export const FriendRequestDataSchema = z.object({
@@ -46,6 +47,10 @@ export const SystemNotificationDataSchema = z.object({
   system_name: z.string(),
 });
 
+export const SandboxFailedDeployDataSchema = z.object({
+  sandbox_lifecycle_id: z.string().uuid(),
+});
+
 export const NotificationSourceSchema = z.discriminatedUnion("source_type", [
   z.object({
     source_data: UserSchema,
@@ -76,6 +81,10 @@ export const NotificationDataSchema = z.discriminatedUnion(
       data: SystemReleaseDataSchema,
       notification_type: z.literal("system:new_release"),
     }),
+    z.object({
+      data: SandboxFailedDeployDataSchema,
+      notification_type: z.literal("admin:sandbox:failed-deploy"),
+    }),
   ],
 );
 
@@ -102,6 +111,9 @@ export type NotificationSourceType = z.infer<
   typeof NotificationSourceTypeSchema
 >;
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
+export type SandboxFailedDeployData = z.infer<
+  typeof SandboxFailedDeployDataSchema
+>;
 export type SessionReactionAddedData = z.infer<
   typeof SessionReactionDataSchema
 >;

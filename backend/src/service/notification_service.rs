@@ -11,9 +11,9 @@ use crate::{
     },
     entity::notification::{
         FriendRequestAcceptedData, FriendRequestData, NotificationSource, NotificationType,
-        SessionReactionData, SystemNotificationData,
+        SandboxFailedDeployData, SessionReactionData, SystemNotificationData,
     },
-    repository::notification::NotificationRepository,
+    repository::{notification::NotificationRepository, user::UserRepository},
     router::clerk::Actor,
     service::friend_service::ReadFriendRequestDto,
 };
@@ -21,12 +21,14 @@ use crate::{
 #[derive(Clone)]
 pub struct NotificationService {
     repository: NotificationRepository,
+    user_repo: UserRepository,
 }
 
 impl NotificationService {
     pub fn new(db: &Arc<Database>) -> Self {
         Self {
             repository: NotificationRepository::new(db),
+            user_repo: UserRepository::new(db),
         }
     }
 
@@ -195,5 +197,32 @@ impl NotificationService {
         self.repository
             .cleanup_old_notifications(user_id, cutoff_date)
             .await
+    }
+
+    #[instrument(err, skip(self), fields(sandbox_lifecycle_id = %sandbox_lifecycle_id))]
+    pub async fn notify_admins_sandbox_failed_deploy(
+        &self,
+        sandbox_lifecycle_id: Uuid,
+    ) -> Result<Vec<Uuid>> {
+        let admin_ids = self.user_repo.get_admin_ids().await?;
+        let mut notification_ids = Vec::new();
+
+        for user_id in admin_ids {
+            let dto = CreateNotificationDto {
+                user_id,
+                source: NotificationSource::System(SystemNotificationData {
+                    system_id: "nowaster-sandbox".to_string(),
+                    system_name: "Nowaster Sandbox".to_string(),
+                }),
+                notification_type: NotificationType::AdminSandboxFailedDeploy(
+                    SandboxFailedDeployData { sandbox_lifecycle_id },
+                ),
+            };
+
+            let id = self.create_notification(dto).await?;
+            notification_ids.push(id);
+        }
+
+        Ok(notification_ids)
     }
 }

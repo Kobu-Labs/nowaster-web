@@ -34,6 +34,10 @@ pub enum NotificationTypeSql {
     #[sqlx(rename = "project:completed")]
     #[serde(rename = "project:completed")]
     ProjectCompleted,
+
+    #[sqlx(rename = "admin:sandbox:failed-deploy")]
+    #[serde(rename = "admin:sandbox:failed-deploy")]
+    AdminSandboxFailedDeploy,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
@@ -112,6 +116,14 @@ pub enum NotificationType {
 
     #[serde(rename = "project:completed")]
     ProjectCompleted(ProjectCompletedData),
+
+    #[serde(rename = "admin:sandbox:failed-deploy")]
+    AdminSandboxFailedDeploy(SandboxFailedDeployData),
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct SandboxFailedDeployData {
+    pub sandbox_lifecycle_id: Uuid,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
