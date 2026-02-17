@@ -31,7 +31,7 @@ async fn create_handler(
 ) -> ApiResponse<ReadFixedSessionDto> {
     let res = state
         .session_service
-        .create_fixed_session(payload, actor)
+        .create_fixed_session(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -41,7 +41,7 @@ async fn active_session_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<Vec<ActiveSession>> {
-    let res = state.session_service.get_active_sessions(actor).await;
+    let res = state.session_service.get_active_sessions(&actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -53,7 +53,7 @@ async fn delete_handler(
 ) -> ApiResponse<()> {
     let res = state
         .session_service
-        .delete_session(session_id, actor)
+        .delete_session(session_id, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -66,7 +66,7 @@ async fn filter_handler(
 ) -> ApiResponse<Vec<ReadFixedSessionDto>> {
     let res = state
         .session_service
-        .filter_fixed_sessions(payload, actor)
+        .filter_fixed_sessions(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -79,7 +79,7 @@ async fn update_handler(
 ) -> ApiResponse<ReadFixedSessionDto> {
     let res = state
         .session_service
-        .update_fixed_session(payload, actor)
+        .update_fixed_session(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }

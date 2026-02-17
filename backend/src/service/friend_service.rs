@@ -176,34 +176,34 @@ pub trait FriendServiceTrait {
     async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto>;
 
     async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto>;
 
     async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto>;
 
     async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto>;
 
-    async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>>;
+    async fn list_friends(&self, actor: &Actor) -> Result<Vec<ReadFriendshipDto>>;
 
-    async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()>;
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: &Actor) -> Result<()>;
 
     async fn list_friend_requests(
         &self,
-        actor: Actor,
+        actor: &Actor,
         data: ReadFriendRequestsDto,
     ) -> Result<Vec<ReadFriendRequestDto>>;
 }
@@ -222,7 +222,7 @@ impl FriendServiceTrait for FriendService {
     async fn create_friend_request(
         &self,
         dto: CreateFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto> {
         if dto.recipient_id == actor.user_id {
             return Err(anyhow::anyhow!(
@@ -241,7 +241,7 @@ impl FriendServiceTrait for FriendService {
     async fn accept_friend_request(
         &self,
         dto: AcceptFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -250,7 +250,7 @@ impl FriendServiceTrait for FriendService {
 
         let request = self
             .repo
-            .get_friend_request(dto.request_id, actor.clone())
+            .get_friend_request(dto.request_id, actor)
             .await?;
 
         if request.status != FriendRequestStatus::Pending {
@@ -269,13 +269,13 @@ impl FriendServiceTrait for FriendService {
         self.subscription_service
             .subscribe(
                 AddFeedSource::User(request.requestor.id.clone()),
-                request.recipient.id.clone(),
+                &request.recipient.id,
             )
             .await;
         self.subscription_service
             .subscribe(
                 AddFeedSource::User(request.recipient.id.clone()),
-                request.requestor.id.clone(),
+                &request.requestor.id,
             )
             .await;
 
@@ -297,7 +297,7 @@ impl FriendServiceTrait for FriendService {
     async fn reject_friend_request(
         &self,
         dto: RejectFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -306,7 +306,7 @@ impl FriendServiceTrait for FriendService {
 
         let request = self
             .repo
-            .get_friend_request(dto.request_id, actor.clone())
+            .get_friend_request(dto.request_id, actor)
             .await?;
 
         if request.status != FriendRequestStatus::Pending {
@@ -329,7 +329,7 @@ impl FriendServiceTrait for FriendService {
     async fn cancel_friend_request(
         &self,
         dto: CancelFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto> {
         let dto = UpdateFriendRequestDto {
             request_id: dto.request_id,
@@ -338,7 +338,7 @@ impl FriendServiceTrait for FriendService {
 
         let request = self
             .repo
-            .get_friend_request(dto.request_id, actor.clone())
+            .get_friend_request(dto.request_id, actor)
             .await?;
 
         if request.status != FriendRequestStatus::Pending {
@@ -358,23 +358,23 @@ impl FriendServiceTrait for FriendService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
-        let result = self.repo.list_friends(actor.clone()).await?;
+    async fn list_friends(&self, actor: &Actor) -> Result<Vec<ReadFriendshipDto>> {
+        let result = self.repo.list_friends(actor).await?;
         Ok(result)
     }
 
     #[instrument(err, skip(self), fields(friendship_id = %dto.friendship_id, actor_id = %actor))]
-    async fn remove_friend(&self, dto: RemoveFriendDto, actor: Actor) -> Result<()> {
-        let friendship = self.repo.remove_friendship(dto, actor.clone()).await?;
+    async fn remove_friend(&self, dto: RemoveFriendDto, actor: &Actor) -> Result<()> {
+        let friendship = self.repo.remove_friendship(dto, actor).await?;
 
-        let other_user_id = if friendship.friend1.id == actor.user_id.clone() {
+        let other_user_id = if friendship.friend1.id == actor.user_id {
             friendship.clone().friend2.id
         } else {
             friendship.clone().friend1.id
         };
 
         self.subscription_service
-            .unsubscribe(RemoveFeedSource::User(other_user_id), actor.user_id.clone())
+            .unsubscribe(RemoveFeedSource::User(other_user_id), &actor.user_id)
             .await;
         self.visibility_service
             .recalculate_friendship_visibility(friendship.clone())
@@ -386,7 +386,7 @@ impl FriendServiceTrait for FriendService {
     #[instrument(err, skip(self), fields(actor_id = %actor, direction = %data.direction))]
     async fn list_friend_requests(
         &self,
-        actor: Actor,
+        actor: &Actor,
         data: ReadFriendRequestsDto,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = self.repo.list_friend_requests(data, actor).await?;

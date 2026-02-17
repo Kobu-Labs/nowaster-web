@@ -66,7 +66,7 @@ impl NotificationService {
     pub async fn mark_notifications_seen(
         &self,
         dto: MarkNotificationsSeenDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<u64> {
         self.repository
             .mark_notifications_seen(&dto.notification_ids, actor)
@@ -91,7 +91,7 @@ impl NotificationService {
     }
 
     #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor))]
-    pub async fn delete_notification(&self, notification_id: Uuid, actor: Actor) -> Result<bool> {
+    pub async fn delete_notification(&self, notification_id: Uuid, actor: &Actor) -> Result<bool> {
         self.repository
             .delete_notification(notification_id, actor)
             .await

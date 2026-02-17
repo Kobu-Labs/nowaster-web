@@ -29,25 +29,25 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
-    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()>;
+    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: &Actor) -> Result<()>;
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Self::SessionType>;
-    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64>;
+    async fn delete_session(&self, id: Uuid, actor: &Actor) -> Result<()>;
+    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: &Actor) -> Result<u64>;
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Self::SessionType>>;
     type SessionType;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Option<Self::SessionType>>;
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>>;
-    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession>;
+    async fn create(&self, dto: CreateFixedSessionDto, actor: &Actor) -> Result<FixedSession>;
 }
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
@@ -151,7 +151,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>> {
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Option<Self::SessionType>> {
         let sessions = sqlx::query_as!(
             GenericFullRowSession,
             r#"SELECT
@@ -207,7 +207,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, session_count = dtos.len()))]
-    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()> {
+    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: &Actor) -> Result<()> {
         let sessions: Vec<CreateFixedSessionDtoWithId> =
             dtos.iter().cloned().map(Into::into).collect();
 
@@ -224,7 +224,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 .push_bind(session.start_time)
                 .push_bind(session.end_time)
                 .push_bind(session.description.clone())
-                .push_bind(actor.user_id.clone())
+                .push_bind(&actor.user_id)
                 .push_bind(session.id)
                 .push_bind(session.template_id)
                 .push_bind(session.project_id)
@@ -257,7 +257,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = %dto.category_id))]
-    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
+    async fn create(&self, dto: CreateFixedSessionDto, actor: &Actor) -> Result<FixedSession> {
         let result = sqlx::query!(
             r#"
                 INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id, project_id, task_id)
@@ -292,7 +292,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             .await?;
         }
 
-        let session = self.find_by_id(result.id, actor.clone()).await?;
+        let session = self.find_by_id(result.id, actor).await?;
         match session {
             Some(val) => Ok(val),
             None => Err(anyhow!("Error creating the session")),
@@ -303,7 +303,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Self::SessionType>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT
@@ -344,7 +344,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             WHERE
                 s.user_id = "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(from_endtime) = dto.from_end_time {
             query
@@ -490,7 +490,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
-    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
+    async fn delete_session(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM session
@@ -506,7 +506,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64> {
+    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: &Actor) -> Result<u64> {
         if dto.is_empty() {
             return Err(anyhow!(
                 "No filters were specified - aborting session deletion"
@@ -518,7 +518,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             r#"DELETE FROM session s
             WHERE s.user_id = "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
         query.push(" AND s.type = 'fixed'");
 
         if let Some(from_endtime) = dto.from_end_time {
@@ -558,7 +558,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Self::SessionType> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         dbg!(&dto.project_id);

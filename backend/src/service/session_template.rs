@@ -41,15 +41,15 @@ impl SessionTemplateService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_templates(&self, actor: Actor) -> Result<Vec<ReadSesionTemplateRow>> {
+    pub async fn get_templates(&self, actor: &Actor) -> Result<Vec<ReadSesionTemplateRow>> {
         self.repo.get_recurring_sessions(actor).await
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn create_template(&self, dto: CreateSessionTemplateDto, actor: Actor) -> Result<()> {
+    pub async fn create_template(&self, dto: CreateSessionTemplateDto, actor: &Actor) -> Result<()> {
         let template_id = Uuid::new_v4();
         self.repo
-            .create_session_template(template_id, dto.clone(), actor.clone())
+            .create_session_template(template_id, dto.clone(), actor)
             .await?;
         let mut sessions: Vec<CreateFixedSessionDto> = Vec::new();
 
@@ -87,13 +87,13 @@ impl SessionTemplateService {
     pub async fn update_session_template(
         &self,
         dto: UpdateSessionTemplateDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         self.repo.update_session_template(dto, actor).await
     }
 
     #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
-    pub async fn delete_recurring_session(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_recurring_session(&self, id: Uuid, actor: &Actor) -> Result<()> {
         self.repo.delete_recurring_session(id, actor).await
     }
 
@@ -102,7 +102,7 @@ impl SessionTemplateService {
         &self,
         id: Uuid,
         action: ExistingSessionsAction,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         match action {
             ExistingSessionsAction::KeepAll => {}
@@ -114,7 +114,7 @@ impl SessionTemplateService {
                             template_id: Some(id),
                             ..Default::default()
                         },
-                        actor.clone(),
+                        actor,
                     )
                     .await?;
             }
@@ -127,7 +127,7 @@ impl SessionTemplateService {
                             from_start_time: Some(DateFilter { value: Utc::now() }),
                             ..Default::default()
                         },
-                        actor.clone(),
+                        actor,
                     )
                     .await?;
             }

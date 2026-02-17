@@ -291,7 +291,7 @@ impl NotificationRepository {
     pub async fn mark_notifications_seen(
         &self,
         notification_ids: &[Uuid],
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<u64> {
         if notification_ids.is_empty() {
             return Ok(0);
@@ -345,7 +345,7 @@ impl NotificationRepository {
     }
 
     #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor))]
-    pub async fn delete_notification(&self, notification_id: Uuid, actor: Actor) -> Result<bool> {
+    pub async fn delete_notification(&self, notification_id: Uuid, actor: &Actor) -> Result<bool> {
         let result = sqlx::query!(
             r#"
                 DELETE FROM notification

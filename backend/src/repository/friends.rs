@@ -34,7 +34,7 @@ impl FriendsRepository {
         }
     }
     #[instrument(err, skip(self), fields(request_id = %id, actor_id = %actor))]
-    pub async fn get_friend_request(&self, id: Uuid, actor: Actor) -> Result<ReadFriendRequestDto> {
+    pub async fn get_friend_request(&self, id: Uuid, actor: &Actor) -> Result<ReadFriendRequestDto> {
         let result = sqlx::query(
             r#"
                 SELECT 
@@ -56,7 +56,7 @@ impl FriendsRepository {
             "#,
         )
         .bind(id)
-        .bind(actor.user_id)
+        .bind(&actor.user_id)
         .fetch_one(self.db.get_pool())
         .await?;
 
@@ -165,7 +165,7 @@ impl FriendsRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
+    pub async fn list_friends(&self, actor: &Actor) -> Result<Vec<ReadFriendshipDto>> {
         let result = sqlx::query(
             r#"
                 SELECT 
@@ -183,7 +183,7 @@ impl FriendsRepository {
                 WHERE (f.friend_1_id = $1 OR f.friend_2_id = $1) AND f.deleted is not true
             "#,
         )
-        .bind(actor.user_id)
+        .bind(&actor.user_id)
         .fetch_all(self.db.get_pool())
         .await?;
 
@@ -199,7 +199,7 @@ impl FriendsRepository {
     pub async fn remove_friendship(
         &self,
         dto: RemoveFriendDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendshipDto> {
         let row = sqlx::query(
             r#"
@@ -224,7 +224,7 @@ impl FriendsRepository {
             "#,
         )
         .bind(dto.friendship_id)
-        .bind(actor.user_id)
+        .bind(&actor.user_id)
         .fetch_one(self.db.get_pool())
         .await?;
 
@@ -237,7 +237,7 @@ impl FriendsRepository {
     pub async fn create_friend_request(
         &self,
         data: CreateFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto> {
         let mut tx = self.db.get_pool().begin().await?;
         let exising_request = sqlx::query!(
@@ -306,7 +306,7 @@ impl FriendsRepository {
                 JOIN "user" u2 ON u2.id = i.recipient_id
             "#,
         )
-        .bind(actor.user_id)
+        .bind(&actor.user_id)
         .bind(data.recipient_id)
         .bind(data.introduction_message)
         .fetch_one(tx.as_mut())
@@ -323,7 +323,7 @@ impl FriendsRepository {
     pub async fn list_friend_requests(
         &self,
         data: ReadFriendRequestsDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadFriendRequestDto>> {
         let result = sqlx::query(
             r#"
@@ -347,7 +347,7 @@ impl FriendsRepository {
                     AND fr.status = 'pending'
             "#,
         )
-            .bind(actor.user_id)
+            .bind(&actor.user_id)
             .bind(data.direction.to_string())
         .fetch_all(self.db.get_pool())
         .await?;

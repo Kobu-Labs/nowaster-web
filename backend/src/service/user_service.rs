@@ -37,7 +37,7 @@ impl UserService {
     pub async fn update_user(
         &self,
         dto: UpdateUserDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadUserDto, UserError> {
         if actor.role == UserRole::User && actor.user_id != dto.id {
             return Err(UserError::Unauthorized);
@@ -73,11 +73,11 @@ impl UserService {
     }
 
     #[instrument(err, skip(self), fields(user_id = %user_id))]
-    pub async fn get_user_by_id(&self, user_id: String) -> Result<Option<ReadUserDto>, UserError> {
+    pub async fn get_user_by_id(&self, user_id: &str) -> Result<Option<ReadUserDto>, UserError> {
         let user = self
             .repo
             .filter_users(FilterUsersDto {
-                id: Some(IdFilter::Single(user_id)),
+                id: Some(IdFilter::Single(user_id.to_owned())),
                 ..Default::default()
             })
             .await

@@ -37,17 +37,17 @@ pub struct ReadProjectRow {
 }
 
 pub trait ProjectRepositoryTrait {
-    async fn create(&self, dto: CreateProjectDto, actor: Actor) -> Result<Project>;
-    async fn update(&self, dto: UpdateProjectDto, actor: Actor) -> Result<Project>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Project>;
-    async fn delete_project(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn filter_projects(&self, filter: FilterProjectDto, actor: Actor)
+    async fn create(&self, dto: CreateProjectDto, actor: &Actor) -> Result<Project>;
+    async fn update(&self, dto: UpdateProjectDto, actor: &Actor) -> Result<Project>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Project>;
+    async fn delete_project(&self, id: Uuid, actor: &Actor) -> Result<()>;
+    async fn filter_projects(&self, filter: FilterProjectDto, actor: &Actor)
         -> Result<Vec<Project>>;
     async fn get_projects_details(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadProjectDetailsDto>>;
-    async fn get_project_statistics(&self, actor: Actor) -> Result<ProjectStatsDto>;
+    async fn get_project_statistics(&self, actor: &Actor) -> Result<ProjectStatsDto>;
     fn new(db: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadProjectRow) -> Project;
 }
@@ -58,7 +58,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor, project_name = %dto.name))]
-    async fn create(&self, dto: CreateProjectDto, actor: Actor) -> Result<Project> {
+    async fn create(&self, dto: CreateProjectDto, actor: &Actor) -> Result<Project> {
         let row = sqlx::query_as!(
             ReadProjectRow,
             r#"
@@ -105,7 +105,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     async fn filter_projects(
         &self,
         filter: FilterProjectDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Project>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
@@ -123,7 +123,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
                 WHERE project.user_id =
             ",
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(name) = filter.name {
             query.push(" AND project.name = ").push_bind(name);
@@ -148,7 +148,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(project_id = %id, actor_id = %actor))]
-    async fn delete_project(&self, id: Uuid, actor: Actor) -> Result<()> {
+    async fn delete_project(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM project
@@ -164,7 +164,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(project_id = %id, actor_id = %actor))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Project> {
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Project> {
         let result = self
             .filter_projects(
                 FilterProjectDto {
@@ -183,7 +183,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(project_id = %dto.id, actor_id = %actor))]
-    async fn update(&self, dto: UpdateProjectDto, actor: Actor) -> Result<Project> {
+    async fn update(&self, dto: UpdateProjectDto, actor: &Actor) -> Result<Project> {
         let result = sqlx::query_as!(
             ReadProjectRow,
             r#"
@@ -224,7 +224,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn get_projects_details(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadProjectDetailsDto>> {
         let rows = sqlx::query_as!(
             ReadProjectDetailsDto,
@@ -255,7 +255,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_project_statistics(&self, actor: Actor) -> Result<ProjectStatsDto> {
+    async fn get_project_statistics(&self, actor: &Actor) -> Result<ProjectStatsDto> {
         let stats = sqlx::query_as!(
             ProjectStatsDto,
             r#"

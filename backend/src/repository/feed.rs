@@ -176,7 +176,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: &str) -> Result<()> {
         let (source_id, source_type) = match source {
             RemoveFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -197,7 +197,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: &str) -> Result<()> {
         let (source_id, source_type) = match source {
             AddFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -241,7 +241,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn get_feed(&self, user_id: String, query: FeedQueryDto) -> Result<Vec<FeedEvent>> {
+    pub async fn get_feed(&self, user_id: &str, query: FeedQueryDto) -> Result<Vec<FeedEvent>> {
         let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
             SELECT DISTINCT
@@ -267,7 +267,7 @@ impl FeedRepository {
                 AND fs.source_id = fe.source_id
                 AND fs.subscriber_id ="#,
         );
-        base_query.push_bind(user_id.clone());
+        base_query.push_bind(user_id);
         base_query.push(" WHERE fs.is_muted IS NOT TRUE AND fs.is_paused IS NOT TRUE");
         base_query.push(" AND fs.is_allowed_by_visibility IS TRUE ");
 
@@ -379,7 +379,7 @@ impl FeedRepository {
     pub async fn create_reaction(
         &self,
         dto: CreateFeedReactionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<FeedReaction> {
         let id = Uuid::new_v4();
         sqlx::query!(
@@ -409,7 +409,7 @@ impl FeedRepository {
         &self,
         feed_event_id: Uuid,
         emoji: String,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         sqlx::query!(
             r#"
@@ -429,7 +429,7 @@ impl FeedRepository {
     #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_user_subscriptions(
         &self,
-        user_id: String,
+        user_id: &str,
     ) -> Result<Vec<FeedSubscriptionRow>> {
         let results = sqlx::query_as!(
             FeedSubscriptionRow,
@@ -458,7 +458,7 @@ impl FeedRepository {
     pub async fn update_subscription(
         &self,
         subscription_id: Uuid,
-        user_id: String,
+        user_id: &str,
         is_muted: Option<bool>,
         is_paused: Option<bool>,
     ) -> Result<()> {
