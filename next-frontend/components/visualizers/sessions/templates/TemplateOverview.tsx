@@ -280,7 +280,7 @@ const DeleteTemplateAlertDialog: FC<{
               with them?
             </p>
             <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-green-50/50 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/10 rounded-lg border border-green-200/30 dark:border-green-800/20">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-green-950/20 to-emerald-950/10 rounded-lg border border-green-800/20">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-2 shrink-0" />
                   <div className="flex-1">
@@ -291,7 +291,7 @@ const DeleteTemplateAlertDialog: FC<{
                   </div>
                 </div>
                 <Button
-                  className="w-full sm:w-auto sm:min-w-24 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950/20"
+                  className="w-full sm:w-auto sm:min-w-24 border-green-700 text-green-400 hover:bg-green-950/20"
                   onClick={() => { props.onConfirm("keep-all"); }}
                   size="sm"
                   variant="outline"
@@ -300,11 +300,11 @@ const DeleteTemplateAlertDialog: FC<{
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-orange-50/50 to-yellow-50/30 dark:from-orange-950/20 dark:to-yellow-950/10 rounded-lg border border-orange-200/30 dark:border-orange-800/20">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-orange-950/20 to-yellow-950/10 rounded-lg border border-orange-800/20">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium text-orange-600 dark:text-orange-400">
+                    <p className="font-medium text-orange-400">
                       Delete future sessions
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -321,11 +321,11 @@ const DeleteTemplateAlertDialog: FC<{
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-red-50/50 to-pink-50/30 dark:from-red-950/20 dark:to-pink-950/10 rounded-lg border border-red-200/30 dark:border-red-800/20">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-linear-to-r from-red-950/20 to-pink-950/10 rounded-lg border border-red-800/20">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="w-2 h-2 rounded-full bg-red-500 mt-2 shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium text-red-600 dark:text-red-400">
+                    <p className="font-medium text-red-400">
                       Delete all sessions
                     </p>
                     <p className="text-sm text-muted-foreground">

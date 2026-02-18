@@ -10,7 +10,7 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html className="dark" lang="en">
       <Head>
         <link href="/favicon.ico" rel="icon" sizes="any" />
         <link
