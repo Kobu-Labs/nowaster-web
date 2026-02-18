@@ -16,9 +16,10 @@ export function SiteHeader() {
         <Image
           alt="Logo"
           className="h-8 w-8"
-          height={80}
+          height={32}
+          priority
           src="/logo.png"
-          width={80}
+          width={32}
         />
         <span className="inline-block font-bold hidden xs:block">Nowaster</span>
       </Link>
