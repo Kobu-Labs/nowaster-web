@@ -124,7 +124,7 @@ const ProjectDetailPage: FC<ProjectDetailPageProps> = ({ projectId }) => {
     <div className="flex gap-6 w-full p-6">
       <div className="flex-1 space-y-6 min-w-0">
         <div
-          className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg rounded-lg p-6"
+          className="backdrop-blur-md bg-gray-900/80 shadow-lg rounded-lg p-6"
           style={{ borderLeft: `4px solid ${project.color}` }}
         >
           <div className="flex items-start justify-between">

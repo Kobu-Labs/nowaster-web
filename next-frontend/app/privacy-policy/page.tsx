@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
             Last updated: January 31, 2026
           </p>
 
-          <div className="prose prose-slate dark:prose-invert max-w-none">
+          <div className="prose prose-invert max-w-none">
             <section className="mb-8 p-6 bg-primary/5 rounded-lg border-2 border-primary/20">
               <h2 className="text-2xl font-bold mb-4 text-primary">
                 Our Privacy Commitment
@@ -242,11 +242,11 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-2xl font-semibold mb-4">
                 Data Sharing & Disclosure
               </h2>
-              <div className="bg-green-50 dark:bg-green-950/20 border-l-4 border-green-500 p-4 mb-6">
-                <p className="font-bold text-green-900 dark:text-green-100 mb-2">
+              <div className="bg-green-950/20 border-l-4 border-green-500 p-4 mb-6">
+                <p className="font-bold text-green-100 mb-2">
                   We Never Sell Your Data
                 </p>
-                <p className="text-green-800 dark:text-green-200">
+                <p className="text-green-200">
                   We have never sold user data to third parties, and we never
                   will. Your time tracking information, personal details, and
                   usage patterns are not for sale. Period. This is a core
