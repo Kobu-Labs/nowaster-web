@@ -1,6 +1,3 @@
-import { SignedIn } from "@/components/auth/SignedIn";
-import { SignedOut } from "@/components/auth/SignedOut";
-import { WelcomeBackButton } from "@/components/auth/WelcomBackButton";
 import { Button } from "@/components/shadcn/button";
 import { Newspaper } from "lucide-react";
 import Image from "next/image";
@@ -33,18 +30,11 @@ export function SiteHeader() {
             <span>Releases</span>
           </Link>
         </Button>
-        <SignedIn>
-          <Link href="/home">
-            <WelcomeBackButton />
-          </Link>
-        </SignedIn>
-        <SignedOut>
-          <Link href="/sign-in">
-            <Button variant="secondary">
-              <p>Log in</p>
-            </Button>
-          </Link>
-        </SignedOut>
+        <Link href="/sign-in">
+          <Button variant="secondary">
+            <p>Log in</p>
+          </Button>
+        </Link>
       </nav>
     </header>
   );

@@ -14,22 +14,16 @@ import {
   type FC,
   type PropsWithChildren,
   useCallback,
-  useEffect,
   useState,
 } from "react";
 
-export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [user, setUser] = useState<null | User>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const router = useRouter();
+type AuthProviderProps = {
+  initialUser?: null | User;
+} & PropsWithChildren;
 
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-    setIsLoaded(true);
-  }, []);
+export const AuthProvider: FC<AuthProviderProps> = ({ children, initialUser = null }) => {
+  const [user, setUser] = useState<null | User>(initialUser);
+  const router = useRouter();
 
   const setTokens = useCallback((accessToken: string) => {
     queryClient.clear();
@@ -55,7 +49,6 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        isLoaded,
         isSignedIn: user !== null,
         setTokens,
         signOut,

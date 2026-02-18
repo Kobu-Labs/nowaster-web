@@ -13,9 +13,9 @@ import type { FC, PropsWithChildren } from "react";
  * </SignedIn>
  */
 export const SignedIn: FC<PropsWithChildren> = ({ children }) => {
-  const { isLoaded, user } = useAuth();
+  const { user } = useAuth();
 
-  if (!isLoaded || !user) {
+  if (!user) {
     return null;
   }
 
