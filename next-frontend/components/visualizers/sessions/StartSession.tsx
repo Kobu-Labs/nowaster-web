@@ -79,7 +79,6 @@ const NoActiveSession: FC = () => {
         <TooltipTrigger asChild>
           <Button
             className="group/start justify-start gap-2 bg-transparent"
-            loading={createSession.isPending}
             onClick={() => {
               createSession.mutate({
                 projectId: undefined,
@@ -90,16 +89,11 @@ const NoActiveSession: FC = () => {
             size="sm"
             variant="outline"
           >
-            <>
-              {!createSession.isPending && (
-                <Play className="group-hover/start:text-green-500 size-4" />
-              )}
-
-              <Timer
-                durationInSeconds={0}
-                formatingFunction={formatTimeDifference}
-              />
-            </>
+            <Play className="group-hover/start:text-green-500 size-4" />
+            <Timer
+              durationInSeconds={0}
+              formatingFunction={formatTimeDifference}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent className="text-nowrap">Start a session</TooltipContent>
@@ -169,6 +163,7 @@ const StopwatchSessionActive: FC<{
             <TooltipTrigger asChild>
               <Button
                 className={cn("flex gap-2 items-center")}
+                loading={false}
                 onClick={() => setOpen((prev) => !prev)}
                 ref={editButtonRef}
                 variant="ghost"
