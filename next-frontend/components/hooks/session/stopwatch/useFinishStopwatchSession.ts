@@ -1,9 +1,6 @@
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
-import type {
-  StopwatchSessionWithId } from "@/api/definitions";
-import {
-  ScheduledSessionRequestSchema,
-} from "@/api/definitions";
+import type { StopwatchSessionWithId } from "@/api/definitions";
+import { ScheduledSessionRequestSchema } from "@/api/definitions";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,8 +15,10 @@ export const useFinishStopwatchSession = () => {
         category_id: session.category?.id,
         description: session.description,
         endTime: new Date(),
+        projectId: session.projectId,
         startTime: session.startTime,
         tag_ids: session.tags?.map((tag) => tag.id) ?? [],
+        taskId: session.taskId,
       });
 
       if (!parsed.success) {
