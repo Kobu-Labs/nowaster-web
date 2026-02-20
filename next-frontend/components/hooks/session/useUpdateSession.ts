@@ -1,5 +1,3 @@
-/* eslint-disable perfectionist/sort-objects */
-
 import { ScheduledSessionApi, StopwatchApi } from "@/api";
 import type {
   ScheduledSessionRequest,

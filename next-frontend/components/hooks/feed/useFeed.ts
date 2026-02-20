@@ -1,5 +1,3 @@
-/* eslint-disable perfectionist/sort-objects */
-
 import { InfiniteData } from "@tanstack/react-query";
 import {
   useInfiniteQuery,
