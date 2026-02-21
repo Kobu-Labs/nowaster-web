@@ -266,9 +266,21 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     Router::new()
         .nest("/api", api_router)
-        .layer(TraceLayer::new_for_http().make_span_with(make_span_for_request))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(make_span_for_request)
+                .on_response(record_response_status),
+        )
         .layer(cors)
         .into_make_service()
+}
+
+fn record_response_status<B>(
+    response: &http::Response<B>,
+    _latency: std::time::Duration,
+    span: &tracing::Span,
+) {
+    span.record("http.status_code", response.status().as_u16());
 }
 
 fn make_span_for_request<B>(req: &Request<B>) -> tracing::Span {
