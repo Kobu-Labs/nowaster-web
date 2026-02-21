@@ -152,9 +152,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
     async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Option<Self::SessionType>> {
-        let sessions = sqlx::query_as!(
-            GenericFullRowSession,
-            r#"SELECT
+        let sessions = crate::named_query!(
+            "session_find_by_id",
+            sqlx::query_as!(
+                GenericFullRowSession,
+                r#"SELECT
                 s.id,
                 s.user_id as "user_id!",
                 s.start_time,
@@ -193,11 +195,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.id = $1
                 AND type = 'fixed'
                 AND s.user_id = $2"#,
-            id,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                id,
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let result = self.convert(sessions)?;
         match result.first() {
@@ -258,24 +260,26 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = %dto.category_id))]
     async fn create(&self, dto: CreateFixedSessionDto, actor: &Actor) -> Result<FixedSession> {
-        let result = sqlx::query!(
-            r#"
+        let result = crate::named_query!(
+            "session_create",
+            sqlx::query!(
+                r#"
                 INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id, project_id, task_id)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING session.id
             "#,
-            dto.category_id,
-            String::from("fixed"),
-            dto.start_time,
-            dto.end_time,
-            dto.description,
-            actor.user_id,
-            dto.template_id,
-            dto.project_id,
-            dto.task_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                dto.category_id,
+                String::from("fixed"),
+                dto.start_time,
+                dto.end_time,
+                dto.description,
+                actor.user_id,
+                dto.template_id,
+                dto.project_id,
+                dto.task_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         if !dto.tag_ids.is_empty() {
             sqlx::query(
@@ -368,10 +372,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
         query.push(" ORDER BY s.start_time DESC");
 
-        let rows = query
-            .build_query_as::<GenericFullRowSession>()
-            .fetch_all(self.db_conn.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "session_filter",
+            query
+                .build_query_as::<GenericFullRowSession>()
+                .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let mut sessions = self.convert(rows)?;
 
@@ -558,8 +564,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     ) -> Result<Self::SessionType> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         dbg!(&dto.project_id);
-        sqlx::query(
-            r#"
+        crate::named_query!(
+            "session_update",
+            sqlx::query(
+                r#"
                 UPDATE "session" s SET
                     description = COALESCE($1, s.description),
                     start_time = COALESCE($2, s.start_time),
@@ -569,20 +577,20 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                     task_id = CASE WHEN $7 THEN $8 ELSE s.task_id END
                 WHERE s.id = $9
             "#,
-        )
-        .bind(dto.description)
-        .bind(dto.start_time)
-        .bind(dto.end_time)
-        .bind(dto.category_id)
-        // following is to distinguish if the field should not be updated,
-        // or be set to NULL, hence the 'CASE WHEN...' above
-        .bind(dto.project_id.is_some())
-        .bind(dto.project_id.flatten())
-        .bind(dto.task_id.is_some())
-        .bind(dto.task_id.flatten())
-        .bind(dto.id)
-        .execute(tx.as_mut())
-        .await?;
+            )
+            .bind(dto.description)
+            .bind(dto.start_time)
+            .bind(dto.end_time)
+            .bind(dto.category_id)
+            // following is to distinguish if the field should not be updated,
+            // or be set to NULL, hence the 'CASE WHEN...' above
+            .bind(dto.project_id.is_some())
+            .bind(dto.project_id.flatten())
+            .bind(dto.task_id.is_some())
+            .bind(dto.task_id.flatten())
+            .bind(dto.id)
+            .execute(tx.as_mut())
+        )?;
 
         if let Some(tags) = dto.tag_ids {
             sqlx::query!(
@@ -617,9 +625,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
     #[instrument(err, skip(self), fields(id = %id))]
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>> {
-        let sessions = sqlx::query_as!(
-            GenericFullRowSession,
-            r#"SELECT
+        let sessions = crate::named_query!(
+            "session_find_by_id_admin",
+            sqlx::query_as!(
+                GenericFullRowSession,
+                r#"SELECT
                 s.id,
                 s.user_id as "user_id!",
                 s.start_time,
@@ -658,10 +668,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.id = $1
                 AND type = 'fixed'
                 "#,
-            id,
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                id,
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let result = self.convert(sessions)?;
         match result.first() {

@@ -120,21 +120,23 @@ impl StopwatchSessionRepository {
         actor: &Actor,
     ) -> Result<StopwatchSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
-        let result = sqlx::query!(
-            r#"
+        let result = crate::named_query!(
+            "stopwatch_create",
+            sqlx::query!(
+                r#"
                 INSERT INTO stopwatch_session (category_id, start_time, description, user_id, project_id, task_id)
                 VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING stopwatch_session.id
             "#,
-            category_id,
-            dto.start_time,
-            dto.description,
-            actor.user_id,
-            dto.project_id,
-            dto.task_id
-        )
-        .fetch_one(tx.as_mut())
-        .await?;
+                category_id,
+                dto.start_time,
+                dto.description,
+                actor.user_id,
+                dto.project_id,
+                dto.task_id
+            )
+            .fetch_one(tx.as_mut())
+        )?;
 
         if let Some(tags) = tag_ids {
             if !tags.is_empty() {
@@ -161,9 +163,11 @@ impl StopwatchSessionRepository {
     // INFO: only one stopwatch session can be active at a time
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn read_stopwatch(&self, actor: &Actor) -> Result<Option<StopwatchSession>> {
-        let sessions = sqlx::query_as!(
-            StopwatchFullRow,
-            r#"SELECT
+        let sessions = crate::named_query!(
+            "stopwatch_read",
+            sqlx::query_as!(
+                StopwatchFullRow,
+                r#"SELECT
                 s.id,
 
                 s.user_id,
@@ -195,10 +199,10 @@ impl StopwatchSessionRepository {
                 on tts.tag_id = t.id
             WHERE
                 s.user_id = $1"#,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let result = self.convert(sessions)?;
         Ok(result.first().cloned())
@@ -227,8 +231,10 @@ impl StopwatchSessionRepository {
         actor: &Actor,
     ) -> Result<StopwatchSession> {
         let mut tx = self.db_conn.get_pool().begin().await?;
-        sqlx::query(
-            r#"
+        crate::named_query!(
+            "stopwatch_update",
+            sqlx::query(
+                r#"
                 UPDATE "stopwatch_session" s SET
                     description = COALESCE($1, s.description),
                     start_time = COALESCE($2, s.start_time),
@@ -237,19 +243,19 @@ impl StopwatchSessionRepository {
                     task_id = CASE WHEN $6 THEN $7 ELSE s.task_id END
                 WHERE s.id = $8
             "#,
-        )
-        .bind(dto.description)
-        .bind(dto.start_time)
-        .bind(dto.category_id)
-        // following is to distinguish if the field should not be updated,
-        // or be set to NULL, hence the 'CASE WHEN...' above
-        .bind(dto.project_id.is_some())
-        .bind(dto.project_id.flatten())
-        .bind(dto.task_id.is_some())
-        .bind(dto.task_id.flatten())
-        .bind(dto.id)
-        .execute(tx.as_mut())
-        .await?;
+            )
+            .bind(dto.description)
+            .bind(dto.start_time)
+            .bind(dto.category_id)
+            // following is to distinguish if the field should not be updated,
+            // or be set to NULL, hence the 'CASE WHEN...' above
+            .bind(dto.project_id.is_some())
+            .bind(dto.project_id.flatten())
+            .bind(dto.task_id.is_some())
+            .bind(dto.task_id.flatten())
+            .bind(dto.id)
+            .execute(tx.as_mut())
+        )?;
 
         println!("Tags: {:?}", dto.tag_ids);
         if let Some(tags) = dto.tag_ids {
