@@ -1,5 +1,6 @@
 use async_trait::async_trait;
-use sqlx::{Error, PgPool};
+use sqlx::postgres::PgConnectOptions;
+use sqlx::{ConnectOptions, Error, PgPool};
 
 pub struct Database {
     pool: PgPool,
@@ -16,7 +17,13 @@ pub trait DatabaseTrait {
 #[async_trait]
 impl DatabaseTrait for Database {
     async fn init(database_url: String) -> Result<Self, Error> {
-        let pool = sqlx::postgres::PgPool::connect(database_url.as_str()).await?;
+        let opts = database_url
+            .parse::<PgConnectOptions>()?
+            .log_statements(log::LevelFilter::Debug);
+
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .connect_with(opts)
+            .await?;
         sqlx::migrate!("./migrations").run(&pool).await?;
 
         Ok(Self { pool })
