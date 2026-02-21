@@ -13,19 +13,21 @@ pub async fn metrics_worker(mut rx: mpsc::Receiver<MetricEvent>, pool: PgPool) {
                 path,
                 status_code,
                 duration_ms,
+                user_id,
             } => {
                 match sqlx::query(
-                    "INSERT INTO metrics_handler (request_id, method, path, status_code, duration_ms) VALUES ($1, $2, $3, $4, $5)",
+                    "INSERT INTO metrics_handler (request_id, method, path, status_code, duration_ms, user_id) VALUES ($1, $2, $3, $4, $5, $6)",
                 )
                 .bind(request_id)
                 .bind(&method)
                 .bind(&path)
                 .bind(status_code)
                 .bind(duration_ms)
+                .bind(user_id.as_deref())
                 .execute(&pool)
                 .await
                 {
-                    Ok(_) => debug!(request_id = %request_id, method, path, status_code, duration_ms, "tracked http request"),
+                    Ok(_) => debug!(request_id = %request_id, method, path, status_code, duration_ms, user_id, "tracked http request"),
                     Err(e) => warn!(error = %e, "failed to track http request metric"),
                 }
             }

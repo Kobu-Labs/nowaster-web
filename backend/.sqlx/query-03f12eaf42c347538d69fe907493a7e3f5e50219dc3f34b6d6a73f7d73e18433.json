@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                UPDATE task t\n                SET\n                    name = COALESCE($2, t.name),\n                    description = COALESCE($3, t.description),\n                    completed = COALESCE($4, t.completed)\n                WHERE\n                    t.id = $1\n                    AND t.user_id = $5\n                RETURNING \n                    t.id, \n                    t.project_id, \n                    t.name, \n                    t.description, \n                    t.completed, \n                    t.user_id, \n                    t.created_at, \n                    t.updated_at\n            ",
+  "query": "\n                UPDATE task t\n                SET\n                    name = COALESCE($2, t.name),\n                    description = COALESCE($3, t.description),\n                    completed = COALESCE($4, t.completed)\n                WHERE\n                    t.id = $1\n                    AND t.user_id = $5\n                RETURNING\n                    t.id,\n                    t.project_id,\n                    t.name,\n                    t.description,\n                    t.completed,\n                    t.user_id,\n                    t.created_at,\n                    t.updated_at\n            ",
   "describe": {
     "columns": [
       {
@@ -64,5 +64,5 @@
       false
     ]
   },
-  "hash": "cb6d4adfa4d285446e9e6dbe986501b034ea4ea9bcb4490ac973a72672cd08a0"
+  "hash": "03f12eaf42c347538d69fe907493a7e3f5e50219dc3f34b6d6a73f7d73e18433"
 }

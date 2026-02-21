@@ -291,5 +291,6 @@ fn make_span_for_request<B>(req: &Request<B>) -> tracing::Span {
         uri = %req.uri(),
         request_id = %request_id,
         http.status_code = tracing::field::Empty,
+        user_id = tracing::field::Empty,
     )
 }

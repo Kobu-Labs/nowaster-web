@@ -13,6 +13,7 @@ pub enum MetricEvent {
         path: String,
         status_code: i16,
         duration_ms: f64,
+        user_id: Option<String>,
     },
     DbQuery {
         request_id: Option<Uuid>,
