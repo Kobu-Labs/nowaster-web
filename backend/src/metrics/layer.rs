@@ -27,6 +27,7 @@ struct HttpSpanData {
     method: String,
     path: String,
     status_code: Option<i16>,
+    user_id: Option<String>,
 }
 
 // Only carries the name; timing comes from the sqlx::query event.
@@ -129,6 +130,7 @@ where
                 method: visitor.get("method").unwrap_or_default(),
                 path: visitor.get("uri").unwrap_or_default(),
                 status_code: None,
+                user_id: None,
             });
         } else if target == "db_metrics" && name == "db_query" {
             let mut visitor = FieldVisitor::new();
@@ -156,6 +158,9 @@ where
                 if let Ok(code) = status.parse::<i16>() {
                     data.status_code = Some(code);
                 }
+            }
+            if let Some(user_id) = visitor.get("user_id") {
+                data.user_id = Some(user_id);
             }
         }
     }
@@ -214,6 +219,7 @@ where
                     path: data.path.clone(),
                     status_code,
                     duration_ms,
+                    user_id: data.user_id.clone(),
                 });
             }
         }
