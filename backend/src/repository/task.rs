@@ -60,9 +60,11 @@ impl TaskRepositoryTrait for TaskRepository {
 
     #[instrument(err, skip(self), fields(actor_id = %actor, task_name = %dto.name))]
     async fn create(&self, dto: CreateTaskDto, actor: &Actor) -> Result<Task> {
-        let row = sqlx::query_as!(
-            ReadTaskRow,
-            r#"
+        let row = crate::named_query!(
+            "task_create",
+            sqlx::query_as!(
+                ReadTaskRow,
+                r#"
                 INSERT INTO task (project_id, name, description, user_id)
                 VALUES ($1, $2, $3, $4)
                 RETURNING
@@ -75,13 +77,13 @@ impl TaskRepositoryTrait for TaskRepository {
                     created_at,
                     updated_at
             "#,
-            dto.project_id,
-            dto.name,
-            dto.description,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                dto.project_id,
+                dto.name,
+                dto.description,
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(self.mapper(row))
     }
@@ -136,10 +138,10 @@ impl TaskRepositoryTrait for TaskRepository {
 
         query.push(" ORDER BY task.completed ASC, task.updated_at DESC");
 
-        let rows = query
-            .build_query_as::<ReadTaskRow>()
-            .fetch_all(self.db_conn.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "task_filter",
+            query.build_query_as::<ReadTaskRow>().fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())
     }
@@ -182,9 +184,11 @@ impl TaskRepositoryTrait for TaskRepository {
 
     #[instrument(err, skip(self), fields(task_id = %dto.id, actor_id = %actor))]
     async fn update(&self, dto: UpdateTaskDto, actor: &Actor) -> Result<Task> {
-        let row = sqlx::query_as!(
-            ReadTaskRow,
-            r#"
+        let row = crate::named_query!(
+            "task_update",
+            sqlx::query_as!(
+                ReadTaskRow,
+                r#"
                 UPDATE task t
                 SET
                     name = COALESCE($2, t.name),
@@ -193,33 +197,35 @@ impl TaskRepositoryTrait for TaskRepository {
                 WHERE
                     t.id = $1
                     AND t.user_id = $5
-                RETURNING 
-                    t.id, 
-                    t.project_id, 
-                    t.name, 
-                    t.description, 
-                    t.completed, 
-                    t.user_id, 
-                    t.created_at, 
+                RETURNING
+                    t.id,
+                    t.project_id,
+                    t.name,
+                    t.description,
+                    t.completed,
+                    t.user_id,
+                    t.created_at,
                     t.updated_at
             "#,
-            dto.id,
-            dto.name,
-            dto.description,
-            dto.completed,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                dto.id,
+                dto.name,
+                dto.description,
+                dto.completed,
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(self.mapper(row))
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn get_task_statistics(&self, actor: &Actor) -> Result<TaskStatsDto> {
-        let stats = sqlx::query_as!(
-            TaskStatsDto,
-            r#"
+        let stats = crate::named_query!(
+            "task_statistics",
+            sqlx::query_as!(
+                TaskStatsDto,
+                r#"
                 SELECT
                     COUNT(t.id) as "total_tasks!",
                     COUNT(CASE WHEN t.completed = false THEN 1 END) as "active_tasks!",
@@ -230,10 +236,10 @@ impl TaskRepositoryTrait for TaskRepository {
                 LEFT JOIN session s ON s.task_id = t.id
                 WHERE t.user_id = $1
             "#,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(stats)
     }
@@ -248,9 +254,11 @@ impl TaskRepositoryTrait for TaskRepository {
             return Ok(Vec::new());
         }
 
-        let rows = sqlx::query_as!(
-            ReadTaskDetailsDto,
-            r#"
+        let rows = crate::named_query!(
+            "task_details_by_ids",
+            sqlx::query_as!(
+                ReadTaskDetailsDto,
+                r#"
                 SELECT
                     t.id,
                     t.project_id,
@@ -267,11 +275,11 @@ impl TaskRepositoryTrait for TaskRepository {
                 GROUP BY t.id, t.project_id, t.name, t.description, t.completed, t.user_id, t.created_at, t.updated_at
                 ORDER BY t.completed ASC, t.updated_at DESC
             "#,
-            &task_ids,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                &task_ids,
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows)
     }

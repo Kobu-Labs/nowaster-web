@@ -219,10 +219,12 @@ impl CategoryRepositoryTrait for CategoryRepository {
         &self,
         actor: &Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
-        let rows = sqlx::query_as!(
-            ReadCategoryWithSessionCountDto,
-            r#"
-                SELECT 
+        let rows = crate::named_query!(
+            "category_session_count",
+            sqlx::query_as!(
+                ReadCategoryWithSessionCountDto,
+                r#"
+                SELECT
                     c.id,
                     c.name,
                     c.color,
@@ -234,20 +236,21 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 GROUP BY c.id
                 ORDER BY COALESCE(COUNT(s.id),0) DESC
             "#,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows)
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor))]
+    #[instrument(level = "debug", err, skip_all)]
     async fn get_category_statistics(&self, actor: &Actor) -> Result<CategoryStatsDto> {
-        // First get basic stats
-        let basic_stats = sqlx::query!(
-            r#"
-                SELECT 
+        let basic_stats = crate::named_query!(
+            "category_stats_basic",
+            sqlx::query!(
+                r#"
+                SELECT
                     COUNT(DISTINCT c.id) as "total_categories!",
                     COUNT(s.id) as "total_sessions!",
                     CAST(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time))) / 60 AS FLOAT8) as total_time_minutes
@@ -255,15 +258,16 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
                 WHERE c.created_by = $1
             "#,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
-        // Get most used category separately
-        let most_used = sqlx::query!(
-            r#"
-                SELECT 
+        let most_used = crate::named_query!(
+            "category_stats_most_used",
+            sqlx::query!(
+                r#"
+                SELECT
                     c.id, c.name, c.color, c.last_used_at
                 FROM category c
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
@@ -272,10 +276,10 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 ORDER BY COUNT(s.id) DESC
                 LIMIT 1
             "#,
-            actor.user_id
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_optional(self.db_conn.get_pool())
+        )?;
 
         let most_used_category = most_used.map(|row| ReadCategoryDto {
             id: row.id,

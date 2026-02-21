@@ -53,10 +53,12 @@ impl RecurringSessionRepository {
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn get_recurring_sessions(&self, actor: &Actor) -> Result<Vec<ReadSesionTemplateRow>> {
-        let rows = sqlx::query_as!(
-            ReadSesionTemplateRow,
-            r#"
-            SELECT 
+        let rows = crate::named_query!(
+            "template_list",
+            sqlx::query_as!(
+                ReadSesionTemplateRow,
+                r#"
+            SELECT
                 st.id,
                 st.name,
                 st.start_date,
@@ -74,7 +76,7 @@ impl RecurringSessionRepository {
                                 'created_by', c.created_by,
                                 'color', c.color,
                                 'last_used_at', c.last_used_at
-                            ) 
+                            )
                         ),
                         'description', rs.description,
                         'start_minute_offset', rs.start_minute_offset,
@@ -102,8 +104,10 @@ impl RecurringSessionRepository {
             WHERE st.user_id = $1
             GROUP BY st.id, st.name, st.start_date, st.end_date, st.interval, st.created_at
            "#,
-            actor.user_id
-        ).fetch_all(self.db_conn.get_pool()).await?;
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows)
     }
@@ -263,9 +267,11 @@ impl RecurringSessionRepository {
 
     #[instrument(err, skip(self), fields(template_id = %id))]
     pub async fn find_template_by_id(&self, id: Uuid) -> Result<Option<ReadTemplateShallowDto>> {
-        let val = sqlx::query_as!(
-            ReadTemplateShallowDto,
-            r#"
+        let val = crate::named_query!(
+            "template_find_by_id",
+            sqlx::query_as!(
+                ReadTemplateShallowDto,
+                r#"
             SELECT
                 s.id,
                 s.name,
@@ -275,10 +281,10 @@ impl RecurringSessionRepository {
             FROM session_template s
             WHERE s.id = $1
             "#,
-            id
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
+                id
+            )
+            .fetch_optional(self.db_conn.get_pool())
+        )?;
 
         Ok(val)
     }
