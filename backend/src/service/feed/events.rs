@@ -25,11 +25,11 @@ impl FeedEventService {
     pub async fn get_feed(
         &self,
         query: FeedQueryDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadFeedEventDto>> {
         let events = self
             .feed_repository
-            .get_feed(actor.user_id.clone(), query)
+            .get_feed(&actor.user_id, query)
             .await?;
 
         if events.is_empty() {

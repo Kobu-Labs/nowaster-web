@@ -55,14 +55,14 @@ impl ProjectService {
     pub async fn create_project(
         &self,
         dto: CreateProjectDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadProjectDto> {
         let res = self.repo.create(dto, actor).await?;
         Ok(ReadProjectDto::from(res))
     }
 
     #[instrument(err, skip(self), fields(project_id = %id, actor = %actor))]
-    pub async fn delete_project(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_project(&self, id: Uuid, actor: &Actor) -> Result<()> {
         self.repo.delete_project(id, actor).await?;
         Ok(())
     }
@@ -71,14 +71,14 @@ impl ProjectService {
     pub async fn filter_projects(
         &self,
         filter: FilterProjectDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadProjectDto>> {
         let res = self.repo.filter_projects(filter, actor).await?;
         Ok(res.into_iter().map(ReadProjectDto::from).collect())
     }
 
     #[instrument(err, skip(self), fields(project_id = %project_id, actor = %actor))]
-    pub async fn get_by_id(&self, project_id: Uuid, actor: Actor) -> Result<Project> {
+    pub async fn get_by_id(&self, project_id: Uuid, actor: &Actor) -> Result<Project> {
         self.repo.find_by_id(project_id, actor).await
     }
 
@@ -86,9 +86,9 @@ impl ProjectService {
     pub async fn update_project(
         &self,
         dto: UpdateProjectDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadProjectDto> {
-        let project = self.repo.find_by_id(dto.id, actor.clone()).await?;
+        let project = self.repo.find_by_id(dto.id, actor).await?;
         if project.user_id != actor.user_id {
             return Err(anyhow::anyhow!(
                 "You are not allowed to update this project"
@@ -99,7 +99,7 @@ impl ProjectService {
         let was_completed = project.completed;
         let is_now_completed = dto.completed.unwrap_or(was_completed);
 
-        let res = self.repo.update(dto, actor.clone()).await?;
+        let res = self.repo.update(dto, actor).await?;
 
         // If project was just completed, publish feed event
         if !was_completed && is_now_completed {
@@ -107,7 +107,7 @@ impl ProjectService {
 
             let tasks = self
                 .task_service
-                .get_tasks_by_project(res.id, actor.clone())
+                .get_tasks_by_project(res.id, actor)
                 .await?;
 
             let tasks_time_breakdown: Vec<TaskTimeBreakdown> = tasks
@@ -127,7 +127,7 @@ impl ProjectService {
                         project_id: Some(res.id),
                         ..Default::default()
                     },
-                    actor.clone(),
+                    actor,
                 )
                 .await?;
 
@@ -161,7 +161,7 @@ impl ProjectService {
 
             let user = self
                 .user_service
-                .get_user_by_id(actor.user_id.clone())
+                .get_user_by_id(&actor.user_id)
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("User not found"))?;
 
@@ -190,13 +190,13 @@ impl ProjectService {
     #[instrument(err, skip(self), fields(actor = %actor))]
     pub async fn get_projects_details(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadProjectDetailsDto>> {
         self.repo.get_projects_details(actor).await
     }
 
     #[instrument(err, skip(self), fields(actor = %actor))]
-    pub async fn get_project_statistics(&self, actor: Actor) -> Result<ProjectStatsDto> {
+    pub async fn get_project_statistics(&self, actor: &Actor) -> Result<ProjectStatsDto> {
         self.repo.get_project_statistics(actor).await
     }
 }

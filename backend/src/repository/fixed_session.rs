@@ -29,25 +29,25 @@ pub struct FixedSessionRepository {
 }
 
 pub trait SessionRepositoryTrait {
-    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()>;
+    async fn create_many(&self, dto: Vec<CreateFixedSessionDto>, actor: &Actor) -> Result<()>;
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Self::SessionType>;
-    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64>;
+    async fn delete_session(&self, id: Uuid, actor: &Actor) -> Result<()>;
+    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: &Actor) -> Result<u64>;
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Self::SessionType>>;
     type SessionType;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn convert(&self, val: Vec<GenericFullRowSession>) -> Result<Vec<Self::SessionType>>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Option<Self::SessionType>>;
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>>;
-    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession>;
+    async fn create(&self, dto: CreateFixedSessionDto, actor: &Actor) -> Result<FixedSession>;
 }
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
@@ -151,10 +151,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Option<Self::SessionType>> {
-        let sessions = sqlx::query_as!(
-            GenericFullRowSession,
-            r#"SELECT
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Option<Self::SessionType>> {
+        let sessions = crate::named_query!(
+            "session_find_by_id",
+            sqlx::query_as!(
+                GenericFullRowSession,
+                r#"SELECT
                 s.id,
                 s.user_id as "user_id!",
                 s.start_time,
@@ -193,11 +195,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.id = $1
                 AND type = 'fixed'
                 AND s.user_id = $2"#,
-            id,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                id,
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let result = self.convert(sessions)?;
         match result.first() {
@@ -207,7 +209,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, session_count = dtos.len()))]
-    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: Actor) -> Result<()> {
+    async fn create_many(&self, dtos: Vec<CreateFixedSessionDto>, actor: &Actor) -> Result<()> {
         let sessions: Vec<CreateFixedSessionDtoWithId> =
             dtos.iter().cloned().map(Into::into).collect();
 
@@ -224,7 +226,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 .push_bind(session.start_time)
                 .push_bind(session.end_time)
                 .push_bind(session.description.clone())
-                .push_bind(actor.user_id.clone())
+                .push_bind(&actor.user_id)
                 .push_bind(session.id)
                 .push_bind(session.template_id)
                 .push_bind(session.project_id)
@@ -257,42 +259,40 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id, category_id = %dto.category_id))]
-    async fn create(&self, dto: CreateFixedSessionDto, actor: Actor) -> Result<FixedSession> {
-        let result = sqlx::query!(
-            r#"
+    async fn create(&self, dto: CreateFixedSessionDto, actor: &Actor) -> Result<FixedSession> {
+        let result = crate::named_query!(
+            "session_create",
+            sqlx::query!(
+                r#"
                 INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id, project_id, task_id)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING session.id
             "#,
-            dto.category_id,
-            String::from("fixed"),
-            dto.start_time,
-            dto.end_time,
-            dto.description,
-            actor.user_id,
-            dto.template_id,
-            dto.project_id,
-            dto.task_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
-
-        // INFO: pair tags with created session
-        for tag_id in dto.tag_ids {
-            // TODO: this should be done with either UNNEST or bulk insert
-            sqlx::query!(
-                r#"
-                    INSERT INTO tag_to_session (tag_id, session_id)
-                    VALUES ($1, $2)
-                "#,
-                tag_id,
-                result.id
+                dto.category_id,
+                String::from("fixed"),
+                dto.start_time,
+                dto.end_time,
+                dto.description,
+                actor.user_id,
+                dto.template_id,
+                dto.project_id,
+                dto.task_id
             )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
+
+        if !dto.tag_ids.is_empty() {
+            sqlx::query(
+                "INSERT INTO tag_to_session (session_id, tag_id)
+                 SELECT $1, tag_id FROM UNNEST($2::uuid[]) AS tag_id",
+            )
+            .bind(result.id)
+            .bind(&dto.tag_ids)
             .execute(self.db_conn.get_pool())
             .await?;
         }
 
-        let session = self.find_by_id(result.id, actor.clone()).await?;
+        let session = self.find_by_id(result.id, actor).await?;
         match session {
             Some(val) => Ok(val),
             None => Err(anyhow!("Error creating the session")),
@@ -303,7 +303,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn filter_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Self::SessionType>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"SELECT
@@ -344,7 +344,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             WHERE
                 s.user_id = "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(from_endtime) = dto.from_end_time {
             query
@@ -372,10 +372,12 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
         query.push(" ORDER BY s.start_time DESC");
 
-        let rows = query
-            .build_query_as::<GenericFullRowSession>()
-            .fetch_all(self.db_conn.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "session_filter",
+            query
+                .build_query_as::<GenericFullRowSession>()
+                .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let mut sessions = self.convert(rows)?;
 
@@ -490,7 +492,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(id = %id, user_id = %actor.user_id))]
-    async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
+    async fn delete_session(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM session
@@ -506,7 +508,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %actor.user_id))]
-    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: Actor) -> Result<u64> {
+    async fn delete_sessions_by_filter(&self, dto: FilterSessionDto, actor: &Actor) -> Result<u64> {
         if dto.is_empty() {
             return Err(anyhow!(
                 "No filters were specified - aborting session deletion"
@@ -518,7 +520,7 @@ impl SessionRepositoryTrait for FixedSessionRepository {
             r#"DELETE FROM session s
             WHERE s.user_id = "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
         query.push(" AND s.type = 'fixed'");
 
         if let Some(from_endtime) = dto.from_end_time {
@@ -558,12 +560,14 @@ impl SessionRepositoryTrait for FixedSessionRepository {
     async fn update_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Self::SessionType> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         dbg!(&dto.project_id);
-        sqlx::query(
-            r#"
+        crate::named_query!(
+            "session_update",
+            sqlx::query(
+                r#"
                 UPDATE "session" s SET
                     description = COALESCE($1, s.description),
                     start_time = COALESCE($2, s.start_time),
@@ -573,20 +577,20 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                     task_id = CASE WHEN $7 THEN $8 ELSE s.task_id END
                 WHERE s.id = $9
             "#,
-        )
-        .bind(dto.description)
-        .bind(dto.start_time)
-        .bind(dto.end_time)
-        .bind(dto.category_id)
-        // following is to distinguish if the field should not be updated,
-        // or be set to NULL, hence the 'CASE WHEN...' above
-        .bind(dto.project_id.is_some())
-        .bind(dto.project_id.flatten())
-        .bind(dto.task_id.is_some())
-        .bind(dto.task_id.flatten())
-        .bind(dto.id)
-        .execute(tx.as_mut())
-        .await?;
+            )
+            .bind(dto.description)
+            .bind(dto.start_time)
+            .bind(dto.end_time)
+            .bind(dto.category_id)
+            // following is to distinguish if the field should not be updated,
+            // or be set to NULL, hence the 'CASE WHEN...' above
+            .bind(dto.project_id.is_some())
+            .bind(dto.project_id.flatten())
+            .bind(dto.task_id.is_some())
+            .bind(dto.task_id.flatten())
+            .bind(dto.id)
+            .execute(tx.as_mut())
+        )?;
 
         if let Some(tags) = dto.tag_ids {
             sqlx::query!(
@@ -621,9 +625,11 @@ impl SessionRepositoryTrait for FixedSessionRepository {
 
     #[instrument(err, skip(self), fields(id = %id))]
     async fn find_by_id_admin(&self, id: Uuid) -> Result<Option<Self::SessionType>> {
-        let sessions = sqlx::query_as!(
-            GenericFullRowSession,
-            r#"SELECT
+        let sessions = crate::named_query!(
+            "session_find_by_id_admin",
+            sqlx::query_as!(
+                GenericFullRowSession,
+                r#"SELECT
                 s.id,
                 s.user_id as "user_id!",
                 s.start_time,
@@ -662,10 +668,10 @@ impl SessionRepositoryTrait for FixedSessionRepository {
                 s.id = $1
                 AND type = 'fixed'
                 "#,
-            id,
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                id,
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let result = self.convert(sessions)?;
         match result.first() {

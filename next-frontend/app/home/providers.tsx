@@ -1,11 +1,12 @@
 "use client";
 
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { useCategories } from "@/components/hooks/category/useCategory";
 import { useTags } from "@/components/hooks/tag/useTags";
 import { useColors } from "@/components/hooks/useColors";
 import { queryClient } from "@/lib/queryClient";
-import { ThemeProvider } from "@/components/pages/theme-provider";
+import type { User } from "@/lib/auth";
 import { Toaster } from "@/components/shadcn/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -15,22 +16,23 @@ import type { FC } from "react";
 
 type ProvidersProps = {
   children: React.ReactNode;
+  initialUser: null | User;
 };
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children, initialUser }: ProvidersProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SpeedInsights />
-      <Analytics />
-      <AuthGuard>
-        <PrefetchQueries />
-        <ThemeProvider attribute="class" defaultTheme="dark">
+    <AuthProvider initialUser={initialUser}>
+      <QueryClientProvider client={queryClient}>
+        <SpeedInsights />
+        <Analytics />
+        <AuthGuard>
+          <PrefetchQueries />
           {children}
-        </ThemeProvider>
-      </AuthGuard>
-      <ReactQueryDevtools initialIsOpen={false} />
-      <Toaster />
-    </QueryClientProvider>
+        </AuthGuard>
+        <ReactQueryDevtools initialIsOpen={false} />
+        <Toaster />
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 

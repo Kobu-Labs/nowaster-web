@@ -100,6 +100,7 @@ impl FromRequestParts<AppState> for Actor {
                 .validate_impersonation_token(impersonation_token)
                 .await
             {
+                tracing::Span::current().record("user_id", target_user_id.as_str());
                 let role = UserRole::User;
                 return Ok(Actor {
                     user_id: target_user_id,
@@ -110,6 +111,7 @@ impl FromRequestParts<AppState> for Actor {
 
         if let Some(api_key) = parts.headers.get("X-API-Key").and_then(|h| h.to_str().ok()) {
             if let Ok((user_id, role)) = state.auth_service.validate_api_token(api_key).await {
+                tracing::Span::current().record("user_id", user_id.as_str());
                 return Ok(Actor { user_id, role });
             }
         }
@@ -120,6 +122,7 @@ impl FromRequestParts<AppState> for Actor {
                 validate_access_token(cookie.value(), state.config.server.app_env.as_str())
             {
                 let role = UserRole::from_str(&claims.role).unwrap_or(UserRole::User);
+                tracing::Span::current().record("user_id", claims.sub.as_str());
                 return Ok(Actor {
                     user_id: claims.sub,
                     role,

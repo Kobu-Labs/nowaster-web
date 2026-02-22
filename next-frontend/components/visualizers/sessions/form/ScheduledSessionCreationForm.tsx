@@ -175,7 +175,7 @@ export const ScheduledSessionCreationForm: FC<
                                 field.onChange(task);
                               }}
                               projectId={form.watch("project")?.id ?? null}
-                              selectedTaskId={field.value?.id}
+                              selectedTaskId={field.value?.id ?? null}
                             />
                           </FormControl>
                           <FormMessage />

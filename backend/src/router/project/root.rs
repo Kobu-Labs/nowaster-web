@@ -43,7 +43,7 @@ async fn create_project_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateProjectDto>,
 ) -> ApiResponse<ReadProjectDto> {
-    let res = state.project_service.create_project(payload, actor).await;
+    let res = state.project_service.create_project(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -55,7 +55,7 @@ async fn delete_project_handler(
 ) -> ApiResponse<()> {
     let res = state
         .project_service
-        .delete_project(project_id, actor)
+        .delete_project(project_id, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -66,7 +66,7 @@ async fn filter_projects_handler(
     Query(payload): Query<FilterProjectDto>,
     actor: Actor,
 ) -> ApiResponse<Vec<ReadProjectDto>> {
-    let res = state.project_service.filter_projects(payload, actor).await;
+    let res = state.project_service.filter_projects(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -78,7 +78,7 @@ async fn get_project_by_id_handler(
 ) -> ApiResponse<Option<ReadProjectDto>> {
     let res = state
         .project_service
-        .get_by_id(project_id, actor)
+        .get_by_id(project_id, &actor)
         .await
         .map(|val| Some(ReadProjectDto::from(val)));
     ApiResponse::from_result(res)
@@ -90,7 +90,7 @@ async fn update_project_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateProjectDto>,
 ) -> ApiResponse<ReadProjectDto> {
-    let res = state.project_service.update_project(payload, actor).await;
+    let res = state.project_service.update_project(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -99,7 +99,7 @@ async fn get_projects_details(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<Vec<ReadProjectDetailsDto>> {
-    let res = state.project_service.get_projects_details(actor).await;
+    let res = state.project_service.get_projects_details(&actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -108,7 +108,7 @@ async fn get_project_statistics_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<ProjectStatsDto> {
-    let res = state.project_service.get_project_statistics(actor).await;
+    let res = state.project_service.get_project_statistics(&actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -120,7 +120,7 @@ async fn get_tasks_by_project_handler(
 ) -> ApiResponse<Vec<ReadTaskDetailsDto>> {
     let res = state
         .task_service
-        .get_tasks_by_project(project_id, actor)
+        .get_tasks_by_project(project_id, &actor)
         .await;
     ApiResponse::from_result(res)
 }

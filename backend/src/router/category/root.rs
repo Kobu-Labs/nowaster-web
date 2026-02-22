@@ -42,7 +42,7 @@ async fn create_category_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
-    let res = state.category_service.upsert_category(payload, actor).await;
+    let res = state.category_service.upsert_category(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -63,7 +63,7 @@ async fn filter_categories_handler(
 ) -> ApiResponse<Vec<ReadCategoryDto>> {
     let res = state
         .category_service
-        .filter_categories(payload, actor)
+        .filter_categories(payload, &actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -81,7 +81,7 @@ async fn get_category_by_id_handler(
                 id: Some(category_id),
                 name: None,
             },
-            actor,
+            &actor,
         )
         .await
         .map(|val| val.first().cloned());
@@ -94,7 +94,7 @@ async fn update_category_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateCategoryDto>,
 ) -> ApiResponse<ReadCategoryDto> {
-    let res = state.category_service.update_category(payload, actor).await;
+    let res = state.category_service.update_category(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -105,7 +105,7 @@ async fn get_categories_with_session_count_handler(
 ) -> ApiResponse<Vec<ReadCategoryWithSessionCountDto>> {
     let res = state
         .category_service
-        .get_categories_with_session_count(actor)
+        .get_categories_with_session_count(&actor)
         .await;
     ApiResponse::from_result(res)
 }
@@ -115,7 +115,7 @@ async fn get_category_statistics_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<CategoryStatsDto> {
-    let res = state.category_service.get_category_statistics(actor).await;
+    let res = state.category_service.get_category_statistics(&actor).await;
     ApiResponse::from_result(res)
 }
 

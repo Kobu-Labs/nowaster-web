@@ -34,13 +34,15 @@ impl FriendsRepository {
         }
     }
     #[instrument(err, skip(self), fields(request_id = %id, actor_id = %actor))]
-    pub async fn get_friend_request(&self, id: Uuid, actor: Actor) -> Result<ReadFriendRequestDto> {
-        let result = sqlx::query(
-            r#"
-                SELECT 
-                    fr.id, 
+    pub async fn get_friend_request(&self, id: Uuid, actor: &Actor) -> Result<ReadFriendRequestDto> {
+        let result = crate::named_query!(
+            "friend_request_get",
+            sqlx::query(
+                r#"
+                SELECT
+                    fr.id,
                     fr.created_at,
-                    fr.introduction_message, 
+                    fr.introduction_message,
                     fr.status,
 
                     u1.displayname AS requestor_username,
@@ -54,11 +56,11 @@ impl FriendsRepository {
                 JOIN "user" u2 ON u2.id = recipient_id
                 WHERE fr.id = $1 AND (fr.recipient_id = $2 OR fr.requestor_id = $2)
             "#,
-        )
-        .bind(id)
-        .bind(actor.user_id)
-        .fetch_one(self.db.get_pool())
-        .await?;
+            )
+            .bind(id)
+            .bind(&actor.user_id)
+            .fetch_one(self.db.get_pool())
+        )?;
 
         let result = ReadFriendRequestDto::from_row(&result)?;
 
@@ -71,27 +73,29 @@ impl FriendsRepository {
         dto: UpdateFriendRequestDto,
     ) -> Result<ReadFriendRequestDto> {
         let mut tx = self.db.get_pool().begin().await?;
-        let request = sqlx::query(
-            r#"
+        let request = crate::named_query!(
+            "friend_request_update",
+            sqlx::query(
+                r#"
                 WITH updated AS (
                     UPDATE friend_request
-                    SET 
+                    SET
                         status = $1,
                         updated_at = now(),
                         updated_to_status = $1
-                    WHERE id = $2 
-                    RETURNING 
-                        id, 
-                        requestor_id, 
+                    WHERE id = $2
+                    RETURNING
+                        id,
+                        requestor_id,
                         recipient_id,
                         created_at,
                         introduction_message,
                         status
                     )
                 SELECT
-                    u.id, 
+                    u.id,
                     u.created_at,
-                    u.introduction_message, 
+                    u.introduction_message,
                     u.status,
 
                     u1.displayname AS requestor_username,
@@ -104,11 +108,11 @@ impl FriendsRepository {
                 JOIN "user" u1 ON u1.id = u.requestor_id
                 JOIN "user" u2 ON u2.id = u.recipient_id
             "#,
-        )
-        .bind(dto.status)
-        .bind(dto.request_id)
-        .fetch_one(tx.as_mut())
-        .await?;
+            )
+            .bind(dto.status)
+            .bind(dto.request_id)
+            .fetch_one(tx.as_mut())
+        )?;
 
         let request = ReadFriendRequestDto::from_row(&request)?;
 
@@ -133,14 +137,16 @@ impl FriendsRepository {
         recipient_id: String,
         tx: &mut PgConnection,
     ) -> Result<ReadFriendshipDto> {
-        let result = sqlx::query(
-            r#"
+        let result = crate::named_query!(
+            "friend_relationship_create",
+            sqlx::query(
+                r#"
                 WITH inserted as (
                     INSERT INTO friend (friend_1_id, friend_2_id)
                     VALUES ($1, $2)
                     RETURNING id, friend_1_id , friend_2_id , created_at
                 )
-                SELECT 
+                SELECT
                     i.id,
                     i.friend_1_id AS friend1_id,
                     i.friend_2_id AS friend2_id,
@@ -153,11 +159,11 @@ impl FriendsRepository {
                 LEFT JOIN "user" u1 ON u1.id = i.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = i.friend_2_id
             "#,
-        )
-        .bind(requestor_id)
-        .bind(recipient_id)
-        .fetch_one(tx.as_mut())
-        .await?;
+            )
+            .bind(requestor_id)
+            .bind(recipient_id)
+            .fetch_one(tx.as_mut())
+        )?;
 
         let result = ReadFriendshipDto::from_row(&result)?;
 
@@ -165,13 +171,15 @@ impl FriendsRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn list_friends(&self, actor: Actor) -> Result<Vec<ReadFriendshipDto>> {
-        let result = sqlx::query(
-            r#"
-                SELECT 
+    pub async fn list_friends(&self, actor: &Actor) -> Result<Vec<ReadFriendshipDto>> {
+        let result = crate::named_query!(
+            "friend_list",
+            sqlx::query(
+                r#"
+                SELECT
                     f.id,
                     f.friend_1_id as "friend1_id",
-                    f.friend_2_id as "friend2_id", 
+                    f.friend_2_id as "friend2_id",
                     f.created_at,
                     u1.displayname AS friend1_username,
                     u2.displayname AS friend2_username,
@@ -182,10 +190,10 @@ impl FriendsRepository {
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
                 WHERE (f.friend_1_id = $1 OR f.friend_2_id = $1) AND f.deleted is not true
             "#,
-        )
-        .bind(actor.user_id)
-        .fetch_all(self.db.get_pool())
-        .await?;
+            )
+            .bind(&actor.user_id)
+            .fetch_all(self.db.get_pool())
+        )?;
 
         let result = result
             .into_iter()
@@ -199,17 +207,19 @@ impl FriendsRepository {
     pub async fn remove_friendship(
         &self,
         dto: RemoveFriendDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendshipDto> {
-        let row = sqlx::query(
-            r#"
+        let row = crate::named_query!(
+            "friend_remove",
+            sqlx::query(
+                r#"
                 WITH deleted AS (
                     UPDATE friend
                     SET deleted = true
                     WHERE id = $1 AND (friend_1_id = $2 OR friend_2_id = $2)
                     RETURNING id, friend_1_id, friend_2_id, created_at
                 )
-                SELECT 
+                SELECT
                     d.id,
                     d.friend_1_id AS friend1_id,
                     d.friend_2_id AS friend2_id,
@@ -222,11 +232,11 @@ impl FriendsRepository {
                 LEFT JOIN "user" u1 ON u1.id = d.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = d.friend_2_id
             "#,
-        )
-        .bind(dto.friendship_id)
-        .bind(actor.user_id)
-        .fetch_one(self.db.get_pool())
-        .await?;
+            )
+            .bind(dto.friendship_id)
+            .bind(&actor.user_id)
+            .fetch_one(self.db.get_pool())
+        )?;
 
         let result = ReadFriendshipDto::from_row(&row)?;
 
@@ -237,7 +247,7 @@ impl FriendsRepository {
     pub async fn create_friend_request(
         &self,
         data: CreateFriendRequestDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFriendRequestDto> {
         let mut tx = self.db.get_pool().begin().await?;
         let exising_request = sqlx::query!(
@@ -276,8 +286,10 @@ impl FriendsRepository {
             return Err(anyhow::anyhow!("You are already friends"));
         }
 
-        let result = sqlx::query(
-            r#"
+        let result = crate::named_query!(
+            "friend_request_create",
+            sqlx::query(
+                r#"
                 WITH inserted AS (
                     INSERT INTO friend_request (requestor_id, recipient_id, introduction_message)
                     VALUES ($1, $2, $3)
@@ -289,10 +301,10 @@ impl FriendsRepository {
                         introduction_message,
                         status
                 )
-                SELECT 
-                    i.id, 
+                SELECT
+                    i.id,
                     i.created_at,
-                    i.introduction_message, 
+                    i.introduction_message,
                     i.status,
 
                     u1.displayname AS requestor_username,
@@ -305,12 +317,12 @@ impl FriendsRepository {
                 JOIN "user" u1 ON u1.id = i.requestor_id
                 JOIN "user" u2 ON u2.id = i.recipient_id
             "#,
-        )
-        .bind(actor.user_id)
-        .bind(data.recipient_id)
-        .bind(data.introduction_message)
-        .fetch_one(tx.as_mut())
-        .await?;
+            )
+            .bind(&actor.user_id)
+            .bind(data.recipient_id)
+            .bind(data.introduction_message)
+            .fetch_one(tx.as_mut())
+        )?;
 
         tx.commit().await?;
 
@@ -323,14 +335,16 @@ impl FriendsRepository {
     pub async fn list_friend_requests(
         &self,
         data: ReadFriendRequestsDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadFriendRequestDto>> {
-        let result = sqlx::query(
-            r#"
+        let result = crate::named_query!(
+            "friend_request_list",
+            sqlx::query(
+                r#"
                 SELECT
-                    fr.id, 
+                    fr.id,
                     fr.created_at,
-                    fr.introduction_message, 
+                    fr.introduction_message,
                     fr.status,
 
                     u1.displayname AS requestor_username,
@@ -342,15 +356,15 @@ impl FriendsRepository {
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
-                WHERE 
+                WHERE
                     ((fr.recipient_id = $1 AND $2 = 'incoming') OR (fr.requestor_id = $1 AND $2 = 'outgoing'))
                     AND fr.status = 'pending'
             "#,
-        )
-            .bind(actor.user_id)
+            )
+            .bind(&actor.user_id)
             .bind(data.direction.to_string())
-        .fetch_all(self.db.get_pool())
-        .await?;
+            .fetch_all(self.db.get_pool())
+        )?;
 
         let result = result
             .into_iter()
@@ -365,9 +379,11 @@ impl FriendsRepository {
         &self,
         friendship_id: Uuid,
     ) -> Result<Option<ReadFriendshipDto>> {
-        let result = sqlx::query(
-            r#"
-                SELECT 
+        let result = crate::named_query!(
+            "friend_get_by_id",
+            sqlx::query(
+                r#"
+                SELECT
                     f.id,
                     f.friend_1_id AS friend1_id,
                     f.friend_2_id AS friend2_id,
@@ -381,10 +397,10 @@ impl FriendsRepository {
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
                 WHERE f.id = $1
             "#,
-        )
-        .bind(friendship_id)
-        .fetch_optional(self.db.get_pool())
-        .await?;
+            )
+            .bind(friendship_id)
+            .fetch_optional(self.db.get_pool())
+        )?;
 
         match result {
             Some(row) => Ok(Some(ReadFriendshipDto::from_row(&row)?)),

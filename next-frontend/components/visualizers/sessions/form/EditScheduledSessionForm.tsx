@@ -168,7 +168,7 @@ export const EditScheduledSession: FC<EditStopwatchSessionProps> = (props) => {
                           <FormControl>
                             <TaskPicker
                               onSelectTask={(task) => {
-                                field.onChange(task?.id);
+                                field.onChange(task?.id ?? null);
                               }}
                               projectId={form.watch("projectId") ?? null}
                               selectedTaskId={field.value}

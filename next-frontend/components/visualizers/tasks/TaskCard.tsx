@@ -58,7 +58,7 @@ export const TaskCard: FC<TaskCardProps> = ({ onEdit, projectColor, task }) => {
     <Link href={`/home/projects/${task.project_id}/tasks/${task.id}`}>
       <Card
         className={cn(
-          "group backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer h-full flex flex-col",
+          "group backdrop-blur-md bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer h-full flex flex-col",
         )}
         style={{
           borderLeft: projectColor ? `4px solid ${projectColor}` : undefined,

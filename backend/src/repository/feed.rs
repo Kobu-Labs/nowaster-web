@@ -176,7 +176,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: &str) -> Result<()> {
         let (source_id, source_type) = match source {
             RemoveFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -197,7 +197,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: &str) -> Result<()> {
         let (source_id, source_type) = match source {
             AddFeedSource::User(id) => (id, FeedSourceSqlType::User),
         };
@@ -241,7 +241,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn get_feed(&self, user_id: String, query: FeedQueryDto) -> Result<Vec<FeedEvent>> {
+    pub async fn get_feed(&self, user_id: &str, query: FeedQueryDto) -> Result<Vec<FeedEvent>> {
         let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
             SELECT DISTINCT
@@ -267,7 +267,7 @@ impl FeedRepository {
                 AND fs.source_id = fe.source_id
                 AND fs.subscriber_id ="#,
         );
-        base_query.push_bind(user_id.clone());
+        base_query.push_bind(user_id);
         base_query.push(" WHERE fs.is_muted IS NOT TRUE AND fs.is_paused IS NOT TRUE");
         base_query.push(" AND fs.is_allowed_by_visibility IS TRUE ");
 
@@ -281,10 +281,12 @@ impl FeedRepository {
                 .push_bind(limit);
         }
 
-        let rows = base_query
-            .build_query_as::<FeedRowRead>()
-            .fetch_all(self.db.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "feed_list",
+            base_query
+                .build_query_as::<FeedRowRead>()
+                .fetch_all(self.db.get_pool())
+        )?;
 
         let events = rows
             .into_iter()
@@ -300,8 +302,10 @@ impl FeedRepository {
             return Ok(vec![]);
         }
 
-        let results = sqlx::query!(
-            r#"
+        let results = crate::named_query!(
+            "feed_event_reactions",
+            sqlx::query!(
+                r#"
                 SELECT
                     fr.id,
                     fr.feed_event_id,
@@ -314,10 +318,10 @@ impl FeedRepository {
                 JOIN "user" u on u.id = fr.user_id
                 WHERE feed_event_id = ANY($1)
             "#,
-            feed_event_ids
-        )
-        .fetch_all(self.db.get_pool())
-        .await?;
+                feed_event_ids
+            )
+            .fetch_all(self.db.get_pool())
+        )?;
 
         let reactions = results
             .into_iter()
@@ -340,8 +344,10 @@ impl FeedRepository {
 
     #[instrument(err, skip(self), fields(reaction_id = %reaction_id))]
     pub async fn get_reaction_by_id(&self, reaction_id: Uuid) -> Result<Option<FeedReaction>> {
-        let results = sqlx::query!(
-            r#"
+        let results = crate::named_query!(
+            "feed_reaction_by_id",
+            sqlx::query!(
+                r#"
                 SELECT
                     fr.id,
                     fr.feed_event_id,
@@ -354,10 +360,10 @@ impl FeedRepository {
                 JOIN "user" u on u.id = fr.user_id
                 WHERE fr.id = $1
             "#,
-            reaction_id
-        )
-        .fetch_optional(self.db.get_pool())
-        .await?;
+                reaction_id
+            )
+            .fetch_optional(self.db.get_pool())
+        )?;
 
         let reaction = results.map(|row| FeedReaction {
             id: row.id,
@@ -379,7 +385,7 @@ impl FeedRepository {
     pub async fn create_reaction(
         &self,
         dto: CreateFeedReactionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<FeedReaction> {
         let id = Uuid::new_v4();
         sqlx::query!(
@@ -409,7 +415,7 @@ impl FeedRepository {
         &self,
         feed_event_id: Uuid,
         emoji: String,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         sqlx::query!(
             r#"
@@ -429,11 +435,13 @@ impl FeedRepository {
     #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_user_subscriptions(
         &self,
-        user_id: String,
+        user_id: &str,
     ) -> Result<Vec<FeedSubscriptionRow>> {
-        let results = sqlx::query_as!(
-            FeedSubscriptionRow,
-            r#"
+        let results = crate::named_query!(
+            "feed_user_subscriptions",
+            sqlx::query_as!(
+                FeedSubscriptionRow,
+                r#"
                 SELECT
                     fs.id,
                     fs.created_at,
@@ -446,10 +454,10 @@ impl FeedRepository {
                 WHERE fs.subscriber_id = $1
                 ORDER BY fs.created_at DESC
             "#,
-            user_id
-        )
-        .fetch_all(self.db.get_pool())
-        .await?;
+                user_id
+            )
+            .fetch_all(self.db.get_pool())
+        )?;
 
         Ok(results)
     }
@@ -458,7 +466,7 @@ impl FeedRepository {
     pub async fn update_subscription(
         &self,
         subscription_id: Uuid,
-        user_id: String,
+        user_id: &str,
         is_muted: Option<bool>,
         is_paused: Option<bool>,
     ) -> Result<()> {
@@ -570,10 +578,12 @@ impl FeedRepository {
         );
         base_query.push_bind(feed_event_id);
 
-        let row = base_query
-            .build_query_as::<FeedRowRead>()
-            .fetch_optional(self.db.get_pool())
-            .await?;
+        let row = crate::named_query!(
+            "feed_event_by_id",
+            base_query
+                .build_query_as::<FeedRowRead>()
+                .fetch_optional(self.db.get_pool())
+        )?;
 
         let result = match row {
             Some(event) => Some(FeedEventMapper::map_to_feed_event(event)?),

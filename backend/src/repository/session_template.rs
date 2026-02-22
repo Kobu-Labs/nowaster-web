@@ -52,11 +52,13 @@ impl RecurringSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_recurring_sessions(&self, actor: Actor) -> Result<Vec<ReadSesionTemplateRow>> {
-        let rows = sqlx::query_as!(
-            ReadSesionTemplateRow,
-            r#"
-            SELECT 
+    pub async fn get_recurring_sessions(&self, actor: &Actor) -> Result<Vec<ReadSesionTemplateRow>> {
+        let rows = crate::named_query!(
+            "template_list",
+            sqlx::query_as!(
+                ReadSesionTemplateRow,
+                r#"
+            SELECT
                 st.id,
                 st.name,
                 st.start_date,
@@ -74,7 +76,7 @@ impl RecurringSessionRepository {
                                 'created_by', c.created_by,
                                 'color', c.color,
                                 'last_used_at', c.last_used_at
-                            ) 
+                            )
                         ),
                         'description', rs.description,
                         'start_minute_offset', rs.start_minute_offset,
@@ -102,8 +104,10 @@ impl RecurringSessionRepository {
             WHERE st.user_id = $1
             GROUP BY st.id, st.name, st.start_date, st.end_date, st.interval, st.created_at
            "#,
-            actor.user_id
-        ).fetch_all(self.db_conn.get_pool()).await?;
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows)
     }
@@ -112,7 +116,7 @@ impl RecurringSessionRepository {
     pub async fn update_session_template(
         &self,
         dto: UpdateSessionTemplateDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         sqlx::query!(
@@ -147,7 +151,7 @@ impl RecurringSessionRepository {
 
         // TODO :rewrite this to a bulk insert
         for session in dto.sessions {
-            self.create_recurring_session(session, dto.id, actor.clone(), &mut tx)
+            self.create_recurring_session(session, dto.id, actor, &mut tx)
                 .await?;
         }
 
@@ -160,7 +164,7 @@ impl RecurringSessionRepository {
         &self,
         template_id: Uuid,
         dto: CreateSessionTemplateDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         let mut tx = self.db_conn.get_pool().begin().await?;
         let template_id: Uuid = sqlx::query_scalar!(
@@ -181,7 +185,7 @@ impl RecurringSessionRepository {
 
         // TODO :rewrite this to a bulk insert
         for session in dto.sessions {
-            self.create_recurring_session(session, template_id, actor.clone(), &mut tx)
+            self.create_recurring_session(session, template_id, actor, &mut tx)
                 .await?;
         }
 
@@ -194,7 +198,7 @@ impl RecurringSessionRepository {
         &self,
         dto: CreateRecurringSessionDto,
         template_id: Uuid,
-        actor: Actor,
+        actor: &Actor,
         tx: &mut sqlx::Transaction<'_, Postgres>,
     ) -> Result<()> {
         sqlx::query!(
@@ -230,7 +234,7 @@ impl RecurringSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(session_id = %session_id, actor_id = %actor))]
-    pub async fn delete_recurring_session(&self, session_id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_recurring_session(&self, session_id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
             DELETE FROM recurring_session
@@ -246,7 +250,7 @@ impl RecurringSessionRepository {
     }
 
     #[instrument(err, skip(self), fields(template_id = %template_id, actor_id = %actor))]
-    pub async fn delete_session_template(&self, template_id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_session_template(&self, template_id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
             DELETE FROM session_template
@@ -263,9 +267,11 @@ impl RecurringSessionRepository {
 
     #[instrument(err, skip(self), fields(template_id = %id))]
     pub async fn find_template_by_id(&self, id: Uuid) -> Result<Option<ReadTemplateShallowDto>> {
-        let val = sqlx::query_as!(
-            ReadTemplateShallowDto,
-            r#"
+        let val = crate::named_query!(
+            "template_find_by_id",
+            sqlx::query_as!(
+                ReadTemplateShallowDto,
+                r#"
             SELECT
                 s.id,
                 s.name,
@@ -275,10 +281,10 @@ impl RecurringSessionRepository {
             FROM session_template s
             WHERE s.id = $1
             "#,
-            id
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
+                id
+            )
+            .fetch_optional(self.db_conn.get_pool())
+        )?;
 
         Ok(val)
     }

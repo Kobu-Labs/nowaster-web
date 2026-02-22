@@ -37,17 +37,17 @@ pub struct ReadProjectRow {
 }
 
 pub trait ProjectRepositoryTrait {
-    async fn create(&self, dto: CreateProjectDto, actor: Actor) -> Result<Project>;
-    async fn update(&self, dto: UpdateProjectDto, actor: Actor) -> Result<Project>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Project>;
-    async fn delete_project(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn filter_projects(&self, filter: FilterProjectDto, actor: Actor)
+    async fn create(&self, dto: CreateProjectDto, actor: &Actor) -> Result<Project>;
+    async fn update(&self, dto: UpdateProjectDto, actor: &Actor) -> Result<Project>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Project>;
+    async fn delete_project(&self, id: Uuid, actor: &Actor) -> Result<()>;
+    async fn filter_projects(&self, filter: FilterProjectDto, actor: &Actor)
         -> Result<Vec<Project>>;
     async fn get_projects_details(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadProjectDetailsDto>>;
-    async fn get_project_statistics(&self, actor: Actor) -> Result<ProjectStatsDto>;
+    async fn get_project_statistics(&self, actor: &Actor) -> Result<ProjectStatsDto>;
     fn new(db: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadProjectRow) -> Project;
 }
@@ -58,10 +58,12 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor, project_name = %dto.name))]
-    async fn create(&self, dto: CreateProjectDto, actor: Actor) -> Result<Project> {
-        let row = sqlx::query_as!(
-            ReadProjectRow,
-            r#"
+    async fn create(&self, dto: CreateProjectDto, actor: &Actor) -> Result<Project> {
+        let row = crate::named_query!(
+            "project_create",
+            sqlx::query_as!(
+                ReadProjectRow,
+                r#"
                 INSERT INTO project (name, description, image_url, color, user_id)
                 VALUES ($1, $2, $3, $4, $5)
                 RETURNING
@@ -75,14 +77,14 @@ impl ProjectRepositoryTrait for ProjectRepository {
                     created_at,
                     updated_at
             "#,
-            dto.name,
-            dto.description,
-            dto.image_url,
-            dto.color,
-            actor.user_id
-        )
-        .fetch_one(self.db.get_pool())
-        .await?;
+                dto.name,
+                dto.description,
+                dto.image_url,
+                dto.color,
+                actor.user_id
+            )
+            .fetch_one(self.db.get_pool())
+        )?;
 
         Ok(self.mapper(row))
     }
@@ -105,7 +107,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     async fn filter_projects(
         &self,
         filter: FilterProjectDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Project>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
@@ -123,7 +125,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
                 WHERE project.user_id =
             ",
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(name) = filter.name {
             query.push(" AND project.name = ").push_bind(name);
@@ -139,16 +141,16 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
         query.push(" ORDER BY project.completed ASC, project.updated_at DESC");
 
-        let rows = query
-            .build_query_as::<ReadProjectRow>()
-            .fetch_all(self.db.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "project_filter",
+            query.build_query_as::<ReadProjectRow>().fetch_all(self.db.get_pool())
+        )?;
 
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())
     }
 
     #[instrument(err, skip(self), fields(project_id = %id, actor_id = %actor))]
-    async fn delete_project(&self, id: Uuid, actor: Actor) -> Result<()> {
+    async fn delete_project(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM project
@@ -164,7 +166,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(project_id = %id, actor_id = %actor))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Project> {
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Project> {
         let result = self
             .filter_projects(
                 FilterProjectDto {
@@ -183,10 +185,12 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(project_id = %dto.id, actor_id = %actor))]
-    async fn update(&self, dto: UpdateProjectDto, actor: Actor) -> Result<Project> {
-        let result = sqlx::query_as!(
-            ReadProjectRow,
-            r#"
+    async fn update(&self, dto: UpdateProjectDto, actor: &Actor) -> Result<Project> {
+        let result = crate::named_query!(
+            "project_update",
+            sqlx::query_as!(
+                ReadProjectRow,
+                r#"
                 UPDATE project p
                 SET
                     name = COALESCE($2, name),
@@ -196,27 +200,27 @@ impl ProjectRepositoryTrait for ProjectRepository {
                     completed = COALESCE($6, completed)
                 WHERE id = $1
                     AND user_id = $7
-                RETURNING 
-                    id, 
+                RETURNING
+                    id,
                     name,
-                    description, 
-                    image_url, 
-                    color, 
-                    completed, 
-                    user_id, 
-                    created_at, 
+                    description,
+                    image_url,
+                    color,
+                    completed,
+                    user_id,
+                    created_at,
                     updated_at
             "#,
-            dto.id,
-            dto.name,
-            dto.description,
-            dto.image_url,
-            dto.color,
-            dto.completed,
-            actor.user_id
-        )
-        .fetch_one(self.db.get_pool())
-        .await?;
+                dto.id,
+                dto.name,
+                dto.description,
+                dto.image_url,
+                dto.color,
+                dto.completed,
+                actor.user_id
+            )
+            .fetch_one(self.db.get_pool())
+        )?;
 
         Ok(self.mapper(result))
     }
@@ -224,11 +228,13 @@ impl ProjectRepositoryTrait for ProjectRepository {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn get_projects_details(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadProjectDetailsDto>> {
-        let rows = sqlx::query_as!(
-            ReadProjectDetailsDto,
-            r#"
+        let rows = crate::named_query!(
+            "project_details",
+            sqlx::query_as!(
+                ReadProjectDetailsDto,
+                r#"
                 SELECT
                     p.id,
                     p.name,
@@ -246,19 +252,21 @@ impl ProjectRepositoryTrait for ProjectRepository {
                 GROUP BY p.id
                 ORDER BY p.completed ASC, p.updated_at DESC
             "#,
-            actor.user_id
-        )
-        .fetch_all(self.db.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_all(self.db.get_pool())
+        )?;
 
         Ok(rows)
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_project_statistics(&self, actor: Actor) -> Result<ProjectStatsDto> {
-        let stats = sqlx::query_as!(
-            ProjectStatsDto,
-            r#"
+    async fn get_project_statistics(&self, actor: &Actor) -> Result<ProjectStatsDto> {
+        let stats = crate::named_query!(
+            "project_statistics",
+            sqlx::query_as!(
+                ProjectStatsDto,
+                r#"
                 SELECT
                     COUNT(DISTINCT p.id) as "total_projects!",
                     COUNT(DISTINCT CASE WHEN p.completed = false THEN p.id END) as "active_projects!",
@@ -271,10 +279,10 @@ impl ProjectRepositoryTrait for ProjectRepository {
                 LEFT JOIN session s ON s.task_id = t.id
                 WHERE p.user_id = $1
             "#,
-            actor.user_id
-        )
-        .fetch_one(self.db.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_one(self.db.get_pool())
+        )?;
 
         Ok(stats)
     }

@@ -63,7 +63,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
     <Link href={`/home/projects/${project.id}`}>
       <Card
         className={cn(
-          "group backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer h-full flex flex-col",
+          "group backdrop-blur-md bg-gray-900/80 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-lg cursor-pointer h-full flex flex-col",
         )}
         style={{ borderLeft: `4px solid ${project.color}` }}
       >
@@ -193,7 +193,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ onEdit, project }) => {
 
             {project.taskCount > 0 && (
               <div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
                     className="h-2 rounded-full transition-all duration-300"
                     style={{

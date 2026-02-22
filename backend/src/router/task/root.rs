@@ -38,7 +38,7 @@ async fn create_task_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<CreateTaskDto>,
 ) -> ApiResponse<ReadTaskDto> {
-    let res = state.task_service.create_task(payload, actor).await;
+    let res = state.task_service.create_task(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -48,7 +48,7 @@ async fn delete_task_handler(
     Path(task_id): Path<Uuid>,
     actor: Actor,
 ) -> ApiResponse<()> {
-    let res = state.task_service.delete_task(task_id, actor).await;
+    let res = state.task_service.delete_task(task_id, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -58,7 +58,7 @@ async fn filter_tasks_handler(
     Query(payload): Query<FilterTaskDto>,
     actor: Actor,
 ) -> ApiResponse<Vec<ReadTaskDto>> {
-    let res = state.task_service.filter_tasks(payload, actor).await;
+    let res = state.task_service.filter_tasks(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -70,7 +70,7 @@ async fn get_task_by_id_handler(
 ) -> ApiResponse<Option<ReadTaskDto>> {
     let res = state
         .task_service
-        .get_by_id(task_id, actor)
+        .get_by_id(task_id, &actor)
         .await
         .map(|val| Some(ReadTaskDto::from(val)));
     ApiResponse::from_result(res)
@@ -82,7 +82,7 @@ async fn update_task_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<UpdateTaskDto>,
 ) -> ApiResponse<ReadTaskDto> {
-    let res = state.task_service.update_task(payload, actor).await;
+    let res = state.task_service.update_task(payload, &actor).await;
     ApiResponse::from_result(res)
 }
 
@@ -91,7 +91,7 @@ async fn get_task_statistics_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<TaskStatsDto> {
-    let res = state.task_service.get_task_statistics(actor).await;
+    let res = state.task_service.get_task_statistics(&actor).await;
     ApiResponse::from_result(res)
 }
 

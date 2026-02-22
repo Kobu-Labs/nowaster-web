@@ -34,20 +34,20 @@ pub struct ReadCategoryRow {
 
 pub trait CategoryRepositoryTrait {
     async fn update(&self, dto: UpdateCategoryDto) -> Result<Category>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Category>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Category>;
     async fn delete_category(&self, id: Uuid) -> Result<()>;
     async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Category>>;
     async fn get_categories_with_session_count(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>>;
-    async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto>;
+    async fn get_category_statistics(&self, actor: &Actor) -> Result<CategoryStatsDto>;
     fn new(db_conn: &Arc<Database>) -> Self;
-    async fn upsert(&self, dto: CreateCategoryDto, actor: Actor) -> Result<Category>;
+    async fn upsert(&self, dto: CreateCategoryDto, actor: &Actor) -> Result<Category>;
     fn mapper(&self, row: ReadCategoryRow) -> Category;
 }
 
@@ -59,7 +59,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor, category_name = %dto.name))]
-    async fn upsert(&self, dto: CreateCategoryDto, actor: Actor) -> Result<Category> {
+    async fn upsert(&self, dto: CreateCategoryDto, actor: &Actor) -> Result<Category> {
         let row = sqlx::query_as!(
             ReadCategoryRow,
             r#"
@@ -106,7 +106,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
     async fn filter_categories(
         &self,
         filter: FilterCategoryDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<Category>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
@@ -120,7 +120,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 WHERE category.created_by = 
             ",
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(name) = filter.name {
             query.push(" AND category.name = ").push_bind(name);
@@ -156,7 +156,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
     }
 
     #[instrument(err, skip(self), fields(category_id = %id, actor_id = %actor))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Category> {
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Category> {
         let result = self
             .filter_categories(
                 FilterCategoryDto {
@@ -217,12 +217,14 @@ impl CategoryRepositoryTrait for CategoryRepository {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     async fn get_categories_with_session_count(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadCategoryWithSessionCountDto>> {
-        let rows = sqlx::query_as!(
-            ReadCategoryWithSessionCountDto,
-            r#"
-                SELECT 
+        let rows = crate::named_query!(
+            "category_session_count",
+            sqlx::query_as!(
+                ReadCategoryWithSessionCountDto,
+                r#"
+                SELECT
                     c.id,
                     c.name,
                     c.color,
@@ -234,20 +236,21 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 GROUP BY c.id
                 ORDER BY COALESCE(COUNT(s.id),0) DESC
             "#,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows)
     }
 
-    #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_category_statistics(&self, actor: Actor) -> Result<CategoryStatsDto> {
-        // First get basic stats
-        let basic_stats = sqlx::query!(
-            r#"
-                SELECT 
+    #[instrument(level = "debug", err, skip_all)]
+    async fn get_category_statistics(&self, actor: &Actor) -> Result<CategoryStatsDto> {
+        let basic_stats = crate::named_query!(
+            "category_stats_basic",
+            sqlx::query!(
+                r#"
+                SELECT
                     COUNT(DISTINCT c.id) as "total_categories!",
                     COUNT(s.id) as "total_sessions!",
                     CAST(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time))) / 60 AS FLOAT8) as total_time_minutes
@@ -255,15 +258,16 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
                 WHERE c.created_by = $1
             "#,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
-        // Get most used category separately
-        let most_used = sqlx::query!(
-            r#"
-                SELECT 
+        let most_used = crate::named_query!(
+            "category_stats_most_used",
+            sqlx::query!(
+                r#"
+                SELECT
                     c.id, c.name, c.color, c.last_used_at
                 FROM category c
                 LEFT JOIN session s ON c.id = s.category_id AND s.user_id = $1
@@ -272,10 +276,10 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 ORDER BY COUNT(s.id) DESC
                 LIMIT 1
             "#,
-            actor.user_id
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_optional(self.db_conn.get_pool())
+        )?;
 
         let most_used_category = most_used.map(|row| ReadCategoryDto {
             id: row.id,

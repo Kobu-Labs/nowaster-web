@@ -43,7 +43,7 @@ async fn update_friend_request_handler(
                     AcceptFriendRequestDto {
                         request_id: payload.request_id,
                     },
-                    actor,
+                    &actor,
                 )
                 .await
         }
@@ -54,7 +54,7 @@ async fn update_friend_request_handler(
                     RejectFriendRequestDto {
                         request_id: payload.request_id,
                     },
-                    actor,
+                    &actor,
                 )
                 .await
         }
@@ -65,7 +65,7 @@ async fn update_friend_request_handler(
                     CancelFriendRequestDto {
                         request_id: payload.request_id,
                     },
-                    actor,
+                    &actor,
                 )
                 .await
         }
@@ -111,7 +111,7 @@ async fn create_friend_request_handler(
                 recipient_id: recipient.id,
                 introduction_message: payload.introduction_message,
             },
-            actor,
+            &actor,
         )
         .await;
     ApiResponse::from_result(result)
@@ -126,7 +126,7 @@ async fn list_friend_requests_handler(
     let result = state
         .friend_service
         .list_friend_requests(
-            actor,
+            &actor,
             ReadFriendRequestsDto {
                 direction: direction.direction,
             },
@@ -148,7 +148,7 @@ async fn list_friends_handler(
     State(state): State<AppState>,
     actor: Actor,
 ) -> ApiResponse<Vec<ReadFriendshipDto>> {
-    let result = state.friend_service.list_friends(actor.clone()).await;
+    let result = state.friend_service.list_friends(&actor).await;
 
     ApiResponse::from_result(result)
 }
@@ -159,6 +159,6 @@ async fn remove_friend_handler(
     actor: Actor,
     ValidatedRequest(payload): ValidatedRequest<RemoveFriendDto>,
 ) -> ApiResponse<()> {
-    let result = state.friend_service.remove_friend(payload, actor).await;
+    let result = state.friend_service.remove_friend(payload, &actor).await;
     ApiResponse::from_result(result)
 }

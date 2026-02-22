@@ -59,10 +59,12 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn create(&self, dto: CreateTagDto, actor: Actor) -> Result<TagDetails> {
-        let row = sqlx::query_as!(
-            ReadTagRow,
-            r#"
+    pub async fn create(&self, dto: CreateTagDto, actor: &Actor) -> Result<TagDetails> {
+        let row = crate::named_query!(
+            "tag_create",
+            sqlx::query_as!(
+                ReadTagRow,
+                r#"
                 WITH inserted AS (
                     INSERT INTO tag (label, created_by, color)
                     VALUES ($1, $2, $3)
@@ -76,12 +78,12 @@ impl TagRepository {
                     i.last_used_at as "last_used_at!"
                 FROM inserted i
             "#,
-            dto.label,
-            actor.user_id,
-            dto.color
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                dto.label,
+                actor.user_id,
+                dto.color
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         let query = r#"
             INSERT INTO tag_category (tag_id, category_id)
@@ -99,18 +101,20 @@ impl TagRepository {
             .execute(self.db_conn.get_pool())
             .await?;
 
-        let categories = sqlx::query_as!(
-            ReadCategoryDto,
-            r#"
+        let categories = crate::named_query!(
+            "tag_create_categories",
+            sqlx::query_as!(
+                ReadCategoryDto,
+                r#"
             SELECT cat.id, cat.name, cat.color, cat.last_used_at
             FROM category cat
             JOIN tag_category tc ON tc.category_id = cat.id
             WHERE tc.tag_id = $1
         "#,
-            row.id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                row.id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(TagDetails {
             id: row.id,
@@ -133,7 +137,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
-    pub async fn delete_tag(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_tag(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM tag
@@ -149,7 +153,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(tag_id = %id, actor_id = %actor))]
-    pub async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<TagDetails> {
+    pub async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<TagDetails> {
         let result = self
             .filter_tags(
                 TagFilterDto {
@@ -167,7 +171,7 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn filter_tags(&self, filter: TagFilterDto, actor: Actor) -> Result<Vec<TagDetails>> {
+    pub async fn filter_tags(&self, filter: TagFilterDto, actor: &Actor) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 SELECT 
@@ -194,7 +198,7 @@ impl TagRepository {
                 WHERE tag.created_by = 
             "#,
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(id) = filter.id {
             query.push(" and tag.id = ").push_bind(id);
@@ -205,10 +209,12 @@ impl TagRepository {
         }
         query.push(" ORDER BY tag.last_used_at DESC NULLS LAST");
 
-        let rows = query
-            .build_query_as::<ReadTagDetailsRow>()
-            .fetch_all(self.db_conn.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "tag_filter",
+            query
+                .build_query_as::<ReadTagDetailsRow>()
+                .fetch_all(self.db_conn.get_pool())
+        )?;
 
         let mut tags_map: IndexMap<Uuid, TagDetails> = IndexMap::new();
 
@@ -280,7 +286,7 @@ impl TagRepository {
         &self,
         id: Uuid,
         dto: UpdateTagDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<TagDetails> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
@@ -315,10 +321,12 @@ impl TagRepository {
             return Err(anyhow::anyhow!("No fields to update"));
         }
 
-        let row = query
-            .build_query_as::<ReadTagRow>()
-            .fetch_one(self.db_conn.get_pool())
-            .await?;
+        let row = crate::named_query!(
+            "tag_update",
+            query
+                .build_query_as::<ReadTagRow>()
+                .fetch_one(self.db_conn.get_pool())
+        )?;
 
         if let Some(allowed_categories) = dto.allowed_categories {
             sqlx::query!(
@@ -347,35 +355,41 @@ impl TagRepository {
                 .await?;
         }
 
-        self.find_by_id(id, actor.clone()).await
+        self.find_by_id(id, actor).await
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_tag_statistics(&self, actor: Actor) -> Result<TagStatsDto> {
+    pub async fn get_tag_statistics(&self, actor: &Actor) -> Result<TagStatsDto> {
         // Get total tags count
-        let total_tags = sqlx::query_scalar!(
-            "SELECT COUNT(DISTINCT id) FROM tag WHERE created_by = $1",
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+        let total_tags = crate::named_query!(
+            "tag_stats_count",
+            sqlx::query_scalar!(
+                "SELECT COUNT(DISTINCT id) FROM tag WHERE created_by = $1",
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         // Get total usages
-        let total_usages = sqlx::query_scalar!(
-            r#"
+        let total_usages = crate::named_query!(
+            "tag_stats_usages",
+            sqlx::query_scalar!(
+                r#"
                 SELECT COUNT(*)
                 FROM tag_to_session tts
                 JOIN tag t ON t.id = tts.tag_id
                 WHERE t.created_by = $1
             "#,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         // Get most used tag
-        let most_used = sqlx::query!(
-            r#"
+        let most_used = crate::named_query!(
+            "tag_stats_most_used",
+            sqlx::query!(
+                r#"
                 SELECT 
                     t.id, 
                     t.label, 
@@ -387,10 +401,10 @@ impl TagRepository {
                 ORDER BY COUNT(tts.tag_id) DESC
                 LIMIT 1
             "#,
-            actor.user_id
-        )
-        .fetch_optional(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_optional(self.db_conn.get_pool())
+        )?;
 
         let most_used_tag = most_used.map(|row| ReadTagDto {
             id: row.id,
