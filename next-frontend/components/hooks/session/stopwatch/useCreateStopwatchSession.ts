@@ -16,17 +16,6 @@ export const useCreateStopwatchSession = () => {
     mutationFn: async (data: StopwatchSessionRequest["create"]) => {
       return await StopwatchApi.create(data);
     },
-    onError: (error, _data, context) => {
-      queryClient.setQueryData(
-        queryKeys.sessions.active.queryKey,
-        context?.previousSessions,
-      );
-      toast({
-        description: error.message,
-        title: "Error creating session",
-        variant: "destructive",
-      });
-    },
     onMutate: async (data) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.sessions.active.queryKey,
@@ -38,9 +27,7 @@ export const useCreateStopwatchSession = () => {
       queryClient.setQueryData(
         queryKeys.sessions.active.queryKey,
         (
-          old:
-            | (ScheduledSessionWithId | StopwatchSessionWithId)[]
-            | undefined,
+          old: (ScheduledSessionWithId | StopwatchSessionWithId)[] | undefined,
         ) => {
           const optimisticSession: StopwatchSessionWithId = {
             category: null,
@@ -57,6 +44,17 @@ export const useCreateStopwatchSession = () => {
       );
 
       return { previousSessions };
+    },
+    onError: (error, _data, context) => {
+      queryClient.setQueryData(
+        queryKeys.sessions.active.queryKey,
+        context?.previousSessions,
+      );
+      toast({
+        description: error.message,
+        title: "Error creating session",
+        variant: "destructive",
+      });
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({
