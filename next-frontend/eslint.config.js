@@ -66,6 +66,7 @@ export default [
       "unicorn/no-nested-ternary": "off",
       "@typescript-eslint/require-await": "off", // this does not play nicely with server components
       "@typescript-eslint/no-deprecated": "off",
+      "perfectionist/sort-objects": "off",
     },
   },
   {

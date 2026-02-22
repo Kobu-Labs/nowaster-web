@@ -1,5 +1,3 @@
-/* eslint-disable perfectionist/sort-objects */
-
 import type { Notification } from "@/api/definitions/models/notification";
 import type {
   MarkNotificationsSeenRequest,
