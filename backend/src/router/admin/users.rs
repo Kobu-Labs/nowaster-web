@@ -59,7 +59,7 @@ async fn get_user_by_id(
 ) -> Result<Json<ApiResponse<ReadUserDto>>, StatusCode> {
     let user = state
         .user_service
-        .get_user_by_id(user_id.clone())
+        .get_user_by_id(&user_id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get user {}: {}", user_id, e);

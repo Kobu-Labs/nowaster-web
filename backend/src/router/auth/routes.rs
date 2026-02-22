@@ -421,7 +421,7 @@ async fn get_current_user_handler(
 ) -> Result<Json<ApiResponse<serde_json::Value>>, StatusCode> {
     let user = state
         .user_service
-        .get_user_by_id(actor.user_id.clone())
+        .get_user_by_id(&actor.user_id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get user: {}", e);
@@ -456,7 +456,7 @@ async fn assign_guest_handler(
             let existing_id = cookie.value().to_string();
             let existing_user = state
                 .user_service
-                .get_user_by_id(existing_id.clone())
+                .get_user_by_id(&existing_id)
                 .await
                 .unwrap_or(None);
             if let Some(user) = existing_user {

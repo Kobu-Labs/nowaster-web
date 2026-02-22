@@ -1,9 +1,8 @@
 "use client";
 
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { addMinutes } from "date-fns";
+import { addMinutes, format } from "date-fns";
 import { X } from "lucide-react";
-import { DateTime } from "luxon";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 
@@ -84,7 +83,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
           {props.selected
             ? (
                 <>
-                  <p>{DateTime.fromJSDate(props.selected).toFormat("DDD HH:mm")}</p>
+                  <p>{format(props.selected, "PPP HH:mm")}</p>
                   <div className="grow"></div>
                   <X
                     className="cursor-pointer rounded-md hover:bg-destructive "
@@ -128,7 +127,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
                     }}
                     size="icon"
                     variant={
-                      props.selected && props.selected.getHours() === hour
+                      props.selected?.getHours() === hour
                         ? "default"
                         : "ghost"
                     }
@@ -157,7 +156,7 @@ export const DateTimePicker: FC<DatePickerDemoProps> = (props) => {
                     }}
                     size="icon"
                     variant={
-                      props.selected && props.selected.getMinutes() === minute
+                      props.selected?.getMinutes() === minute
                         ? "default"
                         : "ghost"
                     }

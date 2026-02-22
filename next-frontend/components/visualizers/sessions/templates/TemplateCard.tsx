@@ -36,7 +36,7 @@ export const intervalToStartOf = (
 export const TemplateCard: FC<TemplateCardProps> = (props) => {
   const relativeDate = intervalToStartOf(props.template.interval, new Date());
   return (
-    <Card className="border-pink-100/50 bg-linear-to-br from-pink-50/30 via-purple-50/20 to-pink-50/10 dark:border-pink-900/30 dark:from-pink-950/20 dark:via-purple-950/10 dark:to-pink-950/5 shadow-md hover:shadow-lg transition-all duration-300">
+    <Card className="border-pink-900/30 bg-linear-to-br from-pink-950/20 via-purple-950/10 to-pink-950/5 shadow-md hover:shadow-lg transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-pink-500/5 to-purple-500/3 rounded-bl-full" />
@@ -69,7 +69,7 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
           </div>
         </div>
 
-        <Separator className="w-full bg-linear-to-r from-pink-200/50 via-purple-200/50 to-pink-200/50 dark:from-pink-800/30 dark:via-purple-800/30 dark:to-pink-800/30" />
+        <Separator className="w-full bg-linear-to-r from-pink-800/30 via-purple-800/30 to-pink-800/30" />
 
         <div className="space-y-3">
           <h4 className="font-semibold text-sm bg-linear-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
@@ -89,7 +89,7 @@ export const TemplateCard: FC<TemplateCardProps> = (props) => {
               const endTime = addMinutes(relativeDate, session.end_minute_offset);
               return (
                 <div
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border border-pink-200/30 bg-linear-to-r from-pink-50/20 to-purple-50/10 dark:border-pink-800/20 dark:from-pink-950/10 dark:to-purple-950/5"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border border-pink-800/20 bg-linear-to-r from-pink-950/10 to-purple-950/5"
                   key={session.category.id}
                 >
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground min-w-0">

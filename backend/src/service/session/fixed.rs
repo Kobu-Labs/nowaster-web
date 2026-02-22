@@ -64,19 +64,19 @@ impl FixedSessionService {
     pub async fn create_fixed_session(
         &self,
         dto: CreateFixedSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFixedSessionDto> {
-        let res = self.fixed_repo.create(dto, actor.clone()).await?;
+        let res = self.fixed_repo.create(dto, actor).await?;
         let user = self
             .user_service
-            .get_user_by_id(res.user_id.clone())
+            .get_user_by_id(&res.user_id)
             .await?
             .unwrap();
 
         // Fetch project and task data if available
         let project = if let Some(project_id) = res.project_id {
             self.project_repo
-                .find_by_id(project_id, actor.clone())
+                .find_by_id(project_id, actor)
                 .await
                 .ok()
                 .map(|p| FeedSessionProject {
@@ -90,7 +90,7 @@ impl FixedSessionService {
 
         let task = if let Some(task_id) = res.task_id {
             self.task_repo
-                .find_by_id(task_id, actor.clone())
+                .find_by_id(task_id, actor)
                 .await
                 .ok()
                 .map(|t| FeedSessionTask {
@@ -125,14 +125,14 @@ impl FixedSessionService {
     pub async fn filter_fixed_sessions(
         &self,
         dto: FilterSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadFixedSessionDto>> {
         let res = self.fixed_repo.filter_sessions(dto, actor).await?;
         Ok(res.into_iter().map(ReadFixedSessionDto::from).collect())
     }
 
     #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
-    pub async fn delete_session(&self, id: Uuid, actor: Actor) -> Result<()> {
+    pub async fn delete_session(&self, id: Uuid, actor: &Actor) -> Result<()> {
         self.fixed_repo.delete_session(id, actor).await?;
         Ok(())
     }
@@ -141,7 +141,7 @@ impl FixedSessionService {
     pub async fn delete_sessions_by_filter(
         &self,
         dto: FilterSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<u64> {
         let affected_rows = self
             .fixed_repo
@@ -151,7 +151,7 @@ impl FixedSessionService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_active_sessions(&self, actor: Actor) -> Result<Vec<ActiveSession>> {
+    pub async fn get_active_sessions(&self, actor: &Actor) -> Result<Vec<ActiveSession>> {
         let now = chrono::Local::now();
         let active_session_filter: FilterSessionDto = FilterSessionDto {
             from_end_time: Some(DateFilter {
@@ -166,10 +166,10 @@ impl FixedSessionService {
 
         let fixed_sessions = self
             .fixed_repo
-            .filter_sessions(active_session_filter, actor.clone())
+            .filter_sessions(active_session_filter, actor)
             .await?;
 
-        let stopwatch_sessions = self.stopwatch_repo.read_stopwatch(actor.clone()).await?;
+        let stopwatch_sessions = self.stopwatch_repo.read_stopwatch(actor).await?;
 
         let mut all_sessions: Vec<ActiveSession> = fixed_sessions
             .into_iter()
@@ -189,7 +189,7 @@ impl FixedSessionService {
     pub async fn update_fixed_session(
         &self,
         dto: UpdateFixedSessionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<ReadFixedSessionDto> {
         let res = self.fixed_repo.update_session(dto, actor).await?;
 

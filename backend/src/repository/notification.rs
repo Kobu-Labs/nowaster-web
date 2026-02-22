@@ -274,10 +274,12 @@ impl NotificationRepository {
             base_query.push(" LIMIT ").push_bind(limit);
         }
 
-        let rows = base_query
-            .build_query_as::<NotificationRowRead>()
-            .fetch_all(self.db.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "notification_list",
+            base_query
+                .build_query_as::<NotificationRowRead>()
+                .fetch_all(self.db.get_pool())
+        )?;
 
         let notifications = rows
             .into_iter()
@@ -291,7 +293,7 @@ impl NotificationRepository {
     pub async fn mark_notifications_seen(
         &self,
         notification_ids: &[Uuid],
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<u64> {
         if notification_ids.is_empty() {
             return Ok(0);
@@ -314,38 +316,42 @@ impl NotificationRepository {
 
     #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_unseen_count(&self, user_id: String) -> Result<i64> {
-        let result = sqlx::query!(
-            r#"
+        let result = crate::named_query!(
+            "notification_unseen_count",
+            sqlx::query!(
+                r#"
                 SELECT COUNT(*) as count
                 FROM notification
                 WHERE user_id = $1 AND seen = false
             "#,
-            user_id
-        )
-        .fetch_one(self.db.get_pool())
-        .await?;
+                user_id
+            )
+            .fetch_one(self.db.get_pool())
+        )?;
 
         Ok(result.count.unwrap_or(0))
     }
 
     #[instrument(err, skip(self), fields(user_id = %user_id))]
     pub async fn get_total_count(&self, user_id: String) -> Result<i64> {
-        let result = sqlx::query!(
-            r#"
+        let result = crate::named_query!(
+            "notification_total_count",
+            sqlx::query!(
+                r#"
                 SELECT COUNT(*) as count
                 FROM notification
                 WHERE user_id = $1
             "#,
-            user_id
-        )
-        .fetch_one(self.db.get_pool())
-        .await?;
+                user_id
+            )
+            .fetch_one(self.db.get_pool())
+        )?;
 
         Ok(result.count.unwrap_or(0))
     }
 
     #[instrument(err, skip(self), fields(notification_id = %notification_id, actor_id = %actor))]
-    pub async fn delete_notification(&self, notification_id: Uuid, actor: Actor) -> Result<bool> {
+    pub async fn delete_notification(&self, notification_id: Uuid, actor: &Actor) -> Result<bool> {
         let result = sqlx::query!(
             r#"
                 DELETE FROM notification

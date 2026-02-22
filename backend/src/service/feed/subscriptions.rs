@@ -29,12 +29,12 @@ impl FeedSubscriptionService {
     pub async fn update_subscription(
         &self,
         dto: UpdateFeedSubscriptionDto,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<()> {
         self.feed_repository
             .update_subscription(
                 dto.subscription_id,
-                actor.user_id,
+                &actor.user_id,
                 dto.is_muted,
                 dto.is_paused,
             )
@@ -42,12 +42,12 @@ impl FeedSubscriptionService {
     }
 
     #[instrument(err, skip(self), fields(subscriber_id = %subscriber_id))]
-    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: String) -> Result<()> {
+    pub async fn subscribe(&self, source: AddFeedSource, subscriber_id: &str) -> Result<()> {
         self.feed_repository.subscribe(source, subscriber_id).await
     }
 
     #[instrument(err, skip(self), fields(subscriber_id = %subscriber_id))]
-    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: String) -> Result<()> {
+    pub async fn unsubscribe(&self, source: RemoveFeedSource, subscriber_id: &str) -> Result<()> {
         self.feed_repository
             .unsubscribe(source, subscriber_id)
             .await
@@ -63,11 +63,11 @@ impl FeedSubscriptionService {
     #[instrument(err, skip(self), fields(actor_id = %actor))]
     pub async fn get_user_subscriptions(
         &self,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadFeedSubscriptionDto>> {
         let subs_ids = self
             .feed_repository
-            .get_user_subscriptions(actor.user_id)
+            .get_user_subscriptions(&actor.user_id)
             .await?;
 
         let mut sources_by_type: std::collections::HashMap<FeedSourceSqlType, Vec<String>> =

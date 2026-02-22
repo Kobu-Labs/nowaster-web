@@ -17,7 +17,7 @@ pub fn statistics_router() -> Router<AppState> {
 
 #[instrument( skip(state), fields(user_id = %actor))]
 async fn get_colors(State(state): State<AppState>, actor: Actor) -> ApiResponse<ReadColorsDto> {
-    let result = state.statistics_service.get_colors(actor.clone()).await;
+    let result = state.statistics_service.get_colors(&actor).await;
     match result {
         Ok(colors) => ApiResponse::Success { data: colors },
         Err(e) => ApiResponse::Error {
@@ -32,13 +32,13 @@ async fn get_dashboard_data(
     actor: Actor,
 ) -> ApiResponse<DashboardData> {
     let result = try_join!(
-        state.statistics_service.get_current_streak(actor.clone()),
+        state.statistics_service.get_current_streak(&actor),
         state
             .statistics_service
-            .get_total_session_time(actor.clone()),
+            .get_total_session_time(&actor),
         state
             .statistics_service
-            .get_amount_of_sessions(actor.clone()),
+            .get_amount_of_sessions(&actor),
     );
     match result {
         Ok((streak, minutes, session_count)) => ApiResponse::Success {

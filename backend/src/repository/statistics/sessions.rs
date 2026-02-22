@@ -24,28 +24,32 @@ impl StatisticsRepository {
         }
     }
 
-    pub async fn get_colors(&self, actor: Actor) -> Result<ReadColorsDto> {
-        let tag_colors = sqlx::query_as::<_, (String, String)>(
-            r#"
+    pub async fn get_colors(&self, actor: &Actor) -> Result<ReadColorsDto> {
+        let tag_colors = crate::named_query!(
+            "stats_tag_colors",
+            sqlx::query_as::<_, (String, String)>(
+                r#"
                 SELECT tag.color, tag.label
                 FROM tag
                 WHERE tag.created_by = $1
             "#,
-        )
-        .bind(actor.user_id.clone())
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+            )
+            .bind(&actor.user_id)
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
-        let category_colors = sqlx::query_as::<_, (String, String)>(
-            r#"
+        let category_colors = crate::named_query!(
+            "stats_category_colors",
+            sqlx::query_as::<_, (String, String)>(
+                r#"
                 SELECT category.color, category.name
                 FROM category
                 WHERE category.created_by = $1
             "#,
-        )
-        .bind(actor.user_id.clone())
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+            )
+            .bind(&actor.user_id)
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(ReadColorsDto {
             category_colors,
@@ -53,39 +57,45 @@ impl StatisticsRepository {
         })
     }
 
-    pub async fn get_amount_of_sessions(&self, actor: Actor) -> Result<u16> {
-        let count: i64 = sqlx::query_scalar!(
-            r#"
+    pub async fn get_amount_of_sessions(&self, actor: &Actor) -> Result<u16> {
+        let count: i64 = crate::named_query!(
+            "stats_session_count",
+            sqlx::query_scalar!(
+                r#"
                 SELECT COUNT(*) as "count!"
                 FROM session
                 WHERE session.user_id = $1
             "#,
-            actor.user_id,
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id,
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(count as u16)
     }
 
-    pub async fn get_total_session_time(&self, actor: Actor) -> Result<f64> {
-        let sum: Option<f64> = sqlx::query_scalar!(
-            r#"
+    pub async fn get_total_session_time(&self, actor: &Actor) -> Result<f64> {
+        let sum: Option<f64> = crate::named_query!(
+            "stats_total_session_time",
+            sqlx::query_scalar!(
+                r#"
                 SELECT CAST(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60 AS FLOAT8) as "sum"
                 FROM session
                 WHERE session.user_id = $1
             "#,
-            actor.user_id,
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id,
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(sum.unwrap_or(0 as f64))
     }
 
-    pub async fn get_current_streak(&self, actor: Actor) -> Result<u16> {
-        let result = sqlx::query_scalar!(
-            r#"
+    pub async fn get_current_streak(&self, actor: &Actor) -> Result<u16> {
+        let result = crate::named_query!(
+            "stats_current_streak",
+            sqlx::query_scalar!(
+                r#"
                 WITH RECURSIVE consecutive_days AS (
                     SELECT CAST(CURRENT_DATE AS DATE) AS date_day, 1 AS consecutive_count
                     UNION ALL
@@ -102,10 +112,10 @@ impl StatisticsRepository {
                 SELECT MAX(consecutive_count) AS consecutive_days_count
                 FROM consecutive_days;
             "#,
-            actor.user_id,
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id,
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(result.unwrap_or(0) as u16)
     }

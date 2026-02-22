@@ -1,4 +1,3 @@
-import { AuthProvider } from "@/components/auth/AuthProvider";
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
@@ -10,7 +9,7 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html className="dark" lang="en">
       <Head>
         <link href="/favicon.ico" rel="icon" sizes="any" />
         <link
@@ -33,9 +32,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable,
         )}
       >
-        <AuthProvider>
-          <main>{children}</main>
-        </AuthProvider>
+        <main>{children}</main>
       </body>
     </html>
   );

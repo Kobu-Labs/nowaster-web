@@ -36,16 +36,16 @@ pub struct ReadTaskRow {
 }
 
 pub trait TaskRepositoryTrait {
-    async fn create(&self, dto: CreateTaskDto, actor: Actor) -> Result<Task>;
-    async fn update(&self, dto: UpdateTaskDto, actor: Actor) -> Result<Task>;
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Task>;
-    async fn delete_task(&self, id: Uuid, actor: Actor) -> Result<()>;
-    async fn filter_tasks(&self, filter: FilterTaskDto, actor: Actor) -> Result<Vec<Task>>;
-    async fn get_task_statistics(&self, actor: Actor) -> Result<TaskStatsDto>;
+    async fn create(&self, dto: CreateTaskDto, actor: &Actor) -> Result<Task>;
+    async fn update(&self, dto: UpdateTaskDto, actor: &Actor) -> Result<Task>;
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Task>;
+    async fn delete_task(&self, id: Uuid, actor: &Actor) -> Result<()>;
+    async fn filter_tasks(&self, filter: FilterTaskDto, actor: &Actor) -> Result<Vec<Task>>;
+    async fn get_task_statistics(&self, actor: &Actor) -> Result<TaskStatsDto>;
     async fn get_tasks_details_by_ids(
         &self,
         task_ids: Vec<Uuid>,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadTaskDetailsDto>>;
     fn new(db_conn: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadTaskRow) -> Task;
@@ -59,10 +59,12 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor, task_name = %dto.name))]
-    async fn create(&self, dto: CreateTaskDto, actor: Actor) -> Result<Task> {
-        let row = sqlx::query_as!(
-            ReadTaskRow,
-            r#"
+    async fn create(&self, dto: CreateTaskDto, actor: &Actor) -> Result<Task> {
+        let row = crate::named_query!(
+            "task_create",
+            sqlx::query_as!(
+                ReadTaskRow,
+                r#"
                 INSERT INTO task (project_id, name, description, user_id)
                 VALUES ($1, $2, $3, $4)
                 RETURNING
@@ -75,13 +77,13 @@ impl TaskRepositoryTrait for TaskRepository {
                     created_at,
                     updated_at
             "#,
-            dto.project_id,
-            dto.name,
-            dto.description,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                dto.project_id,
+                dto.name,
+                dto.description,
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(self.mapper(row))
     }
@@ -100,7 +102,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn filter_tasks(&self, filter: FilterTaskDto, actor: Actor) -> Result<Vec<Task>> {
+    async fn filter_tasks(&self, filter: FilterTaskDto, actor: &Actor) -> Result<Vec<Task>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             "
                 SELECT
@@ -116,7 +118,7 @@ impl TaskRepositoryTrait for TaskRepository {
                 WHERE task.user_id =
             ",
         );
-        query.push_bind(actor.user_id);
+        query.push_bind(&actor.user_id);
 
         if let Some(name) = filter.name {
             query.push(" AND task.name = ").push_bind(name);
@@ -136,16 +138,16 @@ impl TaskRepositoryTrait for TaskRepository {
 
         query.push(" ORDER BY task.completed ASC, task.updated_at DESC");
 
-        let rows = query
-            .build_query_as::<ReadTaskRow>()
-            .fetch_all(self.db_conn.get_pool())
-            .await?;
+        let rows = crate::named_query!(
+            "task_filter",
+            query.build_query_as::<ReadTaskRow>().fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())
     }
 
     #[instrument(err, skip(self), fields(task_id = %id, actor_id = %actor))]
-    async fn delete_task(&self, id: Uuid, actor: Actor) -> Result<()> {
+    async fn delete_task(&self, id: Uuid, actor: &Actor) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM task
@@ -161,7 +163,7 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(task_id = %id, actor_id = %actor))]
-    async fn find_by_id(&self, id: Uuid, actor: Actor) -> Result<Task> {
+    async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Task> {
         let result = self
             .filter_tasks(
                 FilterTaskDto {
@@ -181,10 +183,12 @@ impl TaskRepositoryTrait for TaskRepository {
     }
 
     #[instrument(err, skip(self), fields(task_id = %dto.id, actor_id = %actor))]
-    async fn update(&self, dto: UpdateTaskDto, actor: Actor) -> Result<Task> {
-        let row = sqlx::query_as!(
-            ReadTaskRow,
-            r#"
+    async fn update(&self, dto: UpdateTaskDto, actor: &Actor) -> Result<Task> {
+        let row = crate::named_query!(
+            "task_update",
+            sqlx::query_as!(
+                ReadTaskRow,
+                r#"
                 UPDATE task t
                 SET
                     name = COALESCE($2, t.name),
@@ -193,33 +197,35 @@ impl TaskRepositoryTrait for TaskRepository {
                 WHERE
                     t.id = $1
                     AND t.user_id = $5
-                RETURNING 
-                    t.id, 
-                    t.project_id, 
-                    t.name, 
-                    t.description, 
-                    t.completed, 
-                    t.user_id, 
-                    t.created_at, 
+                RETURNING
+                    t.id,
+                    t.project_id,
+                    t.name,
+                    t.description,
+                    t.completed,
+                    t.user_id,
+                    t.created_at,
                     t.updated_at
             "#,
-            dto.id,
-            dto.name,
-            dto.description,
-            dto.completed,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                dto.id,
+                dto.name,
+                dto.description,
+                dto.completed,
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(self.mapper(row))
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_task_statistics(&self, actor: Actor) -> Result<TaskStatsDto> {
-        let stats = sqlx::query_as!(
-            TaskStatsDto,
-            r#"
+    async fn get_task_statistics(&self, actor: &Actor) -> Result<TaskStatsDto> {
+        let stats = crate::named_query!(
+            "task_statistics",
+            sqlx::query_as!(
+                TaskStatsDto,
+                r#"
                 SELECT
                     COUNT(t.id) as "total_tasks!",
                     COUNT(CASE WHEN t.completed = false THEN 1 END) as "active_tasks!",
@@ -230,10 +236,10 @@ impl TaskRepositoryTrait for TaskRepository {
                 LEFT JOIN session s ON s.task_id = t.id
                 WHERE t.user_id = $1
             "#,
-            actor.user_id
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
+                actor.user_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
 
         Ok(stats)
     }
@@ -242,15 +248,17 @@ impl TaskRepositoryTrait for TaskRepository {
     async fn get_tasks_details_by_ids(
         &self,
         task_ids: Vec<Uuid>,
-        actor: Actor,
+        actor: &Actor,
     ) -> Result<Vec<ReadTaskDetailsDto>> {
         if task_ids.is_empty() {
             return Ok(Vec::new());
         }
 
-        let rows = sqlx::query_as!(
-            ReadTaskDetailsDto,
-            r#"
+        let rows = crate::named_query!(
+            "task_details_by_ids",
+            sqlx::query_as!(
+                ReadTaskDetailsDto,
+                r#"
                 SELECT
                     t.id,
                     t.project_id,
@@ -267,11 +275,11 @@ impl TaskRepositoryTrait for TaskRepository {
                 GROUP BY t.id, t.project_id, t.name, t.description, t.completed, t.user_id, t.created_at, t.updated_at
                 ORDER BY t.completed ASC, t.updated_at DESC
             "#,
-            &task_ids,
-            actor.user_id
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+                &task_ids,
+                actor.user_id
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
 
         Ok(rows)
     }

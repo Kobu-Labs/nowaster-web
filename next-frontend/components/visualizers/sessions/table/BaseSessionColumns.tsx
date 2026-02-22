@@ -220,7 +220,7 @@ export const BaseSessionTableColumns: ColumnDef<ScheduledSessionWithId>[] = [
     cell: (test) => {
       const time = test.cell.getValue<number>();
       return (
-        <div className="text-xs md:text-sm font-mono">{formatTime(time)}</div>
+        <div className="text-xs md:text-sm">{formatTime(time)}</div>
       );
     },
     header: ({ column }) => (

@@ -66,7 +66,7 @@ export const TagCreateForm: FC<CreateTagDialogProps> = (props) => {
     <Card className="h-fit">
       <CardContent>
         <CardHeader>
-          <CardTitle className="font-mono">Create New Tag</CardTitle>
+          <CardTitle className="">Create New Tag</CardTitle>
           <CardDescription className="text-gray-400">
             Add a new tag to organize your learning sessions
           </CardDescription>

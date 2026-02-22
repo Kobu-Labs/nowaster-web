@@ -1,5 +1,3 @@
-import { SignedIn } from "@/components/auth/SignedIn";
-import { SignedOut } from "@/components/auth/SignedOut";
 import { SiteFooter } from "@/components/pages/site-footer";
 import { SiteHeader } from "@/components/pages/site-header";
 import {
@@ -10,7 +8,6 @@ import {
 import { Button } from "@/components/shadcn/button";
 import { StopwatchIcon } from "@radix-ui/react-icons";
 import {
-  ArrowRightSquare,
   BarChart3,
   ChartArea,
   CheckCircle,
@@ -18,6 +15,8 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import landing1 from "@/public/nowaster-landing-1-dark.jpg";
+import landing2 from "@/public/nowaster-landing-2-dark.png";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -44,39 +43,26 @@ export default async function LandingPage() {
                 </p>
               </div>
 
-              <SignedIn>
-                <Link href="/home">
-                  <Button
-                    className="flex items-center justify-center gap-1 group"
-                    variant="secondary"
-                  >
-                    <p>Go to application</p>
-                    <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
-                  </Button>
-                </Link>
-              </SignedIn>
-              <SignedOut>
-                <Link href="/sign-in">
-                  <Button className="flex items-center justify-center gap-1 group">
-                    <StopwatchIcon className="group-hover:scale-110" />
-                    <p>Start tracking now</p>
-                  </Button>
-                </Link>
-                <Link href="https://www.sandbox.nowaster.app/sign-in" target="_blank">
-                  <Button variant="outline">
-                    No account? Try the sandbox as a guest →
-                  </Button>
-                </Link>
-              </SignedOut>
+              <Link href="/sign-in">
+                <Button className="flex items-center justify-center gap-1 group">
+                  <StopwatchIcon className="group-hover:scale-110" />
+                  <p>Start tracking now</p>
+                </Button>
+              </Link>
+              <Link href="https://www.sandbox.nowaster.app/sign-in" target="_blank">
+                <Button variant="outline">
+                  No account? Try the sandbox as a guest →
+                </Button>
+              </Link>
               <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
             </div>
             <div className="flex items-center justify-center">
               <Image
                 alt="Time tracking dashboard"
-                height={990}
+                placeholder="blur"
                 priority
-                src="/nowaster-landing-1-dark.jpg"
-                width={1320}
+                sizes="(max-width: 1024px) 100vw, 800px"
+                src={landing1}
               />
             </div>
           </div>
@@ -102,10 +88,9 @@ export default async function LandingPage() {
               <div className="flex items-center justify-center">
                 <Image
                   alt="Time tracking dashboard"
-                  height={990}
-                  priority
-                  src="/nowaster-landing-2-dark.png"
-                  width={1320}
+                  placeholder="blur"
+                  sizes="(max-width: 1024px) 100vw, 800px"
+                  src={landing2}
                 />
               </div>
               <div className="flex flex-col justify-center space-y-4 md:m-10">
@@ -331,29 +316,16 @@ export default async function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <SignedIn>
-                  <Link href="/home">
-                    <Button
-                      className="flex items-center justify-center gap-1 group"
-                      variant="secondary"
-                    >
-                      <p>Go to application</p>
-                      <ArrowRightSquare className="group-hover:scale-110 group-hover:text-pink-primary group-hover:transition " />
-                    </Button>
-                  </Link>
-                </SignedIn>
-                <SignedOut>
-                  <Link href="/sign-in">
-                    <Button>
-                      <p>Start your journey now</p>
-                    </Button>
-                  </Link>
-                  <Link href="https://www.sandbox.nowaster.app/sign-in" target="_blank">
-                    <Button variant="outline">
-                      No account? Try the sandbox as a guest →
-                    </Button>
-                  </Link>
-                </SignedOut>
+                <Link href="/sign-in">
+                  <Button>
+                    <p>Start your journey now</p>
+                  </Button>
+                </Link>
+                <Link href="https://www.sandbox.nowaster.app/sign-in" target="_blank">
+                  <Button variant="outline">
+                    No account? Try the sandbox as a guest →
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

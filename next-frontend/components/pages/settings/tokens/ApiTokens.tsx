@@ -132,7 +132,7 @@ export const ApiTokens: FC = () => {
                         <Label>Your API Token</Label>
                         <div className="flex gap-2 mt-2">
                           <Input
-                            className="font-mono text-sm"
+                            className="text-sm"
                             readOnly
                             value={createdToken}
                           />
