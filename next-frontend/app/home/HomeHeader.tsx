@@ -1,5 +1,6 @@
 import { ProfileButton } from "@/components/auth/ProfileButton";
 import { NotificationPopover } from "@/components/notifications/NotificationPopover";
+import { NavAvatarThumb } from "@/components/ui-providers/avatar/NavAvatarThumb";
 import { NowasterLogo } from "@/components/pages/NowasterLogo";
 import { Separator } from "@/components/shadcn/separator";
 import { SidebarTrigger } from "@/components/shadcn/sidebar";
@@ -17,6 +18,7 @@ export const HomeHeader: FC = () => {
         </NowasterLogo>
         <div className="grow"></div>
         <SessionTimer />
+        <NavAvatarThumb />
         <NotificationPopover />
         <ProfileButton />
       </div>

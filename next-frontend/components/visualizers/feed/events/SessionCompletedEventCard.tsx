@@ -41,7 +41,7 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
           <Avatar className="h-10 w-10">
             <AvatarImage
               alt={user.username}
-              src={user.avatar_url ?? undefined}
+              src={user.avatar_thumb_url ?? user.avatar_url ?? undefined}
             />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               {getInitials(user.username)}

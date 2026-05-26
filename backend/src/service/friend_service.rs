@@ -53,14 +53,16 @@ impl FromRow<'_, PgRow> for ReadFriendRequestDto {
             id: row.try_get("requestor_id")?,
             username: row.try_get("requestor_username")?,
             avatar_url: row.try_get("requestor_avatar_url")?,
-            visibility_flags: VisibilityFlags::default(), // Default for friend request display
+            avatar_thumb_url: None,
+            visibility_flags: VisibilityFlags::default(),
         };
 
         let recipient = ReadUserDto {
             id: row.try_get("recipient_id")?,
             username: row.try_get("recipient_username")?,
             avatar_url: row.try_get("recipient_avatar_url")?,
-            visibility_flags: VisibilityFlags::default(), // Default for friend request display
+            avatar_thumb_url: None,
+            visibility_flags: VisibilityFlags::default(),
         };
 
         let created_at: DateTime<Local> = row.try_get("created_at")?;
@@ -84,14 +86,16 @@ impl FromRow<'_, PgRow> for ReadFriendshipDto {
             id: row.try_get("friend1_id")?,
             username: row.try_get("friend1_username")?,
             avatar_url: row.try_get("friend1_avatar_url")?,
-            visibility_flags: VisibilityFlags::default(), // Default for friendship display
+            avatar_thumb_url: None,
+            visibility_flags: VisibilityFlags::default(),
         };
 
         let friend2 = ReadUserDto {
             id: row.try_get("friend2_id")?,
             username: row.try_get("friend2_username")?,
             avatar_url: row.try_get("friend2_avatar_url")?,
-            visibility_flags: VisibilityFlags::default(), // Default for friendship display
+            avatar_thumb_url: None,
+            visibility_flags: VisibilityFlags::default(),
         };
 
         let created_at: DateTime<Local> = row.try_get("created_at")?;

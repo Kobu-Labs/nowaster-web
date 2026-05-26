@@ -16,6 +16,7 @@ impl From<User> for ReadUserDto {
             id: user.id,
             username: user.username,
             avatar_url: user.avatar_url,
+            avatar_thumb_url: None,
             visibility_flags: user.visibility_flags,
         }
     }

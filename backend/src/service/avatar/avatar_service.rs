@@ -152,9 +152,21 @@ impl AvatarService {
 
         self.run_repo.set_running(run_id).await?;
 
-        // TODO: fetch base_character_url from user_avatar.base_preset_id → avatar_preset.reference_image_url
-        // TODO: fetch template_image_url from config or preset
-        let image_bytes = generate_avatar("", "", input_data)
+        let user_avatar = self.avatar_repo.get_by_user_id(user_id).await?;
+        let base_character_url = if let Some(preset_id) = user_avatar.and_then(|a| a.base_preset_id) {
+            self.preset_repo
+                .find_by_id(preset_id)
+                .await?
+                .map(|p| p.reference_image_url)
+                .unwrap_or_default()
+        } else {
+            String::new()
+        };
+
+        // template_image_url will be wired from config when Leonardo.ai is integrated
+        let template_image_url = String::new();
+
+        let image_bytes = generate_avatar(&template_image_url, &base_character_url, input_data)
             .await
             .context("Image generation failed")?;
 

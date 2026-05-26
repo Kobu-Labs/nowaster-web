@@ -99,6 +99,7 @@ impl From<FeedReaction> for ReadFeedReactionDto {
                 id: reaction.user.id.clone(),
                 username: reaction.user.username,
                 avatar_url: reaction.user.avatar_url,
+                avatar_thumb_url: reaction.user.avatar_thumb_url,
                 visibility_flags: VisibilityFlags::default(),
             },
             emoji: reaction.emoji,

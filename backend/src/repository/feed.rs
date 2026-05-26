@@ -75,6 +75,7 @@ struct FeedRowRead {
     pub user_id: Option<String>,
     pub user_name: Option<String>,
     pub user_avatar_url: Option<String>,
+    pub user_avatar_thumb_url: Option<String>,
 
     pub created_at: DateTime<Local>,
 }
@@ -95,6 +96,7 @@ impl FromRow<'_, PgRow> for FeedRowRead {
             user_id: row.try_get("user_id")?,
             user_name: row.try_get("user_name")?,
             user_avatar_url: row.try_get("user_avatar_url")?,
+            user_avatar_thumb_url: row.try_get("user_avatar_thumb_url")?,
         })
     }
 }
@@ -110,6 +112,7 @@ impl FeedEventMapper {
                         id: user_id,
                         username: user_name,
                         avatar_url: row.user_avatar_url,
+                        avatar_thumb_url: row.user_avatar_thumb_url,
                         visibility_flags: VisibilityFlags::default(),
                     })
                 } else {
@@ -257,10 +260,15 @@ impl FeedRepository {
 
                 u.id as user_id,
                 u.displayname as user_name,
-                u.avatar_url as user_avatar_url
+                u.avatar_url as user_avatar_url,
+                ua.current_thumb_url as user_avatar_thumb_url
             FROM feed_event fe
-            LEFT JOIN "user" u 
-                ON u.id = fe.source_id 
+            LEFT JOIN "user" u
+                ON u.id = fe.source_id
+                AND fe.source_type = 'user'
+            LEFT JOIN user_avatar ua
+                ON ua.user_id = fe.source_id
+                AND ua.is_enabled = true
                 AND fe.source_type = 'user'
             JOIN feed_subscription fs
                 ON fs.source_type = fe.source_type
@@ -313,9 +321,11 @@ impl FeedRepository {
                     fr.created_at,
                     u.id as user_id,
                     u.displayname,
-                    u.avatar_url
+                    u.avatar_url,
+                    ua.current_thumb_url as avatar_thumb_url
                 FROM feed_reaction fr
                 JOIN "user" u on u.id = fr.user_id
+                LEFT JOIN user_avatar ua ON ua.user_id = fr.user_id AND ua.is_enabled = true
                 WHERE feed_event_id = ANY($1)
             "#,
                 feed_event_ids
@@ -332,7 +342,8 @@ impl FeedRepository {
                     id: row.user_id,
                     username: row.displayname,
                     avatar_url: row.avatar_url,
-                    visibility_flags: VisibilityFlags::default(), // Default for feed display
+                    avatar_thumb_url: row.avatar_thumb_url,
+                    visibility_flags: VisibilityFlags::default(),
                 },
                 emoji: row.emoji,
                 created_at: row.created_at.into(),
@@ -355,9 +366,11 @@ impl FeedRepository {
                     fr.created_at,
                     u.id as user_id,
                     u.displayname,
-                    u.avatar_url
+                    u.avatar_url,
+                    ua.current_thumb_url as avatar_thumb_url
                 FROM feed_reaction fr
                 JOIN "user" u on u.id = fr.user_id
+                LEFT JOIN user_avatar ua ON ua.user_id = fr.user_id AND ua.is_enabled = true
                 WHERE fr.id = $1
             "#,
                 reaction_id
@@ -372,7 +385,8 @@ impl FeedRepository {
                 id: row.user_id,
                 username: row.displayname,
                 avatar_url: row.avatar_url,
-                visibility_flags: VisibilityFlags::default(), // Default for feed display
+                avatar_thumb_url: row.avatar_thumb_url,
+                visibility_flags: VisibilityFlags::default(),
             },
             emoji: row.emoji,
             created_at: row.created_at.into(),

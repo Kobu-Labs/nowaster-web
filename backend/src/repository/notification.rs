@@ -45,7 +45,7 @@ struct NotificationRowRead {
     pub source_user_id: Option<String>,
     pub source_user_name: Option<String>,
     pub source_user_avatar_url: Option<String>,
-    // Note: group and system source data would be joined here in future
+    pub source_user_avatar_thumb_url: Option<String>,
 }
 
 impl FromRow<'_, PgRow> for NotificationRowRead {
@@ -62,6 +62,7 @@ impl FromRow<'_, PgRow> for NotificationRowRead {
             source_user_id: row.try_get("source_user_id")?,
             source_user_name: row.try_get("source_user_name")?,
             source_user_avatar_url: row.try_get("source_user_avatar_url")?,
+            source_user_avatar_thumb_url: row.try_get("source_user_avatar_thumb_url")?,
         })
     }
 }
@@ -78,6 +79,7 @@ impl NotificationMapper {
                         id: user_id,
                         username: user_name,
                         avatar_url: row.source_user_avatar_url,
+                        avatar_thumb_url: row.source_user_avatar_thumb_url,
                         visibility_flags: VisibilityFlags::default(),
                     })
                 } else {
@@ -251,10 +253,15 @@ impl NotificationRepository {
 
                 u.id as source_user_id,
                 u.displayname as source_user_name,
-                u.avatar_url as source_user_avatar_url
+                u.avatar_url as source_user_avatar_url,
+                ua.current_thumb_url as source_user_avatar_thumb_url
             FROM notification n
             LEFT JOIN "user" u
                 ON u.id = n.source_id
+                AND n.source_type = 'user'
+            LEFT JOIN user_avatar ua
+                ON ua.user_id = n.source_id
+                AND ua.is_enabled = true
                 AND n.source_type = 'user'
             WHERE n.user_id ="#,
         );
