@@ -1,5 +1,7 @@
 "use client";
 
+import { AvatarSettings } from "@/components/ui-providers/avatar/AvatarSettings";
+import { Separator } from "@/components/shadcn/separator";
 import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 import { useUpdateUser } from "@/components/hooks/user/useUpdateUser";
 import { Button } from "@/components/shadcn/button";
@@ -211,6 +213,12 @@ const AccountPage: FC = () => {
               Save Changes
             </Button>
           </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-6 bg-card rounded-lg border p-6">
+          <AvatarSettings />
         </div>
       </div>
     </div>
