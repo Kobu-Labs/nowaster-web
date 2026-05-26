@@ -106,6 +106,7 @@ impl FeedSubscriptionService {
                             id: row.source_id.clone(),
                             username: user.map(|u| u.username.clone()).unwrap_or_default(),
                             avatar_url: user.and_then(|u| u.avatar_url.clone()),
+                            avatar_thumb_url: None,
                             visibility_flags: user.map(|u| u.visibility_flags).unwrap_or_default(),
                         })
                     }
