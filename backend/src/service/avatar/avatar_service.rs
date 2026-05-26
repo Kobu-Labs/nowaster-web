@@ -242,6 +242,17 @@ impl AvatarService {
             .await?
             .ok_or_else(|| anyhow::anyhow!("Avatar not enabled for user"))?;
 
+        if !avatar.is_enabled {
+            anyhow::bail!("Avatar is disabled");
+        }
+
+        if let Some(next_at) = avatar.next_generation_at {
+            if next_at > Utc::now() {
+                let secs = (next_at - Utc::now()).num_seconds().max(0);
+                anyhow::bail!("Generation on cooldown — available in {}s", secs);
+            }
+        }
+
         let tier = format!("{:?}", avatar.tier).to_lowercase();
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
