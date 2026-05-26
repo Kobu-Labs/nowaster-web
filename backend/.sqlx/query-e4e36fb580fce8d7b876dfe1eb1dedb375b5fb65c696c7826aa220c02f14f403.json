@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, user_id, image_url, thumb_url, generation_run_id,\n                   generated_at as \"generated_at: chrono::DateTime<chrono::Utc>\"\n            FROM user_avatar_history\n            WHERE user_id = $1\n            ORDER BY generated_at DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "generation_run_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "generated_at: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e4e36fb580fce8d7b876dfe1eb1dedb375b5fb65c696c7826aa220c02f14f403"
+}
