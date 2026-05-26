@@ -28,6 +28,7 @@ use crate::{
     router::user::root::protected_user_router,
     service::{
         auth_service::AuthService,
+        avatar::avatar_service::AvatarService,
         category_service::CategoryService,
         community_category_service::CommunityCategoryService,
         community_dashboard_service::CommunityDashboardService,
@@ -52,6 +53,7 @@ use crate::{
 
 use super::{
     admin::routes::admin_router, auth::auth_router, category::root::category_router,
+avatar::root::avatar_router,
     community::root::community_router, feed::root::feed_router, friend::root::friend_router,
     notification::root::notification_router, project::root::project_router,
     release::routes::release_router, session::root::session_router,
@@ -89,6 +91,7 @@ pub struct AppState {
     pub project_service: ProjectService,
     pub task_service: TaskService,
     pub sandbox_service: SandboxService,
+    pub avatar_service: AvatarService,
     pub db_backup_repo: crate::repository::db_backup::DbBackupRepository,
     pub s3_client: aws_sdk_s3::Client,
     pub feed: Feed,
@@ -126,6 +129,8 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         .build();
 
     let s3_client = aws_sdk_s3::Client::from_conf(s3_config);
+
+    let avatar_service = AvatarService::new(&db, s3_client.clone(), config.clone());
 
     let auth_service = AuthService::new(&db, config.server.app_env.clone());
     let category_service = CategoryService::new(category_repo.clone());
@@ -218,6 +223,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         project_service,
         task_service,
         sandbox_service,
+        avatar_service,
         db_backup_repo,
         s3_client,
         feed: Feed {
@@ -250,7 +256,8 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         .nest("/releases", release_router().with_state(state.clone()))
         .nest("/admin", admin_router().with_state(state.clone()))
         .nest("/task", task_router().with_state(state.clone()))
-        .nest("/project", project_router().with_state(state.clone()));
+        .nest("/project", project_router().with_state(state.clone()))
+        .nest("/avatar", avatar_router().with_state(state.clone()));
 
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 
