@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, Megaphone, Settings, TestTube, UserCog } from "lucide-react";
+import { Database, Megaphone, Settings, Sparkles, TestTube, UserCog } from "lucide-react";
 
 import {
   Sidebar,
@@ -41,6 +41,12 @@ const adminNavItems = [
     icon: TestTube,
     title: "Sandbox",
     url: "/home/admin/sandbox",
+  },
+  {
+    description: "Manage avatar presets and trigger user regeneration",
+    icon: Sparkles,
+    title: "Avatars",
+    url: "/home/admin/avatars",
   },
 ] as const;
 
