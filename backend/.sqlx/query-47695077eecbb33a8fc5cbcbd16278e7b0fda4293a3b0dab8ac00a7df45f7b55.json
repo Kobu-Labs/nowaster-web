@@ -1,0 +1,90 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                FROM user_avatar\n                WHERE is_enabled = true\n                  AND next_generation_at <= NOW()\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "base_preset_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "current_image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "current_thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "tier: AvatarTier",
+        "type_info": {
+          "Custom": {
+            "name": "avatar_tier",
+            "kind": {
+              "Enum": [
+                "free",
+                "paid"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_enabled",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "last_generated_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "next_generation_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "47695077eecbb33a8fc5cbcbd16278e7b0fda4293a3b0dab8ac00a7df45f7b55"
+}

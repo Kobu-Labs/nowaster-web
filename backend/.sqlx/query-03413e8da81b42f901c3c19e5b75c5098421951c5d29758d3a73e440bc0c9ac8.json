@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO hint (label)\n                VALUES ($1)\n                ON CONFLICT (label) DO UPDATE SET label = EXCLUDED.label\n                RETURNING id, label, usage_count, created_at as \"created_at: DateTime<Utc>\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "usage_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "03413e8da81b42f901c3c19e5b75c5098421951c5d29758d3a73e440bc0c9ac8"
+}

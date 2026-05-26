@@ -1,0 +1,97 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE generation_run SET\n                    status       = 'success',\n                    completed_at = NOW(),\n                    image_url    = $2,\n                    thumb_url    = $3,\n                    input_data   = $4\n                WHERE id = $1\n                RETURNING\n                    id, user_id,\n                    status as \"status: GenerationStatus\",\n                    started_at  as \"started_at: DateTime<Utc>\",\n                    completed_at as \"completed_at: DateTime<Utc>\",\n                    input_data, image_url, thumb_url, error_message, retry_count,\n                    created_at as \"created_at: DateTime<Utc>\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "status: GenerationStatus",
+        "type_info": {
+          "Custom": {
+            "name": "generation_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "running",
+                "success",
+                "failed"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "started_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "completed_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "input_data",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "error_message",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "retry_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "1389d48db88b36c24e87b0a13c22ce6dacfc473e1f4df79530d6794001033df8"
+}
