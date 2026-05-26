@@ -1,4 +1,5 @@
 import {
+  AvatarApi,
   CategoryApi,
   ProjectsApi,
   ScheduledSessionApi,
@@ -81,6 +82,42 @@ const projectKeys = createQueryKeys("projects", {
   }),
 });
 
+const avatarKeys = createQueryKeys("avatar", {
+  categoryHints: (categoryId: string) => ({
+    queryFn: async () =>
+      await AvatarApi.listCategoryHints({ categoryId }),
+    queryKey: [categoryId, "hints"],
+  }),
+  current: {
+    queryFn: async () => await AvatarApi.getAvatar(),
+    queryKey: null,
+  },
+  history: {
+    queryFn: async () => await AvatarApi.listHistory(),
+    queryKey: ["history"],
+  },
+  hints: (q: string) => ({
+    queryFn: async () => await AvatarApi.searchHints({ q }),
+    queryKey: [q],
+  }),
+  latestRun: {
+    queryFn: async () => await AvatarApi.getLatestRun(),
+    queryKey: ["latestRun"],
+  },
+  presets: {
+    queryFn: async () => await AvatarApi.listPresets(),
+    queryKey: ["presets"],
+  },
+  presetsAll: {
+    queryFn: async () => await AvatarApi.adminListAllPresets(),
+    queryKey: ["presetsAll"],
+  },
+  runs: {
+    queryFn: async () => await AvatarApi.listRuns(),
+    queryKey: ["runs"],
+  },
+});
+
 const taskKeys = createQueryKeys("tasks", {
   all: {
     queryFn: async () => await TasksApi.getTasks(),
@@ -97,6 +134,7 @@ const taskKeys = createQueryKeys("tasks", {
 });
 
 export const queryKeys = mergeQueryKeys(
+  avatarKeys,
   sessionkeys,
   tagKeys,
   statisticsKeys,

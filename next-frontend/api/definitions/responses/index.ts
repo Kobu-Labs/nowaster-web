@@ -1,3 +1,4 @@
+export * from "@/api/definitions/responses/avatar";
 export * from "@/api/definitions/responses/base";
 export * from "@/api/definitions/responses/category";
 export * from "@/api/definitions/responses/project";
