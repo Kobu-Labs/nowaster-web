@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE hint SET usage_count = GREATEST(usage_count - 1, 0) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cd601227553f5393164043265259f14b216d38ef5a69b126b1c256cb5782ac8e"
+}

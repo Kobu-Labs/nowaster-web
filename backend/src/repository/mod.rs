@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod avatar;
 pub mod category;
 pub mod db_backup;
 pub mod feed;

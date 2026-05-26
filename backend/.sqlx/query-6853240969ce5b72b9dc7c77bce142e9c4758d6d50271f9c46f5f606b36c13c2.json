@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    ch.category_id,\n                    h.id,\n                    h.label,\n                    h.usage_count,\n                    h.created_at as \"created_at: DateTime<Utc>\"\n                FROM category_hint ch\n                JOIN hint h ON h.id = ch.hint_id\n                WHERE ch.user_id = $1\n                ORDER BY ch.category_id, h.label ASC\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "category_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "label",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "usage_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6853240969ce5b72b9dc7c77bce142e9c4758d6d50271f9c46f5f606b36c13c2"
+}
