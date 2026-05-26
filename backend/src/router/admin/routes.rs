@@ -2,8 +2,12 @@ use axum::Router;
 
 use crate::router::{
     admin::{
-        backups::admin_backups_router, impersonation::admin_impersonation_router,
-        release::admin_release_router, sandbox::admin_sandbox_router, users::admin_users_router,
+        avatar::admin_avatar_router,
+        backups::admin_backups_router,
+        impersonation::admin_impersonation_router,
+        release::admin_release_router,
+        sandbox::admin_sandbox_router,
+        users::admin_users_router,
     },
     root::AppState,
 };
@@ -15,4 +19,5 @@ pub fn admin_router() -> Router<AppState> {
         .nest("/backups", admin_backups_router())
         .nest("/sandbox", admin_sandbox_router())
         .nest("/releases", admin_release_router())
+        .nest("/avatar", admin_avatar_router())
 }
