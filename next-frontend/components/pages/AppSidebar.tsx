@@ -11,6 +11,7 @@ import {
   Rss,
   Settings,
   Shield,
+  Sparkles,
   Tag,
   Users,
   X,
@@ -106,6 +107,11 @@ const navItems = [
     icon: History,
     title: "History",
     url: "/home/history",
+  },
+  {
+    icon: Sparkles,
+    title: "Avatar",
+    url: "/home/avatar",
   },
   {
     icon: Settings,
