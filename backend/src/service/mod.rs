@@ -1,4 +1,5 @@
 pub mod auth_service;
+pub mod avatar;
 pub mod category_service;
 pub mod community_category_service;
 pub mod community_dashboard_service;

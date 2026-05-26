@@ -41,8 +41,11 @@ urlencoding = "2.1"
 ipnetwork = "0.20"
 envy = "0.4.2"
 
-# S3 for backup downloads
+# S3 for backup downloads and avatar storage
 aws-config = { version = "1.1.7",  features = ["behavior-version-latest"] }
 aws-sdk-s3 = "1.122.0"
+
+# Image processing for avatar thumbnail generation
+image = { version = "0.25", default-features = false, features = ["jpeg"] }
 
 
