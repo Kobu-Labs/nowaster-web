@@ -129,7 +129,7 @@ fn build_prompt(activity_data: &str) -> String {
 LOCKED CHARACTER (DO NOT CHANGE UNDER ANY CIRCUMSTANCE):
 - Exact same character identity (face, hair, beard, eyes, proportions)
 - Exact same pose and full body orientation (DO NOT rotate, mirror, or change viewpoint; never show from behind)
-- Character is a fixed reference model placed into scenes (like a statue)
+- Character is a fixed reference figure placed into different scenes, like an action figure getting a costume swap
 - Same low-poly 3D isometric diorama style and camera angle
 
 ALL CHARACTER CHANGES ARE FORBIDDEN:
@@ -149,9 +149,9 @@ CLOTHING:
 Must reflect activity theme but keep the same character body and silhouette
 
 ACTIVITY PRIORITY:
-- 60–80% dominant activity defines environment + lighting + clothing theme
-- Medium activity creates secondary zones
-- Low activity = minor props only
+- The activity marked (dominant) should visually dominate the environment, lighting, and clothing theme
+- Activities marked (secondary) appear only as smaller accent zones or background details
+- Unlisted activities must have no influence on the scene
 
 STYLE:
 Low-poly 3D isometric diorama, toy-like miniature world, cinematic, vibrant environmental storytelling
@@ -159,6 +159,10 @@ Low-poly 3D isometric diorama, toy-like miniature world, cinematic, vibrant envi
 ACTIVITIES:
 {activities}"#
     )
+}
+
+fn build_negative_prompt() -> &'static str {
+    "different pose, rotated view, back view, side view, mirrored, redesigned face, different character, extra character, multiple characters, deformed proportions, camera angle change, text, watermark, blurry"
 }
 
 // ---------------------------------------------------------------------------
@@ -177,6 +181,7 @@ struct GenerationParameters {
     width: u32,
     height: u32,
     prompt: String,
+    negative_prompt: String,
     quantity: u32,
     style_ids: Vec<&'static str>,
     prompt_enhance: &'static str,
@@ -285,6 +290,7 @@ pub async fn generate_avatar_with_init_id(
             width: 2048,
             height: 2048,
             prompt,
+            negative_prompt: build_negative_prompt().to_string(),
             quantity: 1,
             style_ids: vec!["556c1ee5-ec38-42e8-955a-1e82dad0ffa1"],
             prompt_enhance: "OFF",
