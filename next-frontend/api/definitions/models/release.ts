@@ -7,24 +7,24 @@ export const ReleaseUserSchema = z.object({
 });
 
 export const ReleaseSchema = z.object({
-  created_at: z.coerce.date(),
+  created_at: z.coerce.date<Date>(),
   id: z.string(),
   name: z.string(),
   released: z.boolean(),
-  released_at: z.coerce.date().nullable(),
+  released_at: z.coerce.date<Date>().nullable(),
   released_by: ReleaseUserSchema.nullable(),
   seo_description: z.string().nullable(),
   seo_keywords: z.string().nullable(),
   seo_title: z.string().nullable(),
   short_description: z.string().nullish(),
   tags: z.array(z.string()),
-  updated_at: z.coerce.date(),
+  updated_at: z.coerce.date<Date>(),
   version: z.string(),
 });
 
 export const PublicReleaseSchema = z.object({
   name: z.string(),
-  released_at: z.coerce.date(),
+  released_at: z.coerce.date<Date>(),
   released_by: ReleaseUserSchema.nullable(),
   short_description: z.string().nullish(),
   tags: z.array(z.string()),
