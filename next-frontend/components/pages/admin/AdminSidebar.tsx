@@ -43,7 +43,7 @@ const adminNavItems = [
     url: "/home/admin/sandbox",
   },
   {
-    description: "Manage avatar presets and trigger user regeneration",
+    description: "Manage default avatars and trigger user regeneration",
     icon: Sparkles,
     title: "Avatars",
     url: "/home/admin/avatars",
