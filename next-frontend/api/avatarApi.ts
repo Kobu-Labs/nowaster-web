@@ -117,6 +117,33 @@ export const adminDeletePreset = async (
   return parseResponseUnsafe(data, AvatarResponseSchema.adminDeletePreset);
 };
 
+export const adminUploadPresetImages = async (
+  entries: { file: File; name: string; }[],
+) => {
+  const formData = new FormData();
+  for (const { file, name } of entries) {
+    const extension = file.name.includes(".")
+      ? file.name.split(".").pop()
+      : "jpg";
+    const trimmedName = name.trim() || file.name.replace(/\.[^.]+$/, "");
+    formData.append(trimmedName, file, `${trimmedName}.${extension}`);
+  }
+  const { data } = await baseApi.post(
+    `${ADMIN_URL}/presets/upload-bulk`,
+    formData,
+  );
+  return parseResponseUnsafe(data, AvatarResponseSchema.adminBulkUploadPresets);
+};
+
+export const adminUploadPresetToLeonardo = async (
+  params: AvatarRequest["adminUploadPresetToLeonardo"],
+) => {
+  const { data } = await baseApi.post(
+    `${ADMIN_URL}/presets/${params.id}/upload-to-leonardo`,
+  );
+  return parseResponseUnsafe(data, AvatarResponseSchema.adminUploadPresetToLeonardo);
+};
+
 export const adminTriggerGeneration = async (
   params: AvatarRequest["adminTriggerGeneration"],
 ) => {
@@ -144,4 +171,25 @@ export const adminGenerateManual = async (
     assignToUserId: params.assignToUserId,
   });
   return parseResponseUnsafe(data, AvatarResponseSchema.adminGenerate);
+};
+
+export const adminPlaygroundGenerate = async (userId: string) => {
+  const { data } = await baseApi.post(`${ADMIN_URL}/playground`, {
+    userId,
+  });
+  return parseResponseUnsafe(data, AvatarResponseSchema.adminPlaygroundGenerate);
+};
+
+export const adminListRecentRuns = async (limit = 50) => {
+  const { data } = await baseApi.get(`${ADMIN_URL}/runs`, {
+    params: { limit },
+  });
+  return parseResponseUnsafe(data, AvatarResponseSchema.adminListRecentRuns);
+};
+
+export const adminGetPlaygroundData = async (userId: string, weeks: number) => {
+  const { data } = await baseApi.get(`${ADMIN_URL}/playground/${userId}/data`, {
+    params: { weeks },
+  });
+  return parseResponseUnsafe(data, AvatarResponseSchema.adminGetPlaygroundData);
 };
