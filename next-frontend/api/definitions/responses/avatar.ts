@@ -1,4 +1,5 @@
 import {
+  ActivityEntrySchema,
   AvatarHistoryEntrySchema,
   AvatarPresetSchema,
   GenerationRunSchema,
@@ -24,11 +25,16 @@ const removeCategoryHint = z.null();
 
 // Admin
 const adminListAllPresets = z.array(AvatarPresetSchema);
+const adminBulkUploadPresets = z.array(AvatarPresetSchema);
 const adminCreatePreset = AvatarPresetSchema;
 const adminUpdatePreset = AvatarPresetSchema;
 const adminDeletePreset = z.null();
+const adminUploadPresetToLeonardo = AvatarPresetSchema;
 const adminTriggerGeneration = GenerationRunSchema;
 const adminGenerate = GenerationRunSchema;
+const adminPlaygroundGenerate = GenerationRunSchema;
+const adminListRecentRuns = z.array(GenerationRunSchema);
+const adminGetPlaygroundData = z.array(ActivityEntrySchema);
 
 export type AvatarResponse = {
   [Property in keyof typeof AvatarResponseSchema]: z.infer<
@@ -37,12 +43,17 @@ export type AvatarResponse = {
 };
 
 export const AvatarResponseSchema = {
+  adminBulkUploadPresets,
   adminCreatePreset,
   adminDeletePreset,
   adminGenerate,
+  adminGetPlaygroundData,
   adminListAllPresets,
+  adminListRecentRuns,
+  adminPlaygroundGenerate,
   adminTriggerGeneration,
   adminUpdatePreset,
+  adminUploadPresetToLeonardo,
   assignCategoryHint,
   createHint,
   disable,

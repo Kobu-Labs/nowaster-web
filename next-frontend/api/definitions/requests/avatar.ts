@@ -45,6 +45,10 @@ const adminDeletePreset = z.object({
   id: z.string().uuid(),
 });
 
+const adminUploadPresetToLeonardo = z.object({
+  id: z.string().uuid(),
+});
+
 const adminTriggerGeneration = z.object({
   userId: z.string(),
 });
@@ -74,6 +78,7 @@ export const AvatarRequestSchema = {
   adminGenerateManual,
   adminTriggerGeneration,
   adminUpdatePreset,
+  adminUploadPresetToLeonardo,
   assignCategoryHint,
   createHint,
   listCategoryHints,

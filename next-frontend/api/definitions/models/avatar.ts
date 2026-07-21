@@ -14,7 +14,8 @@ export const AvatarPresetSchema = z.object({
   thumbnailUrl: z.string(),
   referenceImageUrl: z.string(),
   isActive: z.boolean(),
-  createdAt: z.coerce.date(),
+  leonardoInitImageId: z.string().nullable().optional(),
+  createdAt: z.coerce.date<Date>(),
 });
 
 export const UserAvatarSchema = z.object({
@@ -23,24 +24,24 @@ export const UserAvatarSchema = z.object({
   isEnabled: z.boolean(),
   currentImageUrl: z.string().nullable(),
   currentThumbUrl: z.string().nullable(),
-  lastGeneratedAt: z.coerce.date().nullable(),
-  nextGenerationAt: z.coerce.date().nullable(),
+  lastGeneratedAt: z.coerce.date<Date>().nullable(),
+  nextGenerationAt: z.coerce.date<Date>().nullable(),
   basePresetId: z.string().uuid().nullable(),
-  updatedAt: z.coerce.date(),
+  updatedAt: z.coerce.date<Date>(),
 });
 
 export const GenerationRunSchema = z.object({
   id: z.string().uuid(),
   userId: z.string(),
   status: GenerationStatusSchema,
-  startedAt: z.coerce.date().nullable(),
-  completedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date<Date>().nullable(),
+  completedAt: z.coerce.date<Date>().nullable(),
   imageUrl: z.string().nullable(),
   thumbUrl: z.string().nullable(),
   inputData: z.string().nullable(),
   errorMessage: z.string().nullable(),
   retryCount: z.number(),
-  createdAt: z.coerce.date(),
+  createdAt: z.coerce.date<Date>(),
 });
 
 export const AvatarHistoryEntrySchema = z.object({
@@ -49,13 +50,18 @@ export const AvatarHistoryEntrySchema = z.object({
   imageUrl: z.string(),
   thumbUrl: z.string(),
   generationRunId: z.string().uuid().nullable(),
-  generatedAt: z.coerce.date(),
+  generatedAt: z.coerce.date<Date>(),
 });
 
 export const HintSchema = z.object({
   id: z.string().uuid(),
   label: z.string(),
   usageCount: z.number(),
+});
+
+export const ActivityEntrySchema = z.object({
+  label: z.string(),
+  hours: z.number(),
 });
 
 export type AvatarTier = z.infer<typeof AvatarTierSchema>;
@@ -65,3 +71,4 @@ export type UserAvatar = z.infer<typeof UserAvatarSchema>;
 export type GenerationRun = z.infer<typeof GenerationRunSchema>;
 export type AvatarHistoryEntry = z.infer<typeof AvatarHistoryEntrySchema>;
 export type Hint = z.infer<typeof HintSchema>;
+export type ActivityEntry = z.infer<typeof ActivityEntrySchema>;
