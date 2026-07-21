@@ -3,30 +3,32 @@
 import type { AvatarPreset } from "@/api/definitions/models/avatar";
 import { usePresets } from "@/components/hooks/avatar/usePresets";
 import { useSetPreset } from "@/components/hooks/avatar/useSetPreset";
-import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/shadcn/dialog";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import Image from "next/image";
-import { type FC, useState } from "react";
+import { type FC } from "react";
 
 type Props = {
-  currentPresetId: string | null;
+  currentPresetId: null | string;
+  onOpenChange: (open: boolean) => void;
+  onSelected?: () => void;
+  open: boolean;
 };
 
 const PresetTile: FC<{
+  isPending: boolean;
+  onSelect: (id: string) => void;
   preset: AvatarPreset;
   selected: boolean;
-  onSelect: (id: string) => void;
-  isPending: boolean;
-}> = ({ preset, selected, onSelect, isPending }) => (
+}> = ({ isPending, onSelect, preset, selected }) => (
   <button
     className={cn(
       "relative overflow-hidden rounded-lg border-2 transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -41,6 +43,7 @@ const PresetTile: FC<{
       className="aspect-square object-cover"
       height={120}
       src={preset.thumbnailUrl}
+      unoptimized
       width={120}
     />
     {selected && (
@@ -52,46 +55,53 @@ const PresetTile: FC<{
   </button>
 );
 
-export const PresetSelectorDialog: FC<Props> = ({ currentPresetId }) => {
-  const [open, setOpen] = useState(false);
+export const PresetSelectorDialog: FC<Props> = ({
+  currentPresetId,
+  onOpenChange,
+  onSelected,
+  open,
+}) => {
   const { data: presets, isLoading } = usePresets();
   const setPreset = useSetPreset();
 
   const handleSelect = async (presetId: string) => {
     await setPreset.mutateAsync(presetId);
-    setOpen(false);
+    onOpenChange(false);
+    onSelected?.();
   };
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          Change preset
-        </Button>
-      </DialogTrigger>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Choose a base preset</DialogTitle>
+          <DialogTitle>Choose your default avatar</DialogTitle>
+          <DialogDescription>
+            This is the character your avatar is based on — their face,
+            body, and pose always stay the same. The scene around them
+            changes automatically based on what you track.
+          </DialogDescription>
         </DialogHeader>
-        {isLoading ? (
-          <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton className="h-[148px] w-full rounded-lg" key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-3">
-            {presets?.map((preset) => (
-              <PresetTile
-                isPending={setPreset.isPending}
-                key={preset.id}
-                onSelect={handleSelect}
-                preset={preset}
-                selected={preset.id === currentPresetId}
-              />
-            ))}
-          </div>
-        )}
+        {isLoading
+          ? (
+              <div className="grid grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton className="h-[148px] w-full rounded-lg" key={i} />
+                ))}
+              </div>
+            )
+          : (
+              <div className="grid grid-cols-3 gap-3">
+                {presets?.map((preset) => (
+                  <PresetTile
+                    isPending={setPreset.isPending}
+                    key={preset.id}
+                    onSelect={handleSelect}
+                    preset={preset}
+                    selected={preset.id === currentPresetId}
+                  />
+                ))}
+              </div>
+            )}
       </DialogContent>
     </Dialog>
   );

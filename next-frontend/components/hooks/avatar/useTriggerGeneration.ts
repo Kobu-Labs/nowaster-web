@@ -8,7 +8,8 @@ export const useTriggerGeneration = () => {
   return useMutation({
     mutationFn: () => AvatarApi.triggerGeneration(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.avatar._def });
+      queryClient.invalidateQueries(queryKeys.avatar.latestRun);
+      queryClient.invalidateQueries(queryKeys.avatar.current);
     },
   });
 };
