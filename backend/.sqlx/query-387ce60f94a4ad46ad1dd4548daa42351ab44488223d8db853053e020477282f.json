@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT id, name, thumbnail_url, reference_image_url, is_active,\n                       created_at as \"created_at: DateTime<Utc>\"\n                FROM avatar_preset WHERE id = $1\n                ",
+  "query": "\n                SELECT id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,\n                       is_active, created_at as \"created_at: DateTime<Utc>\"\n                FROM avatar_preset WHERE id = $1\n                ",
   "describe": {
     "columns": [
       {
@@ -25,11 +25,16 @@
       },
       {
         "ordinal": 4,
+        "name": "leonardo_init_image_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
         "name": "is_active",
         "type_info": "Bool"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
@@ -44,9 +49,10 @@
       false,
       false,
       false,
+      true,
       false,
       false
     ]
   },
-  "hash": "46497f0d478dd22a46b453c320374b5c33a80397430beeb2b7c2bd9fb75dc86a"
+  "hash": "387ce60f94a4ad46ad1dd4548daa42351ab44488223d8db853053e020477282f"
 }

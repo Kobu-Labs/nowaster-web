@@ -87,6 +87,16 @@ pub struct S3Config {
 }
 
 #[derive(Deserialize, Debug, Clone)]
+pub struct LeonardoConfig {
+    #[serde(rename = "leonardo_api_key")]
+    pub api_key: String,
+    #[serde(rename = "leonardo_layout_reference_id")]
+    pub layout_reference_id: String,
+    #[serde(rename = "leonardo_model_id")]
+    pub model_id: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     #[serde(flatten)]
     pub server: ServerConfig,
@@ -102,4 +112,6 @@ pub struct Config {
     pub frontend: FrontendConfig,
     #[serde(flatten)]
     pub s3: S3Config,
+    #[serde(flatten)]
+    pub leonardo: LeonardoConfig,
 }

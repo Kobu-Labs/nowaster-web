@@ -32,6 +32,7 @@ pub struct AvatarPreset {
     pub name: String,
     pub thumbnail_url: String,
     pub reference_image_url: String,
+    pub leonardo_init_image_id: Option<String>,
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
 }

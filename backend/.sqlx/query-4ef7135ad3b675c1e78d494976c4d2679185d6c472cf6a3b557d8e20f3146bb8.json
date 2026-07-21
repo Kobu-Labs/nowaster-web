@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT id, name, thumbnail_url, reference_image_url, is_active,\n                       created_at as \"created_at: DateTime<Utc>\"\n                FROM avatar_preset WHERE is_active = true ORDER BY created_at ASC\n                ",
+  "query": "\n                UPDATE avatar_preset SET leonardo_init_image_id = $2\n                WHERE id = $1\n                RETURNING\n                    id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,\n                    is_active, created_at as \"created_at: DateTime<Utc>\"\n                ",
   "describe": {
     "columns": [
       {
@@ -25,26 +25,35 @@
       },
       {
         "ordinal": 4,
+        "name": "leonardo_init_image_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
         "name": "is_active",
         "type_info": "Bool"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
     },
     "nullable": [
       false,
       false,
       false,
       false,
+      true,
       false,
       false
     ]
   },
-  "hash": "71f2a425cb33040a7e1837bd5abbcfb4e1c239b0c84ace5071b6213e81dc9ec6"
+  "hash": "4ef7135ad3b675c1e78d494976c4d2679185d6c472cf6a3b557d8e20f3146bb8"
 }

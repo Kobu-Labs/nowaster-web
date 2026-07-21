@@ -39,8 +39,8 @@ impl AvatarPresetRepository {
                 INSERT INTO avatar_preset (name, thumbnail_url, reference_image_url, is_active)
                 VALUES ($1, $2, $3, $4)
                 RETURNING
-                    id, name, thumbnail_url, reference_image_url, is_active,
-                    created_at as "created_at: DateTime<Utc>"
+                    id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,
+                    is_active, created_at as "created_at: DateTime<Utc>"
                 "#,
                 dto.name,
                 dto.thumbnail_url,
@@ -66,8 +66,8 @@ impl AvatarPresetRepository {
                     is_active         = COALESCE($5, is_active)
                 WHERE id = $1
                 RETURNING
-                    id, name, thumbnail_url, reference_image_url, is_active,
-                    created_at as "created_at: DateTime<Utc>"
+                    id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,
+                    is_active, created_at as "created_at: DateTime<Utc>"
                 "#,
                 id,
                 dto.name,
@@ -97,8 +97,8 @@ impl AvatarPresetRepository {
             sqlx::query_as!(
                 AvatarPreset,
                 r#"
-                SELECT id, name, thumbnail_url, reference_image_url, is_active,
-                       created_at as "created_at: DateTime<Utc>"
+                SELECT id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,
+                       is_active, created_at as "created_at: DateTime<Utc>"
                 FROM avatar_preset WHERE id = $1
                 "#,
                 id
@@ -115,14 +115,35 @@ impl AvatarPresetRepository {
             sqlx::query_as!(
                 AvatarPreset,
                 r#"
-                SELECT id, name, thumbnail_url, reference_image_url, is_active,
-                       created_at as "created_at: DateTime<Utc>"
+                SELECT id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,
+                       is_active, created_at as "created_at: DateTime<Utc>"
                 FROM avatar_preset ORDER BY created_at ASC
                 "#
             )
             .fetch_all(self.db_conn.get_pool())
         )?;
         Ok(presets)
+    }
+
+    #[instrument(err, skip(self), fields(preset_id = %id))]
+    pub async fn set_leonardo_init_image_id(&self, id: Uuid, leonardo_id: &str) -> Result<AvatarPreset> {
+        let preset = crate::named_query!(
+            "avatar_preset_set_leonardo_id",
+            sqlx::query_as!(
+                AvatarPreset,
+                r#"
+                UPDATE avatar_preset SET leonardo_init_image_id = $2
+                WHERE id = $1
+                RETURNING
+                    id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,
+                    is_active, created_at as "created_at: DateTime<Utc>"
+                "#,
+                id,
+                leonardo_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
+        Ok(preset)
     }
 
     #[instrument(err, skip(self))]
@@ -132,8 +153,8 @@ impl AvatarPresetRepository {
             sqlx::query_as!(
                 AvatarPreset,
                 r#"
-                SELECT id, name, thumbnail_url, reference_image_url, is_active,
-                       created_at as "created_at: DateTime<Utc>"
+                SELECT id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,
+                       is_active, created_at as "created_at: DateTime<Utc>"
                 FROM avatar_preset WHERE is_active = true ORDER BY created_at ASC
                 "#
             )
@@ -187,6 +208,7 @@ impl UserAvatarRepository {
     /// Gets the user's avatar row, creating it with defaults if it doesn't exist.
     #[instrument(err, skip(self))]
     pub async fn upsert(&self, user_id: &str) -> Result<UserAvatar> {
+        tracing::info!(user_id, "upsert: executing INSERT ... ON CONFLICT");
         let avatar = crate::named_query!(
             "user_avatar_upsert",
             sqlx::query_as!(
@@ -209,6 +231,7 @@ impl UserAvatarRepository {
             )
             .fetch_one(self.db_conn.get_pool())
         )?;
+        tracing::info!(user_id, id = %avatar.id, "upsert: OK");
         Ok(avatar)
     }
 
@@ -219,6 +242,7 @@ impl UserAvatarRepository {
         enabled: bool,
         next_generation_at: Option<DateTime<Utc>>,
     ) -> Result<UserAvatar> {
+        tracing::info!(user_id, enabled, "set_enabled: executing UPDATE");
         let avatar = crate::named_query!(
             "user_avatar_set_enabled",
             sqlx::query_as!(
@@ -245,6 +269,7 @@ impl UserAvatarRepository {
             )
             .fetch_one(self.db_conn.get_pool())
         )?;
+        tracing::info!(user_id, "set_enabled: OK");
         Ok(avatar)
     }
 
@@ -503,6 +528,31 @@ impl GenerationRunRepository {
             .fetch_optional(self.db_conn.get_pool())
         )?;
         Ok(run)
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn list_all_recent(&self, limit: i64) -> Result<Vec<GenerationRun>> {
+        let runs = crate::named_query!(
+            "generation_run_list_all_recent",
+            sqlx::query_as!(
+                GenerationRun,
+                r#"
+                SELECT
+                    id, user_id,
+                    status as "status: GenerationStatus",
+                    started_at  as "started_at: DateTime<Utc>",
+                    completed_at as "completed_at: DateTime<Utc>",
+                    input_data, image_url, thumb_url, error_message, retry_count,
+                    created_at as "created_at: DateTime<Utc>"
+                FROM generation_run
+                ORDER BY created_at DESC
+                LIMIT $1
+                "#,
+                limit
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
+        Ok(runs)
     }
 
     #[instrument(err, skip(self))]

@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 indexmap = "2"
-axum = "0.8.1"
+axum = { version = "0.8.1", features = ["multipart"] }
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.43", features = ["full"] }
 tower = { version = "0.5.2", features = ["full"] }
@@ -32,7 +32,7 @@ log = "0.4"
 
 # OAuth and JWT dependencies
 oauth2 = "4.4"
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "multipart"] }
 rand = "0.8"
 sha2 = "0.10"
 hex = "0.4"
@@ -46,6 +46,6 @@ aws-config = { version = "1.1.7",  features = ["behavior-version-latest"] }
 aws-sdk-s3 = "1.122.0"
 
 # Image processing for avatar thumbnail generation
-image = { version = "0.25", default-features = false, features = ["jpeg"] }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 
 

@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH updated AS (\n                    UPDATE \"user\" u SET\n                        displayname = COALESCE($1, u.displayname),\n                        avatar_url = COALESCE($2, u.avatar_url)\n                    WHERE u.id = $3\n                    RETURNING u.id, u.displayname, u.avatar_url, u.visibility_flags\n                )\n                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,\n                       ua.current_thumb_url AS avatar_thumb_url,\n                       ua.current_image_url AS avatar_image_url\n                FROM updated u\n                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "visibility_flags",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "avatar_thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "avatar_image_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "be73eb1b45e6938e05da329bccba002c23db1189e6130d60197e88812f459e05"
+}
