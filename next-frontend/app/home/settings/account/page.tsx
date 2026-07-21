@@ -1,23 +1,38 @@
 "use client";
 
 import { AvatarSettings } from "@/components/ui-providers/avatar/AvatarSettings";
-import { Separator } from "@/components/shadcn/separator";
 import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
 import { useUpdateUser } from "@/components/hooks/user/useUpdateUser";
 import { Button } from "@/components/shadcn/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
 import { Input } from "@/components/shadcn/input";
 import { Label } from "@/components/shadcn/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
-import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
-import { cn, getInitials } from "@/lib/utils";
-import { Check, Loader2, Upload, X } from "lucide-react";
-import { type FC, useState } from "react";
 import { useToast } from "@/components/shadcn/use-toast";
+import { cn } from "@/lib/utils";
+import { Check, Loader2, X } from "lucide-react";
+import { type FC, useState } from "react";
+
+const UsernameRule: FC<{ label: string; valid: boolean; }> = ({
+  label,
+  valid,
+}) => (
+  <span
+    className={cn(
+      "inline-flex items-center gap-1 text-xs",
+      valid ? "text-green-600 dark:text-green-500" : "text-muted-foreground",
+    )}
+  >
+    {valid ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+    {label}
+  </span>
+);
 
 const AccountPage: FC = () => {
   const user = useCurrentUser();
@@ -25,43 +40,13 @@ const AccountPage: FC = () => {
   const { toast } = useToast();
   const [username, setUsername] = useState(user.username);
 
+  const hasChanges = username.trim() !== user.username;
+  const isValidLength = username.trim().length >= 4;
+  const containsSpaces = username.includes(" ");
+  const isAlphanumeric = /^[a-zA-Z0-9]*$/.test(username);
+  const isValidUsername = isValidLength && !containsSpaces && isAlphanumeric;
+
   const handleSave = async () => {
-    if (!username.trim()) {
-      toast({
-        description: "Display name cannot be empty",
-        title: "Error",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (username.trim().length < 4) {
-      toast({
-        description: "Display name must be at least 4 characters",
-        title: "Error",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (username.includes(" ")) {
-      toast({
-        description: "Display name cannot contain spaces",
-        title: "Error",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
-      toast({
-        description: "Display name can only contain letters and numbers",
-        title: "Error",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       await updateUser.mutateAsync({ username: username.trim() });
       toast({
@@ -77,125 +62,42 @@ const AccountPage: FC = () => {
     }
   };
 
-  const hasChanges = username.trim() !== user.username;
-  const isValidLength = username.trim().length >= 4;
-  const containsSpaces = username.includes(" ");
-  const isAlphanumeric = /^[a-zA-Z0-9]*$/.test(username);
-  const isValidUsername = isValidLength && !containsSpaces && isAlphanumeric;
-
   return (
-    <div className="container py-10 max-w-3xl mx-auto">
+    <div className="max-w-2xl">
+      <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
+      <p className="text-muted-foreground mb-6">
+        Manage your account information and preferences.
+      </p>
+
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Account Settings
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your account information and preferences.
-          </p>
-        </div>
+        <AvatarSettings />
 
-        <div className="space-y-6 bg-card rounded-lg border p-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
-                <AvatarFallback className="bg-primary/10 text-2xl">
-                  {getInitials(user.username)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <Label htmlFor="avatar-upload">Profile Picture</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Upload a new profile picture
-                </p>
-                <TooltipProvider>
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <span className="inline-block">
-                        <Button disabled size="sm" variant="outline">
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload Image
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Coming soon! (once I learn AWS S3)</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username">Display Name</Label>
-              <Input
-                autoComplete="off"
-                id="username"
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your display name"
-                type="text"
-                value={username}
+        <Card>
+          <CardHeader>
+            <CardTitle>Display Name</CardTitle>
+            <CardDescription>
+              This is the name that will be visible to other users.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Label htmlFor="username">Display Name</Label>
+            <Input
+              autoComplete="off"
+              id="username"
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your display name"
+              value={username}
+            />
+            <div className="flex flex-wrap gap-3">
+              <UsernameRule label="4+ characters" valid={isValidLength} />
+              <UsernameRule label="No spaces" valid={!containsSpaces} />
+              <UsernameRule
+                label="Letters & numbers only"
+                valid={isAlphanumeric}
               />
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  {isValidLength
-                    ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      )
-                    : (
-                        <X className="h-4 w-4 text-red-500" />
-                      )}
-                  <p
-                    className={cn(
-                      "text-sm",
-                      isValidLength ? "text-green-500" : "text-red-500",
-                    )}
-                  >
-                    At least 4 characters
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {containsSpaces
-                    ? (
-                        <X className="h-4 w-4 text-red-500" />
-                      )
-                    : (
-                        <Check className="h-4 w-4 text-green-500" />
-                      )}
-                  <p
-                    className={cn(
-                      "text-sm",
-                      containsSpaces ? "text-red-500" : "text-green-500",
-                    )}
-                  >
-                    No spaces
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {isAlphanumeric
-                    ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      )
-                    : (
-                        <X className="h-4 w-4 text-red-500" />
-                      )}
-                  <p
-                    className={cn(
-                      "text-sm",
-                      isAlphanumeric ? "text-green-500" : "text-red-500",
-                    )}
-                  >
-                    Only letters and numbers
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                This is the name that will be visible to other users.
-              </p>
             </div>
-          </div>
-
-          <div className="flex justify-end gap-2">
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2">
             <Button
               disabled={!hasChanges}
               onClick={() => setUsername(user.username)}
@@ -212,14 +114,8 @@ const AccountPage: FC = () => {
               )}
               Save Changes
             </Button>
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-6 bg-card rounded-lg border p-6">
-          <AvatarSettings />
-        </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );
