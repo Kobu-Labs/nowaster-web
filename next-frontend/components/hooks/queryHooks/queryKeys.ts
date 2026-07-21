@@ -149,6 +149,14 @@ const avatarKeys = createQueryKeys("avatar", {
     queryFn: async () => await AvatarApi.adminListAllPresets(),
     queryKey: ["presetsAll"],
   },
+  playgroundData: (userId: string, weeks: number) => ({
+    queryFn: async () => await AvatarApi.adminGetPlaygroundData(userId, weeks),
+    queryKey: [userId, weeks, "playgroundData"],
+  }),
+  recentRuns: {
+    queryFn: async () => await AvatarApi.adminListRecentRuns(),
+    queryKey: ["recentRuns"],
+  },
   runs: {
     queryFn: async () => await AvatarApi.listRuns(),
     queryKey: ["runs"],
