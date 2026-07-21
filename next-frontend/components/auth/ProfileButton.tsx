@@ -2,7 +2,8 @@
 
 import { useAuth } from "@/components/hooks/useAuth";
 import { useCurrentUser } from "@/components/hooks/user/useCurrentUser";
-import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
+import { useAvatar } from "@/components/hooks/avatar/useAvatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn/avatar";
 import { Button } from "@/components/shadcn/button";
 import {
   DropdownMenu,
@@ -20,14 +21,17 @@ import type { FC } from "react";
 export const ProfileButton: FC = () => {
   const { signOut } = useAuth();
   const user = useCurrentUser();
+  const { data: avatar } = useAvatar();
 
   const initials = getInitials(user.username);
+  const thumbUrl = avatar?.isEnabled ? avatar.currentThumbUrl : null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="relative h-8 w-8 rounded-full" variant="ghost">
           <Avatar className="h-8 w-8">
+            {thumbUrl && <AvatarImage alt={user.username} src={thumbUrl} />}
             <AvatarFallback className="bg-primary/10">
               {initials}
             </AvatarFallback>

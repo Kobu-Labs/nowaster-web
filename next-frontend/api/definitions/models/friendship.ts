@@ -1,10 +1,10 @@
-import { UserSchema } from "@/api/definitions/models/user";
+import { ReadUserAvatarSchema } from "@/api/definitions/models/feed";
 import { z } from "zod";
 
 export const FriendshipSchema = z.object({
   created_at: z.coerce.date<Date>(),
-  friend1: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
-  friend2: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
+  friend1: ReadUserAvatarSchema,
+  friend2: ReadUserAvatarSchema,
   id: z.uuid(),
 });
 
@@ -21,8 +21,8 @@ export const FriendRequestSchema = z.object({
   created_at: z.coerce.date<Date>(),
   id: z.uuid(),
   introduction_message: z.string().nullable(),
-  recipient: UserSchema,
-  requestor: UserSchema,
+  recipient: ReadUserAvatarSchema,
+  requestor: ReadUserAvatarSchema,
   status: FriendRequestStatusSchema,
 });
 

@@ -16,7 +16,7 @@ export const FriendRequestAcceptedNotificationItem: FC<
       )}
     >
       <UserAvatar
-        avatar_url={props.data.accepter.avatar_url}
+        avatar_url={props.data.accepter.avatar_thumb_url}
         username={props.data.accepter.username}
       />
 

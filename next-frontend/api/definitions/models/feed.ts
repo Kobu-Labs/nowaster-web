@@ -10,8 +10,8 @@ export const EventTypeSchema = z.enum([
 ]);
 
 export const ReadUserAvatarSchema = z.object({
+  avatar_image_url: z.string().nullable().optional(),
   avatar_thumb_url: z.string().nullable().optional(),
-  avatar_url: z.string().nullable(),
   id: z.string(),
   username: z.string(),
 });

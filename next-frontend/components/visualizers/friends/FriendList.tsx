@@ -95,7 +95,7 @@ export const FriendsList = () => {
                             <Avatar>
                               <AvatarImage
                                 alt={friendship.friend.username}
-                                src={friendship.friend.avatar_url ?? undefined}
+                                src={friendship.friend.avatar_thumb_url ?? undefined}
                               />
                               <AvatarFallback>
                                 {getInitials(friendship.friend.username)}
