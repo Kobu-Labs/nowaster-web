@@ -181,7 +181,7 @@ const UserSubscriptionCard: FC<UserSubscriptionCardProps> = ({
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="flex items-center space-x-4">
         <Avatar className="h-10 w-10">
-          <AvatarImage alt={user.username} src={user.avatar_url ?? undefined} />
+          <AvatarImage alt={user.username} src={user.avatar_thumb_url ?? undefined} />
           <AvatarFallback className="bg-primary/10 text-primary font-medium">
             {getInitials(user.username)}
           </AvatarFallback>

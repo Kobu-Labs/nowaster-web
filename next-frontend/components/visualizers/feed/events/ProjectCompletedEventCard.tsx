@@ -5,11 +5,7 @@ import type {
   ReadFeedEvent,
   ReadUserAvatar,
 } from "@/api/definitions/models/feed";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/shadcn/avatar";
+import { FeedUserAvatar } from "@/components/ui-providers/avatar/FeedUserAvatar";
 import { Card, CardContent } from "@/components/shadcn/card";
 import {
   renderActiveShape,
@@ -20,7 +16,7 @@ import { AnimatedTotal } from "@/components/visualizers/feed/AnimatedTotal";
 import { ReactionBar } from "@/components/visualizers/feed/ReactionBar";
 import { ProjectAvatar } from "@/components/visualizers/projects/ProjectAvatar";
 import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
-import { formatTime, getInitials, randomColor } from "@/lib/utils";
+import { formatTime, randomColor } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { FolderCheck } from "lucide-react";
 import type { FC } from "react";
@@ -55,15 +51,7 @@ export const ProjectCompletedFeedCard: FC<ProjectCompletedFeedCardProps> = ({
         <div className="flex">
           <div className="flex flex-col gap-2">
             <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  alt={user.username}
-                  src={user.avatar_url ?? undefined}
-                />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {getInitials(user.username)}
-                </AvatarFallback>
-              </Avatar>
+              <FeedUserAvatar user={user} />
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

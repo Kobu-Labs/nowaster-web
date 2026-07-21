@@ -9,18 +9,14 @@ import type {
   ReadUserAvatar,
   SessionCompletedEventSchema,
 } from "@/api/definitions/models/feed";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/shadcn/avatar";
 import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
+import { FeedUserAvatar } from "@/components/ui-providers/avatar/FeedUserAvatar";
 import { CategoryBadge } from "@/components/visualizers/categories/CategoryBadge";
 import { ReactionBar } from "@/components/visualizers/feed/ReactionBar";
 import { ProjectBadge } from "@/components/visualizers/projects/ProjectBadge";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
-import { getFormattedTimeDifference, getInitials } from "@/lib/utils";
+import { getFormattedTimeDifference } from "@/lib/utils";
 import type { z } from "zod";
 
 type SessionFeedCardProps = {
@@ -38,15 +34,7 @@ export const SessionCompletedFeedCard: FC<SessionFeedCardProps> = ({
     <Card className="w-full">
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage
-              alt={user.username}
-              src={user.avatar_thumb_url ?? user.avatar_url ?? undefined}
-            />
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">
-              {getInitials(user.username)}
-            </AvatarFallback>
-          </Avatar>
+          <FeedUserAvatar user={user} />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">

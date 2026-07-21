@@ -45,7 +45,7 @@ export const NewFriendRequestNotificationItem: FC<
           description: (
             <div className="flex items-center gap-2">
               <UserAvatar
-                avatar_url={props.data.requestor.avatar_url}
+                avatar_url={props.data.requestor.avatar_thumb_url}
                 username={props.data.requestor.username}
               />
               <span>
@@ -73,7 +73,7 @@ export const NewFriendRequestNotificationItem: FC<
       }}
     >
       <UserAvatar
-        avatar_url={props.data.requestor.avatar_url}
+        avatar_url={props.data.requestor.avatar_thumb_url}
         username={props.data.requestor.username}
       />
 

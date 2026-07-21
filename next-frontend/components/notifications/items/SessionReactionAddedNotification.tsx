@@ -15,7 +15,7 @@ type GroupedReaction = {
   count: number;
   emoji: string;
   users: {
-    avatar_url: null | string;
+    avatar_thumb_url?: null | string;
     id: string;
     username: string;
   }[];
@@ -41,7 +41,7 @@ export const SessionReactionAddedNotificationItem: FC<
     const reactionMap = new Map<string, Set<string>>();
     const userMap = new Map<
       string,
-      { avatar_url: null | string; id: string; username: string; }
+      { avatar_thumb_url?: null | string; id: string; username: string; }
     >();
 
     notifications.forEach(({ notification }) => {
@@ -127,7 +127,7 @@ export const SessionReactionAddedNotificationItem: FC<
                 }}
               >
                 <UserAvatar
-                  avatar_url={user.avatar_url}
+                  avatar_url={user.avatar_thumb_url}
                   username={user.username}
                 />
               </div>
