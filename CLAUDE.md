@@ -90,7 +90,7 @@ sqlx migrate revert  # Revert last migration
 - Use TypeScript with strict type checking
 - Follow Next.js App Router conventions
 - Component files use PascalCase (e.g., `UserProfile.tsx`)
-- Use shadcn consistent styling
+- **ALWAYS prefer an existing shadcn solution over building custom UI** — this applies beyond raw HTML elements (e.g. shadcn `Button` instead of a raw `<button>`) to composite patterns too (e.g. a combobox/search-picker should be built from shadcn's `Popover` + `Command`, not a bespoke dropdown). Before writing any new UI pattern, check whether shadcn already has it, or whether an existing component in this repo already composes shadcn primitives for the same pattern (e.g. `CategoryPickerUiProvider` for Popover+Command comboboxes) and reuse/extend that instead of reinventing it. Raw or bespoke elements miss shadcn's built-in styling, cursor, disabled, and focus-state handling, and silently diverge from the rest of the UI
 - State management: React Query for server state, Jotai for client state
 - API calls through centralized client in `api/` directory
 - **ALWAYS use absolute imports** (e.g., `@/components/...` instead of `../../../components/...`)
