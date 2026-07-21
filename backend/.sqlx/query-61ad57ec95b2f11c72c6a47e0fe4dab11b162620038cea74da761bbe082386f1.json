@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,\n                       is_active, created_at as \"created_at: DateTime<Utc>\"\n                FROM avatar_preset WHERE is_active = true ORDER BY created_at ASC\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "thumbnail_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "reference_image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "leonardo_init_image_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "61ad57ec95b2f11c72c6a47e0fe4dab11b162620038cea74da761bbe082386f1"
+}

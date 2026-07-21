@@ -8,6 +8,12 @@ use crate::entity::avatar::{
 };
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ActivityEntryDto {
+    pub label: String,
+    pub hours: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReadAvatarPresetDto {
     pub id: Uuid,
     pub name: String,
@@ -17,6 +23,8 @@ pub struct ReadAvatarPresetDto {
     pub reference_image_url: String,
     #[serde(rename = "isActive")]
     pub is_active: bool,
+    #[serde(rename = "leonardoInitImageId")]
+    pub leonardo_init_image_id: Option<String>,
     #[serde(rename = "createdAt")]
     pub created_at: DateTime<Utc>,
 }
@@ -29,6 +37,7 @@ impl From<AvatarPreset> for ReadAvatarPresetDto {
             thumbnail_url: e.thumbnail_url,
             reference_image_url: e.reference_image_url,
             is_active: e.is_active,
+            leonardo_init_image_id: e.leonardo_init_image_id,
             created_at: e.created_at,
         }
     }
@@ -52,6 +61,8 @@ pub struct ReadUserAvatarDto {
     pub last_generated_at: Option<DateTime<Utc>>,
     #[serde(rename = "nextGenerationAt")]
     pub next_generation_at: Option<DateTime<Utc>>,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: DateTime<Utc>,
 }
 
 impl From<UserAvatar> for ReadUserAvatarDto {
@@ -66,6 +77,7 @@ impl From<UserAvatar> for ReadUserAvatarDto {
             is_enabled: e.is_enabled,
             last_generated_at: e.last_generated_at,
             next_generation_at: e.next_generation_at,
+            updated_at: e.updated_at,
         }
     }
 }

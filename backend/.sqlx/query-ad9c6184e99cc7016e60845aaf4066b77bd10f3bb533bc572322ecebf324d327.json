@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,\n                       ua.current_thumb_url AS avatar_thumb_url,\n                       ua.current_image_url AS avatar_image_url\n                FROM \"user\" u\n                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true\n                WHERE u.email = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "visibility_flags",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "avatar_thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "avatar_image_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "ad9c6184e99cc7016e60845aaf4066b77bd10f3bb533bc572322ecebf324d327"
+}

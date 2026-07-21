@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH upserted AS (\n                    INSERT INTO \"user\" (id, displayname, email, avatar_url, visibility_flags)\n                    VALUES (gen_random_uuid()::text, $1, $2, $3, $4)\n                    ON CONFLICT (email)\n                    DO UPDATE SET\n                        displayname = EXCLUDED.displayname,\n                        avatar_url = EXCLUDED.avatar_url\n                    RETURNING id, displayname, avatar_url, visibility_flags\n                )\n                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,\n                       ua.current_thumb_url AS avatar_thumb_url,\n                       ua.current_image_url AS avatar_image_url\n                FROM upserted u\n                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "visibility_flags",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "avatar_thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "avatar_image_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "95cb4a78c06d9c75a0a5928267f79e1a93f8514f8e50fb77db079ae14c66c344"
+}

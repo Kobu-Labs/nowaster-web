@@ -81,15 +81,24 @@ pub async fn upload_init_image(
 // Prompt construction
 // ---------------------------------------------------------------------------
 
+/// Delimiters for the flat `activity_data` wire format produced by
+/// `AvatarService::aggregate_input_data`: entries separated by
+/// `ACTIVITY_ENTRY_SEP`, each as `label` + `ACTIVITY_FIELD_SEP` + `hours`.
+/// ASCII separator control characters are used instead of ',' / ':' because
+/// category names and hint labels are free text and may legitimately contain
+/// commas or colons.
+pub const ACTIVITY_ENTRY_SEP: &str = "\u{1e}";
+pub const ACTIVITY_FIELD_SEP: &str = "\u{1f}";
+
 fn build_activities_section(activity_data: &str) -> String {
     if activity_data.is_empty() {
         return String::new();
     }
 
     let mut entries: Vec<(String, f64)> = activity_data
-        .split(',')
+        .split(ACTIVITY_ENTRY_SEP)
         .filter_map(|part| {
-            let mut iter = part.trim().rsplitn(2, ':');
+            let mut iter = part.rsplitn(2, ACTIVITY_FIELD_SEP);
             let hours: f64 = iter.next()?.trim().parse().ok()?;
             let label = iter.next()?.trim().to_string();
             Some((label, hours))
@@ -126,27 +135,14 @@ fn build_prompt(activity_data: &str) -> String {
     format!(
         r#"Use the attached image as a STRICT reference.
 
-LOCKED CHARACTER (DO NOT CHANGE UNDER ANY CIRCUMSTANCE):
-- Exact same character identity (face, hair, beard, eyes, proportions)
-- Exact same pose and full body orientation (DO NOT rotate, mirror, or change viewpoint; never show from behind)
-- Character is a fixed reference figure placed into different scenes, like an action figure getting a costume swap
-- Same low-poly 3D isometric diorama style and camera angle
+CHARACTER (LOCKED — do not change):
+Keep the exact same skin tone, eye color and shape, nose shape, jawline, eyebrow shape, facial hair style and length, hair style and color, and body proportions as the reference image. Keep the exact same pose and full body orientation — do not rotate, mirror, or change viewpoint, and never show the character from behind. Keep the same low-poly 3D isometric diorama camera angle.
 
-ALL CHARACTER CHANGES ARE FORBIDDEN:
-- No redesign of face, body, or proportions
-- No pose changes
-- No camera angle changes
-
-SCENE RULE (ONLY PLACE CHANGES HERE):
-- Only the environment may change to express activity
-- Full redesign of room architecture, walls, floors, furniture, lighting, and props
-- Clothing and small accessories may adapt, but must NOT affect identity or pose
+SCENE (ONLY PLACE CHANGES HERE):
+Only the environment may change to express activity — fully redesign room architecture, walls, floors, furniture, lighting, and props. Choose room architecture, furniture, and props that concretely depict the dominant activity (e.g. a home office desk with monitors for coding, gym equipment for working out, a kitchen counter for cooking) — the room itself must visually communicate what the dominant activity is, not just its color or mood. Clothing and small accessories may adapt to the activity theme, but must not affect the character's face, body, or pose.
 
 LIGHTING:
 Activity-driven lighting (mood, color temperature, light sources)
-
-CLOTHING:
-Must reflect activity theme but keep the same character body and silhouette
 
 ACTIVITY PRIORITY:
 - The activity marked (dominant) should visually dominate the environment, lighting, and clothing theme
@@ -233,19 +229,41 @@ struct GeneratedImage {
     url: String,
 }
 
+const MAX_CONSECUTIVE_POLL_ERRORS: u32 = 5;
+
 async fn poll_until_complete(client: &Client, api_key: &str, generation_id: &str) -> Result<String> {
+    let mut consecutive_errors = 0u32;
+
     for _ in 0..MAX_POLLS {
         sleep(POLL_INTERVAL).await;
 
-        let poll_body = client
-            .get(format!("{}/v1/generations/{}", LEONARDO_BASE, generation_id))
-            .bearer_auth(api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .text()
-            .await
-            .context("Failed to read generation status body")?;
+        let poll_body_result = async {
+            client
+                .get(format!("{}/v1/generations/{}", LEONARDO_BASE, generation_id))
+                .bearer_auth(api_key)
+                .send()
+                .await?
+                .error_for_status()?
+                .text()
+                .await
+                .context("Failed to read generation status body")
+        }
+        .await;
+
+        let poll_body = match poll_body_result {
+            Ok(body) => {
+                consecutive_errors = 0;
+                body
+            }
+            Err(e) => {
+                consecutive_errors += 1;
+                tracing::warn!(generation_id, consecutive_errors, "Transient error polling Leonardo generation status: {:#}", e);
+                if consecutive_errors >= MAX_CONSECUTIVE_POLL_ERRORS {
+                    return Err(e.context("Too many consecutive polling errors"));
+                }
+                continue;
+            }
+        };
 
         let resp: GenerationStatusResp = serde_json::from_str(&poll_body)
             .with_context(|| format!("Failed to parse generation status: {}", poll_body))?;
@@ -261,7 +279,10 @@ async fn poll_until_complete(client: &Client, api_key: &str, generation_id: &str
                     .context("Generation COMPLETE but no images returned");
             }
             "FAILED" => anyhow::bail!("Leonardo generation FAILED"),
-            _ => {}
+            "PENDING" => {}
+            other => {
+                tracing::warn!(generation_id, status = other, "Unrecognized Leonardo generation status while polling");
+            }
         }
     }
 
@@ -345,29 +366,25 @@ pub async fn generate_avatar_with_init_id(
 // Image processing and S3 upload (unchanged)
 // ---------------------------------------------------------------------------
 
-/// Uploads a preset image (full + 100×100 thumb) to S3 under the `presets/` prefix.
+/// Uploads a full image + its 100×100 thumb under the given keys.
 /// Returns `(full_image_url, thumb_url)`.
-pub async fn upload_preset_image_to_s3(
+async fn upload_full_and_thumb(
     client: &aws_sdk_s3::Client,
     bucket: &str,
     endpoint_url: &str,
+    image_key: String,
+    thumb_key: String,
     image_bytes: Vec<u8>,
-    extension: &str,
+    image_content_type: String,
 ) -> Result<(String, String)> {
-    let id = Uuid::new_v4();
-    let image_key = format!("presets/{}.{}", id, extension);
-    let thumb_key = format!("presets/{}_thumb.jpg", id);
-
     let thumb_bytes = crop_center_100x100(&image_bytes)?;
-
-    let content_type = if extension == "jpg" { "image/jpeg".to_string() } else { format!("image/{}", extension) };
 
     client
         .put_object()
         .bucket(bucket)
         .key(&image_key)
         .body(ByteStream::from(image_bytes))
-        .content_type(content_type)
+        .content_type(image_content_type)
         .send()
         .await?;
 
@@ -387,6 +404,23 @@ pub async fn upload_preset_image_to_s3(
     Ok((image_url, thumb_url))
 }
 
+/// Uploads a preset image (full + 100×100 thumb) to S3 under the `presets/` prefix.
+/// Returns `(full_image_url, thumb_url)`.
+pub async fn upload_preset_image_to_s3(
+    client: &aws_sdk_s3::Client,
+    bucket: &str,
+    endpoint_url: &str,
+    image_bytes: Vec<u8>,
+    extension: &str,
+) -> Result<(String, String)> {
+    let id = Uuid::new_v4();
+    let image_key = format!("presets/{}.{}", id, extension);
+    let thumb_key = format!("presets/{}_thumb.jpg", id);
+    let content_type = if extension == "jpg" { "image/jpeg".to_string() } else { format!("image/{}", extension) };
+
+    upload_full_and_thumb(client, bucket, endpoint_url, image_key, thumb_key, image_bytes, content_type).await
+}
+
 /// Cuts a region from the image centered at (w/2, ~870px from top in a 2048×2048 reference).
 /// Coordinates and crop size scale proportionally with the actual image dimensions.
 pub fn crop_center_100x100(image_bytes: &[u8]) -> Result<Vec<u8>> {
@@ -399,6 +433,10 @@ pub fn crop_center_100x100(image_bytes: &[u8]) -> Result<Vec<u8>> {
     const CROP_W: u32 = 690;
     const CROP_H: u32 = 690;
 
+    if w < CROP_W || h < CROP_H {
+        anyhow::bail!("image too small to crop: {}x{} is smaller than the {}x{} crop region", w, h, CROP_W, CROP_H);
+    }
+
     let cx = w / 2;
     let cy = REF_CENTER_Y * h / REF_SIZE;
 
@@ -406,9 +444,10 @@ pub fn crop_center_100x100(image_bytes: &[u8]) -> Result<Vec<u8>> {
     let top = cy.saturating_sub(CROP_H / 2).min(h.saturating_sub(CROP_H));
 
     let cropped = img.crop_imm(left, top, CROP_W, CROP_H);
+    let thumb = cropped.resize_exact(100, 100, image::imageops::FilterType::Lanczos3);
 
     let mut cursor = std::io::Cursor::new(Vec::new());
-    cropped.write_to(&mut cursor, image::ImageFormat::Jpeg)?;
+    thumb.write_to(&mut cursor, image::ImageFormat::Jpeg)?;
     Ok(cursor.into_inner())
 }
 
@@ -425,29 +464,5 @@ pub async fn upload_avatar_images(
     let image_key = format!("avatars/{}/{}.jpg", user_id, id);
     let thumb_key = format!("avatars/{}/{}_thumb.jpg", user_id, id);
 
-    let thumb_bytes = crop_center_100x100(&image_bytes)?;
-
-    client
-        .put_object()
-        .bucket(bucket)
-        .key(&image_key)
-        .body(ByteStream::from(image_bytes))
-        .content_type("image/jpeg")
-        .send()
-        .await?;
-
-    client
-        .put_object()
-        .bucket(bucket)
-        .key(&thumb_key)
-        .body(ByteStream::from(thumb_bytes))
-        .content_type("image/jpeg")
-        .send()
-        .await?;
-
-    let base = endpoint_url.trim_end_matches('/');
-    let image_url = format!("{}/{}/{}", base, bucket, image_key);
-    let thumb_url = format!("{}/{}/{}", base, bucket, thumb_key);
-
-    Ok((image_url, thumb_url))
+    upload_full_and_thumb(client, bucket, endpoint_url, image_key, thumb_key, image_bytes, "image/jpeg".to_string()).await
 }

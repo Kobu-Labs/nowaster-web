@@ -16,7 +16,7 @@ use crate::{
         AvatarPresetRepository, CategoryHintRepository, GenerationRunRepository, HintRepository,
         UserAvatarHistoryRepository, UserAvatarRepository,
     },
-    service::avatar::generator::{generate_avatar, upload_avatar_images},
+    service::avatar::generator::{upload_avatar_images, ACTIVITY_ENTRY_SEP, ACTIVITY_FIELD_SEP},
     Config,
 };
 
@@ -46,6 +46,7 @@ pub struct AvatarService {
     category_hint_repo: CategoryHintRepository,
     preset_repo: AvatarPresetRepository,
     s3_client: aws_sdk_s3::Client,
+    http_client: reqwest::Client,
     config: Arc<Config>,
 }
 
@@ -60,6 +61,7 @@ impl AvatarService {
             category_hint_repo: CategoryHintRepository::new(db),
             preset_repo: AvatarPresetRepository::new(db),
             s3_client,
+            http_client: reqwest::Client::new(),
             config,
         }
     }
@@ -87,7 +89,7 @@ impl AvatarService {
                 SELECT
                     s.category_id,
                     c.name AS category_name,
-                    EXTRACT(EPOCH FROM SUM(s.end_time - s.start_time)) / 3600.0 AS total_hours
+                    EXTRACT(EPOCH FROM SUM(s.end_time - s.start_time))::float8 / 3600.0 AS total_hours
                 FROM session s
                 JOIN category c ON c.id = s.category_id
                 WHERE s.user_id = $1
@@ -98,7 +100,7 @@ impl AvatarService {
             SELECT
                 ch.category_name,
                 ch.total_hours AS "total_hours!: f64",
-                h.label AS hint_label
+                h.label AS "hint_label?"
             FROM category_hours ch
             LEFT JOIN category_hint c_hint
                 ON c_hint.category_id = ch.category_id AND c_hint.user_id = $1
@@ -110,6 +112,7 @@ impl AvatarService {
         )
         .fetch_all(self.db.get_pool())
         .await?;
+
 
         let mut categories: HashMap<String, (f64, Vec<String>)> = HashMap::new();
         for row in rows {
@@ -123,78 +126,156 @@ impl AvatarService {
 
         let mut parts: Vec<String> = Vec::new();
         for (category_name, (total_hours, hints)) in &categories {
+            println!("{} {}", category_name, total_hours );
             let hours = (total_hours * 10.0).round() / 10.0;
             if hints.is_empty() {
-                parts.push(format!("{}:{}", category_name, hours));
+                parts.push(format!("{}{}{}", category_name, ACTIVITY_FIELD_SEP, hours));
             } else {
                 for hint in hints {
-                    parts.push(format!("{}:{}", hint, hours));
+                    parts.push(format!("{}{}{}", hint, ACTIVITY_FIELD_SEP, hours));
                 }
             }
         }
         parts.sort();
 
-        Ok(parts.join(","))
+        let res = parts.join(ACTIVITY_ENTRY_SEP);
+        println!("{}",res);
+        Ok(res)
     }
 
     // -----------------------------------------------------------------------
     // Core generation pipeline
     // -----------------------------------------------------------------------
 
-    async fn run_generation_pipeline(
+    /// Creates a run row and marks it running. Fast, DB-only — safe to await
+    /// synchronously from a request handler before handing the slow part
+    /// (`execute_generation`) off to a background task.
+    async fn create_pending_run(&self, user_id: &str) -> Result<Uuid> {
+        let run = self.run_repo.create(user_id).await?;
+        self.run_repo.set_running(run.id).await?;
+        Ok(run.id)
+    }
+
+    /// Runs the actual (slow, third-party-API-bound) generation work for an
+    /// already-created run and records its outcome.
+    async fn execute_generation(
         &self,
+        run_id: Uuid,
         user_id: &str,
         input_data: &str,
         tier: &str,
+        assign: bool,
     ) -> Result<(Uuid, String, String)> {
-        let run = self.run_repo.create(user_id).await?;
-        let run_id = run.id;
-
-        self.run_repo.set_running(run_id).await?;
-
         let user_avatar = self.avatar_repo.get_by_user_id(user_id).await?;
-        let base_character_url = if let Some(preset_id) = user_avatar.and_then(|a| a.base_preset_id) {
-            self.preset_repo
-                .find_by_id(preset_id)
-                .await?
-                .map(|p| p.reference_image_url)
-                .unwrap_or_default()
+        let preset = if let Some(preset_id) = user_avatar.and_then(|a| a.base_preset_id) {
+            self.preset_repo.find_by_id(preset_id).await?
         } else {
-            String::new()
+            None
         };
 
-        // template_image_url will be wired from config when Leonardo.ai is integrated
-        let template_image_url = String::new();
+        let preset = match preset {
+            Some(p) => p,
+            None => {
+                self.run_repo.set_failed(run_id, "No preset selected").await?;
+                anyhow::bail!("Cannot generate avatar: no preset selected for user {}", user_id);
+            }
+        };
 
-        let image_bytes = generate_avatar(&template_image_url, &base_character_url, input_data)
+        // Use cached Leonardo init image ID, or upload the preset image and cache the result.
+        let preset_init_id = if let Some(cached_id) = preset.leonardo_init_image_id.clone() {
+            cached_id
+        } else {
+            let image_bytes = self
+                .http_client
+                .get(&preset.reference_image_url)
+                .send()
+                .await
+                .and_then(|r| r.error_for_status())
+                .context("Failed to download preset image")?
+                .bytes()
+                .await?
+                .to_vec();
+
+            let id = crate::service::avatar::generator::upload_init_image(
+                &self.http_client,
+                &self.config.leonardo.api_key,
+                image_bytes,
+                "jpg",
+            )
             .await
-            .context("Image generation failed")?;
+            .context("Failed to upload preset image to Leonardo")?;
 
-        let (image_url, thumb_url) = upload_avatar_images(
+            if let Err(e) = self.preset_repo.set_leonardo_init_image_id(preset.id, &id).await {
+                tracing::warn!(preset_id = %preset.id, "Failed to cache Leonardo init image ID: {}", e);
+            }
+
+            id
+        };
+
+        let generation_result = crate::service::avatar::generator::generate_avatar_with_init_id(
+            &self.http_client,
+            &self.config.leonardo.api_key,
+            &self.config.leonardo.model_id,
+            &self.config.leonardo.layout_reference_id,
+            &preset_init_id,
+            input_data,
+        )
+        .await;
+
+        let image_bytes = match generation_result {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                tracing::error!(run_id = %run_id, "Generation failed: {:#}", e);
+                let _ = self.run_repo.set_failed(run_id, &e.to_string()).await;
+                return Err(e.context("Image generation failed"));
+            }
+        };
+
+        let upload_result = upload_avatar_images(
             &self.s3_client,
             &self.config.s3.bucket_name,
             &self.config.s3.endpoint_url,
             user_id,
             image_bytes,
         )
-        .await
-        .context("S3 upload failed")?;
+        .await;
+
+        let (image_url, thumb_url) = match upload_result {
+            Ok(urls) => urls,
+            Err(e) => {
+                let _ = self.run_repo.set_failed(run_id, &e.to_string()).await;
+                return Err(e.context("S3 upload failed"));
+            }
+        };
 
         self.run_repo
             .set_success(run_id, &image_url, &thumb_url, input_data)
             .await?;
 
-        let next_generation_at = Utc::now() + regen_interval(tier);
-
-        self.avatar_repo
-            .mark_generated(user_id, &image_url, &thumb_url, next_generation_at)
-            .await?;
-
-        self.history_repo
-            .insert(user_id, &image_url, &thumb_url, run_id)
-            .await?;
+        if assign {
+            let next_generation_at = Utc::now() + regen_interval(tier);
+            self.avatar_repo
+                .mark_generated(user_id, &image_url, &thumb_url, next_generation_at)
+                .await?;
+            self.history_repo
+                .insert(user_id, &image_url, &thumb_url, run_id)
+                .await?;
+        }
 
         Ok((run_id, image_url, thumb_url))
+    }
+
+    /// Convenience wrapper for callers that want to await the full pipeline
+    /// synchronously (admin tooling, where an immediate result is expected).
+    async fn run_generation_pipeline(
+        &self,
+        user_id: &str,
+        input_data: &str,
+        tier: &str,
+        assign: bool,
+    ) -> Result<(Uuid, String, String)> {
+        let run_id = self.create_pending_run(user_id).await?;
+        self.execute_generation(run_id, user_id, input_data, tier, assign).await
     }
 
     // -----------------------------------------------------------------------
@@ -220,8 +301,20 @@ impl AvatarService {
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
 
-        if let Err(e) = self.run_generation_pipeline(user_id, &input_data, &tier).await {
-            tracing::error!(user_id, "Immediate generation on enable failed: {}", e);
+        match self.create_pending_run(user_id).await {
+            Ok(run_id) => {
+                let service = self.clone();
+                let user_id = user_id.to_string();
+                tokio::spawn(async move {
+                    if let Err(e) = service
+                        .execute_generation(run_id, &user_id, &input_data, &tier, true)
+                        .await
+                    {
+                        tracing::error!(user_id, "Immediate generation on enable failed: {:#}", e);
+                    }
+                });
+            }
+            Err(e) => tracing::error!(user_id, "Failed to start generation on enable: {}", e),
         }
 
         Ok(ReadUserAvatarDto::from(updated))
@@ -269,9 +362,18 @@ impl AvatarService {
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
 
-        let (run_id, _, _) = self
-            .run_generation_pipeline(user_id, &input_data, &tier)
-            .await?;
+        let run_id = self.create_pending_run(user_id).await?;
+
+        let service = self.clone();
+        let spawned_user_id = user_id.to_string();
+        tokio::spawn(async move {
+            if let Err(e) = service
+                .execute_generation(run_id, &spawned_user_id, &input_data, &tier, true)
+                .await
+            {
+                tracing::error!(user_id = %spawned_user_id, "Background generation failed: {:#}", e);
+            }
+        });
 
         let run = self
             .run_repo
@@ -279,7 +381,6 @@ impl AvatarService {
             .await?
             .ok_or_else(|| anyhow::anyhow!("Run not found after generation"))?;
 
-        let _ = run_id;
         Ok(ReadGenerationRunDto::from(run))
     }
 
@@ -405,7 +506,26 @@ impl AvatarService {
         &self,
         user_id: &str,
     ) -> Result<ReadGenerationRunDto> {
-        self.trigger_generation(user_id).await
+        let avatar = self
+            .avatar_repo
+            .get_by_user_id(user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Avatar not enabled for user"))?;
+
+        let tier = format!("{:?}", avatar.tier).to_lowercase();
+        let window_start = Utc::now() - data_window(&tier);
+        let input_data = self.aggregate_input_data(user_id, window_start).await?;
+
+        self.run_generation_pipeline(user_id, &input_data, &tier, true)
+            .await?;
+
+        let run = self
+            .run_repo
+            .get_latest_for_user(user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Run not found after generation"))?;
+
+        Ok(ReadGenerationRunDto::from(run))
     }
 
     #[instrument(err, skip(self))]
@@ -437,7 +557,7 @@ impl AvatarService {
             .ok_or_else(|| anyhow::anyhow!("No avatar row found for target user"))?;
         let tier = format!("{:?}", avatar.tier).to_lowercase();
 
-        self.run_generation_pipeline(&target_user_id, &input_data, &tier)
+        self.run_generation_pipeline(&target_user_id, &input_data, &tier, true)
             .await?;
 
         let run = self
@@ -447,6 +567,68 @@ impl AvatarService {
             .ok_or_else(|| anyhow::anyhow!("Run not found after generation"))?;
 
         Ok(ReadGenerationRunDto::from(run))
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn admin_get_playground_data(
+        &self,
+        user_id: &str,
+        weeks: i64,
+    ) -> Result<Vec<crate::dto::avatar::read_avatar::ActivityEntryDto>> {
+        let window_start = Utc::now() - Duration::weeks(weeks.max(1));
+        let raw = self.aggregate_input_data(user_id, window_start).await?;
+        let entries = raw
+            .split(ACTIVITY_ENTRY_SEP)
+            .filter(|s| !s.is_empty())
+            .filter_map(|part| {
+                let mut iter = part.rsplitn(2, ACTIVITY_FIELD_SEP);
+                let hours: f64 = iter.next()?.trim().parse().ok()?;
+                let label = iter.next()?.trim().to_string();
+                Some(crate::dto::avatar::read_avatar::ActivityEntryDto { label, hours })
+            })
+            .collect();
+        Ok(entries)
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn admin_playground_generate(
+        &self,
+        user_id: &str,
+    ) -> Result<ReadGenerationRunDto> {
+        let avatar = self
+            .avatar_repo
+            .get_by_user_id(user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("No avatar found for user {}", user_id))?;
+        let tier = format!("{:?}", avatar.tier).to_lowercase();
+        // Use a wider window for playground so admin can test users with sparse recent activity.
+        let window_start = Utc::now() - Duration::weeks(13);
+        let input_data = self.aggregate_input_data(user_id, window_start).await?;
+        tracing::info!(user_id, input_data = %input_data, "playground input_data");
+
+        // Swallow pipeline errors — the run record has the error_message set via set_failed.
+        // Pre-pipeline errors (avatar/data lookup) propagate normally above.
+        if let Err(e) = self
+            .run_generation_pipeline(user_id, &input_data, &tier, false)
+            .await
+        {
+            tracing::warn!(user_id, "Playground pipeline failed (returning run record): {:#}", e);
+        }
+
+        self.run_repo
+            .get_latest_for_user(user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("No run found for user {}", user_id))
+            .map(ReadGenerationRunDto::from)
+    }
+
+    #[instrument(err, skip(self))]
+    pub async fn admin_list_recent_runs(
+        &self,
+        limit: i64,
+    ) -> Result<Vec<ReadGenerationRunDto>> {
+        let runs = self.run_repo.list_all_recent(limit).await?;
+        Ok(runs.into_iter().map(ReadGenerationRunDto::from).collect())
     }
 
     #[instrument(err, skip(self))]
@@ -480,5 +662,104 @@ impl AvatarService {
     #[instrument(err, skip(self))]
     pub async fn admin_delete_preset(&self, id: Uuid) -> Result<()> {
         self.preset_repo.delete(id).await
+    }
+
+    /// Accepts a list of `(preset_name, image_bytes, extension)` tuples, uploads each to S3
+    /// and Leonardo, and creates a preset record for each one.
+    #[instrument(err(Debug), skip(self, images), fields(count = images.len()))]
+    pub async fn admin_bulk_upload_presets(
+        &self,
+        images: Vec<(String, Vec<u8>, String)>,
+    ) -> Result<Vec<ReadAvatarPresetDto>> {
+        let mut results = Vec::with_capacity(images.len());
+
+        for (name, bytes, extension) in images {
+            let (reference_image_url, thumbnail_url) =
+                crate::service::avatar::generator::upload_preset_image_to_s3(
+                    &self.s3_client,
+                    &self.config.s3.bucket_name,
+                    &self.config.s3.endpoint_url,
+                    bytes.clone(),
+                    &extension,
+                )
+                .await
+                .context("Failed to upload preset image to S3")?;
+
+            let leonardo_id = crate::service::avatar::generator::upload_init_image(
+                &self.http_client,
+                &self.config.leonardo.api_key,
+                bytes,
+                &extension,
+            )
+            .await
+            .context("Failed to upload preset image to Leonardo")?;
+
+            let preset = self
+                .preset_repo
+                .create(CreateAvatarPresetDto {
+                    name,
+                    thumbnail_url,
+                    reference_image_url,
+                    is_active: Some(true),
+                })
+                .await?;
+
+            let preset = self
+                .preset_repo
+                .set_leonardo_init_image_id(preset.id, &leonardo_id)
+                .await?;
+
+            results.push(ReadAvatarPresetDto::from(preset));
+        }
+
+        Ok(results)
+    }
+
+    #[instrument(err, skip(self), fields(preset_id = %id))]
+    pub async fn admin_upload_preset_to_leonardo(&self, id: Uuid) -> Result<ReadAvatarPresetDto> {
+        let preset = self
+            .preset_repo
+            .find_by_id(id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Preset not found"))?;
+
+        let image_bytes = self
+            .http_client
+            .get(&preset.reference_image_url)
+            .send()
+            .await
+            .and_then(|r| r.error_for_status())
+            .context("Failed to download preset reference image")?
+            .bytes()
+            .await?
+            .to_vec();
+
+        let extension = preset
+            .reference_image_url
+            .rsplit('.')
+            .next()
+            .unwrap_or("jpg")
+            .to_lowercase();
+        let extension = if ["jpg", "jpeg", "png", "webp"].contains(&extension.as_str()) {
+            extension
+        } else {
+            "jpg".to_string()
+        };
+
+        let leonardo_id = crate::service::avatar::generator::upload_init_image(
+            &self.http_client,
+            &self.config.leonardo.api_key,
+            image_bytes,
+            &extension,
+        )
+        .await
+        .context("Failed to upload preset image to Leonardo")?;
+
+        let updated = self
+            .preset_repo
+            .set_leonardo_init_image_id(id, &leonardo_id)
+            .await?;
+
+        Ok(ReadAvatarPresetDto::from(updated))
     }
 }

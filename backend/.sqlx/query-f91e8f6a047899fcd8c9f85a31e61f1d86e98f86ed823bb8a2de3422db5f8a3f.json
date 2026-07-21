@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                UPDATE avatar_preset SET\n                    name              = COALESCE($2, name),\n                    thumbnail_url     = COALESCE($3, thumbnail_url),\n                    reference_image_url = COALESCE($4, reference_image_url),\n                    is_active         = COALESCE($5, is_active)\n                WHERE id = $1\n                RETURNING\n                    id, name, thumbnail_url, reference_image_url, is_active,\n                    created_at as \"created_at: DateTime<Utc>\"\n                ",
+  "query": "\n                INSERT INTO avatar_preset (name, thumbnail_url, reference_image_url, is_active)\n                VALUES ($1, $2, $3, $4)\n                RETURNING\n                    id, name, thumbnail_url, reference_image_url, leonardo_init_image_id,\n                    is_active, created_at as \"created_at: DateTime<Utc>\"\n                ",
   "describe": {
     "columns": [
       {
@@ -25,18 +25,22 @@
       },
       {
         "ordinal": 4,
+        "name": "leonardo_init_image_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
         "name": "is_active",
         "type_info": "Bool"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Text",
         "Text",
         "Text",
@@ -48,9 +52,10 @@
       false,
       false,
       false,
+      true,
       false,
       false
     ]
   },
-  "hash": "1891764ec20737864a47b6b033392c4eebc5a71def7616168fc13068c4295d8f"
+  "hash": "f91e8f6a047899fcd8c9f85a31e61f1d86e98f86ed823bb8a2de3422db5f8a3f"
 }

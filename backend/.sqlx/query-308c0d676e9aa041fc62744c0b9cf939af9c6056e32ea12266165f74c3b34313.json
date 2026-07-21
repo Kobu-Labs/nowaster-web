@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT\n                    fr.id,\n                    fr.feed_event_id,\n                    fr.emoji,\n                    fr.created_at,\n                    u.id as user_id,\n                    u.displayname,\n                    u.avatar_url,\n                    ua.current_thumb_url as avatar_thumb_url\n                FROM feed_reaction fr\n                JOIN \"user\" u on u.id = fr.user_id\n                LEFT JOIN user_avatar ua ON ua.user_id = fr.user_id AND ua.is_enabled = true\n                WHERE feed_event_id = ANY($1)\n            ",
+  "query": "\n                SELECT\n                    fr.id,\n                    fr.feed_event_id,\n                    fr.emoji,\n                    fr.created_at,\n                    u.id as user_id,\n                    u.displayname,\n                    ua.current_thumb_url as avatar_thumb_url,\n                    ua.current_image_url as avatar_image_url\n                FROM feed_reaction fr\n                JOIN \"user\" u on u.id = fr.user_id\n                LEFT JOIN user_avatar ua ON ua.user_id = fr.user_id AND ua.is_enabled = true\n                WHERE feed_event_id = ANY($1)\n            ",
   "describe": {
     "columns": [
       {
@@ -35,12 +35,12 @@
       },
       {
         "ordinal": 6,
-        "name": "avatar_url",
-        "type_info": "Varchar"
+        "name": "avatar_thumb_url",
+        "type_info": "Text"
       },
       {
         "ordinal": 7,
-        "name": "avatar_thumb_url",
+        "name": "avatar_image_url",
         "type_info": "Text"
       }
     ],
@@ -60,5 +60,5 @@
       true
     ]
   },
-  "hash": "4310e08a2358e3780decef1009bf0e01e2b298b2219a815fa36e9ee24903757d"
+  "hash": "308c0d676e9aa041fc62744c0b9cf939af9c6056e32ea12266165f74c3b34313"
 }

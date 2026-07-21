@@ -37,19 +37,21 @@ async fn main() {
     let (metrics_tx, metrics_rx) = tokio::sync::mpsc::channel::<MetricEvent>(10_000);
 
     tracing_subscriber::registry()
-        .with(fmt::layer().json().with_current_span(false))
+        .with(fmt::layer().pretty())
         .with(EnvFilter::new(log_level))
         .with(MetricsLayer::new(metrics_tx))
         .init();
 
-    let db = Database::init(config.database.connection_url.clone())
-        .await
-        .unwrap_or_else(|e| panic!("Database error: {}", e));
+    let db = Arc::new(
+        Database::init(config.database.connection_url.clone())
+            .await
+            .unwrap_or_else(|e| panic!("Database error: {}", e)),
+    );
 
     let pool = db.get_pool().clone();
     tokio::spawn(metrics_worker(metrics_rx, pool));
 
-    let router = get_router(Arc::new(db), Arc::new(config.clone())).await;
+let router = get_router(db, Arc::new(config.clone())).await;
     let addr = format!("{}:{}", config.server.address, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 

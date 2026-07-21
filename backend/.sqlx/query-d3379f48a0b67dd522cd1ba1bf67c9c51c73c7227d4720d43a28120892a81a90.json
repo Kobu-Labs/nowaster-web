@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH updated AS (\n                    UPDATE \"user\"\n                    SET visibility_flags = $1\n                    WHERE id = $2\n                    RETURNING id, displayname, avatar_url, visibility_flags\n                )\n                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,\n                       ua.current_thumb_url AS avatar_thumb_url,\n                       ua.current_image_url AS avatar_image_url\n                FROM updated u\n                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "displayname",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "visibility_flags",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "avatar_thumb_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "avatar_image_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "d3379f48a0b67dd522cd1ba1bf67c9c51c73c7227d4720d43a28120892a81a90"
+}
