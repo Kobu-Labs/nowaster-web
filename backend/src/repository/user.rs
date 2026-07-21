@@ -20,6 +20,8 @@ pub struct ReadUserRow {
     id: String,
     displayname: String,
     avatar_url: Option<String>,
+    avatar_thumb_url: Option<String>,
+    avatar_image_url: Option<String>,
     visibility_flags: VisibilityFlags,
 }
 
@@ -47,11 +49,18 @@ impl UserRepository {
         let result = sqlx::query_as!(
             ReadUserRow,
             r#"
-                UPDATE "user" u SET
-                    displayname = COALESCE($1, u.displayname),
-                    avatar_url = COALESCE($2, u.avatar_url)
-                WHERE u.id = $3
-                RETURNING u.id, u.displayname, u.avatar_url, u.visibility_flags
+                WITH updated AS (
+                    UPDATE "user" u SET
+                        displayname = COALESCE($1, u.displayname),
+                        avatar_url = COALESCE($2, u.avatar_url)
+                    WHERE u.id = $3
+                    RETURNING u.id, u.displayname, u.avatar_url, u.visibility_flags
+                )
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM updated u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
             "#,
             dto.username,
             dto.avatar_url,
@@ -68,6 +77,8 @@ impl UserRepository {
             id: row.id,
             username: row.displayname,
             avatar_url: row.avatar_url,
+            avatar_thumb_url: row.avatar_thumb_url,
+            avatar_image_url: row.avatar_image_url,
             visibility_flags: row.visibility_flags,
         }
     }
@@ -107,8 +118,11 @@ impl UserRepository {
 
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
-                SELECT id, displayname, avatar_url, visibility_flags
-                FROM "user"
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM "user" u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
                 WHERE
             "#,
         );
@@ -119,13 +133,13 @@ impl UserRepository {
             match id {
                 IdFilter::Many(ids) => {
                     separated
-                        .push("id = ANY(")
+                        .push("u.id = ANY(")
                         .push_bind_unseparated(ids)
                         .push_unseparated(")");
                 }
                 IdFilter::Single(single) => {
                     let pattern = format!("%{}%", single);
-                    separated.push("id ILIKE ").push_bind_unseparated(pattern);
+                    separated.push("u.id ILIKE ").push_bind_unseparated(pattern);
                 }
             }
         }
@@ -133,7 +147,7 @@ impl UserRepository {
         if let Some(name) = filter.name {
             let pattern = format!("%{}%", name);
             separated
-                .push("displayname ILIKE ")
+                .push("u.displayname ILIKE ")
                 .push_bind_unseparated(pattern);
         }
 
@@ -155,10 +169,17 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                UPDATE "user"
-                SET visibility_flags = $1
-                WHERE id = $2
-                RETURNING id, displayname, avatar_url, visibility_flags
+                WITH updated AS (
+                    UPDATE "user"
+                    SET visibility_flags = $1
+                    WHERE id = $2
+                    RETURNING id, displayname, avatar_url, visibility_flags
+                )
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM updated u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
             "#,
             dto.visibility_flags.as_raw(),
             user_id
@@ -174,9 +195,12 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                SELECT id, displayname, avatar_url, visibility_flags
-                FROM "user"
-                WHERE id = $1
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM "user" u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
+                WHERE u.id = $1
             "#,
             user_id
         )
@@ -195,9 +219,12 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                SELECT id, displayname, avatar_url, visibility_flags
-                FROM "user"
-                WHERE email = $1
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM "user" u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
+                WHERE u.email = $1
             "#,
             email
         )
@@ -231,9 +258,16 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                INSERT INTO "user" (id, displayname, email, avatar_url, visibility_flags)
-                VALUES ($1, $2, $3, $4, $5)
-                RETURNING id, displayname, avatar_url, visibility_flags
+                WITH inserted AS (
+                    INSERT INTO "user" (id, displayname, email, avatar_url, visibility_flags)
+                    VALUES ($1, $2, $3, $4, $5)
+                    RETURNING id, displayname, avatar_url, visibility_flags
+                )
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM inserted u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
             "#,
             id,
             display_name,
@@ -258,13 +292,20 @@ impl UserRepository {
         let row = sqlx::query_as!(
             ReadUserRow,
             r#"
-                INSERT INTO "user" (id, displayname, email, avatar_url, visibility_flags)
-                VALUES (gen_random_uuid()::text, $1, $2, $3, $4)
-                ON CONFLICT (email)
-                DO UPDATE SET
-                    displayname = EXCLUDED.displayname,
-                    avatar_url = EXCLUDED.avatar_url
-                RETURNING id, displayname, avatar_url, visibility_flags
+                WITH upserted AS (
+                    INSERT INTO "user" (id, displayname, email, avatar_url, visibility_flags)
+                    VALUES (gen_random_uuid()::text, $1, $2, $3, $4)
+                    ON CONFLICT (email)
+                    DO UPDATE SET
+                        displayname = EXCLUDED.displayname,
+                        avatar_url = EXCLUDED.avatar_url
+                    RETURNING id, displayname, avatar_url, visibility_flags
+                )
+                SELECT u.id, u.displayname, u.avatar_url, u.visibility_flags,
+                       ua.current_thumb_url AS avatar_thumb_url,
+                       ua.current_image_url AS avatar_image_url
+                FROM upserted u
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
             "#,
             display_name,
             email,

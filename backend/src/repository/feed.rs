@@ -74,8 +74,8 @@ struct FeedRowRead {
 
     pub user_id: Option<String>,
     pub user_name: Option<String>,
-    pub user_avatar_url: Option<String>,
     pub user_avatar_thumb_url: Option<String>,
+    pub user_avatar_image_url: Option<String>,
 
     pub created_at: DateTime<Local>,
 }
@@ -95,8 +95,8 @@ impl FromRow<'_, PgRow> for FeedRowRead {
 
             user_id: row.try_get("user_id")?,
             user_name: row.try_get("user_name")?,
-            user_avatar_url: row.try_get("user_avatar_url")?,
             user_avatar_thumb_url: row.try_get("user_avatar_thumb_url")?,
+            user_avatar_image_url: row.try_get("user_avatar_image_url")?,
         })
     }
 }
@@ -111,8 +111,8 @@ impl FeedEventMapper {
                     FeedEventSource::User(ReadUserDto {
                         id: user_id,
                         username: user_name,
-                        avatar_url: row.user_avatar_url,
                         avatar_thumb_url: row.user_avatar_thumb_url,
+                        avatar_image_url: row.user_avatar_image_url,
                         visibility_flags: VisibilityFlags::default(),
                     })
                 } else {
@@ -260,8 +260,8 @@ impl FeedRepository {
 
                 u.id as user_id,
                 u.displayname as user_name,
-                u.avatar_url as user_avatar_url,
-                ua.current_thumb_url as user_avatar_thumb_url
+                ua.current_thumb_url as user_avatar_thumb_url,
+                ua.current_image_url as user_avatar_image_url
             FROM feed_event fe
             LEFT JOIN "user" u
                 ON u.id = fe.source_id
@@ -321,8 +321,8 @@ impl FeedRepository {
                     fr.created_at,
                     u.id as user_id,
                     u.displayname,
-                    u.avatar_url,
-                    ua.current_thumb_url as avatar_thumb_url
+                    ua.current_thumb_url as avatar_thumb_url,
+                    ua.current_image_url as avatar_image_url
                 FROM feed_reaction fr
                 JOIN "user" u on u.id = fr.user_id
                 LEFT JOIN user_avatar ua ON ua.user_id = fr.user_id AND ua.is_enabled = true
@@ -341,8 +341,8 @@ impl FeedRepository {
                 user: ReadUserDto {
                     id: row.user_id,
                     username: row.displayname,
-                    avatar_url: row.avatar_url,
                     avatar_thumb_url: row.avatar_thumb_url,
+                    avatar_image_url: row.avatar_image_url,
                     visibility_flags: VisibilityFlags::default(),
                 },
                 emoji: row.emoji,
@@ -366,8 +366,8 @@ impl FeedRepository {
                     fr.created_at,
                     u.id as user_id,
                     u.displayname,
-                    u.avatar_url,
-                    ua.current_thumb_url as avatar_thumb_url
+                    ua.current_thumb_url as avatar_thumb_url,
+                    ua.current_image_url as avatar_image_url
                 FROM feed_reaction fr
                 JOIN "user" u on u.id = fr.user_id
                 LEFT JOIN user_avatar ua ON ua.user_id = fr.user_id AND ua.is_enabled = true
@@ -384,8 +384,8 @@ impl FeedRepository {
             user: ReadUserDto {
                 id: row.user_id,
                 username: row.displayname,
-                avatar_url: row.avatar_url,
                 avatar_thumb_url: row.avatar_thumb_url,
+                avatar_image_url: row.avatar_image_url,
                 visibility_flags: VisibilityFlags::default(),
             },
             emoji: row.emoji,
@@ -571,7 +571,7 @@ impl FeedRepository {
     pub async fn get_feed_event_by_id(&self, feed_event_id: Uuid) -> Result<Option<FeedEvent>> {
         let mut base_query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
-            SELECT 
+            SELECT
                 fe.id,
                 fe.created_at,
 
@@ -583,10 +583,15 @@ impl FeedRepository {
 
                 u.id as user_id,
                 u.displayname as user_name,
-                u.avatar_url as user_avatar_url
+                ua.current_thumb_url as user_avatar_thumb_url,
+                ua.current_image_url as user_avatar_image_url
             FROM feed_event fe
-            LEFT JOIN "user" u 
-                ON u.id = fe.source_id 
+            LEFT JOIN "user" u
+                ON u.id = fe.source_id
+                AND fe.source_type = 'user'
+            LEFT JOIN user_avatar ua
+                ON ua.user_id = fe.source_id
+                AND ua.is_enabled = true
                 AND fe.source_type = 'user'
             WHERE fe.id = "#,
         );

@@ -432,7 +432,7 @@ async fn get_current_user_handler(
     let response = serde_json::json!({
         "id": user.id,
         "username": user.username,
-        "avatarUrl": user.avatar_url,
+        "avatarUrl": user.avatar_thumb_url,
         "role": actor.role.to_string(),
     });
 

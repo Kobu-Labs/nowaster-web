@@ -52,16 +52,16 @@ impl FromRow<'_, PgRow> for ReadFriendRequestDto {
         let requestor = ReadUserDto {
             id: row.try_get("requestor_id")?,
             username: row.try_get("requestor_username")?,
-            avatar_url: row.try_get("requestor_avatar_url")?,
-            avatar_thumb_url: None,
+            avatar_thumb_url: row.try_get("requestor_avatar_thumb_url")?,
+            avatar_image_url: row.try_get("requestor_avatar_image_url")?,
             visibility_flags: VisibilityFlags::default(),
         };
 
         let recipient = ReadUserDto {
             id: row.try_get("recipient_id")?,
             username: row.try_get("recipient_username")?,
-            avatar_url: row.try_get("recipient_avatar_url")?,
-            avatar_thumb_url: None,
+            avatar_thumb_url: row.try_get("recipient_avatar_thumb_url")?,
+            avatar_image_url: row.try_get("recipient_avatar_image_url")?,
             visibility_flags: VisibilityFlags::default(),
         };
 
@@ -85,16 +85,16 @@ impl FromRow<'_, PgRow> for ReadFriendshipDto {
         let friend1 = ReadUserDto {
             id: row.try_get("friend1_id")?,
             username: row.try_get("friend1_username")?,
-            avatar_url: row.try_get("friend1_avatar_url")?,
-            avatar_thumb_url: None,
+            avatar_thumb_url: row.try_get("friend1_avatar_thumb_url")?,
+            avatar_image_url: row.try_get("friend1_avatar_image_url")?,
             visibility_flags: VisibilityFlags::default(),
         };
 
         let friend2 = ReadUserDto {
             id: row.try_get("friend2_id")?,
             username: row.try_get("friend2_username")?,
-            avatar_url: row.try_get("friend2_avatar_url")?,
-            avatar_thumb_url: None,
+            avatar_thumb_url: row.try_get("friend2_avatar_thumb_url")?,
+            avatar_image_url: row.try_get("friend2_avatar_image_url")?,
             visibility_flags: VisibilityFlags::default(),
         };
 

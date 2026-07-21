@@ -216,7 +216,7 @@ async fn proxy_get_sandbox_lifecycles(
         .await
         .unwrap_or_default()
         .into_iter()
-        .map(|u| (u.id, (u.username, u.avatar_url)))
+        .map(|u| (u.id, (u.username, u.avatar_thumb_url)))
         .collect();
 
     let enriched = lifecycles
