@@ -31,6 +31,8 @@ pub struct StopwatchFullRow {
 
     pub user_id: String,
     pub user_name: String,
+    pub user_avatar_thumb_url: Option<String>,
+    pub user_avatar_image_url: Option<String>,
 
     start_time: DateTime<Utc>,
     session_type: SessionType,
@@ -72,7 +74,9 @@ impl StopwatchSessionRepository {
                     id: session.user_id.clone(),
                     username: session.user_name.clone(),
                     avatar_url: None,
-                    visibility_flags: VisibilityFlags::default(), // Default for session display
+                    avatar_thumb_url: session.user_avatar_thumb_url.clone(),
+                    avatar_image_url: session.user_avatar_image_url.clone(),
+                    visibility_flags: VisibilityFlags::default(),
                 },
                 category: None,
                 tags: None,
@@ -172,6 +176,8 @@ impl StopwatchSessionRepository {
 
                 s.user_id,
                 u.displayname as user_name,
+                ua.current_thumb_url as user_avatar_thumb_url,
+                ua.current_image_url as user_avatar_image_url,
 
                 s.start_time,
                 s.description,
@@ -191,6 +197,8 @@ impl StopwatchSessionRepository {
             FROM stopwatch_session s
             INNER JOIN "user" u
                 on u.id = s.user_id
+            LEFT JOIN user_avatar ua
+                ON ua.user_id = s.user_id AND ua.is_enabled = true
             LEFT JOIN category c
                 on c.id = s.category_id
             LEFT JOIN tag_to_stopwatch_session tts

@@ -47,13 +47,17 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
-                    u1.avatar_url as requestor_avatar_url,
+                    ua1.current_thumb_url AS requestor_avatar_thumb_url,
+                    ua1.current_image_url AS requestor_avatar_image_url,
                     u2.displayname AS recipient_username,
                     u2.id AS recipient_id,
-                    u2.avatar_url as recipient_avatar_url
+                    ua2.current_thumb_url AS recipient_avatar_thumb_url,
+                    ua2.current_image_url AS recipient_avatar_image_url
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = u1.id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = u2.id AND ua2.is_enabled = true
                 WHERE fr.id = $1 AND (fr.recipient_id = $2 OR fr.requestor_id = $2)
             "#,
             )
@@ -100,13 +104,17 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
-                    u1.avatar_url as requestor_avatar_url,
+                    ua1.current_thumb_url AS requestor_avatar_thumb_url,
+                    ua1.current_image_url AS requestor_avatar_image_url,
                     u2.displayname AS recipient_username,
                     u2.id AS recipient_id,
-                    u2.avatar_url as recipient_avatar_url
+                    ua2.current_thumb_url AS recipient_avatar_thumb_url,
+                    ua2.current_image_url AS recipient_avatar_image_url
                 FROM updated u
                 JOIN "user" u1 ON u1.id = u.requestor_id
                 JOIN "user" u2 ON u2.id = u.recipient_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = u1.id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = u2.id AND ua2.is_enabled = true
             "#,
             )
             .bind(dto.status)
@@ -152,12 +160,16 @@ impl FriendsRepository {
                     i.friend_2_id AS friend2_id,
                     i.created_at,
                     u1.displayname AS friend1_username,
-                    u1.avatar_url as friend1_avatar_url,
+                    ua1.current_thumb_url AS friend1_avatar_thumb_url,
+                    ua1.current_image_url AS friend1_avatar_image_url,
                     u2.displayname AS friend2_username,
-                    u2.avatar_url as friend2_avatar_url
+                    ua2.current_thumb_url AS friend2_avatar_thumb_url,
+                    ua2.current_image_url AS friend2_avatar_image_url
                 FROM inserted i
                 LEFT JOIN "user" u1 ON u1.id = i.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = i.friend_2_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = i.friend_1_id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = i.friend_2_id AND ua2.is_enabled = true
             "#,
             )
             .bind(requestor_id)
@@ -182,12 +194,16 @@ impl FriendsRepository {
                     f.friend_2_id as "friend2_id",
                     f.created_at,
                     u1.displayname AS friend1_username,
+                    ua1.current_thumb_url AS friend1_avatar_thumb_url,
+                    ua1.current_image_url AS friend1_avatar_image_url,
                     u2.displayname AS friend2_username,
-                    u1.avatar_url as friend1_avatar_url,
-                    u2.avatar_url as friend2_avatar_url
+                    ua2.current_thumb_url AS friend2_avatar_thumb_url,
+                    ua2.current_image_url AS friend2_avatar_image_url
                 FROM friend f
                 LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = f.friend_1_id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = f.friend_2_id AND ua2.is_enabled = true
                 WHERE (f.friend_1_id = $1 OR f.friend_2_id = $1) AND f.deleted is not true
             "#,
             )
@@ -225,12 +241,16 @@ impl FriendsRepository {
                     d.friend_2_id AS friend2_id,
                     d.created_at,
                     u1.displayname AS friend1_username,
+                    ua1.current_thumb_url AS friend1_avatar_thumb_url,
+                    ua1.current_image_url AS friend1_avatar_image_url,
                     u2.displayname AS friend2_username,
-                    u1.avatar_url as friend1_avatar_url,
-                    u2.avatar_url as friend2_avatar_url
+                    ua2.current_thumb_url AS friend2_avatar_thumb_url,
+                    ua2.current_image_url AS friend2_avatar_image_url
                 FROM deleted d
                 LEFT JOIN "user" u1 ON u1.id = d.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = d.friend_2_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = d.friend_1_id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = d.friend_2_id AND ua2.is_enabled = true
             "#,
             )
             .bind(dto.friendship_id)
@@ -309,13 +329,17 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
-                    u1.avatar_url as requestor_avatar_url,
+                    ua1.current_thumb_url AS requestor_avatar_thumb_url,
+                    ua1.current_image_url AS requestor_avatar_image_url,
                     u2.displayname AS recipient_username,
                     u2.id AS recipient_id,
-                    u2.avatar_url as recipient_avatar_url
+                    ua2.current_thumb_url AS recipient_avatar_thumb_url,
+                    ua2.current_image_url AS recipient_avatar_image_url
                 FROM inserted i
                 JOIN "user" u1 ON u1.id = i.requestor_id
                 JOIN "user" u2 ON u2.id = i.recipient_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = u1.id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = u2.id AND ua2.is_enabled = true
             "#,
             )
             .bind(&actor.user_id)
@@ -349,13 +373,17 @@ impl FriendsRepository {
 
                     u1.displayname AS requestor_username,
                     u1.id AS requestor_id,
-                    u1.avatar_url as requestor_avatar_url,
+                    ua1.current_thumb_url AS requestor_avatar_thumb_url,
+                    ua1.current_image_url AS requestor_avatar_image_url,
                     u2.displayname AS recipient_username,
                     u2.id AS recipient_id,
-                    u2.avatar_url as recipient_avatar_url
+                    ua2.current_thumb_url AS recipient_avatar_thumb_url,
+                    ua2.current_image_url AS recipient_avatar_image_url
                 FROM friend_request fr
                 JOIN "user" u1 ON u1.id = requestor_id
                 JOIN "user" u2 ON u2.id = recipient_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = u1.id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = u2.id AND ua2.is_enabled = true
                 WHERE
                     ((fr.recipient_id = $1 AND $2 = 'incoming') OR (fr.requestor_id = $1 AND $2 = 'outgoing'))
                     AND fr.status = 'pending'
@@ -390,11 +418,15 @@ impl FriendsRepository {
                     f.created_at,
                     u1.displayname AS friend1_username,
                     u2.displayname AS friend2_username,
-                    u1.avatar_url as friend1_avatar_url,
-                    u2.avatar_url as friend2_avatar_url
+                    ua1.current_thumb_url AS friend1_avatar_thumb_url,
+                    ua1.current_image_url AS friend1_avatar_image_url,
+                    ua2.current_thumb_url AS friend2_avatar_thumb_url,
+                    ua2.current_image_url AS friend2_avatar_image_url
                 FROM friend f
                 LEFT JOIN "user" u1 ON u1.id = f.friend_1_id
                 LEFT JOIN "user" u2 ON u2.id = f.friend_2_id
+                LEFT JOIN user_avatar ua1 ON ua1.user_id = f.friend_1_id AND ua1.is_enabled = true
+                LEFT JOIN user_avatar ua2 ON ua2.user_id = f.friend_2_id AND ua2.is_enabled = true
                 WHERE f.id = $1
             "#,
             )
