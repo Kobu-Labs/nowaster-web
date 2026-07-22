@@ -1,19 +1,13 @@
 "use client";
 
 import type { ReadUserAvatar } from "@/api/definitions/models/feed";
+import { AvatarDialog } from "@/components/ui-providers/avatar/AvatarDialog";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shadcn/dialog";
 import { getInitials } from "@/lib/utils";
-import Image from "next/image";
 import { type FC, useState } from "react";
 
 type Props = {
@@ -52,24 +46,13 @@ export const FeedUserAvatar: FC<Props> = ({ user, size = "md" }) => {
         </Avatar>
       </button>
 
-      {hasFullImage && (
-        <Dialog onOpenChange={setDialogOpen} open={dialogOpen}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle>{user.username}&apos;s Avatar</DialogTitle>
-            </DialogHeader>
-            <div className="flex justify-center">
-              <div className="relative h-64 w-64 overflow-hidden rounded-lg">
-                <Image
-                  alt={`${user.username}'s avatar`}
-                  className="object-cover"
-                  fill
-                  src={imageUrl}
-                />
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+      {imageUrl && (
+        <AvatarDialog
+          imageUrl={imageUrl}
+          onOpenChange={setDialogOpen}
+          open={dialogOpen}
+          username={user.username}
+        />
       )}
     </>
   );
