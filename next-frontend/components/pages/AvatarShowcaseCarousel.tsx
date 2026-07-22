@@ -22,7 +22,6 @@ const AVATAR_FILES = [
   "avatar-09.jpg",
 ];
 
-// TODO: remove — testing data to work out category/hour tags per avatar
 const AVATAR_TAGS: Record<string, { hours: number; label: string; }[]> = {
   "avatar-01.jpg": [
     { hours: 35, label: "Gardening" },
@@ -99,7 +98,6 @@ export const AvatarShowcaseCarousel: FC = () => {
                   sizes="(max-width: 640px) 80vw, 500px"
                   src={`/avatars/${file}`}
                 />
-                {/* TODO: remove — testing tags to work out category/hour mapping per avatar */}
                 <div className="absolute inset-x-0 bottom-0 flex flex-wrap gap-1.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-2.5 pt-8">
                   {[...(AVATAR_TAGS[file] ?? [])]
                     .sort((a, b) => b.hours - a.hours)
