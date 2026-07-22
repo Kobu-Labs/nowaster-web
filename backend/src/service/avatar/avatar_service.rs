@@ -12,11 +12,12 @@ use crate::{
         },
         write_avatar::{AdminGenerationSource, CreateAvatarPresetDto, UpdateAvatarPresetDto},
     },
+    entity::avatar::{ActivityEntry, GenerationStatus, UserAvatar},
     repository::avatar::{
         AvatarPresetRepository, CategoryHintRepository, GenerationRunRepository, HintRepository,
         UserAvatarHistoryRepository, UserAvatarRepository,
     },
-    service::avatar::generator::{upload_avatar_images, ACTIVITY_ENTRY_SEP, ACTIVITY_FIELD_SEP},
+    service::avatar::generator::upload_avatar_images,
     Config,
 };
 
@@ -75,7 +76,7 @@ impl AvatarService {
         &self,
         user_id: &str,
         window_start: DateTime<Utc>,
-    ) -> Result<String> {
+    ) -> Result<Vec<ActivityEntry>> {
         struct Row {
             category_name: String,
             total_hours: f64,
@@ -113,7 +114,6 @@ impl AvatarService {
         .fetch_all(self.db.get_pool())
         .await?;
 
-
         let mut categories: HashMap<String, (f64, Vec<String>)> = HashMap::new();
         for row in rows {
             let entry = categories
@@ -124,28 +124,48 @@ impl AvatarService {
             }
         }
 
-        let mut parts: Vec<String> = Vec::new();
-        for (category_name, (total_hours, hints)) in &categories {
-            println!("{} {}", category_name, total_hours );
-            let hours = (total_hours * 10.0).round() / 10.0;
+        // Multiple categories can resolve to the same final label (e.g. the
+        // same hint attached to two categories, or a hint colliding with a
+        // plain category name), so merge by label instead of emitting one
+        // entry per category.
+        let mut hours_by_label: HashMap<String, f64> = HashMap::new();
+        for (category_name, (total_hours, hints)) in categories {
             if hints.is_empty() {
-                parts.push(format!("{}{}{}", category_name, ACTIVITY_FIELD_SEP, hours));
+                *hours_by_label.entry(category_name).or_insert(0.0) += total_hours;
             } else {
                 for hint in hints {
-                    parts.push(format!("{}{}{}", hint, ACTIVITY_FIELD_SEP, hours));
+                    *hours_by_label.entry(hint).or_insert(0.0) += total_hours;
                 }
             }
         }
-        parts.sort();
 
-        let res = parts.join(ACTIVITY_ENTRY_SEP);
-        println!("{}",res);
-        Ok(res)
+        let mut entries: Vec<ActivityEntry> = hours_by_label
+            .into_iter()
+            .map(|(label, hours)| ActivityEntry {
+                label,
+                hours: (hours * 10.0).round() / 10.0,
+            })
+            .collect();
+        entries.sort_by(|a, b| a.label.cmp(&b.label));
+
+        Ok(entries)
     }
 
     // -----------------------------------------------------------------------
     // Core generation pipeline
     // -----------------------------------------------------------------------
+
+    /// Fetches the user's avatar row and derives its tier string. Centralizes
+    /// a lookup that used to be repeated ad-hoc at every generation call site.
+    async fn get_avatar_and_tier(&self, user_id: &str) -> Result<(UserAvatar, String)> {
+        let avatar = self
+            .avatar_repo
+            .get_by_user_id(user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Avatar not enabled for user"))?;
+        let tier = format!("{:?}", avatar.tier).to_lowercase();
+        Ok((avatar, tier))
+    }
 
     /// Creates a run row and marks it running. Fast, DB-only — safe to await
     /// synchronously from a request handler before handing the slow part
@@ -157,17 +177,18 @@ impl AvatarService {
     }
 
     /// Runs the actual (slow, third-party-API-bound) generation work for an
-    /// already-created run and records its outcome.
+    /// already-created run and records its outcome. `base_preset_id` is
+    /// passed in by the caller (already loaded) rather than re-fetched here.
     async fn execute_generation(
         &self,
         run_id: Uuid,
         user_id: &str,
-        input_data: &str,
+        input_data: &[ActivityEntry],
         tier: &str,
+        base_preset_id: Option<Uuid>,
         assign: bool,
     ) -> Result<(Uuid, String, String)> {
-        let user_avatar = self.avatar_repo.get_by_user_id(user_id).await?;
-        let preset = if let Some(preset_id) = user_avatar.and_then(|a| a.base_preset_id) {
+        let preset = if let Some(preset_id) = base_preset_id {
             self.preset_repo.find_by_id(preset_id).await?
         } else {
             None
@@ -270,12 +291,14 @@ impl AvatarService {
     async fn run_generation_pipeline(
         &self,
         user_id: &str,
-        input_data: &str,
+        input_data: &[ActivityEntry],
         tier: &str,
+        base_preset_id: Option<Uuid>,
         assign: bool,
     ) -> Result<(Uuid, String, String)> {
         let run_id = self.create_pending_run(user_id).await?;
-        self.execute_generation(run_id, user_id, input_data, tier, assign).await
+        self.execute_generation(run_id, user_id, input_data, tier, base_preset_id, assign)
+            .await
     }
 
     // -----------------------------------------------------------------------
@@ -292,6 +315,7 @@ impl AvatarService {
     pub async fn enable(&self, user_id: &str) -> Result<ReadUserAvatarDto> {
         let avatar = self.avatar_repo.upsert(user_id).await?;
         let tier = format!("{:?}", avatar.tier).to_lowercase();
+        let base_preset_id = avatar.base_preset_id;
 
         let updated = self
             .avatar_repo
@@ -307,7 +331,7 @@ impl AvatarService {
                 let user_id = user_id.to_string();
                 tokio::spawn(async move {
                     if let Err(e) = service
-                        .execute_generation(run_id, &user_id, &input_data, &tier, true)
+                        .execute_generation(run_id, &user_id, &input_data, &tier, base_preset_id, true)
                         .await
                     {
                         tracing::error!(user_id, "Immediate generation on enable failed: {:#}", e);
@@ -341,11 +365,7 @@ impl AvatarService {
 
     #[instrument(err, skip(self))]
     pub async fn trigger_generation(&self, user_id: &str) -> Result<ReadGenerationRunDto> {
-        let avatar = self
-            .avatar_repo
-            .get_by_user_id(user_id)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Avatar not enabled for user"))?;
+        let (avatar, tier) = self.get_avatar_and_tier(user_id).await?;
 
         if !avatar.is_enabled {
             anyhow::bail!("Avatar is disabled");
@@ -358,7 +378,13 @@ impl AvatarService {
             }
         }
 
-        let tier = format!("{:?}", avatar.tier).to_lowercase();
+        if let Some(latest) = self.run_repo.get_latest_for_user(user_id).await? {
+            if latest.status == GenerationStatus::Running {
+                anyhow::bail!("A generation is already in progress");
+            }
+        }
+
+        let base_preset_id = avatar.base_preset_id;
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
 
@@ -368,7 +394,7 @@ impl AvatarService {
         let spawned_user_id = user_id.to_string();
         tokio::spawn(async move {
             if let Err(e) = service
-                .execute_generation(run_id, &spawned_user_id, &input_data, &tier, true)
+                .execute_generation(run_id, &spawned_user_id, &input_data, &tier, base_preset_id, true)
                 .await
             {
                 tracing::error!(user_id = %spawned_user_id, "Background generation failed: {:#}", e);
@@ -447,6 +473,28 @@ impl AvatarService {
         user_id: &str,
         hint_id: Uuid,
     ) -> Result<()> {
+        if self
+            .category_hint_repo
+            .is_hint_assigned_elsewhere(user_id, hint_id, category_id)
+            .await?
+        {
+            anyhow::bail!(
+                "This hint is already used by another of your categories — assigning it here \
+                 too would merge both categories' hours under one label"
+            );
+        }
+
+        if self
+            .category_hint_repo
+            .hint_label_matches_other_category_name(user_id, hint_id, category_id)
+            .await?
+        {
+            anyhow::bail!(
+                "This hint's label matches the name of another of your categories — assigning \
+                 it here would merge both categories' hours under one label"
+            );
+        }
+
         self.hint_repo.increment_usage(hint_id).await?;
         self.category_hint_repo
             .assign(category_id, user_id, hint_id)
@@ -506,17 +554,12 @@ impl AvatarService {
         &self,
         user_id: &str,
     ) -> Result<ReadGenerationRunDto> {
-        let avatar = self
-            .avatar_repo
-            .get_by_user_id(user_id)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Avatar not enabled for user"))?;
+        let (avatar, tier) = self.get_avatar_and_tier(user_id).await?;
 
-        let tier = format!("{:?}", avatar.tier).to_lowercase();
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
 
-        self.run_generation_pipeline(user_id, &input_data, &tier, true)
+        self.run_generation_pipeline(user_id, &input_data, &tier, avatar.base_preset_id, true)
             .await?;
 
         let run = self
@@ -534,7 +577,11 @@ impl AvatarService {
         source: AdminGenerationSource,
         assign_to_user_id: Option<&str>,
     ) -> Result<ReadGenerationRunDto> {
-        let (input_data, target_user_id) = match &source {
+        // For the User source, the source user's avatar is already loaded to compute
+        // input_data; reuse it for the target avatar/tier lookup below when the
+        // generation is being assigned back to that same user (the common case),
+        // instead of re-fetching the identical row.
+        let (input_data, target_user_id, source_user_avatar) = match &source {
             AdminGenerationSource::User { user_id } => {
                 let avatar = self
                     .avatar_repo
@@ -544,20 +591,32 @@ impl AvatarService {
                 let tier = format!("{:?}", avatar.tier).to_lowercase();
                 let window_start = Utc::now() - data_window(&tier);
                 let data = self.aggregate_input_data(user_id, window_start).await?;
-                (data, assign_to_user_id.unwrap_or(user_id).to_string())
+                let target_user_id = assign_to_user_id.unwrap_or(user_id).to_string();
+                let reusable = if target_user_id == *user_id { Some(avatar) } else { None };
+                (data, target_user_id, reusable)
             }
             AdminGenerationSource::Manual { data } => {
                 let user_id = assign_to_user_id
                     .ok_or_else(|| anyhow::anyhow!("assign_to_user_id required for manual source"))?;
-                (data.clone(), user_id.to_string())
+                let entries = data
+                    .iter()
+                    .map(|d| ActivityEntry { label: d.label.clone(), hours: d.hours })
+                    .collect();
+                (entries, user_id.to_string(), None)
             }
         };
 
-        let avatar = self.avatar_repo.get_by_user_id(&target_user_id).await?
-            .ok_or_else(|| anyhow::anyhow!("No avatar row found for target user"))?;
+        let avatar = match source_user_avatar {
+            Some(avatar) => avatar,
+            None => self
+                .avatar_repo
+                .get_by_user_id(&target_user_id)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("No avatar row found for target user"))?,
+        };
         let tier = format!("{:?}", avatar.tier).to_lowercase();
 
-        self.run_generation_pipeline(&target_user_id, &input_data, &tier, true)
+        self.run_generation_pipeline(&target_user_id, &input_data, &tier, avatar.base_preset_id, true)
             .await?;
 
         let run = self
@@ -576,18 +635,11 @@ impl AvatarService {
         weeks: i64,
     ) -> Result<Vec<crate::dto::avatar::read_avatar::ActivityEntryDto>> {
         let window_start = Utc::now() - Duration::weeks(weeks.max(1));
-        let raw = self.aggregate_input_data(user_id, window_start).await?;
-        let entries = raw
-            .split(ACTIVITY_ENTRY_SEP)
-            .filter(|s| !s.is_empty())
-            .filter_map(|part| {
-                let mut iter = part.rsplitn(2, ACTIVITY_FIELD_SEP);
-                let hours: f64 = iter.next()?.trim().parse().ok()?;
-                let label = iter.next()?.trim().to_string();
-                Some(crate::dto::avatar::read_avatar::ActivityEntryDto { label, hours })
-            })
-            .collect();
-        Ok(entries)
+        let entries = self.aggregate_input_data(user_id, window_start).await?;
+        Ok(entries
+            .into_iter()
+            .map(crate::dto::avatar::read_avatar::ActivityEntryDto::from)
+            .collect())
     }
 
     #[instrument(err, skip(self))]
@@ -595,21 +647,16 @@ impl AvatarService {
         &self,
         user_id: &str,
     ) -> Result<ReadGenerationRunDto> {
-        let avatar = self
-            .avatar_repo
-            .get_by_user_id(user_id)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("No avatar found for user {}", user_id))?;
-        let tier = format!("{:?}", avatar.tier).to_lowercase();
+        let (avatar, tier) = self.get_avatar_and_tier(user_id).await?;
         // Use a wider window for playground so admin can test users with sparse recent activity.
         let window_start = Utc::now() - Duration::weeks(13);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
-        tracing::info!(user_id, input_data = %input_data, "playground input_data");
+        tracing::info!(user_id, input_data = ?input_data, "playground input_data");
 
         // Swallow pipeline errors — the run record has the error_message set via set_failed.
         // Pre-pipeline errors (avatar/data lookup) propagate normally above.
         if let Err(e) = self
-            .run_generation_pipeline(user_id, &input_data, &tier, false)
+            .run_generation_pipeline(user_id, &input_data, &tier, avatar.base_preset_id, false)
             .await
         {
             tracing::warn!(user_id, "Playground pipeline failed (returning run record): {:#}", e);

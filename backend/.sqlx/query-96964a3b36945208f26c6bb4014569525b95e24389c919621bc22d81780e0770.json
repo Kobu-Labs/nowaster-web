@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                UPDATE generation_run SET\n                    status     = 'running',\n                    started_at = NOW()\n                WHERE id = $1\n                RETURNING\n                    id, user_id,\n                    status as \"status: GenerationStatus\",\n                    started_at  as \"started_at: DateTime<Utc>\",\n                    completed_at as \"completed_at: DateTime<Utc>\",\n                    input_data, image_url, thumb_url, error_message, retry_count,\n                    created_at as \"created_at: DateTime<Utc>\"\n                ",
+  "query": "\n                SELECT\n                    id, user_id,\n                    status as \"status: GenerationStatus\",\n                    started_at  as \"started_at: DateTime<Utc>\",\n                    completed_at as \"completed_at: DateTime<Utc>\",\n                    input_data as \"input_data: crate::entity::avatar::ActivityData\",\n                    image_url, thumb_url, error_message, retry_count,\n                    created_at as \"created_at: DateTime<Utc>\"\n                FROM generation_run\n                WHERE user_id = $1\n                ORDER BY created_at DESC\n                ",
   "describe": {
     "columns": [
       {
@@ -42,8 +42,8 @@
       },
       {
         "ordinal": 5,
-        "name": "input_data",
-        "type_info": "Text"
+        "name": "input_data: crate::entity::avatar::ActivityData",
+        "type_info": "Jsonb"
       },
       {
         "ordinal": 6,
@@ -73,7 +73,7 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Text"
       ]
     },
     "nullable": [
@@ -90,5 +90,5 @@
       false
     ]
   },
-  "hash": "85e3faa9ca81fcc9b0833f8faff41277e999a25fe7785774c23b45fdf217e0bd"
+  "hash": "96964a3b36945208f26c6bb4014569525b95e24389c919621bc22d81780e0770"
 }

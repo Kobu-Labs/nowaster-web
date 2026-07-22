@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use tokio::time::{sleep, Duration};
 use uuid::Uuid;
 
+use crate::entity::avatar::ActivityEntry;
+
 const LEONARDO_BASE: &str = "https://cloud.leonardo.ai/api/rest";
 const POLL_INTERVAL: Duration = Duration::from_secs(5);
 const MAX_POLLS: u32 = 72; // 6 minutes max
@@ -81,28 +83,10 @@ pub async fn upload_init_image(
 // Prompt construction
 // ---------------------------------------------------------------------------
 
-/// Delimiters for the flat `activity_data` wire format produced by
-/// `AvatarService::aggregate_input_data`: entries separated by
-/// `ACTIVITY_ENTRY_SEP`, each as `label` + `ACTIVITY_FIELD_SEP` + `hours`.
-/// ASCII separator control characters are used instead of ',' / ':' because
-/// category names and hint labels are free text and may legitimately contain
-/// commas or colons.
-pub const ACTIVITY_ENTRY_SEP: &str = "\u{1e}";
-pub const ACTIVITY_FIELD_SEP: &str = "\u{1f}";
-
-fn build_activities_section(activity_data: &str) -> String {
-    if activity_data.is_empty() {
-        return String::new();
-    }
-
-    let mut entries: Vec<(String, f64)> = activity_data
-        .split(ACTIVITY_ENTRY_SEP)
-        .filter_map(|part| {
-            let mut iter = part.rsplitn(2, ACTIVITY_FIELD_SEP);
-            let hours: f64 = iter.next()?.trim().parse().ok()?;
-            let label = iter.next()?.trim().to_string();
-            Some((label, hours))
-        })
+fn build_activities_section(activity_data: &[ActivityEntry]) -> String {
+    let mut entries: Vec<(&str, f64)> = activity_data
+        .iter()
+        .map(|entry| (entry.label.as_str(), entry.hours))
         .collect();
 
     entries.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
@@ -130,7 +114,7 @@ fn build_activities_section(activity_data: &str) -> String {
         .join("\n")
 }
 
-fn build_prompt(activity_data: &str) -> String {
+fn build_prompt(activity_data: &[ActivityEntry]) -> String {
     let activities = build_activities_section(activity_data);
     format!(
         r#"Use the attached image as a STRICT reference.
@@ -301,7 +285,7 @@ pub async fn generate_avatar_with_init_id(
     model_id: &str,
     layout_reference_id: &str,
     preset_init_id: &str,
-    activity_data: &str,
+    activity_data: &[ActivityEntry],
 ) -> Result<Vec<u8>> {
     let prompt = build_prompt(activity_data);
 
@@ -372,30 +356,31 @@ async fn upload_full_and_thumb(
     client: &aws_sdk_s3::Client,
     bucket: &str,
     endpoint_url: &str,
-    image_key: String,
-    thumb_key: String,
+    keys: (String, String),
     image_bytes: Vec<u8>,
     image_content_type: String,
+    crop_fn: fn(&[u8]) -> Result<Vec<u8>>,
 ) -> Result<(String, String)> {
-    let thumb_bytes = crop_center_100x100(&image_bytes)?;
+    let (image_key, thumb_key) = keys;
+    let thumb_bytes = crop_fn(&image_bytes)?;
 
-    client
+    let full_put = client
         .put_object()
         .bucket(bucket)
         .key(&image_key)
         .body(ByteStream::from(image_bytes))
         .content_type(image_content_type)
-        .send()
-        .await?;
+        .send();
 
-    client
+    let thumb_put = client
         .put_object()
         .bucket(bucket)
         .key(&thumb_key)
         .body(ByteStream::from(thumb_bytes))
         .content_type("image/jpeg")
-        .send()
-        .await?;
+        .send();
+
+    tokio::try_join!(full_put, thumb_put)?;
 
     let base = endpoint_url.trim_end_matches('/');
     let image_url = format!("{}/{}/{}", base, bucket, image_key);
@@ -418,11 +403,43 @@ pub async fn upload_preset_image_to_s3(
     let thumb_key = format!("presets/{}_thumb.jpg", id);
     let content_type = if extension == "jpg" { "image/jpeg".to_string() } else { format!("image/{}", extension) };
 
-    upload_full_and_thumb(client, bucket, endpoint_url, image_key, thumb_key, image_bytes, content_type).await
+    upload_full_and_thumb(
+        client,
+        bucket,
+        endpoint_url,
+        (image_key, thumb_key),
+        image_bytes,
+        content_type,
+        crop_center_square_thumb,
+    )
+    .await
+}
+
+/// Generic center-crop for arbitrary-sized images (e.g. admin-uploaded preset
+/// photos with unknown framing), unlike `crop_center_100x100` below which
+/// assumes the AI-generated diorama's fixed 2048x2048 layout. Crops the
+/// largest centered square that fits the image, so it works for any
+/// dimensions with no minimum-size floor.
+fn crop_center_square_thumb(image_bytes: &[u8]) -> Result<Vec<u8>> {
+    use image::GenericImageView;
+    let img = image::load_from_memory(image_bytes)?;
+    let (w, h) = img.dimensions();
+
+    let side = w.min(h);
+    let left = (w - side) / 2;
+    let top = (h - side) / 2;
+
+    let cropped = img.crop_imm(left, top, side, side);
+    let thumb = cropped.resize_exact(100, 100, image::imageops::FilterType::Lanczos3);
+
+    let mut cursor = std::io::Cursor::new(Vec::new());
+    thumb.write_to(&mut cursor, image::ImageFormat::Jpeg)?;
+    Ok(cursor.into_inner())
 }
 
 /// Cuts a region from the image centered at (w/2, ~870px from top in a 2048×2048 reference).
 /// Coordinates and crop size scale proportionally with the actual image dimensions.
+/// Only valid for the AI-generated diorama output — not for arbitrary preset photos.
 pub fn crop_center_100x100(image_bytes: &[u8]) -> Result<Vec<u8>> {
     use image::GenericImageView;
     let img = image::load_from_memory(image_bytes)?;
@@ -464,5 +481,14 @@ pub async fn upload_avatar_images(
     let image_key = format!("avatars/{}/{}.jpg", user_id, id);
     let thumb_key = format!("avatars/{}/{}_thumb.jpg", user_id, id);
 
-    upload_full_and_thumb(client, bucket, endpoint_url, image_key, thumb_key, image_bytes, "image/jpeg".to_string()).await
+    upload_full_and_thumb(
+        client,
+        bucket,
+        endpoint_url,
+        (image_key, thumb_key),
+        image_bytes,
+        "image/jpeg".to_string(),
+        crop_center_100x100,
+    )
+    .await
 }

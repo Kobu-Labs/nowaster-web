@@ -30,6 +30,11 @@ export const UserAvatarSchema = z.object({
   updatedAt: z.coerce.date<Date>(),
 });
 
+export const ActivityEntrySchema = z.object({
+  label: z.string(),
+  hours: z.number(),
+});
+
 export const GenerationRunSchema = z.object({
   id: z.string().uuid(),
   userId: z.string(),
@@ -38,7 +43,7 @@ export const GenerationRunSchema = z.object({
   completedAt: z.coerce.date<Date>().nullable(),
   imageUrl: z.string().nullable(),
   thumbUrl: z.string().nullable(),
-  inputData: z.string().nullable(),
+  inputData: z.array(ActivityEntrySchema).nullable(),
   errorMessage: z.string().nullable(),
   retryCount: z.number(),
   createdAt: z.coerce.date<Date>(),
@@ -57,11 +62,6 @@ export const HintSchema = z.object({
   id: z.string().uuid(),
   label: z.string(),
   usageCount: z.number(),
-});
-
-export const ActivityEntrySchema = z.object({
-  label: z.string(),
-  hours: z.number(),
 });
 
 export type AvatarTier = z.infer<typeof AvatarTierSchema>;

@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::dto::avatar::read_avatar::ActivityEntryDto;
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CreateAvatarPresetDto {
     pub name: String,
@@ -49,7 +51,7 @@ pub enum AdminGenerationSource {
         user_id: String,
     },
     #[serde(rename = "manual")]
-    Manual { data: String },
+    Manual { data: Vec<ActivityEntryDto> },
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

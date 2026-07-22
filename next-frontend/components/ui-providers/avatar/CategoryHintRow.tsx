@@ -21,6 +21,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
+import { TableCell, TableRow } from "@/components/shadcn/table";
+import { useToast } from "@/components/shadcn/use-toast";
 import { Plus, X } from "lucide-react";
 import { type FC, useState } from "react";
 
@@ -38,6 +40,7 @@ export const CategoryHintRow: FC<Props> = ({ categoryId, categoryName }) => {
   const assign = useAssignCategoryHint(categoryId);
   const remove = useRemoveCategoryHint(categoryId);
   const createHint = useCreateHint();
+  const { toast } = useToast();
 
   const assignedIds = new Set(assigned.map((h) => h.id));
   const filterable = suggestions.filter((h) => !assignedIds.has(h.id));
@@ -45,29 +48,47 @@ export const CategoryHintRow: FC<Props> = ({ categoryId, categoryName }) => {
   const handleSelect = async (hint: Hint) => {
     setOpen(false);
     setQuery("");
-    await assign.mutateAsync(hint.id);
+    try {
+      await assign.mutateAsync(hint.id);
+    } catch (e) {
+      toast({
+        description: e instanceof Error ? e.message : "Failed to add hint",
+        title: "Error",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCreate = async () => {
-    if (!query.trim()) return;
-    const hint = await createHint.mutateAsync(query.trim());
-    setOpen(false);
-    setQuery("");
-    await assign.mutateAsync(hint.id);
+    if (!query.trim()) {
+      return;
+    }
+    try {
+      const hint = await createHint.mutateAsync(query.trim());
+      setOpen(false);
+      setQuery("");
+      await assign.mutateAsync(hint.id);
+    } catch (e) {
+      toast({
+        description: e instanceof Error ? e.message : "Failed to add hint",
+        title: "Error",
+        variant: "destructive",
+      });
+    }
   };
 
-  const showCreate =
-    query.trim().length > 0 &&
-    !suggestions.some(
-      (h) => h.label.toLowerCase() === query.trim().toLowerCase(),
-    );
+  const showCreate
+    = query.trim().length > 0
+      && !suggestions.some(
+        (h) => h.label.toLowerCase() === query.trim().toLowerCase(),
+      );
 
   return (
-    <tr>
-      <td className="py-3 pr-4 align-top text-sm font-medium">
+    <TableRow className="hover:bg-transparent">
+      <TableCell className="align-top text-sm font-medium">
         {categoryName}
-      </td>
-      <td className="py-3 align-top">
+      </TableCell>
+      <TableCell className="align-top">
         <div className="flex flex-wrap items-center gap-1">
           {assigned.map((hint) => (
             <Badge className="gap-1 pr-1" key={hint.id} variant="secondary">
@@ -106,7 +127,9 @@ export const CategoryHintRow: FC<Props> = ({ categoryId, categoryName }) => {
                     <CommandGroup heading="Create new">
                       <CommandItem onSelect={handleCreate}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Create &quot;{query.trim()}&quot;
+                        Create &quot;
+                        {query.trim()}
+                        &quot;
                       </CommandItem>
                     </CommandGroup>
                   )}
@@ -120,7 +143,8 @@ export const CategoryHintRow: FC<Props> = ({ categoryId, categoryName }) => {
                         >
                           {hint.label}
                           <span className="ml-auto text-xs text-muted-foreground">
-                            {hint.usageCount}×
+                            {hint.usageCount}
+                            ×
                           </span>
                         </CommandItem>
                       ))}
@@ -134,7 +158,7 @@ export const CategoryHintRow: FC<Props> = ({ categoryId, categoryName }) => {
             </PopoverContent>
           </Popover>
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };
