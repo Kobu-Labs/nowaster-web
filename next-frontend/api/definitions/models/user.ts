@@ -9,7 +9,8 @@ export const VisibilityFlagsSchema = z.object({
 });
 
 export const UserSchema = z.object({
-  avatarUrl: z.string().nullish(),
+  avatarImageUrl: z.string().nullish(),
+  avatarThumbUrl: z.string().nullish(),
   id: z.string(),
   role: z.enum(["admin", "user"]).optional(),
   username: z.string().trim().min(1),

@@ -9,8 +9,9 @@ import { useQuery } from "@tanstack/react-query";
  * It assumes the user is authenticated and will throw an error if not.
  *
  * Immediately returns basic user data (id, username, role) from auth state,
- * then silently upgrades to the full profile (including avatarUrl, visibilityFlags)
- * once the background fetch completes. No loading states or Suspense needed.
+ * then silently upgrades to the full profile (including avatarThumbUrl,
+ * avatarImageUrl, visibilityFlags) once the background fetch completes. No
+ * loading states or Suspense needed.
  */
 export const useCurrentUser = () => {
   const { user } = useAuth();

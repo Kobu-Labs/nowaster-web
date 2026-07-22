@@ -6,8 +6,11 @@ use crate::{entity::user::User, entity::visibility::VisibilityFlags};
 pub struct ReadUserDto {
     pub id: String,
     pub username: String,
+    #[serde(rename = "avatarThumbUrl")]
     pub avatar_thumb_url: Option<String>,
+    #[serde(rename = "avatarImageUrl")]
     pub avatar_image_url: Option<String>,
+    #[serde(rename = "visibilityFlags")]
     pub visibility_flags: VisibilityFlags,
 }
 

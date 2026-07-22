@@ -49,7 +49,7 @@ export const UserSearchPicker: FC<UserSearchPickerProps> = ({
         className={`flex max-w-xs items-center gap-2 rounded-md border px-2 py-1.5 ${className ?? ""}`}
       >
         <Avatar className="h-6 w-6 shrink-0">
-          <AvatarImage src={selectedUser.avatarUrl ?? undefined} />
+          <AvatarImage src={selectedUser.avatarThumbUrl ?? undefined} />
           <AvatarFallback className="text-xs">
             {selectedUser.username.charAt(0).toUpperCase()}
           </AvatarFallback>
@@ -119,7 +119,7 @@ export const UserSearchPicker: FC<UserSearchPickerProps> = ({
                   value={user.id}
                 >
                   <Avatar className="mr-2 h-5 w-5 shrink-0">
-                    <AvatarImage src={user.avatarUrl ?? undefined} />
+                    <AvatarImage src={user.avatarThumbUrl ?? undefined} />
                     <AvatarFallback className="text-[10px]">
                       {user.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
