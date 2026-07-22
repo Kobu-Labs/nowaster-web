@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, Rss, Settings, Shield, Sliders, UserCircle } from "lucide-react";
+import { Key, Rss, Settings, Shield, Sliders, Sparkles, UserCircle } from "lucide-react";
 
 import {
   Sidebar,
@@ -23,6 +23,12 @@ const settingsNavItems = [
     icon: UserCircle,
     title: "Account",
     url: "/home/settings/account",
+  },
+  {
+    description: "Manage your AI-generated avatar",
+    icon: Sparkles,
+    title: "Avatar",
+    url: "/home/settings/avatar",
   },
   {
     description: "Manage your feed subscriptions",

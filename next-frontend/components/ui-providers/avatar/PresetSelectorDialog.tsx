@@ -23,7 +23,7 @@ type Props = {
   open: boolean;
 };
 
-const PresetTile: FC<{
+export const PresetTile: FC<{
   isPending: boolean;
   onSelect: (id: string) => void;
   preset: AvatarPreset;
