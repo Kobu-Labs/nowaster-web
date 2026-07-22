@@ -1,22 +1,13 @@
+import { AvatarShowcaseCarousel } from "@/components/pages/AvatarShowcaseCarousel";
 import { SiteFooter } from "@/components/pages/site-footer";
 import { SiteHeader } from "@/components/pages/site-header";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/shadcn/avatar";
+import { TestimonialAvatar } from "@/components/pages/TestimonialAvatar";
 import { Button } from "@/components/shadcn/button";
 import { StopwatchIcon } from "@radix-ui/react-icons";
-import {
-  BarChart3,
-  ChartArea,
-  CheckCircle,
-  Clock,
-} from "lucide-react";
+import { CheckCircle, Clock, UserPlus } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
-import landing1 from "@/public/nowaster-landing-1-dark.jpg";
-import landing2 from "@/public/nowaster-landing-2-dark.png";
+import dashboardScreenshot from "@/public/screenshot-dashboard.png";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -30,16 +21,16 @@ export default async function LandingPage() {
     <>
       <SiteHeader />
       <div className="flex flex-col min-h-screen">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-linear-to-b from-background to-muted">
-          <div className="px-4 md:px-6 grid gap-6 md:grid-cols-1 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_800px] max-w-7xl mx-auto">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-linear-to-b from-background to-muted">
+          <div className="px-4 md:px-6 grid gap-10 md:grid-cols-1 lg:grid-cols-[1fr_640px] lg:gap-12 xl:grid-cols-[1fr_760px] max-w-7xl mx-auto items-center">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                  Track Your Time, Boost Your Productivity
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  Every hour, twice over.
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  Effortlessly track time, manage projects, and analyze
-                  productivity with our intuitive time tracking solution.
+                  Log your time once. Get a dashboard that breaks it down —
+                  and a personal avatar that grows from it.
                 </p>
               </div>
 
@@ -54,88 +45,36 @@ export default async function LandingPage() {
                   No account? Try the sandbox as a guest →
                 </Button>
               </Link>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row"></div>
             </div>
+
             <div className="flex items-center justify-center">
               <Image
-                alt="Time tracking dashboard"
+                alt="Nowaster time tracking dashboard"
+                className="rounded-2xl border shadow-lg"
                 placeholder="blur"
                 priority
-                sizes="(max-width: 1024px) 100vw, 800px"
-                src={landing1}
+                sizes="(max-width: 1024px) 100vw, 760px"
+                src={dashboardScreenshot}
               />
             </div>
           </div>
         </section>
 
         <section
-          className="w-full py-12 md:py-24 lg:py-32 bg-background relative"
-          id="features"
+          className="w-full py-12 md:py-24 lg:py-32 bg-background"
+          id="avatar"
         >
-          <div className="px-10 md:px-6 relative">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                  Everything you need to master your time
-                </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Our time tracking app combines powerful features with a simple
-                  interface to help you stay productive.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:gird-cols[1fr_600px] lg:gap-12">
-              <div className="flex items-center justify-center">
-                <Image
-                  alt="Time tracking dashboard"
-                  placeholder="blur"
-                  sizes="(max-width: 1024px) 100vw, 800px"
-                  src={landing2}
-                />
-              </div>
-              <div className="flex flex-col justify-center space-y-4 md:m-10">
-                <ul className="grid gap-6">
-                  <li className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary/10 p-2 text-primary">
-                      <Clock className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">
-                        Simple Time Tracking
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Start and stop timers with a single click. Track time
-                        across categories and tags effortlessly.
-                      </p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary/10 p-2 text-primary">
-                      <BarChart3 className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">Detailed Reports</h3>
-                      <p className="text-muted-foreground">
-                        Generate comprehensive reports to analyze your
-                        productivity and identify areas for improvement.
-                      </p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary/10 p-2 text-primary">
-                      <ChartArea className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">Extensive Charting</h3>
-                      <p className="text-muted-foreground">
-                        Configurable visualizations provide insights into your
-                        time spending habits
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
+          <div className="px-4 md:px-6 max-w-6xl mx-auto">
+            <h2 className="text-center text-3xl font-bold tracking-tighter md:text-4xl/tight">
+              A character built from what you actually did
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-center text-muted-foreground">
+              Pick your avatar&apos;s look once. The scene around them
+              updates every week, built from whatever took up most of your
+              time.
+            </p>
+
+            <AvatarShowcaseCarousel />
           </div>
         </section>
 
@@ -148,37 +87,46 @@ export default async function LandingPage() {
                   How It Works
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Get started in minutes with our simple three-step process.
+                  Sign up, track your time, and watch your dashboard — and
+                  your avatar — take shape.
                 </p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl gap-8 py-12 md:grid-cols-3">
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <span className="text-2xl font-bold">1</span>
+            <div className="relative mx-auto grid max-w-5xl gap-8 py-12 md:grid-cols-3">
+              <div className="absolute top-24 left-[16.6%] right-[16.6%] hidden h-px bg-border md:block" />
+
+              <div className="relative flex flex-col items-center space-y-4 text-center">
+                <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full border-4 border-muted bg-primary text-primary-foreground shadow-md">
+                  <UserPlus className="h-9 w-9" />
                 </div>
                 <h3 className="text-xl font-bold">Sign Up</h3>
                 <p className="text-muted-foreground">
-                  Create your account in seconds and set up your workspace.
+                  Create your account and pick your avatar&apos;s look once.
                 </p>
               </div>
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <span className="text-2xl font-bold">2</span>
+              <div className="relative flex flex-col items-center space-y-4 text-center">
+                <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full border-4 border-muted bg-primary text-primary-foreground shadow-md">
+                  <Clock className="h-9 w-9" />
                 </div>
                 <h3 className="text-xl font-bold">Track Time</h3>
                 <p className="text-muted-foreground">
-                  Start tracking your time with our intuitive timer interface.
+                  Log hours against categories as you go about your week.
                 </p>
               </div>
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <span className="text-2xl font-bold">3</span>
+              <div className="relative flex flex-col items-center space-y-4 text-center">
+                <div className="relative z-10 h-24 w-24 overflow-hidden rounded-full border-4 border-muted shadow-md">
+                  <Image
+                    alt="A Nowaster avatar scene"
+                    className="h-full w-full object-cover"
+                    height={96}
+                    src="/avatars/avatar-02-thumb.jpg"
+                    width={96}
+                  />
                 </div>
-                <h3 className="text-xl font-bold">Analyze & Improve</h3>
+                <h3 className="text-xl font-bold">See Your Week</h3>
                 <p className="text-muted-foreground">
-                  Review your data and optimize your workflow for maximum
-                  productivity.
+                  Dashboards update instantly. Your avatar&apos;s scene
+                  updates every week.
                 </p>
               </div>
             </div>
@@ -186,7 +134,7 @@ export default async function LandingPage() {
         </section>
 
         <section
-          className="w-full py-12 md:py-24 lg:py-32 bg-background "
+          className="w-full py-12 md:py-24 lg:py-32 bg-background"
           id="pricing"
         >
           <div className="px-4 md:px-6">
@@ -251,10 +199,11 @@ export default async function LandingPage() {
             <div className="mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarImage alt="d" />
-                    <AvatarFallback>D</AvatarFallback>
-                  </Avatar>
+                  <TestimonialAvatar
+                    avatarFile="avatar-04.jpg"
+                    fallback="D"
+                    name="d3jv"
+                  />
                   <div>
                     <h4 className="font-bold">d3jv</h4>
                     <p className="text-sm text-muted-foreground">Student</p>
@@ -267,13 +216,15 @@ export default async function LandingPage() {
               </div>
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback>I</AvatarFallback>
-                  </Avatar>
+                  <TestimonialAvatar
+                    avatarFile="avatar-05.jpg"
+                    fallback="I"
+                    name="izmi"
+                  />
                   <div>
                     <h4 className="font-bold">izmi</h4>
                     <p className="text-sm text-muted-foreground">
-                      Sotfware Engineer @ RedHat
+                      Software Engineer @ RedHat
                     </p>
                   </div>
                 </div>
@@ -285,9 +236,11 @@ export default async function LandingPage() {
               </div>
               <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback>K</AvatarFallback>
-                  </Avatar>
+                  <TestimonialAvatar
+                    avatarFile="avatar-06.jpg"
+                    fallback="K"
+                    name="Kobu"
+                  />
                   <div>
                     <h4 className="font-bold">Kobu</h4>
                     <p className="text-sm text-muted-foreground">
