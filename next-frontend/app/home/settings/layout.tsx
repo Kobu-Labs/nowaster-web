@@ -13,7 +13,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       <SidebarProvider className="flex-1" defaultOpen>
         <SettingsSidebar />
         <SidebarInset className="flex-1">
-          <div className="p-6">{children}</div>
+          <div className="mx-auto w-full max-w-3xl p-6">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </div>

@@ -63,7 +63,7 @@ const AccountPage: FC = () => {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
       <p className="text-muted-foreground mb-6">
         Manage your account information and preferences.

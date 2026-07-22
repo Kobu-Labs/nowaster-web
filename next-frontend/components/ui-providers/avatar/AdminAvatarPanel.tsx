@@ -384,7 +384,7 @@ const RunCard: FC<{ run: GenerationRun; }> = ({ run }) => {
                   className="object-cover transition-opacity group-hover:opacity-80"
                   fill
                   sizes="(max-width: 640px) 25vw, (max-width: 1024px) 16vw, 12.5vw"
-                  src={imageUrl}
+                  src={thumbUrl}
                   unoptimized
                 />
               )
