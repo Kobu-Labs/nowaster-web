@@ -71,7 +71,7 @@ export const AdminImpersonation: FC = () => {
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatarUrl ?? undefined} />
+                        <AvatarImage src={user.avatarThumbUrl ?? undefined} />
                         <AvatarFallback>
                           {user.username.charAt(0).toUpperCase()}
                         </AvatarFallback>
