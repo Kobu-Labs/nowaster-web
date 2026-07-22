@@ -26,7 +26,7 @@ export default async function LandingPage() {
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                  Every hour, twice over.
+                  Track your time. Watch it take shape.
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
                   Log your time once. Get a dashboard that breaks it down —
