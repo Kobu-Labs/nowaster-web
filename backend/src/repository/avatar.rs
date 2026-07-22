@@ -8,8 +8,8 @@ use crate::{
     config::database::{Database, DatabaseTrait},
     dto::avatar::write_avatar::{CreateAvatarPresetDto, UpdateAvatarPresetDto},
     entity::avatar::{
-        AvatarPreset, AvatarTier, CategoryHint, GenerationRun, GenerationStatus, Hint, UserAvatar,
-        UserAvatarHistory,
+        ActivityEntry, AvatarPreset, AvatarTier, CategoryHint, GenerationRun, GenerationStatus,
+        Hint, UserAvatar, UserAvatarHistory,
     },
 };
 
@@ -389,7 +389,7 @@ impl GenerationRunRepository {
 
     #[instrument(err, skip(self))]
     pub async fn create(&self, user_id: &str) -> Result<GenerationRun> {
-        let run = crate::named_query!(
+        let result = crate::named_query!(
             "generation_run_create",
             sqlx::query_as!(
                 GenerationRun,
@@ -401,14 +401,24 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 "#,
                 user_id
             )
             .fetch_one(self.db_conn.get_pool())
-        )?;
-        Ok(run)
+        );
+
+        match result {
+            Ok(run) => Ok(run),
+            Err(sqlx::Error::Database(db_err))
+                if db_err.constraint() == Some("generation_run_one_active_per_user") =>
+            {
+                anyhow::bail!("A generation is already in progress")
+            }
+            Err(e) => Err(e.into()),
+        }
     }
 
     #[instrument(err, skip(self))]
@@ -427,7 +437,8 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 "#,
                 id
@@ -443,8 +454,9 @@ impl GenerationRunRepository {
         id: Uuid,
         image_url: &str,
         thumb_url: &str,
-        input_data: &str,
+        input_data: &[ActivityEntry],
     ) -> Result<GenerationRun> {
+        let input_data = sqlx::types::Json(input_data);
         let run = crate::named_query!(
             "generation_run_set_success",
             sqlx::query_as!(
@@ -462,13 +474,14 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 "#,
                 id,
                 image_url,
                 thumb_url,
-                input_data
+                input_data as _
             )
             .fetch_one(self.db_conn.get_pool())
         )?;
@@ -493,7 +506,8 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 "#,
                 id,
@@ -516,7 +530,8 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 FROM generation_run
                 WHERE user_id = $1
@@ -542,7 +557,8 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 FROM generation_run
                 ORDER BY created_at DESC
@@ -567,7 +583,8 @@ impl GenerationRunRepository {
                     status as "status: GenerationStatus",
                     started_at  as "started_at: DateTime<Utc>",
                     completed_at as "completed_at: DateTime<Utc>",
-                    input_data, image_url, thumb_url, error_message, retry_count,
+                    input_data as "input_data: crate::entity::avatar::ActivityData",
+                    image_url, thumb_url, error_message, retry_count,
                     created_at as "created_at: DateTime<Utc>"
                 FROM generation_run
                 WHERE user_id = $1
@@ -751,6 +768,63 @@ impl CategoryHintRepository {
             .fetch_one(self.db_conn.get_pool())
         )?;
         Ok(ch)
+    }
+
+    /// True if this hint is already assigned to a category other than
+    /// `category_id` for this user — attaching it here too would make two
+    /// categories resolve to the same avatar-generation label.
+    #[instrument(err, skip(self))]
+    pub async fn is_hint_assigned_elsewhere(
+        &self,
+        user_id: &str,
+        hint_id: Uuid,
+        category_id: Uuid,
+    ) -> Result<bool> {
+        let row = crate::named_query!(
+            "category_hint_assigned_elsewhere",
+            sqlx::query!(
+                r#"
+                SELECT EXISTS (
+                    SELECT 1 FROM category_hint
+                    WHERE user_id = $1 AND hint_id = $2 AND category_id != $3
+                ) AS "exists!"
+                "#,
+                user_id,
+                hint_id,
+                category_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
+        Ok(row.exists)
+    }
+
+    /// True if this hint's label matches the plain name of another of this
+    /// user's categories — same collision as above, via a different route.
+    #[instrument(err, skip(self))]
+    pub async fn hint_label_matches_other_category_name(
+        &self,
+        user_id: &str,
+        hint_id: Uuid,
+        category_id: Uuid,
+    ) -> Result<bool> {
+        let row = crate::named_query!(
+            "category_hint_label_matches_category_name",
+            sqlx::query!(
+                r#"
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM category c
+                    JOIN hint h ON h.label = c.name
+                    WHERE c.created_by = $1 AND h.id = $2 AND c.id != $3
+                ) AS "exists!"
+                "#,
+                user_id,
+                hint_id,
+                category_id
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
+        Ok(row.exists)
     }
 
     #[instrument(err, skip(self))]

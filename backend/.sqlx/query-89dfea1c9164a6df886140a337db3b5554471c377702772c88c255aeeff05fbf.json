@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT EXISTS (\n                    SELECT 1\n                    FROM category c\n                    JOIN hint h ON h.label = c.name\n                    WHERE c.created_by = $1 AND h.id = $2 AND c.id != $3\n                ) AS \"exists!\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "89dfea1c9164a6df886140a337db3b5554471c377702772c88c255aeeff05fbf"
+}

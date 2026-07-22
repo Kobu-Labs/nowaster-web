@@ -14,10 +14,10 @@ import Image from "next/image";
 import type { FC } from "react";
 
 type Props = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   imageUrl: string;
   latestRun?: GenerationRun | null;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
   username?: string;
 };
 
@@ -28,25 +28,9 @@ export const AvatarDialog: FC<Props> = ({
   latestRun,
   username,
 }) => {
-  // Wire format produced by the backend's `aggregate_input_data`: entries
-  // separated by ACTIVITY_ENTRY_SEP, each as `label` + ACTIVITY_FIELD_SEP +
-  // `hours`. ASCII separator control characters are used instead of ',' / ':'
-  // because category names and hint labels are free text.
-  const ACTIVITY_ENTRY_SEP = "\u{1E}";
-  const ACTIVITY_FIELD_SEP = "\u{1F}";
-
-  const hints =
-    latestRun?.inputData
-      ?.split(ACTIVITY_ENTRY_SEP)
-      .filter(Boolean)
-      .map((entry) => {
-        const sepIdx = entry.lastIndexOf(ACTIVITY_FIELD_SEP);
-        return {
-          label: entry.slice(0, sepIdx).trim(),
-          hours: Number(entry.slice(sepIdx + 1).trim()),
-        };
-      })
-      .sort((a, b) => b.hours - a.hours) ?? [];
+  const hints = (latestRun?.inputData ?? []).toSorted(
+    (a, b) => b.hours - a.hours,
+  );
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
@@ -70,13 +54,14 @@ export const AvatarDialog: FC<Props> = ({
             />
           </div>
 
-          {latestRun && (
+          {latestRun?.status === "success" && (
             <>
               <Separator />
 
               <div className="w-full space-y-2">
                 <p className="text-sm font-medium text-center">
-                  Generated{" "}
+                  Generated
+                  {" "}
                   {format(latestRun.completedAt ?? latestRun.createdAt, "PPP")}
                 </p>
 
@@ -87,15 +72,16 @@ export const AvatarDialog: FC<Props> = ({
                     </p>
 
                     <div className="flex flex-wrap justify-center gap-1">
-                      {hints.map(({ label, hours }) => (
+                      {hints.map(({ label, hours }, i) => (
                         <Badge
                           className="gap-1"
-                          key={label}
+                          key={`${label}-${i}`}
                           variant="secondary"
                         >
                           {label}
                           <span className="text-muted-foreground">
-                            {hours}h
+                            {hours}
+                            h
                           </span>
                         </Badge>
                       ))}

@@ -52,6 +52,14 @@ pub struct UserAvatar {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ActivityEntry {
+    pub label: String,
+    pub hours: f64,
+}
+
+pub type ActivityData = sqlx::types::Json<Vec<ActivityEntry>>;
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct GenerationRun {
     pub id: Uuid,
@@ -59,7 +67,7 @@ pub struct GenerationRun {
     pub status: GenerationStatus,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
-    pub input_data: Option<String>,
+    pub input_data: Option<ActivityData>,
     pub image_url: Option<String>,
     pub thumb_url: Option<String>,
     pub error_message: Option<String>,

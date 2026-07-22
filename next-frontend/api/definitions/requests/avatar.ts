@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ActivityEntrySchema } from "@/api/definitions/models/avatar";
+
 const setPreset = z.object({
   presetId: z.string().uuid(),
 });
@@ -61,7 +63,7 @@ const adminGenerateFromUser = z.object({
 
 const adminGenerateManual = z.object({
   type: z.literal("manual"),
-  data: z.string().min(1),
+  data: z.array(ActivityEntrySchema).min(1),
   assignToUserId: z.string(),
 });
 

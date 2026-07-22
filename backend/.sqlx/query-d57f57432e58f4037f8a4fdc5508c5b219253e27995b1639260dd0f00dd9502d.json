@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH category_hours AS (\n                SELECT\n                    s.category_id,\n                    c.name AS category_name,\n                    EXTRACT(EPOCH FROM SUM(s.end_time - s.start_time))::float8 / 3600.0 AS total_hours\n                FROM session s\n                JOIN category c ON c.id = s.category_id\n                WHERE s.user_id = $1\n                  AND s.end_time IS NOT NULL\n                  AND s.start_time >= $2\n                GROUP BY s.category_id, c.name\n            )\n            SELECT\n                ch.category_name,\n                ch.total_hours AS \"total_hours!: f64\",\n                h.label AS \"hint_label?\"\n            FROM category_hours ch\n            LEFT JOIN category_hint c_hint\n                ON c_hint.category_id = ch.category_id AND c_hint.user_id = $1\n            LEFT JOIN hint h ON h.id = c_hint.hint_id\n            ORDER BY ch.category_name, h.label\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "category_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "total_hours!: f64",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 2,
+        "name": "hint_label?",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "d57f57432e58f4037f8a4fdc5508c5b219253e27995b1639260dd0f00dd9502d"
+}

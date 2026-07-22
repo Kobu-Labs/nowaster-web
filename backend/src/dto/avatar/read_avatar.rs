@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::entity::avatar::{
-    AvatarPreset, AvatarTier, GenerationRun, GenerationStatus, Hint, UserAvatar,
+    ActivityEntry, AvatarPreset, AvatarTier, GenerationRun, GenerationStatus, Hint, UserAvatar,
     UserAvatarHistory,
 };
 
@@ -11,6 +11,12 @@ use crate::entity::avatar::{
 pub struct ActivityEntryDto {
     pub label: String,
     pub hours: f64,
+}
+
+impl From<ActivityEntry> for ActivityEntryDto {
+    fn from(e: ActivityEntry) -> Self {
+        Self { label: e.label, hours: e.hours }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -93,7 +99,7 @@ pub struct ReadGenerationRunDto {
     #[serde(rename = "completedAt")]
     pub completed_at: Option<DateTime<Utc>>,
     #[serde(rename = "inputData")]
-    pub input_data: Option<String>,
+    pub input_data: Option<Vec<ActivityEntryDto>>,
     #[serde(rename = "imageUrl")]
     pub image_url: Option<String>,
     #[serde(rename = "thumbUrl")]
@@ -114,7 +120,9 @@ impl From<GenerationRun> for ReadGenerationRunDto {
             status: e.status,
             started_at: e.started_at,
             completed_at: e.completed_at,
-            input_data: e.input_data,
+            input_data: e
+                .input_data
+                .map(|json| json.0.into_iter().map(ActivityEntryDto::from).collect()),
             image_url: e.image_url,
             thumb_url: e.thumb_url,
             error_message: e.error_message,

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT\n                    id, user_id,\n                    status as \"status: GenerationStatus\",\n                    started_at  as \"started_at: DateTime<Utc>\",\n                    completed_at as \"completed_at: DateTime<Utc>\",\n                    input_data, image_url, thumb_url, error_message, retry_count,\n                    created_at as \"created_at: DateTime<Utc>\"\n                FROM generation_run\n                WHERE user_id = $1\n                ORDER BY created_at DESC\n                ",
+  "query": "\n                SELECT\n                    id, user_id,\n                    status as \"status: GenerationStatus\",\n                    started_at  as \"started_at: DateTime<Utc>\",\n                    completed_at as \"completed_at: DateTime<Utc>\",\n                    input_data as \"input_data: crate::entity::avatar::ActivityData\",\n                    image_url, thumb_url, error_message, retry_count,\n                    created_at as \"created_at: DateTime<Utc>\"\n                FROM generation_run\n                ORDER BY created_at DESC\n                LIMIT $1\n                ",
   "describe": {
     "columns": [
       {
@@ -42,8 +42,8 @@
       },
       {
         "ordinal": 5,
-        "name": "input_data",
-        "type_info": "Text"
+        "name": "input_data: crate::entity::avatar::ActivityData",
+        "type_info": "Jsonb"
       },
       {
         "ordinal": 6,
@@ -73,7 +73,7 @@
     ],
     "parameters": {
       "Left": [
-        "Text"
+        "Int8"
       ]
     },
     "nullable": [
@@ -90,5 +90,5 @@
       false
     ]
   },
-  "hash": "c003b117cbbc415a82c6f465f25ac028ce2391e887b5880c67e98651829b8112"
+  "hash": "681d92a6a06116d9d1de5c529c8db5393ea57307178cb46b6415c8ede7b1e9a0"
 }
