@@ -2,6 +2,7 @@
 
 import type { GenerationRun } from "@/api/definitions/models/avatar";
 import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -10,13 +11,16 @@ import {
 } from "@/components/shadcn/dialog";
 import { Separator } from "@/components/shadcn/separator";
 import { format } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import type { FC } from "react";
+import type { FC, KeyboardEvent } from "react";
 
 type Props = {
   imageUrl: string;
   latestRun?: GenerationRun | null;
+  onNext?: () => void;
   onOpenChange: (open: boolean) => void;
+  onPrevious?: () => void;
   open: boolean;
   username?: string;
 };
@@ -26,15 +30,25 @@ export const AvatarDialog: FC<Props> = ({
   onOpenChange,
   imageUrl,
   latestRun,
+  onNext,
+  onPrevious,
   username,
 }) => {
   const hints = (latestRun?.inputData ?? []).toSorted(
     (a, b) => b.hours - a.hours,
   );
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowLeft" && onPrevious) {
+      onPrevious();
+    } else if (e.key === "ArrowRight" && onNext) {
+      onNext();
+    }
+  };
+
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-w-[90vw] w-full">
+      <DialogContent className="max-w-[90vw] w-full" onKeyDown={handleKeyDown}>
         <DialogHeader>
           <DialogTitle>
             {username ? `${username}'s Avatar` : "Avatar"}
@@ -52,6 +66,30 @@ export const AvatarDialog: FC<Props> = ({
               src={imageUrl}
               unoptimized
             />
+
+            {onPrevious && (
+              <Button
+                aria-label="Previous avatar"
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-white hover:bg-black/80 hover:text-white"
+                onClick={onPrevious}
+                size="icon"
+                variant="ghost"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            )}
+
+            {onNext && (
+              <Button
+                aria-label="Next avatar"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-white hover:bg-black/80 hover:text-white"
+                onClick={onNext}
+                size="icon"
+                variant="ghost"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            )}
           </div>
 
           {latestRun?.status === "success" && (
