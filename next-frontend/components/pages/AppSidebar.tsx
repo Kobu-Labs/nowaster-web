@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Building2,
   ChartPie,
   BookTemplate as FileTemplate,
   Folders,
@@ -95,6 +96,11 @@ const navItems = [
     icon: Users,
     title: "Friends",
     url: "/home/friends",
+  },
+  {
+    icon: Building2,
+    title: "Communities",
+    url: "/home/communities",
   },
   {
     icon: History,

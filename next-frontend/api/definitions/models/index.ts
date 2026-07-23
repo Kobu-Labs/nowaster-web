@@ -1,4 +1,5 @@
 export * from "@/api/definitions/models/category";
+export * from "@/api/definitions/models/community";
 export * from "@/api/definitions/models/project";
 export * from "@/api/definitions/models/project";
 export * from "@/api/definitions/models/recorded-session";

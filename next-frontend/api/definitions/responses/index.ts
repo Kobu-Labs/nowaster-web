@@ -1,5 +1,6 @@
 export * from "@/api/definitions/responses/base";
 export * from "@/api/definitions/responses/category";
+export * from "@/api/definitions/responses/community";
 export * from "@/api/definitions/responses/project";
 export * from "@/api/definitions/responses/project";
 // TODO: uncomment where this file has something

@@ -2,6 +2,7 @@ pub mod admin;
 pub mod auth;
 pub mod category;
 pub mod clerk;
+pub mod community;
 pub mod feed;
 pub mod friend;
 pub mod notification;

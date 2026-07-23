@@ -1,5 +1,6 @@
 import {
   CategoryApi,
+  CommunityApi,
   ProjectsApi,
   ScheduledSessionApi,
   StatisticsApi,
@@ -57,6 +58,17 @@ const categoryKeys = createQueryKeys("categories", {
   }),
 });
 
+const communityKeys = createQueryKeys("communities", {
+  mine: {
+    queryFn: async () => await CommunityApi.listMine(),
+    queryKey: ["mine"],
+  },
+  byId: (id: string) => ({
+    queryFn: async () => await CommunityApi.getById({ id }),
+    queryKey: [id],
+  }),
+});
+
 const projectKeys = createQueryKeys("projects", {
   all: {
     queryFn: async () => await ProjectsApi.getProjects(),
@@ -101,6 +113,7 @@ export const queryKeys = mergeQueryKeys(
   tagKeys,
   statisticsKeys,
   categoryKeys,
+  communityKeys,
   projectKeys,
   taskKeys,
 );

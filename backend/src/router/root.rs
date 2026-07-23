@@ -11,6 +11,7 @@ use crate::{
     config::database::Database,
     repository::{
         category::{CategoryRepository, CategoryRepositoryTrait},
+        community::CommunityRepository,
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
@@ -26,6 +27,7 @@ use crate::{
     service::{
         auth_service::AuthService,
         category_service::CategoryService,
+        community_service::CommunityService,
         feed::{
             events::FeedEventService, reactions::FeedReactionService,
             subscriptions::FeedSubscriptionService, visibility::FeedVisibilityService,
@@ -46,8 +48,9 @@ use crate::{
 
 use super::{
     admin::routes::admin_router, auth::auth_router, category::root::category_router,
-    feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
-    project::root::project_router, release::routes::release_router, session::root::session_router,
+    community::root::community_router, feed::root::feed_router, friend::root::friend_router,
+    notification::root::notification_router, project::root::project_router,
+    release::routes::release_router, session::root::session_router,
     statistics::root::statistics_router, tag::root::tag_router, task::root::task_router,
 };
 
@@ -70,6 +73,7 @@ pub struct AppState {
     pub stopwatch_service: StopwatchSessionService,
     pub tag_service: TagService,
     pub category_service: CategoryService,
+    pub community_service: CommunityService,
     pub user_service: UserService,
     pub statistics_service: StatisticsService,
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
@@ -86,6 +90,7 @@ pub struct AppState {
 
 pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
+    let community_repo = CommunityRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
     let user_repo = UserRepository::new(&db);
@@ -116,6 +121,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let auth_service = AuthService::new(&db, config.server.app_env.clone());
     let category_service = CategoryService::new(category_repo.clone());
+    let community_service = CommunityService::new(community_repo);
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);
 
@@ -185,6 +191,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         session_service,
         tag_service,
         category_service,
+        community_service,
         user_service,
         statistics_service,
         stopwatch_service,
@@ -215,6 +222,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         .nest("/session", session_router().with_state(state.clone()))
         .nest("/tag", tag_router().with_state(state.clone()))
         .nest("/category", category_router().with_state(state.clone()))
+        .nest("/community", community_router().with_state(state.clone()))
         .nest("/statistics", statistics_router().with_state(state.clone()))
         .nest("/friends", friend_router().with_state(state.clone()))
         .nest("/feed", feed_router().with_state(state.clone()))
