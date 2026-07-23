@@ -55,6 +55,8 @@ const createMapping = z.object({
 const deleteMapping = z.object({ communityId: z.uuid(), id: z.uuid() });
 const listMyMappings = z.object({ communityId: z.uuid() });
 
+const getDashboard = z.object({ communityId: z.uuid() });
+
 export const CommunityRequestSchema = {
   create,
   update,
@@ -73,6 +75,7 @@ export const CommunityRequestSchema = {
   createMapping,
   deleteMapping,
   listMyMappings,
+  getDashboard,
 };
 export type CommunityRequest = {
   [Property in keyof typeof CommunityRequestSchema]: z.infer<

@@ -256,10 +256,7 @@ impl CommunityService {
     }
 
     #[instrument(err, skip(self), fields(code = %code))]
-    pub async fn preview_by_invite_code(
-        &self,
-        code: &str,
-    ) -> Result<CommunityInvitePreviewDto> {
+    pub async fn preview_by_invite_code(&self, code: &str) -> Result<CommunityInvitePreviewDto> {
         let community = self
             .repo
             .find_community_by_invite_code(code)
@@ -299,9 +296,7 @@ impl CommunityService {
             .ok_or_else(|| anyhow::anyhow!("Community not found"))?;
 
         if community.owner_id != actor.user_id {
-            return Err(anyhow::anyhow!(
-                "Only the owner can manage the invite code"
-            ));
+            return Err(anyhow::anyhow!("Only the owner can manage the invite code"));
         }
 
         Ok(community)

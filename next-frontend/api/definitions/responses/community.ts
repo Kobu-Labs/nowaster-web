@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   CategoryMappingSchema,
+  CommunityDashboardSchema,
   CommunityInvitePreviewSchema,
   CommunityMemberSchema,
   CommunityWithIdSchema,
@@ -27,6 +28,7 @@ export const CommunityResponseSchema = {
   createMapping: CategoryMappingSchema,
   listMyMappings: z.array(CategoryMappingSchema),
   deleteMapping: z.null(),
+  getDashboard: CommunityDashboardSchema,
 };
 export type CommunityResponse = {
   [Property in keyof typeof CommunityResponseSchema]: z.infer<

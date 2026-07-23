@@ -88,6 +88,10 @@ const communityKeys = createQueryKeys("communities", {
     queryFn: async () => await CommunityApi.listMyMappings({ communityId }),
     queryKey: [communityId, "my-mappings"],
   }),
+  dashboard: (communityId: string) => ({
+    queryFn: async () => await CommunityApi.getDashboard({ communityId }),
+    queryKey: [communityId, "dashboard"],
+  }),
 });
 
 const projectKeys = createQueryKeys("projects", {

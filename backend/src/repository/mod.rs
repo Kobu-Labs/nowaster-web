@@ -2,6 +2,7 @@ pub mod auth;
 pub mod category;
 pub mod community;
 pub mod community_category;
+pub mod community_dashboard;
 pub mod db_backup;
 pub mod feed;
 pub mod fixed_session;

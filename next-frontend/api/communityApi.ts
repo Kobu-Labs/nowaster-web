@@ -127,3 +127,8 @@ export const deleteMapping = async (params: CommunityRequest["deleteMapping"]) =
   );
   return await parseResponseUnsafe(data, CommunityResponseSchema.deleteMapping);
 };
+
+export const getDashboard = async (params: CommunityRequest["getDashboard"]) => {
+  const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/dashboard`);
+  return await parseResponseUnsafe(data, CommunityResponseSchema.getDashboard);
+};

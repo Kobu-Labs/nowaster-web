@@ -1,6 +1,7 @@
 pub mod auth_service;
 pub mod category_service;
 pub mod community_category_service;
+pub mod community_dashboard_service;
 pub mod community_service;
 pub mod feed;
 pub mod friend_service;
