@@ -10,9 +10,14 @@ import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import { useAuth } from "@/components/hooks/useAuth";
 import { useCommunityById } from "@/components/hooks/community/useCommunityById";
+import { useCommunityMembers } from "@/components/hooks/community/useCommunityMembers";
 import { ArchiveCommunityButton } from "@/components/visualizers/communities/ArchiveCommunityButton";
 import { EditCommunitySettingsForm } from "@/components/visualizers/communities/EditCommunitySettingsForm";
+import { InviteCodeCard } from "@/components/visualizers/communities/InviteCodeCard";
+import { JoinCommunityButton } from "@/components/visualizers/communities/JoinCommunityButton";
+import { MemberList } from "@/components/visualizers/communities/MemberList";
 import { getInitials } from "@/lib/utils";
 import { Edit, Globe, Lock } from "lucide-react";
 import type { FC } from "react";
@@ -24,6 +29,8 @@ type CommunityDetailPageProps = {
 
 export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
   const query = useCommunityById(id);
+  const membersQuery = useCommunityMembers(id);
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
 
   if (query.isPending) {
@@ -111,6 +118,12 @@ export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
             Edit
           </Button>
         )}
+        {!community.is_owner
+          && community.visibility_type === "public"
+          && membersQuery.isSuccess
+          && !membersQuery.data.some((member) => member.user.id === user?.id) && (
+          <JoinCommunityButton communityId={community.id} />
+        )}
       </div>
 
       {community.is_owner && editing && (
@@ -123,6 +136,15 @@ export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
           </CardContent>
         </Card>
       )}
+
+      {community.is_owner && community.visibility_type === "invite_only" && (
+        <InviteCodeCard communityId={community.id} />
+      )}
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">Members</h2>
+        <MemberList communityId={community.id} />
+      </div>
 
       {community.is_owner && (
         <>

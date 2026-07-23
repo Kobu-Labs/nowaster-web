@@ -1,15 +1,55 @@
 use anyhow::Result;
+use rand::Rng;
 use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
-    dto::community::{
-        create_community::CreateCommunityDto, read_community::ReadCommunityDto,
-        update_community::UpdateCommunityDto,
+    dto::{
+        community::{
+            create_community::CreateCommunityDto,
+            invite_code::{CommunityInvitePreviewDto, ReadInviteCodeDto},
+            join_community::JoinCommunityDto,
+            read_community::ReadCommunityDto,
+            read_member::ReadCommunityMemberDto,
+            update_community::UpdateCommunityDto,
+        },
+        user::read_user::ReadUserDto,
     },
-    repository::community::CommunityRepository,
+    entity::community::{
+        Community, CommunityDataVisibility, CommunityInviteCode, CommunityMemberRole,
+        CommunityVisibilityType,
+    },
+    repository::community::{CommunityMemberWithUserRow, CommunityRepository},
     router::clerk::Actor,
 };
+
+const INVITE_CODE_LENGTH: usize = 10;
+const INVITE_CODE_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const MAX_INVITE_CODE_ATTEMPTS: u8 = 5;
+
+fn generate_invite_code() -> String {
+    let mut rng = rand::thread_rng();
+    (0..INVITE_CODE_LENGTH)
+        .map(|_| {
+            let idx = rng.gen_range(0..INVITE_CODE_ALPHABET.len());
+            INVITE_CODE_ALPHABET[idx] as char
+        })
+        .collect()
+}
+
+fn member_row_to_dto(row: CommunityMemberWithUserRow) -> ReadCommunityMemberDto {
+    ReadCommunityMemberDto {
+        id: row.id,
+        user: ReadUserDto {
+            id: row.user_id,
+            username: row.username,
+            avatar_url: row.avatar_url,
+            visibility_flags: row.visibility_flags,
+        },
+        role: row.role,
+        joined_at: row.joined_at,
+    }
+}
 
 #[derive(Clone)]
 pub struct CommunityService {
@@ -27,22 +67,16 @@ impl CommunityService {
         dto: CreateCommunityDto,
         actor: &Actor,
     ) -> Result<ReadCommunityDto> {
-        let community = self.repo.create(dto, &actor.user_id).await?;
+        let community = self
+            .repo
+            .create_with_owner_membership(dto, &actor.user_id)
+            .await?;
         Ok(ReadCommunityDto::from_entity(community, actor))
     }
 
     #[instrument(err, skip(self), fields(community_id = %id, actor = %actor))]
     pub async fn get_community(&self, id: Uuid, actor: &Actor) -> Result<ReadCommunityDto> {
-        let community = self
-            .repo
-            .find_by_id(id)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Community not found"))?;
-
-        if community.is_archived() && community.owner_id != actor.user_id {
-            return Err(anyhow::anyhow!("Community not found"));
-        }
-
+        let community = self.find_active_or_owned(id, actor).await?;
         Ok(ReadCommunityDto::from_entity(community, actor))
     }
 
@@ -92,10 +126,228 @@ impl CommunityService {
 
     #[instrument(err, skip(self), fields(actor = %actor))]
     pub async fn list_my_communities(&self, actor: &Actor) -> Result<Vec<ReadCommunityDto>> {
-        let communities = self.repo.list_owned_by(&actor.user_id).await?;
+        let communities = self.repo.list_for_member(&actor.user_id).await?;
         Ok(communities
             .into_iter()
             .map(|c| ReadCommunityDto::from_entity(c, actor))
             .collect())
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %dto.community_id, actor = %actor))]
+    pub async fn join_community(
+        &self,
+        dto: JoinCommunityDto,
+        actor: &Actor,
+    ) -> Result<ReadCommunityMemberDto> {
+        let community = self
+            .repo
+            .find_by_id(dto.community_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Community not found"))?;
+
+        if community.is_archived() {
+            return Err(anyhow::anyhow!("This community is no longer active"));
+        }
+
+        if self
+            .repo
+            .find_membership(dto.community_id, &actor.user_id)
+            .await?
+            .is_some()
+        {
+            return Err(anyhow::anyhow!(
+                "You are already a member of this community"
+            ));
+        }
+
+        if community.visibility_type == CommunityVisibilityType::InviteOnly {
+            let stored_code = self.repo.get_invite_code(community.id).await?;
+            let matches = match (&dto.invite_code, &stored_code) {
+                (Some(submitted), Some(stored)) => submitted.eq_ignore_ascii_case(&stored.code),
+                _ => false,
+            };
+
+            if !matches {
+                return Err(anyhow::anyhow!("Invalid or expired invite code"));
+            }
+        }
+
+        self.repo
+            .add_member(community.id, &actor.user_id, CommunityMemberRole::Member)
+            .await?;
+
+        let row = self
+            .repo
+            .find_member_with_user(community.id, &actor.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Failed to load new membership"))?;
+
+        Ok(member_row_to_dto(row))
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %community_id, actor = %actor))]
+    pub async fn leave_community(&self, community_id: Uuid, actor: &Actor) -> Result<()> {
+        let membership = self
+            .repo
+            .find_membership(community_id, &actor.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("You are not a member of this community"))?;
+
+        if membership.role == CommunityMemberRole::Owner {
+            return Err(anyhow::anyhow!(
+                "The owner cannot leave a community. Archive it or transfer ownership first."
+            ));
+        }
+
+        self.repo
+            .remove_member(community_id, &actor.user_id)
+            .await?;
+        Ok(())
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %community_id, actor = %actor))]
+    pub async fn list_members(
+        &self,
+        community_id: Uuid,
+        actor: &Actor,
+    ) -> Result<Vec<ReadCommunityMemberDto>> {
+        let community = self.find_active_or_owned(community_id, actor).await?;
+        self.assert_can_view_community_data(&community, actor)
+            .await?;
+
+        let rows = self.repo.list_members(community_id).await?;
+        Ok(rows.into_iter().map(member_row_to_dto).collect())
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %community_id, actor = %actor))]
+    pub async fn get_invite_code(
+        &self,
+        community_id: Uuid,
+        actor: &Actor,
+    ) -> Result<ReadInviteCodeDto> {
+        let community = self.assert_owner(community_id, actor).await?;
+
+        if let Some(existing) = self.repo.get_invite_code(community.id).await? {
+            return Ok(ReadInviteCodeDto {
+                code: existing.code,
+                updated_at: existing.updated_at,
+            });
+        }
+
+        let created = self.generate_and_store_code(community.id, actor).await?;
+        Ok(ReadInviteCodeDto {
+            code: created.code,
+            updated_at: created.updated_at,
+        })
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %community_id, actor = %actor))]
+    pub async fn regenerate_invite_code(
+        &self,
+        community_id: Uuid,
+        actor: &Actor,
+    ) -> Result<ReadInviteCodeDto> {
+        let community = self.assert_owner(community_id, actor).await?;
+        let created = self.generate_and_store_code(community.id, actor).await?;
+        Ok(ReadInviteCodeDto {
+            code: created.code,
+            updated_at: created.updated_at,
+        })
+    }
+
+    #[instrument(err, skip(self), fields(code = %code))]
+    pub async fn preview_by_invite_code(
+        &self,
+        code: &str,
+    ) -> Result<CommunityInvitePreviewDto> {
+        let community = self
+            .repo
+            .find_community_by_invite_code(code)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Invalid or expired invite code"))?;
+
+        let member_count = self.repo.count_members(community.id).await?;
+
+        Ok(CommunityInvitePreviewDto {
+            community_id: community.id,
+            name: community.name,
+            avatar_url: community.avatar_url,
+            member_count,
+            visibility_type: community.visibility_type,
+        })
+    }
+
+    async fn find_active_or_owned(&self, id: Uuid, actor: &Actor) -> Result<Community> {
+        let community = self
+            .repo
+            .find_by_id(id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Community not found"))?;
+
+        if community.is_archived() && community.owner_id != actor.user_id {
+            return Err(anyhow::anyhow!("Community not found"));
+        }
+
+        Ok(community)
+    }
+
+    async fn assert_owner(&self, community_id: Uuid, actor: &Actor) -> Result<Community> {
+        let community = self
+            .repo
+            .find_by_id(community_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Community not found"))?;
+
+        if community.owner_id != actor.user_id {
+            return Err(anyhow::anyhow!(
+                "Only the owner can manage the invite code"
+            ));
+        }
+
+        Ok(community)
+    }
+
+    async fn assert_can_view_community_data(
+        &self,
+        community: &Community,
+        actor: &Actor,
+    ) -> Result<()> {
+        if community.data_visibility == CommunityDataVisibility::Public {
+            return Ok(());
+        }
+
+        let is_member = self
+            .repo
+            .find_membership(community.id, &actor.user_id)
+            .await?
+            .is_some();
+
+        if !is_member {
+            return Err(anyhow::anyhow!(
+                "You must be a member to view this community's members"
+            ));
+        }
+
+        Ok(())
+    }
+
+    async fn generate_and_store_code(
+        &self,
+        community_id: Uuid,
+        actor: &Actor,
+    ) -> Result<CommunityInviteCode> {
+        for _ in 0..MAX_INVITE_CODE_ATTEMPTS {
+            let code = generate_invite_code();
+            if !self.repo.code_in_use(&code).await? {
+                return self
+                    .repo
+                    .upsert_invite_code(community_id, &code, &actor.user_id)
+                    .await;
+            }
+        }
+
+        Err(anyhow::anyhow!(
+            "Could not generate a unique invite code, try again"
+        ))
     }
 }

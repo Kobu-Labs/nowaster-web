@@ -24,7 +24,28 @@ const update = z.object({
 const archive = z.object({ id: z.uuid() });
 const getById = z.object({ id: z.uuid() });
 
-export const CommunityRequestSchema = { create, update, archive, getById };
+const join = z.object({
+  communityId: z.uuid(),
+  inviteCode: z.string().trim().optional(),
+});
+const leave = z.object({ communityId: z.uuid() });
+const listMembers = z.object({ communityId: z.uuid() });
+const getInviteCode = z.object({ communityId: z.uuid() });
+const regenerateInviteCode = z.object({ communityId: z.uuid() });
+const previewByCode = z.object({ code: z.string().trim().min(1) });
+
+export const CommunityRequestSchema = {
+  create,
+  update,
+  archive,
+  getById,
+  join,
+  leave,
+  listMembers,
+  getInviteCode,
+  regenerateInviteCode,
+  previewByCode,
+};
 export type CommunityRequest = {
   [Property in keyof typeof CommunityRequestSchema]: z.infer<
     (typeof CommunityRequestSchema)[Property]

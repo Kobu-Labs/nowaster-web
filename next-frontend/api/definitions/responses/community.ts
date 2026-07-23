@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { CommunityWithIdSchema } from "@/api/definitions/models/community";
+import {
+  CommunityInvitePreviewSchema,
+  CommunityMemberSchema,
+  CommunityWithIdSchema,
+  InviteCodeSchema,
+} from "@/api/definitions/models/community";
 
 export const CommunityResponseSchema = {
   create: CommunityWithIdSchema,
@@ -7,6 +12,12 @@ export const CommunityResponseSchema = {
   update: CommunityWithIdSchema,
   archive: z.null(),
   listMine: z.array(CommunityWithIdSchema),
+  join: CommunityMemberSchema,
+  leave: z.null(),
+  listMembers: z.array(CommunityMemberSchema),
+  getInviteCode: InviteCodeSchema,
+  regenerateInviteCode: InviteCodeSchema,
+  previewByCode: CommunityInvitePreviewSchema,
 };
 export type CommunityResponse = {
   [Property in keyof typeof CommunityResponseSchema]: z.infer<

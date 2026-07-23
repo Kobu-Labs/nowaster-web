@@ -11,10 +11,17 @@ use crate::{
         create_community::CreateCommunityDto, read_community::ReadCommunityDto,
         update_community::UpdateCommunityDto,
     },
-    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{
+        clerk::Actor, community::membership::membership_routes, request::ValidatedRequest,
+        response::ApiResponse, root::AppState,
+    },
 };
 
 pub fn community_router() -> Router<AppState> {
+    crud_routes().merge(membership_routes())
+}
+
+fn crud_routes() -> Router<AppState> {
     Router::new()
         .route(
             "/",
