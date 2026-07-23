@@ -1,9 +1,11 @@
+mod community;
 pub mod config;
 pub mod data;
 mod guest;
 mod npc;
 
 use std::sync::Arc;
+use uuid::Uuid;
 
 use crate::config::database::{Database, DatabaseTrait};
 
@@ -27,5 +29,12 @@ impl SandboxSeeder {
         npc_ids: &[String],
     ) -> Result<(), sqlx::Error> {
         guest::seed_guest_user(self.db.get_pool(), user_id, npc_ids).await
+    }
+
+    pub async fn seed_communities(
+        &self,
+        member_ids: &[String],
+    ) -> Result<Vec<Uuid>, sqlx::Error> {
+        community::seed_communities(self.db.get_pool(), member_ids).await
     }
 }

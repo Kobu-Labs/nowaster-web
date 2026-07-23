@@ -3,6 +3,7 @@ pub mod impersonation;
 pub mod release;
 pub mod routes;
 pub mod sandbox;
+pub mod seed;
 pub mod users;
 
 use axum::{

@@ -4,6 +4,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tracing::{info, warn};
+use uuid::Uuid;
 
 use crate::{
     config::{database::Database, env::AppEnvironment},
@@ -116,6 +117,35 @@ impl SandboxService {
         Ok(())
     }
 
+    /// Seeds a handful of demo communities on top of whatever users already
+    /// exist. Reused both by the full sandbox reset cycle below (so the
+    /// public sandbox demo showcases communities) and by an admin-triggered
+    /// endpoint for populating a local/dev database without touching
+    /// anything else. `extra_member_id`, when given, is folded in as a
+    /// member/owner so a real logged-in user can see the seeded data.
+    pub async fn seed_demo_communities(
+        &self,
+        extra_member_id: Option<&str>,
+    ) -> Result<Vec<Uuid>, sqlx::Error> {
+        let mut member_ids = self.lifecycle_repo.get_npc_ids().await?;
+
+        if member_ids.len() < 2 {
+            let needed = SandboxConfig::NPC_COUNT
+                .saturating_sub(member_ids.len())
+                .max(2);
+            let mut new_npc_ids = self.seeder.seed_npc_users(needed).await?;
+            member_ids.append(&mut new_npc_ids);
+        }
+
+        if let Some(id) = extra_member_id {
+            if !member_ids.iter().any(|m| m == id) {
+                member_ids.push(id.to_string());
+            }
+        }
+
+        self.seeder.seed_communities(&member_ids).await
+    }
+
     async fn cycle(&self, triggered_by: &str, triggered_type: &str) -> Result<(), sqlx::Error> {
         let current_id = self.lifecycle_repo.get_active().await?.map(|l| l.id);
         self.lifecycle_repo
@@ -139,6 +169,15 @@ impl SandboxService {
                 if let Err(e) = self.seeder.seed_guest_user(guest_id, &npc_ids).await {
                     warn!("⚠️  Failed to seed guest {}: {}", guest_id, e);
                 }
+            }
+
+            let community_member_ids: Vec<String> = npc_ids
+                .iter()
+                .cloned()
+                .chain(guests.iter().map(|(guest_id, _)| guest_id.clone()))
+                .collect();
+            if let Err(e) = self.seeder.seed_communities(&community_member_ids).await {
+                warn!("⚠️  Failed to seed demo communities: {}", e);
             }
 
             self.lifecycle_repo.activate(new_lifecycle.id).await?;
