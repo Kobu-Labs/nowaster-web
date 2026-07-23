@@ -12,6 +12,7 @@ use crate::{
     repository::{
         category::{CategoryRepository, CategoryRepositoryTrait},
         community::CommunityRepository,
+        community_category::CommunityCategoryRepository,
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
@@ -27,6 +28,7 @@ use crate::{
     service::{
         auth_service::AuthService,
         category_service::CategoryService,
+        community_category_service::CommunityCategoryService,
         community_service::CommunityService,
         feed::{
             events::FeedEventService, reactions::FeedReactionService,
@@ -74,6 +76,7 @@ pub struct AppState {
     pub tag_service: TagService,
     pub category_service: CategoryService,
     pub community_service: CommunityService,
+    pub community_category_service: CommunityCategoryService,
     pub user_service: UserService,
     pub statistics_service: StatisticsService,
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
@@ -91,6 +94,7 @@ pub struct AppState {
 pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMakeService<Router> {
     let category_repo = CategoryRepository::new(&db);
     let community_repo = CommunityRepository::new(&db);
+    let community_category_repo = CommunityCategoryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
     let user_repo = UserRepository::new(&db);
@@ -121,7 +125,12 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let auth_service = AuthService::new(&db, config.server.app_env.clone());
     let category_service = CategoryService::new(category_repo.clone());
-    let community_service = CommunityService::new(community_repo);
+    let community_service = CommunityService::new(community_repo.clone());
+    let community_category_service = CommunityCategoryService::new(
+        community_category_repo,
+        community_repo,
+        category_service.clone(),
+    );
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);
 
@@ -192,6 +201,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         tag_service,
         category_service,
         community_service,
+        community_category_service,
         user_service,
         statistics_service,
         stopwatch_service,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { HasID } from "@/validation/utils";
+import { CategoryWithIdSchema } from "@/api/definitions/models/category";
 import { UserSchema } from "@/api/definitions/models/user";
 
 export const CommunityVisibilityTypeSchema = z.enum(["public", "invite_only"]);
@@ -41,6 +42,22 @@ export const CommunityInvitePreviewSchema = z.object({
   visibility_type: CommunityVisibilityTypeSchema,
 });
 
+export const TrackedCategorySchema = z.object({
+  id: z.uuid(),
+  community_id: z.uuid(),
+  name: z.string(),
+  color: z.string(),
+  mapped_member_count: z.number(),
+});
+
+export const CategoryMappingSchema = z.object({
+  id: z.uuid(),
+  tracked_category: TrackedCategorySchema,
+  personal_category: CategoryWithIdSchema,
+  created_at: z.coerce.date<Date>(),
+});
+
+export type CategoryMapping = z.infer<typeof CategoryMappingSchema>;
 export type Community = z.infer<typeof CommunitySchema>;
 export type CommunityDataVisibility = z.infer<typeof CommunityDataVisibilitySchema>;
 export type CommunityInvitePreview = z.infer<typeof CommunityInvitePreviewSchema>;
@@ -49,3 +66,4 @@ export type CommunityMemberRole = z.infer<typeof CommunityMemberRoleSchema>;
 export type CommunityVisibilityType = z.infer<typeof CommunityVisibilityTypeSchema>;
 export type CommunityWithId = z.infer<typeof CommunityWithIdSchema>;
 export type InviteCode = z.infer<typeof InviteCodeSchema>;
+export type TrackedCategory = z.infer<typeof TrackedCategorySchema>;

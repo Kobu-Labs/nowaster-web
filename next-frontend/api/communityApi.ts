@@ -64,3 +64,66 @@ export const previewByInviteCode = async (params: CommunityRequest["previewByCod
   const { data } = await baseApi.get(`${BASE_URL}/invite/${params.code}`);
   return await parseResponseUnsafe(data, CommunityResponseSchema.previewByCode);
 };
+
+export const listTrackedCategories = async (
+  params: CommunityRequest["listTrackedCategories"],
+) => {
+  const { data } = await baseApi.get(
+    `${BASE_URL}/${params.communityId}/tracked-categories`,
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.listTrackedCategories);
+};
+
+export const createTrackedCategory = async (
+  params: CommunityRequest["createTrackedCategory"],
+) => {
+  const { data } = await baseApi.post(
+    `${BASE_URL}/${params.communityId}/tracked-categories`,
+    { name: params.name, color: params.color },
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.createTrackedCategory);
+};
+
+export const updateTrackedCategory = async (
+  params: CommunityRequest["updateTrackedCategory"],
+) => {
+  const { data } = await baseApi.patch(
+    `${BASE_URL}/${params.communityId}/tracked-categories/${params.id}`,
+    { name: params.name, color: params.color },
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.updateTrackedCategory);
+};
+
+export const deleteTrackedCategory = async (
+  params: CommunityRequest["deleteTrackedCategory"],
+) => {
+  const { data } = await baseApi.delete(
+    `${BASE_URL}/${params.communityId}/tracked-categories/${params.id}`,
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.deleteTrackedCategory);
+};
+
+export const createMapping = async (params: CommunityRequest["createMapping"]) => {
+  const { data } = await baseApi.post(
+    `${BASE_URL}/${params.communityId}/category-mappings`,
+    {
+      tracked_category_id: params.trackedCategoryId,
+      personal_category_id: params.personalCategoryId,
+    },
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.createMapping);
+};
+
+export const listMyMappings = async (params: CommunityRequest["listMyMappings"]) => {
+  const { data } = await baseApi.get(
+    `${BASE_URL}/${params.communityId}/category-mappings/me`,
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.listMyMappings);
+};
+
+export const deleteMapping = async (params: CommunityRequest["deleteMapping"]) => {
+  const { data } = await baseApi.delete(
+    `${BASE_URL}/${params.communityId}/category-mappings/${params.id}`,
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.deleteMapping);
+};

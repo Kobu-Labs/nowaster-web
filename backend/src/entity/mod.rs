@@ -1,5 +1,6 @@
 pub mod category;
 pub mod community;
+pub mod community_category;
 pub mod db_backup;
 pub mod feed;
 pub mod notification;

@@ -12,13 +12,18 @@ use crate::{
         update_community::UpdateCommunityDto,
     },
     router::{
-        clerk::Actor, community::membership::membership_routes, request::ValidatedRequest,
-        response::ApiResponse, root::AppState,
+        clerk::Actor,
+        community::{category::category_mapping_routes, membership::membership_routes},
+        request::ValidatedRequest,
+        response::ApiResponse,
+        root::AppState,
     },
 };
 
 pub fn community_router() -> Router<AppState> {
-    crud_routes().merge(membership_routes())
+    crud_routes()
+        .merge(membership_routes())
+        .merge(category_mapping_routes())
 }
 
 fn crud_routes() -> Router<AppState> {

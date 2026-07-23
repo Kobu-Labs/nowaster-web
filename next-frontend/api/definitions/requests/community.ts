@@ -34,6 +34,27 @@ const getInviteCode = z.object({ communityId: z.uuid() });
 const regenerateInviteCode = z.object({ communityId: z.uuid() });
 const previewByCode = z.object({ code: z.string().trim().min(1) });
 
+const createTrackedCategory = z.object({
+  communityId: z.uuid(),
+  name: z.string().trim().min(1, "Name is required").max(60),
+  color: z.string().trim().min(1),
+});
+const updateTrackedCategory = z.object({
+  communityId: z.uuid(),
+  id: z.uuid(),
+  name: z.string().trim().min(1).max(60).optional(),
+  color: z.string().trim().min(1).optional(),
+});
+const deleteTrackedCategory = z.object({ communityId: z.uuid(), id: z.uuid() });
+const listTrackedCategories = z.object({ communityId: z.uuid() });
+const createMapping = z.object({
+  communityId: z.uuid(),
+  trackedCategoryId: z.uuid(),
+  personalCategoryId: z.uuid(),
+});
+const deleteMapping = z.object({ communityId: z.uuid(), id: z.uuid() });
+const listMyMappings = z.object({ communityId: z.uuid() });
+
 export const CommunityRequestSchema = {
   create,
   update,
@@ -45,6 +66,13 @@ export const CommunityRequestSchema = {
   getInviteCode,
   regenerateInviteCode,
   previewByCode,
+  createTrackedCategory,
+  updateTrackedCategory,
+  deleteTrackedCategory,
+  listTrackedCategories,
+  createMapping,
+  deleteMapping,
+  listMyMappings,
 };
 export type CommunityRequest = {
   [Property in keyof typeof CommunityRequestSchema]: z.infer<

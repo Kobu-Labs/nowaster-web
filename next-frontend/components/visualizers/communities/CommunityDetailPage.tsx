@@ -13,11 +13,16 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { useAuth } from "@/components/hooks/useAuth";
 import { useCommunityById } from "@/components/hooks/community/useCommunityById";
 import { useCommunityMembers } from "@/components/hooks/community/useCommunityMembers";
+import { useMyMappings } from "@/components/hooks/community/useMyMappings";
+import { useTrackedCategories } from "@/components/hooks/community/useTrackedCategories";
 import { ArchiveCommunityButton } from "@/components/visualizers/communities/ArchiveCommunityButton";
+import { CategoryMappingOnboarding } from "@/components/visualizers/communities/CategoryMappingOnboarding";
 import { EditCommunitySettingsForm } from "@/components/visualizers/communities/EditCommunitySettingsForm";
 import { InviteCodeCard } from "@/components/visualizers/communities/InviteCodeCard";
 import { JoinCommunityButton } from "@/components/visualizers/communities/JoinCommunityButton";
 import { MemberList } from "@/components/visualizers/communities/MemberList";
+import { MyMappingsList } from "@/components/visualizers/communities/MyMappingsList";
+import { TrackedCategoryManager } from "@/components/visualizers/communities/TrackedCategoryManager";
 import { getInitials } from "@/lib/utils";
 import { Edit, Globe, Lock } from "lucide-react";
 import type { FC } from "react";
@@ -30,8 +35,11 @@ type CommunityDetailPageProps = {
 export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
   const query = useCommunityById(id);
   const membersQuery = useCommunityMembers(id);
+  const trackedCategoriesQuery = useTrackedCategories(id);
+  const mappingsQuery = useMyMappings(id);
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [onboardingSkipped, setOnboardingSkipped] = useState(false);
 
   if (query.isPending) {
     return (
@@ -66,6 +74,11 @@ export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
   }
 
   const community = query.data;
+
+  const showOnboarding
+    = !onboardingSkipped
+      && (trackedCategoriesQuery.data?.length ?? 0) > 0
+      && mappingsQuery.data?.length === 0;
 
   return (
     <div className="w-full p-6 space-y-6">
@@ -144,6 +157,25 @@ export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
       <div>
         <h2 className="mb-3 text-lg font-semibold">Members</h2>
         <MemberList communityId={community.id} />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">Tracked Categories</h2>
+        <TrackedCategoryManager communityId={community.id} isOwner={community.is_owner} />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">My Mappings</h2>
+        {showOnboarding
+          ? (
+              <CategoryMappingOnboarding
+                communityId={community.id}
+                onSkip={() => setOnboardingSkipped(true)}
+              />
+            )
+          : (
+              <MyMappingsList communityId={community.id} />
+            )}
       </div>
 
       {community.is_owner && (

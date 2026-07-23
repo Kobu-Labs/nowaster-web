@@ -1,9 +1,11 @@
 import { z } from "zod";
 import {
+  CategoryMappingSchema,
   CommunityInvitePreviewSchema,
   CommunityMemberSchema,
   CommunityWithIdSchema,
   InviteCodeSchema,
+  TrackedCategorySchema,
 } from "@/api/definitions/models/community";
 
 export const CommunityResponseSchema = {
@@ -18,6 +20,13 @@ export const CommunityResponseSchema = {
   getInviteCode: InviteCodeSchema,
   regenerateInviteCode: InviteCodeSchema,
   previewByCode: CommunityInvitePreviewSchema,
+  createTrackedCategory: TrackedCategorySchema,
+  listTrackedCategories: z.array(TrackedCategorySchema),
+  updateTrackedCategory: TrackedCategorySchema,
+  deleteTrackedCategory: z.null(),
+  createMapping: CategoryMappingSchema,
+  listMyMappings: z.array(CategoryMappingSchema),
+  deleteMapping: z.null(),
 };
 export type CommunityResponse = {
   [Property in keyof typeof CommunityResponseSchema]: z.infer<

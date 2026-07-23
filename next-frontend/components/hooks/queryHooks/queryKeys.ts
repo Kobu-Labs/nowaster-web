@@ -79,6 +79,15 @@ const communityKeys = createQueryKeys("communities", {
     queryFn: async () => await CommunityApi.previewByInviteCode({ code }),
     queryKey: ["invite-preview", code],
   }),
+  trackedCategories: (communityId: string) => ({
+    queryFn: async () =>
+      await CommunityApi.listTrackedCategories({ communityId }),
+    queryKey: [communityId, "tracked-categories"],
+  }),
+  myMappings: (communityId: string) => ({
+    queryFn: async () => await CommunityApi.listMyMappings({ communityId }),
+    queryKey: [communityId, "my-mappings"],
+  }),
 });
 
 const projectKeys = createQueryKeys("projects", {
