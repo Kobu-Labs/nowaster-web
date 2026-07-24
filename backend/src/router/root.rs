@@ -14,6 +14,7 @@ use crate::{
         community::CommunityRepository,
         community_category::CommunityCategoryRepository,
         community_dashboard::CommunityDashboardRepository,
+        community_invite::CommunityInviteRepository,
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         friends::FriendsRepository,
@@ -32,6 +33,7 @@ use crate::{
         category_service::CategoryService,
         community_category_service::CommunityCategoryService,
         community_dashboard_service::CommunityDashboardService,
+        community_invite_service::CommunityInviteService,
         community_service::CommunityService,
         feed::{
             events::FeedEventService, reactions::FeedReactionService,
@@ -82,6 +84,7 @@ pub struct AppState {
     pub community_service: CommunityService,
     pub community_category_service: CommunityCategoryService,
     pub community_dashboard_service: CommunityDashboardService,
+    pub community_invite_service: CommunityInviteService,
     pub user_service: UserService,
     pub statistics_service: StatisticsService,
     pub friend_service: Arc<dyn FriendServiceTrait + Send + Sync>,
@@ -141,7 +144,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         category_service.clone(),
     );
     let community_dashboard_service =
-        CommunityDashboardService::new(community_dashboard_repo, community_repo);
+        CommunityDashboardService::new(community_dashboard_repo, community_repo.clone());
     let tag_service = TagService::new(tag_repo, category_repo.clone());
     let statistics_service = StatisticsService::new(statistics_repo);
 
@@ -163,6 +166,14 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         user_repo.clone(),
         visibility_service.clone(),
         subscription_service.clone(),
+    );
+
+    let community_invite_repo = CommunityInviteRepository::new(&db);
+    let community_invite_service = CommunityInviteService::new(
+        community_invite_repo,
+        community_repo,
+        user_service.clone(),
+        notification_service.clone(),
     );
 
     let session_service = FixedSessionService::new(
@@ -214,6 +225,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         community_service,
         community_category_service,
         community_dashboard_service,
+        community_invite_service,
         user_service,
         statistics_service,
         stopwatch_service,

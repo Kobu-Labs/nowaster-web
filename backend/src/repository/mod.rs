@@ -4,6 +4,7 @@ pub mod category;
 pub mod community;
 pub mod community_category;
 pub mod community_dashboard;
+pub mod community_invite;
 pub mod db_backup;
 pub mod feed;
 pub mod fixed_session;

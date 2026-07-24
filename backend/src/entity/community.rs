@@ -71,12 +71,44 @@ pub struct CommunityMember {
     pub joined_at: DateTime<Local>,
 }
 
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Type, PartialEq, Eq)]
+#[sqlx(type_name = "community_invite_type", rename_all = "lowercase")]
+#[serde(rename_all = "lowercase")]
+pub enum CommunityInviteType {
+    Direct,
+    Link,
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Type, PartialEq, Eq)]
+#[sqlx(type_name = "community_invite_status", rename_all = "lowercase")]
+#[serde(rename_all = "lowercase")]
+pub enum CommunityInviteStatus {
+    Pending,
+    Accepted,
+    Declined,
+    Revoked,
+    Expired,
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct CommunityInviteCode {
+pub struct CommunityInvite {
     pub id: Uuid,
     pub community_id: Uuid,
-    pub code: String,
+    pub invite_type: CommunityInviteType,
+    pub status: CommunityInviteStatus,
+    pub invited_user_id: Option<String>,
+    pub code: Option<String>,
+    pub max_uses: Option<i32>,
+    pub use_count: i32,
     pub created_by: String,
+    pub expires_at: Option<DateTime<Local>>,
+    pub responded_at: Option<DateTime<Local>>,
     pub created_at: DateTime<Local>,
-    pub updated_at: DateTime<Local>,
+}
+
+impl CommunityInvite {
+    pub fn is_expired(&self) -> bool {
+        self.expires_at
+            .is_some_and(|expires_at| expires_at < Local::now())
+    }
 }

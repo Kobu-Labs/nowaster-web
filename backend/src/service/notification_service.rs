@@ -9,8 +9,10 @@ use crate::{
         CreateNotificationDto, MarkNotificationsSeenDto, NotificationCountDto,
         NotificationQueryDto, ReadNotificationDto,
     },
+    dto::user::read_user::ReadUserDto,
     entity::notification::{
-        BackupCompletedData, BackupFailedData, FriendRequestAcceptedData, FriendRequestData,
+        BackupCompletedData, BackupFailedData, CommunityInviteAcceptedData,
+        CommunityInviteReceivedData, FriendRequestAcceptedData, FriendRequestData,
         NotificationSource, NotificationType, SandboxFailedDeployData, SessionReactionData,
         SystemNotificationData,
     },
@@ -123,6 +125,54 @@ impl NotificationService {
             notification_type: NotificationType::FriendRequestAccepted(FriendRequestAcceptedData {
                 accepter: request.recipient.clone(),
             }),
+        };
+
+        self.create_notification(dto).await
+    }
+
+    #[instrument(err, skip(self), fields(invite_id = %invite_id, community_id = %community_id, invitee_id = %invitee.id))]
+    pub async fn notify_community_invite_received(
+        &self,
+        invite_id: Uuid,
+        community_id: Uuid,
+        community_name: String,
+        invitee: ReadUserDto,
+        inviter: ReadUserDto,
+    ) -> Result<Uuid> {
+        let dto = CreateNotificationDto {
+            user_id: invitee.id,
+            source: NotificationSource::User(inviter.clone()),
+            notification_type: NotificationType::CommunityInviteReceived(
+                CommunityInviteReceivedData {
+                    invite_id,
+                    community_id,
+                    community_name,
+                    inviter,
+                },
+            ),
+        };
+
+        self.create_notification(dto).await
+    }
+
+    #[instrument(err, skip(self), fields(inviter_id = %inviter_id, community_id = %community_id, accepter_id = %accepter.id))]
+    pub async fn notify_community_invite_accepted(
+        &self,
+        inviter_id: &str,
+        community_id: Uuid,
+        community_name: String,
+        accepter: ReadUserDto,
+    ) -> Result<Uuid> {
+        let dto = CreateNotificationDto {
+            user_id: inviter_id.to_string(),
+            source: NotificationSource::User(accepter.clone()),
+            notification_type: NotificationType::CommunityInviteAccepted(
+                CommunityInviteAcceptedData {
+                    community_id,
+                    community_name,
+                    accepter,
+                },
+            ),
         };
 
         self.create_notification(dto).await

@@ -10,8 +10,8 @@ use crate::{
     dto::community::{create_community::CreateCommunityDto, update_community::UpdateCommunityDto},
     entity::{
         community::{
-            Community, CommunityDataVisibility, CommunityInviteCode, CommunityMember,
-            CommunityMemberRole, CommunityVisibilityType,
+            Community, CommunityDataVisibility, CommunityMember, CommunityMemberRole,
+            CommunityVisibilityType,
         },
         visibility::VisibilityFlags,
     },
@@ -89,32 +89,6 @@ pub struct CommunityMemberWithUserRow {
     pub avatar_image_url: Option<String>,
     pub visibility_flags: VisibilityFlags,
 }
-
-#[derive(sqlx::FromRow, Debug)]
-struct CommunityInviteCodeRow {
-    id: Uuid,
-    community_id: Uuid,
-    code: String,
-    created_by: String,
-    created_at: DateTime<Local>,
-    updated_at: DateTime<Local>,
-}
-
-impl From<CommunityInviteCodeRow> for CommunityInviteCode {
-    fn from(row: CommunityInviteCodeRow) -> Self {
-        Self {
-            id: row.id,
-            community_id: row.community_id,
-            code: row.code,
-            created_by: row.created_by,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        }
-    }
-}
-
-const COMMUNITY_INVITE_CODE_COLUMNS: &str =
-    "id, community_id, code, created_by, created_at, updated_at";
 
 impl CommunityRepository {
     pub fn new(db_conn: &Arc<Database>) -> Self {
@@ -454,83 +428,5 @@ impl CommunityRepository {
         .await?;
 
         Ok(count)
-    }
-
-    #[instrument(err, skip(self), fields(community_id = %community_id))]
-    pub async fn get_invite_code(&self, community_id: Uuid) -> Result<Option<CommunityInviteCode>> {
-        let query = format!(
-            r#"SELECT {COMMUNITY_INVITE_CODE_COLUMNS} FROM "community_invite_code" WHERE community_id = $1"#
-        );
-
-        let row = sqlx::query_as::<_, CommunityInviteCodeRow>(&query)
-            .bind(community_id)
-            .fetch_optional(self.db_conn.get_pool())
-            .await?;
-
-        Ok(row.map(CommunityInviteCode::from))
-    }
-
-    #[instrument(err, skip(self), fields(community_id = %community_id))]
-    pub async fn upsert_invite_code(
-        &self,
-        community_id: Uuid,
-        code: &str,
-        created_by: &str,
-    ) -> Result<CommunityInviteCode> {
-        let query = format!(
-            r#"
-                INSERT INTO "community_invite_code" (community_id, code, created_by)
-                VALUES ($1, $2, $3)
-                ON CONFLICT (community_id)
-                DO UPDATE SET code = $2, updated_at = NOW()
-                RETURNING {COMMUNITY_INVITE_CODE_COLUMNS}
-            "#
-        );
-
-        let row = sqlx::query_as::<_, CommunityInviteCodeRow>(&query)
-            .bind(community_id)
-            .bind(code)
-            .bind(created_by)
-            .fetch_one(self.db_conn.get_pool())
-            .await?;
-
-        Ok(row.into())
-    }
-
-    #[instrument(err, skip(self), fields(code = %code))]
-    pub async fn find_community_by_invite_code(&self, code: &str) -> Result<Option<Community>> {
-        let columns = COMMUNITY_COLUMNS
-            .split(", ")
-            .map(|col| format!("c.{col}"))
-            .collect::<Vec<_>>()
-            .join(", ");
-
-        let query = format!(
-            r#"
-                SELECT {columns}
-                FROM "community" c
-                JOIN "community_invite_code" ic ON ic.community_id = c.id
-                WHERE UPPER(ic.code) = UPPER($1) AND c.archived_at IS NULL
-            "#
-        );
-
-        let row = sqlx::query_as::<_, CommunityRow>(&query)
-            .bind(code)
-            .fetch_optional(self.db_conn.get_pool())
-            .await?;
-
-        Ok(row.map(Community::from))
-    }
-
-    #[instrument(err, skip(self), fields(code = %code))]
-    pub async fn code_in_use(&self, code: &str) -> Result<bool> {
-        let count: i64 = sqlx::query_scalar(
-            r#"SELECT COUNT(*) FROM "community_invite_code" WHERE UPPER(code) = UPPER($1)"#,
-        )
-        .bind(code)
-        .fetch_one(self.db_conn.get_pool())
-        .await?;
-
-        Ok(count > 0)
     }
 }

@@ -8,7 +8,6 @@ use uuid::Uuid;
 
 use crate::{
     dto::community::{
-        invite_code::{CommunityInvitePreviewDto, ReadInviteCodeDto},
         join_community::JoinCommunityDto,
         read_member::{
             CommunityCapabilitiesDto, ListCommunityMembersParamsDto, ReadCommunityMemberDto,
@@ -40,12 +39,6 @@ pub fn membership_routes() -> Router<AppState> {
             "/{community_id}/capabilities",
             get(get_capabilities_handler),
         )
-        .route("/{community_id}/invite-code", get(get_invite_code_handler))
-        .route(
-            "/{community_id}/invite-code/regenerate",
-            axum::routing::post(regenerate_invite_code_handler),
-        )
-        .route("/invite/{code}", get(preview_by_invite_code_handler))
 }
 
 #[instrument(skip(state), fields(user_id = %actor, community_id = %community_id, target_user = %user_id))]
@@ -135,42 +128,5 @@ async fn list_community_members_handler(
         .community_service
         .list_members(community_id, &actor, params.limit, params.offset)
         .await;
-    ApiResponse::from_result(result)
-}
-
-#[instrument(skip(state), fields(user_id = %actor, community_id = %community_id))]
-async fn get_invite_code_handler(
-    State(state): State<AppState>,
-    Path(community_id): Path<Uuid>,
-    actor: Actor,
-) -> ApiResponse<ReadInviteCodeDto> {
-    let result = state
-        .community_service
-        .get_invite_code(community_id, &actor)
-        .await;
-    ApiResponse::from_result(result)
-}
-
-#[instrument(skip(state), fields(user_id = %actor, community_id = %community_id))]
-async fn regenerate_invite_code_handler(
-    State(state): State<AppState>,
-    Path(community_id): Path<Uuid>,
-    actor: Actor,
-) -> ApiResponse<ReadInviteCodeDto> {
-    let result = state
-        .community_service
-        .regenerate_invite_code(community_id, &actor)
-        .await;
-    ApiResponse::from_result(result)
-}
-
-#[instrument(skip(state), fields(user_id = %actor, code = %code))]
-async fn preview_by_invite_code_handler(
-    State(state): State<AppState>,
-    Path(code): Path<String>,
-    actor: Actor,
-) -> ApiResponse<CommunityInvitePreviewDto> {
-    let _ = &actor;
-    let result = state.community_service.preview_by_invite_code(&code).await;
     ApiResponse::from_result(result)
 }

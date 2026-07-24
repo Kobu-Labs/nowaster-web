@@ -14,7 +14,7 @@ use crate::{
     router::{
         clerk::Actor,
         community::{
-            category::category_mapping_routes, dashboard::dashboard_routes,
+            category::category_mapping_routes, dashboard::dashboard_routes, invite::invite_routes,
             membership::membership_routes,
         },
         request::ValidatedRequest,
@@ -28,6 +28,7 @@ pub fn community_router() -> Router<AppState> {
         .merge(membership_routes())
         .merge(category_mapping_routes())
         .merge(dashboard_routes())
+        .merge(invite_routes())
 }
 
 fn crud_routes() -> Router<AppState> {

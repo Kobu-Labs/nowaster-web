@@ -46,6 +46,14 @@ pub enum NotificationTypeSql {
     #[sqlx(rename = "admin:backup:failed")]
     #[serde(rename = "admin:backup:failed")]
     AdminBackupFailed,
+
+    #[sqlx(rename = "community:invite_received")]
+    #[serde(rename = "community:invite_received")]
+    CommunityInviteReceived,
+
+    #[sqlx(rename = "community:invite_accepted")]
+    #[serde(rename = "community:invite_accepted")]
+    CommunityInviteAccepted,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, Deserialize, Serialize)]
@@ -133,6 +141,12 @@ pub enum NotificationType {
 
     #[serde(rename = "admin:backup:failed")]
     AdminBackupFailed(BackupFailedData),
+
+    #[serde(rename = "community:invite_received")]
+    CommunityInviteReceived(CommunityInviteReceivedData),
+
+    #[serde(rename = "community:invite_accepted")]
+    CommunityInviteAccepted(CommunityInviteAcceptedData),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -154,6 +168,21 @@ pub struct BackupFailedData {
     pub error_message: Option<String>,
     pub duration_seconds: Option<i32>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CommunityInviteReceivedData {
+    pub invite_id: Uuid,
+    pub community_id: Uuid,
+    pub community_name: String,
+    pub inviter: ReadUserDto,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CommunityInviteAcceptedData {
+    pub community_id: Uuid,
+    pub community_name: String,
+    pub accepter: ReadUserDto,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

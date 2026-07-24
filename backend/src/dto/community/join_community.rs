@@ -6,6 +6,4 @@ use validator::Validate;
 pub struct JoinCommunityDto {
     #[serde(default)]
     pub community_id: Uuid,
-    #[validate(length(min = 1, max = 12))]
-    pub invite_code: Option<String>,
 }
