@@ -234,6 +234,26 @@ impl CommunityCategoryRepository {
         Ok(count)
     }
 
+    #[instrument(err, skip(self), fields(community_id = %community_id))]
+    pub async fn count_mapped_members_by_category(
+        &self,
+        community_id: Uuid,
+    ) -> Result<std::collections::HashMap<Uuid, i64>> {
+        let rows: Vec<(Uuid, i64)> = sqlx::query_as(
+            r#"
+                SELECT tracked_category_id, COUNT(DISTINCT user_id)
+                FROM "community_category_mapping"
+                WHERE community_id = $1
+                GROUP BY tracked_category_id
+            "#,
+        )
+        .bind(community_id)
+        .fetch_all(self.db_conn.get_pool())
+        .await?;
+
+        Ok(rows.into_iter().collect())
+    }
+
     #[instrument(err, skip(self), fields(tracked_category_id = %tracked_category_id, personal_category_id = %personal_category_id))]
     pub async fn create_mapping(
         &self,

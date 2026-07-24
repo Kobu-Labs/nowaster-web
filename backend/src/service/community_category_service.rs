@@ -164,15 +164,18 @@ impl CommunityCategoryService {
         self.assert_can_view(community_id, actor).await?;
 
         let tracked_categories = self.repo.list_tracked_categories(community_id).await?;
+        let counts = self
+            .repo
+            .count_mapped_members_by_category(community_id)
+            .await?;
 
-        let mut result = Vec::with_capacity(tracked_categories.len());
-        for tracked_category in tracked_categories {
-            let mapped_member_count = self.repo.count_mapped_members(tracked_category.id).await?;
-            result.push(tracked_category_to_dto(
-                tracked_category,
-                mapped_member_count,
-            ));
-        }
+        let result = tracked_categories
+            .into_iter()
+            .map(|tracked_category| {
+                let mapped_member_count = counts.get(&tracked_category.id).copied().unwrap_or(0);
+                tracked_category_to_dto(tracked_category, mapped_member_count)
+            })
+            .collect();
 
         Ok(result)
     }
