@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   CommunityDataVisibilitySchema,
+  CommunityMemberRoleSchema,
   CommunityVisibilityTypeSchema,
 } from "@/api/definitions/models/community";
 
@@ -34,6 +35,14 @@ const listMembers = z.object({
   limit: z.number().int().positive().optional(),
   offset: z.number().int().nonnegative().optional(),
 });
+const updateMemberRole = z.object({
+  communityId: z.uuid(),
+  userId: z.string(),
+  newRole: CommunityMemberRoleSchema.exclude(["owner"]),
+});
+const removeMember = z.object({ communityId: z.uuid(), userId: z.string() });
+const getCapabilities = z.object({ communityId: z.uuid() });
+
 const getInviteCode = z.object({ communityId: z.uuid() });
 const regenerateInviteCode = z.object({ communityId: z.uuid() });
 const previewByCode = z.object({ code: z.string().trim().min(1) });
@@ -69,6 +78,9 @@ export const CommunityRequestSchema = {
   join,
   leave,
   listMembers,
+  updateMemberRole,
+  removeMember,
+  getCapabilities,
   getInviteCode,
   regenerateInviteCode,
   previewByCode,

@@ -72,6 +72,10 @@ const communityKeys = createQueryKeys("communities", {
     queryFn: async () => await CommunityApi.listMembers({ communityId }),
     queryKey: [communityId, "members"],
   }),
+  capabilities: (communityId: string) => ({
+    queryFn: async () => await CommunityApi.getCapabilities({ communityId }),
+    queryKey: [communityId, "capabilities"],
+  }),
   inviteCode: (communityId: string) => ({
     queryFn: async () => await CommunityApi.getInviteCode({ communityId }),
     queryKey: [communityId, "invite-code"],

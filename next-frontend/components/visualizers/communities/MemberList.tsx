@@ -1,13 +1,16 @@
 "use client";
 
+import type { CommunityMember } from "@/api/definitions";
 import { useAuth } from "@/components/hooks/useAuth";
+import { useCommunityCapabilities } from "@/components/hooks/community/useCommunityCapabilities";
 import { useCommunityMembers } from "@/components/hooks/community/useCommunityMembers";
+import { useRemoveMember } from "@/components/hooks/community/useRemoveMember";
+import { useUpdateMemberRole } from "@/components/hooks/community/useUpdateMemberRole";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -19,10 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn/table";
+import { ConfirmRemoveMemberDialog } from "@/components/visualizers/communities/ConfirmRemoveMemberDialog";
 import { LeaveCommunityButton } from "@/components/visualizers/communities/LeaveCommunityButton";
+import { MemberActionsMenu } from "@/components/visualizers/communities/MemberActionsMenu";
+import { MemberRoleBadge } from "@/components/visualizers/communities/MemberRoleBadge";
 import { getInitials } from "@/lib/utils";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import type { FC } from "react";
 
 type MemberListProps = {
@@ -33,6 +40,10 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
   const query = useCommunityMembers(communityId);
   const { user } = useAuth();
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;
+  const capabilitiesQuery = useCommunityCapabilities(communityId);
+  const updateMemberRole = useUpdateMemberRole(communityId);
+  const removeMember = useRemoveMember(communityId);
+  const [memberToRemove, setMemberToRemove] = useState<CommunityMember | null>(null);
 
   if (query.isPending) {
     return (
@@ -104,17 +115,25 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={member.role === "owner" ? "secondary" : "outline"}>
-                    {member.role === "owner" ? "Owner" : "Member"}
-                  </Badge>
+                  <MemberRoleBadge role={member.role} />
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {format(member.joined_at, "MMM d, yyyy")}
                 </TableCell>
                 <TableCell>
-                  {member.user.id === user?.id && member.role !== "owner" && (
-                    <LeaveCommunityButton communityId={communityId} />
-                  )}
+                  {member.user.id === user?.id && member.role !== "owner"
+                    ? <LeaveCommunityButton communityId={communityId} />
+                    : (
+                        <MemberActionsMenu
+                          capabilities={capabilitiesQuery.data}
+                          member={member}
+                          onDemote={() =>
+                            updateMemberRole.mutate({ userId: member.user.id, newRole: "member" })}
+                          onPromote={() =>
+                            updateMemberRole.mutate({ userId: member.user.id, newRole: "manager" })}
+                          onRequestRemove={() => setMemberToRemove(member)}
+                        />
+                      )}
                 </TableCell>
               </TableRow>
             ))}
@@ -141,18 +160,38 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
                     {member.user.username}
                     {member.user.id === user?.id && " (You)"}
                   </p>
-                  <Badge variant={member.role === "owner" ? "secondary" : "outline"}>
-                    {member.role === "owner" ? "Owner" : "Member"}
-                  </Badge>
+                  <MemberRoleBadge role={member.role} />
                 </div>
               </div>
-              {member.user.id === user?.id && member.role !== "owner" && (
-                <LeaveCommunityButton communityId={communityId} />
-              )}
+              {member.user.id === user?.id && member.role !== "owner"
+                ? <LeaveCommunityButton communityId={communityId} />
+                : (
+                    <MemberActionsMenu
+                      capabilities={capabilitiesQuery.data}
+                      member={member}
+                      onDemote={() =>
+                        updateMemberRole.mutate({ userId: member.user.id, newRole: "member" })}
+                      onPromote={() =>
+                        updateMemberRole.mutate({ userId: member.user.id, newRole: "manager" })}
+                      onRequestRemove={() => setMemberToRemove(member)}
+                    />
+                  )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <ConfirmRemoveMemberDialog
+        onConfirm={() => {
+          if (memberToRemove) {
+            removeMember.mutate(memberToRemove.user.id);
+          }
+          setMemberToRemove(null);
+        }}
+        onOpenChange={(open) => !open && setMemberToRemove(null)}
+        open={!!memberToRemove}
+        username={memberToRemove?.user.username}
+      />
 
       {hasNextPage && (
         <div className="flex justify-center pt-4">

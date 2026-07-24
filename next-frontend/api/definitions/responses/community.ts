@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   CategoryMappingSchema,
+  CommunityCapabilitiesSchema,
   CommunityDashboardSchema,
   CommunityInvitePreviewSchema,
   CommunityMemberSchema,
@@ -19,6 +20,9 @@ export const CommunityResponseSchema = {
   join: CommunityMemberSchema,
   leave: z.null(),
   listMembers: CommunityMembersPageSchema,
+  updateMemberRole: CommunityMemberSchema,
+  removeMember: z.null(),
+  getCapabilities: CommunityCapabilitiesSchema,
   getInviteCode: InviteCodeSchema,
   regenerateInviteCode: InviteCodeSchema,
   previewByCode: CommunityInvitePreviewSchema,

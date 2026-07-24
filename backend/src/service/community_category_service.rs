@@ -81,7 +81,8 @@ impl CommunityCategoryService {
         dto: CreateTrackedCategoryDto,
         actor: &Actor,
     ) -> Result<ReadTrackedCategoryDto> {
-        self.assert_owner(community_id, actor).await?;
+        self.assert_can_manage_categories(community_id, actor)
+            .await?;
 
         if self
             .repo
@@ -115,7 +116,8 @@ impl CommunityCategoryService {
             .await?
             .ok_or_else(|| anyhow::anyhow!("Tracked category not found"))?;
 
-        self.assert_owner(existing.community_id, actor).await?;
+        self.assert_can_manage_categories(existing.community_id, actor)
+            .await?;
 
         if let Some(new_name) = &dto.name {
             if new_name != &existing.name
@@ -149,7 +151,8 @@ impl CommunityCategoryService {
             .await?
             .ok_or_else(|| anyhow::anyhow!("Tracked category not found"))?;
 
-        self.assert_owner(existing.community_id, actor).await?;
+        self.assert_can_manage_categories(existing.community_id, actor)
+            .await?;
 
         self.repo.delete_tracked_category(id).await?;
         Ok(())
@@ -281,16 +284,25 @@ impl CommunityCategoryService {
         Ok(rows.into_iter().map(mapping_row_to_dto).collect())
     }
 
-    async fn assert_owner(&self, community_id: Uuid, actor: &Actor) -> Result<()> {
-        let community = self
-            .community_repo
+    async fn assert_can_manage_categories(&self, community_id: Uuid, actor: &Actor) -> Result<()> {
+        self.community_repo
             .find_by_id(community_id)
             .await?
             .ok_or_else(|| anyhow::anyhow!("Community not found"))?;
 
-        if community.owner_id != actor.user_id {
+        let member = self
+            .community_repo
+            .find_membership(community_id, &actor.user_id)
+            .await?
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "You do not have permission to manage this community's tracked categories"
+                )
+            })?;
+
+        if !member.role.can_manage_categories() {
             return Err(anyhow::anyhow!(
-                "Only the owner can manage tracked categories"
+                "You do not have permission to manage this community's tracked categories"
             ));
         }
 

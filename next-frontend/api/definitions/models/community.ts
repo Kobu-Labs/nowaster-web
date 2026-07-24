@@ -21,7 +21,7 @@ export const CommunitySchema = z.object({
 
 export const CommunityWithIdSchema = CommunitySchema.merge(HasID);
 
-export const CommunityMemberRoleSchema = z.enum(["owner", "member"]);
+export const CommunityMemberRoleSchema = z.enum(["owner", "manager", "member"]);
 
 export const CommunityMemberSchema = z.object({
   id: z.uuid(),
@@ -33,6 +33,13 @@ export const CommunityMemberSchema = z.object({
 export const CommunityMembersPageSchema = z.object({
   members: z.array(CommunityMemberSchema),
   total: z.number(),
+});
+
+export const CommunityCapabilitiesSchema = z.object({
+  can_manage_members: z.boolean(),
+  can_manage_categories: z.boolean(),
+  can_change_roles: z.boolean(),
+  can_delete_community: z.boolean(),
 });
 
 export const InviteCodeSchema = z.object({
@@ -92,6 +99,7 @@ export const CommunityDashboardSchema = z.object({
 export type CategoryBreakdown = z.infer<typeof CategoryBreakdownSchema>;
 export type CategoryMapping = z.infer<typeof CategoryMappingSchema>;
 export type Community = z.infer<typeof CommunitySchema>;
+export type CommunityCapabilities = z.infer<typeof CommunityCapabilitiesSchema>;
 export type CommunityDashboard = z.infer<typeof CommunityDashboardSchema>;
 export type CommunityDataVisibility = z.infer<typeof CommunityDataVisibilitySchema>;
 export type CommunityInvitePreview = z.infer<typeof CommunityInvitePreviewSchema>;

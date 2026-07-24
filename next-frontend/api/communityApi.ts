@@ -48,6 +48,26 @@ export const listMembers = async (params: CommunityRequest["listMembers"]) => {
   return await parseResponseUnsafe(data, CommunityResponseSchema.listMembers);
 };
 
+export const updateMemberRole = async (params: CommunityRequest["updateMemberRole"]) => {
+  const { data } = await baseApi.patch(
+    `${BASE_URL}/${params.communityId}/members/${params.userId}/role`,
+    { new_role: params.newRole },
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.updateMemberRole);
+};
+
+export const removeMember = async (params: CommunityRequest["removeMember"]) => {
+  const { data } = await baseApi.delete(
+    `${BASE_URL}/${params.communityId}/members/${params.userId}`,
+  );
+  return await parseResponseUnsafe(data, CommunityResponseSchema.removeMember);
+};
+
+export const getCapabilities = async (params: CommunityRequest["getCapabilities"]) => {
+  const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/capabilities`);
+  return await parseResponseUnsafe(data, CommunityResponseSchema.getCapabilities);
+};
+
 export const getInviteCode = async (params: CommunityRequest["getInviteCode"]) => {
   const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/invite-code`);
   return await parseResponseUnsafe(data, CommunityResponseSchema.getInviteCode);

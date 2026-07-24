@@ -39,12 +39,27 @@ impl Community {
     }
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, Type, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Type, PartialEq, Eq, PartialOrd, Ord)]
 #[sqlx(type_name = "community_member_role", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum CommunityMemberRole {
     Member,
+    Manager,
     Owner,
+}
+
+impl CommunityMemberRole {
+    pub fn can_manage_members(&self) -> bool {
+        *self >= Self::Manager
+    }
+
+    pub fn can_manage_categories(&self) -> bool {
+        *self >= Self::Manager
+    }
+
+    pub fn can_change_roles(&self) -> bool {
+        *self == Self::Owner
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

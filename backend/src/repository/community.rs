@@ -335,6 +335,49 @@ impl CommunityRepository {
         Ok(())
     }
 
+    #[instrument(err, skip(self), fields(community_id = %community_id, user_id = %user_id, new_role = ?new_role))]
+    pub async fn update_member_role(
+        &self,
+        community_id: Uuid,
+        user_id: &str,
+        new_role: CommunityMemberRole,
+    ) -> Result<CommunityMember> {
+        let query = format!(
+            r#"
+                UPDATE "community_member"
+                SET role = $3
+                WHERE community_id = $1 AND user_id = $2
+                RETURNING {COMMUNITY_MEMBER_COLUMNS}
+            "#
+        );
+
+        let row = sqlx::query_as::<_, CommunityMemberRow>(&query)
+            .bind(community_id)
+            .bind(user_id)
+            .bind(new_role)
+            .fetch_one(self.db_conn.get_pool())
+            .await?;
+
+        Ok(row.into())
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %community_id, role = ?role))]
+    pub async fn count_members_by_role(
+        &self,
+        community_id: Uuid,
+        role: CommunityMemberRole,
+    ) -> Result<i64> {
+        let count: i64 = sqlx::query_scalar(
+            r#"SELECT COUNT(*) FROM "community_member" WHERE community_id = $1 AND role = $2"#,
+        )
+        .bind(community_id)
+        .bind(role)
+        .fetch_one(self.db_conn.get_pool())
+        .await?;
+
+        Ok(count)
+    }
+
     #[instrument(err, skip(self), fields(community_id = %community_id, limit = %limit, offset = %offset))]
     pub async fn list_members(
         &self,

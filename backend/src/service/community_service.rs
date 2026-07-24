@@ -10,7 +10,10 @@ use crate::{
             invite_code::{CommunityInvitePreviewDto, ReadInviteCodeDto},
             join_community::JoinCommunityDto,
             read_community::ReadCommunityDto,
-            read_member::{ReadCommunityMemberDto, ReadCommunityMembersPageDto},
+            read_member::{
+                CommunityCapabilitiesDto, ReadCommunityMemberDto, ReadCommunityMembersPageDto,
+                RemoveMemberDto, UpdateMemberRoleDto,
+            },
             update_community::UpdateCommunityDto,
         },
         user::read_user::ReadUserDto,
@@ -237,6 +240,127 @@ impl CommunityService {
         Ok(ReadCommunityMembersPageDto {
             members: rows.into_iter().map(member_row_to_dto).collect(),
             total,
+        })
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %dto.community_id, target_user = %dto.user_id, actor = %actor))]
+    pub async fn update_member_role(
+        &self,
+        dto: UpdateMemberRoleDto,
+        actor: &Actor,
+    ) -> Result<ReadCommunityMemberDto> {
+        let acting_member = self
+            .repo
+            .find_membership(dto.community_id, &actor.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("You are not a member of this community"))?;
+
+        if !acting_member.role.can_change_roles() {
+            return Err(anyhow::anyhow!(
+                "You must be the community owner to change member roles"
+            ));
+        }
+
+        if dto.user_id == actor.user_id {
+            return Err(anyhow::anyhow!("You cannot change your own role"));
+        }
+
+        let target = self
+            .repo
+            .find_membership(dto.community_id, &dto.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("That user is not a member of this community"))?;
+
+        if target.role == CommunityMemberRole::Owner {
+            return Err(anyhow::anyhow!("You cannot change the owner's role"));
+        }
+
+        if dto.new_role == CommunityMemberRole::Owner {
+            return Err(anyhow::anyhow!(
+                "Ownership can only change through community deletion or transfer"
+            ));
+        }
+
+        if target.role == dto.new_role {
+            return Err(anyhow::anyhow!("This member already has that role"));
+        }
+
+        self.repo
+            .update_member_role(dto.community_id, &dto.user_id, dto.new_role)
+            .await?;
+
+        let row = self
+            .repo
+            .find_member_with_user(dto.community_id, &dto.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Failed to load updated membership"))?;
+
+        Ok(member_row_to_dto(row))
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %dto.community_id, target_user = %dto.user_id, actor = %actor))]
+    pub async fn remove_member(&self, dto: RemoveMemberDto, actor: &Actor) -> Result<()> {
+        let acting_member = self
+            .repo
+            .find_membership(dto.community_id, &actor.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("You are not a member of this community"))?;
+
+        if !acting_member.role.can_manage_members() {
+            return Err(anyhow::anyhow!(
+                "You do not have permission to remove members from this community"
+            ));
+        }
+
+        let target = self
+            .repo
+            .find_membership(dto.community_id, &dto.user_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("That user is not a member of this community"))?;
+
+        if target.role == CommunityMemberRole::Owner {
+            return Err(anyhow::anyhow!("The community owner cannot be removed"));
+        }
+
+        if target.role == CommunityMemberRole::Manager
+            && acting_member.role != CommunityMemberRole::Owner
+        {
+            return Err(anyhow::anyhow!("Only the owner can remove a manager"));
+        }
+
+        self.repo
+            .remove_member(dto.community_id, &dto.user_id)
+            .await?;
+        Ok(())
+    }
+
+    #[instrument(err, skip(self), fields(community_id = %community_id, actor = %actor))]
+    pub async fn get_capabilities(
+        &self,
+        community_id: Uuid,
+        actor: &Actor,
+    ) -> Result<CommunityCapabilitiesDto> {
+        let community = self.find_active_or_owned(community_id, actor).await?;
+        let role = self
+            .repo
+            .find_membership(community_id, &actor.user_id)
+            .await?
+            .map(|m| m.role);
+
+        let (can_manage_members, can_manage_categories, can_change_roles) = match role {
+            Some(role) => (
+                role.can_manage_members(),
+                role.can_manage_categories(),
+                role.can_change_roles(),
+            ),
+            None => (false, false, false),
+        };
+
+        Ok(CommunityCapabilitiesDto {
+            can_manage_members,
+            can_manage_categories,
+            can_change_roles,
+            can_delete_community: community.owner_id == actor.user_id,
         })
     }
 
