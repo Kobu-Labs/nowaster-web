@@ -9,7 +9,7 @@ use crate::{
     dto::community::discover::{
         CategoryAutocompleteDto, DiscoverCommunitiesDto, DiscoverCommunitiesResultDto,
     },
-    router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
+    router::{clerk::Actor, response::ApiResponse, root::AppState},
 };
 
 pub fn discovery_routes() -> Router<AppState> {
@@ -22,7 +22,7 @@ pub fn discovery_routes() -> Router<AppState> {
 async fn discover_communities_handler(
     State(state): State<AppState>,
     actor: Actor,
-    ValidatedRequest(payload): ValidatedRequest<DiscoverCommunitiesDto>,
+    Query(payload): Query<DiscoverCommunitiesDto>,
 ) -> ApiResponse<DiscoverCommunitiesResultDto> {
     let result = state.community_service.discover_communities(payload, &actor).await;
     ApiResponse::from_result(result)

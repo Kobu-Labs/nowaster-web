@@ -1,7 +1,6 @@
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use validator::Validate;
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -12,15 +11,17 @@ pub enum DiscoverySort {
     Newest,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct DiscoverCommunitiesDto {
+    #[serde(default)]
     pub query: Option<String>,
+    #[serde(default)]
     pub category: Option<String>,
     #[serde(default)]
     pub sort: DiscoverySort,
-    #[validate(range(min = 1, max = 50))]
+    #[serde(default)]
     pub limit: Option<i64>,
-    #[validate(range(min = 0))]
+    #[serde(default)]
     pub offset: Option<i64>,
 }
 
@@ -42,8 +43,7 @@ pub struct DiscoverCommunitiesResultDto {
     pub total_count: i64,
 }
 
-#[derive(Clone, Serialize, Deserialize, Validate, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CategoryAutocompleteDto {
-    #[validate(length(min = 1))]
     pub prefix: String,
 }
