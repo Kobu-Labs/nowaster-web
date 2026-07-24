@@ -6,6 +6,9 @@ use crate::{
     dto::{
         community::{
             create_community::CreateCommunityDto,
+            discover::{
+                CommunitySearchResultDto, DiscoverCommunitiesDto, DiscoverCommunitiesResultDto,
+            },
             join_community::JoinCommunityDto,
             read_community::ReadCommunityDto,
             read_member::{
@@ -19,12 +22,18 @@ use crate::{
     entity::community::{
         Community, CommunityDataVisibility, CommunityMemberRole, CommunityVisibilityType,
     },
-    repository::community::{CommunityMemberWithUserRow, CommunityRepository},
+    repository::{
+        community::{CommunityMemberWithUserRow, CommunityRepository},
+        community_discovery::{CommunityDiscoveryRepository, DiscoverCommunitiesFilter},
+    },
     router::clerk::Actor,
 };
 
 const DEFAULT_MEMBERS_PAGE_SIZE: i64 = 50;
 const MAX_MEMBERS_PAGE_SIZE: i64 = 100;
+const DEFAULT_DISCOVER_PAGE_SIZE: i64 = 20;
+const MAX_DISCOVER_PAGE_SIZE: i64 = 50;
+const CATEGORY_AUTOCOMPLETE_LIMIT: i64 = 10;
 
 fn member_row_to_dto(row: CommunityMemberWithUserRow) -> ReadCommunityMemberDto {
     ReadCommunityMemberDto {
@@ -44,11 +53,15 @@ fn member_row_to_dto(row: CommunityMemberWithUserRow) -> ReadCommunityMemberDto 
 #[derive(Clone)]
 pub struct CommunityService {
     repo: CommunityRepository,
+    discovery_repo: CommunityDiscoveryRepository,
 }
 
 impl CommunityService {
-    pub fn new(repo: CommunityRepository) -> Self {
-        Self { repo }
+    pub fn new(repo: CommunityRepository, discovery_repo: CommunityDiscoveryRepository) -> Self {
+        Self {
+            repo,
+            discovery_repo,
+        }
     }
 
     #[instrument(err, skip(self), fields(actor = %actor))]
@@ -377,5 +390,60 @@ impl CommunityService {
         }
 
         Ok(())
+    }
+
+    #[instrument(err, skip(self), fields(actor = %actor, query = ?dto.query, sort = ?dto.sort))]
+    pub async fn discover_communities(
+        &self,
+        dto: DiscoverCommunitiesDto,
+        actor: &Actor,
+    ) -> Result<DiscoverCommunitiesResultDto> {
+        let limit = dto
+            .limit
+            .unwrap_or(DEFAULT_DISCOVER_PAGE_SIZE)
+            .clamp(1, MAX_DISCOVER_PAGE_SIZE);
+        let offset = dto.offset.unwrap_or(0).max(0);
+
+        let rows = self
+            .discovery_repo
+            .search_public_communities(
+                DiscoverCommunitiesFilter {
+                    query: dto.query,
+                    category: dto.category,
+                    sort: dto.sort,
+                    limit,
+                    offset,
+                },
+                &actor.user_id,
+            )
+            .await?;
+
+        let total_count = rows.first().map(|row| row.total_count).unwrap_or(0);
+
+        let results = rows
+            .into_iter()
+            .map(|row| CommunitySearchResultDto {
+                id: row.id,
+                name: row.name,
+                description: row.description,
+                avatar_url: row.avatar_url,
+                member_count: row.member_count,
+                recent_activity_minutes: row.recent_minutes as i64,
+                is_member: row.is_member,
+                created_at: row.created_at,
+            })
+            .collect();
+
+        Ok(DiscoverCommunitiesResultDto {
+            results,
+            total_count,
+        })
+    }
+
+    #[instrument(err, skip(self), fields(prefix = %prefix))]
+    pub async fn autocomplete_categories(&self, prefix: &str) -> Result<Vec<String>> {
+        self.discovery_repo
+            .list_distinct_tracked_category_names(prefix, CATEGORY_AUTOCOMPLETE_LIMIT)
+            .await
     }
 }

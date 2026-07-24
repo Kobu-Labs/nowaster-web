@@ -31,6 +31,7 @@ struct CommunityRow {
     visibility_type: CommunityVisibilityType,
     data_visibility: CommunityDataVisibility,
     owner_id: String,
+    member_count: i32,
     archived_at: Option<DateTime<Local>>,
     created_at: DateTime<Local>,
     updated_at: DateTime<Local>,
@@ -46,6 +47,7 @@ impl From<CommunityRow> for Community {
             visibility_type: row.visibility_type,
             data_visibility: row.data_visibility,
             owner_id: row.owner_id,
+            member_count: row.member_count,
             archived_at: row.archived_at,
             created_at: row.created_at,
             updated_at: row.updated_at,
@@ -53,7 +55,7 @@ impl From<CommunityRow> for Community {
     }
 }
 
-const COMMUNITY_COLUMNS: &str = "id, name, description, avatar_url, visibility_type, data_visibility, owner_id, archived_at, created_at, updated_at";
+const COMMUNITY_COLUMNS: &str = "id, name, description, avatar_url, visibility_type, data_visibility, owner_id, member_count, archived_at, created_at, updated_at";
 
 #[derive(sqlx::FromRow, Debug)]
 struct CommunityMemberRow {

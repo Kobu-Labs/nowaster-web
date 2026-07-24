@@ -28,6 +28,7 @@ pub struct Community {
     pub visibility_type: CommunityVisibilityType,
     pub data_visibility: CommunityDataVisibility,
     pub owner_id: String,
+    pub member_count: i32,
     pub archived_at: Option<DateTime<Local>>,
     pub created_at: DateTime<Local>,
     pub updated_at: DateTime<Local>,

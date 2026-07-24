@@ -1,4 +1,5 @@
 pub mod create_community;
+pub mod discover;
 pub mod invite;
 pub mod join_community;
 pub mod read_community;

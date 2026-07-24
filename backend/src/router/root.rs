@@ -14,6 +14,7 @@ use crate::{
         community::CommunityRepository,
         community_category::CommunityCategoryRepository,
         community_dashboard::CommunityDashboardRepository,
+        community_discovery::CommunityDiscoveryRepository,
         community_invite::CommunityInviteRepository,
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
@@ -54,11 +55,10 @@ use crate::{
 };
 
 use super::{
-    admin::routes::admin_router, auth::auth_router, category::root::category_router,
-avatar::root::avatar_router,
-    community::root::community_router, feed::root::feed_router, friend::root::friend_router,
-    notification::root::notification_router, project::root::project_router,
-    release::routes::release_router, session::root::session_router,
+    admin::routes::admin_router, auth::auth_router, avatar::root::avatar_router,
+    category::root::category_router, community::root::community_router, feed::root::feed_router,
+    friend::root::friend_router, notification::root::notification_router,
+    project::root::project_router, release::routes::release_router, session::root::session_router,
     statistics::root::statistics_router, tag::root::tag_router, task::root::task_router,
 };
 
@@ -105,6 +105,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
     let community_repo = CommunityRepository::new(&db);
     let community_category_repo = CommunityCategoryRepository::new(&db);
     let community_dashboard_repo = CommunityDashboardRepository::new(&db);
+    let community_discovery_repo = CommunityDiscoveryRepository::new(&db);
     let tag_repo = TagRepository::new(&db);
     let session_repo = FixedSessionRepository::new(&db);
     let user_repo = UserRepository::new(&db);
@@ -133,11 +134,10 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
 
     let s3_client = aws_sdk_s3::Client::from_conf(s3_config);
 
-    let avatar_service = AvatarService::new(&db, s3_client.clone(), config.clone());
-
     let auth_service = AuthService::new(&db, config.server.app_env.clone());
     let category_service = CategoryService::new(category_repo.clone());
-    let community_service = CommunityService::new(community_repo.clone());
+    let community_service =
+        CommunityService::new(community_repo.clone(), community_discovery_repo);
     let community_category_service = CommunityCategoryService::new(
         community_category_repo,
         community_repo.clone(),
@@ -174,6 +174,14 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         community_repo,
         user_service.clone(),
         notification_service.clone(),
+    );
+
+    let avatar_service = AvatarService::new(
+        &db,
+        s3_client.clone(),
+        config.clone(),
+        notification_service.clone(),
+        user_service.clone(),
     );
 
     let session_service = FixedSessionService::new(
