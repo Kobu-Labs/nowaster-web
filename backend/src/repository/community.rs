@@ -85,7 +85,8 @@ pub struct CommunityMemberWithUserRow {
     pub joined_at: DateTime<Local>,
     pub user_id: String,
     pub username: String,
-    pub avatar_url: Option<String>,
+    pub avatar_thumb_url: Option<String>,
+    pub avatar_image_url: Option<String>,
     pub visibility_flags: VisibilityFlags,
 }
 
@@ -347,10 +348,12 @@ impl CommunityRepository {
                     cm.joined_at,
                     u.id AS user_id,
                     u.displayname AS username,
-                    u.avatar_url,
+                    ua.current_thumb_url AS avatar_thumb_url,
+                    ua.current_image_url AS avatar_image_url,
                     u.visibility_flags
                 FROM "community_member" cm
                 JOIN "user" u ON u.id = cm.user_id
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
                 WHERE cm.community_id = $1
                 ORDER BY cm.role DESC, cm.joined_at ASC
             "#,
@@ -376,10 +379,12 @@ impl CommunityRepository {
                     cm.joined_at,
                     u.id AS user_id,
                     u.displayname AS username,
-                    u.avatar_url,
+                    ua.current_thumb_url AS avatar_thumb_url,
+                    ua.current_image_url AS avatar_image_url,
                     u.visibility_flags
                 FROM "community_member" cm
                 JOIN "user" u ON u.id = cm.user_id
+                LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
                 WHERE cm.community_id = $1 AND cm.user_id = $2
             "#,
         )

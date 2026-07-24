@@ -43,7 +43,8 @@ fn member_row_to_dto(row: CommunityMemberWithUserRow) -> ReadCommunityMemberDto 
         user: ReadUserDto {
             id: row.user_id,
             username: row.username,
-            avatar_url: row.avatar_url,
+            avatar_thumb_url: row.avatar_thumb_url,
+            avatar_image_url: row.avatar_image_url,
             visibility_flags: row.visibility_flags,
         },
         role: row.role,
