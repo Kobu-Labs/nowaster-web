@@ -24,7 +24,7 @@ export const CommunityMemberRoleSchema = z.enum(["owner", "member"]);
 
 export const CommunityMemberSchema = z.object({
   id: z.uuid(),
-  user: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
+  user: UserSchema,
   role: CommunityMemberRoleSchema,
   joined_at: z.coerce.date<Date>(),
 });
@@ -67,7 +67,7 @@ export const CategoryBreakdownSchema = z.object({
 });
 
 export const MemberContributionSchema = z.object({
-  user: UserSchema.merge(z.object({ avatar_url: z.string().nullable() })),
+  user: UserSchema,
   total_minutes: z.number(),
   session_count: z.number(),
   percentage: z.number(),

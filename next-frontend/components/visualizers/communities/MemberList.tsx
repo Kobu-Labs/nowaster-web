@@ -76,7 +76,7 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
                     <Avatar className="h-6 w-6">
                       <AvatarImage
                         alt={member.user.username}
-                        src={member.user.avatar_url ?? undefined}
+                        src={member.user.avatarThumbUrl ?? undefined}
                       />
                       <AvatarFallback>
                         {getInitials(member.user.username)}
@@ -115,7 +115,7 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
                 <Avatar className="h-8 w-8">
                   <AvatarImage
                     alt={member.user.username}
-                    src={member.user.avatar_url ?? undefined}
+                    src={member.user.avatarThumbUrl ?? undefined}
                   />
                   <AvatarFallback>
                     {getInitials(member.user.username)}

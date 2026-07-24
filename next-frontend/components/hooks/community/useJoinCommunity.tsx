@@ -34,11 +34,7 @@ export const useJoinCommunity = () => {
           id: "optimistic",
           joined_at: new Date(),
           role: "member",
-          user: {
-            avatar_url: null,
-            id: user.id,
-            username: user.username,
-          },
+          user,
         };
 
         queryClient.setQueryData(
