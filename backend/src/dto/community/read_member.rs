@@ -11,3 +11,15 @@ pub struct ReadCommunityMemberDto {
     pub role: CommunityMemberRole,
     pub joined_at: DateTime<Local>,
 }
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ReadCommunityMembersPageDto {
+    pub members: Vec<ReadCommunityMemberDto>,
+    pub total: i64,
+}
+
+#[derive(Clone, Deserialize, Debug)]
+pub struct ListCommunityMembersParamsDto {
+    pub limit: Option<i64>,
+    pub offset: Option<i64>,
+}

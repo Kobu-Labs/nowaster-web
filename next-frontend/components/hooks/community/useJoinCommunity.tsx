@@ -1,8 +1,9 @@
-import type { CommunityMember, CommunityRequest, CommunityWithId } from "@/api/definitions";
+import type { CommunityMember, CommunityMembersPage, CommunityRequest, CommunityWithId } from "@/api/definitions";
 import { CommunityApi } from "@/api";
 import { useAuth } from "@/components/hooks/useAuth";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
+import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useJoinCommunity = () => {
@@ -39,10 +40,23 @@ export const useJoinCommunity = () => {
 
         queryClient.setQueryData(
           queryKeys.communities.members(data.communityId).queryKey,
-          (old: CommunityMember[] | undefined) => [
-            ...(old ?? []),
-            optimisticMember,
-          ],
+          (old: InfiniteData<CommunityMembersPage> | undefined) => {
+            const firstPage = old?.pages[0];
+            if (!old || !firstPage) {
+              return old;
+            }
+            return {
+              ...old,
+              pages: [
+                {
+                  ...firstPage,
+                  members: [...firstPage.members, optimisticMember],
+                  total: firstPage.total + 1,
+                },
+                ...old.pages.slice(1),
+              ],
+            };
+          },
         );
       }
 

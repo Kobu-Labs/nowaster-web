@@ -42,7 +42,9 @@ export const leave = async (params: CommunityRequest["leave"]) => {
 };
 
 export const listMembers = async (params: CommunityRequest["listMembers"]) => {
-  const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/members`);
+  const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/members`, {
+    params: { limit: params.limit, offset: params.offset },
+  });
   return await parseResponseUnsafe(data, CommunityResponseSchema.listMembers);
 };
 

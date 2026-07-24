@@ -1,8 +1,9 @@
-import type { CommunityMember, CommunityRequest, CommunityWithId } from "@/api/definitions";
+import type { CommunityMembersPage, CommunityRequest, CommunityWithId } from "@/api/definitions";
 import { CommunityApi } from "@/api";
 import { useAuth } from "@/components/hooks/useAuth";
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
 import { useToast } from "@/components/shadcn/use-toast";
+import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useLeaveCommunity = () => {
@@ -31,8 +32,23 @@ export const useLeaveCommunity = () => {
 
       queryClient.setQueryData(
         queryKeys.communities.members(data.communityId).queryKey,
-        (old: CommunityMember[] | undefined) =>
-          old?.filter((member) => member.user.id !== user?.id),
+        (old: InfiniteData<CommunityMembersPage> | undefined) => {
+          if (!old) {
+            return old;
+          }
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              members: page.members.filter(
+                (member) => member.user.id !== user?.id,
+              ),
+              total: page.members.some((member) => member.user.id === user?.id)
+                ? page.total - 1
+                : page.total,
+            })),
+          };
+        },
       );
 
       queryClient.setQueryData(

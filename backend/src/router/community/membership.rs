@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     routing::get,
     Router,
 };
@@ -10,7 +10,7 @@ use crate::{
     dto::community::{
         invite_code::{CommunityInvitePreviewDto, ReadInviteCodeDto},
         join_community::JoinCommunityDto,
-        read_member::ReadCommunityMemberDto,
+        read_member::{ListCommunityMembersParamsDto, ReadCommunityMemberDto, ReadCommunityMembersPageDto},
     },
     router::{clerk::Actor, request::ValidatedRequest, response::ApiResponse, root::AppState},
 };
@@ -65,11 +65,12 @@ async fn leave_community_handler(
 async fn list_community_members_handler(
     State(state): State<AppState>,
     Path(community_id): Path<Uuid>,
+    Query(params): Query<ListCommunityMembersParamsDto>,
     actor: Actor,
-) -> ApiResponse<Vec<ReadCommunityMemberDto>> {
+) -> ApiResponse<ReadCommunityMembersPageDto> {
     let result = state
         .community_service
-        .list_members(community_id, &actor)
+        .list_members(community_id, &actor, params.limit, params.offset)
         .await;
     ApiResponse::from_result(result)
 }

@@ -10,9 +10,7 @@ import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { useAuth } from "@/components/hooks/useAuth";
 import { useCommunityById } from "@/components/hooks/community/useCommunityById";
-import { useCommunityMembers } from "@/components/hooks/community/useCommunityMembers";
 import { ArchiveCommunityButton } from "@/components/visualizers/communities/ArchiveCommunityButton";
 import { CommunityDetailTabs } from "@/components/visualizers/communities/CommunityDetailTabs";
 import { EditCommunitySettingsForm } from "@/components/visualizers/communities/EditCommunitySettingsForm";
@@ -29,8 +27,6 @@ type CommunityDetailPageProps = {
 
 export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
   const query = useCommunityById(id);
-  const membersQuery = useCommunityMembers(id);
-  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
 
   if (query.isPending) {
@@ -119,9 +115,8 @@ export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
           </Button>
         )}
         {!community.is_owner
-          && community.visibility_type === "public"
-          && membersQuery.isSuccess
-          && !membersQuery.data.some((member) => member.user.id === user?.id) && (
+          && !community.is_member
+          && community.visibility_type === "public" && (
           <JoinCommunityButton communityId={community.id} />
         )}
       </div>

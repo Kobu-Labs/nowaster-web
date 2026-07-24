@@ -29,7 +29,11 @@ const join = z.object({
   inviteCode: z.string().trim().optional(),
 });
 const leave = z.object({ communityId: z.uuid() });
-const listMembers = z.object({ communityId: z.uuid() });
+const listMembers = z.object({
+  communityId: z.uuid(),
+  limit: z.number().int().positive().optional(),
+  offset: z.number().int().nonnegative().optional(),
+});
 const getInviteCode = z.object({ communityId: z.uuid() });
 const regenerateInviteCode = z.object({ communityId: z.uuid() });
 const previewByCode = z.object({ code: z.string().trim().min(1) });

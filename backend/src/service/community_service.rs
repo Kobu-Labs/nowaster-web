@@ -10,7 +10,7 @@ use crate::{
             invite_code::{CommunityInvitePreviewDto, ReadInviteCodeDto},
             join_community::JoinCommunityDto,
             read_community::ReadCommunityDto,
-            read_member::ReadCommunityMemberDto,
+            read_member::{ReadCommunityMemberDto, ReadCommunityMembersPageDto},
             update_community::UpdateCommunityDto,
         },
         user::read_user::ReadUserDto,
@@ -26,6 +26,9 @@ use crate::{
 const INVITE_CODE_LENGTH: usize = 10;
 const INVITE_CODE_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const MAX_INVITE_CODE_ATTEMPTS: u8 = 5;
+
+const DEFAULT_MEMBERS_PAGE_SIZE: i64 = 50;
+const MAX_MEMBERS_PAGE_SIZE: i64 = 100;
 
 fn generate_invite_code() -> String {
     let mut rng = rand::thread_rng();
@@ -72,13 +75,18 @@ impl CommunityService {
             .repo
             .create_with_owner_membership(dto, &actor.user_id)
             .await?;
-        Ok(ReadCommunityDto::from_entity(community, actor))
+        Ok(ReadCommunityDto::from_entity(community, actor, true))
     }
 
     #[instrument(err, skip(self), fields(community_id = %id, actor = %actor))]
     pub async fn get_community(&self, id: Uuid, actor: &Actor) -> Result<ReadCommunityDto> {
         let community = self.find_active_or_owned(id, actor).await?;
-        Ok(ReadCommunityDto::from_entity(community, actor))
+        let is_member = self
+            .repo
+            .find_membership(id, &actor.user_id)
+            .await?
+            .is_some();
+        Ok(ReadCommunityDto::from_entity(community, actor, is_member))
     }
 
     #[instrument(err, skip(self), fields(community_id = %dto.id, actor = %actor))]
@@ -100,7 +108,7 @@ impl CommunityService {
         }
 
         let updated = self.repo.update(dto).await?;
-        Ok(ReadCommunityDto::from_entity(updated, actor))
+        Ok(ReadCommunityDto::from_entity(updated, actor, true))
     }
 
     #[instrument(err, skip(self), fields(community_id = %id, actor = %actor))]
@@ -130,7 +138,7 @@ impl CommunityService {
         let communities = self.repo.list_for_member(&actor.user_id).await?;
         Ok(communities
             .into_iter()
-            .map(|c| ReadCommunityDto::from_entity(c, actor))
+            .map(|c| ReadCommunityDto::from_entity(c, actor, true))
             .collect())
     }
 
@@ -211,13 +219,25 @@ impl CommunityService {
         &self,
         community_id: Uuid,
         actor: &Actor,
-    ) -> Result<Vec<ReadCommunityMemberDto>> {
+        limit: Option<i64>,
+        offset: Option<i64>,
+    ) -> Result<ReadCommunityMembersPageDto> {
         let community = self.find_active_or_owned(community_id, actor).await?;
         self.assert_can_view_community_data(&community, actor)
             .await?;
 
-        let rows = self.repo.list_members(community_id).await?;
-        Ok(rows.into_iter().map(member_row_to_dto).collect())
+        let limit = limit
+            .unwrap_or(DEFAULT_MEMBERS_PAGE_SIZE)
+            .clamp(1, MAX_MEMBERS_PAGE_SIZE);
+        let offset = offset.unwrap_or(0).max(0);
+
+        let rows = self.repo.list_members(community_id, limit, offset).await?;
+        let total = self.repo.count_members(community_id).await?;
+
+        Ok(ReadCommunityMembersPageDto {
+            members: rows.into_iter().map(member_row_to_dto).collect(),
+            total,
+        })
     }
 
     #[instrument(err, skip(self), fields(community_id = %community_id, actor = %actor))]

@@ -8,6 +8,7 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { Badge } from "@/components/shadcn/badge";
+import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import {
@@ -21,6 +22,7 @@ import {
 import { LeaveCommunityButton } from "@/components/visualizers/communities/LeaveCommunityButton";
 import { getInitials } from "@/lib/utils";
 import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
 import type { FC } from "react";
 
 type MemberListProps = {
@@ -30,6 +32,7 @@ type MemberListProps = {
 export const MemberList: FC<MemberListProps> = ({ communityId }) => {
   const query = useCommunityMembers(communityId);
   const { user } = useAuth();
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;
 
   if (query.isPending) {
     return (
@@ -54,10 +57,22 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
     );
   }
 
-  const members = query.data;
+  const members = query.data.pages.flatMap((page) => page.members);
+  const total = query.data.pages.at(-1)?.total ?? members.length;
 
   return (
     <>
+      <p className="mb-3 text-sm text-muted-foreground">
+        Showing
+        {" "}
+        {members.length}
+        {" "}
+        of
+        {" "}
+        {total}
+        {" "}
+        members
+      </p>
       <div className="hidden sm:block">
         <Table>
           <TableHeader>
@@ -138,6 +153,20 @@ export const MemberList: FC<MemberListProps> = ({ communityId }) => {
           </Card>
         ))}
       </div>
+
+      {hasNextPage && (
+        <div className="flex justify-center pt-4">
+          <Button
+            disabled={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
+            variant="outline"
+          >
+            {isFetchingNextPage
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : "Load more members"}
+          </Button>
+        </div>
+      )}
     </>
   );
 };

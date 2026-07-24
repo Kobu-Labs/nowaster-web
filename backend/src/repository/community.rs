@@ -335,10 +335,12 @@ impl CommunityRepository {
         Ok(())
     }
 
-    #[instrument(err, skip(self), fields(community_id = %community_id))]
+    #[instrument(err, skip(self), fields(community_id = %community_id, limit = %limit, offset = %offset))]
     pub async fn list_members(
         &self,
         community_id: Uuid,
+        limit: i64,
+        offset: i64,
     ) -> Result<Vec<CommunityMemberWithUserRow>> {
         let rows = sqlx::query_as::<_, CommunityMemberWithUserRow>(
             r#"
@@ -356,9 +358,12 @@ impl CommunityRepository {
                 LEFT JOIN user_avatar ua ON ua.user_id = u.id AND ua.is_enabled = true
                 WHERE cm.community_id = $1
                 ORDER BY cm.role DESC, cm.joined_at ASC
+                LIMIT $2 OFFSET $3
             "#,
         )
         .bind(community_id)
+        .bind(limit)
+        .bind(offset)
         .fetch_all(self.db_conn.get_pool())
         .await?;
 

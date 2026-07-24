@@ -14,6 +14,7 @@ export const CommunitySchema = z.object({
   data_visibility: CommunityDataVisibilitySchema,
   owner_id: z.string(),
   is_owner: z.boolean(),
+  is_member: z.boolean(),
   archived_at: z.coerce.date<Date>().nullable(),
   created_at: z.coerce.date<Date>(),
 });
@@ -27,6 +28,11 @@ export const CommunityMemberSchema = z.object({
   user: UserSchema,
   role: CommunityMemberRoleSchema,
   joined_at: z.coerce.date<Date>(),
+});
+
+export const CommunityMembersPageSchema = z.object({
+  members: z.array(CommunityMemberSchema),
+  total: z.number(),
 });
 
 export const InviteCodeSchema = z.object({
@@ -91,6 +97,7 @@ export type CommunityDataVisibility = z.infer<typeof CommunityDataVisibilitySche
 export type CommunityInvitePreview = z.infer<typeof CommunityInvitePreviewSchema>;
 export type CommunityMember = z.infer<typeof CommunityMemberSchema>;
 export type CommunityMemberRole = z.infer<typeof CommunityMemberRoleSchema>;
+export type CommunityMembersPage = z.infer<typeof CommunityMembersPageSchema>;
 export type CommunityVisibilityType = z.infer<typeof CommunityVisibilityTypeSchema>;
 export type CommunityWithId = z.infer<typeof CommunityWithIdSchema>;
 export type InviteCode = z.infer<typeof InviteCodeSchema>;
