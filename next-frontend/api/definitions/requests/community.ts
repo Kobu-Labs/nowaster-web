@@ -27,7 +27,6 @@ const getById = z.object({ id: z.uuid() });
 
 const join = z.object({
   communityId: z.uuid(),
-  inviteCode: z.string().trim().optional(),
 });
 const leave = z.object({ communityId: z.uuid() });
 const listMembers = z.object({
@@ -43,8 +42,20 @@ const updateMemberRole = z.object({
 const removeMember = z.object({ communityId: z.uuid(), userId: z.string() });
 const getCapabilities = z.object({ communityId: z.uuid() });
 
-const getInviteCode = z.object({ communityId: z.uuid() });
-const regenerateInviteCode = z.object({ communityId: z.uuid() });
+const createDirectInvite = z.object({
+  communityId: z.uuid(),
+  inviteeUsername: z.string().trim().min(1, "Enter a username"),
+});
+const createLinkInvite = z.object({
+  communityId: z.uuid(),
+  expiresInDays: z.union([z.literal(1), z.literal(7), z.literal(30)]).nullable(),
+  maxUses: z.number().int().positive().nullable(),
+});
+const listCommunityInvites = z.object({ communityId: z.uuid() });
+const listIncomingInvites = z.object({});
+const respondToInvite = z.object({ inviteId: z.uuid(), accept: z.boolean() });
+const revokeInvite = z.object({ communityId: z.uuid(), inviteId: z.uuid() });
+const joinViaCode = z.object({ code: z.string().trim().min(1) });
 const previewByCode = z.object({ code: z.string().trim().min(1) });
 
 const createTrackedCategory = z.object({
@@ -81,8 +92,13 @@ export const CommunityRequestSchema = {
   updateMemberRole,
   removeMember,
   getCapabilities,
-  getInviteCode,
-  regenerateInviteCode,
+  createDirectInvite,
+  createLinkInvite,
+  listCommunityInvites,
+  listIncomingInvites,
+  respondToInvite,
+  revokeInvite,
+  joinViaCode,
   previewByCode,
   createTrackedCategory,
   updateTrackedCategory,

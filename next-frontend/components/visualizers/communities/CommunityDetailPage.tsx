@@ -11,10 +11,11 @@ import { Card, CardContent } from "@/components/shadcn/card";
 import { Separator } from "@/components/shadcn/separator";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { useCommunityById } from "@/components/hooks/community/useCommunityById";
+import { useCommunityCapabilities } from "@/components/hooks/community/useCommunityCapabilities";
 import { ArchiveCommunityButton } from "@/components/visualizers/communities/ArchiveCommunityButton";
 import { CommunityDetailTabs } from "@/components/visualizers/communities/CommunityDetailTabs";
 import { EditCommunitySettingsForm } from "@/components/visualizers/communities/EditCommunitySettingsForm";
-import { InviteCodeCard } from "@/components/visualizers/communities/InviteCodeCard";
+import { InviteManagementPanel } from "@/components/visualizers/communities/InviteManagementPanel";
 import { JoinCommunityButton } from "@/components/visualizers/communities/JoinCommunityButton";
 import { getInitials } from "@/lib/utils";
 import { Edit, Globe, Lock } from "lucide-react";
@@ -27,6 +28,7 @@ type CommunityDetailPageProps = {
 
 export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
   const query = useCommunityById(id);
+  const capabilitiesQuery = useCommunityCapabilities(id);
   const [editing, setEditing] = useState(false);
 
   if (query.isPending) {
@@ -132,8 +134,8 @@ export const CommunityDetailPage: FC<CommunityDetailPageProps> = ({ id }) => {
         </Card>
       )}
 
-      {community.is_owner && community.visibility_type === "invite_only" && (
-        <InviteCodeCard communityId={community.id} />
+      {capabilitiesQuery.data?.can_manage_members && (
+        <InviteManagementPanel communityId={community.id} />
       )}
 
       <CommunityDetailTabs communityId={community.id} isOwner={community.is_owner} />

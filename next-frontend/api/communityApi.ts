@@ -30,9 +30,7 @@ export const archive = async (params: CommunityRequest["archive"]) => {
 };
 
 export const join = async (params: CommunityRequest["join"]) => {
-  const { data } = await baseApi.post(`${BASE_URL}/${params.communityId}/members`, {
-    invite_code: params.inviteCode,
-  });
+  const { data } = await baseApi.post(`${BASE_URL}/${params.communityId}/members`);
   return await parseResponseUnsafe(data, CommunityResponseSchema.join);
 };
 
@@ -68,22 +66,52 @@ export const getCapabilities = async (params: CommunityRequest["getCapabilities"
   return await parseResponseUnsafe(data, CommunityResponseSchema.getCapabilities);
 };
 
-export const getInviteCode = async (params: CommunityRequest["getInviteCode"]) => {
-  const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/invite-code`);
-  return await parseResponseUnsafe(data, CommunityResponseSchema.getInviteCode);
+export const createDirectInvite = async (params: CommunityRequest["createDirectInvite"]) => {
+  const { data } = await baseApi.post(`${BASE_URL}/${params.communityId}/invites`, {
+    invitee_username: params.inviteeUsername,
+  });
+  return await parseResponseUnsafe(data, CommunityResponseSchema.createDirectInvite);
 };
 
-export const regenerateInviteCode = async (
-  params: CommunityRequest["regenerateInviteCode"],
-) => {
-  const { data } = await baseApi.post(
-    `${BASE_URL}/${params.communityId}/invite-code/regenerate`,
+export const createLinkInvite = async (params: CommunityRequest["createLinkInvite"]) => {
+  const { data } = await baseApi.post(`${BASE_URL}/${params.communityId}/invites/link`, {
+    expires_in_days: params.expiresInDays,
+    max_uses: params.maxUses,
+  });
+  return await parseResponseUnsafe(data, CommunityResponseSchema.createLinkInvite);
+};
+
+export const listCommunityInvites = async (params: CommunityRequest["listCommunityInvites"]) => {
+  const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/invites`);
+  return await parseResponseUnsafe(data, CommunityResponseSchema.listCommunityInvites);
+};
+
+export const listIncomingInvites = async () => {
+  const { data } = await baseApi.get(`${BASE_URL}/invites/inbox`);
+  return await parseResponseUnsafe(data, CommunityResponseSchema.listIncomingInvites);
+};
+
+export const respondToInvite = async (params: CommunityRequest["respondToInvite"]) => {
+  const { data } = await baseApi.patch(`${BASE_URL}/invites/${params.inviteId}`, {
+    accept: params.accept,
+  });
+  return await parseResponseUnsafe(data, CommunityResponseSchema.respondToInvite);
+};
+
+export const revokeInvite = async (params: CommunityRequest["revokeInvite"]) => {
+  const { data } = await baseApi.delete(
+    `${BASE_URL}/${params.communityId}/invites/${params.inviteId}`,
   );
-  return await parseResponseUnsafe(data, CommunityResponseSchema.regenerateInviteCode);
+  return await parseResponseUnsafe(data, CommunityResponseSchema.revokeInvite);
+};
+
+export const joinViaCode = async (params: CommunityRequest["joinViaCode"]) => {
+  const { data } = await baseApi.post(`${BASE_URL}/join/${params.code}`);
+  return await parseResponseUnsafe(data, CommunityResponseSchema.joinViaCode);
 };
 
 export const previewByInviteCode = async (params: CommunityRequest["previewByCode"]) => {
-  const { data } = await baseApi.get(`${BASE_URL}/invite/${params.code}`);
+  const { data } = await baseApi.get(`${BASE_URL}/join/${params.code}/preview`);
   return await parseResponseUnsafe(data, CommunityResponseSchema.previewByCode);
 };
 

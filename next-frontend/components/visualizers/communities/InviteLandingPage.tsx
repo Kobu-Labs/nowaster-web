@@ -8,8 +8,8 @@ import {
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { useInvitePreview } from "@/components/hooks/community/useInvitePreview";
-import { useJoinCommunity } from "@/components/hooks/community/useJoinCommunity";
+import { useJoinPreview } from "@/components/hooks/community/useJoinPreview";
+import { useJoinViaCode } from "@/components/hooks/community/useJoinViaCode";
 import { getInitials } from "@/lib/utils";
 import { Users } from "lucide-react";
 import Link from "next/link";
@@ -21,8 +21,8 @@ type InviteLandingPageProps = {
 };
 
 export const InviteLandingPage: FC<InviteLandingPageProps> = ({ code }) => {
-  const query = useInvitePreview(code);
-  const joinCommunity = useJoinCommunity();
+  const query = useJoinPreview(code);
+  const joinViaCode = useJoinViaCode();
   const router = useRouter();
 
   if (query.isPending) {
@@ -42,8 +42,8 @@ export const InviteLandingPage: FC<InviteLandingPageProps> = ({ code }) => {
           This invite link isn&apos;t valid
         </h1>
         <p className="text-muted-foreground">
-          The code may have been regenerated or the community may no longer
-          exist. Ask for a new invite link.
+          This invite link is no longer valid. Ask the community owner for a
+          new one.
         </p>
         <Button asChild variant="outline">
           <Link href="/home/communities">Back to Communities</Link>
@@ -75,17 +75,14 @@ export const InviteLandingPage: FC<InviteLandingPageProps> = ({ code }) => {
             members
           </p>
           <Button
-            disabled={joinCommunity.isPending}
-            loading={joinCommunity.isPending}
+            disabled={joinViaCode.isPending}
+            loading={joinViaCode.isPending}
             onClick={() => {
-              joinCommunity.mutate(
-                { communityId: preview.community_id, inviteCode: code },
-                {
-                  onSuccess: () => {
-                    router.push(`/home/communities/${preview.community_id}`);
-                  },
+              joinViaCode.mutate(code, {
+                onSuccess: () => {
+                  router.push(`/home/communities/${preview.community_id}`);
                 },
-              );
+              });
             }}
           >
             Join Community

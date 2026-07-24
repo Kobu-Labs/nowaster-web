@@ -1,10 +1,12 @@
 "use client";
 
+import { useInviteInbox } from "@/components/hooks/community/useInviteInbox";
 import { useMyCommunities } from "@/components/hooks/community/useMyCommunities";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { CommunityCard } from "@/components/visualizers/communities/CommunityCard";
 import { CreateCommunityDialog } from "@/components/visualizers/communities/CreateCommunityDialog";
+import { InviteInbox } from "@/components/visualizers/communities/InviteInbox";
 import { Users } from "lucide-react";
 import type { FC } from "react";
 
@@ -25,6 +27,7 @@ const CommunityCardSkeleton: FC = () => (
 
 export const CommunityList: FC = () => {
   const query = useMyCommunities();
+  const inboxQuery = useInviteInbox();
 
   return (
     <div className="w-full p-6 space-y-6">
@@ -38,6 +41,13 @@ export const CommunityList: FC = () => {
         </div>
         <CreateCommunityDialog />
       </div>
+
+      {!!inboxQuery.data?.length && (
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">Pending invites</h2>
+          <InviteInbox />
+        </div>
+      )}
 
       {query.isPending && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

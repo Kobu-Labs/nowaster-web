@@ -6,6 +6,8 @@ import type {
 } from "@/api/definitions/models/notification";
 import { BackupCompletedNotificationItem } from "@/components/notifications/items/BackupCompletedNotification";
 import { BackupFailedNotificationItem } from "@/components/notifications/items/BackupFailedNotification";
+import { CommunityInviteAcceptedNotificationItem } from "@/components/notifications/items/CommunityInviteAcceptedNotification";
+import { CommunityInviteReceivedNotificationItem } from "@/components/notifications/items/CommunityInviteReceivedNotification";
 import { FriendRequestAcceptedNotificationItem } from "@/components/notifications/items/FriendRequestAcceptedNotification";
 import { NewFriendRequestNotificationItem } from "@/components/notifications/items/NewFriendRequestNotification";
 import { NewReleaseNotificationItem } from "@/components/notifications/items/NewReleaseNotification";
@@ -89,6 +91,22 @@ const NotificationsRegistry: FC<NotificationItemProps> = (props) => {
     case "admin:sandbox:failed-deploy": {
       return (
         <SandboxFailedDeployNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "community:invite_accepted": {
+      return (
+        <CommunityInviteAcceptedNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "community:invite_received": {
+      return (
+        <CommunityInviteReceivedNotificationItem
           data={props.notification.data}
           {...props}
         />

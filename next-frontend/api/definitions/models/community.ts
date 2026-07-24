@@ -42,9 +42,28 @@ export const CommunityCapabilitiesSchema = z.object({
   can_delete_community: z.boolean(),
 });
 
-export const InviteCodeSchema = z.object({
-  code: z.string(),
-  updated_at: z.coerce.date<Date>(),
+export const CommunityInviteTypeSchema = z.enum(["direct", "link"]);
+export const CommunityInviteStatusSchema = z.enum([
+  "pending",
+  "accepted",
+  "declined",
+  "revoked",
+  "expired",
+]);
+
+export const CommunityInviteSchema = z.object({
+  id: z.uuid(),
+  community_id: z.uuid(),
+  community_name: z.string(),
+  invite_type: CommunityInviteTypeSchema,
+  status: CommunityInviteStatusSchema,
+  invited_user: UserSchema.nullable(),
+  code: z.string().nullable(),
+  created_by: UserSchema,
+  expires_at: z.coerce.date<Date>().nullable(),
+  max_uses: z.number().nullable(),
+  use_count: z.number(),
+  created_at: z.coerce.date<Date>(),
 });
 
 export const CommunityInvitePreviewSchema = z.object({
@@ -102,12 +121,14 @@ export type Community = z.infer<typeof CommunitySchema>;
 export type CommunityCapabilities = z.infer<typeof CommunityCapabilitiesSchema>;
 export type CommunityDashboard = z.infer<typeof CommunityDashboardSchema>;
 export type CommunityDataVisibility = z.infer<typeof CommunityDataVisibilitySchema>;
+export type CommunityInvite = z.infer<typeof CommunityInviteSchema>;
 export type CommunityInvitePreview = z.infer<typeof CommunityInvitePreviewSchema>;
+export type CommunityInviteStatus = z.infer<typeof CommunityInviteStatusSchema>;
+export type CommunityInviteType = z.infer<typeof CommunityInviteTypeSchema>;
 export type CommunityMember = z.infer<typeof CommunityMemberSchema>;
 export type CommunityMemberRole = z.infer<typeof CommunityMemberRoleSchema>;
 export type CommunityMembersPage = z.infer<typeof CommunityMembersPageSchema>;
 export type CommunityVisibilityType = z.infer<typeof CommunityVisibilityTypeSchema>;
 export type CommunityWithId = z.infer<typeof CommunityWithIdSchema>;
-export type InviteCode = z.infer<typeof InviteCodeSchema>;
 export type MemberContribution = z.infer<typeof MemberContributionSchema>;
 export type TrackedCategory = z.infer<typeof TrackedCategorySchema>;

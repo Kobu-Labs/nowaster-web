@@ -76,13 +76,17 @@ const communityKeys = createQueryKeys("communities", {
     queryFn: async () => await CommunityApi.getCapabilities({ communityId }),
     queryKey: [communityId, "capabilities"],
   }),
-  inviteCode: (communityId: string) => ({
-    queryFn: async () => await CommunityApi.getInviteCode({ communityId }),
-    queryKey: [communityId, "invite-code"],
+  invites: (communityId: string) => ({
+    queryFn: async () => await CommunityApi.listCommunityInvites({ communityId }),
+    queryKey: [communityId, "invites"],
   }),
-  invitePreview: (code: string) => ({
+  inbox: {
+    queryFn: async () => await CommunityApi.listIncomingInvites(),
+    queryKey: ["invite-inbox"],
+  },
+  joinPreview: (code: string) => ({
     queryFn: async () => await CommunityApi.previewByInviteCode({ code }),
-    queryKey: ["invite-preview", code],
+    queryKey: ["join-preview", code],
   }),
   trackedCategories: (communityId: string) => ({
     queryFn: async () =>

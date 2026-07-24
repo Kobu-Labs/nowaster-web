@@ -16,6 +16,8 @@ export const NotificationTypeSchema = z.enum([
   "admin:sandbox:failed-deploy",
   "admin:backup:completed",
   "admin:backup:failed",
+  "community:invite_received",
+  "community:invite_accepted",
 ]);
 
 export const FriendRequestDataSchema = z.object({
@@ -67,6 +69,19 @@ export const BackupFailedDataSchema = z.object({
   started_at: z.coerce.date().nullable(),
 });
 
+export const CommunityInviteReceivedDataSchema = z.object({
+  community_id: z.string(),
+  community_name: z.string(),
+  invite_id: z.string(),
+  inviter: UserSchema,
+});
+
+export const CommunityInviteAcceptedDataSchema = z.object({
+  accepter: UserSchema,
+  community_id: z.string(),
+  community_name: z.string(),
+});
+
 export const NotificationSourceSchema = z.discriminatedUnion("source_type", [
   z.object({
     source_data: UserSchema,
@@ -109,6 +124,14 @@ export const NotificationDataSchema = z.discriminatedUnion(
       data: BackupFailedDataSchema,
       notification_type: z.literal("admin:backup:failed"),
     }),
+    z.object({
+      data: CommunityInviteReceivedDataSchema,
+      notification_type: z.literal("community:invite_received"),
+    }),
+    z.object({
+      data: CommunityInviteAcceptedDataSchema,
+      notification_type: z.literal("community:invite_accepted"),
+    }),
   ],
 );
 
@@ -124,6 +147,12 @@ export const NotificationSchema = z
 
 export type BackupCompletedData = z.infer<typeof BackupCompletedDataSchema>;
 export type BackupFailedData = z.infer<typeof BackupFailedDataSchema>;
+export type CommunityInviteAcceptedData = z.infer<
+  typeof CommunityInviteAcceptedDataSchema
+>;
+export type CommunityInviteReceivedData = z.infer<
+  typeof CommunityInviteReceivedDataSchema
+>;
 export type FriendRequestAcceptedData = z.infer<
   typeof FriendRequestAcceptedDataSchema
 >;
