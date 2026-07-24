@@ -17,6 +17,8 @@ use crate::{
     router::clerk::Actor,
 };
 
+const LEADERBOARD_SIZE: i64 = 50;
+
 fn percentage_of(part: f64, total: f64) -> f64 {
     if total <= 0.0 {
         0.0
@@ -69,17 +71,18 @@ impl CommunityDashboardService {
             }
         }
 
-        let (total, categories, members) = tokio::join!(
+        let (total, categories, members, member_count) = tokio::join!(
             self.repo.get_total_minutes(community_id),
             self.repo.get_category_breakdown(community_id),
-            self.repo.get_member_contributions(community_id)
+            self.repo
+                .get_member_contributions(community_id, LEADERBOARD_SIZE),
+            self.community_repo.count_members(community_id)
         );
 
         let (total_minutes, total_sessions) = total?;
         let categories = categories?;
         let members = members?;
-
-        let member_count = members.len() as i64;
+        let member_count = member_count?;
 
         let categories = categories
             .into_iter()

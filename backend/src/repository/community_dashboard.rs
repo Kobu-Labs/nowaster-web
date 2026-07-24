@@ -104,10 +104,11 @@ impl CommunityDashboardRepository {
         Ok(rows)
     }
 
-    #[instrument(err, skip(self), fields(community_id = %community_id))]
+    #[instrument(err, skip(self), fields(community_id = %community_id, limit = %limit))]
     pub async fn get_member_contributions(
         &self,
         community_id: Uuid,
+        limit: i64,
     ) -> Result<Vec<MemberContributionRow>> {
         let rows = sqlx::query_as::<_, MemberContributionRow>(
             r#"
@@ -135,9 +136,11 @@ impl CommunityDashboardRepository {
                 WHERE cm.community_id = $1
                 GROUP BY cm.user_id, u.displayname, ua.current_thumb_url, ua.current_image_url, u.visibility_flags
                 ORDER BY total_minutes DESC, u.displayname ASC
+                LIMIT $2
             "#,
         )
         .bind(community_id)
+        .bind(limit)
         .fetch_all(self.db_conn.get_pool())
         .await?;
 

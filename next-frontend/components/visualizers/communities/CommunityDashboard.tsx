@@ -128,6 +128,19 @@ export const CommunityDashboard: FC<CommunityDashboardProps> = ({
 
       <div>
         <h3 className="mb-3 font-semibold">Member Contributions</h3>
+        {dashboard.members.length < dashboard.member_count && (
+          <p className="mb-2 text-sm text-muted-foreground">
+            Top
+            {" "}
+            {dashboard.members.length}
+            {" "}
+            of
+            {" "}
+            {dashboard.member_count}
+            {" "}
+            members by tracked time — see the Members tab for everyone.
+          </p>
+        )}
         <MemberContributionList members={dashboard.members} />
       </div>
     </div>
