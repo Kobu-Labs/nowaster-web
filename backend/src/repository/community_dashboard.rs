@@ -60,7 +60,7 @@ impl CommunityDashboardRepository {
                       AND s.end_time IS NOT NULL
                 )
                 SELECT
-                    COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60, 0) AS total_minutes,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time))) / 60, 0)::float8 AS total_minutes,
                     COUNT(*) AS session_count
                 FROM qualifying_sessions
             "#,
@@ -83,7 +83,7 @@ impl CommunityDashboardRepository {
                     tc.id AS tracked_category_id,
                     tc.name,
                     tc.color,
-                    COALESCE(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time))) / 60, 0) AS total_minutes,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (s.end_time - s.start_time))) / 60, 0)::float8 AS total_minutes,
                     COUNT(s.id) AS session_count
                 FROM community_tracked_category tc
                 LEFT JOIN community_category_mapping ccm
@@ -126,7 +126,7 @@ impl CommunityDashboardRepository {
                     ua.current_thumb_url AS avatar_thumb_url,
                     ua.current_image_url AS avatar_image_url,
                     u.visibility_flags,
-                    COALESCE(SUM(EXTRACT(EPOCH FROM (qs.end_time - qs.start_time))) / 60, 0) AS total_minutes,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (qs.end_time - qs.start_time))) / 60, 0)::float8 AS total_minutes,
                     COUNT(qs.id) AS session_count
                 FROM community_member cm
                 JOIN "user" u ON u.id = cm.user_id
