@@ -119,6 +119,72 @@ const RegenerateSection: FC = () => {
   );
 };
 
+const GrantGenerationsSection: FC = () => {
+  const [selectedUser, setSelectedUser] = useState<null | User>(null);
+  const [amount, setAmount] = useState<string>("20");
+  const { toast } = useToast();
+
+  const grant = useMutation({
+    mutationFn: () =>
+      AvatarApi.adminGrantGenerations({
+        amount: Number.parseInt(amount, 10),
+        userId: selectedUser?.id ?? "",
+      }),
+    onError: (e) =>
+      toast({
+        description: e instanceof Error ? e.message : "Failed",
+        title: "Error",
+        variant: "destructive",
+      }),
+    onSuccess: (updated) => {
+      toast({
+        description: `${selectedUser?.username} now has ${updated.availableGenerations} generation${updated.availableGenerations === 1 ? "" : "s"} available`,
+        title: "Granted",
+      });
+    },
+  });
+
+  const parsedAmount = Number.parseInt(amount, 10);
+  const isValidAmount = Number.isFinite(parsedAmount) && parsedAmount !== 0;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm text-muted-foreground">
+        Adds (or subtracts) generations from a user&apos;s balance. They&apos;ll
+        be notified.
+      </p>
+      <div className="flex gap-2">
+        <UserSearchPicker
+          onClear={() => setSelectedUser(null)}
+          onSelectUser={setSelectedUser}
+          selectedUser={selectedUser}
+        />
+        <Input
+          className="w-24"
+          onChange={(e) => setAmount(e.target.value)}
+          type="number"
+          value={amount}
+        />
+        <Button
+          disabled={!selectedUser || !isValidAmount || grant.isPending}
+          onClick={() => grant.mutate()}
+          size="sm"
+          variant="outline"
+        >
+          {grant.isPending
+            ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )
+            : (
+                <Plus className="mr-2 h-4 w-4" />
+              )}
+          Grant
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const ActivityDataPreview: FC<{ entries: ActivityEntry[]; }> = ({ entries }) => {
   if (entries.length === 0) {
     return (
@@ -332,14 +398,16 @@ const PlaygroundSection: FC = () => {
   );
 };
 
+const GENERATION_TABS = ["playground", "regenerate", "grant"] as const;
+
 const GenerationSection: FC = () => {
-  const [tab, setTab] = useState<"playground" | "regenerate">("playground");
+  const [tab, setTab] = useState<(typeof GENERATION_TABS)[number]>("playground");
 
   return (
     <div className="space-y-4">
       <h3 className="font-medium">Generation</h3>
       <div className="flex gap-1 rounded-lg bg-muted p-1 w-fit">
-        {(["playground", "regenerate"] as const).map((t) => (
+        {GENERATION_TABS.map((t) => (
           <button
             className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === t
@@ -350,11 +418,15 @@ const GenerationSection: FC = () => {
             onClick={() => setTab(t)}
             type="button"
           >
-            {t === "playground" ? "Playground" : "Regenerate for user"}
+            {t === "playground" && "Playground"}
+            {t === "regenerate" && "Regenerate for user"}
+            {t === "grant" && "Grant generations"}
           </button>
         ))}
       </div>
-      {tab === "playground" ? <PlaygroundSection /> : <RegenerateSection />}
+      {tab === "playground" && <PlaygroundSection />}
+      {tab === "regenerate" && <RegenerateSection />}
+      {tab === "grant" && <GrantGenerationsSection />}
     </div>
   );
 };

@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     dto::avatar::{
-        read_avatar::{ActivityEntryDto, ReadAvatarPresetDto, ReadGenerationRunDto},
+        read_avatar::{ActivityEntryDto, ReadAvatarPresetDto, ReadGenerationRunDto, ReadUserAvatarDto},
         write_avatar::{AdminGenerateAvatarDto, CreateAvatarPresetDto, UpdateAvatarPresetDto},
     },
     router::{admin::AdminUser, response::ApiResponse, root::AppState},
@@ -18,6 +18,10 @@ use crate::{
 pub fn admin_avatar_router() -> Router<AppState> {
     Router::new()
         .route("/users/{user_id}/generate", post(regenerate_for_user_handler))
+        .route(
+            "/users/{user_id}/generations/grant",
+            post(grant_generations_handler),
+        )
         .route("/generate", post(custom_generate_handler))
         .route("/playground", post(playground_generate_handler))
         .route("/playground/{user_id}/data", get(playground_data_handler))
@@ -51,6 +55,11 @@ struct ListRunsQuery {
 #[derive(Deserialize, Debug)]
 struct PlaygroundDataQuery {
     weeks: Option<i64>,
+}
+
+#[derive(Deserialize, Debug)]
+struct GrantGenerationsRequest {
+    amount: i32,
 }
 
 #[instrument(skip(state))]
@@ -103,6 +112,21 @@ async fn regenerate_for_user_handler(
     Path(user_id): Path<String>,
 ) -> ApiResponse<ReadGenerationRunDto> {
     ApiResponse::from_result(state.avatar_service.admin_trigger_generation(&user_id).await)
+}
+
+#[instrument(skip(state), fields(target_user_id = %user_id))]
+async fn grant_generations_handler(
+    State(state): State<AppState>,
+    AdminUser(admin): AdminUser,
+    Path(user_id): Path<String>,
+    axum::Json(payload): axum::Json<GrantGenerationsRequest>,
+) -> ApiResponse<ReadUserAvatarDto> {
+    ApiResponse::from_result(
+        state
+            .avatar_service
+            .admin_grant_generations(&user_id, payload.amount, &admin.user_id)
+            .await,
+    )
 }
 
 #[instrument(skip(state))]

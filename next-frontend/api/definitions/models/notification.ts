@@ -16,6 +16,7 @@ export const NotificationTypeSchema = z.enum([
   "admin:sandbox:failed-deploy",
   "admin:backup:completed",
   "admin:backup:failed",
+  "avatar:generations_granted",
   "community:invite_received",
   "community:invite_accepted",
 ]);
@@ -67,6 +68,10 @@ export const BackupFailedDataSchema = z.object({
   duration_seconds: z.number().nullable(),
   error_message: z.string().nullable(),
   started_at: z.coerce.date().nullable(),
+});
+
+export const AvatarGenerationsGrantedDataSchema = z.object({
+  amount: z.number(),
 });
 
 export const CommunityInviteReceivedDataSchema = z.object({
@@ -125,6 +130,10 @@ export const NotificationDataSchema = z.discriminatedUnion(
       notification_type: z.literal("admin:backup:failed"),
     }),
     z.object({
+      data: AvatarGenerationsGrantedDataSchema,
+      notification_type: z.literal("avatar:generations_granted"),
+    }),
+    z.object({
       data: CommunityInviteReceivedDataSchema,
       notification_type: z.literal("community:invite_received"),
     }),
@@ -145,6 +154,9 @@ export const NotificationSchema = z
   .and(NotificationSourceSchema)
   .and(NotificationDataSchema);
 
+export type AvatarGenerationsGrantedData = z.infer<
+  typeof AvatarGenerationsGrantedDataSchema
+>;
 export type BackupCompletedData = z.infer<typeof BackupCompletedDataSchema>;
 export type BackupFailedData = z.infer<typeof BackupFailedDataSchema>;
 export type CommunityInviteAcceptedData = z.infer<

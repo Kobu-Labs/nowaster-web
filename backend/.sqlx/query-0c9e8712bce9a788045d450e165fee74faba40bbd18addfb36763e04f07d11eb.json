@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                UPDATE user_avatar SET\n                    current_image_url  = $2,\n                    current_thumb_url  = $3,\n                    last_generated_at  = NOW(),\n                    next_generation_at = $4,\n                    updated_at         = NOW()\n                WHERE user_id = $1\n                RETURNING\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                ",
+  "query": "\n                UPDATE user_avatar SET\n                    base_preset_id = $2,\n                    updated_at = NOW()\n                WHERE user_id = $1\n                RETURNING\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    available_generations,\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                ",
   "describe": {
     "columns": [
       {
@@ -60,11 +60,16 @@
       },
       {
         "ordinal": 9,
+        "name": "available_generations",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "updated_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
@@ -72,9 +77,7 @@
     "parameters": {
       "Left": [
         "Text",
-        "Text",
-        "Text",
-        "Timestamptz"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -88,8 +91,9 @@
       true,
       true,
       false,
+      false,
       false
     ]
   },
-  "hash": "526db7e864dd5a6290788c2db393debc91396450a50473761504d1da4ea8c374"
+  "hash": "0c9e8712bce9a788045d450e165fee74faba40bbd18addfb36763e04f07d11eb"
 }

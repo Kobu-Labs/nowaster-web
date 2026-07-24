@@ -20,7 +20,8 @@
                 "project:completed",
                 "admin:sandbox:failed-deploy",
                 "admin:backup:completed",
-                "admin:backup:failed"
+                "admin:backup:failed",
+                "avatar:generations_granted"
               ]
             }
           }

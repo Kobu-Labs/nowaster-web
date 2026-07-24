@@ -126,7 +126,11 @@ impl AvatarPresetRepository {
     }
 
     #[instrument(err, skip(self), fields(preset_id = %id))]
-    pub async fn set_leonardo_init_image_id(&self, id: Uuid, leonardo_id: &str) -> Result<AvatarPreset> {
+    pub async fn set_leonardo_init_image_id(
+        &self,
+        id: Uuid,
+        leonardo_id: &str,
+    ) -> Result<AvatarPreset> {
         let preset = crate::named_query!(
             "avatar_preset_set_leonardo_id",
             sqlx::query_as!(
@@ -194,6 +198,7 @@ impl UserAvatarRepository {
                     is_enabled,
                     last_generated_at as "last_generated_at: DateTime<Utc>",
                     next_generation_at as "next_generation_at: DateTime<Utc>",
+                    available_generations,
                     created_at as "created_at: DateTime<Utc>",
                     updated_at as "updated_at: DateTime<Utc>"
                 FROM user_avatar WHERE user_id = $1
@@ -224,6 +229,7 @@ impl UserAvatarRepository {
                     is_enabled,
                     last_generated_at as "last_generated_at: DateTime<Utc>",
                     next_generation_at as "next_generation_at: DateTime<Utc>",
+                    available_generations,
                     created_at as "created_at: DateTime<Utc>",
                     updated_at as "updated_at: DateTime<Utc>"
                 "#,
@@ -236,12 +242,7 @@ impl UserAvatarRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn set_enabled(
-        &self,
-        user_id: &str,
-        enabled: bool,
-        next_generation_at: Option<DateTime<Utc>>,
-    ) -> Result<UserAvatar> {
+    pub async fn set_enabled(&self, user_id: &str, enabled: bool) -> Result<UserAvatar> {
         tracing::info!(user_id, enabled, "set_enabled: executing UPDATE");
         let avatar = crate::named_query!(
             "user_avatar_set_enabled",
@@ -250,7 +251,6 @@ impl UserAvatarRepository {
                 r#"
                 UPDATE user_avatar SET
                     is_enabled = $2,
-                    next_generation_at = COALESCE($3, next_generation_at),
                     updated_at = NOW()
                 WHERE user_id = $1
                 RETURNING
@@ -260,12 +260,12 @@ impl UserAvatarRepository {
                     is_enabled,
                     last_generated_at as "last_generated_at: DateTime<Utc>",
                     next_generation_at as "next_generation_at: DateTime<Utc>",
+                    available_generations,
                     created_at as "created_at: DateTime<Utc>",
                     updated_at as "updated_at: DateTime<Utc>"
                 "#,
                 user_id,
-                enabled,
-                next_generation_at
+                enabled
             )
             .fetch_one(self.db_conn.get_pool())
         )?;
@@ -291,6 +291,7 @@ impl UserAvatarRepository {
                     is_enabled,
                     last_generated_at as "last_generated_at: DateTime<Utc>",
                     next_generation_at as "next_generation_at: DateTime<Utc>",
+                    available_generations,
                     created_at as "created_at: DateTime<Utc>",
                     updated_at as "updated_at: DateTime<Utc>"
                 "#,
@@ -302,14 +303,15 @@ impl UserAvatarRepository {
         Ok(avatar)
     }
 
-    /// Called after a successful generation to update image URLs and reschedule.
+    /// Called after a successful generation to update image URLs. Decrements
+    /// `available_generations` unless `consume_quota` is false (admin bypass).
     #[instrument(err, skip(self))]
     pub async fn mark_generated(
         &self,
         user_id: &str,
         image_url: &str,
         thumb_url: &str,
-        next_generation_at: DateTime<Utc>,
+        consume_quota: bool,
     ) -> Result<UserAvatar> {
         let avatar = crate::named_query!(
             "user_avatar_mark_generated",
@@ -317,11 +319,14 @@ impl UserAvatarRepository {
                 UserAvatar,
                 r#"
                 UPDATE user_avatar SET
-                    current_image_url  = $2,
-                    current_thumb_url  = $3,
-                    last_generated_at  = NOW(),
-                    next_generation_at = $4,
-                    updated_at         = NOW()
+                    current_image_url    = $2,
+                    current_thumb_url    = $3,
+                    last_generated_at    = NOW(),
+                    available_generations = CASE WHEN $4
+                        THEN GREATEST(available_generations - 1, 0)
+                        ELSE available_generations
+                    END,
+                    updated_at           = NOW()
                 WHERE user_id = $1
                 RETURNING
                     id, user_id, base_preset_id,
@@ -330,44 +335,50 @@ impl UserAvatarRepository {
                     is_enabled,
                     last_generated_at as "last_generated_at: DateTime<Utc>",
                     next_generation_at as "next_generation_at: DateTime<Utc>",
+                    available_generations,
                     created_at as "created_at: DateTime<Utc>",
                     updated_at as "updated_at: DateTime<Utc>"
                 "#,
                 user_id,
                 image_url,
                 thumb_url,
-                next_generation_at
+                consume_quota
             )
             .fetch_one(self.db_conn.get_pool())
         )?;
         Ok(avatar)
     }
 
-    /// Returns all avatar rows where next_generation_at is due. Used by the cron worker.
+    /// Adds (or subtracts) `amount` from the user's generation balance,
+    /// clamped at zero. Used by admin grants.
     #[instrument(err, skip(self))]
-    pub async fn find_due_for_generation(&self) -> Result<Vec<UserAvatar>> {
-        let avatars = crate::named_query!(
-            "user_avatar_due_for_generation",
+    pub async fn admin_grant_generations(&self, user_id: &str, amount: i32) -> Result<UserAvatar> {
+        let avatar = crate::named_query!(
+            "user_avatar_admin_grant_generations",
             sqlx::query_as!(
                 UserAvatar,
                 r#"
-                SELECT
+                UPDATE user_avatar SET
+                    available_generations = GREATEST(available_generations + $2, 0),
+                    updated_at = NOW()
+                WHERE user_id = $1
+                RETURNING
                     id, user_id, base_preset_id,
                     current_image_url, current_thumb_url,
                     tier as "tier: AvatarTier",
                     is_enabled,
                     last_generated_at as "last_generated_at: DateTime<Utc>",
                     next_generation_at as "next_generation_at: DateTime<Utc>",
+                    available_generations,
                     created_at as "created_at: DateTime<Utc>",
                     updated_at as "updated_at: DateTime<Utc>"
-                FROM user_avatar
-                WHERE is_enabled = true
-                  AND next_generation_at <= NOW()
-                "#
+                "#,
+                user_id,
+                amount
             )
-            .fetch_all(self.db_conn.get_pool())
+            .fetch_one(self.db_conn.get_pool())
         )?;
-        Ok(avatars)
+        Ok(avatar)
     }
 }
 
@@ -828,12 +839,7 @@ impl CategoryHintRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn remove(
-        &self,
-        category_id: Uuid,
-        user_id: &str,
-        hint_id: Uuid,
-    ) -> Result<()> {
+    pub async fn remove(&self, category_id: Uuid, user_id: &str, hint_id: Uuid) -> Result<()> {
         crate::named_query!(
             "category_hint_remove",
             sqlx::query!(
@@ -851,11 +857,7 @@ impl CategoryHintRepository {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn list_for_category(
-        &self,
-        category_id: Uuid,
-        user_id: &str,
-    ) -> Result<Vec<Hint>> {
+    pub async fn list_for_category(&self, category_id: Uuid, user_id: &str) -> Result<Vec<Hint>> {
         let hints = crate::named_query!(
             "category_hint_list_for_category",
             sqlx::query_as!(
@@ -877,10 +879,7 @@ impl CategoryHintRepository {
 
     /// Returns all (category_id, hints) pairs for a user. Used to build the avatar page table.
     #[instrument(err, skip(self))]
-    pub async fn list_all_for_user(
-        &self,
-        user_id: &str,
-    ) -> Result<Vec<(Uuid, Hint)>> {
+    pub async fn list_all_for_user(&self, user_id: &str) -> Result<Vec<(Uuid, Hint)>> {
         #[derive(sqlx::FromRow)]
         struct Row {
             category_id: Uuid,

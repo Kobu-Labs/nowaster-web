@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO user_avatar (user_id)\n                VALUES ($1)\n                ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()\n                RETURNING\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                ",
+  "query": "\n                SELECT\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    available_generations,\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                FROM user_avatar WHERE user_id = $1\n                ",
   "describe": {
     "columns": [
       {
@@ -60,18 +60,23 @@
       },
       {
         "ordinal": 9,
+        "name": "available_generations",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "updated_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Varchar"
+        "Text"
       ]
     },
     "nullable": [
@@ -85,8 +90,9 @@
       true,
       true,
       false,
+      false,
       false
     ]
   },
-  "hash": "1c904dc0b72d49897779ab27dce7d5fd2cabce8cffcce1c12e0a6881be59e11a"
+  "hash": "0292750d7ce6624166031d402c41fecb986cade3cb09aa47d375d0198b03cf59"
 }

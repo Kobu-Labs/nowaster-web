@@ -48,6 +48,7 @@ pub struct UserAvatar {
     pub is_enabled: bool,
     pub last_generated_at: Option<DateTime<Utc>>,
     pub next_generation_at: Option<DateTime<Utc>>,
+    pub available_generations: i32,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

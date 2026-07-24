@@ -31,6 +31,7 @@ const adminUpdatePreset = AvatarPresetSchema;
 const adminDeletePreset = z.null();
 const adminUploadPresetToLeonardo = AvatarPresetSchema;
 const adminTriggerGeneration = GenerationRunSchema;
+const adminGrantGenerations = UserAvatarSchema;
 const adminGenerate = GenerationRunSchema;
 const adminPlaygroundGenerate = GenerationRunSchema;
 const adminListRecentRuns = z.array(GenerationRunSchema);
@@ -48,6 +49,7 @@ export const AvatarResponseSchema = {
   adminDeletePreset,
   adminGenerate,
   adminGetPlaygroundData,
+  adminGrantGenerations,
   adminListAllPresets,
   adminListRecentRuns,
   adminPlaygroundGenerate,

@@ -67,6 +67,8 @@ pub struct ReadUserAvatarDto {
     pub last_generated_at: Option<DateTime<Utc>>,
     #[serde(rename = "nextGenerationAt")]
     pub next_generation_at: Option<DateTime<Utc>>,
+    #[serde(rename = "availableGenerations")]
+    pub available_generations: i32,
     #[serde(rename = "updatedAt")]
     pub updated_at: DateTime<Utc>,
 }
@@ -83,6 +85,7 @@ impl From<UserAvatar> for ReadUserAvatarDto {
             is_enabled: e.is_enabled,
             last_generated_at: e.last_generated_at,
             next_generation_at: e.next_generation_at,
+            available_generations: e.available_generations,
             updated_at: e.updated_at,
         }
     }

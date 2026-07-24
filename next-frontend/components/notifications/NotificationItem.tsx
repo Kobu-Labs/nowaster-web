@@ -4,6 +4,8 @@ import type {
   Notification,
   SessionReactionAddedData,
 } from "@/api/definitions/models/notification";
+import { useMarkNotificationsSeen } from "@/components/hooks/notifications/useNotifications";
+import { AvatarGenerationsGrantedNotificationItem } from "@/components/notifications/items/AvatarGenerationsGrantedNotification";
 import { BackupCompletedNotificationItem } from "@/components/notifications/items/BackupCompletedNotification";
 import { BackupFailedNotificationItem } from "@/components/notifications/items/BackupFailedNotification";
 import { CommunityInviteAcceptedNotificationItem } from "@/components/notifications/items/CommunityInviteAcceptedNotification";
@@ -24,6 +26,8 @@ type NotificationHandlerProps = {
 };
 
 export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
+  const markSeenMutation = useMarkNotificationsSeen();
+
   const genericNotifications: Notification[] = [];
   const sessionReactionNotifications: Record<string, {
     notification: {
@@ -49,21 +53,37 @@ export const NotificationsHandler: FC<NotificationHandlerProps> = (props) => {
     }
   });
 
+  const markSeen = (ids: string[]) => {
+    if (ids.length > 0) {
+      markSeenMutation.mutate({ notification_ids: ids });
+    }
+  };
+
   return (
     <div className="divide-y">
       {genericNotifications.map((notification) => (
-        <NotificationsRegistry
+        <div
           key={notification.id}
-          notification={notification}
-        />
+          onClick={() => markSeen(notification.seen ? [] : [notification.id])}
+        >
+          <NotificationsRegistry notification={notification} />
+        </div>
       ))}
       {Object.entries(sessionReactionNotifications).map(
         ([session_id, notif]) => (
-          <SessionReactionAddedNotificationItem
+          <div
             key={session_id}
-            notifications={notif}
-            sessionId={session_id}
-          />
+            onClick={() => markSeen(
+              notif
+                .filter(({ notification }) => !notification.seen)
+                .map(({ notification }) => notification.id),
+            )}
+          >
+            <SessionReactionAddedNotificationItem
+              notifications={notif}
+              sessionId={session_id}
+            />
+          </div>
         ),
       )}
     </div>
@@ -91,6 +111,14 @@ const NotificationsRegistry: FC<NotificationItemProps> = (props) => {
     case "admin:sandbox:failed-deploy": {
       return (
         <SandboxFailedDeployNotificationItem
+          data={props.notification.data}
+          {...props}
+        />
+      );
+    }
+    case "avatar:generations_granted": {
+      return (
+        <AvatarGenerationsGrantedNotificationItem
           data={props.notification.data}
           {...props}
         />

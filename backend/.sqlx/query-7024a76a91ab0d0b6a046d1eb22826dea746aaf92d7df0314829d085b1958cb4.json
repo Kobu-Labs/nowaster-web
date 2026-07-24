@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                FROM user_avatar WHERE user_id = $1\n                ",
+  "query": "\n                UPDATE user_avatar SET\n                    is_enabled = $2,\n                    updated_at = NOW()\n                WHERE user_id = $1\n                RETURNING\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    available_generations,\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                ",
   "describe": {
     "columns": [
       {
@@ -60,18 +60,24 @@
       },
       {
         "ordinal": 9,
+        "name": "available_generations",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "updated_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Text"
+        "Text",
+        "Bool"
       ]
     },
     "nullable": [
@@ -85,8 +91,9 @@
       true,
       true,
       false,
+      false,
       false
     ]
   },
-  "hash": "6deec7f39a2989ea60280c51f81c7241143102b42e4365fb7d35bdac18573e56"
+  "hash": "7024a76a91ab0d0b6a046d1eb22826dea746aaf92d7df0314829d085b1958cb4"
 }

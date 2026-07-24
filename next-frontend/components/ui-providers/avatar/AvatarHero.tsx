@@ -66,8 +66,8 @@ export const AvatarHero: FC = () => {
   const hasPreset = !!avatar?.basePresetId;
   const isGenerating
     = generate.isPending || latestRun?.status === "running";
-  const onCooldown
-    = !!avatar?.nextGenerationAt && avatar.nextGenerationAt > new Date();
+  const availableGenerations = avatar?.availableGenerations ?? 0;
+  const outOfGenerations = availableGenerations <= 0;
   const settingUp = setPreset.isPending || enable.isPending;
 
   const handleDisable = async () => {
@@ -181,17 +181,15 @@ export const AvatarHero: FC = () => {
                         </p>
                       )}
 
-                      {avatar?.nextGenerationAt && (
-                        <p className="text-sm text-muted-foreground">
-                          {onCooldown
-                            ? `Next generation available ${format(avatar.nextGenerationAt, "PPP")}`
-                            : "Ready to regenerate"}
-                        </p>
-                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {outOfGenerations
+                          ? "No generations available"
+                          : `${availableGenerations} generation${availableGenerations === 1 ? "" : "s"} available`}
+                      </p>
 
                       <div className="flex items-center gap-2">
                         <Button
-                          disabled={isGenerating || onCooldown}
+                          disabled={isGenerating || outOfGenerations}
                           onClick={handleGenerate}
                           size="sm"
                           variant="outline"

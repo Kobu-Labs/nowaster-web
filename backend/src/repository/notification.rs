@@ -150,8 +150,11 @@ impl NotificationMapper {
             NotificationTypeSql::AdminBackupCompleted => Ok(
                 NotificationType::AdminBackupCompleted(serde_json::from_value(content)?),
             ),
-            NotificationTypeSql::AdminBackupFailed => Ok(
-                NotificationType::AdminBackupFailed(serde_json::from_value(content)?),
+            NotificationTypeSql::AdminBackupFailed => Ok(NotificationType::AdminBackupFailed(
+                serde_json::from_value(content)?,
+            )),
+            NotificationTypeSql::AvatarGenerationsGranted => Ok(
+                NotificationType::AvatarGenerationsGranted(serde_json::from_value(content)?),
             ),
             NotificationTypeSql::CommunityInviteReceived => Ok(
                 NotificationType::CommunityInviteReceived(serde_json::from_value(content)?),
@@ -200,6 +203,10 @@ impl NotificationMapper {
             )),
             NotificationType::AdminBackupFailed(data) => Ok((
                 NotificationTypeSql::AdminBackupFailed,
+                serde_json::to_value(data)?,
+            )),
+            NotificationType::AvatarGenerationsGranted(data) => Ok((
+                NotificationTypeSql::AvatarGenerationsGranted,
                 serde_json::to_value(data)?,
             )),
             NotificationType::CommunityInviteReceived(data) => Ok((

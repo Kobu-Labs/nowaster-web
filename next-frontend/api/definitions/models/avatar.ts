@@ -26,6 +26,7 @@ export const UserAvatarSchema = z.object({
   currentThumbUrl: z.string().nullable(),
   lastGeneratedAt: z.coerce.date<Date>().nullable(),
   nextGenerationAt: z.coerce.date<Date>().nullable(),
+  availableGenerations: z.number(),
   basePresetId: z.string().uuid().nullable(),
   updatedAt: z.coerce.date<Date>(),
 });

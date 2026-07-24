@@ -6,28 +6,33 @@ use uuid::Uuid;
 
 use crate::{
     config::database::{Database, DatabaseTrait},
-    dto::avatar::{
-        read_avatar::{
-            ReadAvatarPresetDto, ReadGenerationRunDto, ReadUserAvatarDto, ReadUserAvatarHistoryDto,
+    dto::{
+        avatar::{
+            read_avatar::{
+                ReadAvatarPresetDto, ReadGenerationRunDto, ReadUserAvatarDto,
+                ReadUserAvatarHistoryDto,
+            },
+            write_avatar::{AdminGenerationSource, CreateAvatarPresetDto, UpdateAvatarPresetDto},
         },
-        write_avatar::{AdminGenerationSource, CreateAvatarPresetDto, UpdateAvatarPresetDto},
+        notification::CreateNotificationDto,
     },
-    entity::avatar::{ActivityEntry, GenerationStatus, UserAvatar},
+    entity::{
+        avatar::{ActivityEntry, GenerationStatus, UserAvatar},
+        notification::{AvatarGenerationsGrantedData, NotificationSource, NotificationType},
+    },
     repository::avatar::{
         AvatarPresetRepository, CategoryHintRepository, GenerationRunRepository, HintRepository,
         UserAvatarHistoryRepository, UserAvatarRepository,
     },
     service::avatar::generator::upload_avatar_images,
+    service::notification_service::NotificationService,
+    service::user_service::UserService,
     Config,
 };
 
 // ---------------------------------------------------------------------------
 // Tier helpers — extend here when paid tier is implemented
 // ---------------------------------------------------------------------------
-
-fn regen_interval(_tier: &str) -> Duration {
-    Duration::weeks(1)
-}
 
 fn data_window(_tier: &str) -> Duration {
     Duration::weeks(1)
@@ -49,10 +54,18 @@ pub struct AvatarService {
     s3_client: aws_sdk_s3::Client,
     http_client: reqwest::Client,
     config: Arc<Config>,
+    notification_service: NotificationService,
+    user_service: UserService,
 }
 
 impl AvatarService {
-    pub fn new(db: &Arc<Database>, s3_client: aws_sdk_s3::Client, config: Arc<Config>) -> Self {
+    pub fn new(
+        db: &Arc<Database>,
+        s3_client: aws_sdk_s3::Client,
+        config: Arc<Config>,
+        notification_service: NotificationService,
+        user_service: UserService,
+    ) -> Self {
         Self {
             db: Arc::clone(db),
             avatar_repo: UserAvatarRepository::new(db),
@@ -64,6 +77,8 @@ impl AvatarService {
             s3_client,
             http_client: reqwest::Client::new(),
             config,
+            notification_service,
+            user_service,
         }
     }
 
@@ -184,9 +199,9 @@ impl AvatarService {
         run_id: Uuid,
         user_id: &str,
         input_data: &[ActivityEntry],
-        tier: &str,
         base_preset_id: Option<Uuid>,
         assign: bool,
+        consume_quota: bool,
     ) -> Result<(Uuid, String, String)> {
         let preset = if let Some(preset_id) = base_preset_id {
             self.preset_repo.find_by_id(preset_id).await?
@@ -197,8 +212,13 @@ impl AvatarService {
         let preset = match preset {
             Some(p) => p,
             None => {
-                self.run_repo.set_failed(run_id, "No preset selected").await?;
-                anyhow::bail!("Cannot generate avatar: no preset selected for user {}", user_id);
+                self.run_repo
+                    .set_failed(run_id, "No preset selected")
+                    .await?;
+                anyhow::bail!(
+                    "Cannot generate avatar: no preset selected for user {}",
+                    user_id
+                );
             }
         };
 
@@ -226,7 +246,11 @@ impl AvatarService {
             .await
             .context("Failed to upload preset image to Leonardo")?;
 
-            if let Err(e) = self.preset_repo.set_leonardo_init_image_id(preset.id, &id).await {
+            if let Err(e) = self
+                .preset_repo
+                .set_leonardo_init_image_id(preset.id, &id)
+                .await
+            {
                 tracing::warn!(preset_id = %preset.id, "Failed to cache Leonardo init image ID: {}", e);
             }
 
@@ -274,9 +298,8 @@ impl AvatarService {
             .await?;
 
         if assign {
-            let next_generation_at = Utc::now() + regen_interval(tier);
             self.avatar_repo
-                .mark_generated(user_id, &image_url, &thumb_url, next_generation_at)
+                .mark_generated(user_id, &image_url, &thumb_url, consume_quota)
                 .await?;
             self.history_repo
                 .insert(user_id, &image_url, &thumb_url, run_id)
@@ -292,13 +315,20 @@ impl AvatarService {
         &self,
         user_id: &str,
         input_data: &[ActivityEntry],
-        tier: &str,
         base_preset_id: Option<Uuid>,
         assign: bool,
+        consume_quota: bool,
     ) -> Result<(Uuid, String, String)> {
         let run_id = self.create_pending_run(user_id).await?;
-        self.execute_generation(run_id, user_id, input_data, tier, base_preset_id, assign)
-            .await
+        self.execute_generation(
+            run_id,
+            user_id,
+            input_data,
+            base_preset_id,
+            assign,
+            consume_quota,
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -317,10 +347,7 @@ impl AvatarService {
         let tier = format!("{:?}", avatar.tier).to_lowercase();
         let base_preset_id = avatar.base_preset_id;
 
-        let updated = self
-            .avatar_repo
-            .set_enabled(user_id, true, Some(Utc::now()))
-            .await?;
+        let updated = self.avatar_repo.set_enabled(user_id, true).await?;
 
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
@@ -331,7 +358,14 @@ impl AvatarService {
                 let user_id = user_id.to_string();
                 tokio::spawn(async move {
                     if let Err(e) = service
-                        .execute_generation(run_id, &user_id, &input_data, &tier, base_preset_id, true)
+                        .execute_generation(
+                            run_id,
+                            &user_id,
+                            &input_data,
+                            base_preset_id,
+                            true,
+                            true,
+                        )
                         .await
                     {
                         tracing::error!(user_id, "Immediate generation on enable failed: {:#}", e);
@@ -347,7 +381,7 @@ impl AvatarService {
     #[instrument(err, skip(self))]
     pub async fn disable(&self, user_id: &str) -> Result<ReadUserAvatarDto> {
         self.avatar_repo.upsert(user_id).await?;
-        let updated = self.avatar_repo.set_enabled(user_id, false, None).await?;
+        let updated = self.avatar_repo.set_enabled(user_id, false).await?;
         Ok(ReadUserAvatarDto::from(updated))
     }
 
@@ -371,11 +405,8 @@ impl AvatarService {
             anyhow::bail!("Avatar is disabled");
         }
 
-        if let Some(next_at) = avatar.next_generation_at {
-            if next_at > Utc::now() {
-                let secs = (next_at - Utc::now()).num_seconds().max(0);
-                anyhow::bail!("Generation on cooldown — available in {}s", secs);
-            }
+        if avatar.available_generations <= 0 {
+            anyhow::bail!("No generations available");
         }
 
         if let Some(latest) = self.run_repo.get_latest_for_user(user_id).await? {
@@ -394,7 +425,14 @@ impl AvatarService {
         let spawned_user_id = user_id.to_string();
         tokio::spawn(async move {
             if let Err(e) = service
-                .execute_generation(run_id, &spawned_user_id, &input_data, &tier, base_preset_id, true)
+                .execute_generation(
+                    run_id,
+                    &spawned_user_id,
+                    &input_data,
+                    base_preset_id,
+                    true,
+                    true,
+                )
                 .await
             {
                 tracing::error!(user_id = %spawned_user_id, "Background generation failed: {:#}", e);
@@ -452,7 +490,10 @@ impl AvatarService {
     // -----------------------------------------------------------------------
 
     #[instrument(err, skip(self))]
-    pub async fn search_hints(&self, query: &str) -> Result<Vec<crate::dto::avatar::read_avatar::ReadHintDto>> {
+    pub async fn search_hints(
+        &self,
+        query: &str,
+    ) -> Result<Vec<crate::dto::avatar::read_avatar::ReadHintDto>> {
         let hints = self.hint_repo.search(query, 20).await?;
         Ok(hints
             .into_iter()
@@ -461,7 +502,10 @@ impl AvatarService {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn create_hint(&self, label: &str) -> Result<crate::dto::avatar::read_avatar::ReadHintDto> {
+    pub async fn create_hint(
+        &self,
+        label: &str,
+    ) -> Result<crate::dto::avatar::read_avatar::ReadHintDto> {
         let hint = self.hint_repo.create(label).await?;
         Ok(crate::dto::avatar::read_avatar::ReadHintDto::from(hint))
     }
@@ -539,10 +583,7 @@ impl AvatarService {
     #[instrument(err, skip(self))]
     pub async fn list_active_presets(&self) -> Result<Vec<ReadAvatarPresetDto>> {
         let presets = self.preset_repo.list_active().await?;
-        Ok(presets
-            .into_iter()
-            .map(ReadAvatarPresetDto::from)
-            .collect())
+        Ok(presets.into_iter().map(ReadAvatarPresetDto::from).collect())
     }
 
     // -----------------------------------------------------------------------
@@ -550,16 +591,13 @@ impl AvatarService {
     // -----------------------------------------------------------------------
 
     #[instrument(err, skip(self))]
-    pub async fn admin_trigger_generation(
-        &self,
-        user_id: &str,
-    ) -> Result<ReadGenerationRunDto> {
+    pub async fn admin_trigger_generation(&self, user_id: &str) -> Result<ReadGenerationRunDto> {
         let (avatar, tier) = self.get_avatar_and_tier(user_id).await?;
 
         let window_start = Utc::now() - data_window(&tier);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
 
-        self.run_generation_pipeline(user_id, &input_data, &tier, avatar.base_preset_id, true)
+        self.run_generation_pipeline(user_id, &input_data, avatar.base_preset_id, true, false)
             .await?;
 
         let run = self
@@ -592,15 +630,23 @@ impl AvatarService {
                 let window_start = Utc::now() - data_window(&tier);
                 let data = self.aggregate_input_data(user_id, window_start).await?;
                 let target_user_id = assign_to_user_id.unwrap_or(user_id).to_string();
-                let reusable = if target_user_id == *user_id { Some(avatar) } else { None };
+                let reusable = if target_user_id == *user_id {
+                    Some(avatar)
+                } else {
+                    None
+                };
                 (data, target_user_id, reusable)
             }
             AdminGenerationSource::Manual { data } => {
-                let user_id = assign_to_user_id
-                    .ok_or_else(|| anyhow::anyhow!("assign_to_user_id required for manual source"))?;
+                let user_id = assign_to_user_id.ok_or_else(|| {
+                    anyhow::anyhow!("assign_to_user_id required for manual source")
+                })?;
                 let entries = data
                     .iter()
-                    .map(|d| ActivityEntry { label: d.label.clone(), hours: d.hours })
+                    .map(|d| ActivityEntry {
+                        label: d.label.clone(),
+                        hours: d.hours,
+                    })
                     .collect();
                 (entries, user_id.to_string(), None)
             }
@@ -614,10 +660,15 @@ impl AvatarService {
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("No avatar row found for target user"))?,
         };
-        let tier = format!("{:?}", avatar.tier).to_lowercase();
 
-        self.run_generation_pipeline(&target_user_id, &input_data, &tier, avatar.base_preset_id, true)
-            .await?;
+        self.run_generation_pipeline(
+            &target_user_id,
+            &input_data,
+            avatar.base_preset_id,
+            true,
+            false,
+        )
+        .await?;
 
         let run = self
             .run_repo
@@ -626,6 +677,41 @@ impl AvatarService {
             .ok_or_else(|| anyhow::anyhow!("Run not found after generation"))?;
 
         Ok(ReadGenerationRunDto::from(run))
+    }
+
+    /// Adjusts a user's generation balance (e.g. "+20 runs") and notifies them.
+    /// Does not touch quota consumed by other flows — this is a direct add/subtract.
+    #[instrument(err, skip(self))]
+    pub async fn admin_grant_generations(
+        &self,
+        user_id: &str,
+        amount: i32,
+        granted_by_actor_id: &str,
+    ) -> Result<ReadUserAvatarDto> {
+        self.avatar_repo.upsert(user_id).await?;
+        let updated = self
+            .avatar_repo
+            .admin_grant_generations(user_id, amount)
+            .await?;
+
+        if let Some(admin_dto) = self
+            .user_service
+            .get_user_by_id(granted_by_actor_id)
+            .await?
+        {
+            let dto = CreateNotificationDto {
+                user_id: user_id.to_string(),
+                source: NotificationSource::User(admin_dto),
+                notification_type: NotificationType::AvatarGenerationsGranted(
+                    AvatarGenerationsGrantedData { amount },
+                ),
+            };
+            if let Err(e) = self.notification_service.create_notification(dto).await {
+                tracing::warn!(user_id, "Failed to notify user of generation grant: {}", e);
+            }
+        }
+
+        Ok(ReadUserAvatarDto::from(updated))
     }
 
     #[instrument(err, skip(self))]
@@ -643,11 +729,8 @@ impl AvatarService {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn admin_playground_generate(
-        &self,
-        user_id: &str,
-    ) -> Result<ReadGenerationRunDto> {
-        let (avatar, tier) = self.get_avatar_and_tier(user_id).await?;
+    pub async fn admin_playground_generate(&self, user_id: &str) -> Result<ReadGenerationRunDto> {
+        let (avatar, _tier) = self.get_avatar_and_tier(user_id).await?;
         // Use a wider window for playground so admin can test users with sparse recent activity.
         let window_start = Utc::now() - Duration::weeks(13);
         let input_data = self.aggregate_input_data(user_id, window_start).await?;
@@ -656,10 +739,14 @@ impl AvatarService {
         // Swallow pipeline errors — the run record has the error_message set via set_failed.
         // Pre-pipeline errors (avatar/data lookup) propagate normally above.
         if let Err(e) = self
-            .run_generation_pipeline(user_id, &input_data, &tier, avatar.base_preset_id, false)
+            .run_generation_pipeline(user_id, &input_data, avatar.base_preset_id, false, false)
             .await
         {
-            tracing::warn!(user_id, "Playground pipeline failed (returning run record): {:#}", e);
+            tracing::warn!(
+                user_id,
+                "Playground pipeline failed (returning run record): {:#}",
+                e
+            );
         }
 
         self.run_repo
@@ -670,10 +757,7 @@ impl AvatarService {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn admin_list_recent_runs(
-        &self,
-        limit: i64,
-    ) -> Result<Vec<ReadGenerationRunDto>> {
+    pub async fn admin_list_recent_runs(&self, limit: i64) -> Result<Vec<ReadGenerationRunDto>> {
         let runs = self.run_repo.list_all_recent(limit).await?;
         Ok(runs.into_iter().map(ReadGenerationRunDto::from).collect())
     }
@@ -681,10 +765,7 @@ impl AvatarService {
     #[instrument(err, skip(self))]
     pub async fn admin_list_all_presets(&self) -> Result<Vec<ReadAvatarPresetDto>> {
         let presets = self.preset_repo.list_all().await?;
-        Ok(presets
-            .into_iter()
-            .map(ReadAvatarPresetDto::from)
-            .collect())
+        Ok(presets.into_iter().map(ReadAvatarPresetDto::from).collect())
     }
 
     #[instrument(err, skip(self))]

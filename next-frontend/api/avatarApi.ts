@@ -153,6 +153,16 @@ export const adminTriggerGeneration = async (
   return parseResponseUnsafe(data, AvatarResponseSchema.adminTriggerGeneration);
 };
 
+export const adminGrantGenerations = async (
+  params: AvatarRequest["adminGrantGenerations"],
+) => {
+  const { data } = await baseApi.post(
+    `${ADMIN_URL}/users/${params.userId}/generations/grant`,
+    { amount: params.amount },
+  );
+  return parseResponseUnsafe(data, AvatarResponseSchema.adminGrantGenerations);
+};
+
 export const adminGenerateFromUser = async (
   params: AvatarRequest["adminGenerateFromUser"],
 ) => {

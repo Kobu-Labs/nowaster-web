@@ -55,6 +55,11 @@ const adminTriggerGeneration = z.object({
   userId: z.string(),
 });
 
+const adminGrantGenerations = z.object({
+  userId: z.string(),
+  amount: z.number().int(),
+});
+
 const adminGenerateFromUser = z.object({
   type: z.literal("user"),
   userId: z.string(),
@@ -78,6 +83,7 @@ export const AvatarRequestSchema = {
   adminDeletePreset,
   adminGenerateFromUser,
   adminGenerateManual,
+  adminGrantGenerations,
   adminTriggerGeneration,
   adminUpdatePreset,
   adminUploadPresetToLeonardo,

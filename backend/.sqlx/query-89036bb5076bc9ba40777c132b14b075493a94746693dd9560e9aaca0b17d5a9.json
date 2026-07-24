@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                FROM user_avatar\n                WHERE is_enabled = true\n                  AND next_generation_at <= NOW()\n                ",
+  "query": "\n                UPDATE user_avatar SET\n                    current_image_url    = $2,\n                    current_thumb_url    = $3,\n                    last_generated_at    = NOW(),\n                    available_generations = CASE WHEN $4\n                        THEN GREATEST(available_generations - 1, 0)\n                        ELSE available_generations\n                    END,\n                    updated_at           = NOW()\n                WHERE user_id = $1\n                RETURNING\n                    id, user_id, base_preset_id,\n                    current_image_url, current_thumb_url,\n                    tier as \"tier: AvatarTier\",\n                    is_enabled,\n                    last_generated_at as \"last_generated_at: DateTime<Utc>\",\n                    next_generation_at as \"next_generation_at: DateTime<Utc>\",\n                    available_generations,\n                    created_at as \"created_at: DateTime<Utc>\",\n                    updated_at as \"updated_at: DateTime<Utc>\"\n                ",
   "describe": {
     "columns": [
       {
@@ -60,17 +60,27 @@
       },
       {
         "ordinal": 9,
+        "name": "available_generations",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
         "name": "created_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "updated_at: DateTime<Utc>",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
+      ]
     },
     "nullable": [
       false,
@@ -83,8 +93,9 @@
       true,
       true,
       false,
+      false,
       false
     ]
   },
-  "hash": "47695077eecbb33a8fc5cbcbd16278e7b0fda4293a3b0dab8ac00a7df45f7b55"
+  "hash": "89036bb5076bc9ba40777c132b14b075493a94746693dd9560e9aaca0b17d5a9"
 }

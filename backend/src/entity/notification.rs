@@ -47,6 +47,10 @@ pub enum NotificationTypeSql {
     #[serde(rename = "admin:backup:failed")]
     AdminBackupFailed,
 
+    #[sqlx(rename = "avatar:generations_granted")]
+    #[serde(rename = "avatar:generations_granted")]
+    AvatarGenerationsGranted,
+
     #[sqlx(rename = "community:invite_received")]
     #[serde(rename = "community:invite_received")]
     CommunityInviteReceived,
@@ -142,6 +146,9 @@ pub enum NotificationType {
     #[serde(rename = "admin:backup:failed")]
     AdminBackupFailed(BackupFailedData),
 
+    #[serde(rename = "avatar:generations_granted")]
+    AvatarGenerationsGranted(AvatarGenerationsGrantedData),
+
     #[serde(rename = "community:invite_received")]
     CommunityInviteReceived(CommunityInviteReceivedData),
 
@@ -168,6 +175,11 @@ pub struct BackupFailedData {
     pub error_message: Option<String>,
     pub duration_seconds: Option<i32>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct AvatarGenerationsGrantedData {
+    pub amount: i32,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
