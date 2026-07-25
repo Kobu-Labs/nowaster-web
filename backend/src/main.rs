@@ -46,6 +46,11 @@ async fn main() {
         .await
         .unwrap_or_else(|e| panic!("Database error: {}", e));
 
+    if std::env::args().nth(1).as_deref() == Some("seed-dev") {
+        seeding::dev::run(&Arc::new(db), &config.server.app_env).await;
+        return;
+    }
+
     let pool = db.get_pool().clone();
     tokio::spawn(metrics_worker(metrics_rx, pool));
 
