@@ -8,6 +8,7 @@ import {
   TagApi,
   TasksApi,
 } from "@/api";
+import type { CommunityRequest } from "@/api/definitions";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import {
   createQueryKeys,
@@ -100,6 +101,14 @@ const communityKeys = createQueryKeys("communities", {
   dashboard: (communityId: string) => ({
     queryFn: async () => await CommunityApi.getDashboard({ communityId }),
     queryKey: [communityId, "dashboard"],
+  }),
+  discover: (params: CommunityRequest["discoverCommunities"]) => ({
+    queryFn: async () => await CommunityApi.discoverCommunities(params),
+    queryKey: [params],
+  }),
+  categoryAutocomplete: (prefix: string) => ({
+    queryFn: async () => await CommunityApi.autocompleteCategories({ prefix }),
+    queryKey: [prefix],
   }),
 });
 

@@ -8,6 +8,7 @@ import {
   CommunityMemberSchema,
   CommunityMembersPageSchema,
   CommunityWithIdSchema,
+  DiscoverCommunitiesResultSchema,
   TrackedCategorySchema,
 } from "@/api/definitions/models/community";
 
@@ -39,6 +40,8 @@ export const CommunityResponseSchema = {
   listMyMappings: z.array(CategoryMappingSchema),
   deleteMapping: z.null(),
   getDashboard: CommunityDashboardSchema,
+  discoverCommunities: DiscoverCommunitiesResultSchema,
+  autocompleteCategories: z.array(z.string()),
 };
 export type CommunityResponse = {
   [Property in keyof typeof CommunityResponseSchema]: z.infer<

@@ -115,6 +115,24 @@ export const CommunityDashboardSchema = z.object({
   generated_at: z.coerce.date<Date>(),
 });
 
+export const DiscoverySortSchema = z.enum(["members", "activity", "newest"]);
+
+export const CommunitySearchResultSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  avatar_url: z.string().nullable(),
+  member_count: z.number(),
+  recent_activity_minutes: z.number(),
+  is_member: z.boolean(),
+  created_at: z.coerce.date<Date>(),
+});
+
+export const DiscoverCommunitiesResultSchema = z.object({
+  results: z.array(CommunitySearchResultSchema),
+  total_count: z.number(),
+});
+
 export type CategoryBreakdown = z.infer<typeof CategoryBreakdownSchema>;
 export type CategoryMapping = z.infer<typeof CategoryMappingSchema>;
 export type Community = z.infer<typeof CommunitySchema>;
@@ -128,7 +146,10 @@ export type CommunityInviteType = z.infer<typeof CommunityInviteTypeSchema>;
 export type CommunityMember = z.infer<typeof CommunityMemberSchema>;
 export type CommunityMemberRole = z.infer<typeof CommunityMemberRoleSchema>;
 export type CommunityMembersPage = z.infer<typeof CommunityMembersPageSchema>;
+export type CommunitySearchResult = z.infer<typeof CommunitySearchResultSchema>;
 export type CommunityVisibilityType = z.infer<typeof CommunityVisibilityTypeSchema>;
 export type CommunityWithId = z.infer<typeof CommunityWithIdSchema>;
+export type DiscoverCommunitiesResult = z.infer<typeof DiscoverCommunitiesResultSchema>;
+export type DiscoverySort = z.infer<typeof DiscoverySortSchema>;
 export type MemberContribution = z.infer<typeof MemberContributionSchema>;
 export type TrackedCategory = z.infer<typeof TrackedCategorySchema>;

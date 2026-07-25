@@ -182,3 +182,27 @@ export const getDashboard = async (params: CommunityRequest["getDashboard"]) => 
   const { data } = await baseApi.get(`${BASE_URL}/${params.communityId}/dashboard`);
   return await parseResponseUnsafe(data, CommunityResponseSchema.getDashboard);
 };
+
+export const discoverCommunities = async (
+  params: CommunityRequest["discoverCommunities"],
+) => {
+  const { data } = await baseApi.get(`${BASE_URL}/discover`, {
+    params: {
+      query: params.query,
+      category: params.category,
+      sort: params.sort,
+      limit: params.limit,
+      offset: params.offset,
+    },
+  });
+  return await parseResponseUnsafe(data, CommunityResponseSchema.discoverCommunities);
+};
+
+export const autocompleteCategories = async (
+  params: CommunityRequest["autocompleteCategories"],
+) => {
+  const { data } = await baseApi.get(`${BASE_URL}/discover/categories`, {
+    params: { prefix: params.prefix },
+  });
+  return await parseResponseUnsafe(data, CommunityResponseSchema.autocompleteCategories);
+};

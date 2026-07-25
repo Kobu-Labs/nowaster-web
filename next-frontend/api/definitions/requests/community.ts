@@ -3,6 +3,7 @@ import {
   CommunityDataVisibilitySchema,
   CommunityMemberRoleSchema,
   CommunityVisibilityTypeSchema,
+  DiscoverySortSchema,
 } from "@/api/definitions/models/community";
 
 const create = z.object({
@@ -81,6 +82,17 @@ const listMyMappings = z.object({ communityId: z.uuid() });
 
 const getDashboard = z.object({ communityId: z.uuid() });
 
+const discoverCommunities = z.object({
+  query: z.string().trim().min(1).optional(),
+  category: z.string().trim().min(1).optional(),
+  sort: DiscoverySortSchema.optional(),
+  limit: z.number().int().positive().optional(),
+  offset: z.number().int().nonnegative().optional(),
+});
+const autocompleteCategories = z.object({
+  prefix: z.string().trim().min(1),
+});
+
 export const CommunityRequestSchema = {
   create,
   update,
@@ -108,6 +120,8 @@ export const CommunityRequestSchema = {
   deleteMapping,
   listMyMappings,
   getDashboard,
+  discoverCommunities,
+  autocompleteCategories,
 };
 export type CommunityRequest = {
   [Property in keyof typeof CommunityRequestSchema]: z.infer<

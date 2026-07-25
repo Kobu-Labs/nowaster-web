@@ -2,12 +2,14 @@
 
 import { useInviteInbox } from "@/components/hooks/community/useInviteInbox";
 import { useMyCommunities } from "@/components/hooks/community/useMyCommunities";
+import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { CommunityCard } from "@/components/visualizers/communities/CommunityCard";
 import { CreateCommunityDialog } from "@/components/visualizers/communities/CreateCommunityDialog";
 import { InviteInbox } from "@/components/visualizers/communities/InviteInbox";
-import { Users } from "lucide-react";
+import { Compass, Users } from "lucide-react";
+import Link from "next/link";
 import type { FC } from "react";
 
 const CommunityCardSkeleton: FC = () => (
@@ -39,7 +41,15 @@ export const CommunityList: FC = () => {
             things.
           </p>
         </div>
-        <CreateCommunityDialog />
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/home/communities/discover">
+              <Compass className="mr-2 h-4 w-4" />
+              Discover
+            </Link>
+          </Button>
+          <CreateCommunityDialog />
+        </div>
       </div>
 
       {!!inboxQuery.data?.length && (
