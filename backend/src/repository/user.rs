@@ -238,11 +238,9 @@ impl UserRepository {
     }
 
     pub async fn get_admin_ids(&self) -> Result<Vec<String>> {
-        let ids = sqlx::query_scalar!(
-            r#"SELECT id FROM "user" WHERE role = 'admin'"#
-        )
-        .fetch_all(self.db_conn.get_pool())
-        .await?;
+        let ids = sqlx::query_scalar!(r#"SELECT id FROM "user" WHERE role = 'admin'"#)
+            .fetch_all(self.db_conn.get_pool())
+            .await?;
         Ok(ids)
     }
 

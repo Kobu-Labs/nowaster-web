@@ -447,10 +447,7 @@ impl FeedRepository {
     }
 
     #[instrument(err, skip(self), fields(user_id = %user_id))]
-    pub async fn get_user_subscriptions(
-        &self,
-        user_id: &str,
-    ) -> Result<Vec<FeedSubscriptionRow>> {
+    pub async fn get_user_subscriptions(&self, user_id: &str) -> Result<Vec<FeedSubscriptionRow>> {
         let results = crate::named_query!(
             "feed_user_subscriptions",
             sqlx::query_as!(

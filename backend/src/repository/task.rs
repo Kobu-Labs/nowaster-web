@@ -140,7 +140,9 @@ impl TaskRepositoryTrait for TaskRepository {
 
         let rows = crate::named_query!(
             "task_filter",
-            query.build_query_as::<ReadTaskRow>().fetch_all(self.db_conn.get_pool())
+            query
+                .build_query_as::<ReadTaskRow>()
+                .fetch_all(self.db_conn.get_pool())
         )?;
 
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())

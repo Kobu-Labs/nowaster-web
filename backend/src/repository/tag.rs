@@ -171,7 +171,11 @@ impl TagRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn filter_tags(&self, filter: TagFilterDto, actor: &Actor) -> Result<Vec<TagDetails>> {
+    pub async fn filter_tags(
+        &self,
+        filter: TagFilterDto,
+        actor: &Actor,
+    ) -> Result<Vec<TagDetails>> {
         let mut query: QueryBuilder<'_, Postgres> = QueryBuilder::new(
             r#"
                 SELECT 

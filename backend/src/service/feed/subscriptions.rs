@@ -2,7 +2,9 @@ use anyhow::Result;
 use tracing::instrument;
 
 use crate::{
-    dto::feed::{AddFeedSource, ReadFeedSubscriptionDto, RemoveFeedSource, UpdateFeedSubscriptionDto},
+    dto::feed::{
+        AddFeedSource, ReadFeedSubscriptionDto, RemoveFeedSource, UpdateFeedSubscriptionDto,
+    },
     entity::feed::FeedEventSource,
     repository::{feed::FeedRepository, user::UserRepository},
     router::clerk::Actor,
@@ -31,12 +33,23 @@ impl FeedSubscriptionService {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    pub async fn get_user_subscriptions(&self, actor: &Actor) -> Result<Vec<ReadFeedSubscriptionDto>> {
-        let rows = self.feed_repo.get_user_subscriptions(&actor.user_id).await?;
+    pub async fn get_user_subscriptions(
+        &self,
+        actor: &Actor,
+    ) -> Result<Vec<ReadFeedSubscriptionDto>> {
+        let rows = self
+            .feed_repo
+            .get_user_subscriptions(&actor.user_id)
+            .await?;
 
         let user_ids: Vec<String> = rows
             .iter()
-            .filter(|r| matches!(r.source_type, crate::repository::feed::FeedSourceSqlType::User))
+            .filter(|r| {
+                matches!(
+                    r.source_type,
+                    crate::repository::feed::FeedSourceSqlType::User
+                )
+            })
             .map(|r| r.source_id.clone())
             .collect();
 

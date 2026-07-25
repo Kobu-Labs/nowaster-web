@@ -35,10 +35,7 @@ impl StopwatchSessionService {
     ) -> Result<ReadStopwatchSessionDto> {
         let category = match dto.clone().category {
             Some(cat) => {
-                let a = self
-                    .category_service
-                    .upsert_category(cat, actor)
-                    .await?;
+                let a = self.category_service.upsert_category(cat, actor).await?;
                 Some(a)
             }
             None => None,

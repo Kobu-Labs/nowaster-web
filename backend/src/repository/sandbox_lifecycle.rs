@@ -155,13 +155,15 @@ impl SandboxLifecycleRepository {
         .await
     }
 
-    pub async fn create_guest_user_pool(&self, count: usize) -> Result<Vec<(String, String)>, sqlx::Error> {
-        let current_count: i64 = sqlx::query_scalar!(
-            r#"SELECT COUNT(*) FROM "user" WHERE id LIKE 'guest_%'"#,
-        )
-        .fetch_one(self.db_conn.get_pool())
-        .await?
-        .unwrap_or(0);
+    pub async fn create_guest_user_pool(
+        &self,
+        count: usize,
+    ) -> Result<Vec<(String, String)>, sqlx::Error> {
+        let current_count: i64 =
+            sqlx::query_scalar!(r#"SELECT COUNT(*) FROM "user" WHERE id LIKE 'guest_%'"#,)
+                .fetch_one(self.db_conn.get_pool())
+                .await?
+                .unwrap_or(0);
 
         let mut created: Vec<(String, String)> = Vec::new();
 

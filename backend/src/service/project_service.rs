@@ -8,13 +8,16 @@ use crate::{
         project::{
             create_project::CreateProjectDto,
             filter_project::FilterProjectDto,
-            read_project::{ProjectStatsDto, ReadProjectDto, ReadProjectDetailsDto},
+            read_project::{ProjectStatsDto, ReadProjectDetailsDto, ReadProjectDto},
             update_project::UpdateProjectDto,
         },
         session::filter_session::FilterSessionDto,
     },
     entity::{
-        feed::{CategoryTimeBreakdown, FeedEventSource, FeedEventType, ProjectEventData, TaskTimeBreakdown},
+        feed::{
+            CategoryTimeBreakdown, FeedEventSource, FeedEventType, ProjectEventData,
+            TaskTimeBreakdown,
+        },
         project::Project,
     },
     repository::{
@@ -22,7 +25,10 @@ use crate::{
         project::{ProjectRepository, ProjectRepositoryTrait},
     },
     router::clerk::Actor,
-    service::{feed::events::FeedEventService, session::fixed::FixedSessionService, task_service::TaskService, user_service::UserService},
+    service::{
+        feed::events::FeedEventService, session::fixed::FixedSessionService,
+        task_service::TaskService, user_service::UserService,
+    },
 };
 
 #[derive(Clone)]
@@ -137,8 +143,7 @@ impl ProjectService {
                 std::collections::HashMap::new();
 
             for session in sessions {
-                let duration_minutes =
-                    (session.end_time - session.start_time).num_minutes() as f64;
+                let duration_minutes = (session.end_time - session.start_time).num_minutes() as f64;
                 category_map
                     .entry(session.category.id)
                     .and_modify(|(_, _, minutes)| *minutes += duration_minutes)
@@ -188,10 +193,7 @@ impl ProjectService {
     }
 
     #[instrument(err, skip(self), fields(actor = %actor))]
-    pub async fn get_projects_details(
-        &self,
-        actor: &Actor,
-    ) -> Result<Vec<ReadProjectDetailsDto>> {
+    pub async fn get_projects_details(&self, actor: &Actor) -> Result<Vec<ReadProjectDetailsDto>> {
         self.repo.get_projects_details(actor).await
     }
 

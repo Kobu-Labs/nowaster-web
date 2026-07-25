@@ -90,9 +90,7 @@ impl TaskService {
             .await?;
 
         let task_ids: Vec<Uuid> = project_tasks.iter().map(|task| task.id).collect();
-        self.repo
-            .get_tasks_details_by_ids(task_ids, actor)
-            .await
+        self.repo.get_tasks_details_by_ids(task_ids, actor).await
     }
 
     #[instrument(err, skip(self), fields(task_id = %task_id, actor = %actor))]
@@ -140,10 +138,7 @@ impl TaskService {
                 .await?;
 
             if let Some(task_detail) = task_details.first() {
-                let project = self
-                    .project_repo
-                    .find_by_id(res.project_id, actor)
-                    .await?;
+                let project = self.project_repo.find_by_id(res.project_id, actor).await?;
 
                 let user = self
                     .user_service

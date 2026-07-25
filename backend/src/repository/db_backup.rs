@@ -2,7 +2,10 @@ use anyhow::Result;
 use std::sync::Arc;
 use tracing::instrument;
 
-use crate::{config::database::{Database, DatabaseTrait}, entity::db_backup::DbBackup};
+use crate::{
+    config::database::{Database, DatabaseTrait},
+    entity::db_backup::DbBackup,
+};
 
 #[derive(Clone)]
 pub struct DbBackupRepository {

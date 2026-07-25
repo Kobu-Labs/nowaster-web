@@ -27,10 +27,7 @@ impl FeedEventService {
         query: FeedQueryDto,
         actor: &Actor,
     ) -> Result<Vec<ReadFeedEventDto>> {
-        let events = self
-            .feed_repository
-            .get_feed(&actor.user_id, query)
-            .await?;
+        let events = self.feed_repository.get_feed(&actor.user_id, query).await?;
 
         if events.is_empty() {
             return Ok(vec![]);

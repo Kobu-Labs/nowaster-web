@@ -252,10 +252,7 @@ impl FriendServiceTrait for FriendService {
             status: FriendRequestStatus::Accepted,
         };
 
-        let request = self
-            .repo
-            .get_friend_request(dto.request_id, actor)
-            .await?;
+        let request = self.repo.get_friend_request(dto.request_id, actor).await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
@@ -308,10 +305,7 @@ impl FriendServiceTrait for FriendService {
             status: FriendRequestStatus::Rejected,
         };
 
-        let request = self
-            .repo
-            .get_friend_request(dto.request_id, actor)
-            .await?;
+        let request = self.repo.get_friend_request(dto.request_id, actor).await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(
@@ -340,10 +334,7 @@ impl FriendServiceTrait for FriendService {
             status: FriendRequestStatus::Cancelled,
         };
 
-        let request = self
-            .repo
-            .get_friend_request(dto.request_id, actor)
-            .await?;
+        let request = self.repo.get_friend_request(dto.request_id, actor).await?;
 
         if request.status != FriendRequestStatus::Pending {
             return Err(anyhow::anyhow!(

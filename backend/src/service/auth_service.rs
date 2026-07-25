@@ -9,7 +9,10 @@ use crate::{
     auth::{
         generate_access_token, generate_refresh_token, revoke_refresh_token, validate_refresh_token,
     },
-    config::{database::{Database, DatabaseTrait}, env::AppEnvironment},
+    config::{
+        database::{Database, DatabaseTrait},
+        env::AppEnvironment,
+    },
     repository::{
         auth::{
             api_tokens::{ApiTokenRecord, ApiTokenRepository},
@@ -168,7 +171,12 @@ impl AuthService {
             "🔐 [AUTH] ✅ OAuth login completed successfully! New user: {}",
             is_new_user
         );
-        Ok((access_token, refresh_token, user_id_str.to_string(), is_new_user))
+        Ok((
+            access_token,
+            refresh_token,
+            user_id_str.to_string(),
+            is_new_user,
+        ))
     }
 
     /// Refresh access token using refresh token

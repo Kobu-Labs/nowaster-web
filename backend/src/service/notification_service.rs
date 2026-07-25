@@ -266,7 +266,9 @@ impl NotificationService {
                     system_name: "Nowaster Sandbox".to_string(),
                 }),
                 notification_type: NotificationType::AdminSandboxFailedDeploy(
-                    SandboxFailedDeployData { sandbox_lifecycle_id },
+                    SandboxFailedDeployData {
+                        sandbox_lifecycle_id,
+                    },
                 ),
             };
 

@@ -41,12 +41,12 @@ pub trait ProjectRepositoryTrait {
     async fn update(&self, dto: UpdateProjectDto, actor: &Actor) -> Result<Project>;
     async fn find_by_id(&self, id: Uuid, actor: &Actor) -> Result<Project>;
     async fn delete_project(&self, id: Uuid, actor: &Actor) -> Result<()>;
-    async fn filter_projects(&self, filter: FilterProjectDto, actor: &Actor)
-        -> Result<Vec<Project>>;
-    async fn get_projects_details(
+    async fn filter_projects(
         &self,
+        filter: FilterProjectDto,
         actor: &Actor,
-    ) -> Result<Vec<ReadProjectDetailsDto>>;
+    ) -> Result<Vec<Project>>;
+    async fn get_projects_details(&self, actor: &Actor) -> Result<Vec<ReadProjectDetailsDto>>;
     async fn get_project_statistics(&self, actor: &Actor) -> Result<ProjectStatsDto>;
     fn new(db: &Arc<Database>) -> Self;
     fn mapper(&self, row: ReadProjectRow) -> Project;
@@ -143,7 +143,9 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
         let rows = crate::named_query!(
             "project_filter",
-            query.build_query_as::<ReadProjectRow>().fetch_all(self.db.get_pool())
+            query
+                .build_query_as::<ReadProjectRow>()
+                .fetch_all(self.db.get_pool())
         )?;
 
         Ok(rows.into_iter().map(|row| self.mapper(row)).collect())
@@ -226,10 +228,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     #[instrument(err, skip(self), fields(actor_id = %actor))]
-    async fn get_projects_details(
-        &self,
-        actor: &Actor,
-    ) -> Result<Vec<ReadProjectDetailsDto>> {
+    async fn get_projects_details(&self, actor: &Actor) -> Result<Vec<ReadProjectDetailsDto>> {
         let rows = crate::named_query!(
             "project_details",
             sqlx::query_as!(

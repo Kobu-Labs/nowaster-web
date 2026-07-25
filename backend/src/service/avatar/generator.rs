@@ -51,8 +51,9 @@ pub async fn upload_init_image(
     // Upload bytes to the presigned S3 URL returned by Leonardo
     let fields_map: serde_json::Map<String, serde_json::Value> = match &data.fields {
         serde_json::Value::Object(m) => m.clone(),
-        serde_json::Value::String(s) => serde_json::from_str(s)
-            .context("Failed to parse init-image fields JSON string")?,
+        serde_json::Value::String(s) => {
+            serde_json::from_str(s).context("Failed to parse init-image fields JSON string")?
+        }
         other => anyhow::bail!("init-image fields has unexpected type: {}", other),
     };
 
@@ -215,7 +216,11 @@ struct GeneratedImage {
 
 const MAX_CONSECUTIVE_POLL_ERRORS: u32 = 5;
 
-async fn poll_until_complete(client: &Client, api_key: &str, generation_id: &str) -> Result<String> {
+async fn poll_until_complete(
+    client: &Client,
+    api_key: &str,
+    generation_id: &str,
+) -> Result<String> {
     let mut consecutive_errors = 0u32;
 
     for _ in 0..MAX_POLLS {
@@ -223,7 +228,10 @@ async fn poll_until_complete(client: &Client, api_key: &str, generation_id: &str
 
         let poll_body_result = async {
             client
-                .get(format!("{}/v1/generations/{}", LEONARDO_BASE, generation_id))
+                .get(format!(
+                    "{}/v1/generations/{}",
+                    LEONARDO_BASE, generation_id
+                ))
                 .bearer_auth(api_key)
                 .send()
                 .await?
@@ -241,7 +249,12 @@ async fn poll_until_complete(client: &Client, api_key: &str, generation_id: &str
             }
             Err(e) => {
                 consecutive_errors += 1;
-                tracing::warn!(generation_id, consecutive_errors, "Transient error polling Leonardo generation status: {:#}", e);
+                tracing::warn!(
+                    generation_id,
+                    consecutive_errors,
+                    "Transient error polling Leonardo generation status: {:#}",
+                    e
+                );
                 if consecutive_errors >= MAX_CONSECUTIVE_POLL_ERRORS {
                     return Err(e.context("Too many consecutive polling errors"));
                 }
@@ -265,7 +278,11 @@ async fn poll_until_complete(client: &Client, api_key: &str, generation_id: &str
             "FAILED" => anyhow::bail!("Leonardo generation FAILED"),
             "PENDING" => {}
             other => {
-                tracing::warn!(generation_id, status = other, "Unrecognized Leonardo generation status while polling");
+                tracing::warn!(
+                    generation_id,
+                    status = other,
+                    "Unrecognized Leonardo generation status while polling"
+                );
             }
         }
     }
@@ -302,11 +319,17 @@ pub async fn generate_avatar_with_init_id(
             guidances: Guidances {
                 image_reference: vec![
                     ImageReference {
-                        image: ImageRefId { id: preset_init_id.to_string(), image_type: "UPLOADED" },
+                        image: ImageRefId {
+                            id: preset_init_id.to_string(),
+                            image_type: "UPLOADED",
+                        },
                         strength: "HIGH",
                     },
                     ImageReference {
-                        image: ImageRefId { id: layout_reference_id.to_string(), image_type: "UPLOADED" },
+                        image: ImageRefId {
+                            id: layout_reference_id.to_string(),
+                            image_type: "UPLOADED",
+                        },
                         strength: "HIGH",
                     },
                 ],
@@ -324,7 +347,10 @@ pub async fn generate_avatar_with_init_id(
         .error_for_status()
         .context("Failed to submit generation request")?;
 
-    let gen_body = gen_response.text().await.context("Failed to read generation response body")?;
+    let gen_body = gen_response
+        .text()
+        .await
+        .context("Failed to read generation response body")?;
     tracing::debug!(body = %gen_body, "Leonardo /v2/generations raw response");
 
     let job: GenerationJobResp = serde_json::from_str(&gen_body)
@@ -401,7 +427,11 @@ pub async fn upload_preset_image_to_s3(
     let id = Uuid::new_v4();
     let image_key = format!("presets/{}.{}", id, extension);
     let thumb_key = format!("presets/{}_thumb.jpg", id);
-    let content_type = if extension == "jpg" { "image/jpeg".to_string() } else { format!("image/{}", extension) };
+    let content_type = if extension == "jpg" {
+        "image/jpeg".to_string()
+    } else {
+        format!("image/{}", extension)
+    };
 
     upload_full_and_thumb(
         client,
@@ -451,7 +481,13 @@ pub fn crop_center_100x100(image_bytes: &[u8]) -> Result<Vec<u8>> {
     const CROP_H: u32 = 690;
 
     if w < CROP_W || h < CROP_H {
-        anyhow::bail!("image too small to crop: {}x{} is smaller than the {}x{} crop region", w, h, CROP_W, CROP_H);
+        anyhow::bail!(
+            "image too small to crop: {}x{} is smaller than the {}x{} crop region",
+            w,
+            h,
+            CROP_W,
+            CROP_H
+        );
     }
 
     let cx = w / 2;

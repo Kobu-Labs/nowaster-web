@@ -13,7 +13,9 @@ use crate::{
             stopwatch_session::ReadStopwatchSessionDto,
         },
     },
-    entity::feed::{FeedEventSource, FeedEventType, FeedSessionProject, FeedSessionTask, SessionEventData},
+    entity::feed::{
+        FeedEventSource, FeedEventType, FeedSessionProject, FeedSessionTask, SessionEventData,
+    },
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         project::{ProjectRepository, ProjectRepositoryTrait},
