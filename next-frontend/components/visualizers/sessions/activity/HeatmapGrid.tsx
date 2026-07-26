@@ -93,6 +93,7 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
   }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrolledYearRef = useRef<null | number>(null);
   const [hover, setHover] = useState<Hover | null>(null);
 
   // Unified render model: a plain week is just a column with no gap/label of
@@ -215,9 +216,19 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
   }, [cellSize, columnOffsets, columns]);
 
   // Scrolls the current year's grid to bring today's column into view. Only
-  // runs once the grid actually reflects the current year and has mounted.
+  // runs once per year, after a real container width has been measured -
+  // columnOffsets otherwise get a new reference on every resize (the gap
+  // stretches to fill available width), which would keep resetting the
+  // user's manual scroll position back to today on every window resize or
+  // sidebar toggle.
   useEffect(() => {
-    if (displayYear !== CURRENT_YEAR || isPending || !scrollRef.current) {
+    if (
+      displayYear !== CURRENT_YEAR
+      || isPending
+      || containerWidth === null
+      || !scrollRef.current
+      || scrolledYearRef.current === displayYear
+    ) {
       return;
     }
     const container = scrollRef.current;
@@ -231,7 +242,8 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
       0,
       (columnOffsets[todayColumnIndex] ?? 0) - container.clientWidth / 2,
     );
-  }, [columnOffsets, columns, displayYear, isPending]);
+    scrolledYearRef.current = displayYear;
+  }, [columnOffsets, columns, containerWidth, displayYear, isPending]);
 
   // Event delegation instead of a handler per cell - keeps the ~365 cell
   // elements themselves as plain, prop-stable divs.
