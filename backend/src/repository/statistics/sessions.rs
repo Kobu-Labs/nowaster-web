@@ -1,8 +1,10 @@
 use crate::{
     config::database::{Database, DatabaseTrait},
+    dto::statistics::daily_activity::DailyActivity,
     router::clerk::Actor,
 };
 use anyhow::Result;
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -118,5 +120,70 @@ impl StatisticsRepository {
         )?;
 
         Ok(result.unwrap_or(0) as u16)
+    }
+
+    // INFO: AT TIME ZONE accepts a bound parameter, so this never risks SQL
+    // injection even before validation - the validation exists purely to
+    // silently fall back to UTC on an unrecognized zone, per product decision.
+    async fn resolve_timezone<'a>(&self, timezone: Option<&'a str>) -> Result<&'a str> {
+        let requested_tz = timezone.unwrap_or("UTC");
+
+        let is_valid_tz = crate::named_query!(
+            "stats_validate_timezone",
+            sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM pg_timezone_names WHERE name = $1) as "exists!""#,
+                requested_tz,
+            )
+            .fetch_one(self.db_conn.get_pool())
+        )?;
+
+        Ok(if is_valid_tz { requested_tz } else { "UTC" })
+    }
+
+    pub async fn get_daily_activity(
+        &self,
+        actor: &Actor,
+        timezone: Option<&str>,
+        from: Option<DateTime<Utc>>,
+        to: Option<DateTime<Utc>>,
+    ) -> Result<Vec<DailyActivity>> {
+        let tz = self.resolve_timezone(timezone).await?;
+
+        // Defaults preserve the original rolling-last-year behavior when the
+        // caller doesn't need an arbitrary window (e.g. a specific past year).
+        let range_start = from.unwrap_or_else(|| Utc::now() - Duration::days(370));
+        let range_end = to.unwrap_or_else(Utc::now);
+
+        let rows = crate::named_query!(
+            "stats_daily_activity",
+            sqlx::query!(
+                r#"
+                SELECT
+                    (session.start_time AT TIME ZONE $2)::date AS "day!",
+                    CAST(COALESCE(SUM(EXTRACT(EPOCH FROM (session.end_time - session.start_time)) / 60), 0) AS FLOAT8) AS "minutes!",
+                    COUNT(*) AS "session_count!"
+                FROM session
+                WHERE session.user_id = $1
+                    AND session.start_time >= $3
+                    AND session.start_time < $4
+                GROUP BY 1
+                ORDER BY 1
+            "#,
+                actor.user_id,
+                tz,
+                range_start,
+                range_end,
+            )
+            .fetch_all(self.db_conn.get_pool())
+        )?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| DailyActivity {
+                date: row.day,
+                minutes: row.minutes,
+                session_count: row.session_count,
+            })
+            .collect())
     }
 }

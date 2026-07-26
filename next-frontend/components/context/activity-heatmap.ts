@@ -1,0 +1,19 @@
+import type { HeatmapCell, MonthLabel } from "@/lib/activity-heatmap";
+import type { Dispatch, SetStateAction } from "react";
+import { createContext } from "react";
+
+export type ActivityHeatmapContextType = {
+  displayYear: number;
+  isError: boolean;
+  isFetching: boolean;
+  isPending: boolean;
+  monthLabels: MonthLabel[];
+  selectedYear: number;
+  setSelectedYear: Dispatch<SetStateAction<number>>;
+  totalMinutes: number;
+  weeks: HeatmapCell[][];
+};
+
+export const ActivityHeatmapContext = createContext<
+  ActivityHeatmapContextType | undefined
+>(undefined);

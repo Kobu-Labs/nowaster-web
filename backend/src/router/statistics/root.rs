@@ -1,9 +1,15 @@
 use axum::routing::get;
-use axum::{extract::State, Router};
+use axum::{
+    extract::{Query, State},
+    Router,
+};
+use chrono::{DateTime, Utc};
+use serde::Deserialize;
 use tokio::try_join;
 use tracing::instrument;
 
 use crate::dto::statistics::dashboard::DashboardData;
+use crate::dto::statistics::daily_activity::DailyActivity;
 use crate::repository::statistics::sessions::ReadColorsDto;
 use crate::router::clerk::Actor;
 use crate::router::response::ApiResponse;
@@ -13,6 +19,7 @@ pub fn statistics_router() -> Router<AppState> {
     Router::new()
         .route("/dashboard", get(get_dashboard_data))
         .route("/colors", get(get_colors))
+        .route("/daily-activity", get(get_daily_activity))
 }
 
 #[instrument( skip(state), fields(user_id = %actor))]
@@ -20,6 +27,31 @@ async fn get_colors(State(state): State<AppState>, actor: Actor) -> ApiResponse<
     let result = state.statistics_service.get_colors(&actor).await;
     match result {
         Ok(colors) => ApiResponse::Success { data: colors },
+        Err(e) => ApiResponse::Error {
+            message: e.to_string(),
+        },
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct DailyActivityQuery {
+    from: Option<DateTime<Utc>>,
+    timezone: Option<String>,
+    to: Option<DateTime<Utc>>,
+}
+
+#[instrument( skip(state), fields(user_id = %actor))]
+async fn get_daily_activity(
+    State(state): State<AppState>,
+    actor: Actor,
+    Query(params): Query<DailyActivityQuery>,
+) -> ApiResponse<Vec<DailyActivity>> {
+    let result = state
+        .statistics_service
+        .get_daily_activity(&actor, params.timezone.as_deref(), params.from, params.to)
+        .await;
+    match result {
+        Ok(data) => ApiResponse::Success { data },
         Err(e) => ApiResponse::Error {
             message: e.to_string(),
         },
