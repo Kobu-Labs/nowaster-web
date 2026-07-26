@@ -75,19 +75,33 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
 
   // Available width can change from a card resize, a sidebar toggle, or the
   // viewport itself - re-measure whenever it does, not just on mount.
+  // Coalesced to one state update per animation frame - during a drag-resize
+  // or a sidebar collapse animation, ResizeObserver can fire many times per
+  // frame, and without this each tick would re-run the cell-size search loop
+  // and column layout math, causing visible jank.
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) {
       return;
     }
+    let frame: null | number = null;
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width;
-      if (width !== undefined) {
-        setContainerWidth(width);
+      if (width === undefined) {
+        return;
       }
+      if (frame !== null) {
+        cancelAnimationFrame(frame);
+      }
+      frame = requestAnimationFrame(() => {
+        setContainerWidth(width);
+      });
     });
     observer.observe(el);
     return () => {
+      if (frame !== null) {
+        cancelAnimationFrame(frame);
+      }
       observer.disconnect();
     };
   }, []);
