@@ -25,11 +25,7 @@ export const ActivityHeatmap: FC = () => {
       </div>
 
       <div className="flex justify-center">
-        <HeatmapGrid
-          desktopCellSize={19}
-          onDaySelect={setSelectedDate}
-          showMonthSeparators
-        />
+        <HeatmapGrid desktopCellSize={19} onDaySelect={setSelectedDate} />
       </div>
 
       <DayDetailDialog

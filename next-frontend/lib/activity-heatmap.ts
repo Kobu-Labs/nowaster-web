@@ -26,11 +26,6 @@ export type HeatmapRange = {
   start: Date;
 };
 
-export type MonthLabel = {
-  label: string;
-  weekIndex: number;
-};
-
 export const CURRENT_YEAR = new Date().getFullYear();
 
 const dateKey = (date: Date) => format(date, "yyyy-MM-dd");
@@ -94,7 +89,7 @@ const computeTier = (minutes: number, breakpoints: number[]): number => {
 export const buildActivityHeatmap = (
   activity: DailyActivityPoint[],
   range: HeatmapRange,
-): { monthLabels: MonthLabel[]; weeks: HeatmapCell[][]; } => {
+): { weeks: HeatmapCell[][]; } => {
   const endDate = startOfDay(range.end);
   const startDate = startOfDay(range.start);
 
@@ -141,21 +136,7 @@ export const buildActivityHeatmap = (
     weeks.push(cells.slice(i, i + 7));
   }
 
-  const monthLabels: MonthLabel[] = [];
-  let lastMonth = -1;
-  weeks.forEach((week, weekIndex) => {
-    const firstRealDay = week.find((cell) => cell.date !== null);
-    if (!firstRealDay?.date) {
-      return;
-    }
-    const month = firstRealDay.date.getMonth();
-    if (month !== lastMonth) {
-      monthLabels.push({ label: format(firstRealDay.date, "MMM"), weekIndex });
-      lastMonth = month;
-    }
-  });
-
-  return { monthLabels, weeks };
+  return { weeks };
 };
 
 const EMPTY_CELL: HeatmapCell = { date: null, minutes: 0, sessionCount: 0, tier: -1 };

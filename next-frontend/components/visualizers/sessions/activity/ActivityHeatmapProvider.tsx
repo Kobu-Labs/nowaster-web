@@ -41,7 +41,7 @@ export const ActivityHeatmapProvider: FC<PropsWithChildren> = ({ children }) => 
     setDisplayYear(selectedYear);
   }
 
-  const { monthLabels, weeks } = useMemo(
+  const { weeks } = useMemo(
     () =>
       buildActivityHeatmap(
         (data ?? []).map((point) => ({
@@ -65,7 +65,6 @@ export const ActivityHeatmapProvider: FC<PropsWithChildren> = ({ children }) => 
         displayYear,
         isError,
         isPending,
-        monthLabels,
         selectedYear,
         setSelectedYear,
         totalMinutes,

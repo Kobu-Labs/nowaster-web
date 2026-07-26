@@ -59,15 +59,10 @@ type HeatmapGridProps = {
   // never needs to scroll. Mobile always uses its own touch-sized default.
   desktopCellSize?: number;
   onDaySelect: (date: Date) => void;
-  // Feature-flagged: leaves an actual gap between the last column of one
-  // month and the first of the next, splitting any week that straddles a
-  // month boundary so the gap lands on the real date. Off by default since
-  // it's an aesthetic option, not every consumer wants it.
-  showMonthSeparators?: boolean;
 };
 
 export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
-  const { displayYear, isPending, monthLabels, weeks } = useActivityHeatmap();
+  const { displayYear, isPending, weeks } = useActivityHeatmap();
   const isMobile = useIsMobile();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -110,20 +105,10 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
   const scrolledYearRef = useRef<null | number>(null);
   const [hover, setHover] = useState<Hover | null>(null);
 
-  // Unified render model: a plain week is just a column with no gap/label of
-  // its own (labels for the non-split case come from the existing
-  // week-indexed monthLabels), while splitWeeksByMonth produces columns with
-  // accurate isMonthStart/monthLabel for the flag-on case.
-  const columns: HeatmapColumn[] = useMemo(() => {
-    if (props.showMonthSeparators) {
-      return splitWeeksByMonth(weeks);
-    }
-    return weeks.map((cells, weekIndex) => ({
-      cells,
-      isMonthStart: false,
-      monthLabel: monthLabels.find((label) => label.weekIndex === weekIndex)?.label ?? null,
-    }));
-  }, [monthLabels, props.showMonthSeparators, weeks]);
+  // Splits any week that straddles a month boundary into two partial
+  // columns, so the gap between months lands on the real date and each
+  // column carries accurate isMonthStart/monthLabel.
+  const columns: HeatmapColumn[] = useMemo(() => splitWeeksByMonth(weeks), [weeks]);
 
   const monthStartCount = useMemo(
     () => columns.filter((column) => column.isMonthStart).length,
@@ -162,10 +147,8 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
     // gap below is stretched per-year to fill the remaining width. Sizing to
     // the real column count instead would give thinner years bigger cells
     // and visibly shift everything below the card when switching years.
-    const worstCaseColumns = props.showMonthSeparators ? MAX_WEEKS + MAX_MONTH_STARTS : MAX_WEEKS;
-    const worstCaseGapUnits = props.showMonthSeparators
-      ? (worstCaseColumns - 1) + MAX_MONTH_STARTS * 2
-      : worstCaseColumns - 1;
+    const worstCaseColumns = MAX_WEEKS + MAX_MONTH_STARTS;
+    const worstCaseGapUnits = (worstCaseColumns - 1) + MAX_MONTH_STARTS * 2;
     const minTotalWidthFor = (size: number) => worstCaseColumns * size + worstCaseGapUnits * gapForCellSize(size);
 
     const gapUnits = Math.max(0, columns.length - 1) + monthStartCount * 2;
@@ -189,7 +172,7 @@ export const HeatmapGrid: FC<HeatmapGridProps> = (props) => {
       monthGap: columnGap * 2,
       rowGap: gapForCellSize(MIN_DESKTOP_CELL_SIZE),
     };
-  }, [columns.length, containerWidth, isMobile, monthStartCount, props.desktopCellSize, props.showMonthSeparators]);
+  }, [columns.length, containerWidth, isMobile, monthStartCount, props.desktopCellSize]);
 
   const columnStep = cellSize + columnGap;
   const rowStep = cellSize + rowGap;
