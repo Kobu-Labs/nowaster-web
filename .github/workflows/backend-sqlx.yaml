@@ -35,7 +35,7 @@ jobs:
           workspaces: backend
 
       - name: Install SQLx CLI
-        run: cargo install sqlx-cli --no-default-features --features postgres
+        run: cargo install sqlx-cli --version 0.8.3 --no-default-features --features postgres
 
       - name: Run SQLx prepare check
         run: cargo sqlx prepare --check
