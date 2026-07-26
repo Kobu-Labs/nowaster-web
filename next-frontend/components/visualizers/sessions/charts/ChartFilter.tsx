@@ -58,30 +58,34 @@ const MatchModeToggle: FC<MatchModeToggleProps> = ({
         Sessions must have
       </span>
       <div className="inline-flex rounded-md border border-border p-0.5">
-        <button
+        <Button
           className={cn(
-            "rounded-sm px-2 py-0.5 transition-colors",
+            "h-auto rounded-sm px-2 py-0.5 text-xs",
             mode === "all"
-              ? "bg-primary text-primary-foreground"
-              : "hover:bg-accent/50",
+              ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+              : "bg-transparent text-current hover:bg-accent/50",
           )}
           onClick={() => onChange("all")}
+          size="sm"
           type="button"
+          variant="ghost"
         >
           all
-        </button>
-        <button
+        </Button>
+        <Button
           className={cn(
-            "rounded-sm px-2 py-0.5 transition-colors",
+            "h-auto rounded-sm px-2 py-0.5 text-xs",
             mode === "some"
-              ? "bg-primary text-primary-foreground"
-              : "hover:bg-accent/50",
+              ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+              : "bg-transparent text-current hover:bg-accent/50",
           )}
           onClick={() => onChange("some")}
+          size="sm"
           type="button"
+          variant="ghost"
         >
           any
-        </button>
+        </Button>
       </div>
       <span>
         of the selected
