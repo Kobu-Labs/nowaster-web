@@ -6,7 +6,11 @@ use crate::{
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::sync::Arc;
+use tokio::sync::OnceCell;
+
+static VALID_TIMEZONES: OnceCell<HashSet<String>> = OnceCell::const_new();
 
 #[derive(Clone)]
 pub struct StatisticsRepository {
@@ -125,19 +129,29 @@ impl StatisticsRepository {
     // INFO: AT TIME ZONE accepts a bound parameter, so this never risks SQL
     // injection even before validation - the validation exists purely to
     // silently fall back to UTC on an unrecognized zone, per product decision.
+    //
+    // pg_timezone_names doesn't change at runtime, so the valid set is loaded
+    // once per process and cached instead of round-tripping to Postgres on
+    // every daily-activity request.
     async fn resolve_timezone<'a>(&self, timezone: Option<&'a str>) -> Result<&'a str> {
         let requested_tz = timezone.unwrap_or("UTC");
 
-        let is_valid_tz = crate::named_query!(
-            "stats_validate_timezone",
-            sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM pg_timezone_names WHERE name = $1) as "exists!""#,
-                requested_tz,
-            )
-            .fetch_one(self.db_conn.get_pool())
-        )?;
+        let valid_timezones = VALID_TIMEZONES
+            .get_or_try_init(|| async {
+                let rows = crate::named_query!(
+                    "stats_valid_timezones",
+                    sqlx::query_scalar!(r#"SELECT name AS "name!" FROM pg_timezone_names"#)
+                        .fetch_all(self.db_conn.get_pool())
+                )?;
+                Ok::<_, anyhow::Error>(rows.into_iter().collect::<HashSet<_>>())
+            })
+            .await?;
 
-        Ok(if is_valid_tz { requested_tz } else { "UTC" })
+        Ok(if valid_timezones.contains(requested_tz) {
+            requested_tz
+        } else {
+            "UTC"
+        })
     }
 
     pub async fn get_daily_activity(
