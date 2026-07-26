@@ -1,4 +1,4 @@
-import { addDays, format, getDay, startOfDay } from "date-fns";
+import { addDays, endOfDay, format, getDay, startOfDay } from "date-fns";
 
 export type DailyActivityPoint = {
   date: Date;
@@ -48,7 +48,7 @@ export const parseLocalDateKey = (key: string): Date => {
 // elapsed - the grid always shows all 12 months so its shape doesn't change
 // as the year progresses.
 export const calendarYearRange = (year: number): HeatmapRange => ({
-  end: new Date(year, 11, 31),
+  end: endOfDay(new Date(year, 11, 31)),
   start: new Date(year, 0, 1),
 });
 
