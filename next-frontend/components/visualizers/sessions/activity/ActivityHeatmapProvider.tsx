@@ -64,7 +64,6 @@ export const ActivityHeatmapProvider: FC<PropsWithChildren> = ({ children }) => 
       value={{
         displayYear,
         isError,
-        isFetching,
         isPending,
         monthLabels,
         selectedYear,

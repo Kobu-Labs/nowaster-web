@@ -5,7 +5,6 @@ import { createContext } from "react";
 export type ActivityHeatmapContextType = {
   displayYear: number;
   isError: boolean;
-  isFetching: boolean;
   isPending: boolean;
   monthLabels: MonthLabel[];
   selectedYear: number;
