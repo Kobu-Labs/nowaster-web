@@ -29,8 +29,8 @@ export const DayDetailDialog: FC<DayDetailDialogProps> = ({
   const referenceDate = date ?? new Date();
   const filter: SessionFilterPrecursor = {
     data: {
-      endTimeFrom: { value: startOfDay(referenceDate) },
-      endTimeTo: { value: endOfDay(referenceDate) },
+      startTimeFrom: { value: startOfDay(referenceDate) },
+      startTimeTo: { value: endOfDay(referenceDate) },
     },
     settings: {},
   };

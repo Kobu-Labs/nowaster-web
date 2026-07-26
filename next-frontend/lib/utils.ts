@@ -108,6 +108,18 @@ export const translateFilterPrecursor = (
     };
   }
 
+  if (data.startTimeTo?.value) {
+    filter.toStartTime = {
+      value: data.startTimeTo.value,
+    };
+  }
+
+  if (data.startTimeFrom?.value) {
+    filter.fromStartTime = {
+      value: data.startTimeFrom.value,
+    };
+  }
+
   if (data.tags && data.tags?.length > 0) {
     filter.tags = filter.tags ?? {};
     if (tags?.id?.mode) {
