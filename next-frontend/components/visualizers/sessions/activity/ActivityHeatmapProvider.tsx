@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC, PropsWithChildren } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/components/hooks/queryHooks/queryKeys";
@@ -31,11 +31,15 @@ export const ActivityHeatmapProvider: FC<PropsWithChildren> = ({ children }) => 
     retry: false,
   });
 
-  useEffect(() => {
-    if (!isFetching) {
-      setDisplayYear(selectedYear);
-    }
-  }, [isFetching, selectedYear]);
+  // Adjusted during render rather than in an effect: an effect would commit
+  // one render where the new year's `data` is already in but `displayYear`
+  // (and thus displayRange) is still the old year, flashing the grid empty
+  // before the effect catches up. Updating state directly in the render body
+  // is the same instant the mismatch would otherwise happen, so React
+  // re-renders with the corrected value before anything is painted.
+  if (!isFetching && displayYear !== selectedYear) {
+    setDisplayYear(selectedYear);
+  }
 
   const { monthLabels, weeks } = useMemo(
     () =>
