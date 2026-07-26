@@ -36,11 +36,12 @@ const TagBadgeAuto = (props: { tag: TagWithId; }) => {
 
   const color = colors[props.tag.label] ?? props.tag.color;
 
+  const existingColor = colors[props.tag.label];
   useEffect(() => {
-    if (colors[props.tag.label] === undefined) {
+    if (existingColor === undefined) {
       setColors((prev) => ({ ...prev, [props.tag.label]: color }));
     }
-  }, [colors, props.tag.label, color, setColors]);
+  }, [existingColor, props.tag.label, color, setColors]);
 
   return <TagBadgeInner color={color} label={props.tag.label} />;
 };
