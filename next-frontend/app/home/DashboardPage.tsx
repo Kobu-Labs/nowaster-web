@@ -16,36 +16,25 @@ import { CurrentStreakKpiCard } from "@/components/visualizers/sessions/kpi/Curr
 import { TotalSessionTimeKpiCard } from "@/components/visualizers/sessions/kpi/TotalMinutesSpentKpiCard";
 import { TotalSessionsKpiCard } from "@/components/visualizers/sessions/kpi/TotalSessionsKpiCard";
 import { TotalSessionTimeCard } from "@/components/visualizers/sessions/kpi/TotalSessionTimeCard";
+import { ActivityHeatmap } from "@/components/visualizers/sessions/activity/ActivityHeatmap";
+import { ActivityHeatmapProvider } from "@/components/visualizers/sessions/activity/ActivityHeatmapProvider";
+import { HeatmapCardShell } from "@/components/visualizers/sessions/activity/HeatmapCardShell";
 import { FilterContextProvider } from "@/components/visualizers/sessions/SessionFilterContextProvider";
-import { FilteredSessionTimeline } from "@/components/visualizers/sessions/timeline/FilteredSessionTimeline";
 import { TagBadge } from "@/components/visualizers/tags/TagBadge";
 import { cn, formatTime } from "@/lib/utils";
 import type { SessionFilterPrecursor } from "@/state/chart-filter";
 import { useQuery } from "@tanstack/react-query";
 import {
-  addHours,
   differenceInMinutes,
   endOfDay,
   startOfDay,
   subDays,
-  subHours,
 } from "date-fns";
 import { TrendingDown, TrendingUp, TrendingUpDown } from "lucide-react";
 import { use, useMemo } from "react";
 
 export default function DashboardPage() {
   const isMobile = useIsMobile();
-  const timelineFilter: SessionFilterPrecursor = useMemo(
-    () => ({
-      data: {
-        endTimeFrom: { value: subHours(new Date(), 20) },
-        endTimeTo: { value: addHours(new Date(), 1) },
-      },
-      settings: {},
-    }),
-    [],
-  );
-
   const todayFilter: SessionFilterPrecursor = useMemo(
     () => ({
       data: {
@@ -149,11 +138,11 @@ export default function DashboardPage() {
             initialGranularity="days-in-month"
           />
         </FilterContextProvider>
-        <FilterContextProvider initialFilter={timelineFilter}>
-          <div className="col-span-full">
-            <FilteredSessionTimeline />
-          </div>
-        </FilterContextProvider>
+        <ActivityHeatmapProvider>
+          <HeatmapCardShell className="col-span-full">
+            <ActivityHeatmap />
+          </HeatmapCardShell>
+        </ActivityHeatmapProvider>
         <Card className="col-span-full md:col-span-2 flex flex-col">
           <CardHeader className="p-0 pt-4 pl-4">
             <h2 className="text-xl font-bold tracking-tight">

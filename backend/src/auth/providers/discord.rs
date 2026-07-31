@@ -63,7 +63,7 @@ impl OAuthProvider for DiscordProvider {
         println!("🔄 [DISCORD] Token URL: {}", config.token_url);
         println!("🔄 [DISCORD] Client ID: {}", config.client_id);
         println!("🔄 [DISCORD] Redirect URI: {}", config.redirect_url);
-        println!("🔄 [DISCORD] Code: {}...", &code.chars().take(20).collect::<String>());
+        println!("🔄 [DISCORD] Code: {}...", code.chars().take(20).collect::<String>());
 
         let response = client
             .post(&config.token_url)

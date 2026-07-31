@@ -68,7 +68,7 @@ impl OAuthProvider for GitHubProvider {
         println!("🔄 [GITHUB] Token URL: {}", config.token_url);
         println!("🔄 [GITHUB] Client ID: {}", config.client_id);
         println!("🔄 [GITHUB] Redirect URI: {}", config.redirect_url);
-        println!("🔄 [GITHUB] Code: {}...", &code.chars().take(20).collect::<String>());
+        println!("🔄 [GITHUB] Code: {}...", code.chars().take(20).collect::<String>());
 
         let response = client
             .post(&config.token_url)

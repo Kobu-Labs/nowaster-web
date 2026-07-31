@@ -1,5 +1,6 @@
 pub mod config;
 pub mod data;
+pub mod dev;
 mod guest;
 mod npc;
 

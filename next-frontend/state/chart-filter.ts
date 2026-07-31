@@ -19,6 +19,8 @@ export type FilterValueFiller = {
   endTimeFrom?: { value: Date; };
   endTimeTo?: { value: Date; };
   project?: null | ProjectWithId;
+  startTimeFrom?: { value: Date; };
+  startTimeTo?: { value: Date; };
   tags?: TagDetails[];
   tasks?: TaskWithId[];
 };

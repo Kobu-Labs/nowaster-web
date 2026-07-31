@@ -40,6 +40,15 @@ const tagKeys = createQueryKeys("tags", {
 });
 
 const statisticsKeys = createQueryKeys("statistics", {
+  dailyActivity: (timezone: string, from?: Date, to?: Date) => ({
+    queryFn: async () =>
+      await StatisticsApi.getDailyActivity(timezone, from, to),
+    queryKey: [
+      timezone,
+      from?.toISOString() ?? "none",
+      to?.toISOString() ?? "none",
+    ],
+  }),
   dashboard: {
     queryFn: async () => await StatisticsApi.getDashboardData(),
     queryKey: ["dashboard"],

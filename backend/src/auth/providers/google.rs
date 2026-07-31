@@ -67,7 +67,7 @@ impl OAuthProvider for GoogleProvider {
         println!("🔄 [GOOGLE] Token URL: {}", config.token_url);
         println!("🔄 [GOOGLE] Client ID: {}", config.client_id);
         println!("🔄 [GOOGLE] Redirect URI: {}", config.redirect_url);
-        println!("🔄 [GOOGLE] Code: {}...", &code.chars().take(20).collect::<String>());
+        println!("🔄 [GOOGLE] Code: {}...", code.chars().take(20).collect::<String>());
 
         let response = client
             .post(&config.token_url)

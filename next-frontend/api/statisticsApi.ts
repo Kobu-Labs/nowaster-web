@@ -24,3 +24,21 @@ export const getColors = async () => {
     }),
   );
 };
+
+export const getDailyActivity = async (
+  timezone: string,
+  from?: Date,
+  to?: Date,
+) => {
+  const { data } = await baseApi.get("statistics/daily-activity", {
+    params: {
+      from: from?.toISOString(),
+      timezone,
+      to: to?.toISOString(),
+    },
+  });
+  return await parseResponseUnsafe(
+    data,
+    StatisticsResponseSchema.getDailyActivity,
+  );
+};
