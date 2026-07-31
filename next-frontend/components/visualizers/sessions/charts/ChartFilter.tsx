@@ -13,35 +13,104 @@ import {
   handleSelectTask,
   overwriteData,
 } from "@/state/chart-filter";
-import { CircleHelp, Filter, RotateCcw, X } from "lucide-react";
+import { ChartPie, Filter, Folders, Tag as TagIcon, X } from "lucide-react";
 import type { FC } from "react";
 import { useMemo } from "react";
 
 import { useChartFilter } from "@/components/hooks/use-chart-filter";
+import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
-import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
 import { Separator } from "@/components/shadcn/separator";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/shadcn/sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
 import { CategoryPicker } from "@/components/visualizers/categories/CategoryPicker";
 import { SimpleTagPicker } from "@/components/visualizers/tags/TagPicker";
 import { ProjectPicker } from "@/components/visualizers/projects/ProjectPicker";
 import { TaskPicker } from "@/components/visualizers/tasks/TaskPicker";
 import { TaskBadge } from "@/components/visualizers/tasks/TaskBadge";
 import { cn, countLeaves, translateFilterPrecursor } from "@/lib/utils";
+
+type MatchMode = "all" | "some";
+
+type MatchModeToggleProps = {
+  itemLabel: string;
+  mode?: MatchMode;
+  onChange: (mode: MatchMode) => void;
+};
+
+// Same all/any wording for tags, categories and tasks so the concept
+// only has to be learned once.
+const MatchModeToggle: FC<MatchModeToggleProps> = ({
+  itemLabel,
+  mode = "some",
+  onChange,
+}) => {
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <span>
+        Sessions must have
+      </span>
+      <div className="inline-flex rounded-md border border-border p-0.5">
+        <Button
+          className={cn(
+            "h-auto rounded-sm px-2 py-0.5 text-xs",
+            mode === "all"
+              ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+              : "bg-transparent text-current hover:bg-accent/50",
+          )}
+          onClick={() => onChange("all")}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          all
+        </Button>
+        <Button
+          className={cn(
+            "h-auto rounded-sm px-2 py-0.5 text-xs",
+            mode === "some"
+              ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+              : "bg-transparent text-current hover:bg-accent/50",
+          )}
+          onClick={() => onChange("some")}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          any
+        </Button>
+      </div>
+      <span>
+        of the selected
+        {" "}
+        {itemLabel}
+      </span>
+    </div>
+  );
+};
+
+const SectionHeader: FC<{
+  count: number;
+  icon: FC<{ className?: string; }>;
+  title: string;
+}> = ({ count, icon: Icon, title }) => (
+  <div className="flex items-center gap-2">
+    <Icon className="h-4 w-4 text-muted-foreground" />
+    <span className="text-sm font-medium">{title}</span>
+    {count > 0 && (
+      <Badge className="h-5 px-1.5" variant="secondary">
+        {count}
+      </Badge>
+    )}
+  </div>
+);
 
 export const ChartFilter: FC = () => {
   const { filter, setFilter } = useChartFilter();
@@ -83,219 +152,156 @@ export const ChartFilter: FC = () => {
     [filter],
   );
 
+  const tagCount = filter.data.tags?.length ?? 0;
+  const categoryCount = filter.data.categories?.length ?? 0;
+  const taskCount = filter.data.tasks?.length ?? 0;
+
   return (
     <div className="flex flex-col">
       <Sheet modal={false}>
-        <SheetTrigger asChild className="group relative cursor-pointer">
-          <Button
-            className="flex items-center justify-center overflow-visible w-fit"
-            variant="outline"
-          >
-            <Filter className="group-hover:text-pink-300 ">Open</Filter>
+        <SheetTrigger asChild>
+          <Button className="gap-2" variant="outline">
+            <Filter className="h-4 w-4" />
+            Filters
             {appliedFiltersCount > 0 && (
-              <div
-                className={cn(
-                  "absolute right-[10%] top-[-20%] animate-blink text-shadow-neon-pink group-hover:text-pink-300",
-                )}
-              >
+              <Badge className="h-5 px-1.5" variant="secondary">
                 {appliedFiltersCount}
-              </div>
+              </Badge>
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent className="flex flex-col p-4">
-          <SheetHeader>
-            <SheetTitle>Apply filter</SheetTitle>
+        <SheetContent className="flex flex-col gap-0 p-0">
+          <SheetHeader className="gap-1">
+            <SheetTitle>Filters</SheetTitle>
+            <p className="text-sm text-muted-foreground">
+              Show only sessions that match what you pick below.
+            </p>
           </SheetHeader>
-          <div className="flex flex-col gap-1">
-            <SheetDescription>Filter by tags</SheetDescription>
-
-            <SimpleTagPicker
-              modal={false}
-              onNewTagsSelected={onSelectTag}
-              selectedTags={filter.data.tags ?? []}
-            />
-            <RadioGroup
-              className="flex flex-col space-y-1"
-              defaultValue={filter.settings.tags?.label?.mode}
-              onValueChange={(value: "all" | "some") => {
-                setFilter((state) => changeTagFilterMode(state, value));
-              }}
-            >
-              <div className="flex items-center  gap-2">
-                <RadioGroupItem id="category-exact" value="all" />
-                <Label htmlFor="category-exact">Superset matching</Label>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <CircleHelp className="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Each session will contain all of these tags</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center  gap-2">
-                <RadioGroupItem id="category-some" value="some" />
-                <Label htmlFor="category-some">Subset matching</Label>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <CircleHelp className="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        Each session will contain at least one of these tags
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </RadioGroup>
-          </div>
           <Separator />
-          <div className="flex flex-col gap-1">
-            <SheetDescription>Filter by categories</SheetDescription>
-            <CategoryPicker
-              mode="multiple"
-              onSelectCategory={onSelectCategory}
-              selectedCategories={filter.data.categories ?? []}
-            />
-            <RadioGroup
-              className="flex flex-col space-y-1"
-              defaultValue={filter.settings.categories?.name?.mode}
-              onValueChange={(value: "all" | "some") => {
-                setFilter((state) => changeCategoryFilterMode(state, value));
-              }}
-            >
-              <div className="flex items-center  gap-2">
-                <RadioGroupItem id="category-exact" value="all" />
-                <Label htmlFor="category-exact">Exact match</Label>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <CircleHelp className="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Each session will have this category</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem id="category-some" value="some" />
-                <Label htmlFor="category-some">
-                  &rdquo;One of&rdquo; match
-                </Label>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <CircleHelp className="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Each session will have one of these categories</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </RadioGroup>
-          </div>
-          <Separator />
-          <div className="flex flex-col gap-2">
-            <SheetDescription>Filter by tasks</SheetDescription>
 
-            {/* Selected tasks */}
-            {filter.data.tasks && filter.data.tasks.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {filter.data.tasks.map((task) => (
-                  <div className="flex items-center gap-1" key={task.id}>
-                    <TaskBadge
-                      completed={task.completed}
-                      name={task.name}
-                      skipStrikethrough
-                    />
-
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-destructive"
-                      onClick={() => onRemoveTask(task.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Project selector */}
-            <div className="flex flex-col gap-1">
-              <Label className="text-xs text-muted-foreground">
-                Select Project
-              </Label>
-              <ProjectPicker
-                onSelectProject={onSelectProject}
-                selectedProjectId={filter.data.project?.id ?? null}
-                skipStrikethrough
+          <div className="flex flex-col gap-4 overflow-y-auto p-4">
+            {/* Tags */}
+            <div className="flex flex-col gap-2">
+              <SectionHeader count={tagCount} icon={TagIcon} title="Tags" />
+              <SimpleTagPicker
+                modal={false}
+                onNewTagsSelected={onSelectTag}
+                selectedTags={filter.data.tags ?? []}
               />
+              {tagCount > 1 && (
+                <MatchModeToggle
+                  itemLabel="tags"
+                  mode={filter.settings.tags?.label?.mode}
+                  onChange={(mode) => {
+                    setFilter((state) => changeTagFilterMode(state, mode));
+                  }}
+                />
+              )}
             </div>
 
-            {/* Task selector */}
-            {filter.data.project && (
+            <Separator />
+
+            {/* Categories */}
+            <div className="flex flex-col gap-2">
+              <SectionHeader
+                count={categoryCount}
+                icon={ChartPie}
+                title="Categories"
+              />
+              <CategoryPicker
+                mode="multiple"
+                onSelectCategory={onSelectCategory}
+                selectedCategories={filter.data.categories ?? []}
+              />
+              {categoryCount > 1 && (
+                <MatchModeToggle
+                  itemLabel="categories"
+                  mode={filter.settings.categories?.name?.mode}
+                  onChange={(mode) => {
+                    setFilter((state) =>
+                      changeCategoryFilterMode(state, mode));
+                  }}
+                />
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Tasks */}
+            <div className="flex flex-col gap-2">
+              <SectionHeader count={taskCount} icon={Folders} title="Tasks" />
+
+              {filter.data.tasks && filter.data.tasks.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {filter.data.tasks.map((task) => (
+                    <div className="flex items-center gap-1" key={task.id}>
+                      <TaskBadge
+                        completed={task.completed}
+                        name={task.name}
+                        skipStrikethrough
+                      />
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-destructive"
+                        onClick={() => onRemoveTask(task.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="flex flex-col gap-1">
                 <Label className="text-xs text-muted-foreground">
-                  Add Task
+                  Project
                 </Label>
-                <TaskPicker
-                  onSelectTask={onSelectTask}
-                  projectId={filter.data.project.id}
-                  selectedTaskId={null}
+                <ProjectPicker
+                  onSelectProject={onSelectProject}
+                  selectedProjectId={filter.data.project?.id ?? null}
                   skipStrikethrough
                 />
               </div>
-            )}
 
-            <RadioGroup
-              className="flex flex-col space-y-1"
-              defaultValue={filter.settings.tasks?.id?.mode}
-              onValueChange={(value: "all" | "some") => {
-                setFilter((state) => changeTaskFilterMode(state, value));
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <RadioGroupItem id="task-all" value="all" />
-                <Label htmlFor="task-all">All tasks</Label>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <CircleHelp className="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Sessions must be associated with all selected tasks</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem id="task-some" value="some" />
-                <Label htmlFor="task-some">Any task</Label>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <CircleHelp className="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        Sessions must be associated with at least one selected
-                        task
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </RadioGroup>
-            <Separator className="my-2" />
+              {filter.data.project && (
+                <div className="flex flex-col gap-1">
+                  <Label className="text-xs text-muted-foreground">
+                    Add task
+                  </Label>
+                  <TaskPicker
+                    onSelectTask={onSelectTask}
+                    projectId={filter.data.project.id}
+                    selectedTaskId={null}
+                    skipStrikethrough
+                  />
+                </div>
+              )}
+
+              {taskCount > 1 && (
+                <MatchModeToggle
+                  itemLabel="tasks"
+                  mode={filter.settings.tasks?.id?.mode}
+                  onChange={(mode) => {
+                    setFilter((state) => changeTaskFilterMode(state, mode));
+                  }}
+                />
+              )}
+            </div>
           </div>
-          <Button className="w-min" onClick={resetFilter} variant="destructive">
-            <RotateCcw />
-          </Button>
+
+          <Separator />
+          <SheetFooter className="flex-row items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {appliedFiltersCount === 0
+                ? "No filters applied"
+                : `${appliedFiltersCount} filter${appliedFiltersCount === 1 ? "" : "s"} applied`}
+            </span>
+            <Button
+              disabled={appliedFiltersCount === 0}
+              onClick={resetFilter}
+              size="sm"
+              variant="ghost"
+            >
+              Clear filters
+            </Button>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
     </div>

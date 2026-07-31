@@ -19,7 +19,7 @@ export const SidebarWithPreferences: React.FC<SidebarWithPreferencesProps> = ({
         collapsible={sidebarBehavior === "permanent" ? "none" : "offcanvas"}
         variant={sidebarBehavior === "floating" ? "floating" : "sidebar"}
       />
-      {children}
+      <div className="mx-auto w-full max-w-[1690px]">{children}</div>
     </div>
   );
 };

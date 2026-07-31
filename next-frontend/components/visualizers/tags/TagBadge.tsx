@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useEffect } from "react";
 import { tagColors } from "@/state/tags";
 
 import { cn, randomColor } from "@/lib/utils";
@@ -34,9 +35,13 @@ const TagBadgeAuto = (props: { tag: TagWithId; }) => {
   const [colors, setColors] = useAtom(tagColors);
 
   const color = colors[props.tag.label] ?? props.tag.color;
-  if (colors[props.tag.label] === undefined) {
-    setColors({ ...colors, [props.tag.label]: color });
-  }
+
+  const existingColor = colors[props.tag.label];
+  useEffect(() => {
+    if (existingColor === undefined) {
+      setColors((prev) => ({ ...prev, [props.tag.label]: color }));
+    }
+  }, [existingColor, props.tag.label, color, setColors]);
 
   return <TagBadgeInner color={color} label={props.tag.label} />;
 };

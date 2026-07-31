@@ -1,10 +1,10 @@
 # Use Rust official image
-FROM rust:1.93 as builder
+FROM rust:1.93 AS builder
 
 WORKDIR /app
 
 # Install SQLx CLI for database migrations
-RUN cargo install sqlx-cli --no-default-features --features postgres
+RUN cargo install sqlx-cli --version 0.8.3 --no-default-features --features postgres
 
 # Copy dependencies for caching
 COPY Cargo.toml Cargo.lock ./
@@ -19,7 +19,6 @@ COPY .sqlx .sqlx
 RUN unset DATABASE_URL
 # Build the backend
 RUN SQLX_OFFLINE=true cargo build --release
-ENV DATABASE_URL=${DATABASE_URL}
 
 # Final runtime image
 FROM ubuntu:24.04
