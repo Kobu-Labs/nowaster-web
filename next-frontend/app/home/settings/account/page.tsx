@@ -12,9 +12,9 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
-import { getInitials, cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { Check, Loader2, Upload, X } from "lucide-react";
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 import { useToast } from "@/components/shadcn/use-toast";
 
 const AccountPage: FC = () => {
@@ -26,8 +26,8 @@ const AccountPage: FC = () => {
   const handleSave = async () => {
     if (!username.trim()) {
       toast({
-        title: "Error",
         description: "Display name cannot be empty",
+        title: "Error",
         variant: "destructive",
       });
       return;
@@ -35,8 +35,8 @@ const AccountPage: FC = () => {
 
     if (username.trim().length < 4) {
       toast({
-        title: "Error",
         description: "Display name must be at least 4 characters",
+        title: "Error",
         variant: "destructive",
       });
       return;
@@ -44,8 +44,8 @@ const AccountPage: FC = () => {
 
     if (username.includes(" ")) {
       toast({
-        title: "Error",
         description: "Display name cannot contain spaces",
+        title: "Error",
         variant: "destructive",
       });
       return;
@@ -53,8 +53,8 @@ const AccountPage: FC = () => {
 
     if (!/^[a-zA-Z0-9]+$/.test(username)) {
       toast({
-        title: "Error",
         description: "Display name can only contain letters and numbers",
+        title: "Error",
         variant: "destructive",
       });
       return;
@@ -63,13 +63,13 @@ const AccountPage: FC = () => {
     try {
       await updateUser.mutateAsync({ username: username.trim() });
       toast({
-        title: "Success",
         description: "Your account settings have been updated",
+        title: "Success",
       });
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
         description: "Failed to update account settings",
+        title: "Error",
         variant: "destructive",
       });
     }
@@ -136,11 +136,13 @@ const AccountPage: FC = () => {
               />
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  {isValidLength ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
+                  {isValidLength
+                    ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )
+                    : (
+                        <X className="h-4 w-4 text-red-500" />
+                      )}
                   <p
                     className={cn(
                       "text-sm",
@@ -151,26 +153,30 @@ const AccountPage: FC = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {!containsSpaces ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
+                  {containsSpaces
+                    ? (
+                        <X className="h-4 w-4 text-red-500" />
+                      )
+                    : (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )}
                   <p
                     className={cn(
                       "text-sm",
-                      !containsSpaces ? "text-green-500" : "text-red-500",
+                      containsSpaces ? "text-red-500" : "text-green-500",
                     )}
                   >
                     No spaces
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isAlphanumeric ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
+                  {isAlphanumeric
+                    ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )
+                    : (
+                        <X className="h-4 w-4 text-red-500" />
+                      )}
                   <p
                     className={cn(
                       "text-sm",

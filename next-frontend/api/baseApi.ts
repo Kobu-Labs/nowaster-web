@@ -87,10 +87,12 @@ baseApi.interceptors.response.use(
       try {
         const tokens = await refreshTokens();
         originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
-        return baseApi(originalRequest);
+        return await baseApi(originalRequest);
       } catch (refreshError) {
         globalThis.location.href = "/sign-in";
-        return Promise.reject(refreshError);
+        throw refreshError instanceof Error
+          ? refreshError
+          : new Error(String(refreshError));
       }
     }
 

@@ -33,21 +33,29 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li className="text-foreground">
-                  <strong>We will never sell your data.</strong> Not now, not
+                  <strong>We will never sell your data.</strong>
+                  {" "}
+                  Not now, not
                   ever. Your personal information and time tracking data are
                   yours alone.
                 </li>
                 <li className="text-foreground">
-                  <strong>We collect only what we need.</strong> We only gather
+                  <strong>We collect only what we need.</strong>
+                  {" "}
+                  We only gather
                   information necessary to provide you with our time tracking
                   service.
                 </li>
                 <li className="text-foreground">
-                  <strong>You control your data.</strong> You can export,
+                  <strong>You control your data.</strong>
+                  {" "}
+                  You can export,
                   modify, or delete your data at any time.
                 </li>
                 <li className="text-foreground">
-                  <strong>Transparency first.</strong> We clearly explain what
+                  <strong>Transparency first.</strong>
+                  {" "}
+                  We clearly explain what
                   data we collect and why, with no hidden practices.
                 </li>
               </ul>
@@ -291,27 +299,39 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
                 <li>
-                  <strong>Access:</strong> Request a copy of the personal data
+                  <strong>Access:</strong>
+                  {" "}
+                  Request a copy of the personal data
                   we hold about you
                 </li>
                 <li>
-                  <strong>Correction:</strong> Request corrections to inaccurate
+                  <strong>Correction:</strong>
+                  {" "}
+                  Request corrections to inaccurate
                   or incomplete data
                 </li>
                 <li>
-                  <strong>Deletion:</strong> Request deletion of your account
+                  <strong>Deletion:</strong>
+                  {" "}
+                  Request deletion of your account
                   and associated data
                 </li>
                 <li>
-                  <strong>Data Portability:</strong> Request your data in a
+                  <strong>Data Portability:</strong>
+                  {" "}
+                  Request your data in a
                   structured, machine-readable format
                 </li>
                 <li>
-                  <strong>Objection:</strong> Object to certain processing of
+                  <strong>Objection:</strong>
+                  {" "}
+                  Object to certain processing of
                   your data
                 </li>
                 <li>
-                  <strong>Withdrawal of Consent:</strong> Withdraw consent for
+                  <strong>Withdrawal of Consent:</strong>
+                  {" "}
+                  Withdraw consent for
                   data processing where we rely on consent
                 </li>
               </ul>
@@ -328,15 +348,21 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
                 <li>
-                  <strong>Authentication:</strong> Session cookies to keep you
+                  <strong>Authentication:</strong>
+                  {" "}
+                  Session cookies to keep you
                   logged in
                 </li>
                 <li>
-                  <strong>Preferences:</strong> Storing your UI preferences
+                  <strong>Preferences:</strong>
+                  {" "}
+                  Storing your UI preferences
                   (like sidebar state)
                 </li>
                 <li>
-                  <strong>Analytics:</strong> Vercel analytics cookies (if
+                  <strong>Analytics:</strong>
+                  {" "}
+                  Vercel analytics cookies (if
                   enabled)
                 </li>
               </ul>
@@ -466,7 +492,8 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
                 <li>
-                  Via GitHub:{" "}
+                  Via GitHub:
+                  {" "}
                   <Link
                     className="text-primary hover:underline"
                     href="https://github.com/Kobu-Labs/nowaster-web/issues"
@@ -491,19 +518,27 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
                 <li>
-                  <strong>Contract Performance:</strong> Processing necessary to
+                  <strong>Contract Performance:</strong>
+                  {" "}
+                  Processing necessary to
                   provide our services
                 </li>
                 <li>
-                  <strong>Legitimate Interests:</strong> Improving our service
+                  <strong>Legitimate Interests:</strong>
+                  {" "}
+                  Improving our service
                   and security
                 </li>
                 <li>
-                  <strong>Consent:</strong> For optional features like social
+                  <strong>Consent:</strong>
+                  {" "}
+                  For optional features like social
                   sharing
                 </li>
                 <li>
-                  <strong>Legal Obligation:</strong> Compliance with applicable
+                  <strong>Legal Obligation:</strong>
+                  {" "}
+                  Compliance with applicable
                   laws
                 </li>
               </ul>
