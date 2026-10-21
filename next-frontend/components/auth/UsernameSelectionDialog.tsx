@@ -14,7 +14,7 @@ import { Label } from "@/components/shadcn/label";
 import { useToast } from "@/components/shadcn/use-toast";
 import { cn } from "@/lib/utils";
 import { Check, Loader2, X } from "lucide-react";
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 
 type UsernameSelectionDialogProps = {
   onComplete: () => void;
@@ -42,14 +42,14 @@ export const UsernameSelectionDialog: FC<UsernameSelectionDialogProps> = ({
     try {
       await updateUser.mutateAsync({ username: username.trim() });
       toast({
-        title: "Welcome!",
         description: "Your username has been set successfully",
+        title: "Welcome!",
       });
       onComplete();
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
         description: "Failed to set username. Please try again.",
+        title: "Error",
         variant: "destructive",
       });
     }
@@ -90,11 +90,13 @@ export const UsernameSelectionDialog: FC<UsernameSelectionDialogProps> = ({
             {username.length > 0 && (
               <div className="space-y-1 pt-2">
                 <div className="flex items-center gap-2">
-                  {isValidLength ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
+                  {isValidLength
+                    ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )
+                    : (
+                        <X className="h-4 w-4 text-red-500" />
+                      )}
                   <p
                     className={cn(
                       "text-sm",
@@ -105,26 +107,30 @@ export const UsernameSelectionDialog: FC<UsernameSelectionDialogProps> = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {!containsSpaces ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
+                  {containsSpaces
+                    ? (
+                        <X className="h-4 w-4 text-red-500" />
+                      )
+                    : (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )}
                   <p
                     className={cn(
                       "text-sm",
-                      !containsSpaces ? "text-green-500" : "text-red-500",
+                      containsSpaces ? "text-red-500" : "text-green-500",
                     )}
                   >
                     No spaces
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isAlphanumeric ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
+                  {isAlphanumeric
+                    ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )
+                    : (
+                        <X className="h-4 w-4 text-red-500" />
+                      )}
                   <p
                     className={cn(
                       "text-sm",

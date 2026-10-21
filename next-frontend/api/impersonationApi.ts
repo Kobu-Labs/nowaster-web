@@ -6,7 +6,9 @@ import { z } from "zod";
 const BASE_URL = "/admin";
 
 export const searchUsers = async (query: string, limit = 10) => {
-  if (!query.trim()) { return []; }
+  if (!query.trim()) {
+    return [];
+  }
   const { data } = await baseApi.get(`${BASE_URL}/users/search`, {
     params: { limit, q: query },
   });

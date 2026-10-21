@@ -10,6 +10,16 @@ type RootLayoutProps = {
   children: React.ReactNode;
 };
 
+export default function RootLayout({ children }: RootLayoutProps) {
+  return (
+    <Providers>
+      <Suspense fallback={null}>
+        <LayoutContent>{children}</LayoutContent>
+      </Suspense>
+    </Providers>
+  );
+}
+
 function LayoutContent({ children }: RootLayoutProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,7 +30,7 @@ function LayoutContent({ children }: RootLayoutProps) {
     if (isFirstTime) {
       setShowUsernameDialog(true);
       // Remove the query param from URL
-      const newUrl = window.location.pathname;
+      const newUrl = globalThis.location.pathname;
       router.replace(newUrl);
     }
   }, [searchParams, router]);
@@ -37,15 +47,5 @@ function LayoutContent({ children }: RootLayoutProps) {
       />
       <SidebarWithPreferences>{children}</SidebarWithPreferences>
     </>
-  );
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
-  return (
-    <Providers>
-      <Suspense fallback={null}>
-        <LayoutContent>{children}</LayoutContent>
-      </Suspense>
-    </Providers>
   );
 }
