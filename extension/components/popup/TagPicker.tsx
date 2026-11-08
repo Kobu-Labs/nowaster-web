@@ -23,7 +23,7 @@ type Props = {
 
 /**
  * Multi-select tag dropdown, modelled on the web app's TagPickerUiProvider.
- * Renders inline (see CategoryPicker) and stays open while toggling.
+ * Overlays the fields below (see CategoryPicker) and stays open while toggling.
  */
 export const TagPicker: FC<Props> = ({ tags, selected, onToggle, onCreate, creating }) => {
   const [open, setOpen] = useState(false);
@@ -37,7 +37,7 @@ export const TagPicker: FC<Props> = ({ tags, selected, onToggle, onCreate, creat
   const exists = tags.some((t) => t.label.trim().toLowerCase() === lower);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="relative">
       <Button
         variant="outline"
         role="combobox"
@@ -56,10 +56,10 @@ export const TagPicker: FC<Props> = ({ tags, selected, onToggle, onCreate, creat
         )}
       </Button>
       {open ? (
-        <div className="overflow-hidden rounded-md border bg-popover text-popover-foreground">
+        <div className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
           <Command shouldFilter={false}>
             <CommandInput placeholder="Search tags" value={search} onValueChange={setSearch} />
-            <CommandList>
+            <CommandList className="max-h-40">
               {query && !exists ? (
                 <CommandItem
                   value="__create__"

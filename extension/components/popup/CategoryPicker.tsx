@@ -23,7 +23,7 @@ type Props = {
 
 /**
  * Single-select category dropdown, modelled on the web app's CategoryPickerUiProvider.
- * The list renders inline, not in a popover, because the popup window clips anything that extends past it.
+ * The list overlays the fields below instead of pushing them down, so opening it does not shift the layout.
  */
 export const CategoryPicker: FC<Props> = ({ categories, selected, onSelect, onCreate, creating }) => {
   const [open, setOpen] = useState(false);
@@ -44,7 +44,7 @@ export const CategoryPicker: FC<Props> = ({ categories, selected, onSelect, onCr
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="relative">
       <Button
         variant="outline"
         role="combobox"
@@ -60,10 +60,10 @@ export const CategoryPicker: FC<Props> = ({ categories, selected, onSelect, onCr
         )}
       </Button>
       {open ? (
-        <div className="overflow-hidden rounded-md border bg-popover text-popover-foreground">
+        <div className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
           <Command shouldFilter={false}>
             <CommandInput placeholder="Search categories" value={search} onValueChange={setSearch} />
-            <CommandList>
+            <CommandList className="max-h-40">
               {query && !exists ? (
                 <CommandItem
                   value="__create__"
