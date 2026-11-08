@@ -1,10 +1,13 @@
-import { Settings } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw, Settings } from "lucide-react";
 import type { FC } from "react";
 import { browser } from "wxt/browser";
 import { useSettings, useStoredState } from "@/components/hooks/useSettings";
 import { ActiveSessionCard } from "@/components/popup/ActiveSessionCard";
 import { QuickStart } from "@/components/popup/QuickStart";
 import { Button } from "@/components/ui/button";
+import { pullFromApi } from "@/lib/sync";
+import { cn } from "@/lib/utils";
 
 const openOptions = () => {
   void browser.runtime.openOptionsPage();
@@ -14,6 +17,15 @@ const openOptions = () => {
 export const Popup: FC = () => {
   const settings = useSettings();
   const state = useStoredState();
+  const queryClient = useQueryClient();
+
+  const refresh = useMutation({
+    mutationFn: async () => {
+      if (!settings.data) return;
+      await pullFromApi(settings.data);
+      await queryClient.invalidateQueries();
+    },
+  });
 
   if (settings.isPending || state.isPending) return <div className="h-24 w-[360px]" />;
 
@@ -23,10 +35,24 @@ export const Popup: FC = () => {
     <div className="max-h-[560px] w-[360px] overflow-y-auto p-3">
       <header className="mb-3 flex items-center justify-between">
         <span className="text-sm font-semibold">Nowaster</span>
-        <Button variant="ghost" size="icon" aria-label="Open settings" onClick={openOptions}>
-          <Settings className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {hasToken ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Refresh"
+              disabled={refresh.isPending}
+              onClick={() => refresh.mutate()}
+            >
+              <RefreshCw className={cn("h-4 w-4", refresh.isPending && "animate-spin")} />
+            </Button>
+          ) : null}
+          <Button variant="ghost" size="icon" aria-label="Open settings" onClick={openOptions}>
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
       </header>
+      {refresh.isError ? <p className="mb-2 text-xs text-red-400">{refresh.error.message}</p> : null}
       {!hasToken || !settings.data ? (
         <div className="rounded-lg border p-4 text-sm">
           <p className="mb-3 text-muted-foreground">

@@ -4,6 +4,7 @@ import * as api from "@/lib/api";
 import { patternToUrlFilter } from "@/lib/pattern";
 import { diffRules } from "@/lib/rules";
 import { getSettings, getState, setActiveSession, setBlockPatterns } from "@/lib/storage";
+import type { Settings } from "@/lib/types";
 
 export const TICK_ALARM = "nowaster-tick";
 
@@ -39,7 +40,15 @@ export const applyState = async (): Promise<void> => {
   }
 };
 
-/** Pull the active session and block list from the API into storage. Offline keeps old state. */
+/** Pull the active session and block list from the API into storage. Throws on failure. */
+export const pullFromApi = async (settings: Settings): Promise<void> => {
+  const session = await api.getActiveSession(settings);
+  await setActiveSession(session ?? null);
+  const rules = await api.listBlockRules(settings);
+  await setBlockPatterns(rules.map((r) => r.pattern));
+};
+
+/** Background refresh. Offline keeps the old state; a rejected token clears the active session. */
 export const refreshFromApi = async (): Promise<void> => {
   const settings = await getSettings();
   if (!settings.token) {
@@ -47,10 +56,7 @@ export const refreshFromApi = async (): Promise<void> => {
     return;
   }
   try {
-    const session = await api.getActiveSession(settings);
-    await setActiveSession(session ?? null);
-    const rules = await api.listBlockRules(settings);
-    await setBlockPatterns(rules.map((r) => r.pattern));
+    await pullFromApi(settings);
   } catch (error) {
     if (error instanceof api.ApiError && error.status === 401) await setActiveSession(null);
   }
