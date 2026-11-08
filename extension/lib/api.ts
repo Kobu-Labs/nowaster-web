@@ -84,6 +84,16 @@ export const finishSession = async (s: Settings, id: string, endTime: string): P
   }
 };
 
+/** Delete a running stopwatch without saving it. A 404 means it is already gone, which counts as discarded. */
+export const discardSession = async (s: Settings, id: string): Promise<void> => {
+  try {
+    await request<null>(s, `/session/stopwatch/${id}`, { method: "DELETE" });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return;
+    throw error;
+  }
+};
+
 export const listBlockRules = (s: Settings) => request<BlockRule[]>(s, "/block-rules");
 export const createBlockRule = (s: Settings, pattern: string) =>
   request<BlockRule>(s, "/block-rules", { method: "POST", body: JSON.stringify({ pattern }) });

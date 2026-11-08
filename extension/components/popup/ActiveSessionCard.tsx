@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { Square } from "lucide-react";
+import { useState } from "react";
 import type { FC } from "react";
 import { useNow } from "@/components/hooks/useNow";
 import { CategoryBadge } from "@/components/popup/CategoryBadge";
@@ -14,6 +15,14 @@ type Props = { settings: Settings; session: StopwatchSession };
 
 export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
   const now = useNow();
+  const [confirming, setConfirming] = useState(false);
+  const discard = useMutation({
+    mutationFn: async () => {
+      // Throws before touching local state on failure, so the session stays active.
+      await api.discardSession(settings, session.id);
+      await setActiveSession(null);
+    },
+  });
   const stop = useMutation({
     mutationFn: async () => {
       // On failure this throws before touching local state, so the session stays active and Stop can be retried.
@@ -53,12 +62,49 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
       <Button
         variant="secondary"
         className="mt-3 w-full bg-black/30 text-white"
-        disabled={stop.isPending}
+        disabled={stop.isPending || discard.isPending}
         onClick={() => stop.mutate()}
       >
         <Square className="h-4 w-4" />
         {stop.isPending ? "Stopping..." : "Stop"}
       </Button>
+      {confirming ? (
+        <div className="mt-2 flex flex-col gap-2 text-xs">
+          <p>Discard this session? It will not be saved.</p>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1 bg-black/30 text-white"
+              disabled={discard.isPending}
+              onClick={() => discard.mutate()}
+            >
+              {discard.isPending ? "Discarding..." : "Discard"}
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1 bg-black/30 text-white"
+              disabled={discard.isPending}
+              onClick={() => setConfirming(false)}
+            >
+              Keep
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="mt-2 w-full text-xs text-white/80 underline-offset-2 hover:underline disabled:opacity-50"
+          disabled={stop.isPending || discard.isPending}
+          onClick={() => setConfirming(true)}
+        >
+          Discard session
+        </button>
+      )}
+      {discard.isError ? (
+        <p role="alert" className="mt-2 text-xs">
+          Could not discard the session: {discard.error.message}. It is still running; try again.
+        </p>
+      ) : null}
       {stop.isError ? (
         <p role="alert" className="mt-2 text-xs">
           Could not stop the session: {stop.error.message}. It is still running; try again.
