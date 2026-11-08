@@ -1,11 +1,12 @@
 import { browser } from "wxt/browser";
 import type { Settings, StopwatchSession } from "@/lib/types";
 
-/** Production API. Dev builds talk to the local backend (IPv6 loopback, the port in backend/.env). */
+/** Default API. Dev builds talk to the local backend (IPv6 loopback, the port in backend/.env). Overridable in options. */
 export const DEFAULT_API_BASE = import.meta.env.DEV ? "http://[::1]:4008/api" : "https://nowaster.app/api";
 
 const KEYS = {
   token: "token",
+  apiBase: "apiBase",
   activeSession: "activeSession",
   blockPatterns: "blockPatterns",
 } as const;
@@ -19,15 +20,18 @@ const area = () => browser.storage.local;
 
 export const normalizeBase = (value: string): string => value.trim().replace(/\/+$/, "");
 
-/** The API base is a build-time constant, so any value saved by an older version is ignored. */
 export const getSettings = async (): Promise<Settings> => {
-  const r = await area().get([KEYS.token]);
+  const r = await area().get([KEYS.token, KEYS.apiBase]);
   const token = typeof r[KEYS.token] === "string" ? (r[KEYS.token] as string) : "";
-  return { token, apiBase: DEFAULT_API_BASE };
+  const base = typeof r[KEYS.apiBase] === "string" ? normalizeBase(r[KEYS.apiBase] as string) : "";
+  return { token, apiBase: base || DEFAULT_API_BASE };
 };
 
-export const saveToken = async (token: string): Promise<void> => {
-  await area().set({ [KEYS.token]: token.trim() });
+export const saveSettings = async (settings: Settings): Promise<void> => {
+  await area().set({
+    [KEYS.token]: settings.token.trim(),
+    [KEYS.apiBase]: normalizeBase(settings.apiBase) || DEFAULT_API_BASE,
+  });
 };
 
 export const getState = async (): Promise<StoredState> => {
