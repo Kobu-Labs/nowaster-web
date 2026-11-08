@@ -25,7 +25,7 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
   });
   const stop = useMutation({
     mutationFn: async () => {
-      // On failure this throws before touching local state, so the session stays active and Stop can be retried.
+      // On failure this throws before touching local state, so the session stays active and Finish can be retried.
       // A 404 (already stopped elsewhere) resolves to null and is treated as stopped.
       await api.finishSession(settings, session.id, new Date().toISOString());
       await setActiveSession(null);
@@ -67,7 +67,7 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
           onClick={() => stop.mutate()}
         >
           <Square className="h-4 w-4" />
-          {stop.isPending ? "Stopping..." : "Stop"}
+          {stop.isPending ? "Finishing..." : "Finish"}
         </Button>
         <Button
           variant="destructive"
