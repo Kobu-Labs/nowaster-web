@@ -47,7 +47,7 @@ const securityNavItems = [
   },
 ] as const;
 
-const focusNavItems = [
+const extensionNavItems = [
   {
     description: "Domains blocked while a session is active",
     icon: Ban,
@@ -123,10 +123,10 @@ export function SettingsSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="my-2">
-          <SidebarGroupLabel>Focus</SidebarGroupLabel>
+          <SidebarGroupLabel>Extension</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {focusNavItems.map((item) => (
+              {extensionNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link className="flex items-start gap-1" href={item.url}>
