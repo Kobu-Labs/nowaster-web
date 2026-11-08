@@ -72,7 +72,7 @@ export const FocusPage: FC = () => {
       )}
 
       <a
-        href={appUrl}
+        href={`${appUrl}/home`}
         className={cn(buttonVariants({ variant: "outline", className: "w-full" }))}
       >
         <ExternalLink className="h-4 w-4" />
