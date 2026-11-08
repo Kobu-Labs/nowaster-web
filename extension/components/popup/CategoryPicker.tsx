@@ -1,6 +1,7 @@
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FC } from "react";
+import { useClickOutside } from "@/components/hooks/useClickOutside";
 import { CategoryBadge } from "@/components/popup/CategoryBadge";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,9 +43,11 @@ export const CategoryPicker: FC<Props> = ({ categories, selected, onSelect, onCr
     setOpen(false);
     setSearch("");
   };
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useClickOutside(wrapperRef, open, close);
 
   return (
-    <div className="relative">
+    <div ref={wrapperRef} className="relative">
       <Button
         variant="outline"
         role="combobox"

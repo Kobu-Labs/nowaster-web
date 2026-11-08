@@ -1,6 +1,7 @@
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FC } from "react";
+import { useClickOutside } from "@/components/hooks/useClickOutside";
 import { TagBadge } from "@/components/popup/TagBadge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,8 +37,14 @@ export const TagPicker: FC<Props> = ({ tags, selected, onToggle, onCreate, creat
   const ordered = [...matches.filter(isSelected), ...matches.filter((t) => !isSelected(t))];
   const exists = tags.some((t) => t.label.trim().toLowerCase() === lower);
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useClickOutside(wrapperRef, open, () => {
+    setOpen(false);
+    setSearch("");
+  });
+
   return (
-    <div className="relative">
+    <div ref={wrapperRef} className="relative">
       <Button
         variant="outline"
         role="combobox"
