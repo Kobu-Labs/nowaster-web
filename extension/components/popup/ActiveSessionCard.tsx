@@ -3,6 +3,7 @@ import { Square } from "lucide-react";
 import type { FC } from "react";
 import { useNow } from "@/components/hooks/useNow";
 import { Badge } from "@/components/ui/badge";
+import { CategoryBadge } from "@/components/popup/CategoryBadge";
 import { Button } from "@/components/ui/button";
 import * as api from "@/lib/api";
 import { formatElapsed } from "@/lib/badge";
@@ -35,7 +36,13 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
       <div className="mt-1 text-2xl font-semibold tabular-nums">
         {formatElapsed(now - Date.parse(session.startTime))}
       </div>
-      <div className="mt-1 truncate text-sm">{session.category?.name ?? "No category"}</div>
+      {session.category ? (
+        <div className="mt-2">
+          <CategoryBadge name={session.category.name} color={session.category.color} className="bg-black/30 text-white" />
+        </div>
+      ) : (
+        <div className="mt-1 text-sm">No category</div>
+      )}
       {session.tags && session.tags.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1">
           {session.tags.map((tag) => (
