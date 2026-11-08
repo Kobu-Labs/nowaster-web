@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Play } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Play, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { FC } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +14,11 @@ import type { Category, Settings } from "@/lib/types";
 type Props = { settings: Settings; hasActive: boolean };
 
 const MAX_SHOWN = 8;
+// Matches the badge colour; the web app lets the user recolour the category later.
+const NEW_CATEGORY_COLOR = "#b82e8a";
 
 export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | null>(null);
   const [tagIds, setTagIds] = useState<string[]>([]);
@@ -23,6 +26,14 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
 
   const categories = useQuery({ queryKey: ["categories", settings.apiBase], queryFn: () => api.getCategories(settings) });
   const tags = useQuery({ queryKey: ["tags", settings.apiBase], queryFn: () => api.getTags(settings) });
+
+  const createCategory = useMutation({
+    mutationFn: async (name: string) => {
+      const created = await api.createCategory(settings, { name, color: NEW_CATEGORY_COLOR });
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      setCategory(created);
+    },
+  });
 
   const start = useMutation({
     mutationFn: async () => {
@@ -46,6 +57,9 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
         .slice(0, MAX_SHOWN),
     [tags.data, q, category],
   );
+
+  const exactCategory = categories.data?.some((c) => c.name.trim().toLowerCase() === q) ?? false;
+  const canCreateCategory = q.length > 0 && categories.isSuccess && !exactCategory;
 
   const toggleTag = (id: string) =>
     setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -76,10 +90,21 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
                 </Badge>
               </button>
             ))}
-            {categories.isSuccess && shownCategories.length === 0 ? (
+            {categories.isSuccess && shownCategories.length === 0 && !canCreateCategory ? (
               <span className="text-xs text-muted-foreground">No categories</span>
             ) : null}
+            {canCreateCategory ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={createCategory.isPending}
+                onClick={() => createCategory.mutate(search.trim())}
+              >
+                <Plus className="h-4 w-4" /> Create &quot;{search.trim()}&quot;
+              </Button>
+            ) : null}
           </div>
+          {createCategory.isError ? <p className="mt-1 text-xs text-red-400">{createCategory.error.message}</p> : null}
         </div>
         <div>
           <p className="mb-1 text-xs text-muted-foreground">Tags</p>

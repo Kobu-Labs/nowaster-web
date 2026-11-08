@@ -41,6 +41,9 @@ export const getMe = (s: Settings) => request<CurrentUser>(s, "/auth/me");
 export const getCategories = async (s: Settings) => byLastUsed(await request<Category[]>(s, "/category"));
 export const getTags = async (s: Settings) => byLastUsed(await request<Tag[]>(s, "/tag"));
 
+export const createCategory = (s: Settings, input: { name: string; color: string }) =>
+  request<Category>(s, "/category", { method: "POST", body: JSON.stringify(input) });
+
 export const getActiveSession = (s: Settings) => request<StopwatchSession | null>(s, "/session/stopwatch");
 
 export const startSession = (
