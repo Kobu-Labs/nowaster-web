@@ -10,7 +10,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +21,10 @@ type Props = {
   creating: boolean;
 };
 
-/** Single-select category dropdown, modelled on the web app's CategoryPickerUiProvider. */
+/**
+ * Single-select category dropdown, modelled on the web app's CategoryPickerUiProvider.
+ * The list renders inline, not in a popover, because the popup window clips anything that extends past it.
+ */
 export const CategoryPicker: FC<Props> = ({ categories, selected, onSelect, onCreate, creating }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -36,63 +38,68 @@ export const CategoryPicker: FC<Props> = ({ categories, selected, onSelect, onCr
   ];
   const exists = categories.some((c) => c.name.trim().toLowerCase() === lower);
 
+  const close = () => {
+    setOpen(false);
+    setSearch("");
+  };
+
   return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) setSearch("");
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-start">
-          <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
-          {selected ? (
-            <CategoryBadge name={selected.name} color={selected.color} selected />
-          ) : (
-            <span className="text-muted-foreground">Select category</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-        <Command shouldFilter={false}>
-          <CommandInput placeholder="Search categories" value={search} onValueChange={setSearch} />
-          <CommandList>
-            {query && !exists ? (
-              <CommandItem
-                value="__create__"
-                disabled={creating}
-                onSelect={() => {
-                  onCreate(query);
-                  setOpen(false);
-                }}
-              >
-                <Plus />
-                Create <CategoryBadge name={query} color="#b82e8a" />
-              </CommandItem>
-            ) : null}
-            {ordered.length > 0 ? (
-              <CommandGroup heading="Categories">
-                {ordered.map((c) => (
-                  <CommandItem
-                    key={c.id}
-                    value={c.id}
-                    onSelect={() => {
-                      onSelect(c);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check className={cn(selected?.id === c.id ? "opacity-100" : "opacity-0")} />
-                    <CategoryBadge name={c.name} color={c.color} />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ) : !query ? (
-              <p className="p-3 text-center text-sm text-muted-foreground">Type to create a category.</p>
-            ) : null}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="flex flex-col gap-2">
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        className="w-full justify-start"
+        onClick={() => (open ? close() : setOpen(true))}
+      >
+        <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+        {selected ? (
+          <CategoryBadge name={selected.name} color={selected.color} selected />
+        ) : (
+          <span className="text-muted-foreground">Select category</span>
+        )}
+      </Button>
+      {open ? (
+        <div className="overflow-hidden rounded-md border bg-popover text-popover-foreground">
+          <Command shouldFilter={false}>
+            <CommandInput placeholder="Search categories" value={search} onValueChange={setSearch} />
+            <CommandList>
+              {query && !exists ? (
+                <CommandItem
+                  value="__create__"
+                  disabled={creating}
+                  onSelect={() => {
+                    onCreate(query);
+                    close();
+                  }}
+                >
+                  <Plus />
+                  Create <CategoryBadge name={query} color="#b82e8a" />
+                </CommandItem>
+              ) : null}
+              {ordered.length > 0 ? (
+                <CommandGroup heading="Categories">
+                  {ordered.map((c) => (
+                    <CommandItem
+                      key={c.id}
+                      value={c.id}
+                      onSelect={() => {
+                        onSelect(c);
+                        close();
+                      }}
+                    >
+                      <Check className={cn(selected?.id === c.id ? "opacity-100" : "opacity-0")} />
+                      <CategoryBadge name={c.name} color={c.color} />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ) : !query ? (
+                <p className="p-3 text-center text-sm text-muted-foreground">Type to create a category.</p>
+              ) : null}
+            </CommandList>
+          </Command>
+        </div>
+      ) : null}
+    </div>
   );
 };
