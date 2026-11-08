@@ -1,0 +1,57 @@
+/* Design tokens copied from next-frontend/styles/globals.css (:root). Dark only. */
+:root {
+  color-scheme: dark;
+
+  --background: 224 71% 4%;
+  --background-gradient: linear-gradient(135deg,
+      hsl(224 71% 4%) 0%,
+      hsl(322 65% 48% / 0.06) 50%,
+      hsl(262 60% 45% / 0.04) 100%);
+  --foreground: 213 31% 91%;
+
+  --muted: 300 47% 11%;
+  --muted-foreground: 215.4 16.3% 56.9%;
+
+  --accent: 322 65% 48%;
+  --accent-foreground: 210 40% 98%;
+
+  --popover: 300 47% 11%;
+  --popover-foreground: 215 20.2% 65.1%;
+
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+
+  --card: 224 71% 4%;
+  --card-foreground: 213 31% 91%;
+
+  --primary: 322 65% 48%;
+  --primary-foreground: 224 71% 4%;
+
+  --secondary: 222.2 47.4% 11.2%;
+  --secondary-foreground: 210 40% 98%;
+
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+
+  --ring: 322 65% 48%;
+
+  --radius: 0.5rem;
+
+  --gradient-primary: linear-gradient(135deg,
+      hsl(322 65% 48%) 0%,
+      hsl(262 60% 45%) 100%);
+  --gradient-secondary: linear-gradient(135deg,
+      hsl(322 65% 48% / 0.15) 0%,
+      hsl(262 60% 45% / 0.1) 100%);
+  --gradient-secondary-solid: linear-gradient(135deg,
+      hsl(285 48% 8%) 0%,
+      hsl(245 55% 9%) 100%);
+
+  --pink-primary: 322 65% 48%;
+  --purple-primary: 262 60% 45%;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.03); }
+}

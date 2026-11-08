@@ -1,0 +1,64 @@
+import { useMutation } from "@tanstack/react-query";
+import { Square } from "lucide-react";
+import type { FC } from "react";
+import { useNow } from "@/components/hooks/useNow";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import * as api from "@/lib/api";
+import { formatElapsed } from "@/lib/badge";
+import { setActiveSession } from "@/lib/storage";
+import type { Settings, StopwatchSession } from "@/lib/types";
+
+type Props = { settings: Settings; session: StopwatchSession };
+
+export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
+  const now = useNow();
+  const stop = useMutation({
+    mutationFn: async () => {
+      // On failure this throws before touching local state, so the session stays active and Stop can be retried.
+      // A 404 (already stopped elsewhere) resolves to null and is treated as stopped.
+      await api.finishSession(settings, session.id, new Date().toISOString());
+      await setActiveSession(null);
+    },
+  });
+
+  return (
+    <section
+      aria-label="Active session"
+      className="rounded-lg p-4 text-white"
+      style={{ background: "var(--gradient-primary)" }}
+    >
+      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-white/80">
+        <span className="h-2 w-2 animate-live rounded-full bg-white" />
+        Running
+      </div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums">
+        {formatElapsed(now - Date.parse(session.startTime))}
+      </div>
+      <div className="mt-1 truncate text-sm">{session.category?.name ?? "No category"}</div>
+      {session.tags && session.tags.length > 0 ? (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {session.tags.map((tag) => (
+            <Badge key={tag.id} className="bg-black/25 text-white">
+              {tag.label}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+      <Button
+        variant="secondary"
+        className="mt-3 w-full bg-black/30 text-white"
+        disabled={stop.isPending}
+        onClick={() => stop.mutate()}
+      >
+        <Square className="h-4 w-4" />
+        {stop.isPending ? "Stopping..." : "Stop"}
+      </Button>
+      {stop.isError ? (
+        <p role="alert" className="mt-2 text-xs">
+          Could not stop the session: {stop.error.message}. It is still running; try again.
+        </p>
+      ) : null}
+    </section>
+  );
+};
