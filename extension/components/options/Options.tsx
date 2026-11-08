@@ -9,22 +9,21 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import * as api from "@/lib/api";
 import { patternToUrlFilter } from "@/lib/pattern";
-import { DEFAULT_API_BASE, normalizeBase, saveSettings, setBlockPatterns } from "@/lib/storage";
+import { DEFAULT_API_BASE, saveToken, setBlockPatterns } from "@/lib/storage";
 import type { Settings } from "@/lib/types";
 
 const ConnectionCard: FC<{ initial: Settings }> = ({ initial }) => {
   const [token, setToken] = useState(initial.token);
-  const [apiBase, setApiBase] = useState(initial.apiBase);
   const [reveal, setReveal] = useState(false);
 
   const save = useMutation({
-    mutationFn: () => saveSettings({ token, apiBase }),
+    mutationFn: () => saveToken(token),
   });
 
   const test = useMutation({
     mutationFn: async () => {
-      await saveSettings({ token, apiBase });
-      return api.getMe({ token: token.trim(), apiBase: normalizeBase(apiBase) || DEFAULT_API_BASE });
+      await saveToken(token);
+      return api.getMe({ token: token.trim(), apiBase: DEFAULT_API_BASE });
     },
   });
 
@@ -53,10 +52,6 @@ const ConnectionCard: FC<{ initial: Settings }> = ({ initial }) => {
             This token grants full access to your account. Keep it private and revoke it from the web app&apos;s
             Settings, Tokens page if it leaks.
           </p>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="base" className="text-xs text-muted-foreground">API base URL (override for development)</label>
-          <Input id="base" value={apiBase} onChange={(e) => setApiBase(e.target.value)} placeholder={DEFAULT_API_BASE} />
         </div>
         <div className="flex items-center gap-2">
           <Button disabled={save.isPending} onClick={() => save.mutate()}>Save</Button>

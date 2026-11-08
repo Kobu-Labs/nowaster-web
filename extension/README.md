@@ -28,9 +28,7 @@ Firefox `about:debugging` > This Firefox > Load Temporary Add-on > `.output/fire
 Open the extension's options page, paste an API token created in the web app (Settings, Tokens), and press
 "Test connection". The token is stored in `chrome.storage.local` and sent as `X-API-Key`. It grants full account access.
 
-The API base URL defaults to `https://nowaster.app/api` and already ends in `/api`; endpoints are paths relative to
-it (`/auth/me`, `/category`, `/tag`, `/session/stopwatch`, `/block-rules`). Override it in options for development
-(for example `http://localhost:8000/api`); the browser asks for permission for that origin.
+The API base URL is set at build time: production builds use `https://nowaster.app/api`, dev builds use the local backend `http://[::1]:4008/api`. It already ends in `/api`; endpoints are paths relative to it (`/auth/me`, `/category`, `/tag`, `/session/stopwatch`, `/block-rules`).
 
 Blocked sites: adding a site in options asks the browser for access to that domain only. With access, the site
 redirects to the focus page while a session runs; without it (or if you decline), the site is still blocked but
