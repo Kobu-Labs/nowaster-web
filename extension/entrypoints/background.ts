@@ -1,5 +1,6 @@
 import { browser } from "wxt/browser";
 import { STATE_KEYS } from "@/lib/storage";
+import { forgetNavigation, rememberNavigation } from "@/lib/navigation";
 import { applyState, refreshFromApi, TICK_ALARM } from "@/lib/sync";
 
 export default defineBackground(() => {
@@ -17,6 +18,12 @@ export default defineBackground(() => {
     if (alarm.name !== TICK_ALARM) return;
     void refreshFromApi().then(applyState);
   });
+
+  // Fires before the block rule redirects, so the focus page can offer the original address.
+  browser.webNavigation.onBeforeNavigate.addListener((details) => {
+    if (details.frameId === 0) void rememberNavigation(details.tabId, details.url);
+  });
+  browser.tabs.onRemoved.addListener((tabId) => void forgetNavigation(tabId));
 
   browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;

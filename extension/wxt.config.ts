@@ -10,7 +10,7 @@ export default defineConfig({
   manifest: {
     name: "Nowaster",
     description: "Start and stop Nowaster sessions and block distracting sites while a session runs.",
-    permissions: ["storage", "alarms", "declarativeNetRequest"],
+    permissions: ["storage", "alarms", "declarativeNetRequest", "webNavigation"],
     // Granted at install so blocked sites can redirect to the focus page and the API origin works
     // in every environment (production or a dev override). Trade-off: broad access, one install warning.
     host_permissions: ["<all_urls>"],
