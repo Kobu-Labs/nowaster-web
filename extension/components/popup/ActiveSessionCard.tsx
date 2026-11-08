@@ -2,8 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Square } from "lucide-react";
 import type { FC } from "react";
 import { useNow } from "@/components/hooks/useNow";
-import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/popup/CategoryBadge";
+import { TagBadge } from "@/components/popup/TagBadge";
 import { Button } from "@/components/ui/button";
 import * as api from "@/lib/api";
 import { formatElapsed } from "@/lib/badge";
@@ -38,7 +38,7 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
       </div>
       {session.category ? (
         <div className="mt-2">
-          <CategoryBadge name={session.category.name} color={session.category.color} className="bg-black/30 text-white" />
+          <CategoryBadge name={session.category.name} color={session.category.color} className="bg-black/40" />
         </div>
       ) : (
         <div className="mt-1 text-sm">No category</div>
@@ -46,9 +46,7 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
       {session.tags && session.tags.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1">
           {session.tags.map((tag) => (
-            <Badge key={tag.id} className="bg-black/25 text-white">
-              {tag.label}
-            </Badge>
+            <TagBadge key={tag.id} label={tag.label} color={tag.color} />
           ))}
         </div>
       ) : null}
