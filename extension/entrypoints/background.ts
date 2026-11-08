@@ -18,10 +18,6 @@ export default defineBackground(() => {
     void refreshFromApi().then(applyState);
   });
 
-  // Granting or revoking site access switches rules between redirect and block.
-  browser.permissions.onAdded.addListener(() => void applyState());
-  browser.permissions.onRemoved.addListener(() => void applyState());
-
   browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
     if (STATE_KEYS.some((key) => key in changes)) void applyState();
