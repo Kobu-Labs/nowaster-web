@@ -62,5 +62,7 @@ export const DEFAULT_WEB_APP_URL = import.meta.env.DEV ? "http://localhost:3000"
 export const webAppUrl = (apiBase: string): string => {
   const base = normalizeBase(apiBase);
   if (base === DEFAULT_API_BASE) return DEFAULT_WEB_APP_URL;
+  // A local dev backend saved in settings still means the Next.js dev server on port 3000.
+  if (/^https?:\/\/(\[::1\]|localhost|127\.0\.0\.1):4008(\/|$)/.test(base)) return "http://localhost:3000";
   return base.replace(/\/api$/, "");
 };
