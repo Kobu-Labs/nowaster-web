@@ -52,5 +52,15 @@ export const setBlockPatterns = async (patterns: string[]): Promise<void> => {
 
 export const STATE_KEYS: string[] = [KEYS.activeSession, KEYS.blockPatterns];
 
-/** The web app lives at the API origin without the trailing /api segment. */
-export const webAppUrl = (apiBase: string): string => normalizeBase(apiBase).replace(/\/api$/, "");
+/** The web frontend. Dev builds use the local Next.js dev server; the API base is a different origin there. */
+export const DEFAULT_WEB_APP_URL = import.meta.env.DEV ? "http://localhost:3000" : "https://nowaster.app";
+
+/**
+ * The web app for an API base. The default API maps to the frontend above; a self-hosted API base is
+ * assumed to share its origin with the web app, so the trailing /api is dropped.
+ */
+export const webAppUrl = (apiBase: string): string => {
+  const base = normalizeBase(apiBase);
+  if (base === DEFAULT_API_BASE) return DEFAULT_WEB_APP_URL;
+  return base.replace(/\/api$/, "");
+};
