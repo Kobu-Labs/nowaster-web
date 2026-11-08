@@ -70,6 +70,7 @@ export const ActiveSessionCard: FC<Props> = ({ settings, session }) => {
           {stop.isPending ? "Stopping..." : "Stop"}
         </Button>
         <Button
+          variant="destructive"
           size="icon"
           aria-label="Discard session"
           className="h-9 w-9 shrink-0 bg-red-600 text-white hover:bg-red-700"
