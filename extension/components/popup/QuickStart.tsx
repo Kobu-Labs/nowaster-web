@@ -16,6 +16,7 @@ type Props = { settings: Settings; hasActive: boolean };
 const MAX_SHOWN = 8;
 // Matches the badge colour; the web app lets the user recolour the category later.
 const NEW_CATEGORY_COLOR = "#b82e8a";
+const NEW_TAG_COLOR = "#7c3aed";
 
 export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
   const queryClient = useQueryClient();
@@ -32,6 +33,14 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
       const created = await api.createCategory(settings, { name, color: NEW_CATEGORY_COLOR });
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
       setCategory(created);
+    },
+  });
+
+  const createTag = useMutation({
+    mutationFn: async (label: string) => {
+      const created = await api.createTag(settings, { label, color: NEW_TAG_COLOR });
+      await queryClient.invalidateQueries({ queryKey: ["tags"] });
+      setTagIds((prev) => [...prev, created.id]);
     },
   });
 
@@ -60,6 +69,9 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
 
   const exactCategory = categories.data?.some((c) => c.name.trim().toLowerCase() === q) ?? false;
   const canCreateCategory = q.length > 0 && categories.isSuccess && !exactCategory;
+
+  const exactTag = tags.data?.some((t) => t.label.trim().toLowerCase() === q) ?? false;
+  const canCreateTag = q.length > 0 && tags.isSuccess && !exactTag;
 
   const toggleTag = (id: string) =>
     setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -114,10 +126,21 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
                 <Badge variant={tagIds.includes(t.id) ? "active" : "outline"}>{t.label}</Badge>
               </button>
             ))}
-            {tags.isSuccess && shownTags.length === 0 ? (
+            {tags.isSuccess && shownTags.length === 0 && !canCreateTag ? (
               <span className="text-xs text-muted-foreground">No tags</span>
             ) : null}
+            {canCreateTag ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={createTag.isPending}
+                onClick={() => createTag.mutate(search.trim())}
+              >
+                <Plus className="h-4 w-4" /> Create &quot;{search.trim()}&quot;
+              </Button>
+            ) : null}
           </div>
+          {createTag.isError ? <p className="mt-1 text-xs text-red-400">{createTag.error.message}</p> : null}
         </div>
         <Input
           placeholder="Description (optional)"

@@ -44,6 +44,10 @@ export const getTags = async (s: Settings) => byLastUsed(await request<Tag[]>(s,
 export const createCategory = (s: Settings, input: { name: string; color: string }) =>
   request<Category>(s, "/category", { method: "POST", body: JSON.stringify(input) });
 
+/** A new tag with no category restriction, so it can be used with any category. */
+export const createTag = (s: Settings, input: { label: string; color: string }) =>
+  request<Tag>(s, "/tag", { method: "POST", body: JSON.stringify({ ...input, allowedCategories: [] }) });
+
 export const getActiveSession = (s: Settings) => request<StopwatchSession | null>(s, "/session/stopwatch");
 
 export const startSession = (
