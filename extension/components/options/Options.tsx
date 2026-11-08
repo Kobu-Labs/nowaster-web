@@ -2,51 +2,28 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Plus, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import type { FC } from "react";
-import { browser } from "wxt/browser";
 import { useSettings } from "@/components/hooks/useSettings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import * as api from "@/lib/api";
-import { originsForHost, patternHost, patternToUrlFilter } from "@/lib/pattern";
-import { releasableOrigins } from "@/lib/rules";
+import { patternToUrlFilter } from "@/lib/pattern";
 import { DEFAULT_API_BASE, normalizeBase, saveSettings, setBlockPatterns } from "@/lib/storage";
 import type { Settings } from "@/lib/types";
-
-const originPattern = (apiBase: string): string | null => {
-  try {
-    return `${new URL(apiBase).origin}/*`;
-  } catch {
-    return null;
-  }
-};
 
 const ConnectionCard: FC<{ initial: Settings }> = ({ initial }) => {
   const [token, setToken] = useState(initial.token);
   const [apiBase, setApiBase] = useState(initial.apiBase);
   const [reveal, setReveal] = useState(false);
 
-  // Firefox only shows the permission prompt inside the click's user gesture, so the request is made
-  // synchronously in the click handler and the promise is handed to the mutation.
-  const requestApiAccess = (): Promise<void> => {
-    const origin = originPattern(normalizeBase(apiBase) || DEFAULT_API_BASE);
-    if (!origin) return Promise.reject(new Error("API base URL is not a valid URL"));
-    return browser.permissions.request({ origins: [origin] }).then((granted) => {
-      if (!granted) throw new Error(`Permission to reach ${origin} was not granted`);
-    });
-  };
-
-  const persist = async (access: Promise<void>) => {
-    await access;
-    await saveSettings({ token, apiBase });
-  };
-
-  const save = useMutation({ mutationFn: persist });
+  const save = useMutation({
+    mutationFn: () => saveSettings({ token, apiBase }),
+  });
 
   const test = useMutation({
-    mutationFn: async (access: Promise<void>) => {
-      await persist(access);
+    mutationFn: async () => {
+      await saveSettings({ token, apiBase });
       return api.getMe({ token: token.trim(), apiBase: normalizeBase(apiBase) || DEFAULT_API_BASE });
     },
   });
@@ -82,8 +59,8 @@ const ConnectionCard: FC<{ initial: Settings }> = ({ initial }) => {
           <Input id="base" value={apiBase} onChange={(e) => setApiBase(e.target.value)} placeholder={DEFAULT_API_BASE} />
         </div>
         <div className="flex items-center gap-2">
-          <Button disabled={save.isPending} onClick={() => save.mutate(requestApiAccess())}>Save</Button>
-          <Button variant="outline" disabled={test.isPending || !token.trim()} onClick={() => test.mutate(requestApiAccess())}>
+          <Button disabled={save.isPending} onClick={() => save.mutate()}>Save</Button>
+          <Button variant="outline" disabled={test.isPending || !token.trim()} onClick={() => test.mutate()}>
             Test connection
           </Button>
         </div>
@@ -107,7 +84,6 @@ const ConnectionCard: FC<{ initial: Settings }> = ({ initial }) => {
 const BlockListCard: FC<{ settings: Settings }> = ({ settings }) => {
   const queryClient = useQueryClient();
   const [pattern, setPattern] = useState("");
-  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
   const rules = useQuery({
     queryKey: ["block-rules", settings.apiBase, settings.token],
@@ -121,35 +97,10 @@ const BlockListCard: FC<{ settings: Settings }> = ({ settings }) => {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["block-rules"] });
 
-  // Which rules currently have host access (redirect) and which fall back to block.
-  const access = useQuery({
-    queryKey: ["host-access", rules.data?.map((r) => r.pattern)],
-    queryFn: async () => {
-      const entries = await Promise.all(
-        (rules.data ?? []).map(async (r) => {
-          const host = patternHost(r.pattern);
-          const granted = host
-            ? await browser.permissions.contains({ origins: originsForHost(host) }).catch(() => false)
-            : false;
-          return [r.id, granted] as const;
-        }),
-      );
-      return new Map(entries);
-    },
-    enabled: rules.isSuccess,
-  });
-
   const add = useMutation({
-    mutationFn: async ({ host, access }: { host: string | null; access: Promise<boolean> }) => {
-      if (!host || !patternToUrlFilter(pattern)) throw new Error("Enter a domain such as example.com");
-      // A refusal is not an error; the rule is still added and blocks without redirect.
-      const granted = await access;
+    mutationFn: async () => {
+      if (!patternToUrlFilter(pattern)) throw new Error("Enter a domain such as example.com");
       await api.createBlockRule(settings, pattern.trim());
-      setNotice(
-        granted
-          ? { ok: true, text: `${host} added. Redirect to the focus page is enabled.` }
-          : { ok: false, text: `${host} added. Access not granted: it will be blocked without redirect.` },
-      );
       setPattern("");
       await refresh();
     },
@@ -157,22 +108,8 @@ const BlockListCard: FC<{ settings: Settings }> = ({ settings }) => {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const removed = rules.data?.find((r) => r.id === id);
       await api.deleteBlockRule(settings, id);
-      // Release the removed rule's site access unless another rule still needs it. Failures are ignored.
-      const host = removed ? patternHost(removed.pattern) : null;
-      if (host) {
-        const remaining = (rules.data ?? [])
-          .filter((r) => r.id !== id)
-          .flatMap((r) => {
-            const h = patternHost(r.pattern);
-            return h ? [originsForHost(h)] : [];
-          });
-        const origins = releasableOrigins(originsForHost(host), remaining);
-        if (origins.length > 0) await browser.permissions.remove({ origins }).catch(() => false);
-      }
       await refresh();
-      await queryClient.invalidateQueries({ queryKey: ["host-access"] });
     },
   });
 
@@ -189,12 +126,7 @@ const BlockListCard: FC<{ settings: Settings }> = ({ settings }) => {
           className="flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            const host = patternHost(pattern);
-            // Requested synchronously from the submit event so Firefox treats it as a user gesture.
-            const access = host
-              ? browser.permissions.request({ origins: originsForHost(host) }).catch(() => false)
-              : Promise.resolve(false);
-            add.mutate({ host, access });
+            add.mutate();
           }}
         >
           <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="example.com" aria-label="Site to block" />
@@ -202,20 +134,12 @@ const BlockListCard: FC<{ settings: Settings }> = ({ settings }) => {
             <Plus className="h-4 w-4" /> Add
           </Button>
         </form>
-        {notice && !add.isError ? (
-          <p className={notice.ok ? "text-xs text-emerald-400" : "text-xs text-muted-foreground"}>{notice.text}</p>
-        ) : null}
         {add.isError ? <p className="text-xs text-red-400">{add.error.message}</p> : null}
         {rules.isError ? <p className="text-xs text-red-400">{rules.error.message}</p> : null}
         <ul className="flex flex-col divide-y rounded-md border">
           {(rules.data ?? []).map((rule) => (
             <li key={rule.id} className="flex items-center justify-between px-3 py-2">
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate text-sm">{rule.pattern}</span>
-                {access.data?.get(rule.id) === false ? (
-                  <span className="text-xs text-muted-foreground">access not granted: blocked without redirect</span>
-                ) : null}
-              </span>
+              <span className="truncate text-sm">{rule.pattern}</span>
               <Button variant="ghost" size="icon" aria-label={`Remove ${rule.pattern}`} onClick={() => remove.mutate(rule.id)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
