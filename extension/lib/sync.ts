@@ -1,7 +1,7 @@
 import { browser } from "wxt/browser";
 import { formatBadge } from "@/lib/badge";
 import * as api from "@/lib/api";
-import { patternToUrlFilter } from "@/lib/pattern";
+import { patternToUrlFilter, urlMatchesFilter } from "@/lib/pattern";
 import { diffRules } from "@/lib/rules";
 import { getSettings, getState, setActiveSession, setBlockPatterns } from "@/lib/storage";
 import type { Settings } from "@/lib/types";
@@ -60,4 +60,21 @@ export const refreshFromApi = async (): Promise<void> => {
   } catch (error) {
     if (error instanceof api.ApiError && error.status === 401) await setActiveSession(null);
   }
+};
+
+/** Reload open tabs that match the block list, so the redirect rules apply to them. Returns how many were reloaded. */
+export const reloadBlockedTabs = async (): Promise<number> => {
+  const { blockPatterns } = await getState();
+  const filters = blockPatterns.map(patternToUrlFilter).filter((f): f is string => f !== null);
+  if (filters.length === 0) return 0;
+  const tabs = await browser.tabs.query({});
+  let reloaded = 0;
+  for (const tab of tabs) {
+    if (tab.id === undefined || !tab.url) continue;
+    const url = tab.url;
+    if (!filters.some((f) => urlMatchesFilter(url, f))) continue;
+    await browser.tabs.reload(tab.id).catch(() => undefined);
+    reloaded++;
+  }
+  return reloaded;
 };

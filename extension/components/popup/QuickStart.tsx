@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import * as api from "@/lib/api";
 import { setActiveSession } from "@/lib/storage";
-import { refreshFromApi } from "@/lib/sync";
+import { applyState, refreshFromApi, reloadBlockedTabs } from "@/lib/sync";
 import type { Category, Settings, Tag } from "@/lib/types";
 
 type Props = { settings: Settings; hasActive: boolean };
@@ -53,6 +53,9 @@ export const QuickStart: FC<Props> = ({ settings, hasActive }) => {
       });
       await setActiveSession(session);
       await refreshFromApi();
+      // Apply the redirect rules now, then reload tabs already open on a blocked site so they are redirected too.
+      await applyState();
+      await reloadBlockedTabs();
     },
   });
 
