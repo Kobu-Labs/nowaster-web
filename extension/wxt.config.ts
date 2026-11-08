@@ -11,11 +11,9 @@ export default defineConfig({
     name: "Nowaster",
     description: "Start and stop Nowaster sessions and block distracting sites while a session runs.",
     permissions: ["storage", "alarms", "declarativeNetRequest"],
-    host_permissions: ["https://nowaster.app/*"],
-    // Declares what may be requested at runtime; nothing here is granted at install. Browsers only
-    // let permissions.request ask for origins covered by this list, so per-domain requests
-    // (block rules, custom API origin) need it. The UI only ever requests one domain at a time.
-    optional_host_permissions: ["*://*/*"],
+    // Granted at install so blocked sites can redirect to the focus page and the API origin works
+    // in every environment (production or a dev override). Trade-off: broad access, one install warning.
+    host_permissions: ["<all_urls>"],
     web_accessible_resources: [
       { resources: ["focus.html"], matches: ["<all_urls>"] },
     ],
