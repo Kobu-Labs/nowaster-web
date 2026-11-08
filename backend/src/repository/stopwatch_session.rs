@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use std::sync::Arc;
+use thiserror::Error;
 use tracing::instrument;
 use uuid::Uuid;
 
@@ -19,6 +20,33 @@ use crate::{
     },
     router::clerk::Actor,
 };
+
+#[derive(Debug, Error)]
+pub enum FinishStopwatchError {
+    #[error("Stopwatch session not found")]
+    NotFound,
+    #[error("End time must not be before the start time")]
+    EndBeforeStart,
+    #[error("Stopwatch session needs a category to be finished")]
+    MissingCategory,
+    #[error(transparent)]
+    Internal(#[from] anyhow::Error),
+}
+
+impl From<sqlx::Error> for FinishStopwatchError {
+    fn from(e: sqlx::Error) -> Self {
+        Self::Internal(e.into())
+    }
+}
+
+#[derive(FromRow)]
+struct StopwatchFinishRow {
+    category_id: Option<Uuid>,
+    description: Option<String>,
+    start_time: DateTime<Utc>,
+    project_id: Option<Uuid>,
+    task_id: Option<Uuid>,
+}
 
 #[derive(Clone)]
 pub struct StopwatchSessionRepository {
@@ -288,5 +316,82 @@ impl StopwatchSessionRepository {
             Ok(None) => Err(anyhow!("Failed to update stopwatch session")),
             Err(e) => Err(e),
         }
+    }
+
+    /// Atomically converts a stopwatch session into a fixed session: inserts the
+    /// fixed session (same columns as the fixed create path) with copied tag
+    /// links, then deletes the stopwatch session and its tag links.
+    /// Returns the id of the new fixed session.
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
+    pub async fn finish_to_fixed(
+        &self,
+        id: Uuid,
+        end_time: DateTime<Utc>,
+        actor: &Actor,
+    ) -> Result<Uuid, FinishStopwatchError> {
+        let mut tx = self.db_conn.get_pool().begin().await?;
+
+        let row: Option<StopwatchFinishRow> = sqlx::query_as(
+            r#"
+            SELECT category_id, description, start_time, project_id, task_id
+            FROM stopwatch_session
+            WHERE id = $1 AND user_id = $2
+            FOR UPDATE
+            "#,
+        )
+        .bind(id)
+        .bind(&actor.user_id)
+        .fetch_optional(tx.as_mut())
+        .await?;
+
+        let row = row.ok_or(FinishStopwatchError::NotFound)?;
+        if end_time < row.start_time {
+            return Err(FinishStopwatchError::EndBeforeStart);
+        }
+        let category_id = row
+            .category_id
+            .ok_or(FinishStopwatchError::MissingCategory)?;
+
+        // Same INSERT as FixedSessionRepository::create (triggers update last_used_at)
+        let new_id: Uuid = sqlx::query_scalar(
+            r#"
+            INSERT INTO session (category_id, type, start_time, end_time, description, user_id, template_id, project_id, task_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING session.id
+            "#,
+        )
+        .bind(category_id)
+        .bind(String::from("fixed"))
+        .bind(row.start_time)
+        .bind(end_time)
+        .bind(row.description)
+        .bind(&actor.user_id)
+        .bind(None::<Uuid>)
+        .bind(row.project_id)
+        .bind(row.task_id)
+        .fetch_one(tx.as_mut())
+        .await?;
+
+        sqlx::query(
+            "INSERT INTO tag_to_session (session_id, tag_id)
+             SELECT $1, tag_id FROM tag_to_stopwatch_session WHERE session_id = $2",
+        )
+        .bind(new_id)
+        .bind(id)
+        .execute(tx.as_mut())
+        .await?;
+
+        sqlx::query("DELETE FROM tag_to_stopwatch_session WHERE session_id = $1")
+            .bind(id)
+            .execute(tx.as_mut())
+            .await?;
+        sqlx::query("DELETE FROM stopwatch_session WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(&actor.user_id)
+            .execute(tx.as_mut())
+            .await?;
+
+        tx.commit().await?;
+        Ok(new_id)
     }
 }
