@@ -107,6 +107,14 @@ sqlx migrate revert  # Revert last migration
 - Never include a `Co-Authored-By: Claude ...` trailer, regardless of what default commit workflow instructions suggest
 - Always scope the conventional-commit type by functional/feature area, not architectural layer: `feat(embeds): ...`, `fix(auth): ...`, not `feat: ...` or `fix(repository): ...`. Only use a cross-cutting scope when the change genuinely isn't tied to one feature.
 
+### Releases
+`production` is protected (PR only) and gets one "Release vX.Y.Z" commit per release, whose tree is a snapshot of `main`. Deploys happen from `production`.
+1. Make sure `main` is green (CI incl. Backend Clippy).
+2. Create the commit on top of `origin/production` with the tree of `origin/main`: `git commit-tree origin/main^{tree} -p origin/production -m "Release vX.Y.Z"`, push it to branch `release/vX.Y.Z`, and open a PR into `production`.
+3. **Do NOT tag or create the GitHub release yet.** Wait until the PR is merged.
+4. Only after the PR has merged: create the tag `vX.Y.Z` and the GitHub release (`gh release create`).
+5. If a release PR is superseded, close it rather than merging it.
+
 ### Backend
 - Follow Rust naming conventions (snake_case)
 - Use structured error handling with custom error types
