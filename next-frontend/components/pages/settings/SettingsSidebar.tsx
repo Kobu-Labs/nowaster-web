@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, Rss, Settings, Shield, Sliders, UserCircle } from "lucide-react";
+import { Ban, Key, Rss, Settings, Shield, Sliders, UserCircle } from "lucide-react";
 
 import {
   Sidebar,
@@ -44,6 +44,15 @@ const securityNavItems = [
     icon: Key,
     title: "API Tokens",
     url: "/home/settings/tokens",
+  },
+] as const;
+
+const extensionNavItems = [
+  {
+    description: "Domains blocked while a session is active",
+    icon: Ban,
+    title: "Block list",
+    url: "/home/settings/block-list",
   },
 ] as const;
 
@@ -98,6 +107,26 @@ export function SettingsSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {securityNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link className="flex items-start gap-1" href={item.url}>
+                      <div className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="my-2">
+          <SidebarGroupLabel>Extension</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {extensionNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link className="flex items-start gap-1" href={item.url}>

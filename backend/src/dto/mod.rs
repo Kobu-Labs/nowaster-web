@@ -1,3 +1,4 @@
+pub mod block_rule;
 pub mod category;
 pub mod db_backup;
 pub mod feed;

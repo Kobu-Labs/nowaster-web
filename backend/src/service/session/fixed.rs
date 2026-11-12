@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::DateTime;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 use uuid::Uuid;
@@ -13,11 +13,14 @@ use crate::{
             stopwatch_session::ReadStopwatchSessionDto,
         },
     },
-    entity::feed::{FeedEventSource, FeedEventType, FeedSessionProject, FeedSessionTask, SessionEventData},
+    entity::feed::{
+        FeedEventSource, FeedEventType, FeedSessionProject, FeedSessionTask, SessionEventData,
+    },
+    entity::session::FixedSession,
     repository::{
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
         project::{ProjectRepository, ProjectRepositoryTrait},
-        stopwatch_session::StopwatchSessionRepository,
+        stopwatch_session::{FinishStopwatchError, StopwatchSessionRepository},
         task::{TaskRepository, TaskRepositoryTrait},
     },
     router::clerk::Actor,
@@ -67,6 +70,12 @@ impl FixedSessionService {
         actor: &Actor,
     ) -> Result<ReadFixedSessionDto> {
         let res = self.fixed_repo.create(dto, actor).await?;
+        self.publish_session_completed(&res, actor).await?;
+
+        Ok(ReadFixedSessionDto::from(res))
+    }
+
+    async fn publish_session_completed(&self, res: &FixedSession, actor: &Actor) -> Result<()> {
         let user = self
             .user_service
             .get_user_by_id(&res.user_id)
@@ -117,7 +126,28 @@ impl FixedSessionService {
                 source: FeedEventSource::User(user),
             })
             .await?;
+        Ok(())
+    }
 
+    /// Atomically turns the caller's stopwatch session into a fixed session.
+    #[instrument(err, skip(self), fields(session_id = %id, actor_id = %actor))]
+    pub async fn finish_stopwatch_session(
+        &self,
+        id: Uuid,
+        end_time: Option<DateTime<Utc>>,
+        actor: &Actor,
+    ) -> Result<ReadFixedSessionDto, FinishStopwatchError> {
+        let end_time = end_time.unwrap_or_else(Utc::now);
+        let new_id = self
+            .stopwatch_repo
+            .finish_to_fixed(id, end_time, actor)
+            .await?;
+        let res = self
+            .fixed_repo
+            .find_by_id(new_id, actor)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Error creating the session"))?;
+        self.publish_session_completed(&res, actor).await?;
         Ok(ReadFixedSessionDto::from(res))
     }
 

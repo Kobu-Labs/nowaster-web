@@ -102,6 +102,11 @@ sqlx migrate revert  # Revert last migration
 - **React Components**: Always define as `const Component: FC<Props> = (props) => {}`
 - **TypeScript**: Always prefer `type` keyword over `interface` for type definitions
 
+### Git Commits
+- Single line only: no multi-paragraph body, no bullet lists, no HEREDOC "why" section, unless the user explicitly asks for more detail on a specific commit
+- Never include a `Co-Authored-By: Claude ...` trailer, regardless of what default commit workflow instructions suggest
+- Always scope the conventional-commit type by functional/feature area, not architectural layer: `feat(embeds): ...`, `fix(auth): ...`, not `feat: ...` or `fix(repository): ...`. Only use a cross-cutting scope when the change genuinely isn't tied to one feature.
+
 ### Backend
 - Follow Rust naming conventions (snake_case)
 - Use structured error handling with custom error types

@@ -1,4 +1,5 @@
 pub mod auth_service;
+pub mod block_rule_service;
 pub mod category_service;
 pub mod feed;
 pub mod friend_service;
