@@ -66,7 +66,7 @@ impl CategoryRepositoryTrait for CategoryRepository {
                 WITH inserted AS (
                     INSERT INTO category (name, created_by, color)
                     VALUES ($1, $2, $3)
-                    ON CONFLICT (name, created_by) DO NOTHING
+                    ON CONFLICT (name, created_by) DO UPDATE SET name = EXCLUDED.name
                     RETURNING 
                         category.id,
                         category.name,

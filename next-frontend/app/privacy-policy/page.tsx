@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="text-muted-foreground mb-8">
-            Last updated: January 31, 2026
+            Last updated: November 8, 2026
           </p>
 
           <div className="prose prose-invert max-w-none">
@@ -481,6 +481,61 @@ export default function PrivacyPolicyPage() {
                 any changes. Your continued use of the Service after changes are
                 posted constitutes your acceptance of the updated Privacy
                 Policy.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">
+                Browser Extension
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                The Nowaster browser extension (Chrome and Firefox) starts and
+                finishes time-tracking sessions and blocks the sites on your
+                block list while a session runs. It does not include analytics
+                or advertising, and we do not sell its data.
+              </p>
+              <h3 className="text-xl font-semibold mb-3 mt-6">
+                What the extension stores on your device
+              </h3>
+              <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
+                <li>
+                  Your personal API token, sent as the X-API-Key header only to
+                  the Nowaster API address set in the extension settings
+                </li>
+                <li>
+                  The API address itself and your block list
+                </li>
+                <li>
+                  The active session, so the toolbar timer and blocking work
+                  offline
+                </li>
+                <li>
+                  The address of the last page you opened in each tab, kept in
+                  session storage. It is overwritten on each navigation and
+                  deleted when the tab closes. It is used only to offer a
+                  &quot;Continue&quot; button on the focus page and is never sent
+                  to our servers
+                </li>
+              </ul>
+              <h3 className="text-xl font-semibold mb-3 mt-6">
+                What is sent to the Nowaster API
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Starting, finishing or discarding a session, creating categories
+                and tags, and managing your block list are sent to the Nowaster
+                API, the same data the web app stores. You can revoke the API
+                token at any time in Settings, Tokens. Revoking it stops the
+                extension from accessing your account.
+              </p>
+              <h3 className="text-xl font-semibold mb-3 mt-6">
+                Why the extension can access all websites
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Your block list can contain any domain, and a block requires the
+                extension to act on the pages you open. The extension does not
+                read or change the content of pages. It reads tab addresses only
+                to reload open tabs that match your block list when a session
+                starts.
               </p>
             </section>
 

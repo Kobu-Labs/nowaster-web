@@ -1,5 +1,6 @@
 pub mod admin;
 pub mod auth;
+pub mod block_rule;
 pub mod category;
 pub mod clerk;
 pub mod feed;

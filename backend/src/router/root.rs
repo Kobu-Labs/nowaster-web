@@ -10,6 +10,7 @@ use uuid::Uuid;
 use crate::{
     config::database::Database,
     repository::{
+        block_rule::BlockRuleRepository,
         category::{CategoryRepository, CategoryRepositoryTrait},
         feed::FeedRepository,
         fixed_session::{FixedSessionRepository, SessionRepositoryTrait},
@@ -25,6 +26,7 @@ use crate::{
     router::user::root::protected_user_router,
     service::{
         auth_service::AuthService,
+        block_rule_service::BlockRuleService,
         category_service::CategoryService,
         feed::{
             events::FeedEventService, reactions::FeedReactionService,
@@ -45,9 +47,10 @@ use crate::{
 };
 
 use super::{
-    admin::routes::admin_router, auth::auth_router, category::root::category_router,
-    feed::root::feed_router, friend::root::friend_router, notification::root::notification_router,
-    project::root::project_router, release::routes::release_router, session::root::session_router,
+    admin::routes::admin_router, auth::auth_router, block_rule::root::block_rule_router,
+    category::root::category_router, feed::root::feed_router, friend::root::friend_router,
+    notification::root::notification_router, project::root::project_router,
+    release::routes::release_router, session::root::session_router,
     statistics::root::statistics_router, tag::root::tag_router, task::root::task_router,
 };
 
@@ -78,6 +81,7 @@ pub struct AppState {
     pub release_service: ReleaseService,
     pub project_service: ProjectService,
     pub task_service: TaskService,
+    pub block_rule_service: BlockRuleService,
     pub sandbox_service: SandboxService,
     pub db_backup_repo: crate::repository::db_backup::DbBackupRepository,
     pub s3_client: aws_sdk_s3::Client,
@@ -96,6 +100,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
     let feed_repo = FeedRepository::new(&db);
     let project_repo = ProjectRepository::new(&db);
     let task_repo = TaskRepository::new(&db);
+    let block_rule_service = BlockRuleService::new(BlockRuleRepository::new(&db));
     let db_backup_repo = crate::repository::db_backup::DbBackupRepository::new(&db);
 
     // Initialize S3 client
@@ -193,6 +198,7 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         release_service,
         project_service,
         task_service,
+        block_rule_service,
         sandbox_service,
         db_backup_repo,
         s3_client,
@@ -225,7 +231,11 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         .nest("/releases", release_router().with_state(state.clone()))
         .nest("/admin", admin_router().with_state(state.clone()))
         .nest("/task", task_router().with_state(state.clone()))
-        .nest("/project", project_router().with_state(state.clone()));
+        .nest("/project", project_router().with_state(state.clone()))
+        .nest(
+            "/block-rules",
+            block_rule_router().with_state(state.clone()),
+        );
 
     let api_router = Router::new().merge(auth_routes).merge(protected_routes);
 
@@ -234,7 +244,14 @@ pub async fn get_router(db: Arc<Database>, config: Arc<crate::Config>) -> IntoMa
         | crate::config::env::AppEnvironment::NowasterSandbox => {
             let frontend_url = &config.frontend.url;
             println!("🌐 [CORS] Allowing origin: {}", frontend_url);
-            tower_http::cors::AllowOrigin::exact(frontend_url.parse::<http::HeaderValue>().unwrap())
+            // Browser extensions authenticate with X-API-Key and send no cookies, so their origins are
+            // allowed in local and sandbox only. Production reaches the API through the extension's host permission.
+            let frontend_url = frontend_url.clone();
+            tower_http::cors::AllowOrigin::predicate(move |origin, _| {
+                origin.as_bytes() == frontend_url.as_bytes()
+                    || origin.as_bytes().starts_with(b"chrome-extension://")
+                    || origin.as_bytes().starts_with(b"moz-extension://")
+            })
         }
         _ => tower_http::cors::AllowOrigin::predicate(|origin, _| {
             origin
